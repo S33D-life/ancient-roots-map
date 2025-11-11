@@ -1,9 +1,30 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, Image } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, Image, User } from "lucide-react";
 import treeIcon from "@/assets/tree-icon.png";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 const Header = () => {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical bg-background/95 backdrop-blur-md">
       <div className="container mx-auto px-4 py-4">
@@ -35,9 +56,28 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Button variant="sacred" size="sm" className="hidden md:inline-flex">
-              Add Tree
-            </Button>
+            {user ? (
+              <Button
+                variant="sacred"
+                size="sm"
+                className="hidden md:inline-flex gap-2"
+                asChild
+              >
+                <Link to="/dashboard">
+                  <User className="w-4 h-4" />
+                  Dashboard
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                variant="sacred"
+                size="sm"
+                className="hidden md:inline-flex"
+                asChild
+              >
+                <Link to="/auth">Login</Link>
+              </Button>
+            )}
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="w-5 h-5" />
             </Button>

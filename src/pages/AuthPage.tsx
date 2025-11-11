@@ -23,14 +23,14 @@ const AuthPage = () => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/map");
+        navigate("/dashboard");
       }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/map");
+        navigate("/dashboard");
       }
     });
 
@@ -84,7 +84,7 @@ const AuthPage = () => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/map`,
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
 
