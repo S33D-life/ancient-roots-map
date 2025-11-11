@@ -4,6 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
 import TreeImportExport from "./TreeImportExport";
+import ConversionStatus from "./ConversionStatus";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -49,7 +50,9 @@ const Map = () => {
     const fetchTrees = async () => {
       const { data, error } = await supabase
         .from('trees')
-        .select('*, created_by');
+        .select('*, created_by')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
 
       if (error) {
         console.error('Error fetching trees:', error);
@@ -59,6 +62,7 @@ const Map = () => {
           variant: "destructive",
         });
       } else {
+        console.log(`Loaded ${data?.length || 0} trees with coordinates`);
         setTrees(data || []);
       }
     };
@@ -208,6 +212,8 @@ const Map = () => {
 
   return (
     <div className="relative w-full h-screen">
+      <ConversionStatus />
+      
       {/* Tabs and filters at top */}
       <Card className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-background/95 backdrop-blur border-border shadow-lg">
         <div className="flex items-center gap-4 p-3">
@@ -222,7 +228,7 @@ const Map = () => {
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by species" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background border-border z-50">
               <SelectItem value="all">All Species</SelectItem>
               {uniqueSpecies.map(species => (
                 <SelectItem key={species} value={species}>{species}</SelectItem>
