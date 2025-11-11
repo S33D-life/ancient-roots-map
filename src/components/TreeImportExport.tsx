@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "./PhotoImport";
+import PreloadCollectiveButton from "./PreloadCollectiveButton";
 import { Upload, Download, Loader2, MapPin } from "lucide-react";
 
 const TreeImportExport = () => {
@@ -216,6 +217,8 @@ const TreeImportExport = () => {
   return (
     <div className="absolute top-20 left-4 z-10 flex gap-2">
       <PhotoImport />
+      
+      <PreloadCollectiveButton />
       
       <div className="relative">
         <input
