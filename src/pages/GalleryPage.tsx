@@ -12,8 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2 } from "lucide-react";
-import { parseCSV, convertCSVToTreeData, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
+import { Progress } from "@/components/ui/progress";
 
 interface Tree {
   id: string;
@@ -52,6 +54,7 @@ const GalleryPage = () => {
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -152,6 +155,7 @@ const GalleryPage = () => {
     if (!file) return;
 
     setIsImporting(true);
+    const startTime = Date.now();
 
     try {
       const text = await file.text();
@@ -163,13 +167,41 @@ const GalleryPage = () => {
         return;
       }
 
-      toast.success(`Converting coordinates for ${csvRows.length} trees...`);
+      const totalTrees = csvRows.length;
+      setImportProgress({ current: 0, total: totalTrees, startTime });
+      
+      toast.success(`Processing ${totalTrees} trees...`);
 
-      const treeData = await convertCSVToTreeData(csvRows);
+      // Convert coordinates with progress tracking
+      const treeData: any[] = [];
+      
+      for (let i = 0; i < csvRows.length; i++) {
+        const row = csvRows[i];
+        try {
+          const coords = await convertToCoordinates(row.what3words);
+          if (coords) {
+            treeData.push({
+              ...row,
+              latitude: coords.coordinates.lat,
+              longitude: coords.coordinates.lng,
+            });
+          }
+          
+          // Update progress
+          setImportProgress({ 
+            current: i + 1, 
+            total: totalTrees, 
+            startTime 
+          });
+        } catch (error) {
+          console.error(`Failed to convert ${row.what3words}:`, error);
+        }
+      }
 
       if (treeData.length === 0) {
-        toast.error("Could not convert what3words addresses to coordinates");
+        toast.error("Could not convert any what3words addresses to coordinates");
         setIsImporting(false);
+        setImportProgress({ current: 0, total: 0, startTime: 0 });
         return;
       }
 
@@ -196,6 +228,7 @@ const GalleryPage = () => {
       toast.error("An error occurred while importing the CSV");
     } finally {
       setIsImporting(false);
+      setImportProgress({ current: 0, total: 0, startTime: 0 });
     }
   };
 
@@ -392,6 +425,32 @@ const GalleryPage = () => {
                         </label>
                       </div>
                     </div>
+                    
+                    {isImporting && importProgress.total > 0 && (
+                      <div className="mt-4 p-4 border border-mystical rounded-lg bg-background/50 space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-foreground">
+                            Converting trees: {importProgress.current} / {importProgress.total}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {(() => {
+                              const elapsed = (Date.now() - importProgress.startTime) / 1000;
+                              const rate = importProgress.current / elapsed;
+                              const remaining = (importProgress.total - importProgress.current) / rate;
+                              const minutes = Math.floor(remaining / 60);
+                              const seconds = Math.floor(remaining % 60);
+                              return isFinite(remaining) && remaining > 0
+                                ? `Est. ${minutes}m ${seconds}s remaining`
+                                : 'Calculating...';
+                            })()}
+                          </span>
+                        </div>
+                        <Progress 
+                          value={(importProgress.current / importProgress.total) * 100} 
+                          className="h-2"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="border-t border-mystical pt-4">
