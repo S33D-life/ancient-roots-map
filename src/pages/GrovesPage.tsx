@@ -39,6 +39,10 @@ const GrovesPage = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapToken, setMapToken] = useState<string>('');
   const [tokenInput, setTokenInput] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filterSpecies, setFilterSpecies] = useState<string>('all');
+  const [filterScope, setFilterScope] = useState<string>('all');
+  const [filterLocation, setFilterLocation] = useState<string>('all');
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -88,15 +92,38 @@ const GrovesPage = () => {
     };
   }, [mapToken]);
 
+  // Filter projects based on search and filters
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch = searchQuery === '' || 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesSpecies = filterSpecies === 'all' || project.species === filterSpecies;
+    const matchesScope = filterScope === 'all' || project.project_scope === filterScope;
+    const matchesLocation = filterLocation === 'all' || 
+      project.state === filterLocation || 
+      project.nation === filterLocation;
+    
+    return matchesSearch && matchesSpecies && matchesScope && matchesLocation;
+  });
+
+  // Get unique values for filters
+  const uniqueSpecies = Array.from(new Set(projects.map(p => p.species).filter(Boolean)));
+  const uniqueScopes = Array.from(new Set(projects.map(p => p.project_scope).filter(Boolean)));
+  const uniqueLocations = Array.from(new Set([
+    ...projects.map(p => p.state).filter(Boolean),
+    ...projects.map(p => p.nation).filter(Boolean)
+  ]));
+
   useEffect(() => {
-    if (!map.current || projects.length === 0) return;
+    if (!map.current || filteredProjects.length === 0) return;
 
     // Clear existing markers
     const markers = document.querySelectorAll(".project-marker");
     markers.forEach((marker) => marker.remove());
 
-    // Add markers for each project
-    projects.forEach((project) => {
+    // Add markers for each filtered project
+    filteredProjects.forEach((project) => {
       if (project.latitude && project.longitude) {
         const el = document.createElement("div");
         el.className = "project-marker";
@@ -124,7 +151,7 @@ const GrovesPage = () => {
           .addTo(map.current!);
       }
     });
-  }, [projects]);
+  }, [filteredProjects]);
 
   const fetchProjects = async () => {
     try {
@@ -200,16 +227,17 @@ const GrovesPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
-              Browse Tree Groves
-            </h1>
-            <p className="text-muted-foreground">
-              Discover local and species-specific tree mapping projects
-            </p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
+                Tree Mapping Resources
+              </h1>
+              <p className="text-muted-foreground">
+                Discover existing databases and projects for finding ancient trees
+              </p>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="sacred" size="lg">
                 <Plus className="w-4 h-4 mr-2" />
@@ -340,7 +368,76 @@ const GrovesPage = () => {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
+
+        {/* Search and Filters */}
+        <Card className="border-mystical mb-6">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-2">
+                <Label htmlFor="search">Search Projects</Label>
+                <Input
+                  id="search"
+                  placeholder="Search by name or description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="filterSpecies">Filter by Species</Label>
+                <Select value={filterSpecies} onValueChange={setFilterSpecies}>
+                  <SelectTrigger id="filterSpecies">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Species</SelectItem>
+                    {uniqueSpecies.map((species) => (
+                      <SelectItem key={species} value={species!}>
+                        {species}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="filterScope">Filter by Scope</Label>
+                <Select value={filterScope} onValueChange={setFilterScope}>
+                  <SelectTrigger id="filterScope">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Scopes</SelectItem>
+                    {uniqueScopes.map((scope) => (
+                      <SelectItem key={scope} value={scope!}>
+                        {scope}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Label htmlFor="filterLocation">Filter by Location</Label>
+              <Select value={filterLocation} onValueChange={setFilterLocation}>
+                <SelectTrigger id="filterLocation">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Locations</SelectItem>
+                  {uniqueLocations.map((location) => (
+                    <SelectItem key={location} value={location!}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="mt-4 text-sm text-muted-foreground">
+              Showing {filteredProjects.length} of {projects.length} projects
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="map" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
@@ -391,13 +488,13 @@ const GrovesPage = () => {
           <TabsContent value="list" className="mt-0">
             {loading ? (
               <p className="text-center py-8">Loading projects...</p>
-            ) : projects.length === 0 ? (
+            ) : filteredProjects.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">
-                No projects found. Be the first to add one!
+                {projects.length === 0 ? "No projects found. Be the first to add one!" : "No projects match your filters."}
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project) => (
+                {filteredProjects.map((project) => (
                   <Card key={project.id} className="border-mystical hover:shadow-elegant transition-mystical">
                     <CardHeader>
                       <CardTitle className="font-serif text-mystical flex items-start justify-between">
