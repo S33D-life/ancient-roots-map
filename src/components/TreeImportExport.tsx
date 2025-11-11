@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { parseCSV, convertCSVToTreeData, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import PhotoImport from "./PhotoImport";
 import { Upload, Download, Loader2 } from "lucide-react";
 
 const TreeImportExport = () => {
@@ -122,6 +123,8 @@ const TreeImportExport = () => {
 
   return (
     <div className="absolute top-20 left-4 z-10 flex gap-2">
+      <PhotoImport />
+      
       <div className="relative">
         <input
           type="file"

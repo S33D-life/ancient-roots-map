@@ -8,29 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyA1Zpu0X_c1buzTMuJh29j1WHmNibdYefA';
 
-// Use Google Maps as the base map style
-const GOOGLE_MAP_STYLE = {
-  version: 8,
-  sources: {
-    'google-tiles': {
-      type: 'raster',
-      tiles: [
-        `https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&key=${GOOGLE_MAPS_API_KEY}`,
-        `https://mt1.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&key=${GOOGLE_MAPS_API_KEY}`,
-      ],
-      tileSize: 256,
-    },
-  },
-  layers: [
-    {
-      id: 'google-tiles-layer',
-      type: 'raster',
-      source: 'google-tiles',
-      minzoom: 0,
-      maxzoom: 22,
-    },
-  ],
-};
+// Use a vintage/antique map style
+const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
 interface Tree {
   id: string;
@@ -98,7 +77,7 @@ const Map = () => {
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: GOOGLE_MAP_STYLE as any,
+      style: VINTAGE_MAP_STYLE,
       center: [0, 20],
       zoom: 2,
       attributionControl: false,
