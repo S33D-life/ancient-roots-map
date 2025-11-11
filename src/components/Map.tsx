@@ -93,6 +93,8 @@ const Map = () => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: GOOGLE_MAP_STYLE as any,
