@@ -12,6 +12,7 @@ const TreeImportExport = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
+  const [batchSize, setBatchSize] = useState(50);
   const { toast } = useToast();
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,13 +96,14 @@ const TreeImportExport = () => {
         return;
       }
 
-      // Fetch trees without coordinates
+      // Fetch trees without coordinates (limited by batch size)
       const { data: trees, error: fetchError } = await supabase
         .from('trees')
         .select('*')
         .is('latitude', null)
         .is('longitude', null)
-        .eq('created_by', user.id);
+        .eq('created_by', user.id)
+        .limit(batchSize);
 
       if (fetchError) throw fetchError;
 
@@ -119,7 +121,7 @@ const TreeImportExport = () => {
 
       toast({
         title: "Converting coordinates...",
-        description: `Processing ${trees.length} trees`,
+        description: `Processing batch of ${trees.length} trees`,
       });
 
       for (const tree of trees) {
@@ -249,19 +251,31 @@ const TreeImportExport = () => {
         </label>
       </div>
 
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={handleConvertCoordinates}
-        disabled={isConverting}
-      >
-        {isConverting ? (
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-        ) : (
-          <MapPin className="h-4 w-4 mr-2" />
-        )}
-        Convert Coordinates
-      </Button>
+      <div className="flex gap-1">
+        <select
+          value={batchSize}
+          onChange={(e) => setBatchSize(Number(e.target.value))}
+          disabled={isConverting}
+          className="h-9 rounded-md border border-input bg-background px-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <option value={10}>10</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+        </select>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleConvertCoordinates}
+          disabled={isConverting}
+        >
+          {isConverting ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <MapPin className="h-4 w-4 mr-2" />
+          )}
+          Convert Coordinates
+        </Button>
+      </div>
 
       <Button
         variant="secondary"
