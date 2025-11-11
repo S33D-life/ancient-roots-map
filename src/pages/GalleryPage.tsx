@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2 } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2 } from "lucide-react";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -44,6 +44,15 @@ interface Offering {
   created_at: string;
 }
 
+interface WishlistItem {
+  id: string;
+  user_id: string;
+  tree_id: string;
+  notes: string | null;
+  created_at: string;
+  trees: Tree;
+}
+
 const GalleryPage = () => {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
@@ -55,6 +64,8 @@ const GalleryPage = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -65,6 +76,7 @@ const GalleryPage = () => {
 
   useEffect(() => {
     fetchTrees();
+    fetchWishlist();
   }, []);
 
   useEffect(() => {
@@ -103,6 +115,96 @@ const GalleryPage = () => {
     } catch (error) {
       console.error("Error fetching offerings:", error);
       toast.error("Failed to load offerings");
+    }
+  };
+
+  const fetchWishlist = async () => {
+    setWishlistLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setWishlist([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("tree_wishlist")
+        .select("*, trees(*)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setWishlist(data || []);
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      toast.error("Failed to load wishlist");
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  const addToWishlist = async (treeId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Please log in to add trees to your wishlist");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("tree_wishlist")
+        .insert({ user_id: user.id, tree_id: treeId });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.info("This tree is already in your wishlist");
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      toast.success("Tree added to your Wishing Tree!");
+      fetchWishlist();
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      toast.error("Failed to add tree to wishlist");
+    }
+  };
+
+  const removeFromWishlist = async (wishlistId: string) => {
+    try {
+      const { error } = await supabase
+        .from("tree_wishlist")
+        .delete()
+        .eq("id", wishlistId);
+
+      if (error) throw error;
+
+      toast.success("Tree removed from your wishlist");
+      fetchWishlist();
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      toast.error("Failed to remove tree from wishlist");
+    }
+  };
+
+  const updateWishlistNotes = async (wishlistId: string, notes: string) => {
+    try {
+      const { error } = await supabase
+        .from("tree_wishlist")
+        .update({ notes })
+        .eq("id", wishlistId);
+
+      if (error) throw error;
+
+      toast.success("Notes updated");
+      fetchWishlist();
+    } catch (error) {
+      console.error("Error updating notes:", error);
+      toast.error("Failed to update notes");
     }
   };
 
@@ -316,9 +418,10 @@ const GalleryPage = () => {
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-8">
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
+            <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gallery" className="space-y-8">
@@ -355,10 +458,9 @@ const GalleryPage = () => {
                 {filteredTrees.map((tree) => (
                   <Card
                     key={tree.id}
-                    className="border-mystical hover:shadow-elegant transition-mystical cursor-pointer"
-                    onClick={() => setSelectedTree(tree)}
+                    className="border-mystical hover:shadow-elegant transition-mystical"
                   >
-                    <CardHeader>
+                    <CardHeader className="cursor-pointer" onClick={() => setSelectedTree(tree)}>
                       <CardTitle className="font-serif text-mystical line-clamp-1">
                         {tree.name}
                       </CardTitle>
@@ -369,7 +471,7 @@ const GalleryPage = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-2 text-sm cursor-pointer" onClick={() => setSelectedTree(tree)}>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <MapPin className="w-4 h-4" />
                           <span className="truncate">/{tree.what3words}</span>
@@ -384,6 +486,20 @@ const GalleryPage = () => {
                             {tree.description}
                           </p>
                         )}
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToWishlist(tree.id);
+                          }}
+                          className="w-full"
+                        >
+                          <Heart className="w-4 h-4 mr-2" />
+                          Add to Wishing Tree
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -514,6 +630,94 @@ const GalleryPage = () => {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="wishlist" className="space-y-6">
+            <Card className="border-mystical bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-2xl font-serif text-mystical">
+                  Wishing Tree
+                </CardTitle>
+                <CardDescription>
+                  Trees you dream of visiting someday
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {wishlistLoading ? (
+                  <p className="text-center py-12">Loading your wishlist...</p>
+                ) : wishlist.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground mb-2">
+                      Your Wishing Tree is empty
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Add trees from the Gallery that you would like to visit
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {wishlist.map((item) => (
+                      <Card key={item.id} className="border-mystical/50">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="font-serif text-mystical line-clamp-1">
+                                {item.trees.name}
+                              </CardTitle>
+                              <CardDescription className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="font-serif">
+                                  {item.trees.species}
+                                </Badge>
+                              </CardDescription>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeFromWishlist(item.id)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="w-4 h-4" />
+                            <span className="truncate">/{item.trees.what3words}</span>
+                          </div>
+                          
+                          {item.trees.state && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.trees.state}{item.trees.nation ? `, ${item.trees.nation}` : ''}
+                            </p>
+                          )}
+
+                          <div className="pt-2 border-t border-border">
+                            <Label className="text-xs text-muted-foreground">Personal Notes</Label>
+                            <Textarea
+                              value={item.notes || ""}
+                              onChange={(e) => updateWishlistNotes(item.id, e.target.value)}
+                              placeholder="Why do you want to visit this tree?"
+                              className="mt-1 min-h-[60px] text-sm"
+                            />
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedTree(item.trees)}
+                            className="w-full"
+                          >
+                            View Details
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
