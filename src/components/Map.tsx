@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
+import TreeImportExport from "./TreeImportExport";
 import { useToast } from "@/hooks/use-toast";
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyA1Zpu0X_c1buzTMuJh29j1WHmNibdYefA';
@@ -192,6 +193,7 @@ const Map = () => {
   return (
     <div className="relative w-full h-screen">
       <MapSearch onLocationSelect={handleLocationSelect} />
+      <TreeImportExport />
       <div ref={mapContainer} className="absolute inset-0" />
       
       <style>{`
