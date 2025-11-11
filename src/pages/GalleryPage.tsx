@@ -9,8 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2 } from "lucide-react";
+import { parseCSV, convertCSVToTreeData, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import PhotoImport from "@/components/PhotoImport";
 
 interface Tree {
   id: string;
@@ -47,6 +50,8 @@ const GalleryPage = () => {
   const [isOfferingDialogOpen, setIsOfferingDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -142,6 +147,88 @@ const GalleryPage = () => {
     }
   };
 
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+
+    try {
+      const text = await file.text();
+      const csvRows = parseCSV(text);
+
+      if (csvRows.length === 0) {
+        toast.error("No valid tree data found in the CSV file");
+        setIsImporting(false);
+        return;
+      }
+
+      toast.success(`Converting coordinates for ${csvRows.length} trees...`);
+
+      const treeData = await convertCSVToTreeData(csvRows);
+
+      if (treeData.length === 0) {
+        toast.error("Could not convert what3words addresses to coordinates");
+        setIsImporting(false);
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const treesToInsert = treeData.map(tree => ({
+        ...tree,
+        created_by: user?.id,
+      }));
+
+      const { error } = await supabase
+        .from('trees')
+        .insert(treesToInsert);
+
+      if (error) throw error;
+
+      toast.success(`Successfully imported ${treeData.length} trees!`);
+      fetchTrees();
+
+      // Reset the input
+      event.target.value = '';
+    } catch (error) {
+      console.error('Import error:', error);
+      toast.error("An error occurred while importing the CSV");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+
+    try {
+      const { data: trees, error } = await supabase
+        .from('trees')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!trees || trees.length === 0) {
+        toast.error("There are no trees in the database to export");
+        setIsExporting(false);
+        return;
+      }
+
+      const csv = generateCSV(trees);
+      const filename = `ancient-friends-ledger-${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csv, filename);
+
+      toast.success(`Exported ${trees.length} trees to ${filename}`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error("An error occurred while exporting the CSV");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const uniqueSpecies = Array.from(new Set(trees.map(t => t.species)));
 
   const filteredTrees = trees.filter(tree => {
@@ -175,78 +262,187 @@ const GalleryPage = () => {
             Ancient Friends Gallery
           </h1>
           <p className="text-muted-foreground">
-            Explore all mapped trees and their offerings
+            Explore all mapped trees and manage the tree ledger
           </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <Input
-            placeholder="Search by name, species, or what3words..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1"
-          />
-          <Select value={speciesFilter} onValueChange={setSpeciesFilter}>
-            <SelectTrigger className="w-full md:w-[200px]">
-              <SelectValue placeholder="Filter by species" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Species</SelectItem>
-              {uniqueSpecies.map((species) => (
-                <SelectItem key={species} value={species}>
-                  {species}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs defaultValue="gallery" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
+            <TabsTrigger value="gallery">Gallery</TabsTrigger>
+            <TabsTrigger value="ledger">Ledger</TabsTrigger>
+          </TabsList>
 
-        {loading ? (
-          <p className="text-center py-12">Loading trees...</p>
-        ) : filteredTrees.length === 0 ? (
-          <p className="text-center py-12 text-muted-foreground">
-            No trees found. Import some trees to get started!
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredTrees.map((tree) => (
-              <Card
-                key={tree.id}
-                className="border-mystical hover:shadow-elegant transition-mystical cursor-pointer"
-                onClick={() => setSelectedTree(tree)}
-              >
-                <CardHeader>
-                  <CardTitle className="font-serif text-mystical line-clamp-1">
-                    {tree.name}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-2">
-                    <Badge variant="outline" className="font-serif">
-                      {tree.species}
-                    </Badge>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      <span className="truncate">/{tree.what3words}</span>
+          <TabsContent value="gallery" className="space-y-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              <Input
+                placeholder="Search by name, species, or what3words..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1"
+              />
+              <Select value={speciesFilter} onValueChange={setSpeciesFilter}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue placeholder="Filter by species" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Species</SelectItem>
+                  {uniqueSpecies.map((species) => (
+                    <SelectItem key={species} value={species}>
+                      {species}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {loading ? (
+              <p className="text-center py-12">Loading trees...</p>
+            ) : filteredTrees.length === 0 ? (
+              <p className="text-center py-12 text-muted-foreground">
+                No trees found. Import some trees to get started!
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredTrees.map((tree) => (
+                  <Card
+                    key={tree.id}
+                    className="border-mystical hover:shadow-elegant transition-mystical cursor-pointer"
+                    onClick={() => setSelectedTree(tree)}
+                  >
+                    <CardHeader>
+                      <CardTitle className="font-serif text-mystical line-clamp-1">
+                        {tree.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-2">
+                        <Badge variant="outline" className="font-serif">
+                          {tree.species}
+                        </Badge>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <MapPin className="w-4 h-4" />
+                          <span className="truncate">/{tree.what3words}</span>
+                        </div>
+                        {tree.estimated_age && (
+                          <p className="text-muted-foreground">
+                            Est. Age: {tree.estimated_age} years
+                          </p>
+                        )}
+                        {tree.description && (
+                          <p className="text-muted-foreground line-clamp-2">
+                            {tree.description}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="ledger" className="space-y-6">
+            <Card className="border-mystical bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-2xl font-serif text-mystical">
+                  Tree Ledger
+                </CardTitle>
+                <CardDescription>
+                  Import and export tree data from what3words CSV files
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-serif font-semibold mb-3">Import Data</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Upload CSV files exported from what3words containing tree locations and data
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <PhotoImport />
+                      
+                      <div className="relative">
+                        <input
+                          type="file"
+                          accept=".csv"
+                          onChange={handleImport}
+                          className="hidden"
+                          id="csv-upload-ledger"
+                          disabled={isImporting}
+                        />
+                        <label htmlFor="csv-upload-ledger">
+                          <Button
+                            variant="secondary"
+                            size="default"
+                            disabled={isImporting}
+                            className="cursor-pointer"
+                            asChild
+                          >
+                            <span>
+                              {isImporting ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <Upload className="h-4 w-4 mr-2" />
+                              )}
+                              Import what3words CSV
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
                     </div>
-                    {tree.estimated_age && (
-                      <p className="text-muted-foreground">
-                        Est. Age: {tree.estimated_age} years
-                      </p>
-                    )}
-                    {tree.description && (
-                      <p className="text-muted-foreground line-clamp-2">
-                        {tree.description}
-                      </p>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+
+                  <div className="border-t border-mystical pt-4">
+                    <h3 className="text-lg font-serif font-semibold mb-3">Export Data</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Download all tree data as a CSV file for backup or external use
+                    </p>
+                    <Button
+                      variant="secondary"
+                      onClick={handleExport}
+                      disabled={isExporting}
+                    >
+                      {isExporting ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      Export All Trees to CSV
+                    </Button>
+                  </div>
+
+                  <div className="border-t border-mystical pt-4">
+                    <h3 className="text-lg font-serif font-semibold mb-3">Ledger Stats</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                        <p className="text-2xl font-bold text-mystical">{trees.length}</p>
+                        <p className="text-sm text-muted-foreground">Total Trees</p>
+                      </div>
+                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                        <p className="text-2xl font-bold text-mystical">{uniqueSpecies.length}</p>
+                        <p className="text-sm text-muted-foreground">Species</p>
+                      </div>
+                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                        <p className="text-2xl font-bold text-mystical">
+                          {new Set(trees.map(t => t.nation).filter(Boolean)).size}
+                        </p>
+                        <p className="text-sm text-muted-foreground">Nations</p>
+                      </div>
+                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                        <p className="text-2xl font-bold text-mystical">
+                          {new Set(trees.map(t => t.state).filter(Boolean)).size}
+                        </p>
+                        <p className="text-sm text-muted-foreground">States/Regions</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Dialog open={!!selectedTree} onOpenChange={(open) => !open && setSelectedTree(null)}>
