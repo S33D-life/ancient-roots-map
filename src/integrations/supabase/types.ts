@@ -183,9 +183,9 @@ export type Database = {
           estimated_age: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
-          latitude: number
+          latitude: number | null
           lineage: string | null
-          longitude: number
+          longitude: number | null
           name: string
           nation: string | null
           project_name: string | null
@@ -203,9 +203,9 @@ export type Database = {
           estimated_age?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
-          latitude: number
+          latitude?: number | null
           lineage?: string | null
-          longitude: number
+          longitude?: number | null
           name: string
           nation?: string | null
           project_name?: string | null
@@ -223,9 +223,9 @@ export type Database = {
           estimated_age?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
-          latitude?: number
+          latitude?: number | null
           lineage?: string | null
-          longitude?: number
+          longitude?: number | null
           name?: string
           nation?: string | null
           project_name?: string | null

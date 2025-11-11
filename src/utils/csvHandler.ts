@@ -132,22 +132,12 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
 };
 
 export const convertCSVToTreeData = async (csvRows: TreeCSVRow[]): Promise<TreeData[]> => {
-  const treeData: TreeData[] = [];
-
-  for (const row of csvRows) {
-    try {
-      const coords = await convertToCoordinates(row.what3words);
-      if (coords) {
-        treeData.push({
-          ...row,
-          latitude: coords.coordinates.lat,
-          longitude: coords.coordinates.lng,
-        });
-      }
-    } catch (error) {
-      console.error(`Failed to convert coordinates for ${row.what3words}:`, error);
-    }
-  }
+  // Return tree data without coordinates - they'll be converted separately
+  const treeData: TreeData[] = csvRows.map(row => ({
+    ...row,
+    latitude: null as any,
+    longitude: null as any,
+  }));
 
   return treeData;
 };

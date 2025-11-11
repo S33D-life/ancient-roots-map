@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { parseCSV, convertCSVToTreeData, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "./PhotoImport";
-import { Upload, Download, Loader2 } from "lucide-react";
+import { Upload, Download, Loader2, MapPin } from "lucide-react";
 
 const TreeImportExport = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
   const { toast } = useToast();
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,28 +33,24 @@ const TreeImportExport = () => {
         return;
       }
 
-      toast({
-        title: "Converting coordinates...",
-        description: `Processing ${csvRows.length} trees`,
-      });
-
-      const treeData = await convertCSVToTreeData(csvRows);
-
-      if (treeData.length === 0) {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
         toast({
-          title: "Conversion failed",
-          description: "Could not convert what3words addresses to coordinates",
+          title: "Authentication required",
+          description: "You must be logged in to import trees",
           variant: "destructive",
         });
         setIsImporting(false);
         return;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const treesToInsert = treeData.map(tree => ({
+      // Insert trees without coordinates - they'll be converted later
+      const treesToInsert = csvRows.map(tree => ({
         ...tree,
-        created_by: user?.id,
+        created_by: user.id,
+        latitude: null,
+        longitude: null,
       }));
 
       const { error } = await supabase
@@ -63,7 +61,7 @@ const TreeImportExport = () => {
 
       toast({
         title: "Import successful",
-        description: `Successfully imported ${treeData.length} trees`,
+        description: `Successfully imported ${csvRows.length} trees. Use "Convert Coordinates" to add locations.`,
       });
 
       // Reset the input
@@ -77,6 +75,100 @@ const TreeImportExport = () => {
       });
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleConvertCoordinates = async () => {
+    setIsConverting(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "You must be logged in to convert coordinates",
+          variant: "destructive",
+        });
+        setIsConverting(false);
+        return;
+      }
+
+      // Fetch trees without coordinates
+      const { data: trees, error: fetchError } = await supabase
+        .from('trees')
+        .select('*')
+        .is('latitude', null)
+        .is('longitude', null)
+        .eq('created_by', user.id);
+
+      if (fetchError) throw fetchError;
+
+      if (!trees || trees.length === 0) {
+        toast({
+          title: "No trees to convert",
+          description: "All your trees already have coordinates",
+        });
+        setIsConverting(false);
+        return;
+      }
+
+      let converted = 0;
+      let failed = 0;
+
+      toast({
+        title: "Converting coordinates...",
+        description: `Processing ${trees.length} trees`,
+      });
+
+      for (const tree of trees) {
+        try {
+          const coords = await convertToCoordinates(tree.what3words);
+          
+          if (coords) {
+            const { error: updateError } = await supabase
+              .from('trees')
+              .update({
+                latitude: coords.coordinates.lat,
+                longitude: coords.coordinates.lng,
+              })
+              .eq('id', tree.id);
+
+            if (!updateError) {
+              converted++;
+            } else {
+              failed++;
+            }
+          } else {
+            failed++;
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message === 'quota_exceeded') {
+            toast({
+              title: "API quota exceeded",
+              description: `Converted ${converted} of ${trees.length} trees before hitting quota. Try again later.`,
+              variant: "destructive",
+            });
+            setIsConverting(false);
+            return;
+          }
+          failed++;
+        }
+      }
+
+      toast({
+        title: "Conversion complete",
+        description: `Converted ${converted} trees${failed > 0 ? `, ${failed} failed` : ''}`,
+      });
+    } catch (error) {
+      console.error('Conversion error:', error);
+      toast({
+        title: "Conversion failed",
+        description: "An error occurred while converting coordinates",
+        variant: "destructive",
+      });
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -153,6 +245,20 @@ const TreeImportExport = () => {
           </Button>
         </label>
       </div>
+
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={handleConvertCoordinates}
+        disabled={isConverting}
+      >
+        {isConverting ? (
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+        ) : (
+          <MapPin className="h-4 w-4 mr-2" />
+        )}
+        Convert Coordinates
+      </Button>
 
       <Button
         variant="secondary"
