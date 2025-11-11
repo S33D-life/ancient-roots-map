@@ -172,29 +172,45 @@ const GalleryPage = () => {
       
       toast.success(`Processing ${totalTrees} trees...`);
 
-      // Convert coordinates with progress tracking
+      // Convert coordinates with progress tracking and graceful quota handling
       const treeData: any[] = [];
-      
+      let consecutiveFailures = 0;
+
       for (let i = 0; i < csvRows.length; i++) {
         const row = csvRows[i];
         try {
           const coords = await convertToCoordinates(row.what3words);
+
           if (coords) {
             treeData.push({
               ...row,
               latitude: coords.coordinates.lat,
               longitude: coords.coordinates.lng,
             });
+            consecutiveFailures = 0;
+          } else {
+            consecutiveFailures += 1;
           }
-          
+
           // Update progress
           setImportProgress({ 
             current: i + 1, 
             total: totalTrees, 
             startTime 
           });
+
+          // If consecutive failures suggest a service-wide issue (e.g., quota), abort early to avoid spamming
+          if (consecutiveFailures >= 1 && i < Math.min(5, totalTrees)) {
+            toast.error("what3words limit reached or unavailable. Try again later or upgrade your plan.");
+            break;
+          }
         } catch (error) {
           console.error(`Failed to convert ${row.what3words}:`, error);
+          consecutiveFailures += 1;
+          if (consecutiveFailures >= 1 && i < Math.min(5, totalTrees)) {
+            toast.error("what3words limit reached or unavailable. Try again later or upgrade your plan.");
+            break;
+          }
         }
       }
 
@@ -446,7 +462,7 @@ const GalleryPage = () => {
                           </span>
                         </div>
                         <Progress 
-                          value={(importProgress.current / importProgress.total) * 100} 
+                          value={importProgress.total ? (importProgress.current / importProgress.total) * 100 : 0} 
                           className="h-2"
                         />
                       </div>
