@@ -32,26 +32,42 @@ const MapSearch = ({ onLocationSelect }: MapSearchProps) => {
   }, [searchInput]);
 
   const handleSearch = async (words: string) => {
-    const location = await convertToCoordinates(words);
-    
-    if (location) {
-      onLocationSelect(
-        location.coordinates.lat,
-        location.coordinates.lng,
-        location.words
-      );
-      setSearchInput(location.words);
-      setShowSuggestions(false);
-      toast({
-        title: "Location found",
-        description: `Navigating to ${location.words}`,
-      });
-    } else {
-      toast({
-        title: "Location not found",
-        description: "Please check the what3words address",
-        variant: "destructive",
-      });
+    try {
+      const location = await convertToCoordinates(words);
+      
+      if (location) {
+        onLocationSelect(
+          location.coordinates.lat,
+          location.coordinates.lng,
+          location.words
+        );
+        setSearchInput(location.words);
+        setShowSuggestions(false);
+        toast({
+          title: "Location found",
+          description: `Navigating to ${location.words}`,
+        });
+      } else {
+        toast({
+          title: "Location not found",
+          description: "Please check the what3words address",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message === 'quota_exceeded') {
+        toast({
+          title: "API Quota Exceeded",
+          description: "What3words searches are temporarily paused. Cached results will still work. Please try again in 1 hour.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Search failed",
+          description: "An error occurred while searching",
+          variant: "destructive",
+        });
+      }
     }
   };
 

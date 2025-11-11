@@ -63,39 +63,51 @@ const PhotoImport = () => {
         });
 
         // Convert to coordinates
-        const coords = await convertToCoordinates(what3words);
-        
-        if (!coords) {
+        try {
+          const coords = await convertToCoordinates(what3words);
+          
+          if (!coords) {
+            toast({
+              title: "Invalid address",
+              description: "Could not convert what3words to coordinates",
+              variant: "destructive",
+            });
+            setIsProcessing(false);
+            return;
+          }
+
+          // Store the data for the add tree form
+          localStorage.setItem('pendingTreeData', JSON.stringify({
+            what3words,
+            latitude: coords.coordinates.lat,
+            longitude: coords.coordinates.lng,
+            photoData: base64Image
+          }));
+
+          setIsProcessing(false);
+          
           toast({
-            title: "Invalid address",
-            description: "Could not convert what3words to coordinates",
-            variant: "destructive",
+            title: "Tree data ready",
+            description: "Click 'Add Tree' to complete the form",
           });
+        } catch (error) {
+          if (error instanceof Error && error.message === 'quota_exceeded') {
+            toast({
+              title: "API Quota Exceeded",
+              description: "What3words conversions are temporarily paused. You can manually enter tree details instead.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Conversion failed",
+              description: "Could not convert what3words to coordinates",
+              variant: "destructive",
+            });
+          }
           setIsProcessing(false);
           return;
         }
 
-        // Pre-fill form data (you can expand this to include the actual form)
-        toast({
-          title: "Success!",
-          description: `Ready to add tree at ${what3words}`,
-        });
-
-        // Store the data for the add tree form
-        localStorage.setItem('pendingTreeData', JSON.stringify({
-          what3words,
-          latitude: coords.coordinates.lat,
-          longitude: coords.coordinates.lng,
-          photoData: base64Image
-        }));
-
-        setIsProcessing(false);
-        
-        // You can trigger opening an add tree form here
-        toast({
-          title: "Tree data ready",
-          description: "Click 'Add Tree' to complete the form",
-        });
       };
 
       reader.onerror = () => {

@@ -33,6 +33,18 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error("What3words API error:", errorData);
+      
+      // Detect quota exceeded error
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ 
+            error: "quota_exceeded",
+            message: "What3words API quota exceeded. Please try again later or upgrade your plan."
+          }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: errorData.error?.message || "Failed to convert what3words address" }),
         { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
