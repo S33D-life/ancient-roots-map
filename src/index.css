@@ -8,89 +8,82 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Ancient forest mystical theme - deep greens and golden amber */
+    --background: 80 15% 10%;
+    --foreground: 45 100% 85%;
+    
+    --card: 75 20% 12%;
+    --card-foreground: 45 95% 80%;
+    
+    --popover: 75 22% 11%;
+    --popover-foreground: 45 100% 85%;
+    
+    /* Golden amber primary */
+    --primary: 42 95% 55%;
+    --primary-foreground: 80 20% 8%;
+    
+    /* Deep forest secondary */
+    --secondary: 78 18% 18%;
+    --secondary-foreground: 45 100% 75%;
+    
+    /* Muted earth tones */
+    --muted: 75 15% 20%;
+    --muted-foreground: 45 40% 60%;
+    
+    /* Golden accent */
+    --accent: 45 100% 60%;
+    --accent-foreground: 80 20% 8%;
+    
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 100% 95%;
+    
+    /* Subtle golden borders */
+    --border: 42 60% 35%;
+    --input: 75 18% 18%;
+    --ring: 42 95% 55%;
+    
+    --radius: 0.75rem;
+    
+    /* Custom mystical colors */
+    --mystical-glow: 45 100% 70%;
+    --sacred-gold: 42 88% 45%;
+    --ancient-green: 75 25% 15%;
+    --earth-brown: 30 25% 20%;
+    
+    /* Gradients */
+    --gradient-mystical: linear-gradient(135deg, hsl(42 95% 45%), hsl(45 100% 60%));
+    --gradient-forest: linear-gradient(180deg, hsl(75 20% 12%), hsl(80 15% 8%));
+    --gradient-radial: radial-gradient(circle at center, hsl(45 100% 60% / 0.15), transparent);
+    
+    /* Sacred geometry glow */
+    --glow-sacred: 0 0 30px hsl(45 100% 60% / 0.4);
+    --glow-subtle: 0 0 20px hsl(42 95% 55% / 0.3);
+    
+    /* Transitions */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Same as root for consistent mystical theme */
+    --background: 80 15% 10%;
+    --foreground: 45 100% 85%;
+    --card: 75 20% 12%;
+    --card-foreground: 45 95% 80%;
+    --popover: 75 22% 11%;
+    --popover-foreground: 45 100% 85%;
+    --primary: 42 95% 55%;
+    --primary-foreground: 80 20% 8%;
+    --secondary: 78 18% 18%;
+    --secondary-foreground: 45 100% 75%;
+    --muted: 75 15% 20%;
+    --muted-foreground: 45 40% 60%;
+    --accent: 45 100% 60%;
+    --accent-foreground: 80 20% 8%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 100% 95%;
+    --border: 42 60% 35%;
+    --input: 75 18% 18%;
+    --ring: 42 95% 55%;
   }
 }
 
@@ -101,5 +94,63 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.05em;
+    color: hsl(var(--primary));
+  }
+}
+
+@layer utilities {
+  .text-mystical {
+    color: hsl(var(--mystical-glow));
+    text-shadow: 0 0 20px hsl(var(--mystical-glow) / 0.5);
+  }
+  
+  .glow-sacred {
+    box-shadow: var(--glow-sacred);
+  }
+  
+  .glow-subtle {
+    box-shadow: var(--glow-subtle);
+  }
+  
+  .bg-gradient-mystical {
+    background: var(--gradient-mystical);
+  }
+  
+  .bg-gradient-forest {
+    background: var(--gradient-forest);
+  }
+  
+  .bg-radial-glow {
+    background: var(--gradient-radial);
+  }
+  
+  .transition-mystical {
+    transition: var(--transition-smooth);
+  }
+  
+  .border-mystical {
+    border-color: hsl(var(--border));
+    border-width: 1.5px;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px hsl(var(--mystical-glow) / 0.6));
+    }
+    50% {
+      opacity: 0.85;
+      filter: drop-shadow(0 0 20px hsl(var(--mystical-glow) / 0.8));
+    }
   }
 }
