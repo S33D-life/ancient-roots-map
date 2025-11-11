@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, Image } from "lucide-react";
 import treeIcon from "@/assets/tree-icon.png";
 
 const Header = () => {
@@ -27,6 +27,10 @@ const Header = () => {
             <Link to="/groves" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
               <span className="font-serif">Browse Groves</span>
+            </Link>
+            <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+              <Image className="w-4 h-4" />
+              <span className="font-serif">Gallery</span>
             </Link>
           </nav>
 
