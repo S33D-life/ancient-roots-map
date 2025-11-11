@@ -21,11 +21,18 @@ export interface TreeData extends TreeCSVRow {
 }
 
 export const parseCSV = (csvText: string): TreeCSVRow[] => {
-  const lines = csvText.trim().split('\n');
+  // Remove BOM if present
+  const cleanText = csvText.replace(/^\uFEFF/, '').trim();
+  const lines = cleanText.split('\n');
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const headers = lines[0].split(',').map(h => h.trim());
   const trees: TreeCSVRow[] = [];
+
+  // Detect if this is a what3words export format
+  const isWhat3WordsExport = headers.some(h => 
+    h.toLowerCase() === 'list' || h.toLowerCase() === 'what3words address'
+  );
 
   for (let i = 1; i < lines.length; i++) {
     const values = lines[i].split(',').map(v => v.trim());
@@ -34,17 +41,54 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
     headers.forEach((header, index) => {
       const value = values[index];
       if (value) {
-        if (header === 'estimated_age') {
-          row[header] = parseInt(value);
-        } else {
-          row[header] = value;
-        }
+        row[header] = value;
       }
     });
 
-    if (row.name && row.species && row.what3words) {
-      trees.push(row);
+    let treeRow: TreeCSVRow;
+
+    if (isWhat3WordsExport) {
+      // Handle what3words export format: List (species), what3words address, Label (name/notes)
+      const what3wordsAddress = row['what3words address'] || row['What3words address'] || '';
+      const species = row['List'] || row['list'] || 'Unknown';
+      const label = row['Label'] || row['label'] || '';
+      
+      if (!what3wordsAddress) continue;
+
+      // Clean what3words address (remove /// prefix if present)
+      const cleanWhat3words = what3wordsAddress.replace(/^\/\/\//, '');
+
+      treeRow = {
+        name: label || cleanWhat3words,
+        species: species,
+        what3words: cleanWhat3words,
+        description: label || '',
+      };
+    } else {
+      // Handle standard format
+      const nameKey = headers.find(h => h.toLowerCase() === 'name') || 'name';
+      const speciesKey = headers.find(h => h.toLowerCase() === 'species') || 'species';
+      const what3wordsKey = headers.find(h => h.toLowerCase() === 'what3words') || 'what3words';
+
+      if (!row[nameKey] || !row[speciesKey] || !row[what3wordsKey]) continue;
+
+      treeRow = {
+        name: row[nameKey],
+        species: row[speciesKey],
+        what3words: row[what3wordsKey],
+        lineage: row.lineage,
+        description: row.description,
+        state: row.state,
+        nation: row.nation,
+        bioregion: row.bioregion,
+        project_name: row.project_name,
+        project_url: row.project_url,
+        estimated_age: row.estimated_age ? parseInt(row.estimated_age) : undefined,
+        grove_scale: row.grove_scale as any,
+      };
     }
+
+    trees.push(treeRow);
   }
 
   return trees;
