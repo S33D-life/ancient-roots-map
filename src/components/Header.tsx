@@ -26,7 +26,7 @@ const Header = () => {
             </Link>
             <Link to="/groves" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
-              <span className="font-serif">Browse Groves</span>
+              <span className="font-serif">Tree Resources</span>
             </Link>
             <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <Image className="w-4 h-4" />

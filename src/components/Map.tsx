@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
 import TreeImportExport from "./TreeImportExport";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyA1Zpu0X_c1buzTMuJh29j1WHmNibdYefA';
 
@@ -19,20 +22,34 @@ interface Tree {
   longitude: number;
   what3words: string;
   description?: string;
+  created_by?: string;
 }
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [trees, setTrees] = useState<Tree[]>([]);
+  const [filteredTrees, setFilteredTrees] = useState<Tree[]>([]);
+  const [viewMode, setViewMode] = useState<string>("collective");
+  const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Get current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUser();
+  }, []);
 
   // Fetch trees from database
   useEffect(() => {
     const fetchTrees = async () => {
       const { data, error } = await supabase
         .from('trees')
-        .select('*');
+        .select('*, created_by');
 
       if (error) {
         console.error('Error fetching trees:', error);
@@ -69,6 +86,26 @@ const Map = () => {
     };
   }, [toast]);
 
+  // Filter trees based on view mode and species
+  useEffect(() => {
+    let filtered = trees;
+
+    // Filter by view mode
+    if (viewMode === "personal" && userId) {
+      filtered = filtered.filter(tree => tree.created_by === userId);
+    }
+
+    // Filter by species
+    if (speciesFilter !== "all") {
+      filtered = filtered.filter(tree => tree.species === speciesFilter);
+    }
+
+    setFilteredTrees(filtered);
+  }, [trees, viewMode, speciesFilter, userId]);
+
+  // Get unique species for filter
+  const uniqueSpecies = Array.from(new Set(trees.map(tree => tree.species))).sort();
+
   // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -103,14 +140,14 @@ const Map = () => {
 
   // Add tree markers
   useEffect(() => {
-    if (!map.current || trees.length === 0) return;
+    if (!map.current || filteredTrees.length === 0) return;
 
     // Remove existing markers
     const existingMarkers = document.querySelectorAll('.tree-marker');
     existingMarkers.forEach(marker => marker.remove());
 
     // Add new markers
-    trees.forEach((tree) => {
+    filteredTrees.forEach((tree) => {
       const el = document.createElement('div');
       el.className = 'tree-marker';
       el.style.cssText = `
@@ -157,7 +194,7 @@ const Map = () => {
         });
       });
     });
-  }, [trees]);
+  }, [filteredTrees]);
 
   const handleLocationSelect = (lat: number, lng: number, what3words: string) => {
     if (map.current) {
@@ -171,8 +208,41 @@ const Map = () => {
 
   return (
     <div className="relative w-full h-screen">
+      {/* Tabs and filters at top */}
+      <Card className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-background/95 backdrop-blur border-border shadow-lg">
+        <div className="flex items-center gap-4 p-3">
+          <Tabs value={viewMode} onValueChange={setViewMode}>
+            <TabsList className="bg-muted">
+              <TabsTrigger value="collective">Collective</TabsTrigger>
+              <TabsTrigger value="personal">Personal Groves</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <Select value={speciesFilter} onValueChange={setSpeciesFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by species" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Species</SelectItem>
+              {uniqueSpecies.map(species => (
+                <SelectItem key={species} value={species}>{species}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <span className="text-sm text-muted-foreground">
+            {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
+          </span>
+        </div>
+      </Card>
+
       <MapSearch onLocationSelect={handleLocationSelect} />
-      <TreeImportExport />
+      
+      {/* Import/Export moved to bottom */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <TreeImportExport />
+      </div>
+      
       <div ref={mapContainer} className="absolute inset-0" />
       
       <style>{`
