@@ -58,6 +58,63 @@ export type Database = {
           },
         ]
       }
+      tree_projects: {
+        Row: {
+          api_url: string | null
+          bioregion: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          nation: string | null
+          project_scope: string | null
+          species: string | null
+          state: string | null
+          updated_at: string
+          website_url: string | null
+          what3words: string | null
+        }
+        Insert: {
+          api_url?: string | null
+          bioregion?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          nation?: string | null
+          project_scope?: string | null
+          species?: string | null
+          state?: string | null
+          updated_at?: string
+          website_url?: string | null
+          what3words?: string | null
+        }
+        Update: {
+          api_url?: string | null
+          bioregion?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          nation?: string | null
+          project_scope?: string | null
+          species?: string | null
+          state?: string | null
+          updated_at?: string
+          website_url?: string | null
+          what3words?: string | null
+        }
+        Relationships: []
+      }
       trees: {
         Row: {
           bioregion: string | null
