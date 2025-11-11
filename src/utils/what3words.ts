@@ -84,6 +84,16 @@ export async function convertToCoordinates(words: string): Promise<What3WordsLoc
       return null;
     }
 
+    // Handle API-level errors returned with 200
+    if (data?.error) {
+      if (data.error === 'quota_exceeded') {
+        setBackoff();
+        throw new Error('quota_exceeded');
+      }
+      console.error('What3words API error payload:', data);
+      return null;
+    }
+
     // Cache successful result
     if (data) {
       setCache(`coords_${words}`, data);
@@ -125,6 +135,15 @@ export async function convertToWhat3Words(lat: number, lng: number): Promise<str
       return null;
     }
 
+    // Handle API-level errors returned with 200
+    if (data?.error) {
+      if (data.error === 'quota_exceeded') {
+        setBackoff();
+      }
+      console.error('What3words reverse API error payload:', data);
+      return null;
+    }
+
     // Cache successful result
     if (data?.words) {
       setCache(cacheKey, data.words);
@@ -158,6 +177,15 @@ export async function autosuggest(input: string): Promise<string[]> {
         setBackoff();
       }
       console.error('What3words autosuggest error:', error);
+      return [];
+    }
+
+    // Handle API-level errors returned with 200
+    if (data?.error) {
+      if (data.error === 'quota_exceeded') {
+        setBackoff();
+      }
+      console.error('What3words autosuggest API error payload:', data);
       return [];
     }
 

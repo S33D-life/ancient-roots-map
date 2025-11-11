@@ -41,7 +41,7 @@ serve(async (req) => {
             error: "quota_exceeded",
             message: "What3words API quota exceeded. Please try again later or upgrade your plan."
           }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       
