@@ -6,8 +6,10 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Loader2, TreeDeciduous, LogOut } from "lucide-react";
+import { Loader2, TreeDeciduous, LogOut, Upload, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { parseCSV, convertCSVToTreeData, generateCSV, downloadCSV } from "@/utils/csvHandler";
+import PhotoImport from "@/components/PhotoImport";
 
 interface Tree {
   id: string;
@@ -31,6 +33,8 @@ const DashboardPage = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [trees, setTrees] = useState<Tree[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isImporting, setIsImporting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -116,6 +120,120 @@ const DashboardPage = () => {
     }
   };
 
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+
+    try {
+      const text = await file.text();
+      const csvRows = parseCSV(text);
+
+      if (csvRows.length === 0) {
+        toast({
+          title: "Invalid CSV",
+          description: "No valid tree data found in the CSV file",
+          variant: "destructive",
+        });
+        setIsImporting(false);
+        return;
+      }
+
+      toast({
+        title: "Converting coordinates...",
+        description: `Processing ${csvRows.length} trees`,
+      });
+
+      const treeData = await convertCSVToTreeData(csvRows);
+
+      if (treeData.length === 0) {
+        toast({
+          title: "Conversion failed",
+          description: "Could not convert what3words addresses to coordinates",
+          variant: "destructive",
+        });
+        setIsImporting(false);
+        return;
+      }
+
+      const treesToInsert = treeData.map(tree => ({
+        ...tree,
+        created_by: user?.id,
+      }));
+
+      const { error } = await supabase
+        .from('trees')
+        .insert(treesToInsert);
+
+      if (error) throw error;
+
+      toast({
+        title: "Import successful",
+        description: `Successfully imported ${treeData.length} trees`,
+      });
+
+      // Refresh trees list
+      if (user) {
+        fetchUserTrees(user.id);
+      }
+
+      // Reset the input
+      event.target.value = '';
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import failed",
+        description: "An error occurred while importing the CSV",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+
+    try {
+      const { data: trees, error } = await supabase
+        .from('trees')
+        .select('*')
+        .eq('created_by', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (!trees || trees.length === 0) {
+        toast({
+          title: "No data to export",
+          description: "You don't have any trees to export",
+          variant: "destructive",
+        });
+        setIsExporting(false);
+        return;
+      }
+
+      const csv = generateCSV(trees);
+      const filename = `my-ancient-friends-${new Date().toISOString().split('T')[0]}.csv`;
+      downloadCSV(csv, filename);
+
+      toast({
+        title: "Export successful",
+        description: `Exported ${trees.length} trees to ${filename}`,
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export failed",
+        description: "An error occurred while exporting the CSV",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -170,6 +288,66 @@ const DashboardPage = () => {
                   Sign Out
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Import/Export Section */}
+          <Card className="border-mystical bg-card/50 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-xl font-serif text-mystical">
+                Import & Export
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                <PhotoImport />
+                
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImport}
+                    className="hidden"
+                    id="csv-upload-dashboard"
+                    disabled={isImporting}
+                  />
+                  <label htmlFor="csv-upload-dashboard">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      disabled={isImporting}
+                      className="cursor-pointer"
+                      asChild
+                    >
+                      <span>
+                        {isImporting ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        Import CSV
+                      </span>
+                    </Button>
+                  </label>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleExport}
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4 mr-2" />
+                  )}
+                  Export My Trees
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3">
+                Import trees from CSV files or export your trees to CSV format
+              </p>
             </CardContent>
           </Card>
 
