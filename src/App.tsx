@@ -9,6 +9,7 @@ import AuthPage from "./pages/AuthPage";
 import GrovesPage from "./pages/GrovesPage";
 import GalleryPage from "./pages/GalleryPage";
 import DashboardPage from "./pages/DashboardPage";
+import TreeDetailPage from "./pages/TreeDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/tree/:id" element={<TreeDetailPage />} />
           <Route path="/groves" element={<GrovesPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/auth" element={<AuthPage />} />
