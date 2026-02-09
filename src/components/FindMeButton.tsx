@@ -39,6 +39,7 @@ const FindMeButton = ({ onLocationFound, autoOpen }: FindMeButtonProps) => {
         setLocation({ lat: latitude, lng: longitude });
         onLocationFound?.(latitude, longitude);
         setLoading(false);
+        // Dialog opens with adjust mode triggered inside AddTreeDialog
         setDialogOpen(true);
       },
       (error) => {
