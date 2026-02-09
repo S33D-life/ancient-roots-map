@@ -434,11 +434,11 @@ const GalleryPage = () => {
       <div 
         className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-700 ${splashFading ? 'opacity-0' : 'opacity-100'}`}
       >
-        <div className="relative w-full h-full overflow-hidden">
+        <div className="relative w-full h-full overflow-hidden flex items-center justify-center bg-black">
           <img 
             src={heartwoodWelcome} 
             alt="Welcome to Heartwood, A Library of Love" 
-            className="w-full h-full object-cover animate-fade-in"
+            className="max-h-[70vh] md:max-h-full md:h-full w-auto md:w-full object-contain md:object-cover animate-fade-in"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
           <AmanitaFlush position="bottom" />
