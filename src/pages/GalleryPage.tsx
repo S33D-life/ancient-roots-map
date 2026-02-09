@@ -18,9 +18,7 @@ import PhotoImport from "@/components/PhotoImport";
 import CreatorsPath from "@/components/CreatorsPath";
 import TreeResources from "@/components/TreeResources";
 import { Progress } from "@/components/ui/progress";
-import heartwoodDark from "@/assets/heartwood-dark.jpeg";
-import heartwoodLight from "@/assets/heartwood-light.jpeg";
-import heartwoodParchment from "@/assets/heartwood-parchment.jpeg";
+import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import heartwoodWelcome from "@/assets/heartwood-welcome.png";
 
 interface Tree {
@@ -453,8 +451,7 @@ const GalleryPage = () => {
             </p>
           </div>
           <div className="hidden md:block shrink-0">
-            <img src={heartwoodDark} alt="Heartwood" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg dark:block hidden" />
-            <img src={heartwoodLight} alt="Heartwood" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg dark:hidden block" />
+            <img src={heartwoodLibrary} alt="Heartwood Library" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
           </div>
         </div>
 
