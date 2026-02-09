@@ -56,7 +56,7 @@ const Header = () => {
               <img 
                 src={teotagLogo} 
                 alt="Teotag" 
-                className="w-14 h-14 rounded-full"
+                className="w-20 h-20 rounded-full"
               />
             </Link>
             <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50">
