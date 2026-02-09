@@ -522,7 +522,7 @@ const GalleryPage = () => {
             {/* Sacred Spiral of 36 */}
             <div className="mb-12">
               <h3 className="text-xl font-serif text-primary text-center mb-6">The Spiral of Staffs</h3>
-              <div className="relative w-full max-w-3xl mx-auto" style={{ height: '700px' }}>
+              <div className="relative w-full max-w-3xl mx-auto overflow-hidden" style={{ height: '800px' }}>
                 {(() => {
                   const spiralStaffs = [
                     { code: "YEW", species: "Yew" },
@@ -565,7 +565,7 @@ const GalleryPage = () => {
                   const centerX = 50;
                   const centerY = 50;
                   const goldenAngle = 137.508;
-                  const scaleFactor = 4.2;
+                  const scaleFactor = 6.5;
 
                   return spiralStaffs.map((staff, i) => {
                     const angle = i * goldenAngle * (Math.PI / 180);
@@ -573,26 +573,29 @@ const GalleryPage = () => {
                     const x = centerX + r * Math.cos(angle);
                     const y = centerY + r * Math.sin(angle);
                     const isRevealed = !staff.code.startsWith("TBD");
+                    const clampedX = Math.max(8, Math.min(92, x));
+                    const clampedY = Math.max(5, Math.min(95, y));
 
                     return (
                       <div
                         key={i}
-                        className={`absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-125 hover:z-20 ${isRevealed ? '' : 'opacity-30'}`}
+                        className={`absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-110 hover:z-20 ${isRevealed ? '' : 'opacity-30'}`}
                         style={{
-                          left: `${x}%`,
-                          top: `${y}%`,
+                          left: `${clampedX}%`,
+                          top: `${clampedY}%`,
                           transform: 'translate(-50%, -50%)',
+                          zIndex: i,
                         }}
                       >
-                        <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border flex items-center justify-center ${isRevealed ? 'border-primary/60 bg-card/80 glow-subtle' : 'border-border bg-muted/30'}`}>
-                          <Wand2 className={`w-5 h-5 ${isRevealed ? 'text-primary' : 'text-muted-foreground/30'}`} />
+                        <div className={`w-9 h-12 sm:w-10 sm:h-14 rounded-md border flex items-center justify-center ${isRevealed ? 'border-primary/60 bg-card/90 glow-subtle' : 'border-border bg-muted/30'}`}>
+                          <Wand2 className={`w-4 h-4 ${isRevealed ? 'text-primary' : 'text-muted-foreground/30'}`} />
                         </div>
-                        <span className="text-[9px] sm:text-[10px] font-serif text-foreground mt-1 whitespace-nowrap">
-                          {staff.code}-C0S13
+                        <span className="text-[8px] sm:text-[9px] font-serif text-foreground mt-0.5 whitespace-nowrap leading-tight">
+                          {staff.code}
                         </span>
-                        <span className="text-[8px] text-muted-foreground">{staff.species}</span>
+                        <span className="text-[7px] text-muted-foreground leading-tight">{staff.species}</span>
                         {isRevealed && (
-                          <Badge variant="outline" className="mt-0.5 text-[7px] px-1 py-0 leading-tight">
+                          <Badge variant="outline" className="mt-0.5 text-[6px] px-1 py-0 leading-tight">
                             {i < 12 ? "Minted" : "Awaiting"}
                           </Badge>
                         )}
