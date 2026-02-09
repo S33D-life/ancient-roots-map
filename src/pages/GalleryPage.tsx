@@ -430,11 +430,11 @@ const GalleryPage = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="gallery" className="w-full">
+        <Tabs defaultValue="staff-room" className="w-full">
           <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8">
+            <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="gallery">Ancient Friends</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
-            <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="creators-path">Creator's Path</TabsTrigger>
             <TabsTrigger value="tree-resources">Tree Resources</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
