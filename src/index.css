@@ -184,4 +184,21 @@ All colors MUST be HSL.
       filter: drop-shadow(0 0 20px hsl(var(--mystical-glow) / 0.8));
     }
   }
+
+  @keyframes tetol-fall {
+    0% {
+      transform: translateY(0) translateX(0) rotate(var(--start-rot, 0deg));
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.25;
+    }
+    90% {
+      opacity: 0.2;
+    }
+    100% {
+      transform: translateY(110vh) translateX(var(--drift, 0px)) rotate(calc(var(--start-rot, 0deg) + 540deg));
+      opacity: 0;
+    }
+  }
 }
