@@ -51,13 +51,22 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical bg-background/95 backdrop-blur-md">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <img 
-              src={teotagLogo} 
-              alt="Teotag" 
-              className="w-[120px] h-[120px] rounded-full"
-            />
-          </Link>
+          <div className="relative group">
+            <Link to="/" className="flex items-center gap-3">
+              <img 
+                src={teotagLogo} 
+                alt="Teotag" 
+                className="w-[120px] h-[120px] rounded-full"
+              />
+            </Link>
+            <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50">
+              <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-4 shadow-lg max-w-xs animate-fade-in">
+                <p className="text-sm font-serif text-foreground">
+                  <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove. Your AI guide through the living atlas.
+                </p>
+              </div>
+            </div>
+          </div>
           
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
