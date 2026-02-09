@@ -523,6 +523,12 @@ const Map = () => {
 
       <div ref={mapContainer} className="absolute inset-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
 
+      {/* Parchment vignette overlay */}
+      <div className="absolute inset-0 pointer-events-none z-[1]" style={{
+        boxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
+        background: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
+      }} />
+
       <style>{`
         .tree-popup .mapboxgl-popup-content {
           background: hsl(120, 40%, 15%);
