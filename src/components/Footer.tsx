@@ -8,8 +8,6 @@ const Footer = () => {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TreeDeciduous className="w-4 h-4 text-primary" />
             <span className="font-serif">s33d.life</span>
-            <span>·</span>
-            <span>Ancient Friends Map</span>
           </div>
 
           <div className="flex items-center gap-4">
