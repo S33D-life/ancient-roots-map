@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Locate, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddTreeDialog from "./AddTreeDialog";
 
@@ -75,7 +75,14 @@ const FindMeButton = ({ onLocationFound }: FindMeButtonProps) => {
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
         ) : (
-          <Locate className="h-4 w-4 mr-2" />
+          <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="10" width="20" height="10" rx="1" />
+            <path d="M2 14h20" />
+            <path d="M12 10v10" />
+            <path d="M10 14h4v3h-4z" fill="currentColor" />
+            <path d="M4 10l2-6h12l2 6" />
+            <path d="M9 4h6" />
+          </svg>
         )}
         Find Me & Add Tree
       </Button>
