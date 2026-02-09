@@ -57,7 +57,7 @@ const Header = () => {
               className="w-10 h-10 rounded-full"
             />
             <h1 className="text-2xl font-serif font-bold tracking-wider text-mystical">
-              ARBOREAL ATLAS OF ANCIENT FRIENDS
+              S33D Life
             </h1>
           </Link>
           
