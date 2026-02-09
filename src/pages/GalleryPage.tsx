@@ -932,6 +932,12 @@ const GalleryPage = () => {
                     117: { code: "ASH-C1S10", img: "/images/staffs/ash-c1-s10.jpeg" },
                     118: { code: "ASH-C1S11", img: "/images/staffs/ash-c1-s11.jpeg" },
                     119: { code: "ASH-C1S12", img: "/images/staffs/ash-c1-s12.jpeg" },
+                    120: { code: "BEE-C1S1", img: "/images/staffs/bee-c1-s1.jpeg" },
+                    121: { code: "BEE-C1S2", img: "/images/staffs/bee-c1-s2.jpeg" },
+                    122: { code: "BEE-C1S3", img: "/images/staffs/bee-c1-s3.jpeg" },
+                    123: { code: "BEE-C1S4", img: "/images/staffs/bee-c1-s4.jpeg" },
+                    124: { code: "BEE-C1S5", img: "/images/staffs/bee-c1-s5.jpeg" },
+                    125: { code: "BEE-C1S6", img: "/images/staffs/bee-c1-s6.jpeg" },
                   };
                   return Array.from({ length: 144 }, (_, i) => {
                     const staffData = gridImages[i];
@@ -959,7 +965,7 @@ const GalleryPage = () => {
 
             <div className="text-center pt-4">
               <p className="text-sm text-muted-foreground">
-                {120} of 144 staffs minted as NFTs · Digital twins coming soon
+                {126} of 144 staffs minted as NFTs · Digital twins coming soon
               </p>
             </div>
           </TabsContent>
