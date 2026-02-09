@@ -49,14 +49,14 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical bg-background/95 backdrop-blur-md">
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="relative group">
             <Link to="/" className="flex items-center gap-3">
               <img 
                 src={teotagLogo} 
                 alt="Teotag" 
-                className="w-[120px] h-[120px] rounded-full"
+                className="w-14 h-14 rounded-full"
               />
             </Link>
             <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50">
