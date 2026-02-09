@@ -414,7 +414,7 @@ const GalleryPage = () => {
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
-            Arboreal Atlas of Ancient Friends
+            Heartwood Library
           </h1>
           <p className="text-muted-foreground">
             Explore all mapped trees and manage the tree ledger
