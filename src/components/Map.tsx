@@ -509,7 +509,7 @@ const Map = () => {
 
       <MapSearch onLocationSelect={handleLocationSelect} />
 
-      <div className="absolute bottom-4 left-4 z-10">
+      <div className="absolute bottom-2 left-2 z-10">
         <FindMeButton
           onLocationFound={(lat, lng) => {
             setUserLocation({ lat, lng });

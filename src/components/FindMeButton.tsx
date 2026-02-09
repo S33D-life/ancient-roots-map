@@ -70,7 +70,8 @@ const FindMeButton = ({ onLocationFound }: FindMeButtonProps) => {
         onClick={handleFindMe}
         disabled={loading}
         variant="mystical"
-        className="shadow-lg"
+        className="shadow-lg bg-[hsl(120,30%,15%)] hover:bg-[hsl(120,30%,20%)] text-[hsl(42,95%,55%)] border border-[hsl(42,60%,40%)]"
+        style={{ textShadow: '0 0 8px hsla(42, 95%, 55%, 0.6), 0 0 16px hsla(42, 95%, 55%, 0.3)' }}
       >
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
