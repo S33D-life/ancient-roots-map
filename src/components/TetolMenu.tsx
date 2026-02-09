@@ -1,21 +1,54 @@
 import { useNavigate } from "react-router-dom";
-import { Sprout, Heart, TreeDeciduous, Sparkles } from "lucide-react";
+import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface TetolMenuProps {
   open: boolean;
   onClose: () => void;
 }
 
-const menuItems = [
-  { to: "/golden-dream", label: "yOur Golden Dream", icon: Sparkles },
-  { to: "/council-of-life", label: "Council of Life", icon: Sprout },
-  { to: "/gallery", label: "Heartwood", icon: Heart },
-  { to: "/map", label: "Ancient Friends", icon: TreeDeciduous },
-  { to: "/", label: "S33D", icon: Sprout, isRoot: true },
+const treeItems = [
+  {
+    to: "/golden-dream",
+    label: "yOur Golden Dream",
+    subtitle: "The Crown",
+    icon: Crown,
+    zone: "crown",
+  },
+  {
+    to: "/council-of-life",
+    label: "Council of Life",
+    subtitle: "The Canopy",
+    icon: Leaf,
+    zone: "canopy",
+  },
+  {
+    to: "/gallery",
+    label: "HeARTwood Library",
+    subtitle: "The Trunk",
+    icon: Heart,
+    zone: "trunk",
+  },
+  {
+    to: "/map",
+    label: "Ancient Friends",
+    subtitle: "The Roots",
+    icon: TreeDeciduous,
+    zone: "roots",
+  },
 ];
 
 const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
   const navigate = useNavigate();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => setVisible(true));
+    } else {
+      setVisible(false);
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -27,67 +60,272 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center"
       onClick={onClose}
-      style={{ background: "linear-gradient(180deg, hsl(100 40% 85% / 0.97), hsl(120 35% 30% / 0.97))" }}
+      style={{
+        background: visible
+          ? "radial-gradient(ellipse at 50% 60%, hsl(80 25% 12% / 0.98), hsl(80 15% 6% / 0.99))"
+          : "transparent",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.5s ease-out",
+      }}
     >
-      <div className="flex flex-col items-center gap-0 relative" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="flex flex-col items-center relative"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          transform: visible ? "scale(1)" : "scale(0.9)",
+          opacity: visible ? 1 : 0,
+          transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        {/* Title */}
         <h1
-          className="text-4xl md:text-5xl font-serif tracking-[0.15em] mb-1"
-          style={{ color: "hsl(42 75% 45%)" }}
+          className="text-3xl md:text-4xl font-serif tracking-[0.25em] mb-0"
+          style={{ color: "hsl(var(--primary))" }}
         >
           TETOL
         </h1>
         <p
-          className="text-sm md:text-base font-serif tracking-widest mb-8 text-center"
-          style={{ color: "hsl(42 65% 40%)" }}
+          className="text-[10px] md:text-xs font-serif tracking-[0.35em] mb-8 text-center uppercase"
+          style={{ color: "hsl(var(--muted-foreground))" }}
         >
-          THE ETHEREAL TREE OF LIFE
+          The Ethereal Tree of Life
         </p>
 
-        <div className="relative flex flex-col items-center">
+        {/* Tree visualization */}
+        <div className="relative flex flex-col items-center w-64 md:w-72">
+          {/* Living trunk line */}
           <div
-            className="absolute top-0 bottom-0 w-1 rounded-full"
-            style={{ background: "linear-gradient(180deg, hsl(120 30% 45% / 0.5), hsl(120 30% 30% / 0.8))" }}
+            className="absolute left-1/2 -translate-x-1/2 w-[3px] rounded-full"
+            style={{
+              top: "0",
+              bottom: "0",
+              background: "linear-gradient(180deg, hsl(42 80% 55% / 0.6) 0%, hsl(30 35% 30% / 0.8) 50%, hsl(25 30% 22% / 0.6) 100%)",
+              opacity: visible ? 1 : 0,
+              transition: "opacity 1s ease-out 0.3s",
+            }}
           />
 
-          <div className="flex flex-col items-center gap-6 relative z-10">
-            {menuItems.map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.to}
-                  onClick={(e) => handleItemClick(item.to, e)}
-                  className="flex flex-col items-center gap-2 group transition-all duration-300 hover:scale-110 bg-transparent border-none cursor-pointer opacity-0 animate-[cascadeIn_0.5s_ease-out_forwards]"
-                  style={{ animationDelay: `${i * 120 + 200}ms` }}
-                >
-                  <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 group-hover:shadow-[0_0_25px_hsl(42_80%_50%_/_0.5)]"
-                    style={{
-                      borderColor: "hsl(42 70% 45%)",
-                      background: `hsl(120 ${35 - i * 3}% ${35 + i * 4}% / 0.7)`,
-                    }}
-                  >
-                    <Icon className="w-7 h-7" style={{ color: "hsl(42 75% 50%)" }} />
-                  </div>
-                  <span
-                    className="font-serif text-sm md:text-base tracking-wider text-center font-semibold uppercase"
-                    style={{ color: "hsl(42 75% 45%)" }}
-                  >
-                    {item.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Crown - Golden Dream */}
+          <TreeNode
+            item={treeItems[0]}
+            index={0}
+            visible={visible}
+            onClick={handleItemClick}
+            glowColor="hsl(42 90% 55% / 0.4)"
+            nodeStyle="crown"
+          />
+
+          {/* Branch connectors - canopy */}
+          <BranchLines visible={visible} delay={0.35} side="both" />
+
+          {/* Canopy - Council of Life */}
+          <TreeNode
+            item={treeItems[1]}
+            index={1}
+            visible={visible}
+            onClick={handleItemClick}
+            glowColor="hsl(120 40% 40% / 0.3)"
+            nodeStyle="canopy"
+          />
+
+          {/* Trunk - Heartwood */}
+          <TreeNode
+            item={treeItems[2]}
+            index={2}
+            visible={visible}
+            onClick={handleItemClick}
+            glowColor="hsl(30 40% 35% / 0.3)"
+            nodeStyle="trunk"
+          />
+
+          {/* Root tendrils */}
+          <BranchLines visible={visible} delay={0.65} side="roots" />
+
+          {/* Roots - Ancient Friends */}
+          <TreeNode
+            item={treeItems[3]}
+            index={3}
+            visible={visible}
+            onClick={handleItemClick}
+            glowColor="hsl(80 30% 30% / 0.3)"
+            nodeStyle="roots"
+          />
         </div>
 
-        <p className="mt-10 text-xs font-serif opacity-50" style={{ color: "hsl(42 60% 40%)" }}>
+        {/* S33D home link at the very bottom */}
+        <button
+          onClick={(e) => handleItemClick("/", e)}
+          className="mt-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(10px)",
+            transition: "all 0.5s ease-out 0.9s",
+          }}
+        >
+          <Sprout
+            className="w-5 h-5 transition-all duration-300 group-hover:scale-110"
+            style={{ color: "hsl(var(--primary))" }}
+          />
+          <span
+            className="font-serif text-xs tracking-[0.3em] uppercase transition-all duration-300 group-hover:tracking-[0.4em]"
+            style={{ color: "hsl(var(--muted-foreground))" }}
+          >
+            S33D
+          </span>
+        </button>
+
+        {/* Close hint */}
+        <p
+          className="mt-6 text-[10px] font-serif tracking-widest"
+          style={{
+            color: "hsl(var(--muted-foreground) / 0.4)",
+            opacity: visible ? 1 : 0,
+            transition: "opacity 0.5s ease-out 1.2s",
+          }}
+        >
           tap anywhere to close
         </p>
       </div>
     </div>
   );
 };
+
+interface TreeNodeProps {
+  item: (typeof treeItems)[0];
+  index: number;
+  visible: boolean;
+  onClick: (to: string, e: React.MouseEvent) => void;
+  glowColor: string;
+  nodeStyle: "crown" | "canopy" | "trunk" | "roots";
+}
+
+const nodeColors: Record<string, { bg: string; border: string; iconColor: string }> = {
+  crown: {
+    bg: "hsl(42 60% 18% / 0.6)",
+    border: "hsl(42 80% 50% / 0.7)",
+    iconColor: "hsl(42 90% 60%)",
+  },
+  canopy: {
+    bg: "hsl(120 25% 18% / 0.6)",
+    border: "hsl(120 35% 40% / 0.6)",
+    iconColor: "hsl(120 45% 55%)",
+  },
+  trunk: {
+    bg: "hsl(30 25% 18% / 0.6)",
+    border: "hsl(30 35% 40% / 0.5)",
+    iconColor: "hsl(30 50% 55%)",
+  },
+  roots: {
+    bg: "hsl(80 20% 16% / 0.6)",
+    border: "hsl(80 30% 35% / 0.5)",
+    iconColor: "hsl(80 35% 50%)",
+  },
+};
+
+const TreeNode = ({ item, index, visible, onClick, glowColor, nodeStyle }: TreeNodeProps) => {
+  const Icon = item.icon;
+  const colors = nodeColors[nodeStyle];
+  const delay = index * 0.15 + 0.2;
+
+  return (
+    <button
+      onClick={(e) => onClick(item.to, e)}
+      className="relative z-10 flex items-center gap-4 group cursor-pointer bg-transparent border-none py-4 w-full"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(15px)",
+        transition: `all 0.6s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+      }}
+    >
+      {/* Left label */}
+      <div className="flex-1 text-right">
+        <p
+          className="font-serif text-sm md:text-base tracking-wider transition-all duration-300 group-hover:tracking-widest"
+          style={{ color: "hsl(var(--foreground))" }}
+        >
+          {item.label}
+        </p>
+        <p
+          className="text-[10px] tracking-[0.2em] uppercase font-serif"
+          style={{ color: colors.iconColor, opacity: 0.7 }}
+        >
+          {item.subtitle}
+        </p>
+      </div>
+
+      {/* Center node */}
+      <div
+        className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border shrink-0 transition-all duration-500 group-hover:scale-110"
+        style={{
+          background: colors.bg,
+          borderColor: colors.border,
+          boxShadow: `0 0 0px ${glowColor}`,
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 25px ${glowColor}`;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0px ${glowColor}`;
+        }}
+      >
+        <Icon className="w-5 h-5 md:w-6 md:h-6" style={{ color: colors.iconColor }} />
+      </div>
+
+      {/* Right spacer for symmetry */}
+      <div className="flex-1" />
+    </button>
+  );
+};
+
+interface BranchLinesProps {
+  visible: boolean;
+  delay: number;
+  side: "both" | "roots";
+}
+
+const BranchLines = ({ visible, delay, side }: BranchLinesProps) => (
+  <div
+    className="relative w-full h-2 flex items-center justify-center"
+    style={{
+      opacity: visible ? 1 : 0,
+      transition: `opacity 0.8s ease-out ${delay}s`,
+    }}
+  >
+    {side === "both" ? (
+      <>
+        <div
+          className="absolute left-[15%] right-1/2 h-[1px]"
+          style={{ background: "linear-gradient(90deg, transparent, hsl(var(--border) / 0.4))" }}
+        />
+        <div
+          className="absolute right-[15%] left-1/2 h-[1px]"
+          style={{ background: "linear-gradient(270deg, transparent, hsl(var(--border) / 0.4))" }}
+        />
+      </>
+    ) : (
+      <>
+        <div
+          className="absolute left-[20%] right-1/2 h-[1px]"
+          style={{ background: "linear-gradient(90deg, transparent, hsl(var(--border) / 0.3))" }}
+        />
+        <div
+          className="absolute right-[20%] left-1/2 h-[1px]"
+          style={{ background: "linear-gradient(270deg, transparent, hsl(var(--border) / 0.3))" }}
+        />
+        {/* Extra root tendrils */}
+        <div
+          className="absolute left-[10%] right-[55%] h-[1px] translate-y-1"
+          style={{ background: "linear-gradient(90deg, transparent, hsl(var(--border) / 0.2))" }}
+        />
+        <div
+          className="absolute right-[10%] left-[55%] h-[1px] translate-y-1"
+          style={{ background: "linear-gradient(270deg, transparent, hsl(var(--border) / 0.2))" }}
+        />
+      </>
+    )}
+  </div>
+);
 
 export default TetolMenu;
