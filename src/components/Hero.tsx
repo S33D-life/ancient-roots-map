@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous, Sparkles } from "lucide-react";
-import bgDark from "@/assets/bg-dark.jpeg";
-import bgLight from "@/assets/bg-light.jpeg";
+import heroS33d from "@/assets/hero-s33d.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -21,8 +20,8 @@ const Hero = () => {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
-        style={{ backgroundImage: `url(${isDark ? bgDark : bgLight})` }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroS33d})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
       </div>
