@@ -1,6 +1,8 @@
 // Shared Amanita mushroom flush + moss ground layer
 // Used on Hero landing page and Heartwood Library splash screen
 
+import { useIsMobile } from "@/hooks/use-mobile";
+
 type FruitingStage = "button" | "emerging" | "young" | "mature" | "open" | "aging";
 
 interface MushroomProps {
@@ -202,6 +204,8 @@ interface AmanitaFlushProps {
 }
 
 const AmanitaFlush = ({ position = "bottom", className = "" }: AmanitaFlushProps) => {
+  const isMobile = useIsMobile();
+  const mobileScale = 0.65;
   const posStyle = position === "top"
     ? { top: '0px' }
     : { bottom: '0px' };
@@ -211,7 +215,7 @@ const AmanitaFlush = ({ position = "bottom", className = "" }: AmanitaFlushProps
       <div className="relative w-full h-full">
         <MossLayer />
         {MUSHROOMS.map((m, i) => (
-          <AmanitaMushroom key={i} {...m} />
+          <AmanitaMushroom key={i} {...m} scale={isMobile ? m.scale * mobileScale : m.scale} />
         ))}
       </div>
       <MushroomKeyframes />
