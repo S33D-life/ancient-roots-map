@@ -483,8 +483,6 @@ const GalleryPage = () => {
             ))}
           </div>
         </div>
-
-        <AmanitaFlush position="bottom" />
       </div>
     );
   }
