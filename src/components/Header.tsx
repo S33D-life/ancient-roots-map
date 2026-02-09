@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, Image, User, Sun, Moon } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sun, Moon } from "lucide-react";
 import s33dLogo from "@/assets/s33d-logo.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,16 +63,14 @@ const Header = () => {
           
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
-              <Image className="w-4 h-4" />
+              <BookOpen className="w-4 h-4" />
+              <TreeDeciduous className="w-4 h-4 -ml-1" />
               <span className="font-serif">Library</span>
             </Link>
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span className="font-serif">Arboreal Atlas</span>
-            </Link>
-            <Link to="/groves" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
-              <span className="font-serif">Tree Resources</span>
+              <MapPin className="w-4 h-4 -ml-1" />
+              <span className="font-serif">Arboreal Atlas</span>
             </Link>
           </nav>
 
