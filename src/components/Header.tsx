@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars } from "lucide-react";
 import s33dLogo from "@/assets/s33d-logo.jpeg";
+import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -76,17 +77,13 @@ const Header = () => {
               {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
             </Button>
             {user ? (
-              <Button
-                variant="sacred"
-                size="sm"
-                className="hidden md:inline-flex gap-2"
-                asChild
+              <Link
+                to="/dashboard"
+                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical"
               >
-                <Link to="/dashboard">
-                  <User className="w-4 h-4" />
-                  Dashboard
-                </Link>
-              </Button>
+                <img src={hearthIcon} alt="Hearth" className="w-8 h-8 rounded-full" />
+                <span className="font-serif">Hearth</span>
+              </Link>
             ) : (
               <Button
                 variant="sacred"
