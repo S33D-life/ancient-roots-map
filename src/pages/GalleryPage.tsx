@@ -16,6 +16,7 @@ import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
 import CreatorsPath from "@/components/CreatorsPath";
+import TreeResources from "@/components/TreeResources";
 import { Progress } from "@/components/ui/progress";
 
 interface Tree {
@@ -421,11 +422,12 @@ const GalleryPage = () => {
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5 mb-8">
+          <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8">
             <TabsTrigger value="gallery">Library</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="creators-path">Creator's Path</TabsTrigger>
+            <TabsTrigger value="tree-resources">Tree Resources</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
           </TabsList>
 
@@ -791,6 +793,10 @@ const GalleryPage = () => {
 
           <TabsContent value="creators-path">
             <CreatorsPath />
+          </TabsContent>
+
+          <TabsContent value="tree-resources" className="space-y-6">
+            <TreeResources />
           </TabsContent>
 
           <TabsContent value="ledger" className="space-y-6">
