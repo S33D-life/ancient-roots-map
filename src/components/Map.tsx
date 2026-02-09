@@ -521,7 +521,7 @@ const Map = () => {
         <TreeImportExport />
       </div>
 
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div ref={mapContainer} className="absolute inset-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
 
       <style>{`
         .tree-popup .mapboxgl-popup-content {
