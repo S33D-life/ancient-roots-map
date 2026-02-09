@@ -58,14 +58,13 @@ const FairyDust = () => {
 
 
 const Hero = () => {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setIsDark(!document.documentElement.classList.contains('light'));
     });
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    setIsDark(!document.documentElement.classList.contains('light'));
     return () => observer.disconnect();
   }, []);
 
@@ -82,8 +81,8 @@ const Hero = () => {
       {/* Sacred Geometry Overlay */}
       <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
 
-      {/* Fairy Dust */}
-      <FairyDust />
+      {/* Fairy Dust - dark mode only */}
+      {isDark && <FairyDust />}
 
 
       {/* Content */}
