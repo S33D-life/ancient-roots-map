@@ -21,7 +21,8 @@ import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
-import heartwoodWelcome from "@/assets/heartwood-splash.png";
+import heartwoodSplashDay from "@/assets/heartwood-splash.png";
+import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import Footer from "@/components/Footer";
@@ -437,7 +438,7 @@ const GalleryPage = () => {
       >
         <div className="relative w-full h-full overflow-hidden flex items-center justify-center bg-black">
           <img 
-            src={heartwoodWelcome} 
+            src={(() => { const h = new Date().getHours(); return h >= 18 || h < 6 ? heartwoodSplashNight : heartwoodSplashDay; })()} 
             alt="Welcome to Heartwood, A Library of Love" 
             className="max-h-[70vh] md:max-h-full md:h-full w-auto md:w-full object-contain md:object-cover animate-fade-in"
           />
