@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AmanitaFlush from "@/components/AmanitaFlush";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -425,13 +426,14 @@ const GalleryPage = () => {
       <div 
         className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-700 ${splashFading ? 'opacity-0' : 'opacity-100'}`}
       >
-        <div className="relative w-full h-full">
+        <div className="relative w-full h-full overflow-hidden">
           <img 
             src={heartwoodWelcome} 
             alt="Welcome to Heartwood, A Library of Love" 
             className="w-full h-full object-cover animate-fade-in"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+          <AmanitaFlush position="bottom" />
         </div>
       </div>
     );
