@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, MapPin, ExternalLink, TreeDeciduous } from "lucide-react";
+import treeResourcesBg from "@/assets/tree-resources-bg.jpeg";
 
 interface TreeProject {
   id: string;
@@ -133,12 +134,16 @@ const TreeResources = () => {
 
   return (
     <div className="space-y-6">
-      <div className="text-center mb-8">
-        <TreeDeciduous className="w-12 h-12 mx-auto mb-4 text-primary" />
-        <h2 className="text-2xl font-serif font-bold text-mystical mb-2">Tree Resources</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Discover existing databases and projects for finding ancient trees
-        </p>
+      {/* Hero banner */}
+      <div className="relative rounded-xl overflow-hidden mb-8">
+        <img src={treeResourcesBg} alt="Tree Resources" className="w-full h-48 md:h-64 object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent flex flex-col items-center justify-end pb-6">
+          <TreeDeciduous className="w-10 h-10 mb-2 text-primary drop-shadow-lg" />
+          <h2 className="text-2xl font-serif font-bold text-mystical mb-1">Tree Resources</h2>
+          <p className="text-muted-foreground text-sm max-w-2xl mx-auto text-center px-4">
+            Discover existing databases and projects for finding ancient trees
+          </p>
+        </div>
       </div>
 
       {/* Search & Filters */}
