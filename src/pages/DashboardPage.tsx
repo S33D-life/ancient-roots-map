@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import WalletConnect from "@/components/WalletConnect";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Loader2, TreeDeciduous, LogOut, Upload, Download } from "lucide-react";
@@ -321,6 +322,18 @@ const DashboardPage = () => {
                   Sign Out
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Wallet & Staff NFT Section */}
+          <Card className="border-mystical bg-card/50 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-xl font-serif text-mystical">
+                Non-Fungible Twig
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WalletConnect />
             </CardContent>
           </Card>
 
