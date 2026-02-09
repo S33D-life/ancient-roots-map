@@ -516,14 +516,16 @@ const GalleryPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
-            <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
-            <TabsTrigger value="gallery">Ancient Friends</TabsTrigger>
-            <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
-            <TabsTrigger value="creators-path">Creator's Path</TabsTrigger>
-            <TabsTrigger value="tree-resources">Tree Resources</TabsTrigger>
-            <TabsTrigger value="ledger">Ledger</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 mb-8">
+            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-4xl md:grid-cols-6 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
+              <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
+              <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
+              <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
+              <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
+              <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
+              <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="gallery" className="space-y-8">
             <div className="flex flex-col md:flex-row gap-4">
