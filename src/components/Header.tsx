@@ -90,7 +90,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hidden md:inline-flex" title={isDark ? "Sunrise" : "Starry Night"}>
+            <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"}>
               {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
             </Button>
             {user ? (
@@ -138,10 +138,6 @@ const Header = () => {
               <Sparkles className="w-4 h-4" />
               <span className="font-serif">yOur Golden Dream</span>
             </Link>
-            <button onClick={() => { toggleTheme(); setMobileOpen(false); }} className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5">
-              {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
-              <span className="font-serif">{isDark ? "Sunrise Mode" : "Starry Night Mode"}</span>
-            </button>
             {user ? (
               <Link to="/dashboard" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
                 <img src={hearthIcon} alt="Hearth" className="w-6 h-6 rounded-full" />
