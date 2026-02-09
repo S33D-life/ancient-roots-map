@@ -543,9 +543,18 @@ const GalleryPage = () => {
                     BIR: "/images/staffs/bir.jpeg",
                     HAZ: "/images/staffs/haz.jpeg",
                     SWE: "/images/staffs/swe.jpeg",
+                    IVY: "/images/staffs/ivy.jpeg",
+                    PLUM: "/images/staffs/plum.jpeg",
+                    PINE: "/images/staffs/pine.jpeg",
+                    RHOD: "/images/staffs/rhod.jpeg",
+                    PRIV: "/images/staffs/priv.jpeg",
+                    WIL: "/images/staffs/wil.jpeg",
+                    BOX: "/images/staffs/box.jpeg",
+                    BUCK: "/images/staffs/buck.jpeg",
+                    YEW: "/images/staffs/yew.jpeg",
                   };
                   const spiralStaffs = [
-                    { code: "YEW", species: "Yew", length: "—", weight: "—" },
+                    { code: "YEW", species: "Yew", length: "161 cm", weight: "1,252 g" },
                     { code: "OAK", species: "Oak", length: "119 cm", weight: "550 g" },
                     { code: "HORN", species: "Hornbeam", length: "133 cm", weight: "990 g" },
                     { code: "HOL", species: "Holly", length: "157 cm", weight: "600 g" },
@@ -564,14 +573,14 @@ const GalleryPage = () => {
                     { code: "BIR", species: "Birch", length: "144 cm", weight: "888 g" },
                     { code: "HAZ", species: "Hazel", length: "99 cm", weight: "734 g" },
                     { code: "SWE", species: "Sweet Chestnut", length: "98 cm", weight: "1,210 g" },
-                    { code: "IVY", species: "Ivy", length: "—", weight: "—" },
-                    { code: "PLUM", species: "Plum", length: "—", weight: "—" },
-                    { code: "PINE", species: "Pine", length: "—", weight: "—" },
-                    { code: "RHOD", species: "Rhododendron", length: "—", weight: "—" },
-                    { code: "PRIV", species: "Privet", length: "—", weight: "—" },
-                    { code: "TBD-25", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-26", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-27", species: "—", length: "—", weight: "—" },
+                    { code: "IVY", species: "Ivy", length: "94 cm", weight: "901 g" },
+                    { code: "PLUM", species: "Plum", length: "103 cm", weight: "505 g" },
+                    { code: "PINE", species: "Pine", length: "159 cm", weight: "1,337 g" },
+                    { code: "RHOD", species: "Rhododendron", length: "116 cm", weight: "560 g" },
+                    { code: "PRIV", species: "Privet", length: "104 cm", weight: "666 g" },
+                    { code: "WIL", species: "Willow", length: "118 cm", weight: "646 g" },
+                    { code: "BOX", species: "Box", length: "161 cm", weight: "1,332 g" },
+                    { code: "BUCK", species: "Buckthorn", length: "161 cm", weight: "663 g" },
                     { code: "TBD-28", species: "—", length: "—", weight: "—" },
                     { code: "TBD-29", species: "—", length: "—", weight: "—" },
                     { code: "TBD-30", species: "—", length: "—", weight: "—" },
@@ -656,6 +665,15 @@ const GalleryPage = () => {
                     16: { code: "BIR", img: "/images/staffs/bir.jpeg" },
                     17: { code: "HAZ", img: "/images/staffs/haz.jpeg" },
                     18: { code: "SWE", img: "/images/staffs/swe.jpeg" },
+                    19: { code: "IVY", img: "/images/staffs/ivy.jpeg" },
+                    20: { code: "PLUM", img: "/images/staffs/plum.jpeg" },
+                    21: { code: "PINE", img: "/images/staffs/pine.jpeg" },
+                    22: { code: "RHOD", img: "/images/staffs/rhod.jpeg" },
+                    23: { code: "PRIV", img: "/images/staffs/priv.jpeg" },
+                    24: { code: "WIL", img: "/images/staffs/wil.jpeg" },
+                    25: { code: "BOX", img: "/images/staffs/box.jpeg" },
+                    26: { code: "BUCK", img: "/images/staffs/buck.jpeg" },
+                    27: { code: "YEW", img: "/images/staffs/yew.jpeg" },
                   };
                   return Array.from({ length: 144 }, (_, i) => {
                     const staffData = gridImages[i];
@@ -683,7 +701,7 @@ const GalleryPage = () => {
 
             <div className="text-center pt-4">
               <p className="text-sm text-muted-foreground">
-                {18} of 144 staffs minted as NFTs · Digital twins coming soon
+                {27} of 144 staffs minted as NFTs · Digital twins coming soon
               </p>
             </div>
           </TabsContent>
