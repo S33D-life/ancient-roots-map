@@ -1,19 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
+import MapFilters, { GroveScale } from "./MapFilters";
 import TreeImportExport from "./TreeImportExport";
 import ConversionStatus from "./ConversionStatus";
 import FindMeButton from "./FindMeButton";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyA1Zpu0X_c1buzTMuJh29j1WHmNibdYefA';
-
-// Use a vintage/antique map style
 const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
 interface Tree {
@@ -25,16 +22,44 @@ interface Tree {
   what3words: string;
   description?: string;
   created_by?: string;
+  nation?: string;
+}
+
+// Haversine distance in km
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Determine continent from coordinates (rough bounding boxes)
+function getContinent(lat: number, lng: number): string {
+  if (lat > 15 && lat < 72 && lng > -25 && lng < 45) return "Europe";
+  if (lat > -35 && lat < 37 && lng > -20 && lng < 55) return "Africa";
+  if (lat > 5 && lat < 78 && lng > 45 && lng < 180) return "Asia";
+  if (lat > -50 && lat < 5 && lng > 90 && lng < 180) return "Oceania";
+  if (lat > -60 && lat < -10 && lng > 110 && lng < 180) return "Oceania";
+  if (lat > 15 && lat < 85 && lng > -170 && lng < -50) return "North America";
+  if (lat > -60 && lat < 15 && lng > -90 && lng < -30) return "South America";
+  return "Other";
 }
 
 const Map = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
-  const [filteredTrees, setFilteredTrees] = useState<Tree[]>([]);
   const [viewMode, setViewMode] = useState<string>("collective");
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [groveScale, setGroveScale] = useState<GroveScale>("all");
   const [userId, setUserId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { toast } = useToast();
 
   // Get current user
@@ -46,70 +71,121 @@ const Map = () => {
     getUser();
   }, []);
 
+  // Get user location for local grove
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {} // silently fail
+      );
+    }
+  }, []);
+
   // Fetch trees from database
   useEffect(() => {
     const fetchTrees = async () => {
       const { data, error } = await supabase
         .from('trees')
-        .select('*, created_by')
+        .select('*')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
 
       if (error) {
         console.error('Error fetching trees:', error);
-        toast({
-          title: "Error loading trees",
-          description: "Failed to load tree data",
-          variant: "destructive",
-        });
+        toast({ title: "Error loading trees", description: "Failed to load tree data", variant: "destructive" });
       } else {
-        console.log(`Loaded ${data?.length || 0} trees with coordinates`);
         setTrees(data || []);
       }
     };
 
     fetchTrees();
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'trees'
-        },
-        () => {
-          fetchTrees();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, () => fetchTrees())
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [toast]);
 
-  // Filter trees based on view mode and species
-  useEffect(() => {
+  // Species counts for filter panel
+  const treeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    trees.forEach((t) => {
+      const key = t.species.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return counts;
+  }, [trees]);
+
+  // Apply filters
+  const filteredTrees = useMemo(() => {
     let filtered = trees;
 
-    // Filter by view mode
+    // View mode
     if (viewMode === "personal" && userId) {
-      filtered = filtered.filter(tree => tree.created_by === userId);
+      filtered = filtered.filter((t) => t.created_by === userId);
     }
 
-    // Filter by species
+    // Species filter
     if (speciesFilter !== "all") {
-      filtered = filtered.filter(tree => tree.species === speciesFilter);
+      filtered = filtered.filter(
+        (t) => t.species.toLowerCase() === speciesFilter.toLowerCase()
+      );
     }
 
-    setFilteredTrees(filtered);
-  }, [trees, viewMode, speciesFilter, userId]);
+    // Grove scale filtering
+    if (groveScale !== "all" && speciesFilter !== "all") {
+      const speciesTrees = filtered;
 
-  // Get unique species for filter
-  const uniqueSpecies = Array.from(new Set(trees.map(tree => tree.species))).sort();
+      if (groveScale === "local") {
+        // 12 nearest of same species from user location or map center
+        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        if (center) {
+          const withDist = speciesTrees.map((t) => ({
+            ...t,
+            dist: haversineKm(center.lat, center.lng, t.latitude, t.longitude),
+          }));
+          withDist.sort((a, b) => a.dist - b.dist);
+          filtered = withDist.slice(0, 12);
+        }
+      } else if (groveScale === "regional") {
+        // Within 200km of user/center
+        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        if (center) {
+          filtered = speciesTrees.filter(
+            (t) => haversineKm(center.lat, center.lng, t.latitude, t.longitude) <= 200
+          );
+        }
+      } else if (groveScale === "national") {
+        // Same nation — requires user location to determine country, or just group by nation
+        // We show all of the same species in the same nation as the user's nearest tree
+        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        if (center && speciesTrees.length > 0) {
+          // Find nearest tree to determine nation
+          let nearest = speciesTrees[0];
+          let nearestDist = Infinity;
+          speciesTrees.forEach((t) => {
+            const d = haversineKm(center.lat, center.lng, t.latitude, t.longitude);
+            if (d < nearestDist) { nearestDist = d; nearest = t; }
+          });
+          if (nearest.nation) {
+            filtered = speciesTrees.filter((t) => t.nation === nearest.nation);
+          }
+        }
+      } else if (groveScale === "continental") {
+        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        if (center) {
+          const userContinent = getContinent(center.lat, center.lng);
+          filtered = speciesTrees.filter(
+            (t) => getContinent(t.latitude, t.longitude) === userContinent
+          );
+        }
+      }
+    }
+
+    return filtered;
+  }, [trees, viewMode, speciesFilter, groveScale, userId, userLocation]);
 
   // Initialize map
   useEffect(() => {
@@ -125,33 +201,20 @@ const Map = () => {
       attributionControl: false,
     });
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'top-right'
-    );
+    map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+    map.current.addControl(new mapboxgl.AttributionControl({ compact: true }));
 
-    map.current.addControl(
-      new mapboxgl.AttributionControl({
-        compact: true,
-      })
-    );
-
-    return () => {
-      map.current?.remove();
-    };
+    return () => { map.current?.remove(); };
   }, []);
 
   // Add tree markers
   useEffect(() => {
-    if (!map.current || filteredTrees.length === 0) return;
+    if (!map.current) return;
 
     // Remove existing markers
-    const existingMarkers = document.querySelectorAll('.tree-marker');
-    existingMarkers.forEach(marker => marker.remove());
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
 
-    // Add new markers
     filteredTrees.forEach((tree) => {
       const el = document.createElement('div');
       el.className = 'tree-marker';
@@ -163,11 +226,10 @@ const Map = () => {
         cursor: pointer;
         transition: filter 0.2s;
       `;
-      
+
       el.addEventListener('mouseenter', () => {
         el.style.filter = 'brightness(1.4) drop-shadow(0 0 4px hsl(45, 80%, 60%))';
       });
-      
       el.addEventListener('mouseleave', () => {
         el.style.filter = 'none';
       });
@@ -197,79 +259,75 @@ const Map = () => {
         .addTo(map.current!);
 
       el.addEventListener('click', () => {
-        map.current?.flyTo({
-          center: [tree.longitude, tree.latitude],
-          zoom: 15,
-          duration: 2000,
-        });
+        map.current?.flyTo({ center: [tree.longitude, tree.latitude], zoom: 15, duration: 2000 });
       });
+
+      markersRef.current.push(marker);
     });
-  }, [filteredTrees]);
+
+    // Fit bounds if grove scale is active and we have trees
+    if (groveScale !== "all" && filteredTrees.length > 1) {
+      const bounds = new mapboxgl.LngLatBounds();
+      filteredTrees.forEach((t) => bounds.extend([t.longitude, t.latitude]));
+      map.current.fitBounds(bounds, { padding: 80, duration: 1500 });
+    }
+  }, [filteredTrees, groveScale]);
 
   const handleLocationSelect = (lat: number, lng: number, what3words: string) => {
     if (map.current) {
-      map.current.flyTo({
-        center: [lng, lat],
-        zoom: 15,
-        duration: 2000,
-      });
+      map.current.flyTo({ center: [lng, lat], zoom: 15, duration: 2000 });
     }
   };
 
   return (
     <div className="relative w-full h-screen">
       <ConversionStatus />
-      
-      {/* Tabs and filters at top */}
+
+      {/* Top bar: view toggle + filters + count */}
       <Card className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-background/95 backdrop-blur border-border shadow-lg">
-        <div className="flex items-center gap-4 p-3">
+        <div className="flex items-center gap-3 p-3">
           <Tabs value={viewMode} onValueChange={setViewMode}>
             <TabsList className="bg-muted">
               <TabsTrigger value="collective">Collective</TabsTrigger>
               <TabsTrigger value="personal">Personal Groves</TabsTrigger>
             </TabsList>
           </Tabs>
-          
-          <Select value={speciesFilter} onValueChange={setSpeciesFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by species" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border-border z-50">
-              <SelectItem value="all">All Species</SelectItem>
-              {uniqueSpecies.map(species => (
-                <SelectItem key={species} value={species}>{species}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <span className="text-sm text-muted-foreground">
+
+          <MapFilters
+            speciesFilter={speciesFilter}
+            onSpeciesChange={setSpeciesFilter}
+            groveScale={groveScale}
+            onGroveScaleChange={setGroveScale}
+            treeCounts={treeCounts}
+            totalTrees={trees.length}
+          />
+
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
             {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
+            {groveScale !== "all" && speciesFilter !== "all" && (
+              <span className="text-primary ml-1">({groveScale} grove)</span>
+            )}
           </span>
         </div>
       </Card>
 
       <MapSearch onLocationSelect={handleLocationSelect} />
-      
-      {/* Find Me button */}
+
       <div className="absolute bottom-4 left-4 z-10">
-        <FindMeButton 
+        <FindMeButton
           onLocationFound={(lat, lng) => {
-            map.current?.flyTo({
-              center: [lng, lat],
-              zoom: 18,
-              duration: 2000,
-            });
+            setUserLocation({ lat, lng });
+            map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
           }}
         />
       </div>
-      
-      {/* Import/Export moved to bottom right */}
+
       <div className="absolute bottom-4 right-4 z-10">
         <TreeImportExport />
       </div>
-      
+
       <div ref={mapContainer} className="absolute inset-0" />
-      
+
       <style>{`
         .tree-popup .mapboxgl-popup-content {
           background: hsl(120, 40%, 15%);
