@@ -456,9 +456,15 @@ const Map = () => {
     }
 
     return () => {
-      if (m.getLayer(GROVE_FILL_ID)) m.removeLayer(GROVE_FILL_ID);
-      if (m.getLayer(GROVE_LINE_ID)) m.removeLayer(GROVE_LINE_ID);
-      if (m.getSource(GROVE_SOURCE_ID)) m.removeSource(GROVE_SOURCE_ID);
+      try {
+        if (m.getStyle()) {
+          if (m.getLayer(GROVE_FILL_ID)) m.removeLayer(GROVE_FILL_ID);
+          if (m.getLayer(GROVE_LINE_ID)) m.removeLayer(GROVE_LINE_ID);
+          if (m.getSource(GROVE_SOURCE_ID)) m.removeSource(GROVE_SOURCE_ID);
+        }
+      } catch {
+        // Map already removed
+      }
     };
   }, [filteredTrees, groveScale]);
 
