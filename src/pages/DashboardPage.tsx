@@ -11,6 +11,7 @@ import { Loader2, TreeDeciduous, LogOut, Upload, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
+import hearthBg from "@/assets/hearth-bg.jpeg";
 import PhotoImport from "@/components/PhotoImport";
 import { Progress } from "@/components/ui/progress";
 
@@ -283,15 +284,20 @@ const DashboardPage = () => {
     .toUpperCase() || user?.email?.[0].toUpperCase() || "U";
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, hsl(270 45% 25%) 0%, hsl(280 50% 35%) 20%, hsl(320 45% 45%) 45%, hsl(350 60% 55%) 65%, hsl(30 70% 55%) 85%, hsl(45 80% 60%) 100%)' }}>
+    <div className="min-h-screen relative">
+      {/* Hearth background */}
+      <div className="fixed inset-0 z-0">
+        <img src={hearthBg} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+      </div>
       <Header />
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <main className="container mx-auto px-4 pt-24 pb-12 relative z-10">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Profile Section */}
           <Card className="border-mystical bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle className="text-2xl font-serif text-mystical">
-                Personal Dashboard
+                Hearth
               </CardTitle>
             </CardHeader>
             <CardContent>
