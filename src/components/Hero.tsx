@@ -42,12 +42,7 @@ const Hero = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/90 font-light leading-relaxed max-w-2xl mx-auto">
-            A Living Map of Ancient Trees
-          </p>
-          
-          <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Map and honor ancient trees worldwide. Connect with sacred groves through what3words locations, 
-            share offerings, and explore a planetary web of wisdom keepers spanning millennia.
+            Under a tree? Weave a moment of truth with an Ancient Friend into yOur Golden Dream.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
