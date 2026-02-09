@@ -23,7 +23,7 @@ const Hero = () => {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heroS33d})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/55 to-background/90" />
       </div>
 
       {/* Sacred Geometry Overlay */}
