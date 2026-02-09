@@ -9,6 +9,7 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return !document.documentElement.classList.contains('light');
@@ -29,7 +30,6 @@ const Header = () => {
   };
 
   useEffect(() => {
-    // Set initial dark mode
     document.documentElement.classList.add('dark');
   }, []);
 
@@ -103,11 +103,42 @@ const Header = () => {
                 <Link to="/auth">Login</Link>
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
               <Menu className="w-5 h-5" />
             </Button>
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileOpen && (
+          <nav className="md:hidden border-t border-mystical mt-2 pt-3 pb-2 flex flex-col gap-3 animate-fade-in">
+            <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <BookOpen className="w-4 h-4" />
+              <TreeDeciduous className="w-4 h-4 -ml-1" />
+              <span className="font-serif">HeARTwood Library</span>
+            </Link>
+            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <TreeDeciduous className="w-4 h-4" />
+              <MapPin className="w-4 h-4 -ml-1" />
+              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
+            </Link>
+            <button onClick={() => { toggleTheme(); setMobileOpen(false); }} className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5">
+              {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
+              <span className="font-serif">{isDark ? "Sunrise Mode" : "Starry Night Mode"}</span>
+            </button>
+            {user ? (
+              <Link to="/dashboard" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+                <img src={hearthIcon} alt="Hearth" className="w-6 h-6 rounded-full" />
+                <span className="font-serif">Hearth</span>
+              </Link>
+            ) : (
+              <Link to="/auth" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+                <User className="w-4 h-4" />
+                <span className="font-serif">Login</span>
+              </Link>
+            )}
+          </nav>
+        )}
       </div>
     </header>
   );
