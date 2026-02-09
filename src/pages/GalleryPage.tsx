@@ -79,6 +79,8 @@ const GalleryPage = () => {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [activeString, setActiveString] = useState<"oak" | "yew" | "beech" | "ash" | "holly">("oak");
   const [spiralSort, setSpiralSort] = useState<string>("spiral");
+  const [hoveredSpiralStaff, setHoveredSpiralStaff] = useState<string | null>(null);
+  const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string } | null>(null);
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -765,21 +767,43 @@ const GalleryPage = () => {
                         ))}
                       </svg>
 
-                      {sortedStaffs.map((staff, i) => {
+                       {sortedStaffs.map((staff, i) => {
                         const { x: clampedX, y: clampedY } = positions[i];
                         const hasImage = staffImages[staff.code];
+
+                        // Count total staffs for this species (1 original + circles)
+                        const speciesStaffCounts: Record<string, number> = {
+                          YEW: 37, OAK: 37, ASH: 13, BEE: 13, HOL: 13,
+                          HORN: 1, HAW: 1, PLA: 1, GOA: 1, ELD: 1, APP: 1,
+                          ROSE: 1, CHER: 1, ROW: 1, ALD: 1, SYC: 1, BIR: 1,
+                          HAZ: 1, SWE: 1, IVY: 1, PLUM: 1, PINE: 1, RHOD: 1,
+                          PRIV: 1, WIL: 1, BOX: 1, BUCK: 1, DAWN: 1, BUD: 1,
+                          CRAB: 1, WITC: 1, PEAR: 1, JAPA: 1, SLOE: 1, MED: 1,
+                          HORS: 1,
+                        };
+                        const totalForSpecies = speciesStaffCounts[staff.code] || 1;
+                        const isHovered = hoveredSpiralStaff === staff.code;
 
                         return (
                           <div
                             key={staff.code}
-                            className="absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-125 hover:z-30"
+                            className="absolute flex flex-col items-center cursor-pointer transition-all duration-300"
                             style={{
                               left: `${clampedX}%`,
                               top: `${clampedY}%`,
-                              transform: 'translate(-50%, -50%)',
-                              zIndex: i + 1,
+                              transform: `translate(-50%, -50%) scale(${isHovered ? 1.6 : 1})`,
+                              zIndex: isHovered ? 100 : i + 1,
+                              filter: isHovered ? 'drop-shadow(0 0 12px hsl(var(--primary) / 0.6))' : 'none',
                             }}
-                            title={`#${i + 1} · ${staff.species} — ${staff.length} · ${staff.weight}`}
+                            onMouseEnter={() => setHoveredSpiralStaff(staff.code)}
+                            onMouseLeave={() => setHoveredSpiralStaff(null)}
+                            onClick={() => setSelectedSpiralStaff({
+                              code: staff.code,
+                              species: staff.species,
+                              length: staff.length,
+                              weight: staff.weight,
+                              image: hasImage || "",
+                            })}
                           >
                             <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-primary/80 text-primary-foreground text-[6px] flex items-center justify-center font-bold z-10">
                               {i + 1}
@@ -798,6 +822,16 @@ const GalleryPage = () => {
                             <Badge variant="outline" className="mt-0.5 text-[6px] px-1 py-0 leading-tight">
                               {hasImage ? "Minted" : "Awaiting"}
                             </Badge>
+
+                            {/* Hover tooltip */}
+                            {isHovered && (
+                              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-card border border-primary/40 rounded-lg px-3 py-1.5 shadow-lg whitespace-nowrap z-50 animate-fade-in">
+                                <p className="text-[10px] font-serif font-bold text-primary">{staff.species}</p>
+                                <p className="text-[9px] text-muted-foreground">
+                                  {totalForSpecies} staff{totalForSpecies > 1 ? 's' : ''} total · {staff.length} · {staff.weight}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -1438,6 +1472,75 @@ const GalleryPage = () => {
                 </div>
               </div>
             </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Spiral Staff Fullscreen Dialog */}
+      <Dialog open={!!selectedSpiralStaff} onOpenChange={(open) => !open && setSelectedSpiralStaff(null)}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden border-primary/40">
+          {selectedSpiralStaff && (
+            <div className="flex flex-col">
+              {selectedSpiralStaff.image ? (
+                <div className="w-full aspect-[3/4] bg-card overflow-hidden">
+                  <img
+                    src={selectedSpiralStaff.image}
+                    alt={`${selectedSpiralStaff.species} staff`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-full aspect-[3/4] bg-muted/30 flex items-center justify-center">
+                  <Wand2 className="w-16 h-16 text-muted-foreground/30" />
+                </div>
+              )}
+              <div className="p-6 space-y-3">
+                <DialogHeader>
+                  <DialogTitle className="font-serif text-2xl text-primary">
+                    {selectedSpiralStaff.species}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between border-b border-border/40 pb-2">
+                    <span className="text-muted-foreground">Code</span>
+                    <span className="font-mono text-foreground">{selectedSpiralStaff.code}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/40 pb-2">
+                    <span className="text-muted-foreground">Length</span>
+                    <span className="text-foreground">{selectedSpiralStaff.length}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/40 pb-2">
+                    <span className="text-muted-foreground">Weight</span>
+                    <span className="text-foreground">{selectedSpiralStaff.weight}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-border/40 pb-2">
+                    <span className="text-muted-foreground">Total in Collection</span>
+                    <span className="text-foreground font-semibold">
+                      {({
+                        YEW: 37, OAK: 37, ASH: 13, BEE: 13, HOL: 13,
+                      } as Record<string, number>)[selectedSpiralStaff.code] || 1} staff{(({
+                        YEW: 37, OAK: 37, ASH: 13, BEE: 13, HOL: 13,
+                      } as Record<string, number>)[selectedSpiralStaff.code] || 1) > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="flex justify-between pb-2">
+                    <span className="text-muted-foreground">Circles</span>
+                    <span className="text-foreground">
+                      {({
+                        YEW: "3 circles (36 + original)", OAK: "3 circles (36 + original)",
+                        ASH: "1 circle (12 + original)", BEE: "1 circle (12 + original)",
+                        HOL: "1 circle (12 + original)",
+                      } as Record<string, string>)[selectedSpiralStaff.code] || "Original only"}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground italic pt-2">
+                  The {selectedSpiralStaff.species} staff — position #{
+                    ["YEW","OAK","HORN","HOL","HAW","PLA","ASH","GOA","ELD","BEE","APP","ROSE","CHER","ROW","ALD","SYC","BIR","HAZ","SWE","IVY","PLUM","PINE","RHOD","PRIV","WIL","BOX","BUCK","DAWN","BUD","CRAB","WITC","PEAR","JAPA","SLOE","MED","HORS"].indexOf(selectedSpiralStaff.code) + 1
+                  } on the sacred spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.
+                </p>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
