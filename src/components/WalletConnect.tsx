@@ -1,4 +1,5 @@
 import { useState } from "react";
+import walletBg from "@/assets/wallet-connect-bg.jpeg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -112,9 +113,13 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
   // No wallet connected yet
   if (!walletAddress) {
     return (
-      <Card className="border-mystical bg-card/50 backdrop-blur">
-        <CardContent className="p-6 text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-secondary flex items-center justify-center">
+      <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden relative">
+        <div className="absolute inset-0 z-0">
+          <img src={walletBg} alt="" className="w-full h-full object-cover opacity-40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/70 to-transparent" />
+        </div>
+        <CardContent className="p-6 text-center space-y-4 relative z-10">
+          <div className="w-16 h-16 mx-auto rounded-full bg-secondary/80 flex items-center justify-center backdrop-blur">
             <Wallet className="w-8 h-8 text-primary" />
           </div>
           <div>
