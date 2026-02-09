@@ -534,6 +534,15 @@ const GalleryPage = () => {
                     GOA: "/images/staffs/goa.jpeg",
                     ELD: "/images/staffs/eld.jpeg",
                     BEE: "/images/staffs/bee.jpeg",
+                    APP: "/images/staffs/app.jpeg",
+                    ROSE: "/images/staffs/rose.jpeg",
+                    CHER: "/images/staffs/cher.jpeg",
+                    ROW: "/images/staffs/row.jpeg",
+                    ALD: "/images/staffs/ald.jpeg",
+                    SYC: "/images/staffs/syc.jpeg",
+                    BIR: "/images/staffs/bir.jpeg",
+                    HAZ: "/images/staffs/haz.jpeg",
+                    SWE: "/images/staffs/swe.jpeg",
                   };
                   const spiralStaffs = [
                     { code: "YEW", species: "Yew", length: "—", weight: "—" },
@@ -546,15 +555,15 @@ const GalleryPage = () => {
                     { code: "GOA", species: "Goat Willow", length: "119 cm", weight: "292 g" },
                     { code: "ELD", species: "Elder", length: "127 cm", weight: "505 g" },
                     { code: "BEE", species: "Beech", length: "128 cm", weight: "1,315 g" },
-                    { code: "APP", species: "Apple", length: "—", weight: "—" },
-                    { code: "ROSE", species: "Rose", length: "—", weight: "—" },
-                    { code: "CHER", species: "Cherry", length: "—", weight: "—" },
-                    { code: "ROW", species: "Rowan", length: "—", weight: "—" },
-                    { code: "ALD", species: "Alder", length: "—", weight: "—" },
-                    { code: "SYC", species: "Sycamore", length: "—", weight: "—" },
-                    { code: "BIR", species: "Birch", length: "—", weight: "—" },
-                    { code: "HAZ", species: "Hazel", length: "—", weight: "—" },
-                    { code: "SWE", species: "Sweet Chestnut", length: "—", weight: "—" },
+                    { code: "APP", species: "Apple", length: "114 cm", weight: "1,000 g" },
+                    { code: "ROSE", species: "Rose", length: "122 cm", weight: "599 g" },
+                    { code: "CHER", species: "Cherry", length: "94 cm", weight: "433 g" },
+                    { code: "ROW", species: "Rowan", length: "138 cm", weight: "911 g" },
+                    { code: "ALD", species: "Alder", length: "93 cm", weight: "955 g" },
+                    { code: "SYC", species: "Sycamore", length: "124 cm", weight: "613 g" },
+                    { code: "BIR", species: "Birch", length: "144 cm", weight: "888 g" },
+                    { code: "HAZ", species: "Hazel", length: "99 cm", weight: "734 g" },
+                    { code: "SWE", species: "Sweet Chestnut", length: "98 cm", weight: "1,210 g" },
                     { code: "IVY", species: "Ivy", length: "—", weight: "—" },
                     { code: "PLUM", species: "Plum", length: "—", weight: "—" },
                     { code: "PINE", species: "Pine", length: "—", weight: "—" },
@@ -638,6 +647,15 @@ const GalleryPage = () => {
                     7: { code: "GOA", img: "/images/staffs/goa.jpeg" },
                     8: { code: "ELD", img: "/images/staffs/eld.jpeg" },
                     9: { code: "BEE", img: "/images/staffs/bee.jpeg" },
+                    10: { code: "APP", img: "/images/staffs/app.jpeg" },
+                    11: { code: "ROSE", img: "/images/staffs/rose.jpeg" },
+                    12: { code: "CHER", img: "/images/staffs/cher.jpeg" },
+                    13: { code: "ROW", img: "/images/staffs/row.jpeg" },
+                    14: { code: "ALD", img: "/images/staffs/ald.jpeg" },
+                    15: { code: "SYC", img: "/images/staffs/syc.jpeg" },
+                    16: { code: "BIR", img: "/images/staffs/bir.jpeg" },
+                    17: { code: "HAZ", img: "/images/staffs/haz.jpeg" },
+                    18: { code: "SWE", img: "/images/staffs/swe.jpeg" },
                   };
                   return Array.from({ length: 144 }, (_, i) => {
                     const staffData = gridImages[i];
@@ -665,7 +683,7 @@ const GalleryPage = () => {
 
             <div className="text-center pt-4">
               <p className="text-sm text-muted-foreground">
-                {12} of 144 staffs minted as NFTs · Digital twins coming soon
+                {18} of 144 staffs minted as NFTs · Digital twins coming soon
               </p>
             </div>
           </TabsContent>
