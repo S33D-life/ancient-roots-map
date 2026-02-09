@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import type { Database } from "@/integrations/supabase/types";
@@ -411,7 +411,7 @@ const SongCard = ({ offering }: { offering: Offering }) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
+        <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
           <Music className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
@@ -424,13 +424,26 @@ const SongCard = ({ offering }: { offering: Offering }) => (
               <source src={offering.media_url} />
             </audio>
           )}
-          <p className="text-[10px] text-muted-foreground/60 mt-3 font-serif tracking-widest uppercase">
-            {new Date(offering.created_at).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
+          <div className="flex items-center gap-3 mt-3">
+            <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
+              {new Date(offering.created_at).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+            {offering.nft_link && offering.nft_link.includes("apple.com") && (
+              <a
+                href={offering.nft_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] text-primary/70 hover:text-primary font-serif tracking-wider"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Apple Music
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </CardContent>
