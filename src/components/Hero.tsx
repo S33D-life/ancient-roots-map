@@ -38,7 +38,7 @@ const Hero = () => {
           </div>
           
           <h1 className="text-5xl md:text-7xl font-serif font-bold tracking-wider text-mystical leading-tight">
-            Under a tree? Weave a moment of truth with this Ancient Friend into yOur Golden Dream.
+            Under a tree?
           </h1>
           
           <p className="text-xl md:text-2xl text-foreground/90 font-light leading-relaxed max-w-2xl mx-auto">
