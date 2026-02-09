@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 interface TetolMenuProps {
   open: boolean;
@@ -60,7 +60,7 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
       onClick={onClose}
       style={{
         background: visible
@@ -70,6 +70,8 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
         transition: "opacity 0.5s ease-out",
       }}
     >
+      {/* Floating leaves */}
+      <FloatingLeaves visible={visible} />
       <div
         className="flex flex-col items-center relative"
         onClick={(e) => e.stopPropagation()}
@@ -327,5 +329,48 @@ const BranchLines = ({ visible, delay, side }: BranchLinesProps) => (
     )}
   </div>
 );
+
+const LEAF_SHAPES = ["🍃", "🍂", "🌿", "✦"] as const;
+
+const FloatingLeaves = ({ visible }: { visible: boolean }) => {
+  const leaves = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => ({
+        id: i,
+        char: LEAF_SHAPES[i % LEAF_SHAPES.length],
+        left: `${5 + Math.random() * 90}%`,
+        delay: Math.random() * 6,
+        duration: 8 + Math.random() * 7,
+        size: 10 + Math.random() * 8,
+        drift: (Math.random() - 0.5) * 60,
+        startRotation: Math.random() * 360,
+      })),
+    []
+  );
+
+  return (
+    <div className="absolute inset-0 pointer-events-none" aria-hidden>
+      {leaves.map((l) => (
+        <span
+          key={l.id}
+          className="absolute"
+          style={{
+            left: l.left,
+            top: "-20px",
+            fontSize: `${l.size}px`,
+            opacity: visible ? 0.25 : 0,
+            animation: visible
+              ? `tetol-fall ${l.duration}s linear ${l.delay}s infinite`
+              : "none",
+            "--drift": `${l.drift}px`,
+            "--start-rot": `${l.startRotation}deg`,
+          } as React.CSSProperties}
+        >
+          {l.char}
+        </span>
+      ))}
+    </div>
+  );
+};
 
 export default TetolMenu;
