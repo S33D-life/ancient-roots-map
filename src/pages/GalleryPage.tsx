@@ -515,24 +515,112 @@ const GalleryPage = () => {
               <h2 className="text-2xl font-serif font-bold text-mystical mb-2">The Staff Room</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
                 144 hand-crafted staffs, each a unique companion for the Ancient Friends game. 
-                Digital twin NFTs are being minted as your in-game identity across the realm.
+                The first 36 form a sacred spiral — one for each founding species — a model for the spiral of trees you'll meet on the journey.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Array.from({ length: 144 }, (_, i) => (
-                <Card key={i} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer">
-                  <CardContent className="p-4 text-center">
-                    <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors">
-                      <Wand2 className="w-8 h-8 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                    </div>
-                    <p className="text-sm font-serif font-medium text-foreground">Staff #{String(i + 1).padStart(3, '0')}</p>
-                    <Badge variant="outline" className="mt-1 text-xs">
-                      {i < 12 ? "Minted" : "Awaiting Mint"}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              ))}
+            {/* Sacred Spiral of 36 */}
+            <div className="mb-12">
+              <h3 className="text-xl font-serif text-primary text-center mb-6">The Spiral of Staffs</h3>
+              <div className="relative w-full max-w-3xl mx-auto" style={{ height: '700px' }}>
+                {(() => {
+                  const spiralStaffs = [
+                    { code: "YEW", species: "Yew" },
+                    { code: "OAK", species: "Oak" },
+                    { code: "HORN", species: "Hornbeam" },
+                    { code: "HOL", species: "Holly" },
+                    { code: "HAW", species: "Hawthorn" },
+                    { code: "PLA", species: "Plane" },
+                    { code: "ASH", species: "Ash" },
+                    { code: "GOA", species: "Goat Willow" },
+                    { code: "ELD", species: "Elder" },
+                    { code: "BEE", species: "Beech" },
+                    { code: "APP", species: "Apple" },
+                    { code: "ROSE", species: "Rose" },
+                    { code: "CHER", species: "Cherry" },
+                    { code: "ROW", species: "Rowan" },
+                    { code: "ALD", species: "Alder" },
+                    { code: "SYC", species: "Sycamore" },
+                    { code: "BIR", species: "Birch" },
+                    { code: "HAZ", species: "Hazel" },
+                    { code: "SWE", species: "Sweet Chestnut" },
+                    { code: "IVY", species: "Ivy" },
+                    { code: "PLUM", species: "Plum" },
+                    { code: "PINE", species: "Pine" },
+                    { code: "RHOD", species: "Rhododendron" },
+                    { code: "PRIV", species: "Privet" },
+                    { code: "TBD-25", species: "—" },
+                    { code: "TBD-26", species: "—" },
+                    { code: "TBD-27", species: "—" },
+                    { code: "TBD-28", species: "—" },
+                    { code: "TBD-29", species: "—" },
+                    { code: "TBD-30", species: "—" },
+                    { code: "TBD-31", species: "—" },
+                    { code: "TBD-32", species: "—" },
+                    { code: "TBD-33", species: "—" },
+                    { code: "TBD-34", species: "—" },
+                    { code: "TBD-35", species: "—" },
+                    { code: "TBD-36", species: "—" },
+                  ];
+                  const centerX = 50;
+                  const centerY = 50;
+                  const goldenAngle = 137.508;
+                  const scaleFactor = 4.2;
+
+                  return spiralStaffs.map((staff, i) => {
+                    const angle = i * goldenAngle * (Math.PI / 180);
+                    const r = scaleFactor * Math.sqrt(i + 1);
+                    const x = centerX + r * Math.cos(angle);
+                    const y = centerY + r * Math.sin(angle);
+                    const isRevealed = !staff.code.startsWith("TBD");
+
+                    return (
+                      <div
+                        key={i}
+                        className={`absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-125 hover:z-20 ${isRevealed ? '' : 'opacity-30'}`}
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`,
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      >
+                        <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border flex items-center justify-center ${isRevealed ? 'border-primary/60 bg-card/80 glow-subtle' : 'border-border bg-muted/30'}`}>
+                          <Wand2 className={`w-5 h-5 ${isRevealed ? 'text-primary' : 'text-muted-foreground/30'}`} />
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] font-serif text-foreground mt-1 whitespace-nowrap">
+                          {staff.code}-C0S13
+                        </span>
+                        <span className="text-[8px] text-muted-foreground">{staff.species}</span>
+                        {isRevealed && (
+                          <Badge variant="outline" className="mt-0.5 text-[7px] px-1 py-0 leading-tight">
+                            {i < 12 ? "Minted" : "Awaiting"}
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+
+            {/* Full 144 Grid */}
+            <div>
+              <h3 className="text-xl font-serif text-primary text-center mb-6">All 144 Staffs</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {Array.from({ length: 144 }, (_, i) => (
+                  <Card key={i} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer">
+                    <CardContent className="p-4 text-center">
+                      <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors">
+                        <Wand2 className="w-8 h-8 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      </div>
+                      <p className="text-sm font-serif font-medium text-foreground">Staff #{String(i + 1).padStart(3, '0')}</p>
+                      <Badge variant="outline" className="mt-1 text-xs">
+                        {i < 12 ? "Minted" : "Awaiting Mint"}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
 
             <div className="text-center pt-4">
