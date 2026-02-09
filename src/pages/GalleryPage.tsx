@@ -414,7 +414,7 @@ const GalleryPage = () => {
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
-            Ancient Friends Library
+            Heartwood Library
           </h1>
           <p className="text-muted-foreground">
             Explore all mapped trees and manage the tree ledger
@@ -423,7 +423,7 @@ const GalleryPage = () => {
 
         <Tabs defaultValue="gallery" className="w-full">
           <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8">
-            <TabsTrigger value="gallery">Library</TabsTrigger>
+            <TabsTrigger value="gallery">Ancient Friends</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="creators-path">Creator's Path</TabsTrigger>
