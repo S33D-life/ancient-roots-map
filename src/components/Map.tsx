@@ -25,6 +25,10 @@ interface Tree {
   nation?: string;
 }
 
+const GROVE_SOURCE_ID = 'grove-boundary-source';
+const GROVE_FILL_ID = 'grove-boundary-fill';
+const GROVE_LINE_ID = 'grove-boundary-line';
+
 // Haversine distance in km
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -36,6 +40,115 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
       Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Compute convex hull of [lng, lat] points using Graham scan
+function convexHull(points: [number, number][]): [number, number][] {
+  if (points.length < 3) return points;
+
+  const sorted = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+
+  function cross(O: [number, number], A: [number, number], B: [number, number]) {
+    return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
+  }
+
+  const lower: [number, number][] = [];
+  for (const p of sorted) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0)
+      lower.pop();
+    lower.push(p);
+  }
+
+  const upper: [number, number][] = [];
+  for (const p of sorted.reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0)
+      upper.pop();
+    upper.push(p);
+  }
+
+  upper.pop();
+  lower.pop();
+  return lower.concat(upper);
+}
+
+// Create a buffered boundary around points (expand hull outward)
+function createGroveBoundary(trees: Tree[], bufferKm: number): GeoJSON.Feature | null {
+  const points: [number, number][] = trees.map((t) => [t.longitude, t.latitude]);
+
+  if (points.length === 0) return null;
+
+  if (points.length === 1) {
+    // Single point → circle approximation
+    const [lng, lat] = points[0];
+    const coords: [number, number][] = [];
+    for (let i = 0; i <= 64; i++) {
+      const angle = (i / 64) * 2 * Math.PI;
+      const dLat = (bufferKm / 111.32) * Math.cos(angle);
+      const dLng = (bufferKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.sin(angle);
+      coords.push([lng + dLng, lat + dLat]);
+    }
+    return {
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'Polygon', coordinates: [coords] },
+    };
+  }
+
+  if (points.length === 2) {
+    // Two points → elongated capsule
+    const hull = points;
+    const expanded = expandHull(hull, bufferKm);
+    return {
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'Polygon', coordinates: [expanded] },
+    };
+  }
+
+  const hull = convexHull(points);
+  const expanded = expandHull(hull, bufferKm);
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: { type: 'Polygon', coordinates: [expanded] },
+  };
+}
+
+// Expand a hull outward by bufferKm, smoothing corners
+function expandHull(hull: [number, number][], bufferKm: number): [number, number][] {
+  if (hull.length < 2) return hull;
+
+  const result: [number, number][] = [];
+  const n = hull.length;
+
+  for (let i = 0; i < n; i++) {
+    const [lng, lat] = hull[i];
+    // Compute outward normal direction from centroid
+    const cx = hull.reduce((s, p) => s + p[0], 0) / n;
+    const cy = hull.reduce((s, p) => s + p[1], 0) / n;
+    const dx = lng - cx;
+    const dy = lat - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const normDx = dx / dist;
+    const normDy = dy / dist;
+
+    const dLat = (bufferKm / 111.32) * normDy;
+    const dLng = (bufferKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * normDx;
+
+    // Add arc points around the corner for smoothness
+    const baseAngle = Math.atan2(normDy, normDx);
+    for (let j = -2; j <= 2; j++) {
+      const angle = baseAngle + (j * Math.PI) / 10;
+      const aLat = (bufferKm / 111.32) * Math.sin(angle);
+      const aLng = (bufferKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.cos(angle);
+      result.push([lng + aLng, lat + aLat]);
+    }
+  }
+
+  // Close the polygon with a convex hull of the expanded points
+  const finalHull = convexHull(result);
+  finalHull.push(finalHull[0]); // close ring
+  return finalHull;
 }
 
 // Determine continent from coordinates (rough bounding boxes)
@@ -271,6 +384,82 @@ const Map = () => {
       filteredTrees.forEach((t) => bounds.extend([t.longitude, t.latitude]));
       map.current.fitBounds(bounds, { padding: 80, duration: 1500 });
     }
+  }, [filteredTrees, groveScale]);
+
+  // Draw grove boundary polygon
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+
+    const drawBoundary = () => {
+      // Remove existing layers and source
+      if (m.getLayer(GROVE_FILL_ID)) m.removeLayer(GROVE_FILL_ID);
+      if (m.getLayer(GROVE_LINE_ID)) m.removeLayer(GROVE_LINE_ID);
+      if (m.getSource(GROVE_SOURCE_ID)) m.removeSource(GROVE_SOURCE_ID);
+
+      // Only draw when grove scale is active and we have 1+ trees
+      if (groveScale === "all" || filteredTrees.length === 0) return;
+
+      // Buffer size scales with grove level
+      const bufferKm =
+        groveScale === "local" ? 5 :
+        groveScale === "regional" ? 20 :
+        groveScale === "national" ? 50 : 100;
+
+      const feature = createGroveBoundary(filteredTrees, bufferKm);
+      if (!feature) return;
+
+      m.addSource(GROVE_SOURCE_ID, {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [feature],
+        },
+      });
+
+      // Translucent fill
+      m.addLayer({
+        id: GROVE_FILL_ID,
+        type: 'fill',
+        source: GROVE_SOURCE_ID,
+        paint: {
+          'fill-color': groveScale === 'local' ? 'hsl(120, 60%, 35%)' :
+                         groveScale === 'regional' ? 'hsl(45, 80%, 50%)' :
+                         groveScale === 'national' ? 'hsl(200, 60%, 45%)' :
+                         'hsl(280, 50%, 45%)',
+          'fill-opacity': 0.12,
+        },
+      });
+
+      // Glowing border line
+      m.addLayer({
+        id: GROVE_LINE_ID,
+        type: 'line',
+        source: GROVE_SOURCE_ID,
+        paint: {
+          'line-color': groveScale === 'local' ? 'hsl(120, 60%, 50%)' :
+                         groveScale === 'regional' ? 'hsl(45, 80%, 60%)' :
+                         groveScale === 'national' ? 'hsl(200, 60%, 60%)' :
+                         'hsl(280, 50%, 60%)',
+          'line-width': 2.5,
+          'line-opacity': 0.7,
+          'line-dasharray': [4, 2],
+        },
+      });
+    };
+
+    // If map style is loaded, draw immediately; otherwise wait
+    if (m.isStyleLoaded()) {
+      drawBoundary();
+    } else {
+      m.once('style.load', drawBoundary);
+    }
+
+    return () => {
+      if (m.getLayer(GROVE_FILL_ID)) m.removeLayer(GROVE_FILL_ID);
+      if (m.getLayer(GROVE_LINE_ID)) m.removeLayer(GROVE_LINE_ID);
+      if (m.getSource(GROVE_SOURCE_ID)) m.removeSource(GROVE_SOURCE_ID);
+    };
   }, [filteredTrees, groveScale]);
 
   const handleLocationSelect = (lat: number, lng: number, what3words: string) => {
