@@ -165,15 +165,20 @@ function getContinent(lat: number, lng: number): string {
   return "Other";
 }
 
-const Map = () => {
+interface MapProps {
+  initialView?: string;
+  initialSpecies?: string;
+}
+
+const Map = ({ initialView, initialSpecies }: MapProps) => {
   const [searchParams] = useSearchParams();
   const autoAddTree = searchParams.get("addTree") === "true";
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
-  const [viewMode, setViewMode] = useState<string>("collective");
-  const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<string>(initialView || "collective");
+  const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
   const [userId, setUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
