@@ -23,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import heartwoodWelcome from "@/assets/hearth-fireplace.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
+import wishingTreeImage from "@/assets/wishing-tree.png";
 import Footer from "@/components/Footer";
 
 interface Tree {
@@ -1231,14 +1232,27 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">
-            <Card className="border-mystical bg-card/50 backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-2xl font-serif text-mystical">
+            {/* Wishing Tree banner */}
+            <div className="relative rounded-xl overflow-hidden border border-border">
+              <img
+                src={wishingTreeImage}
+                alt="Wishing Tree"
+                className="w-full h-48 md:h-64 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+                <h2 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">
                   Wishing Tree
-                </CardTitle>
-                <CardDescription>
+                </h2>
+                <p className="text-sm font-serif text-foreground/80 drop-shadow">
                   Trees you dream of visiting someday
-                </CardDescription>
+                </p>
+              </div>
+            </div>
+
+            <Card className="border-mystical bg-card/50 backdrop-blur">
+              <CardHeader className="sr-only">
+                <CardTitle>Wishing Tree</CardTitle>
               </CardHeader>
               <CardContent>
                 {wishlistLoading ? (
