@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import hearthBg from "@/assets/hearth-bg.jpeg";
+import Footer from "@/components/Footer";
 import PhotoImport from "@/components/PhotoImport";
 import { Progress } from "@/components/ui/progress";
 
@@ -585,6 +586,7 @@ const DashboardPage = () => {
           </Card>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

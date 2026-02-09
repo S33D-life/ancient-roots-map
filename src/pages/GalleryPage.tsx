@@ -22,6 +22,7 @@ import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import heartwoodWelcome from "@/assets/heartwood-welcome.png";
 import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
+import Footer from "@/components/Footer";
 
 interface Tree {
   id: string;
@@ -1440,6 +1441,7 @@ const GalleryPage = () => {
           )}
         </DialogContent>
       </Dialog>
+      <Footer />
     </div>
   );
 };
