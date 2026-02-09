@@ -449,7 +449,7 @@ const DashboardPage = () => {
                     You haven't added any trees yet
                   </p>
                   <Button variant="sacred" onClick={() => navigate("/map")}>
-                    Explore Map
+                    Arrive on the Atlas
                   </Button>
                 </div>
               ) : (
