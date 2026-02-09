@@ -130,8 +130,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude, longitude, what3words: in
             <Input
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value.slice(0, 200))}
               placeholder="e.g., The Old Oak"
+              maxLength={200}
               required
             />
           </div>
@@ -141,8 +142,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude, longitude, what3words: in
             <Input
               id="species"
               value={species}
-              onChange={(e) => setSpecies(e.target.value)}
+              onChange={(e) => setSpecies(e.target.value.slice(0, 200))}
               placeholder="e.g., Quercus robur"
+              maxLength={200}
               required
             />
           </div>
@@ -171,8 +173,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude, longitude, what3words: in
             <Textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
               placeholder="Tell us about this tree..."
+              maxLength={2000}
               rows={3}
             />
           </div>

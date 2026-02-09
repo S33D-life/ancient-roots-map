@@ -191,8 +191,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value.slice(0, 200))}
               placeholder={`Give your ${labels.singular.toLowerCase()} a title`}
+              maxLength={200}
               required
             />
           </div>
@@ -318,8 +319,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
             <Textarea
               id="content"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => setContent(e.target.value.slice(0, 5000))}
               placeholder={labels.placeholder}
+              maxLength={5000}
               rows={type === "poem" || type === "story" ? 6 : 3}
             />
           </div>
