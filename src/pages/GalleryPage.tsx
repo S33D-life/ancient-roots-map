@@ -424,10 +424,9 @@ const GalleryPage = () => {
               Explore all mapped trees and manage the tree ledger
             </p>
           </div>
-          <div className="hidden md:flex gap-3 shrink-0">
-            <img src={heartwoodDark} alt="Heartwood at night" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
-            <img src={heartwoodLight} alt="Heartwood portal" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
-            <img src={heartwoodParchment} alt="Heartwood entrance" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
+          <div className="hidden md:block shrink-0">
+            <img src={heartwoodDark} alt="Heartwood" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg dark:block hidden" />
+            <img src={heartwoodLight} alt="Heartwood" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg dark:hidden block" />
           </div>
         </div>
 
