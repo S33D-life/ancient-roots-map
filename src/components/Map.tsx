@@ -10,6 +10,7 @@ import FindMeButton from "./FindMeButton";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import MistOverlay from "./MistOverlay";
 
 const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
@@ -528,6 +529,9 @@ const Map = () => {
         boxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
         background: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
       }} />
+
+      {/* Drifting mist */}
+      <MistOverlay />
 
       <style>{`
         .tree-popup .mapboxgl-popup-content {
