@@ -58,9 +58,12 @@ const Hero = () => {
               variant="sacred" 
               size="lg" 
               className="min-w-[200px]"
+              asChild
             >
-              <TreeDeciduous className="w-5 h-5 mr-2" />
-              Claim a Tree Encounter
+              <Link to="/map?addTree=true">
+                <TreeDeciduous className="w-5 h-5 mr-2" />
+                Claim a Tree Encounter
+              </Link>
             </Button>
           </div>
 

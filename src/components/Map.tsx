@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,6 +166,8 @@ function getContinent(lat: number, lng: number): string {
 }
 
 const Map = () => {
+  const [searchParams] = useSearchParams();
+  const autoAddTree = searchParams.get("addTree") === "true";
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -511,6 +514,7 @@ const Map = () => {
 
       <div className="absolute bottom-2 left-2 z-10">
         <FindMeButton
+          autoOpen={autoAddTree}
           onLocationFound={(lat, lng) => {
             setUserLocation({ lat, lng });
             map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });

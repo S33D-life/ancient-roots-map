@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -6,13 +6,20 @@ import AddTreeDialog from "./AddTreeDialog";
 
 interface FindMeButtonProps {
   onLocationFound?: (lat: number, lng: number) => void;
+  autoOpen?: boolean;
 }
 
-const FindMeButton = ({ onLocationFound }: FindMeButtonProps) => {
+const FindMeButton = ({ onLocationFound, autoOpen }: FindMeButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (autoOpen) {
+      handleFindMe();
+    }
+  }, [autoOpen]);
 
   const handleFindMe = () => {
     if (!navigator.geolocation) {
