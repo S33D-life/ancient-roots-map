@@ -243,6 +243,32 @@ const Hero = () => {
       {/* Fairy Dust */}
       <FairyDust />
 
+      {/* Moss ground layer */}
+      <div className="absolute bottom-0 left-0 right-0 z-[1] pointer-events-none" style={{ height: '90px' }}>
+        <svg width="100%" height="90" viewBox="0 0 1440 90" preserveAspectRatio="none" className="absolute bottom-0">
+          {/* Deep moss base */}
+          <path d="M0 40 Q60 20 120 32 Q180 10 240 28 Q300 15 360 25 Q420 8 480 22 Q540 12 600 30 Q660 18 720 24 Q780 10 840 28 Q900 16 960 20 Q1020 8 1080 26 Q1140 14 1200 22 Q1260 10 1320 30 Q1380 18 1440 24 L1440 90 L0 90 Z"
+            fill="hsl(120 35% 18%)" />
+          {/* Mid moss layer */}
+          <path d="M0 48 Q40 32 80 42 Q130 28 180 38 Q230 22 280 36 Q340 26 400 34 Q450 20 500 32 Q560 24 620 38 Q680 28 740 34 Q790 22 840 36 Q900 26 960 32 Q1020 20 1080 34 Q1130 24 1180 30 Q1240 18 1300 34 Q1360 26 1440 32 L1440 90 L0 90 Z"
+            fill="hsl(118 38% 22%)" />
+          {/* Light moss highlights */}
+          <path d="M0 56 Q50 42 100 50 Q160 38 220 48 Q290 36 360 46 Q420 34 480 44 Q550 36 620 46 Q690 38 760 44 Q820 32 880 42 Q950 36 1020 44 Q1080 34 1140 42 Q1210 36 1280 44 Q1340 38 1440 42 L1440 90 L0 90 Z"
+            fill="hsl(116 32% 26%)" />
+          {/* Tiny moss tufts */}
+          {[40, 110, 190, 270, 350, 440, 530, 620, 700, 790, 870, 960, 1040, 1130, 1210, 1300, 1380].map((cx, i) => (
+            <g key={i}>
+              <ellipse cx={cx} cy={42 + (i % 3) * 4} rx={6 + (i % 4)} ry={3 + (i % 2)} fill={`hsl(${112 + (i % 5) * 4} ${30 + (i % 3) * 5}% ${20 + (i % 4) * 3}%)`} opacity={0.6 + (i % 3) * 0.1} />
+              <ellipse cx={cx + 12} cy={46 + (i % 2) * 3} rx={4 + (i % 3)} ry={2} fill={`hsl(${125 + (i % 4) * 3} ${35 + (i % 2) * 8}% ${24 + (i % 3) * 2}%)`} opacity={0.5} />
+            </g>
+          ))}
+          {/* Tiny lichen/leaf-litter accents */}
+          {[70, 200, 330, 500, 650, 810, 980, 1100, 1260].map((cx, i) => (
+            <circle key={`l${i}`} cx={cx} cy={50 + (i % 3) * 5} r={1.5 + (i % 2)} fill={`hsl(${40 + i * 8} ${25 + i * 3}% ${30 + i * 2}%)`} opacity={0.3} />
+          ))}
+        </svg>
+      </div>
+
       {/* Amanita Mushrooms - staggered fruiting cycle */}
       {MUSHROOMS.map((m, i) => (
         <AmanitaMushroom key={i} {...m} />
