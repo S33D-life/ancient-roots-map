@@ -66,7 +66,7 @@ const GalleryPage = () => {
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [activeString, setActiveString] = useState<"oak" | "yew" | "beech" | "ash">("oak");
+  const [activeString, setActiveString] = useState<"oak" | "yew" | "beech" | "ash" | "holly">("oak");
   const [spiralSort, setSpiralSort] = useState<string>("spiral");
   const [offeringForm, setOfferingForm] = useState({
     title: "",
@@ -834,6 +834,7 @@ const GalleryPage = () => {
                           { key: "yew" as const, label: "Yew" },
                           { key: "beech" as const, label: "Beech" },
                           { key: "ash" as const, label: "Ash" },
+                          { key: "holly" as const, label: "Holly" },
                         ].map((s) => (
                           <Button
                             key={s.key}
@@ -853,6 +854,7 @@ const GalleryPage = () => {
                           yew: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80468a76dd551cff272b",
                           beech: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80c6a871d19d6dc35bd3",
                           ash: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8079b3e3d68121c9e133",
+                          holly: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d801eb6a8f4e80aa5a574",
                         }[activeString]
                       }
                       width="100%"
