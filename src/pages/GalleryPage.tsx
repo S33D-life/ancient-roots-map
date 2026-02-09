@@ -453,8 +453,8 @@ const GalleryPage = () => {
         <Header />
         {/* Background */}
         <div className="absolute inset-0">
-          <img src={heartwoodLanding} alt="" className="w-full h-full object-cover" style={{ objectPosition: 'center 80%', clipPath: 'inset(10% 0 0 0)' }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/50" />
+          <img src={heartwoodLanding} alt="" className="w-full h-full object-cover" style={{ objectPosition: 'center 80%' }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30 md:from-black/80 md:via-black/30 md:to-black/50" />
         </div>
 
         {/* Content */}
