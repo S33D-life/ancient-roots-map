@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState } from "react";
@@ -69,19 +69,23 @@ const Header = () => {
           </div>
           
           <nav className="hidden md:flex items-center gap-6">
+            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+              <TreeDeciduous className="w-4 h-4" />
+              <MapPin className="w-4 h-4 -ml-1" />
+              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
+            </Link>
             <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               <TreeDeciduous className="w-4 h-4 -ml-1" />
               <span className="font-serif">HeARTwood Library</span>
             </Link>
+            <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+              <Leaf className="w-4 h-4" />
+              <span className="font-serif">Council of Life</span>
+            </Link>
             <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               <span className="font-serif">yOur Golden Dream</span>
-            </Link>
-            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
-              <TreeDeciduous className="w-4 h-4" />
-              <MapPin className="w-4 h-4 -ml-1" />
-              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
             </Link>
           </nav>
 
@@ -116,19 +120,23 @@ const Header = () => {
         {/* Mobile dropdown menu */}
         {mobileOpen && (
           <nav className="md:hidden border-t border-mystical mt-2 pt-3 pb-2 flex flex-col gap-3 animate-fade-in">
+            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <TreeDeciduous className="w-4 h-4" />
+              <MapPin className="w-4 h-4 -ml-1" />
+              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
+            </Link>
             <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
               <BookOpen className="w-4 h-4" />
               <TreeDeciduous className="w-4 h-4 -ml-1" />
               <span className="font-serif">HeARTwood Library</span>
             </Link>
+            <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <Leaf className="w-4 h-4" />
+              <span className="font-serif">Council of Life</span>
+            </Link>
             <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
               <Sparkles className="w-4 h-4" />
               <span className="font-serif">yOur Golden Dream</span>
-            </Link>
-            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
-              <TreeDeciduous className="w-4 h-4" />
-              <MapPin className="w-4 h-4 -ml-1" />
-              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
             </Link>
             <button onClick={() => { toggleTheme(); setMobileOpen(false); }} className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5">
               {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
