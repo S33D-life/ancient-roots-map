@@ -56,6 +56,81 @@ const FairyDust = () => {
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[2]" />;
 };
 
+// Falling leaves for light/day mode
+interface Leaf {
+  x: number; y: number; size: number; rotation: number; rotSpeed: number;
+  speedX: number; speedY: number; opacity: number; hue: number; drift: number;
+}
+
+const FallingLeaves = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animId: number;
+    let leaves: Leaf[] = [];
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const spawnLeaf = (randomY = false): Leaf => ({
+      x: Math.random() * canvas.width,
+      y: randomY ? Math.random() * canvas.height : -20 - Math.random() * 40,
+      size: Math.random() * 8 + 5,
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.03,
+      speedX: (Math.random() - 0.5) * 0.3,
+      speedY: Math.random() * 0.4 + 0.3,
+      opacity: Math.random() * 0.4 + 0.2,
+      hue: [42, 30, 75, 90, 18][Math.floor(Math.random() * 5)],
+      drift: Math.random() * Math.PI * 2,
+    });
+
+    for (let i = 0; i < 25; i++) leaves.push(spawnLeaf(true));
+
+    const drawLeaf = (l: Leaf) => {
+      ctx.save();
+      ctx.translate(l.x, l.y);
+      ctx.rotate(l.rotation);
+      ctx.globalAlpha = l.opacity;
+      ctx.beginPath();
+      ctx.moveTo(0, -l.size);
+      ctx.bezierCurveTo(l.size * 0.6, -l.size * 0.5, l.size * 0.5, l.size * 0.3, 0, l.size);
+      ctx.bezierCurveTo(-l.size * 0.5, l.size * 0.3, -l.size * 0.6, -l.size * 0.5, 0, -l.size);
+      ctx.fillStyle = `hsla(${l.hue}, 55%, 45%, 1)`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0, -l.size * 0.8);
+      ctx.lineTo(0, l.size * 0.8);
+      ctx.strokeStyle = `hsla(${l.hue}, 40%, 35%, 0.5)`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    let t = 0;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      t += 0.01;
+      leaves.forEach((l, i) => {
+        l.x += l.speedX + Math.sin(t * 2 + l.drift) * 0.5;
+        l.y += l.speedY;
+        l.rotation += l.rotSpeed;
+        if (l.y > canvas.height + 20 || l.x < -30 || l.x > canvas.width + 30) {
+          leaves[i] = spawnLeaf();
+        }
+        drawLeaf(l);
+      });
+      animId = requestAnimationFrame(animate);
+    };
+    animate();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+  }, []);
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[2]" />;
+};
+
 
 const Hero = () => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
@@ -81,8 +156,8 @@ const Hero = () => {
       {/* Sacred Geometry Overlay */}
       <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
 
-      {/* Fairy Dust - dark mode only */}
-      {isDark && <FairyDust />}
+      {/* Fairy Dust (dark) / Falling Leaves (light) */}
+      {isDark ? <FairyDust /> : <FallingLeaves />}
 
 
       {/* Content */}
