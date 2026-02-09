@@ -58,7 +58,8 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
                 <button
                   key={item.to}
                   onClick={(e) => handleItemClick(item.to, e)}
-                  className="flex flex-col items-center gap-2 group transition-all duration-300 hover:scale-110 bg-transparent border-none cursor-pointer"
+                  className="flex flex-col items-center gap-2 group transition-all duration-300 hover:scale-110 bg-transparent border-none cursor-pointer opacity-0 animate-[cascadeIn_0.5s_ease-out_forwards]"
+                  style={{ animationDelay: `${i * 120 + 200}ms` }}
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 group-hover:shadow-[0_0_25px_hsl(42_80%_50%_/_0.5)]"
