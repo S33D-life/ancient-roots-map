@@ -41,17 +41,17 @@ const Header = () => {
           </Link>
           
           <nav className="hidden md:flex items-center gap-6">
+            <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+              <Image className="w-4 h-4" />
+              <span className="font-serif">Library</span>
+            </Link>
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              <span className="font-serif">Explore Map</span>
+              <span className="font-serif">Arboreal Atlas</span>
             </Link>
             <Link to="/groves" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
               <span className="font-serif">Tree Resources</span>
-            </Link>
-            <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
-              <Image className="w-4 h-4" />
-              <span className="font-serif">Library</span>
             </Link>
           </nav>
 
