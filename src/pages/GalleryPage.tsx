@@ -18,6 +18,9 @@ import PhotoImport from "@/components/PhotoImport";
 import CreatorsPath from "@/components/CreatorsPath";
 import TreeResources from "@/components/TreeResources";
 import { Progress } from "@/components/ui/progress";
+import heartwoodDark from "@/assets/heartwood-dark.jpeg";
+import heartwoodLight from "@/assets/heartwood-light.jpeg";
+import heartwoodParchment from "@/assets/heartwood-parchment.jpeg";
 
 interface Tree {
   id: string;
@@ -412,13 +415,20 @@ const GalleryPage = () => {
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, hsl(220 40% 12%) 0%, hsl(160 50% 18%) 25%, hsl(120 40% 22%) 45%, hsl(80 45% 20%) 60%, hsl(50 60% 25%) 80%, hsl(220 35% 15%) 100%)' }}>
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
-            Heartwood Library
-          </h1>
-          <p className="text-muted-foreground">
-            Explore all mapped trees and manage the tree ledger
-          </p>
+        <div className="mb-8 flex items-center justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
+              Heartwood Library
+            </h1>
+            <p className="text-muted-foreground">
+              Explore all mapped trees and manage the tree ledger
+            </p>
+          </div>
+          <div className="hidden md:flex gap-3 shrink-0">
+            <img src={heartwoodDark} alt="Heartwood at night" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
+            <img src={heartwoodLight} alt="Heartwood portal" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
+            <img src={heartwoodParchment} alt="Heartwood entrance" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
+          </div>
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
