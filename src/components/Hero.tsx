@@ -1,17 +1,30 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous, Sparkles } from "lucide-react";
-import heroTree from "@/assets/hero-tree.jpg";
+import bgDark from "@/assets/bg-dark.jpeg";
+import bgLight from "@/assets/bg-light.jpeg";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Hero = () => {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(!document.documentElement.classList.contains('light'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    setIsDark(!document.documentElement.classList.contains('light'));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroTree})` }}
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-700"
+        style={{ backgroundImage: `url(${isDark ? bgDark : bgLight})` }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/30 to-background" />
       </div>
 
       {/* Sacred Geometry Overlay */}
