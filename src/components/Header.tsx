@@ -65,7 +65,7 @@ const Header = () => {
             <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               <TreeDeciduous className="w-4 h-4 -ml-1" />
-              <span className="font-serif">Library</span>
+              <span className="font-serif">HeARTwood Library</span>
             </Link>
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
