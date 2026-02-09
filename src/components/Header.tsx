@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars } from "lucide-react";
-import s33dLogo from "@/assets/s33d-logo.jpeg";
+import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,8 +53,8 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <img 
-              src={s33dLogo} 
-              alt="S33D" 
+              src={teotagLogo} 
+              alt="Teotag" 
               className="w-[120px] h-[120px] rounded-full"
             />
           </Link>
