@@ -21,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import heartwoodDark from "@/assets/heartwood-dark.jpeg";
 import heartwoodLight from "@/assets/heartwood-light.jpeg";
 import heartwoodParchment from "@/assets/heartwood-parchment.jpeg";
+import heartwoodWelcome from "@/assets/heartwood-welcome.png";
 
 interface Tree {
   id: string;
@@ -59,6 +60,8 @@ interface WishlistItem {
 }
 
 const GalleryPage = () => {
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashFading, setSplashFading] = useState(false);
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [offerings, setOfferings] = useState<Offering[]>([]);
@@ -80,6 +83,14 @@ const GalleryPage = () => {
     media_url: "",
     nft_link: "",
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSplashFading(true);
+      setTimeout(() => setShowSplash(false), 800);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     fetchTrees();
@@ -410,6 +421,23 @@ const GalleryPage = () => {
       default: return <FileText className="w-4 h-4" />;
     }
   };
+
+  if (showSplash) {
+    return (
+      <div 
+        className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-700 ${splashFading ? 'opacity-0' : 'opacity-100'}`}
+      >
+        <div className="relative w-full h-full">
+          <img 
+            src={heartwoodWelcome} 
+            alt="Welcome to Heartwood, A Library of Love" 
+            className="w-full h-full object-cover animate-fade-in"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, hsl(220 40% 12%) 0%, hsl(160 50% 18%) 25%, hsl(120 40% 22%) 45%, hsl(80 45% 20%) 60%, hsl(50 60% 25%) 80%, hsl(220 35% 15%) 100%)' }}>
