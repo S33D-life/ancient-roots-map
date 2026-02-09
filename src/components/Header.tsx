@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState } from "react";
@@ -74,6 +74,10 @@ const Header = () => {
               <TreeDeciduous className="w-4 h-4 -ml-1" />
               <span className="font-serif">HeARTwood Library</span>
             </Link>
+            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              <span className="font-serif">yOur Golden Dream</span>
+            </Link>
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
               <MapPin className="w-4 h-4 -ml-1" />
@@ -116,6 +120,10 @@ const Header = () => {
               <BookOpen className="w-4 h-4" />
               <TreeDeciduous className="w-4 h-4 -ml-1" />
               <span className="font-serif">HeARTwood Library</span>
+            </Link>
+            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <Sparkles className="w-4 h-4" />
+              <span className="font-serif">yOur Golden Dream</span>
             </Link>
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
               <TreeDeciduous className="w-4 h-4" />

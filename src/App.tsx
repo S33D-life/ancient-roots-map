@@ -12,6 +12,7 @@ import GrovesPage from "./pages/GrovesPage";
 import GalleryPage from "./pages/GalleryPage";
 import DashboardPage from "./pages/DashboardPage";
 import TreeDetailPage from "./pages/TreeDetailPage";
+import GoldenDreamPage from "./pages/GoldenDreamPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/golden-dream" element={<GoldenDreamPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
