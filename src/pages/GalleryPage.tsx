@@ -419,11 +419,12 @@ const GalleryPage = () => {
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-8">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5 mb-8">
             <TabsTrigger value="gallery">Library</TabsTrigger>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
+            <TabsTrigger value="oak-string">Oak String</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gallery" className="space-y-8">
@@ -996,6 +997,27 @@ const GalleryPage = () => {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="oak-string" className="space-y-6">
+            <Card className="border-mystical bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="font-serif text-mystical">Oak String Database</CardTitle>
+                <CardDescription>
+                  Browse the Oak String Notion database
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <iframe
+                  src="https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8023b4ade8b40e4b5156"
+                  width="100%"
+                  height="600"
+                  frameBorder="0"
+                  allowFullScreen
+                  className="rounded-lg border border-border"
+                />
               </CardContent>
             </Card>
           </TabsContent>
