@@ -41,9 +41,6 @@ const Hero = () => {
             Under a tree?
           </h1>
           
-          <p className="text-xl md:text-2xl text-foreground/90 font-light leading-relaxed max-w-2xl mx-auto">
-            Under a tree? Weave a moment of truth with an Ancient Friend into yOur Golden Dream.
-          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
             <Button 
