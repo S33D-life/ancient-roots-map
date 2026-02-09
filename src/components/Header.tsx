@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, Image, User } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, Image, User, Sun, Moon } from "lucide-react";
 import s33dLogo from "@/assets/s33d-logo.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,14 +8,35 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !document.documentElement.classList.contains('light');
+    }
+    return true;
+  });
+
+  const toggleTheme = () => {
+    const html = document.documentElement;
+    if (isDark) {
+      html.classList.remove('dark');
+      html.classList.add('light');
+    } else {
+      html.classList.remove('light');
+      html.classList.add('dark');
+    }
+    setIsDark(!isDark);
+  };
 
   useEffect(() => {
-    // Check current session
+    // Set initial dark mode
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
@@ -55,7 +76,10 @@ const Header = () => {
             </Link>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hidden md:inline-flex">
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             {user ? (
               <Button
                 variant="sacred"

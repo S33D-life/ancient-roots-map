@@ -1,6 +1,5 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import FeaturesSection from "@/components/FeaturesSection";
 
 const Index = () => {
   return (
@@ -8,7 +7,6 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <FeaturesSection />
       </main>
     </div>
   );
