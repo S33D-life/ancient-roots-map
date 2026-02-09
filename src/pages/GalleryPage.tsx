@@ -422,9 +422,9 @@ const GalleryPage = () => {
         <Tabs defaultValue="gallery" className="w-full">
           <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-8">
             <TabsTrigger value="gallery">Library</TabsTrigger>
+            <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
-            <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
           </TabsList>
 
           <TabsContent value="gallery" className="space-y-8">
