@@ -111,12 +111,12 @@ const AmanitaMushroom = ({ x, scale, delay, flip, stage, bottom }: MushroomProps
 
   return (
     <div
-      className="absolute z-[1]"
+      className="absolute z-[4]"
       style={{
         left: x,
-        bottom: `${bottom || 0}px`,
+        top: `${130 + (bottom || 0)}px`,
         transform: `scale(${scale})${flip ? ' scaleX(-1)' : ''}`,
-        transformOrigin: 'bottom center',
+        transformOrigin: 'top center',
         animation: `mushroomGrow ${stage === "button" ? 1.2 : 2}s cubic-bezier(0.34,1.56,0.64,1) ${delay}s both, mushroomSway ${4 + scale * 2}s ease-in-out ${delay + 2.5}s infinite`,
       }}
     >
@@ -258,7 +258,7 @@ const Hero = () => {
       <FairyDust />
 
       {/* Moss ground layer — lush with pine needles like forest floor */}
-      <div className="absolute bottom-0 left-0 right-0 z-[1] pointer-events-none" style={{ height: '110px' }}>
+      <div className="absolute top-[130px] left-0 right-0 z-[3] pointer-events-none" style={{ height: '110px' }}>
         <svg width="100%" height="110" viewBox="0 0 1440 110" preserveAspectRatio="none" className="absolute bottom-0">
           {/* Dark humus / soil base */}
           <rect x="0" y="65" width="1440" height="45" fill="hsl(25 20% 12%)" />
