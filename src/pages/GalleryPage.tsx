@@ -527,7 +527,7 @@ const GalleryPage = () => {
 
             {/* Sacred Spiral of 36 */}
             <div className="mb-12">
-              <h3 className="text-xl font-serif text-primary text-center mb-4">The Spiral of Staffs</h3>
+              <h3 className="text-xl font-serif text-primary text-center mb-4">The Spiral of Species</h3>
               <div className="flex justify-center gap-2 mb-6">
                 <Select value={spiralSort} onValueChange={setSpiralSort}>
                   <SelectTrigger className="w-[200px]">
