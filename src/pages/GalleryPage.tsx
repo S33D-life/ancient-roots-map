@@ -66,7 +66,7 @@ const GalleryPage = () => {
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [activeString, setActiveString] = useState<"oak" | "yew">("oak");
+  const [activeString, setActiveString] = useState<"oak" | "yew" | "beech" | "ash">("oak");
   const [spiralSort, setSpiralSort] = useState<string>("spiral");
   const [offeringForm, setOfferingForm] = useState({
     title: "",
@@ -828,27 +828,32 @@ const GalleryPage = () => {
                   <div className="border-t border-mystical pt-4">
                     <div className="flex items-center gap-3 mb-3">
                       <h3 className="text-lg font-serif font-semibold">Strings</h3>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={activeString === "oak" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setActiveString("oak")}
-                        >
-                          Oak String
-                        </Button>
-                        <Button
-                          variant={activeString === "yew" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setActiveString("yew")}
-                        >
-                          Yew String
-                        </Button>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { key: "oak" as const, label: "Oak" },
+                          { key: "yew" as const, label: "Yew" },
+                          { key: "beech" as const, label: "Beech" },
+                          { key: "ash" as const, label: "Ash" },
+                        ].map((s) => (
+                          <Button
+                            key={s.key}
+                            variant={activeString === s.key ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setActiveString(s.key)}
+                          >
+                            {s.label} String
+                          </Button>
+                        ))}
                       </div>
                     </div>
                     <iframe
-                      src={activeString === "oak"
-                        ? "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8023b4ade8b40e4b5156"
-                        : "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80468a76dd551cff272b"
+                      src={
+                        {
+                          oak: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8023b4ade8b40e4b5156",
+                          yew: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80468a76dd551cff272b",
+                          beech: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80c6a871d19d6dc35bd3",
+                          ash: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8079b3e3d68121c9e133",
+                        }[activeString]
                       }
                       width="100%"
                       height="600"
