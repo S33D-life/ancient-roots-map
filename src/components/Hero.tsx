@@ -63,21 +63,27 @@ interface MushroomProps {
 }
 
 const AmanitaMushroom = ({ x, scale, delay, flip, stage, bottom }: MushroomProps) => {
-  const stemColor = stage === "aging" ? "hsl(40 25% 60%)" : "hsl(48 35% 82%)";
-  const stemRingColor = stage === "aging" ? "hsl(40 20% 50%)" : "hsl(45 30% 72%)";
-  const capHue = stage === "aging" ? "8 55% 32%" : stage === "mature" ? "0 72% 42%" : "356 68% 45%";
-  const capHighlight = stage === "aging" ? "8 50% 38%" : "0 78% 52%";
-  const spotOpacity = stage === "aging" ? 0.5 : stage === "button" ? 0.9 : 0.82;
+  // More naturalistic color palette
+  const stemBase = stage === "aging" ? "hsl(42 18% 58%)" : "hsl(50 28% 85%)";
+  const stemShade = stage === "aging" ? "hsl(38 15% 48%)" : "hsl(46 22% 72%)";
+  const stemRingColor = stage === "aging" ? "hsl(40 16% 52%)" : "hsl(48 24% 76%)";
+  // Real Amanita muscaria: vivid scarlet → fading orange-red with age
+  const capMain = stage === "aging" ? "hsl(12 50% 35%)" : stage === "mature" ? "hsl(4 78% 44%)" : stage === "open" ? "hsl(2 74% 40%)" : "hsl(0 80% 48%)";
+  const capDark = stage === "aging" ? "hsl(8 45% 26%)" : stage === "mature" ? "hsl(358 70% 32%)" : "hsl(356 72% 36%)";
+  const capLight = stage === "aging" ? "hsl(14 42% 42%)" : "hsl(6 82% 56%)";
+  const spotColor = "hsl(55 60% 93%)"; // off-white / cream like real warts
+  const spotOpacity = stage === "aging" ? 0.45 : stage === "button" ? 0.95 : 0.8;
 
-  const configs: Record<FruitingStage, { capRx: number; capRy: number; stemH: number; capY: number; gillsVisible: boolean }> = {
-    button:   { capRx: 10, capRy: 12, stemH: 18, capY: 68, gillsVisible: false },
-    emerging: { capRx: 16, capRy: 16, stemH: 35, capY: 52, gillsVisible: false },
-    young:    { capRx: 22, capRy: 18, stemH: 45, capY: 40, gillsVisible: false },
-    mature:   { capRx: 26, capRy: 18, stemH: 50, capY: 34, gillsVisible: true },
-    open:     { capRx: 28, capRy: 14, stemH: 55, capY: 30, gillsVisible: true },
-    aging:    { capRx: 30, capRy: 12, stemH: 52, capY: 32, gillsVisible: true },
+  const configs: Record<FruitingStage, { capRx: number; capRy: number; stemH: number; capY: number; gillsVisible: boolean; stemW: number }> = {
+    button:   { capRx: 11, capRy: 13, stemH: 16, capY: 69, gillsVisible: false, stemW: 4 },
+    emerging: { capRx: 15, capRy: 15, stemH: 32, capY: 54, gillsVisible: false, stemW: 4.5 },
+    young:    { capRx: 21, capRy: 17, stemH: 42, capY: 42, gillsVisible: false, stemW: 5 },
+    mature:   { capRx: 25, capRy: 16, stemH: 48, capY: 36, gillsVisible: true, stemW: 5.5 },
+    open:     { capRx: 28, capRy: 12, stemH: 53, capY: 32, gillsVisible: true, stemW: 5 },
+    aging:    { capRx: 29, capRy: 10, stemH: 50, capY: 34, gillsVisible: true, stemW: 4.5 },
   };
   const c = configs[stage];
+  const cx = 32;
 
   return (
     <div
@@ -87,59 +93,101 @@ const AmanitaMushroom = ({ x, scale, delay, flip, stage, bottom }: MushroomProps
         bottom: `${bottom || 0}px`,
         transform: `scale(${scale})${flip ? ' scaleX(-1)' : ''}`,
         transformOrigin: 'bottom center',
-        animation: `mushroomGrow ${stage === "button" ? 1 : 1.8}s ease-out ${delay}s both, mushroomSway ${3.5 + scale}s ease-in-out ${delay + 2}s infinite`,
+        animation: `mushroomGrow ${stage === "button" ? 1.2 : 2}s cubic-bezier(0.34,1.56,0.64,1) ${delay}s both, mushroomSway ${4 + scale * 2}s ease-in-out ${delay + 2.5}s infinite`,
       }}
     >
-      <svg width="64" height="82" viewBox="0 0 64 82" fill="none">
-        {/* Stem */}
+      <svg width="64" height="86" viewBox="0 0 64 86" fill="none">
+        <defs>
+          {/* Cap gradient for realistic dome shading */}
+          <radialGradient id={`cap-${stage}-${delay}`} cx="0.42" cy="0.32" r="0.7">
+            <stop offset="0%" stopColor={capLight} stopOpacity="0.6" />
+            <stop offset="45%" stopColor={capMain} />
+            <stop offset="100%" stopColor={capDark} />
+          </radialGradient>
+          {/* Stem gradient for cylindrical shading */}
+          <linearGradient id={`stem-${stage}-${delay}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={stemShade} />
+            <stop offset="35%" stopColor={stemBase} />
+            <stop offset="70%" stopColor={stemBase} />
+            <stop offset="100%" stopColor={stemShade} />
+          </linearGradient>
+        </defs>
+
+        {/* Ground shadow */}
+        <ellipse cx={cx} cy="84" rx={c.stemW + 4} ry="2" fill="hsl(0 0% 10%)" opacity="0.15" />
+
+        {/* Volva (egg cup at base) */}
+        <path d={`M${cx - c.stemW - 3} 82 Q${cx - c.stemW - 4} 78 ${cx - c.stemW} 76 L${cx + c.stemW} 76 Q${cx + c.stemW + 4} 78 ${cx + c.stemW + 3} 82 Z`}
+          fill="hsl(50 20% 80%)" opacity="0.5" />
+
+        {/* Stem — tapered organic shape with slight bulge */}
         <path
-          d={`M28 82 C27 ${82 - c.stemH * 0.4} 25 ${82 - c.stemH * 0.7} 26 ${c.capY + c.capRy - 2} Q30 ${c.capY + c.capRy - 6} 32 ${c.capY + c.capRy - 2} C37 ${82 - c.stemH * 0.7} 35 ${82 - c.stemH * 0.4} 34 82`}
-          fill={stemColor}
+          d={`M${cx - c.stemW} 82 
+              C${cx - c.stemW - 1} ${82 - c.stemH * 0.3} ${cx - c.stemW + 0.5} ${82 - c.stemH * 0.6} ${cx - c.stemW + 1.5} ${c.capY + c.capRy - 1}
+              L${cx + c.stemW - 1.5} ${c.capY + c.capRy - 1}
+              C${cx + c.stemW - 0.5} ${82 - c.stemH * 0.6} ${cx + c.stemW + 1} ${82 - c.stemH * 0.3} ${cx + c.stemW} 82 Z`}
+          fill={`url(#stem-${stage}-${delay})`}
         />
-        {/* Stem ring / skirt */}
+        {/* Subtle stem texture lines */}
+        {[0.3, 0.5, 0.7].map((t, i) => {
+          const sy = c.capY + c.capRy + t * (82 - c.capY - c.capRy);
+          return <line key={i} x1={cx - c.stemW + 2} y1={sy} x2={cx + c.stemW - 2} y2={sy} stroke={stemShade} strokeWidth="0.3" opacity="0.15" />;
+        })}
+
+        {/* Annulus (skirt ring) — hanging remnant */}
         {stage !== "button" && stage !== "emerging" && (
-          <ellipse cx="31" cy={c.capY + c.capRy + 8} rx={stage === "aging" ? 8 : 6} ry="2.5" fill={stemRingColor} opacity="0.7" />
+          <path
+            d={`M${cx - c.stemW - 2} ${c.capY + c.capRy + 6} 
+                Q${cx - c.stemW} ${c.capY + c.capRy + 10} ${cx} ${c.capY + c.capRy + 9}
+                Q${cx + c.stemW} ${c.capY + c.capRy + 10} ${cx + c.stemW + 2} ${c.capY + c.capRy + 6}`}
+            stroke={stemRingColor} strokeWidth="1.2" fill="none" opacity="0.6" />
         )}
-        {/* Volva at base */}
-        <ellipse cx="31" cy="79" rx="8" ry="3" fill="hsl(48 25% 78%)" opacity="0.5" />
-        {/* Cap */}
-        <ellipse cx="32" cy={c.capY} rx={c.capRx} ry={c.capRy} fill={`hsl(${capHue})`} />
-        <ellipse cx="32" cy={c.capY - 1.5} rx={c.capRx - 2} ry={c.capRy - 2} fill={`hsl(${capHue})`} opacity="0.9" />
-        {/* Cap highlight */}
-        <ellipse cx={28} cy={c.capY - c.capRy * 0.3} rx={c.capRx * 0.45} ry={c.capRy * 0.35} fill={`hsl(${capHighlight})`} opacity="0.3" />
-        {/* White wart spots */}
-        {stage !== "button" && (
-          <>
-            <circle cx={32 - c.capRx * 0.4} cy={c.capY - c.capRy * 0.3} r={c.capRx * 0.12} fill="hsl(50 80% 92%)" opacity={spotOpacity} />
-            <circle cx={32 + c.capRx * 0.35} cy={c.capY - c.capRy * 0.45} r={c.capRx * 0.1} fill="hsl(50 80% 92%)" opacity={spotOpacity} />
-            <circle cx={32 - c.capRx * 0.1} cy={c.capY - c.capRy * 0.65} r={c.capRx * 0.09} fill="hsl(50 80% 92%)" opacity={spotOpacity * 0.9} />
-            <circle cx={32 + c.capRx * 0.55} cy={c.capY - c.capRy * 0.1} r={c.capRx * 0.07} fill="hsl(50 80% 92%)" opacity={spotOpacity * 0.8} />
-            <circle cx={32 - c.capRx * 0.6} cy={c.capY + c.capRy * 0.1} r={c.capRx * 0.08} fill="hsl(50 80% 92%)" opacity={spotOpacity * 0.7} />
-          </>
-        )}
-        {(stage === "mature" || stage === "open" || stage === "aging") && (
-          <>
-            <circle cx={32 + c.capRx * 0.15} cy={c.capY - c.capRy * 0.2} r={c.capRx * 0.11} fill="hsl(50 80% 92%)" opacity={spotOpacity * 0.85} />
-            <circle cx={32 - c.capRx * 0.55} cy={c.capY - c.capRy * 0.5} r={c.capRx * 0.06} fill="hsl(50 80% 92%)" opacity={spotOpacity * 0.65} />
-          </>
-        )}
-        {/* Gills */}
-        {c.gillsVisible && (
-          <>
-            <path d={`M${32 - c.capRx + 4} ${c.capY + c.capRy - 2} Q32 ${c.capY + c.capRy + 4} ${32 + c.capRx - 4} ${c.capY + c.capRy - 2}`}
-              stroke="hsl(48 30% 78%)" strokeWidth="0.8" fill="none" opacity="0.5" />
-            {[...Array(7)].map((_, i) => {
-              const t = (i + 1) / 8;
-              const gx = 32 - c.capRx + 4 + t * (c.capRx * 2 - 8);
-              return <line key={i} x1={gx} y1={c.capY + c.capRy - 2} x2={32} y2={c.capY + c.capRy + 2} stroke="hsl(48 25% 72%)" strokeWidth="0.4" opacity="0.3" />;
-            })}
-          </>
-        )}
-        {/* Aging curl */}
-        {stage === "aging" && (
-          <path d={`M${32 - c.capRx} ${c.capY + c.capRy - 1} Q${32 - c.capRx - 2} ${c.capY + c.capRy + 4} ${32 - c.capRx + 3} ${c.capY + c.capRy + 3}`}
-            stroke={`hsl(${capHue})`} strokeWidth="2" fill="none" opacity="0.6" />
-        )}
+
+        {/* Cap — dome shape using a proper arc for convex curvature */}
+        <path
+          d={`M${cx - c.capRx} ${c.capY + c.capRy * 0.3}
+              Q${cx - c.capRx} ${c.capY - c.capRy * 1.1} ${cx} ${c.capY - c.capRy * 1.2}
+              Q${cx + c.capRx} ${c.capY - c.capRy * 1.1} ${cx + c.capRx} ${c.capY + c.capRy * 0.3}
+              Q${cx} ${c.capY + c.capRy * 0.6} ${cx - c.capRx} ${c.capY + c.capRy * 0.3} Z`}
+          fill={`url(#cap-${stage}-${delay})`}
+        />
+        {/* Cap rim underside shadow */}
+        <path
+          d={`M${cx - c.capRx + 2} ${c.capY + c.capRy * 0.25} Q${cx} ${c.capY + c.capRy * 0.55} ${cx + c.capRx - 2} ${c.capY + c.capRy * 0.25}`}
+          stroke={capDark} strokeWidth="1" fill="none" opacity="0.35" />
+
+        {/* Wart spots — irregular sizes and placement like real specimens */}
+        {stage !== "button" && (<>
+          <ellipse cx={cx - c.capRx * 0.35} cy={c.capY - c.capRy * 0.55} rx={c.capRx * 0.1} ry={c.capRx * 0.08} fill={spotColor} opacity={spotOpacity} transform={`rotate(-12 ${cx - c.capRx * 0.35} ${c.capY - c.capRy * 0.55})`} />
+          <ellipse cx={cx + c.capRx * 0.3} cy={c.capY - c.capRy * 0.7} rx={c.capRx * 0.08} ry={c.capRx * 0.065} fill={spotColor} opacity={spotOpacity} transform={`rotate(8 ${cx + c.capRx * 0.3} ${c.capY - c.capRy * 0.7})`} />
+          <ellipse cx={cx - c.capRx * 0.05} cy={c.capY - c.capRy * 0.95} rx={c.capRx * 0.07} ry={c.capRx * 0.06} fill={spotColor} opacity={spotOpacity * 0.9} />
+          <ellipse cx={cx + c.capRx * 0.55} cy={c.capY - c.capRy * 0.3} rx={c.capRx * 0.065} ry={c.capRx * 0.05} fill={spotColor} opacity={spotOpacity * 0.7} transform={`rotate(20 ${cx + c.capRx * 0.55} ${c.capY - c.capRy * 0.3})`} />
+          <ellipse cx={cx - c.capRx * 0.6} cy={c.capY - c.capRy * 0.15} rx={c.capRx * 0.055} ry={c.capRx * 0.045} fill={spotColor} opacity={spotOpacity * 0.6} transform={`rotate(-25 ${cx - c.capRx * 0.6} ${c.capY - c.capRy * 0.15})`} />
+          <ellipse cx={cx + c.capRx * 0.1} cy={c.capY - c.capRy * 0.4} rx={c.capRx * 0.09} ry={c.capRx * 0.07} fill={spotColor} opacity={spotOpacity * 0.75} />
+        </>)}
+        {(stage === "mature" || stage === "open" || stage === "aging") && (<>
+          <ellipse cx={cx + c.capRx * 0.15} cy={c.capY - c.capRy * 0.85} rx={c.capRx * 0.06} ry={c.capRx * 0.05} fill={spotColor} opacity={spotOpacity * 0.65} />
+          <ellipse cx={cx - c.capRx * 0.5} cy={c.capY - c.capRy * 0.65} rx={c.capRx * 0.05} ry={c.capRx * 0.04} fill={spotColor} opacity={spotOpacity * 0.5} transform={`rotate(15 ${cx - c.capRx * 0.5} ${c.capY - c.capRy * 0.65})`} />
+        </>)}
+
+        {/* Gills — radiating lines visible on open/aging caps */}
+        {c.gillsVisible && (<>
+          <path d={`M${cx - c.capRx + 3} ${c.capY + c.capRy * 0.3} Q${cx} ${c.capY + c.capRy * 0.65} ${cx + c.capRx - 3} ${c.capY + c.capRy * 0.3}`}
+            stroke="hsl(50 25% 82%)" strokeWidth="0.6" fill="none" opacity="0.4" />
+          {[...Array(9)].map((_, i) => {
+            const t = (i + 1) / 10;
+            const gx = cx - c.capRx + 3 + t * (c.capRx * 2 - 6);
+            return <line key={i} x1={gx} y1={c.capY + c.capRy * 0.3} x2={cx} y2={c.capY + c.capRy * 0.55} stroke="hsl(50 20% 78%)" strokeWidth="0.35" opacity="0.25" />;
+          })}
+        </>)}
+
+        {/* Aging — cap edge curling and discoloration */}
+        {stage === "aging" && (<>
+          <path d={`M${cx - c.capRx} ${c.capY + c.capRy * 0.3} Q${cx - c.capRx - 3} ${c.capY + c.capRy * 0.6} ${cx - c.capRx + 4} ${c.capY + c.capRy * 0.5}`}
+            stroke={capDark} strokeWidth="1.5" fill="none" opacity="0.5" />
+          <path d={`M${cx + c.capRx} ${c.capY + c.capRy * 0.3} Q${cx + c.capRx + 2} ${c.capY + c.capRy * 0.55} ${cx + c.capRx - 3} ${c.capY + c.capRy * 0.45}`}
+            stroke={capDark} strokeWidth="1.2" fill="none" opacity="0.4" />
+        </>)}
       </svg>
     </div>
   );
@@ -241,14 +289,16 @@ const Hero = () => {
 
       <style>{`
         @keyframes mushroomGrow {
-          0% { transform: scale(0) translateY(20px); opacity: 0; }
-          60% { transform: scale(1.1) translateY(-3px); opacity: 1; }
+          0% { transform: scale(0) translateY(15px); opacity: 0; }
+          50% { transform: scale(1.06) translateY(-2px); opacity: 0.9; }
+          70% { transform: scale(0.97) translateY(1px); opacity: 1; }
           100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         @keyframes mushroomSway {
           0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(2deg); }
-          75% { transform: rotate(-2deg); }
+          20% { transform: rotate(1.2deg); }
+          50% { transform: rotate(-0.8deg); }
+          80% { transform: rotate(1deg); }
         }
       `}</style>
     </section>
