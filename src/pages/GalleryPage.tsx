@@ -552,6 +552,15 @@ const GalleryPage = () => {
                     BOX: "/images/staffs/box.jpeg",
                     BUCK: "/images/staffs/buck.jpeg",
                     YEW: "/images/staffs/yew.jpeg",
+                    DAWN: "/images/staffs/dawn.jpeg",
+                    BUD: "/images/staffs/bud.jpeg",
+                    CRAB: "/images/staffs/crab.jpeg",
+                    WITC: "/images/staffs/witc.jpeg",
+                    PEAR: "/images/staffs/pear.jpeg",
+                    JAPA: "/images/staffs/japa.jpeg",
+                    SLOE: "/images/staffs/sloe.jpeg",
+                    MED: "/images/staffs/med.jpeg",
+                    HORS: "/images/staffs/hors.jpeg",
                   };
                   const spiralStaffs = [
                     { code: "YEW", species: "Yew", length: "161 cm", weight: "1,252 g" },
@@ -581,15 +590,15 @@ const GalleryPage = () => {
                     { code: "WIL", species: "Willow", length: "118 cm", weight: "646 g" },
                     { code: "BOX", species: "Box", length: "161 cm", weight: "1,332 g" },
                     { code: "BUCK", species: "Buckthorn", length: "161 cm", weight: "663 g" },
-                    { code: "TBD-28", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-29", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-30", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-31", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-32", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-33", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-34", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-35", species: "—", length: "—", weight: "—" },
-                    { code: "TBD-36", species: "—", length: "—", weight: "—" },
+                    { code: "DAWN", species: "Dawn Redwood", length: "142 cm", weight: "500 g" },
+                    { code: "BUD", species: "Buddleia", length: "115 cm", weight: "393 g" },
+                    { code: "CRAB", species: "Crab Apple", length: "119 cm", weight: "644 g" },
+                    { code: "WITC", species: "Witch Hazel", length: "84 cm", weight: "433 g" },
+                    { code: "PEAR", species: "Pear", length: "137 cm", weight: "848 g" },
+                    { code: "JAPA", species: "Japanese Maple", length: "103 cm", weight: "1,100 g" },
+                    { code: "SLOE", species: "Blackthorn", length: "177 cm", weight: "1,844 g" },
+                    { code: "MED", species: "Medlar", length: "109 cm", weight: "2,525 g" },
+                    { code: "HORS", species: "Horse Chestnut", length: "101 cm", weight: "1,333 g" },
                   ];
                   const centerX = 50;
                   const centerY = 50;
@@ -674,6 +683,15 @@ const GalleryPage = () => {
                     25: { code: "BOX", img: "/images/staffs/box.jpeg" },
                     26: { code: "BUCK", img: "/images/staffs/buck.jpeg" },
                     27: { code: "YEW", img: "/images/staffs/yew.jpeg" },
+                    28: { code: "DAWN", img: "/images/staffs/dawn.jpeg" },
+                    29: { code: "BUD", img: "/images/staffs/bud.jpeg" },
+                    30: { code: "CRAB", img: "/images/staffs/crab.jpeg" },
+                    31: { code: "WITC", img: "/images/staffs/witc.jpeg" },
+                    32: { code: "PEAR", img: "/images/staffs/pear.jpeg" },
+                    33: { code: "JAPA", img: "/images/staffs/japa.jpeg" },
+                    34: { code: "SLOE", img: "/images/staffs/sloe.jpeg" },
+                    35: { code: "MED", img: "/images/staffs/med.jpeg" },
+                    36: { code: "HORS", img: "/images/staffs/hors.jpeg" },
                   };
                   return Array.from({ length: 144 }, (_, i) => {
                     const staffData = gridImages[i];
@@ -701,7 +719,7 @@ const GalleryPage = () => {
 
             <div className="text-center pt-4">
               <p className="text-sm text-muted-foreground">
-                {27} of 144 staffs minted as NFTs · Digital twins coming soon
+                {36} of 144 staffs minted as NFTs · Digital twins coming soon
               </p>
             </div>
           </TabsContent>
