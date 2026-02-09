@@ -723,6 +723,7 @@ const GalleryPage = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {(() => {
                   const gridImages: Record<number, { code: string; img: string }> = {
+                    0: { code: "YEW", img: "/images/staffs/yew.jpeg" },
                     1: { code: "OAK", img: "/images/staffs/oak.jpeg" },
                     2: { code: "HORN", img: "/images/staffs/horn.jpeg" },
                     3: { code: "HOL", img: "/images/staffs/hol.jpeg" },
@@ -749,7 +750,7 @@ const GalleryPage = () => {
                     24: { code: "WIL", img: "/images/staffs/wil.jpeg" },
                     25: { code: "BOX", img: "/images/staffs/box.jpeg" },
                     26: { code: "BUCK", img: "/images/staffs/buck.jpeg" },
-                    27: { code: "YEW", img: "/images/staffs/yew.jpeg" },
+                    27: { code: "HORS", img: "/images/staffs/hors.jpeg" },
                     28: { code: "DAWN", img: "/images/staffs/dawn.jpeg" },
                     29: { code: "BUD", img: "/images/staffs/bud.jpeg" },
                     30: { code: "CRAB", img: "/images/staffs/crab.jpeg" },
@@ -758,7 +759,6 @@ const GalleryPage = () => {
                     33: { code: "JAPA", img: "/images/staffs/japa.jpeg" },
                     34: { code: "SLOE", img: "/images/staffs/sloe.jpeg" },
                     35: { code: "MED", img: "/images/staffs/med.jpeg" },
-                    36: { code: "HORS", img: "/images/staffs/hors.jpeg" },
                   };
                   return Array.from({ length: 144 }, (_, i) => {
                     const staffData = gridImages[i];
