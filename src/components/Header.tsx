@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, MapPin, TreeDeciduous, Image, User } from "lucide-react";
-import treeIcon from "@/assets/tree-icon.png";
+import s33dLogo from "@/assets/s33d-logo.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -31,9 +31,9 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3 group">
             <img 
-              src={treeIcon} 
-              alt="Ancient Friends" 
-              className="w-10 h-10 animate-pulse-glow"
+              src={s33dLogo} 
+              alt="S33D" 
+              className="w-10 h-10 rounded-full"
             />
             <h1 className="text-2xl font-serif font-bold tracking-wider text-mystical">
               ANCIENT FRIENDS
