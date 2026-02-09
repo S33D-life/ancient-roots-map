@@ -283,7 +283,7 @@ const DashboardPage = () => {
     .toUpperCase() || user?.email?.[0].toUpperCase() || "U";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, hsl(270 45% 25%) 0%, hsl(280 50% 35%) 20%, hsl(320 45% 45%) 45%, hsl(350 60% 55%) 65%, hsl(30 70% 55%) 85%, hsl(45 80% 60%) 100%)' }}>
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-6xl mx-auto space-y-8">
