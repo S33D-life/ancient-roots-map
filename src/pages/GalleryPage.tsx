@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2 } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2 } from "lucide-react";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -418,8 +418,9 @@ const GalleryPage = () => {
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-8">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-8">
             <TabsTrigger value="gallery">Gallery</TabsTrigger>
+            <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
           </TabsList>
@@ -506,6 +507,39 @@ const GalleryPage = () => {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="staff-room" className="space-y-8">
+            <div className="text-center mb-8">
+              <Wand2 className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <h2 className="text-2xl font-serif font-bold text-mystical mb-2">The Staff Room</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                144 hand-crafted staffs, each a unique companion for the Ancient Friends game. 
+                Digital twin NFTs are being minted as your in-game identity across the realm.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {Array.from({ length: 144 }, (_, i) => (
+                <Card key={i} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer">
+                  <CardContent className="p-4 text-center">
+                    <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors">
+                      <Wand2 className="w-8 h-8 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                    </div>
+                    <p className="text-sm font-serif font-medium text-foreground">Staff #{String(i + 1).padStart(3, '0')}</p>
+                    <Badge variant="outline" className="mt-1 text-xs">
+                      {i < 12 ? "Minted" : "Awaiting Mint"}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <div className="text-center pt-4">
+              <p className="text-sm text-muted-foreground">
+                {12} of 144 staffs minted as NFTs · Digital twins coming soon
+              </p>
+            </div>
           </TabsContent>
 
           <TabsContent value="ledger" className="space-y-6">
