@@ -8,7 +8,7 @@ const CouncilOfLifePage = () => {
       <main className="pt-28 pb-8 px-4">
         <div className="max-w-7xl mx-auto">
           <iframe
-            src=""
+            src="https://clammy-viscount-ddb.notion.site/ebd//1e415b58480d8042a722ef57e01e3228"
             width="100%"
             height="800"
             frameBorder="0"
