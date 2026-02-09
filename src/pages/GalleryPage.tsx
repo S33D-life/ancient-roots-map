@@ -524,43 +524,54 @@ const GalleryPage = () => {
               <h3 className="text-xl font-serif text-primary text-center mb-6">The Spiral of Staffs</h3>
               <div className="relative w-full max-w-3xl mx-auto overflow-hidden" style={{ height: '800px' }}>
                 {(() => {
+                  const staffImages: Record<string, string> = {
+                    OAK: "/images/staffs/oak.jpeg",
+                    HORN: "/images/staffs/horn.jpeg",
+                    HOL: "/images/staffs/hol.jpeg",
+                    HAW: "/images/staffs/haw.jpeg",
+                    PLA: "/images/staffs/pla.jpeg",
+                    ASH: "/images/staffs/ash.jpeg",
+                    GOA: "/images/staffs/goa.jpeg",
+                    ELD: "/images/staffs/eld.jpeg",
+                    BEE: "/images/staffs/bee.jpeg",
+                  };
                   const spiralStaffs = [
-                    { code: "YEW", species: "Yew" },
-                    { code: "OAK", species: "Oak" },
-                    { code: "HORN", species: "Hornbeam" },
-                    { code: "HOL", species: "Holly" },
-                    { code: "HAW", species: "Hawthorn" },
-                    { code: "PLA", species: "Plane" },
-                    { code: "ASH", species: "Ash" },
-                    { code: "GOA", species: "Goat Willow" },
-                    { code: "ELD", species: "Elder" },
-                    { code: "BEE", species: "Beech" },
-                    { code: "APP", species: "Apple" },
-                    { code: "ROSE", species: "Rose" },
-                    { code: "CHER", species: "Cherry" },
-                    { code: "ROW", species: "Rowan" },
-                    { code: "ALD", species: "Alder" },
-                    { code: "SYC", species: "Sycamore" },
-                    { code: "BIR", species: "Birch" },
-                    { code: "HAZ", species: "Hazel" },
-                    { code: "SWE", species: "Sweet Chestnut" },
-                    { code: "IVY", species: "Ivy" },
-                    { code: "PLUM", species: "Plum" },
-                    { code: "PINE", species: "Pine" },
-                    { code: "RHOD", species: "Rhododendron" },
-                    { code: "PRIV", species: "Privet" },
-                    { code: "TBD-25", species: "—" },
-                    { code: "TBD-26", species: "—" },
-                    { code: "TBD-27", species: "—" },
-                    { code: "TBD-28", species: "—" },
-                    { code: "TBD-29", species: "—" },
-                    { code: "TBD-30", species: "—" },
-                    { code: "TBD-31", species: "—" },
-                    { code: "TBD-32", species: "—" },
-                    { code: "TBD-33", species: "—" },
-                    { code: "TBD-34", species: "—" },
-                    { code: "TBD-35", species: "—" },
-                    { code: "TBD-36", species: "—" },
+                    { code: "YEW", species: "Yew", length: "—", weight: "—" },
+                    { code: "OAK", species: "Oak", length: "119 cm", weight: "550 g" },
+                    { code: "HORN", species: "Hornbeam", length: "133 cm", weight: "990 g" },
+                    { code: "HOL", species: "Holly", length: "157 cm", weight: "600 g" },
+                    { code: "HAW", species: "Hawthorn", length: "102 cm", weight: "603 g" },
+                    { code: "PLA", species: "London Plane", length: "152 cm", weight: "1,844 g" },
+                    { code: "ASH", species: "Ash", length: "131 cm", weight: "816 g" },
+                    { code: "GOA", species: "Goat Willow", length: "119 cm", weight: "292 g" },
+                    { code: "ELD", species: "Elder", length: "127 cm", weight: "505 g" },
+                    { code: "BEE", species: "Beech", length: "128 cm", weight: "1,315 g" },
+                    { code: "APP", species: "Apple", length: "—", weight: "—" },
+                    { code: "ROSE", species: "Rose", length: "—", weight: "—" },
+                    { code: "CHER", species: "Cherry", length: "—", weight: "—" },
+                    { code: "ROW", species: "Rowan", length: "—", weight: "—" },
+                    { code: "ALD", species: "Alder", length: "—", weight: "—" },
+                    { code: "SYC", species: "Sycamore", length: "—", weight: "—" },
+                    { code: "BIR", species: "Birch", length: "—", weight: "—" },
+                    { code: "HAZ", species: "Hazel", length: "—", weight: "—" },
+                    { code: "SWE", species: "Sweet Chestnut", length: "—", weight: "—" },
+                    { code: "IVY", species: "Ivy", length: "—", weight: "—" },
+                    { code: "PLUM", species: "Plum", length: "—", weight: "—" },
+                    { code: "PINE", species: "Pine", length: "—", weight: "—" },
+                    { code: "RHOD", species: "Rhododendron", length: "—", weight: "—" },
+                    { code: "PRIV", species: "Privet", length: "—", weight: "—" },
+                    { code: "TBD-25", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-26", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-27", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-28", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-29", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-30", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-31", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-32", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-33", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-34", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-35", species: "—", length: "—", weight: "—" },
+                    { code: "TBD-36", species: "—", length: "—", weight: "—" },
                   ];
                   const centerX = 50;
                   const centerY = 50;
@@ -575,20 +586,26 @@ const GalleryPage = () => {
                     const isRevealed = !staff.code.startsWith("TBD");
                     const clampedX = Math.max(8, Math.min(92, x));
                     const clampedY = Math.max(5, Math.min(95, y));
+                    const hasImage = staffImages[staff.code];
 
                     return (
                       <div
                         key={i}
-                        className={`absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-110 hover:z-20 ${isRevealed ? '' : 'opacity-30'}`}
+                        className={`absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-125 hover:z-30 ${isRevealed ? '' : 'opacity-30'}`}
                         style={{
                           left: `${clampedX}%`,
                           top: `${clampedY}%`,
                           transform: 'translate(-50%, -50%)',
                           zIndex: i,
                         }}
+                        title={hasImage ? `${staff.species} — ${staff.length} · ${staff.weight}` : staff.species}
                       >
-                        <div className={`w-9 h-12 sm:w-10 sm:h-14 rounded-md border flex items-center justify-center ${isRevealed ? 'border-primary/60 bg-card/90 glow-subtle' : 'border-border bg-muted/30'}`}>
-                          <Wand2 className={`w-4 h-4 ${isRevealed ? 'text-primary' : 'text-muted-foreground/30'}`} />
+                        <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border overflow-hidden flex items-center justify-center ${isRevealed ? 'border-primary/60 bg-card/90 glow-subtle' : 'border-border bg-muted/30'}`}>
+                          {hasImage ? (
+                            <img src={hasImage} alt={`${staff.species} staff`} className="w-full h-full object-cover" />
+                          ) : (
+                            <Wand2 className={`w-4 h-4 ${isRevealed ? 'text-primary' : 'text-muted-foreground/30'}`} />
+                          )}
                         </div>
                         <span className="text-[8px] sm:text-[9px] font-serif text-foreground mt-0.5 whitespace-nowrap leading-tight">
                           {staff.code}
@@ -596,7 +613,7 @@ const GalleryPage = () => {
                         <span className="text-[7px] text-muted-foreground leading-tight">{staff.species}</span>
                         {isRevealed && (
                           <Badge variant="outline" className="mt-0.5 text-[6px] px-1 py-0 leading-tight">
-                            {i < 12 ? "Minted" : "Awaiting"}
+                            {hasImage ? "Minted" : "Awaiting"}
                           </Badge>
                         )}
                       </div>
@@ -610,19 +627,39 @@ const GalleryPage = () => {
             <div>
               <h3 className="text-xl font-serif text-primary text-center mb-6">All 144 Staffs</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {Array.from({ length: 144 }, (_, i) => (
-                  <Card key={i} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer">
-                    <CardContent className="p-4 text-center">
-                      <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors">
-                        <Wand2 className="w-8 h-8 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                      </div>
-                      <p className="text-sm font-serif font-medium text-foreground">Staff #{String(i + 1).padStart(3, '0')}</p>
-                      <Badge variant="outline" className="mt-1 text-xs">
-                        {i < 12 ? "Minted" : "Awaiting Mint"}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                ))}
+                {(() => {
+                  const gridImages: Record<number, { code: string; img: string }> = {
+                    1: { code: "OAK", img: "/images/staffs/oak.jpeg" },
+                    2: { code: "HORN", img: "/images/staffs/horn.jpeg" },
+                    3: { code: "HOL", img: "/images/staffs/hol.jpeg" },
+                    4: { code: "HAW", img: "/images/staffs/haw.jpeg" },
+                    5: { code: "PLA", img: "/images/staffs/pla.jpeg" },
+                    6: { code: "ASH", img: "/images/staffs/ash.jpeg" },
+                    7: { code: "GOA", img: "/images/staffs/goa.jpeg" },
+                    8: { code: "ELD", img: "/images/staffs/eld.jpeg" },
+                    9: { code: "BEE", img: "/images/staffs/bee.jpeg" },
+                  };
+                  return Array.from({ length: 144 }, (_, i) => {
+                    const staffData = gridImages[i];
+                    return (
+                      <Card key={i} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden">
+                        <CardContent className="p-4 text-center">
+                          <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors overflow-hidden">
+                            {staffData ? (
+                              <img src={staffData.img} alt={`Staff ${staffData.code}`} className="w-full h-full object-cover" />
+                            ) : (
+                              <Wand2 className="w-8 h-8 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                            )}
+                          </div>
+                          <p className="text-sm font-serif font-medium text-foreground">Staff #{String(i + 1).padStart(3, '0')}</p>
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            {staffData ? "Minted" : "Awaiting Mint"}
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    );
+                  });
+                })()}
               </div>
             </div>
 
