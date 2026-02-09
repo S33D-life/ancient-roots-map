@@ -473,6 +473,7 @@ const GalleryPage = () => {
               { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
               { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
               { key: "wishlist", label: "Wishing Tree", desc: "Trees you dream to visit" },
+              { key: "seed-cellar", label: "Seed Cellar", desc: "Living Data Archive" },
               { key: "creators-path", label: "Creator's Path", desc: "Your Journey" },
               { key: "tree-resources", label: "Tree Resources", desc: "Project Directory" },
               { key: "ledger", label: "Ledger", desc: "Data & Strings" },
@@ -519,10 +520,11 @@ const GalleryPage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 mb-8">
-            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-4xl md:grid-cols-6 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
+            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-4xl md:grid-cols-7 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
               <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
               <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
               <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
+              <TabsTrigger value="seed-cellar" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Seed Cellar</TabsTrigger>
               <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
               <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
               <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
@@ -1035,6 +1037,27 @@ const GalleryPage = () => {
 
           <TabsContent value="tree-resources" className="space-y-6">
             <TreeResources />
+          </TabsContent>
+
+          <TabsContent value="seed-cellar" className="space-y-6">
+            <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-2xl font-serif text-primary tracking-wide">
+                  🌱 The Seed Cellar
+                </CardTitle>
+                <CardDescription className="font-serif">
+                  A living data archive — seeds of knowledge waiting to sprout
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <iframe
+                  src="https://airtable.com/embed/appE4ajI4oqPaV8hl/shrTq2DuEhwOJblAB?viewControls=on"
+                  className="w-full border-t border-border"
+                  style={{ height: '70vh', minHeight: 500, background: 'transparent' }}
+                  title="The Seed Cellar"
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="ledger" className="space-y-6">
