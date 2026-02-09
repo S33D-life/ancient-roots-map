@@ -61,7 +61,7 @@ const Hero = () => {
               className="min-w-[200px]"
             >
               <TreeDeciduous className="w-5 h-5 mr-2" />
-              Add a Tree
+              Claim a Tree Encounter
             </Button>
           </div>
 
