@@ -6,10 +6,12 @@ import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import TetolMenu from "./TetolMenu";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [tetolOpen, setTetolOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return !document.documentElement.classList.contains('light');
@@ -52,11 +54,12 @@ const Header = () => {
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="relative group">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3" onDoubleClick={(e) => { e.preventDefault(); setTetolOpen(true); }}>
               <img 
                 src={teotagLogo} 
                 alt="Teotag" 
-                className="w-20 h-20 rounded-full"
+                className="w-20 h-20 rounded-full cursor-pointer"
+                title="Double-click for TETOL"
               />
             </Link>
             <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50">
@@ -152,6 +155,7 @@ const Header = () => {
           </nav>
         )}
       </div>
+      <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
     </header>
   );
 };
