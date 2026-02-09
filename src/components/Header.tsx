@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sun, Moon } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars } from "lucide-react";
 import s33dLogo from "@/assets/s33d-logo.jpeg";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,8 +75,8 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hidden md:inline-flex">
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="hidden md:inline-flex" title={isDark ? "Sunrise" : "Starry Night"}>
+              {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
             </Button>
             {user ? (
               <Button
