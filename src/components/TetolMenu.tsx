@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { Sprout, Heart, BookOpen, TreeDeciduous, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Sprout, Heart, TreeDeciduous, Sparkles } from "lucide-react";
 
 interface TetolMenuProps {
   open: boolean;
@@ -15,7 +15,15 @@ const menuItems = [
 ];
 
 const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
+  const navigate = useNavigate();
+
   if (!open) return null;
+
+  const handleItemClick = (to: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(to);
+    setTimeout(() => onClose(), 150);
+  };
 
   return (
     <div
@@ -24,7 +32,6 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
       style={{ background: "linear-gradient(180deg, hsl(100 40% 85% / 0.97), hsl(120 35% 30% / 0.97))" }}
     >
       <div className="flex flex-col items-center gap-0 relative" onClick={(e) => e.stopPropagation()}>
-        {/* Title */}
         <h1
           className="text-4xl md:text-5xl font-serif tracking-[0.15em] mb-1"
           style={{ color: "hsl(42 75% 45%)" }}
@@ -38,24 +45,20 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
           THE ETHEREAL TREE OF LIFE
         </p>
 
-        {/* Tree trunk line */}
         <div className="relative flex flex-col items-center">
-          {/* Vertical trunk */}
           <div
             className="absolute top-0 bottom-0 w-1 rounded-full"
             style={{ background: "linear-gradient(180deg, hsl(120 30% 45% / 0.5), hsl(120 30% 30% / 0.8))" }}
           />
 
-          {/* Menu items along the trunk */}
           <div className="flex flex-col items-center gap-6 relative z-10">
             {menuItems.map((item, i) => {
               const Icon = item.icon;
               return (
-                <Link
+                <button
                   key={item.to}
-                  to={item.to}
-                  onClick={onClose}
-                  className="flex flex-col items-center gap-2 group transition-all duration-300 hover:scale-110"
+                  onClick={(e) => handleItemClick(item.to, e)}
+                  className="flex flex-col items-center gap-2 group transition-all duration-300 hover:scale-110 bg-transparent border-none cursor-pointer"
                 >
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 group-hover:shadow-[0_0_25px_hsl(42_80%_50%_/_0.5)]"
@@ -72,13 +75,12 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
                   >
                     {item.label}
                   </span>
-                </Link>
+                </button>
               );
             })}
           </div>
         </div>
 
-        {/* Tap to close hint */}
         <p className="mt-10 text-xs font-serif opacity-50" style={{ color: "hsl(42 60% 40%)" }}>
           tap anywhere to close
         </p>
