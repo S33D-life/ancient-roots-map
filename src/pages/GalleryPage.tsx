@@ -505,7 +505,7 @@ const GalleryPage = () => {
               <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
                 Heartwood Library
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground hidden md:block">
                 Explore all mapped trees and manage the tree ledger
               </p>
             </div>
