@@ -15,6 +15,7 @@ import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Up
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
+import CreatorsPath from "@/components/CreatorsPath";
 import { Progress } from "@/components/ui/progress";
 
 interface Tree {
@@ -420,10 +421,11 @@ const GalleryPage = () => {
         </div>
 
         <Tabs defaultValue="gallery" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-8">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5 mb-8">
             <TabsTrigger value="gallery">Library</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
+            <TabsTrigger value="creators-path">Creator's Path</TabsTrigger>
             <TabsTrigger value="ledger">Ledger</TabsTrigger>
           </TabsList>
 
@@ -785,6 +787,10 @@ const GalleryPage = () => {
                 {36} of 144 staffs minted as NFTs · Digital twins coming soon
               </p>
             </div>
+          </TabsContent>
+
+          <TabsContent value="creators-path">
+            <CreatorsPath />
           </TabsContent>
 
           <TabsContent value="ledger" className="space-y-6">
