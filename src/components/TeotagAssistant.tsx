@@ -9,7 +9,7 @@ const TeotagAssistant = () => {
       {expanded && (
         <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-4 shadow-lg max-w-xs animate-fade-in">
           <p className="text-sm font-serif text-foreground">
-            <span className="text-primary font-bold">TEOTAG</span> — The Elder of the Ancient Grove. Your AI guide through the living atlas.
+            <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove. Your AI guide through the living atlas.
           </p>
         </div>
       )}
