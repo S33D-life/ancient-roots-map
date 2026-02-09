@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, TreePine, Wallet } from "lucide-react";
+import { Loader2, TreePine, Wallet, Wand2 } from "lucide-react";
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 
@@ -18,6 +18,7 @@ const AuthPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -67,6 +68,27 @@ const AuthPage = () => {
         description: error.message,
         variant: "destructive",
       });
+    }
+    setIsLoading(false);
+  };
+
+  const handleMagicLink = async () => {
+    try {
+      emailSchema.parse(email);
+    } catch {
+      toast({ title: "Enter a valid email", description: "We need your email to send a magic link", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+    });
+    if (error) {
+      toast({ title: "Magic link failed", description: error.message, variant: "destructive" });
+    } else {
+      setMagicLinkSent(true);
+      toast({ title: "Magic link sent!", description: "Check your email for a login link" });
     }
     setIsLoading(false);
   };
@@ -223,6 +245,16 @@ const AuthPage = () => {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
               Continue with Google
+            </Button>
+
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={handleMagicLink}
+              disabled={isLoading || magicLinkSent}
+            >
+              <Wand2 className="h-4 w-4" />
+              {magicLinkSent ? "Magic link sent — check your email" : "Send Magic Link"}
             </Button>
 
             <WalletConnect compact />
