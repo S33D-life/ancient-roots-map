@@ -289,7 +289,33 @@ const DashboardPage = () => {
       <div className="fixed inset-0 z-0">
         <img src={hearthBg} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+        {/* Firelight glow overlays */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 75%, hsla(30, 80%, 40%, 0.15), transparent)',
+          animation: 'hearthGlow 3s ease-in-out infinite',
+        }} />
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 40% 35% at 48% 80%, hsla(20, 90%, 35%, 0.12), transparent)',
+          animation: 'hearthFlicker 2.1s ease-in-out infinite 0.5s',
+        }} />
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 50% 40% at 52% 78%, hsla(40, 85%, 50%, 0.08), transparent)',
+          animation: 'hearthFlicker 2.7s ease-in-out infinite 1.2s',
+        }} />
       </div>
+      <style>{`
+        @keyframes hearthGlow {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.02); }
+        }
+        @keyframes hearthFlicker {
+          0%, 100% { opacity: 0.5; }
+          20% { opacity: 0.9; }
+          40% { opacity: 0.6; }
+          60% { opacity: 1; }
+          80% { opacity: 0.4; }
+        }
+      `}</style>
       <Header />
       <main className="container mx-auto px-4 pt-24 pb-12 relative z-10">
         <div className="max-w-6xl mx-auto space-y-8">
