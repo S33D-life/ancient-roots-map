@@ -13,6 +13,7 @@ import GalleryPage from "./pages/GalleryPage";
 import DashboardPage from "./pages/DashboardPage";
 import TreeDetailPage from "./pages/TreeDetailPage";
 import GoldenDreamPage from "./pages/GoldenDreamPage";
+import CouncilOfLifePage from "./pages/CouncilOfLifePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/golden-dream" element={<GoldenDreamPage />} />
+          <Route path="/council-of-life" element={<CouncilOfLifePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
