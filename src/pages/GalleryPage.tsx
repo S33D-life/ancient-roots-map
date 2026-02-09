@@ -21,7 +21,7 @@ import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
-import heartwoodWelcome from "@/assets/hearth-fireplace.png";
+import heartwoodWelcome from "@/assets/heartwood-splash.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import Footer from "@/components/Footer";
