@@ -36,9 +36,6 @@ const Hero = () => {
             <Sparkles className="w-12 h-12 text-mystical-glow animate-pulse-glow mx-auto mb-6" />
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-serif font-bold tracking-wider text-mystical leading-tight">
-            Under a tree?
-          </h1>
           
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
