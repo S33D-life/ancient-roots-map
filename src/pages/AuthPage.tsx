@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, TreePine } from "lucide-react";
+import { Loader2, TreePine, Wallet } from "lucide-react";
 import { z } from "zod";
+import WalletConnect from "@/components/WalletConnect";
 
 const emailSchema = z.string().email("Invalid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -223,6 +224,8 @@ const AuthPage = () => {
               </svg>
               Continue with Google
             </Button>
+
+            <WalletConnect compact />
           </div>
         </div>
 
