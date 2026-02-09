@@ -465,7 +465,7 @@ const GalleryPage = () => {
             {[
               { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
               { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
-              { key: "wishlist", label: "Wishing Tree", desc: "Your Sacred Visits" },
+              { key: "wishlist", label: "Wishing Tree", desc: "Trees you dream to visit" },
               { key: "creators-path", label: "Creator's Path", desc: "Your Journey" },
               { key: "tree-resources", label: "Tree Resources", desc: "Project Directory" },
               { key: "ledger", label: "Ledger", desc: "Data & Strings" },
