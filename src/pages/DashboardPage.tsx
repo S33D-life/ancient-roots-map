@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -30,6 +30,75 @@ interface Profile {
   email: string | null;
   avatar_url: string | null;
 }
+
+interface Ember {
+  x: number; y: number; size: number; speedX: number; speedY: number;
+  opacity: number; life: number; maxLife: number; hue: number;
+}
+
+const HearthEmbers = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animId: number;
+    let embers: Ember[] = [];
+
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const spawnEmber = (): Ember => ({
+      x: canvas.width * 0.3 + Math.random() * canvas.width * 0.4,
+      y: canvas.height * 0.75 + Math.random() * canvas.height * 0.15,
+      size: Math.random() * 2.5 + 0.8,
+      speedX: (Math.random() - 0.5) * 0.6,
+      speedY: -(Math.random() * 1.2 + 0.3),
+      opacity: Math.random() * 0.7 + 0.3,
+      life: 0,
+      maxLife: Math.random() * 180 + 80,
+      hue: 20 + Math.random() * 30,
+    });
+
+    for (let i = 0; i < 25; i++) {
+      const e = spawnEmber();
+      e.life = Math.random() * e.maxLife;
+      embers.push(e);
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      embers.forEach((e, i) => {
+        e.life++;
+        e.x += e.speedX + Math.sin(e.life * 0.03) * 0.4;
+        e.y += e.speedY;
+        const progress = e.life / e.maxLife;
+        const alpha = progress < 0.1 ? progress * 10 : progress > 0.7 ? (1 - progress) / 0.3 : 1;
+        const currentOpacity = e.opacity * alpha;
+
+        if (e.life >= e.maxLife || currentOpacity <= 0) {
+          embers[i] = spawnEmber();
+          return;
+        }
+
+        const glow = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * 5);
+        glow.addColorStop(0, `hsla(${e.hue}, 90%, 55%, ${currentOpacity * 0.3})`);
+        glow.addColorStop(1, `hsla(${e.hue}, 80%, 45%, 0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.size * 5, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = `hsla(${e.hue}, 95%, 65%, ${currentOpacity})`;
+        ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill();
+      });
+      animId = requestAnimationFrame(animate);
+    };
+    animate();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+  }, []);
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[1]" />;
+};
 
 const DashboardPage = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -302,6 +371,8 @@ const DashboardPage = () => {
           background: 'radial-gradient(ellipse 50% 40% at 52% 78%, hsla(40, 85%, 50%, 0.08), transparent)',
           animation: 'hearthFlicker 2.7s ease-in-out infinite 1.2s',
         }} />
+        {/* Ember particles */}
+        <HearthEmbers />
       </div>
       <style>{`
         @keyframes hearthGlow {
