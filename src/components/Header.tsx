@@ -56,9 +56,6 @@ const Header = () => {
               alt="S33D" 
               className="w-10 h-10 rounded-full"
             />
-            <h1 className="text-2xl font-serif font-bold tracking-wider text-mystical">
-              S33D Life
-            </h1>
           </Link>
           
           <nav className="hidden md:flex items-center gap-6">
