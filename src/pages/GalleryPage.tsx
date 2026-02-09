@@ -504,7 +504,7 @@ const GalleryPage = () => {
                           }}
                           className="w-full"
                         >
-                          <Heart className="w-4 h-4 mr-2" />
+                          <Heart className="w-4 h-4 mr-2 text-[hsl(39,50%,72%)]" />
                           Add to Wishing Tree
                         </Button>
                       </div>
