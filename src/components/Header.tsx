@@ -79,7 +79,7 @@ const Header = () => {
               <img 
                 src={teotagLogo} 
                 alt="Teotag" 
-                className="w-20 h-20 rounded-full cursor-pointer"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer"
                 title="Double-click for TETOL"
               />
             </a>
