@@ -193,7 +193,7 @@ export type Database = {
           species: string
           state: string | null
           updated_at: string
-          what3words: string
+          what3words: string | null
         }
         Insert: {
           bioregion?: string | null
@@ -213,7 +213,7 @@ export type Database = {
           species: string
           state?: string | null
           updated_at?: string
-          what3words: string
+          what3words?: string | null
         }
         Update: {
           bioregion?: string | null
@@ -233,7 +233,7 @@ export type Database = {
           species?: string
           state?: string | null
           updated_at?: string
-          what3words?: string
+          what3words?: string | null
         }
         Relationships: []
       }

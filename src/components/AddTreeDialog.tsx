@@ -60,10 +60,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude, longitude, what3words: in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !species.trim() || !what3words.trim()) {
+    if (!name.trim() || !species.trim()) {
       toast({
         title: "Missing fields",
-        description: "Please fill in name, species, and what3words",
+        description: "Please fill in name and species",
         variant: "destructive",
       });
       return;
@@ -87,7 +87,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude, longitude, what3words: in
         name: name.trim(),
         species: species.trim(),
         description: description.trim() || null,
-        what3words: what3words.trim(),
+        what3words: what3words.trim() || '',
         latitude,
         longitude,
         created_by: user.id,
@@ -149,15 +149,14 @@ const AddTreeDialog = ({ open, onOpenChange, latitude, longitude, what3words: in
 
           <div className="space-y-2">
             <Label htmlFor="what3words">
-              what3words *
+              what3words
               {fetchingW3w && <Loader2 className="inline ml-2 h-3 w-3 animate-spin" />}
             </Label>
             <Input
               id="what3words"
               value={what3words}
               onChange={(e) => setWhat3words(e.target.value)}
-              placeholder="e.g., filled.count.soap"
-              required
+              placeholder="e.g., filled.count.soap (optional)"
             />
           </div>
 
