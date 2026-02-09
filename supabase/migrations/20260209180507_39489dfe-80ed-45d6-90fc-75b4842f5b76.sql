@@ -1,0 +1,2 @@
+ALTER TABLE public.trees ALTER COLUMN what3words DROP NOT NULL;
+ALTER TABLE public.trees ALTER COLUMN what3words SET DEFAULT '';
