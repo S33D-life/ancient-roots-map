@@ -21,6 +21,7 @@ import TreeResources from "@/components/TreeResources";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import heartwoodWelcome from "@/assets/heartwood-welcome.png";
+import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
 interface Tree {
   id: string;
@@ -61,6 +62,8 @@ interface WishlistItem {
 const GalleryPage = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [splashFading, setSplashFading] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("staff-room");
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [offerings, setOfferings] = useState<Offering[]>([]);
@@ -439,25 +442,77 @@ const GalleryPage = () => {
     );
   }
 
+  if (showLanding) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <Header />
+        {/* Background */}
+        <div className="absolute inset-0">
+          <img src={heartwoodLanding} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/50" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
+          <h1 className="text-5xl md:text-7xl font-serif text-amber-400/90 tracking-wider mb-4 text-center" style={{ textShadow: '0 0 40px hsl(35 80% 30% / 0.6)' }}>
+            HEARTWOOD
+          </h1>
+          <p className="text-amber-200/60 font-serif text-lg md:text-xl mb-12 text-center max-w-md">
+            A Library of Love
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl w-full">
+            {[
+              { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
+              { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
+              { key: "wishlist", label: "Wishing Tree", desc: "Your Sacred Visits" },
+              { key: "creators-path", label: "Creator's Path", desc: "Your Journey" },
+              { key: "tree-resources", label: "Tree Resources", desc: "Project Directory" },
+              { key: "ledger", label: "Ledger", desc: "Data & Strings" },
+            ].map((item) => (
+              <button
+                key={item.key}
+                onClick={() => { setActiveTab(item.key); setShowLanding(false); }}
+                className="group relative rounded-xl border border-amber-700/40 p-5 md:p-6 text-left transition-all duration-300 hover:border-amber-500/60 hover:scale-105"
+                style={{ background: 'linear-gradient(135deg, hsl(28 30% 10% / 0.85), hsl(25 25% 8% / 0.9))' }}
+              >
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at center, hsl(35 70% 40% / 0.15), transparent 70%)' }} />
+                <h3 className="font-serif text-amber-300/90 text-sm md:text-base mb-1 relative z-10">{item.label}</h3>
+                <p className="text-amber-200/40 text-xs relative z-10">{item.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <AmanitaFlush position="bottom" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, hsl(220 40% 12%) 0%, hsl(160 50% 18%) 25%, hsl(120 40% 22%) 45%, hsl(80 45% 20%) 60%, hsl(50 60% 25%) 80%, hsl(220 35% 15%) 100%)' }}>
       <Header />
       <main className="container mx-auto px-4 pt-32 pb-12">
         <div className="mb-8 flex items-center justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
-              Heartwood Library
-            </h1>
-            <p className="text-muted-foreground">
-              Explore all mapped trees and manage the tree ledger
-            </p>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setShowLanding(true)} className="text-amber-400/70 hover:text-amber-300 transition-colors font-serif text-sm border border-amber-700/30 rounded-lg px-3 py-1.5 hover:border-amber-600/50" style={{ background: 'hsl(28 30% 12% / 0.8)' }}>
+              ← Heartwood
+            </button>
+            <div>
+              <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
+                Heartwood Library
+              </h1>
+              <p className="text-muted-foreground">
+                Explore all mapped trees and manage the tree ledger
+              </p>
+            </div>
           </div>
           <div className="hidden md:block shrink-0">
             <img src={heartwoodLibrary} alt="Heartwood Library" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
           </div>
         </div>
 
-        <Tabs defaultValue="staff-room" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="gallery">Ancient Friends</TabsTrigger>
