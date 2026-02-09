@@ -456,7 +456,7 @@ const GalleryPage = () => {
         </div>
 
         <Tabs defaultValue="staff-room" className="w-full">
-          <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8">
+          <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-8" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
             <TabsTrigger value="staff-room">Staff Room</TabsTrigger>
             <TabsTrigger value="gallery">Ancient Friends</TabsTrigger>
             <TabsTrigger value="wishlist">Wishing Tree</TabsTrigger>
