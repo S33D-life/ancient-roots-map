@@ -66,6 +66,7 @@ const GalleryPage = () => {
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [spiralSort, setSpiralSort] = useState<string>("spiral");
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -521,7 +522,23 @@ const GalleryPage = () => {
 
             {/* Sacred Spiral of 36 */}
             <div className="mb-12">
-              <h3 className="text-xl font-serif text-primary text-center mb-6">The Spiral of Staffs</h3>
+              <h3 className="text-xl font-serif text-primary text-center mb-4">The Spiral of Staffs</h3>
+              <div className="flex justify-center gap-2 mb-6">
+                <Select value={spiralSort} onValueChange={setSpiralSort}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Order by..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="spiral">Golden Spiral</SelectItem>
+                    <SelectItem value="name">Code (A–Z)</SelectItem>
+                    <SelectItem value="species">Species (A–Z)</SelectItem>
+                    <SelectItem value="weight-desc">Heaviest First</SelectItem>
+                    <SelectItem value="weight-asc">Lightest First</SelectItem>
+                    <SelectItem value="length-desc">Longest First</SelectItem>
+                    <SelectItem value="length-asc">Shortest First</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="relative w-full max-w-3xl mx-auto overflow-hidden" style={{ height: '800px' }}>
                 {(() => {
                   const staffImages: Record<string, string> = {
@@ -600,52 +617,97 @@ const GalleryPage = () => {
                     { code: "MED", species: "Medlar", length: "109 cm", weight: "2,525 g" },
                     { code: "HORS", species: "Horse Chestnut", length: "101 cm", weight: "1,333 g" },
                   ];
+
+                  const parseNum = (s: string) => parseFloat(s.replace(/,/g, '')) || 0;
+
+                  const sortedStaffs = [...spiralStaffs];
+                  if (spiralSort !== "spiral") {
+                    sortedStaffs.sort((a, b) => {
+                      switch (spiralSort) {
+                        case "name": return a.code.localeCompare(b.code);
+                        case "species": return a.species.localeCompare(b.species);
+                        case "weight-desc": return parseNum(b.weight) - parseNum(a.weight);
+                        case "weight-asc": return parseNum(a.weight) - parseNum(b.weight);
+                        case "length-desc": return parseNum(b.length) - parseNum(a.length);
+                        case "length-asc": return parseNum(a.length) - parseNum(b.length);
+                        default: return 0;
+                      }
+                    });
+                  }
+
                   const centerX = 50;
                   const centerY = 50;
                   const goldenAngle = 137.508;
                   const scaleFactor = 6.5;
 
-                  return spiralStaffs.map((staff, i) => {
+                  const positions = sortedStaffs.map((_, i) => {
                     const angle = i * goldenAngle * (Math.PI / 180);
                     const r = scaleFactor * Math.sqrt(i + 1);
-                    const x = centerX + r * Math.cos(angle);
-                    const y = centerY + r * Math.sin(angle);
-                    const isRevealed = !staff.code.startsWith("TBD");
-                    const clampedX = Math.max(8, Math.min(92, x));
-                    const clampedY = Math.max(5, Math.min(95, y));
-                    const hasImage = staffImages[staff.code];
-
-                    return (
-                      <div
-                        key={i}
-                        className={`absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-125 hover:z-30 ${isRevealed ? '' : 'opacity-30'}`}
-                        style={{
-                          left: `${clampedX}%`,
-                          top: `${clampedY}%`,
-                          transform: 'translate(-50%, -50%)',
-                          zIndex: i,
-                        }}
-                        title={hasImage ? `${staff.species} — ${staff.length} · ${staff.weight}` : staff.species}
-                      >
-                        <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border overflow-hidden flex items-center justify-center ${isRevealed ? 'border-primary/60 bg-card/90 glow-subtle' : 'border-border bg-muted/30'}`}>
-                          {hasImage ? (
-                            <img src={hasImage} alt={`${staff.species} staff`} className="w-full h-full object-cover" />
-                          ) : (
-                            <Wand2 className={`w-4 h-4 ${isRevealed ? 'text-primary' : 'text-muted-foreground/30'}`} />
-                          )}
-                        </div>
-                        <span className="text-[8px] sm:text-[9px] font-serif text-foreground mt-0.5 whitespace-nowrap leading-tight">
-                          {staff.code}
-                        </span>
-                        <span className="text-[7px] text-muted-foreground leading-tight">{staff.species}</span>
-                        {isRevealed && (
-                          <Badge variant="outline" className="mt-0.5 text-[6px] px-1 py-0 leading-tight">
-                            {hasImage ? "Minted" : "Awaiting"}
-                          </Badge>
-                        )}
-                      </div>
-                    );
+                    return {
+                      x: Math.max(8, Math.min(92, centerX + r * Math.cos(angle))),
+                      y: Math.max(5, Math.min(95, centerY + r * Math.sin(angle))),
+                    };
                   });
+
+                  return (
+                    <>
+                      <svg
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        style={{ zIndex: 0 }}
+                      >
+                        <polyline
+                          points={positions.map(p => `${p.x},${p.y}`).join(' ')}
+                          fill="none"
+                          stroke="hsl(var(--primary) / 0.35)"
+                          strokeWidth="0.3"
+                          strokeDasharray="0.8 0.6"
+                          strokeLinecap="round"
+                        />
+                        {positions.map((p, i) => (
+                          <circle key={i} cx={p.x} cy={p.y} r="0.4" fill="hsl(var(--primary) / 0.5)" />
+                        ))}
+                      </svg>
+
+                      {sortedStaffs.map((staff, i) => {
+                        const { x: clampedX, y: clampedY } = positions[i];
+                        const hasImage = staffImages[staff.code];
+
+                        return (
+                          <div
+                            key={staff.code}
+                            className="absolute flex flex-col items-center group cursor-pointer transition-all duration-300 hover:scale-125 hover:z-30"
+                            style={{
+                              left: `${clampedX}%`,
+                              top: `${clampedY}%`,
+                              transform: 'translate(-50%, -50%)',
+                              zIndex: i + 1,
+                            }}
+                            title={`#${i + 1} · ${staff.species} — ${staff.length} · ${staff.weight}`}
+                          >
+                            <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-primary/80 text-primary-foreground text-[6px] flex items-center justify-center font-bold z-10">
+                              {i + 1}
+                            </div>
+                            <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border overflow-hidden flex items-center justify-center ${hasImage ? 'border-primary/60 bg-card/90 glow-subtle' : 'border-border bg-muted/30'}`}>
+                              {hasImage ? (
+                                <img src={hasImage} alt={`${staff.species} staff`} className="w-full h-full object-cover" />
+                              ) : (
+                                <Wand2 className="w-4 h-4 text-muted-foreground/30" />
+                              )}
+                            </div>
+                            <span className="text-[8px] sm:text-[9px] font-serif text-foreground mt-0.5 whitespace-nowrap leading-tight">
+                              {staff.code}
+                            </span>
+                            <span className="text-[7px] text-muted-foreground leading-tight">{staff.species}</span>
+                            <Badge variant="outline" className="mt-0.5 text-[6px] px-1 py-0 leading-tight">
+                              {hasImage ? "Minted" : "Awaiting"}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
                 })()}
               </div>
             </div>
