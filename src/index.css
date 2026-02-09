@@ -63,6 +63,37 @@ All colors MUST be HSL.
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .light {
+    --background: 45 30% 95%;
+    --foreground: 80 20% 15%;
+    --card: 45 25% 92%;
+    --card-foreground: 80 20% 15%;
+    --popover: 45 25% 93%;
+    --popover-foreground: 80 20% 15%;
+    --primary: 42 75% 40%;
+    --primary-foreground: 45 100% 97%;
+    --secondary: 75 15% 88%;
+    --secondary-foreground: 80 20% 20%;
+    --muted: 45 15% 85%;
+    --muted-foreground: 80 15% 40%;
+    --accent: 42 70% 45%;
+    --accent-foreground: 45 100% 97%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 45 100% 97%;
+    --border: 42 30% 70%;
+    --input: 45 20% 88%;
+    --ring: 42 75% 40%;
+    --mystical-glow: 42 70% 40%;
+    --sacred-gold: 42 70% 35%;
+    --ancient-green: 75 20% 85%;
+    --earth-brown: 30 20% 75%;
+    --gradient-mystical: linear-gradient(135deg, hsl(42 75% 35%), hsl(45 80% 50%));
+    --gradient-forest: linear-gradient(180deg, hsl(45 25% 92%), hsl(45 30% 95%));
+    --gradient-radial: radial-gradient(circle at center, hsl(42 70% 45% / 0.1), transparent);
+    --glow-sacred: 0 0 20px hsl(42 70% 45% / 0.2);
+    --glow-subtle: 0 0 15px hsl(42 75% 40% / 0.15);
+  }
+
   .dark {
     /* Same as root for consistent mystical theme */
     --background: 80 15% 10%;
