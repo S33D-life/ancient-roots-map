@@ -70,7 +70,7 @@ const Header = () => {
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
               <TreeDeciduous className="w-4 h-4" />
               <MapPin className="w-4 h-4 -ml-1" />
-              <span className="font-serif">Arboreal Atlas</span>
+              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
             </Link>
           </nav>
 
