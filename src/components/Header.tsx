@@ -55,7 +55,7 @@ const Header = () => {
             <img 
               src={s33dLogo} 
               alt="S33D" 
-              className="w-10 h-10 rounded-full"
+              className="w-[120px] h-[120px] rounded-full"
             />
           </Link>
           
