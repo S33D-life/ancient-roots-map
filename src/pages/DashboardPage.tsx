@@ -388,7 +388,7 @@ const DashboardPage = () => {
         }
       `}</style>
       <Header />
-      <main className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+      <main className="container mx-auto px-4 pt-32 pb-12 relative z-10">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Profile Section */}
           <Card className="border-mystical bg-card/50 backdrop-blur">

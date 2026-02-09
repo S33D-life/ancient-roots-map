@@ -226,7 +226,7 @@ const GrovesPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <main className="container mx-auto px-4 pt-32 pb-12">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
