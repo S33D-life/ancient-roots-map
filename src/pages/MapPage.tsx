@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
 import atlasSplash from "@/assets/atlas-splash.jpeg";
+import atlasLandingBg from "@/assets/atlas-landing-bg.jpeg";
 import atlasSplash2 from "@/assets/atlas-splash-2.jpeg";
 import { TreeDeciduous, Users, Globe, Map as MapIcon, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,10 @@ const MapPage = () => {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <Header />
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, hsl(100 20% 32%), hsl(95 25% 24%) 60%, hsl(90 22% 16%) 100%)' }} />
+        <div className="absolute inset-0">
+          <img src={atlasLandingBg} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/30 to-background/80" />
+        </div>
 
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
           <Compass className="w-12 h-12 text-amber-400/80 mb-4" style={{ filter: 'drop-shadow(0 0 12px hsl(35 80% 40% / 0.5))' }} />
