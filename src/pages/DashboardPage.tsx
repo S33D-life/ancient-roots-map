@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, LayoutDashboard } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, LayoutDashboard, Archive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -15,6 +15,7 @@ import DashboardTrees from "@/components/dashboard/DashboardTrees";
 import DashboardWishlist from "@/components/dashboard/DashboardWishlist";
 import DashboardProfile from "@/components/dashboard/DashboardProfile";
 import Greenhouse from "@/components/Greenhouse";
+import DashboardVault from "@/components/dashboard/DashboardVault";
 
 interface Tree {
   id: string;
@@ -249,6 +250,7 @@ const DashboardPage = () => {
   const TAB_ITEMS = [
     { value: "overview", label: "Overview", icon: LayoutDashboard },
     { value: "trees", label: "My Trees", icon: TreeDeciduous, count: trees.length },
+    { value: "vault", label: "Vault", icon: Archive },
     { value: "wishlist", label: "Wishlist", icon: Star, count: wishlistCount },
     { value: "seedpods", label: "Seed Pods", icon: Sprout, count: plantCount },
     { value: "profile", label: "Settings", icon: Settings },
@@ -332,6 +334,10 @@ const DashboardPage = () => {
                 onImport={handleImport}
                 onExport={handleExport}
               />
+            </TabsContent>
+
+            <TabsContent value="vault">
+              {user && <DashboardVault userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="wishlist">
