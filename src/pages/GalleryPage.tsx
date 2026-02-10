@@ -30,6 +30,7 @@ import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 import wishingTreeImage from "@/assets/wishing-tree.png";
+import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import Footer from "@/components/Footer";
 
 interface Tree {
@@ -91,6 +92,7 @@ const GalleryPage = () => {
   const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
+  const [showSpiral, setShowSpiral] = useState(false);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
   const [offeringForm, setOfferingForm] = useState({
     title: "",
@@ -751,18 +753,29 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="staff-room" className="space-y-8">
-            <div className="text-center mb-8">
-              <Wand2 className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h2 className="text-2xl font-serif font-bold text-mystical mb-2">The Staff Room</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                144 hand-crafted staffs, each a unique companion for the Ancient Friends game. 
-                The first 36 form a sacred spiral — one for each founding species — a model for the spiral of trees you'll meet on the journey.
-              </p>
+            {/* Staff Room Window Banner */}
+            <div className="relative rounded-xl overflow-hidden h-56 md:h-72 mb-8">
+              <img src={staffRoomWindow} alt="The Staff Room" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+              <div className="relative z-10 flex flex-col items-center justify-end h-full pb-6 text-center px-4">
+                <h2 className="text-2xl md:text-3xl font-serif font-bold text-mystical mb-2">The Staff Room</h2>
+                <p className="text-foreground/80 max-w-2xl mx-auto text-sm">
+                  144 hand-crafted staffs, each a unique companion for the Ancient Friends game.
+                </p>
+              </div>
             </div>
 
-            {/* Sacred Spiral of 36 */}
+            {/* Sacred Spiral of 36 — Toggle */}
             <div className="mb-12">
-              <h3 className="text-xl font-serif text-primary text-center mb-4">The Spiral of Species</h3>
+              <button
+                onClick={() => setShowSpiral(!showSpiral)}
+                className="w-full flex items-center justify-center gap-2 py-4 text-primary/80 hover:text-primary font-serif text-lg transition-colors group"
+              >
+                <span>{showSpiral ? 'Hide' : 'Show'} The Spiral of Species</span>
+                <span className={`transition-transform duration-300 ${showSpiral ? 'rotate-180' : ''}`}>▼</span>
+              </button>
+              {showSpiral && (
+              <div className="animate-fade-in">
               <div className="flex justify-center gap-2 mb-6">
                 <Select value={spiralSort} onValueChange={setSpiralSort}>
                   <SelectTrigger className="w-[200px]">
@@ -1002,6 +1015,8 @@ const GalleryPage = () => {
                   );
                 })()}
               </div>
+            </div>
+              )}
             </div>
 
             {/* Full 144 Grid — Collapsible */}
