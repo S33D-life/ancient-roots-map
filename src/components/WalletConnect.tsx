@@ -37,11 +37,18 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
   const shortenAddress = (addr: string) =>
     `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
+  const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  const openMetaMaskDeepLink = () => {
+    // Strip protocol and build MetaMask deep link to open the current dApp in MetaMask's browser
+    const dappUrl = window.location.href.replace(/^https?:\/\//, "");
+    window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
+  };
+
   const handleConnect = async () => {
     setIsConnecting(true);
 
     try {
-      // Check for MetaMask / injected provider
       if (typeof window !== "undefined" && (window as any).ethereum) {
         const accounts = await (window as any).ethereum.request({
           method: "eth_requestAccounts",
@@ -63,6 +70,9 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
           title: "Wallet connected",
           description: `Found ${count} Non-Fungible Twig${count > 1 ? "s" : ""} in your wallet`,
         });
+      } else if (isMobile()) {
+        // On mobile without injected provider, deep-link into MetaMask app
+        openMetaMaskDeepLink();
       } else {
         toast({
           title: "No wallet found",
