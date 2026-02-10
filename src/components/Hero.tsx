@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous } from "lucide-react";
 import heroS33d from "@/assets/hero-s33d.jpeg";
+import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import AmanitaFlush from "@/components/AmanitaFlush";
@@ -223,19 +224,26 @@ const Hero = () => {
         </div>
 
         {/* CTA buttons pinned near bottom */}
-        <div className="absolute bottom-24 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-          <Button variant="mystical" size="lg" className="min-w-[200px]" asChild>
-            <Link to="/map">
-              <MapPin className="w-5 h-5 mr-2" />
-              Arrive on the Atlas
-            </Link>
-          </Button>
-          <Button variant="sacred" size="lg" className="min-w-[200px]" asChild>
-            <Link to="/map?addTree=true">
-              <TreeDeciduous className="w-5 h-5 mr-2" />
-              Claim a Tree Encounter
-            </Link>
-          </Button>
+        <div className="absolute bottom-24 left-0 right-0 flex flex-col items-center gap-4 px-4">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button variant="mystical" size="lg" className="min-w-[200px]" asChild>
+              <Link to="/map">
+                <MapPin className="w-5 h-5 mr-2" />
+                Arrive on the Atlas
+              </Link>
+            </Button>
+            <Button variant="sacred" size="lg" className="min-w-[200px]" asChild>
+              <Link to="/map?addTree=true">
+                <TreeDeciduous className="w-5 h-5 mr-2" />
+                Claim a Tree Encounter
+              </Link>
+            </Button>
+          </div>
+          <img 
+            src={teotagLogo} 
+            alt="Teotag" 
+            className="w-14 h-14 rounded-full border-2 border-primary/40 shadow-lg mt-2 opacity-90"
+          />
         </div>
       </div>
 
