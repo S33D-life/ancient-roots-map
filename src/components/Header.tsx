@@ -122,7 +122,7 @@ const Header = () => {
   };
 
   const fetchAvatar = async (userId: string) => {
-    const { data } = await supabase.from("profiles").select("avatar_url").eq("id", userId).single();
+    const { data } = await supabase.from("profiles").select("avatar_url").eq("id", userId).maybeSingle();
     if (data?.avatar_url) setAvatarUrl(data.avatar_url);
   };
 
