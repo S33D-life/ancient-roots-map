@@ -16,6 +16,53 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
 
+type TimeOfDay = "dawn" | "day" | "dusk" | "night";
+
+function getTimeOfDay(): TimeOfDay {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 8) return "dawn";
+  if (h >= 8 && h < 17) return "day";
+  if (h >= 17 && h < 20) return "dusk";
+  return "night";
+}
+
+const TIME_ATMOSPHERES: Record<TimeOfDay, {
+  mapFilter: string;
+  vignette: string;
+  vignetteBoxShadow: string;
+  ambientGlow: string;
+  label: string;
+}> = {
+  dawn: {
+    mapFilter: 'sepia(0.3) saturate(1.1) brightness(0.88) hue-rotate(-5deg) contrast(1.05)',
+    vignette: 'radial-gradient(ellipse at center, transparent 45%, hsla(25, 50%, 25%, 0.3) 75%, hsla(20, 45%, 15%, 0.55) 100%)',
+    vignetteBoxShadow: 'inset 0 0 120px 60px hsla(25, 45%, 18%, 0.5), inset 0 0 300px 100px hsla(20, 35%, 12%, 0.25)',
+    ambientGlow: 'radial-gradient(ellipse at 30% 80%, hsla(30, 70%, 45%, 0.08) 0%, transparent 60%)',
+    label: 'Dawn',
+  },
+  day: {
+    mapFilter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)',
+    vignette: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
+    vignetteBoxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
+    ambientGlow: 'none',
+    label: 'Day',
+  },
+  dusk: {
+    mapFilter: 'sepia(0.45) saturate(1.15) brightness(0.78) hue-rotate(-15deg) contrast(1.08)',
+    vignette: 'radial-gradient(ellipse at center, transparent 35%, hsla(20, 55%, 18%, 0.4) 70%, hsla(15, 50%, 10%, 0.65) 100%)',
+    vignetteBoxShadow: 'inset 0 0 140px 80px hsla(20, 50%, 12%, 0.7), inset 0 0 350px 120px hsla(15, 40%, 8%, 0.4)',
+    ambientGlow: 'radial-gradient(ellipse at 70% 90%, hsla(25, 80%, 40%, 0.1) 0%, transparent 55%), radial-gradient(ellipse at 20% 60%, hsla(280, 30%, 30%, 0.06) 0%, transparent 50%)',
+    label: 'Dusk',
+  },
+  night: {
+    mapFilter: 'sepia(0.25) saturate(0.85) brightness(0.62) hue-rotate(-20deg) contrast(1.12)',
+    vignette: 'radial-gradient(ellipse at center, transparent 30%, hsla(240, 30%, 10%, 0.45) 65%, hsla(240, 35%, 5%, 0.75) 100%)',
+    vignetteBoxShadow: 'inset 0 0 160px 90px hsla(240, 30%, 6%, 0.8), inset 0 0 400px 140px hsla(240, 25%, 4%, 0.5)',
+    ambientGlow: 'radial-gradient(ellipse at 50% 40%, hsla(220, 40%, 30%, 0.06) 0%, transparent 50%)',
+    label: 'Starlight',
+  },
+};
+
 const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
 interface TreeOfferings {
