@@ -1362,7 +1362,22 @@ const GalleryPage = () => {
                 </p>
               </div>
             </div>
-          </TabsContent>
+
+            {/* Minting Progress — collapsible */}
+            <div>
+              <button
+                onClick={() => setShowMintingProgress(!showMintingProgress)}
+                className="w-full flex items-center justify-center gap-2 py-4 text-primary/80 hover:text-primary font-serif text-lg transition-colors group"
+              >
+                <span>{showMintingProgress ? 'Hide' : 'Show'} Minting Progress</span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showMintingProgress ? 'rotate-180' : ''}`} />
+              </button>
+              {showMintingProgress && (
+                <div className="animate-fade-in">
+                  <MintingStatusDashboard />
+                </div>
+              )}
+            </div>
 
           <TabsContent value="creators-path">
             <CreatorsPath />
