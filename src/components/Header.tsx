@@ -38,10 +38,7 @@ const Header = () => {
     }
   }, [navigate]);
 
-  const handleTeotagHover = useCallback(() => {
-    setGuideTab("search");
-    setGuideOpen(true);
-  }, []);
+  // Hover no longer opens search automatically — it was too aggressive and obscured the header
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
