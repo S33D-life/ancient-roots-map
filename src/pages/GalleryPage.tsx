@@ -474,8 +474,8 @@ const GalleryPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl w-full">
             {[
               { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
-              { key: "music-room", label: "Music Room", desc: "Tree Radio" },
               { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
+              { key: "music-room", label: "Music Room", desc: "Tree Radio" },
               { key: "greenhouse", label: "Greenhouse", desc: "Houseplants & Saplings" },
               { key: "wishlist", label: "Wishing Tree", desc: "Trees you dream to visit" },
               { key: "seed-cellar", label: "Seed Cellar", desc: "Living Data Archive" },
@@ -527,8 +527,8 @@ const GalleryPage = () => {
           <div className="overflow-x-auto -mx-4 px-4 mb-8">
             <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-9 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
               <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
-              <TabsTrigger value="music-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Music Room</TabsTrigger>
               <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
+              <TabsTrigger value="music-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Music Room</TabsTrigger>
               <TabsTrigger value="greenhouse" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Greenhouse</TabsTrigger>
               <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
               <TabsTrigger value="seed-cellar" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Seed Cellar</TabsTrigger>
