@@ -571,6 +571,36 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       {/* Map canvas — rendered first so it sits at the bottom of the stacking order */}
       <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
 
+      {/* Loading / Error overlay */}
+      {mapStatus !== "ready" && (
+        <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, hsl(120, 30%, 12%), hsl(100, 25%, 8%))' }}>
+          {mapStatus === "loading" && (
+            <>
+              <div className="w-10 h-10 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: 'hsl(42, 80%, 55%)', borderRightColor: 'hsl(42, 80%, 55% / 0.3)' }} />
+              <p className="font-serif text-sm" style={{ color: 'hsl(42, 60%, 55%)' }}>Summoning the Atlas…</p>
+            </>
+          )}
+          {mapStatus === "error" && (
+            <div className="flex flex-col items-center gap-3 pointer-events-auto px-6 text-center">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'hsl(0, 40%, 20%)', border: '1px solid hsl(0, 50%, 35%)' }}>
+                <span className="text-xl">🌿</span>
+              </div>
+              <p className="font-serif text-base" style={{ color: 'hsl(42, 60%, 55%)' }}>The Atlas could not awaken</p>
+              <p className="text-xs max-w-xs" style={{ color: 'hsl(42, 30%, 50%)' }}>
+                Map tiles failed to load. This may be a temporary network issue or a WebGL compatibility problem.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 px-5 py-2 rounded-lg font-serif text-sm transition-colors"
+                style={{ background: 'hsl(42, 60%, 25%)', color: 'hsl(42, 80%, 70%)', border: '1px solid hsl(42, 50%, 35%)' }}
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Parchment vignette overlay */}
       <div className="absolute inset-0 pointer-events-none z-[1]" style={{
         boxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
