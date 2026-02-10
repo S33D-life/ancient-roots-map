@@ -4,6 +4,7 @@ import heroS33d from "@/assets/hero-s33d.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import AmanitaFlush from "@/components/AmanitaFlush";
+import { supabase } from "@/integrations/supabase/client";
 
 // Fairy dust particle
 interface Particle {
@@ -134,6 +135,19 @@ const FallingLeaves = () => {
 
 const Hero = () => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
+  const [stats, setStats] = useState({ trees: 0, species: 0, nations: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const { data } = await supabase.from('trees').select('species, nation');
+      if (data) {
+        const species = new Set(data.map(t => t.species).filter(Boolean));
+        const nations = new Set(data.map(t => t.nation).filter(Boolean));
+        setStats({ trees: data.length, species: species.size, nations: nations.size });
+      }
+    };
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -181,15 +195,15 @@ const Hero = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto">
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">1,247</div>
+              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.trees.toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">Ancient Trees</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">87</div>
+              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.species.toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">Species Mapped</div>
             </div>
             <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">43</div>
+              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.nations.toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">Nations</div>
             </div>
           </div>
