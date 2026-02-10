@@ -83,6 +83,11 @@ interface Tree {
 }
 
 const GROVE_SOURCE_ID = 'grove-boundary-source';
+const ROOT_THREADS_SOURCE = 'root-threads-source';
+const ROOT_THREADS_LAYER = 'root-threads-layer';
+
+// Max distance (km) for root thread connections
+const ROOT_THREAD_MAX_KM = 80;
 const GROVE_FILL_ID = 'grove-boundary-fill';
 const GROVE_LINE_ID = 'grove-boundary-line';
 
