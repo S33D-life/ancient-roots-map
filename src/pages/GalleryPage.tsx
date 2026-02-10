@@ -621,6 +621,49 @@ const GalleryPage = () => {
                   </div>
                 </div>
 
+                {/* DJ Zambrezi's Song List */}
+                <div className="mt-6 p-5 rounded-xl border border-primary/20 bg-primary/5 backdrop-blur space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+                      <Music className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-serif text-lg text-primary tracking-wide">DJ Zambrezi's Song List</h4>
+                      <p className="text-xs text-muted-foreground font-serif">Songs to carry to the trees on your next visit</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {[
+                      { title: "Opening", artist: "Penguin Cafe", album: "Handfuls of Night", link: "https://music.apple.com/gb/album/opening/1600717991?i=1600717992", species: "All Species" },
+                      { title: "Perpetuum Mobile", artist: "Penguin Cafe Orchestra", album: "Signs of Life", link: "https://music.apple.com/gb/album/perpetuum-mobile/724017583?i=724017743", species: "Oak" },
+                      { title: "Music for a Found Harmonium", artist: "Penguin Cafe Orchestra", album: "Broadcasting from Home", link: "https://music.apple.com/gb/album/music-for-a-found-harmonium/724033807?i=724033817", species: "Yew" },
+                      { title: "Air à Danser", artist: "Penguin Cafe Orchestra", album: "Signs of Life", link: "https://music.apple.com/gb/album/air-%C3%A0-danser/724017583?i=724017746", species: "Ash" },
+                      { title: "Solaris", artist: "Penguin Cafe", album: "The Imperfect Sea", link: "https://music.apple.com/gb/album/solaris/1209606498?i=1209606748", species: "Beech" },
+                    ].map((song, i) => (
+                      <a
+                        key={i}
+                        href={song.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card/30 hover:bg-primary/10 hover:border-primary/30 transition-colors group"
+                      >
+                        <span className="w-6 text-center text-xs text-muted-foreground font-serif">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-serif text-sm text-foreground/90 truncate group-hover:text-primary transition-colors">{song.title}</p>
+                          <p className="text-xs text-muted-foreground font-serif truncate">{song.artist} · {song.album}</p>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] font-serif shrink-0">{song.species}</Badge>
+                        <LinkIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                      </a>
+                    ))}
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground/60 font-serif italic text-center pt-2">
+                    Curated by DJ Zambrezi — bring these songs as offerings on your next grove walk
+                  </p>
+                </div>
+
                 {/* CTA to Atlas */}
                 <div className="flex justify-center gap-3 pt-4">
                   <Button
