@@ -124,6 +124,36 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_songs: {
+        Row: {
+          artist: string
+          created_at: string
+          id: string
+          link: string | null
+          notes: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          artist: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          notes?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          artist?: string
+          created_at?: string
+          id?: string
+          link?: string | null
+          notes?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tree_projects: {
         Row: {
           api_url: string | null
