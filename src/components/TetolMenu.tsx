@@ -67,7 +67,9 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
           ? "radial-gradient(ellipse at 50% 60%, hsl(80 25% 12% / 0.98), hsl(80 15% 6% / 0.99))"
           : "transparent",
         opacity: visible ? 1 : 0,
-        transition: "opacity 0.5s ease-out",
+        backdropFilter: visible ? "blur(12px)" : "none",
+        WebkitBackdropFilter: visible ? "blur(12px)" : "none",
+        transition: "opacity 0.5s ease-out, backdrop-filter 0.5s ease-out",
       }}
     >
       {/* Floating leaves */}
