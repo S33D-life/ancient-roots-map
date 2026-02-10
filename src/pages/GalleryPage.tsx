@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown } from "lucide-react";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -94,6 +94,91 @@ const GalleryPage = () => {
   const [showAllStaffs, setShowAllStaffs] = useState(false);
   const [showSpiral, setShowSpiral] = useState(false);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
+  const [showBirdTribe, setShowBirdTribe] = useState(false);
+
+  const birdTribeSongs = [
+    { title: "In Between", artist: "Marya Stark" },
+    { title: "There Is a Bird", artist: "Alexa Sunshine Rose" },
+    { title: "Come Healing", artist: "Leonard Cohen" },
+    { title: "Kalyana (feat. Emily Elbert)", artist: "Bird Tribe" },
+    { title: "All My Love", artist: "Bird Tribe" },
+    { title: "Sound of the River", artist: "Tina Malia" },
+    { title: "Welcome Back To Your Life", artist: "Natan Rabin" },
+    { title: "Out of My Head", artist: "Zach Cohen" },
+    { title: "Want to Release", artist: "Gregory Bogard" },
+    { title: "People of Love", artist: "Snatam Kaur" },
+    { title: "Wild Horses", artist: "Tina Malia" },
+    { title: "Ancestral Lines", artist: "Misk'i Takiy" },
+    { title: "Moving with the Spirit (Live)", artist: "Prem Leela & Mooji Mala" },
+    { title: "Love Is the Medicine", artist: "Sierra Marin" },
+    { title: "Light Of Your Grace (Live)", artist: "Mollie Mendoza & Sam Garrett" },
+    { title: "The Blooming", artist: "Marya Stark & Equanimous" },
+    { title: "Phoenix", artist: "Fia" },
+    { title: "Root to Rise", artist: "Kevin Paris & Casey Kalmenson" },
+    { title: "Birds of One Feather", artist: "Murray Kyle" },
+    { title: "Light of This World", artist: "Mooji Mala & Shivali" },
+    { title: "Faithful", artist: "Majbritte Ulrikkeholm & Søren Frieboe" },
+    { title: "Oh My Beloved", artist: "Prema Love" },
+    { title: "The Seed", artist: "Darpan" },
+    { title: "Songbird", artist: "Fleetwood Mac" },
+    { title: "Dissipate", artist: "Sam Garrett" },
+    { title: "Cut the Cord", artist: "Jen Myzel" },
+    { title: "Dance at the Edge of Time (432hz)", artist: "Simone Vitale" },
+    { title: "One in the One", artist: "Gina Sala" },
+    { title: "Knockin' on Heaven's Door (feat. Ladysmith Black Mambazo)", artist: "Ladysmith Black Mambazo" },
+    { title: "Broken Wings", artist: "Mr. Mister" },
+    { title: "Heal This Land", artist: "Tina Malia" },
+    { title: "Oso Blanco", artist: "Bird Tribe & Diana Carr" },
+    { title: "The Mountain", artist: "Trevor Hall" },
+    { title: "The Return", artist: "Trevor Hall" },
+    { title: "Eagle", artist: "Ilan Navah" },
+    { title: "The Sun is Coming", artist: "Felipe Baldomir" },
+    { title: "The Phoenix Flies", artist: "Murray Kyle" },
+    { title: "Ancestors of the North", artist: "Murray Kyle" },
+    { title: "Stand By Me", artist: "Ben E. King" },
+    { title: "With You", artist: "Jai-Jagdeesh" },
+    { title: "Allowing", artist: "Alexia Chellun" },
+    { title: "Remember", artist: "Omkara" },
+    { title: "Sing to the Mountain", artist: "Elephant Revival" },
+    { title: "The Sacred", artist: "Yaima" },
+    { title: "Have a Cigar (Live at Red Rocks)", artist: "Elephant Revival" },
+    { title: "Happy to Be Here", artist: "Wookiefoot" },
+    { title: "Champions", artist: "Arouna & Biko" },
+    { title: "Remember Jah", artist: "Satsang" },
+    { title: "Waves in Jasri", artist: "Dustin Thomas" },
+    { title: "Forgiveness", artist: "Elephant Revival" },
+    { title: "Heart Takes Flight", artist: "Ram Dass & AWARÉ" },
+    { title: "Kikilla Lullaby", artist: "Kailash Kokopelli" },
+    { title: "Feathers", artist: "Kailash Kokopelli" },
+    { title: "Just Love", artist: "Ram Dass & Earthcry" },
+    { title: "Silent Voices", artist: "Ayla Schafer" },
+    { title: "Holy Liberation (feat. Adrian Freed)", artist: "Zed Be El Esse" },
+    { title: "Hey Mama", artist: "Jonah Kest & Satsang" },
+    { title: "Tending the Spark", artist: "Heather Houston" },
+    { title: "May the Longtime Sun", artist: "Sara Thomsen" },
+    { title: "I Wish That I Could Show You", artist: "Barbara McAfee" },
+    { title: "Breathing Trees", artist: "Barbara McAfee" },
+    { title: "My Sister", artist: "Andy Fischer-Price" },
+    { title: "Fire Carrier", artist: "Murray Kyle" },
+    { title: "Together", artist: "Natan Rabin & Felicia Falck" },
+    { title: "Go In Beauty", artist: "Mirabai Ceiba" },
+    { title: "Breathe Easily", artist: "Benji Fox" },
+    { title: "Ancient Eyes", artist: "Mae Bird" },
+    { title: "(Lakshmi) I Choose to Live", artist: "Véra Capou" },
+    { title: "Exactly as It Is", artist: "Miten" },
+    { title: "What the Lovers Do", artist: "Gone Gone Beyond & The Human Experience" },
+    { title: "Sacredness (The Blood Song)", artist: "Shylah Ray Sunshine" },
+    { title: "Open My Heart (feat. Sasha Rose)", artist: "Alexa Sunshine Rose" },
+    { title: "The River", artist: "Sam Garrett" },
+    { title: "Water Song", artist: "Amber Lily" },
+    { title: "Shedding Skins", artist: "Fia" },
+    { title: "Song of Life (feat. Joanna Macy)", artist: "Amber Lily" },
+    { title: "Song of the Wild", artist: "Samara Jade" },
+    { title: "Grandmother Tree & the Feathered Serpent", artist: "Deya Dova" },
+    { title: "Break Free (feat. Tina Malia)", artist: "David Kai" },
+    { title: "Drumming the World Awake", artist: "Diane Patterson" },
+    { title: "All Along the Watchtower", artist: "Jimi Hendrix" },
+  ];
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -628,12 +713,14 @@ const GalleryPage = () => {
                       <Music className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-serif text-lg text-primary tracking-wide">DJ Zambrezi's Song List</h4>
+                      <h4 className="font-serif text-lg text-primary tracking-wide">The Zambrezi Wizard's Earth Radio</h4>
                       <p className="text-xs text-muted-foreground font-serif">Songs to carry to the trees on your next visit</p>
                     </div>
                   </div>
 
+                  {/* Curated Picks */}
                   <div className="space-y-2">
+                    <h5 className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Curated Picks</h5>
                     {[
                       { title: "Opening", artist: "Penguin Cafe", album: "Handfuls of Night", link: "https://music.apple.com/gb/album/opening/1600717991?i=1600717992", species: "All Species" },
                       { title: "We All Come from God", artist: "Penguin Cafe", album: "Rain Before 7...", link: "https://music.apple.com/gb/album/we-all-come-from-god/1625918325?i=1625918336", species: "Oak" },
@@ -641,13 +728,7 @@ const GalleryPage = () => {
                       { title: "Air à Danser", artist: "Penguin Cafe Orchestra", album: "Signs of Life", link: "https://music.apple.com/gb/album/air-%C3%A0-danser/724017583?i=724017746", species: "Ash" },
                       { title: "Solaris", artist: "Penguin Cafe", album: "The Imperfect Sea", link: "https://music.apple.com/gb/album/solaris/1209606498?i=1209606748", species: "Beech" },
                     ].map((song, i) => (
-                      <a
-                        key={i}
-                        href={song.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card/30 hover:bg-primary/10 hover:border-primary/30 transition-colors group"
-                      >
+                      <a key={i} href={song.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card/30 hover:bg-primary/10 hover:border-primary/30 transition-colors group">
                         <span className="w-6 text-center text-xs text-muted-foreground font-serif">{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <p className="font-serif text-sm text-foreground/90 truncate group-hover:text-primary transition-colors">{song.title}</p>
@@ -657,6 +738,42 @@ const GalleryPage = () => {
                         <LinkIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                       </a>
                     ))}
+                  </div>
+
+                  {/* Bird Tribe Playlist */}
+                  <div className="space-y-2 pt-2 border-t border-border/30">
+                    <button
+                      onClick={() => setShowBirdTribe(!showBirdTribe)}
+                      className="flex items-center gap-2 w-full text-left group"
+                    >
+                      <ChevronDown className={`h-4 w-4 text-primary transition-transform ${showBirdTribe ? 'rotate-0' : '-rotate-90'}`} />
+                      <h5 className="text-xs uppercase tracking-widest text-muted-foreground font-serif group-hover:text-primary transition-colors">
+                        Bird Tribe Playlist
+                      </h5>
+                      <span className="text-[10px] text-muted-foreground/50 font-serif ml-auto">
+                        {birdTribeSongs.length} songs
+                      </span>
+                    </button>
+                    {showBirdTribe && (
+                      <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-1">
+                        {birdTribeSongs.map((song, i) => (
+                          <a
+                            key={i}
+                            href="https://music.apple.com/gb/playlist/bird-tribe/pl.u-6mo4zkmU4ZzeVZ"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 hover:bg-primary/10 hover:border-primary/30 transition-colors group"
+                          >
+                            <span className="w-6 text-center text-[10px] text-muted-foreground/60 font-serif">{i + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-serif text-sm text-foreground/80 truncate group-hover:text-primary transition-colors">{song.title}</p>
+                              <p className="text-xs text-muted-foreground font-serif truncate">{song.artist}</p>
+                            </div>
+                            <LinkIcon className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <p className="text-[11px] text-muted-foreground/60 font-serif italic text-center pt-2">
