@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2 } from "lucide-react";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -322,6 +322,25 @@ const GalleryPage = () => {
       toast.error("Failed to remove song");
     }
   };
+
+  const handleShare = async (title: string, text: string, url?: string) => {
+    const shareUrl = url || window.location.href;
+    const shareData = { title, text, url: shareUrl };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${text} ${shareUrl}`);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        await navigator.clipboard.writeText(`${text} ${shareUrl}`);
+        toast.success("Link copied to clipboard!");
+      }
+    }
+  };
+
   const addToWishlist = async (treeId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -1019,7 +1038,7 @@ const GalleryPage = () => {
                           </p>
                         )}
                       </div>
-                      <div className="mt-4 pt-4 border-t border-border">
+                      <div className="mt-4 pt-4 border-t border-border flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1027,7 +1046,7 @@ const GalleryPage = () => {
                             e.stopPropagation();
                             addToWishlist(tree.id);
                           }}
-                          className="w-full"
+                          className="flex-1"
                         >
                           <Heart
                             className="w-4 h-4 mr-2 transition-all duration-300"
@@ -1039,7 +1058,22 @@ const GalleryPage = () => {
                               color: 'hsl(39, 50%, 72%)',
                             }}
                           />
-                          Add to Wishing Tree
+                          Wishing Tree
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShare(
+                              tree.name,
+                              `${tree.name} — a ${tree.species} on the Ancient Friends Map`,
+                              `${window.location.origin}/tree/${tree.id}`
+                            );
+                          }}
+                          title="Share this tree"
+                        >
+                          <Share2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </CardContent>
@@ -1494,6 +1528,22 @@ const GalleryPage = () => {
                           <Badge variant="outline" className="mt-1 text-xs">
                             {staffData ? "Minted" : "Awaiting Mint"}
                           </Badge>
+                          {staffData && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleShare(
+                                  `Staff ${staffData.code}`,
+                                  `Staff ${staffData.code} — one of 144 sacred staffs from the Ancient Friends collection`,
+                                  `${window.location.origin}/gallery`
+                                );
+                              }}
+                              className="mt-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
+                              title="Share this staff"
+                            >
+                              <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-primary transition-colors" />
+                            </button>
+                          )}
                         </CardContent>
                       </Card>
                     );
@@ -2129,6 +2179,19 @@ const GalleryPage = () => {
                     ["YEW","OAK","HORN","HOL","HAW","PLA","ASH","GOA","ELD","BEE","APP","ROSE","CHER","ROW","ALD","SYC","BIR","HAZ","SWE","IVY","PLUM","PINE","RHOD","PRIV","WIL","BOX","BUCK","DAWN","BUD","CRAB","WITC","PEAR","JAPA","SLOE","MED","HORS"].indexOf(selectedSpiralStaff.code) + 1
                   } on the sacred spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-3 gap-2 font-serif text-xs"
+                  onClick={() => handleShare(
+                    `${selectedSpiralStaff.species} Staff`,
+                    `The ${selectedSpiralStaff.species} staff (${selectedSpiralStaff.code}) — ${selectedSpiralStaff.length}, ${selectedSpiralStaff.weight}. One of 144 sacred staffs.`,
+                    `${window.location.origin}/gallery`
+                  )}
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share Staff
+                </Button>
               </div>
             </div>
           )}

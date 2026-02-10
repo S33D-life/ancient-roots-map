@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import type { Database } from "@/integrations/supabase/types";
@@ -164,14 +164,46 @@ const TreeDetailPage = () => {
                   {tree.species}
                 </p>
               </div>
-              {tree.grove_scale && (
-                <Badge
-                  variant="outline"
-                  className="border-primary/50 text-primary font-serif text-xs tracking-widest uppercase"
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={async () => {
+                    const shareData = {
+                      title: tree.name,
+                      text: `${tree.name} — a ${tree.species} on the Ancient Friends Map`,
+                      url: window.location.href,
+                    };
+                    try {
+                      if (navigator.share) {
+                        await navigator.share(shareData);
+                      } else {
+                        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                        const { toast } = await import("sonner");
+                        toast.success("Link copied to clipboard!");
+                      }
+                    } catch (e) {
+                      if ((e as Error).name !== 'AbortError') {
+                        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                        const { toast } = await import("sonner");
+                        toast.success("Link copied to clipboard!");
+                      }
+                    }
+                  }}
+                  title="Share this tree"
                 >
-                  {tree.grove_scale.replace("_", " ")}
-                </Badge>
-              )}
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                {tree.grove_scale && (
+                  <Badge
+                    variant="outline"
+                    className="border-primary/50 text-primary font-serif text-xs tracking-widest uppercase"
+                  >
+                    {tree.grove_scale.replace("_", " ")}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 text-sm mt-4 mb-4">
