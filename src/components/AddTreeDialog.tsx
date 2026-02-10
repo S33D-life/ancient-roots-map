@@ -107,14 +107,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   useEffect(() => {
     if (!adjustMode || !mapContainerRef.current || lat === null || lng === null) return;
 
-    const token = localStorage.getItem("mapbox_token") || import.meta.env.VITE_MAPBOX_TOKEN;
-    if (!token) {
-      toast({ title: "Mapbox token missing", description: "Please set your Mapbox token first", variant: "destructive" });
-      setAdjustMode(false);
-      return;
-    }
-
-    mapboxgl.accessToken = token;
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
     circleAddedRef.current = false;
 
     const map = new mapboxgl.Map({
