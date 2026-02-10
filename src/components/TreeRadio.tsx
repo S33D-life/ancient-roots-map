@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Radio, Play, Pause, SkipForward, Volume2, VolumeX, Music, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,6 +62,7 @@ interface TreeRadioProps {
 }
 
 const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [songs, setSongs] = useState<SongOffering[]>([]);
   const [playlist, setPlaylist] = useState<SongOffering[]>([]);
@@ -71,6 +73,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   const [currentPreview, setCurrentPreview] = useState<ItunesPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch songs by species
   useEffect(() => {
@@ -197,7 +200,18 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
     <>
       {/* Radio toggle button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (clickTimerRef.current) {
+            clearTimeout(clickTimerRef.current);
+            clickTimerRef.current = null;
+            navigate("/radio");
+          } else {
+            clickTimerRef.current = setTimeout(() => {
+              clickTimerRef.current = null;
+              setIsOpen(!isOpen);
+            }, 300);
+          }
+        }}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif tracking-wider transition-all border"
         style={{
           background: isOpen
