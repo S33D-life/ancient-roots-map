@@ -21,6 +21,7 @@ import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
+import greenhouseWindow from "@/assets/greenhouse-window.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
@@ -1430,6 +1431,14 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="greenhouse" className="space-y-6">
+            <div className="relative rounded-xl overflow-hidden border border-primary/20 max-w-sm mx-auto">
+              <img
+                src={greenhouseWindow}
+                alt="Greenhouse"
+                className="w-full h-32 md:h-40 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            </div>
             <Greenhouse />
           </TabsContent>
 
