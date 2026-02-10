@@ -462,7 +462,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       filteredTrees.forEach((t) => bounds.extend([t.longitude, t.latitude]));
       map.current.fitBounds(bounds, { padding: 80, duration: 1500 });
     }
-  }, [filteredTrees, groveScale]);
+  }, [filteredTrees, groveScale, offeringCounts]);
 
   // Draw grove boundary polygon
   useEffect(() => {
