@@ -1,4 +1,5 @@
 import { Heart, TreeDeciduous } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -11,6 +12,12 @@ const Footer = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link
+              to="/assets"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Assets
+            </Link>
             <a
               href="https://giveth.io/project/s33dlife"
               target="_blank"

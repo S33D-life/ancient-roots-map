@@ -16,6 +16,7 @@ import DashboardPage from "./pages/DashboardPage";
 import TreeDetailPage from "./pages/TreeDetailPage";
 import GoldenDreamPage from "./pages/GoldenDreamPage";
 import CouncilOfLifePage from "./pages/CouncilOfLifePage";
+import AssetsPage from "./pages/AssetsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/golden-dream" element={<GoldenDreamPage />} />
             <Route path="/council-of-life" element={<CouncilOfLifePage />} />
+            <Route path="/assets" element={<AssetsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
