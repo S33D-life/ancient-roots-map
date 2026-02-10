@@ -128,9 +128,9 @@ const GrovesPage = () => {
 
         const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
           <div style="padding: 8px;">
-            <h3 style="font-weight: bold; margin-bottom: 4px;">${project.name}</h3>
-            <p style="font-size: 12px; margin-bottom: 4px;">${project.description || ""}</p>
-            <p style="font-size: 11px; color: #666;">${project.project_scope || ""} | ${project.species || "All species"}</p>
+            <h3 style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(project.name)}</h3>
+            <p style="font-size: 12px; margin-bottom: 4px;">${escapeHtml(project.description || "")}</p>
+            <p style="font-size: 11px; color: #666;">${escapeHtml(project.project_scope || "")} | ${escapeHtml(project.species || "All species")}</p>
           </div>
         `);
 
