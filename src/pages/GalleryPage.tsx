@@ -1137,9 +1137,6 @@ const GalleryPage = () => {
               </div>
             </div>
 
-            {/* Minting Status Dashboard */}
-            <MintingStatusDashboard />
-
             {/* Sacred Spiral of 36 — Toggle */}
             <div className="mb-12">
               <button
