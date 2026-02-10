@@ -1378,6 +1378,7 @@ const GalleryPage = () => {
                 </div>
               )}
             </div>
+          </TabsContent>
 
           <TabsContent value="creators-path">
             <CreatorsPath />
