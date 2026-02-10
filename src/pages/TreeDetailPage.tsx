@@ -365,8 +365,28 @@ const TreeDetailPage = () => {
 
 /* ---------- Shared ---------- */
 
+const shareOffering = async (offering: Offering, treeName?: string) => {
+  const typeLabel = offering.type === "poem" ? "poem" : offering.type === "song" ? "song" : offering.type === "story" ? "musing" : offering.type === "nft" ? "NFT" : "memory";
+  const text = `"${offering.title}" — a ${typeLabel} offering${treeName ? ` for ${treeName}` : ""} on the Ancient Friends Map`;
+  const url = window.location.href;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: offering.title, text, url });
+    } else {
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      const { toast } = await import("sonner");
+      toast.success("Link copied to clipboard!");
+    }
+  } catch (e) {
+    if ((e as Error).name !== "AbortError") {
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      const { toast } = await import("sonner");
+      toast.success("Link copied to clipboard!");
+    }
+  }
+};
+
 const getStaffImageFromCode = (code: string): string | null => {
-  // Code format: "OAK-C1S03" → extract prefix before "-"
   const prefix = code.split("-")[0]?.toLowerCase();
   if (!prefix) return null;
   return `/images/staffs/${prefix}.jpeg`;
@@ -465,7 +485,16 @@ const PhotoGrid = ({
               <p className="text-[10px] text-muted-foreground">
                 {new Date(offering.created_at).toLocaleDateString()}
               </p>
-              <SealedByLabel staff={offering.sealed_by_staff} />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); shareOffering(offering); }}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  title="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                </button>
+                <SealedByLabel staff={offering.sealed_by_staff} />
+              </div>
             </div>
           </div>
         </motion.div>
@@ -506,7 +535,16 @@ const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingTy
             year: "numeric",
           })}
         </p>
-        <SealedByLabel staff={offering.sealed_by_staff} />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => shareOffering(offering)}
+            className="text-muted-foreground/60 hover:text-primary transition-colors"
+            title="Share"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+          <SealedByLabel staff={offering.sealed_by_staff} />
+        </div>
       </div>
     </CardContent>
   </Card>
@@ -548,6 +586,13 @@ const SongCard = ({ offering }: { offering: Offering }) => (
                 Apple Music
               </a>
             )}
+            <button
+              onClick={() => shareOffering(offering)}
+              className="text-muted-foreground/60 hover:text-primary transition-colors"
+              title="Share"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
             <SealedByLabel staff={offering.sealed_by_staff} />
           </div>
         </div>
@@ -584,7 +629,16 @@ const NftCard = ({ offering }: { offering: Offering }) => (
             year: "numeric",
           })}
         </p>
-        <SealedByLabel staff={offering.sealed_by_staff} />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => shareOffering(offering)}
+            className="text-muted-foreground/60 hover:text-primary transition-colors"
+            title="Share"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+          <SealedByLabel staff={offering.sealed_by_staff} />
+        </div>
       </div>
     </CardContent>
   </Card>
