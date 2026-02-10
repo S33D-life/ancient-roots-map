@@ -33,6 +33,8 @@ import heartwoodLanding from "@/assets/hearth-cave.png";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import Footer from "@/components/Footer";
+import TetolBreadcrumb from "@/components/TetolBreadcrumb";
+import TetolBridge from "@/components/TetolBridge";
 
 interface Tree {
   id: string;
@@ -675,7 +677,8 @@ const GalleryPage = () => {
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, hsl(220 40% 12%) 0%, hsl(160 50% 18%) 25%, hsl(120 40% 22%) 45%, hsl(80 45% 20%) 60%, hsl(50 60% 25%) 80%, hsl(220 35% 15%) 100%)' }}>
       <Header />
-      <main className="container mx-auto px-4 pt-32 pb-12">
+      <TetolBreadcrumb />
+      <main className="container mx-auto px-4 pt-28 pb-12">
         <div className="mb-8 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <button onClick={() => setShowLanding(true)} className="text-amber-400/70 hover:text-amber-300 transition-colors font-serif text-sm border border-amber-700/30 rounded-lg px-3 py-1.5 hover:border-amber-600/50" style={{ background: 'hsl(28 30% 12% / 0.8)' }}>
@@ -2200,6 +2203,7 @@ const GalleryPage = () => {
           )}
         </DialogContent>
       </Dialog>
+      <TetolBridge />
       <Footer />
     </div>
   );
