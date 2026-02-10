@@ -1,11 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import councilSplash from "@/assets/council-splash.png";
 
 const CouncilOfLifePage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setFadeOut(true), 3000);
+    const hideTimer = setTimeout(() => setShowSplash(false), 4000);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
+  if (showSplash) {
+    return (
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-1000 ${fadeOut ? "opacity-0" : "opacity-100"}`}
+        style={{ backgroundColor: "hsl(160, 40%, 10%)" }}
+      >
+        <img
+          src={councilSplash}
+          alt="Council of Life"
+          className="max-w-md w-[80%] rounded-xl shadow-2xl animate-scale-in"
+        />
+      </div>
+    );
+  }
 
   if (isFullscreen) {
     return (
