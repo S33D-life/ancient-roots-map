@@ -23,7 +23,7 @@ const treeItems = [
     zone: "canopy",
   },
   {
-    to: "/gallery",
+    to: "/library",
     label: "HeARTwood Library",
     subtitle: "The Trunk",
     icon: Heart,

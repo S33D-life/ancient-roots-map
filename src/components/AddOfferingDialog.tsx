@@ -202,7 +202,15 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
       });
       if (error) throw error;
 
-      toast({ title: `${cfg.singular} added!`, description: `Your ${cfg.singular.toLowerCase()} has been saved` });
+      toast({
+        title: `${cfg.singular} added! ✨`,
+        description: `Your ${cfg.singular.toLowerCase()} has been sealed`,
+        action: (
+          <Button variant="outline" size="sm" className="font-serif text-xs" asChild>
+            <a href={`/tree/${treeId}`}>View on map →</a>
+          </Button>
+        ),
+      });
       setTitle("");
       setContent("");
       setMediaUrl("");

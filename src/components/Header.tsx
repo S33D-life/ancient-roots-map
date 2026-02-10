@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart } from "lucide-react";
+import { Menu, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -169,24 +169,34 @@ const Header = () => {
             </div>
           </div>
           
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+          <nav className="hidden md:flex items-center gap-5">
+            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 group">
               <TreeDeciduous className="w-4 h-4" />
-              <MapPin className="w-4 h-4 -ml-1" />
-              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm">Ancient Friends Atlas</span>
+                <span className="text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Roots</span>
+              </div>
             </Link>
-            <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+            <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 group">
               <BookOpen className="w-4 h-4" />
-              <TreeDeciduous className="w-4 h-4 -ml-1" />
-              <span className="font-serif">HeARTwood Library</span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm">HeARTwood Library</span>
+                <span className="text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Heartwood</span>
+              </div>
             </Link>
-            <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+            <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 group">
               <Leaf className="w-4 h-4" />
-              <span className="font-serif">Council of Life</span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm">Council of Life</span>
+                <span className="text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Canopy</span>
+              </div>
             </Link>
-            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2">
+            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 group">
               <Sparkles className="w-4 h-4" />
-              <span className="font-serif">yOur Golden Dream</span>
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm">yOur Golden Dream</span>
+                <span className="text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Crown</span>
+              </div>
             </Link>
           </nav>
 
@@ -233,10 +243,10 @@ const Header = () => {
         {mobileOpen && (
           <nav className="md:hidden border-t border-mystical mt-2 pt-3 pb-2 flex flex-col gap-1 animate-fade-in">
             {[
-              { to: "/map", icon: <><TreeDeciduous className="w-4 h-4" /><MapPin className="w-4 h-4 -ml-1" /></>, label: "Ancient Friend Arboreal Atlas" },
-              { to: "/gallery", icon: <><BookOpen className="w-4 h-4" /><TreeDeciduous className="w-4 h-4 -ml-1" /></>, label: "HeARTwood Library" },
-              { to: "/council-of-life", icon: <Leaf className="w-4 h-4" />, label: "Council of Life" },
-              { to: "/golden-dream", icon: <Sparkles className="w-4 h-4" />, label: "yOur Golden Dream" },
+              { to: "/map", icon: <TreeDeciduous className="w-4 h-4" />, label: "Ancient Friends Atlas", sub: "The Roots" },
+              { to: "/library", icon: <BookOpen className="w-4 h-4" />, label: "HeARTwood Library", sub: "The Heartwood" },
+              { to: "/council-of-life", icon: <Leaf className="w-4 h-4" />, label: "Council of Life", sub: "The Canopy" },
+              { to: "/golden-dream", icon: <Sparkles className="w-4 h-4" />, label: "yOur Golden Dream", sub: "The Crown" },
             ].map((item, i) => (
               <Link
                 key={item.to}
@@ -246,7 +256,10 @@ const Header = () => {
                 onClick={() => setMobileOpen(false)}
               >
                 {item.icon}
-                <span className="font-serif">{item.label}</span>
+                <div className="flex flex-col leading-tight">
+                  <span className="font-serif">{item.label}</span>
+                  <span className="text-[9px] font-serif tracking-[0.12em] uppercase text-muted-foreground/50">{item.sub}</span>
+                </div>
               </Link>
             ))}
             {user ? (

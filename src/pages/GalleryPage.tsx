@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,10 +71,12 @@ interface WishlistItem {
 }
 
 const GalleryPage = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [searchParams] = useSearchParams();
+  const roomParam = searchParams.get("room");
+  const [showSplash, setShowSplash] = useState(!roomParam);
   const [splashFading, setSplashFading] = useState(false);
-  const [showLanding, setShowLanding] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>("staff-room");
+  const [showLanding, setShowLanding] = useState(!roomParam);
+  const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [offerings, setOfferings] = useState<Offering[]>([]);
@@ -1535,7 +1538,7 @@ const GalleryPage = () => {
                                 handleShare(
                                   `Staff ${staffData.code}`,
                                   `Staff ${staffData.code} — one of 144 sacred staffs from the Ancient Friends collection`,
-                                  `${window.location.origin}/gallery`
+                                   `${window.location.origin}/library`
                                 );
                               }}
                               className="mt-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
@@ -2186,7 +2189,7 @@ const GalleryPage = () => {
                   onClick={() => handleShare(
                     `${selectedSpiralStaff.species} Staff`,
                     `The ${selectedSpiralStaff.species} staff (${selectedSpiralStaff.code}) — ${selectedSpiralStaff.length}, ${selectedSpiralStaff.weight}. One of 144 sacred staffs.`,
-                    `${window.location.origin}/gallery`
+                    `${window.location.origin}/library`
                   )}
                 >
                   <Share2 className="w-4 h-4" />
