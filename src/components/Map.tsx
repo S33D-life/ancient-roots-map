@@ -362,16 +362,16 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         closeButton: true,
         className: 'tree-popup',
       }).setHTML(`
-        <div style="padding: 8px; font-family: 'Cinzel', serif; min-width: 200px;">
+        <div style="padding: 10px; font-family: 'Cinzel', serif; min-width: 220px;">
           <h3 style="margin: 0 0 4px 0; font-size: 16px; color: hsl(45, 80%, 60%);">${tree.name}</h3>
           <p style="margin: 0 0 2px 0; font-size: 12px; color: hsl(120, 40%, 70%);">${tree.species}</p>
           <p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(45, 60%, 50%);">📍 ${tree.what3words}</p>
-          ${tree.description ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%);">${tree.description.substring(0, 100)}...</p>` : ''}
-          <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <a href="/tree/${tree.id}" style="font-size: 11px; color: hsl(45, 80%, 60%); text-decoration: underline;">View Details</a>
-            <a href="/tree/${tree.id}?add=photo" style="font-size: 11px; color: hsl(120, 60%, 50%);">+ Memory</a>
-            <a href="/tree/${tree.id}?add=song" style="font-size: 11px; color: hsl(200, 60%, 50%);">+ Song</a>
-            <a href="/tree/${tree.id}?add=story" style="font-size: 11px; color: hsl(280, 60%, 50%);">+ Musing</a>
+          ${tree.description ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%); line-height: 1.4;">${tree.description.substring(0, 100)}${tree.description.length > 100 ? '\u2026' : ''}</p>` : ''}
+          <a href="/tree/${tree.id}" style="display: block; margin-top: 10px; padding: 6px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(42, 88%, 50%), hsl(45, 100%, 60%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.1em; font-weight: 600;">View Ancient Friend &#10230;</a>
+          <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
+            <a href="/tree/${tree.id}?add=photo" style="font-size: 10px; color: hsl(120, 60%, 50%); text-decoration: none; padding: 2px 6px; border: 1px solid hsla(120,60%,50%,0.3); border-radius: 4px;">+ Memory</a>
+            <a href="/tree/${tree.id}?add=song" style="font-size: 10px; color: hsl(200, 60%, 50%); text-decoration: none; padding: 2px 6px; border: 1px solid hsla(200,60%,50%,0.3); border-radius: 4px;">+ Song</a>
+            <a href="/tree/${tree.id}?add=story" style="font-size: 10px; color: hsl(280, 60%, 50%); text-decoration: none; padding: 2px 6px; border: 1px solid hsla(280,60%,50%,0.3); border-radius: 4px;">+ Musing</a>
           </div>
         </div>
       `);
