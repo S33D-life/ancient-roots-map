@@ -618,7 +618,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   return (
     <div className="relative w-full" style={{ height: '100dvh' }}>
       {/* Map canvas — rendered first so it sits at the bottom of the stacking order */}
-      <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
+      <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
 
       {/* Loading / Error overlay */}
       {mapStatus !== "ready" && (
