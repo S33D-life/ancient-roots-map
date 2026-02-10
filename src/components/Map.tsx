@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
 import MapFilters, { GroveScale } from "./MapFilters";
 import TreeImportExport from "./TreeImportExport";
+import TreeRadio from "./TreeRadio";
 import ConversionStatus from "./ConversionStatus";
 import FindMeButton from "./FindMeButton";
 import { useToast } from "@/hooks/use-toast";
@@ -527,7 +528,10 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         />
       </div>
 
-      <div className="absolute bottom-4 right-4 z-10">
+      <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-2">
+        <div className="relative">
+          <TreeRadio speciesFilter={speciesFilter} />
+        </div>
         <TreeImportExport />
       </div>
 
