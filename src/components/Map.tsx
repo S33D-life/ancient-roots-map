@@ -16,6 +16,53 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
 
+type TimeOfDay = "dawn" | "day" | "dusk" | "night";
+
+function getTimeOfDay(): TimeOfDay {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 8) return "dawn";
+  if (h >= 8 && h < 17) return "day";
+  if (h >= 17 && h < 20) return "dusk";
+  return "night";
+}
+
+const TIME_ATMOSPHERES: Record<TimeOfDay, {
+  mapFilter: string;
+  vignette: string;
+  vignetteBoxShadow: string;
+  ambientGlow: string;
+  label: string;
+}> = {
+  dawn: {
+    mapFilter: 'sepia(0.3) saturate(1.1) brightness(0.88) hue-rotate(-5deg) contrast(1.05)',
+    vignette: 'radial-gradient(ellipse at center, transparent 45%, hsla(25, 50%, 25%, 0.3) 75%, hsla(20, 45%, 15%, 0.55) 100%)',
+    vignetteBoxShadow: 'inset 0 0 120px 60px hsla(25, 45%, 18%, 0.5), inset 0 0 300px 100px hsla(20, 35%, 12%, 0.25)',
+    ambientGlow: 'radial-gradient(ellipse at 30% 80%, hsla(30, 70%, 45%, 0.08) 0%, transparent 60%)',
+    label: 'Dawn',
+  },
+  day: {
+    mapFilter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)',
+    vignette: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
+    vignetteBoxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
+    ambientGlow: 'none',
+    label: 'Day',
+  },
+  dusk: {
+    mapFilter: 'sepia(0.45) saturate(1.15) brightness(0.78) hue-rotate(-15deg) contrast(1.08)',
+    vignette: 'radial-gradient(ellipse at center, transparent 35%, hsla(20, 55%, 18%, 0.4) 70%, hsla(15, 50%, 10%, 0.65) 100%)',
+    vignetteBoxShadow: 'inset 0 0 140px 80px hsla(20, 50%, 12%, 0.7), inset 0 0 350px 120px hsla(15, 40%, 8%, 0.4)',
+    ambientGlow: 'radial-gradient(ellipse at 70% 90%, hsla(25, 80%, 40%, 0.1) 0%, transparent 55%), radial-gradient(ellipse at 20% 60%, hsla(280, 30%, 30%, 0.06) 0%, transparent 50%)',
+    label: 'Dusk',
+  },
+  night: {
+    mapFilter: 'sepia(0.25) saturate(0.85) brightness(0.62) hue-rotate(-20deg) contrast(1.12)',
+    vignette: 'radial-gradient(ellipse at center, transparent 30%, hsla(240, 30%, 10%, 0.45) 65%, hsla(240, 35%, 5%, 0.75) 100%)',
+    vignetteBoxShadow: 'inset 0 0 160px 90px hsla(240, 30%, 6%, 0.8), inset 0 0 400px 140px hsla(240, 25%, 4%, 0.5)',
+    ambientGlow: 'radial-gradient(ellipse at 50% 40%, hsla(220, 40%, 30%, 0.06) 0%, transparent 50%)',
+    label: 'Starlight',
+  },
+};
+
 const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
 interface TreeOfferings {
@@ -192,6 +239,8 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
   const [userId, setUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [timeOfDay] = useState<TimeOfDay>(getTimeOfDay);
+  const atmosphere = TIME_ATMOSPHERES[timeOfDay];
   const { toast } = useToast();
 
   // Get current user
@@ -569,7 +618,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   return (
     <div className="relative w-full" style={{ height: '100dvh' }}>
       {/* Map canvas — rendered first so it sits at the bottom of the stacking order */}
-      <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
+      <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
 
       {/* Loading / Error overlay */}
       {mapStatus !== "ready" && (
@@ -601,11 +650,21 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         </div>
       )}
 
-      {/* Parchment vignette overlay */}
+      {/* Living vignette — breathes with time of day */}
       <div className="absolute inset-0 pointer-events-none z-[1]" style={{
-        boxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
-        background: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
+        boxShadow: atmosphere.vignetteBoxShadow,
+        background: atmosphere.vignette,
+        animation: 'vignetteBreath 12s ease-in-out infinite',
+        transition: 'box-shadow 2s ease, background 2s ease',
       }} />
+
+      {/* Ambient glow layer — dusk warmth, dawn blush, night coolness */}
+      {atmosphere.ambientGlow !== 'none' && (
+        <div className="absolute inset-0 pointer-events-none z-[1]" style={{
+          background: atmosphere.ambientGlow,
+          animation: 'ambientDrift 20s ease-in-out infinite alternate',
+        }} />
+      )}
 
       {/* Drifting mist */}
       <MistOverlay />
@@ -642,6 +701,22 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         </div>
       </Card>
 
+      {/* Time-of-day whisper */}
+      <div className="absolute top-[72px] right-4 z-10 animate-fade-in" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
+        <span className="font-serif text-xs px-2.5 py-1 rounded-full" style={{
+          background: 'hsla(30, 30%, 12%, 0.7)',
+          color: 'hsla(42, 60%, 60%, 0.7)',
+          border: '1px solid hsla(42, 40%, 30%, 0.3)',
+          backdropFilter: 'blur(4px)',
+        }}>
+          {timeOfDay === 'dawn' && '🌅'}
+          {timeOfDay === 'day' && '☀️'}
+          {timeOfDay === 'dusk' && '🌇'}
+          {timeOfDay === 'night' && '✦'}
+          {' '}{atmosphere.label}
+        </span>
+      </div>
+
       <MapSearch onLocationSelect={handleLocationSelect} />
 
       <div className="absolute bottom-2 left-2 z-10">
@@ -665,6 +740,14 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         @keyframes ancientPulse {
           0%, 100% { filter: drop-shadow(0 0 2px hsla(42, 80%, 50%, 0.3)); }
           50% { filter: drop-shadow(0 0 8px hsla(42, 80%, 50%, 0.6)); }
+        }
+        @keyframes vignetteBreath {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.85; }
+        }
+        @keyframes ambientDrift {
+          0% { opacity: 0.6; transform: scale(1); }
+          100% { opacity: 1; transform: scale(1.05); }
         }
         .tree-popup .mapboxgl-popup-content {
           background: hsl(120, 40%, 15%);
