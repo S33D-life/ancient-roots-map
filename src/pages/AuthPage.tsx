@@ -6,54 +6,144 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, TreePine, Wallet, Wand2 } from "lucide-react";
+import { Loader2, TreePine, Wallet, Wand2, Mail, ArrowLeft, Eye, EyeOff, CheckCircle2, KeyRound } from "lucide-react";
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
+import teotagLogo from "@/assets/teotag.jpeg";
 
-const emailSchema = z.string().email("Invalid email address");
+const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
+type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email";
+
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string }>({});
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/dashboard");
-      }
-    });
-
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         navigate("/dashboard");
       }
     });
 
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/dashboard");
+    });
+
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const validateInputs = () => {
+  const clearErrors = () => setFieldErrors({});
+
+  const validate = (mode: "login" | "signup" | "forgot") => {
+    const errors: typeof fieldErrors = {};
+    try { emailSchema.parse(email); } catch { errors.email = "Please enter a valid email"; }
+
+    if (mode !== "forgot") {
+      try { passwordSchema.parse(password); } catch { errors.password = "At least 6 characters required"; }
+    }
+
+    if (mode === "signup" && password !== confirmPassword) {
+      errors.confirm = "Passwords don't match";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate("login")) return;
+    setIsLoading(true);
     try {
-      emailSchema.parse(email);
-      passwordSchema.parse(password);
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          throw new Error("Invalid email or password. Please try again.");
+        }
+        if (error.message.includes("Email not confirmed")) {
+          throw new Error("Please verify your email before signing in. Check your inbox.");
+        }
+        throw error;
       }
-      return false;
+      toast({ title: "Welcome back!", description: "You've entered the grove" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      toast({ title: "Login failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate("signup")) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) {
+        if (error.message.includes("User already registered")) {
+          throw new Error("An account with this email already exists. Try logging in.");
+        }
+        throw error;
+      }
+      setView("verify-email");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not create account";
+      toast({ title: "Sign up failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate("forgot")) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (error) throw error;
+      setView("reset-sent");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not send reset email";
+      toast({ title: "Reset failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMagicLink = async () => {
+    try { emailSchema.parse(email); } catch {
+      setFieldErrors({ email: "Enter your email first" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      });
+      if (error) throw error;
+      setView("magic-sent");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not send magic link";
+      toast({ title: "Magic link failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,212 +153,251 @@ const AuthPage = () => {
       redirect_uri: window.location.origin,
     });
     if (error) {
-      toast({
-        title: "Google login failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Google login failed", description: error.message, variant: "destructive" });
     }
     setIsLoading(false);
   };
 
-  const handleMagicLink = async () => {
-    try {
-      emailSchema.parse(email);
-    } catch {
-      toast({ title: "Enter a valid email", description: "We need your email to send a magic link", variant: "destructive" });
-      return;
-    }
-    setIsLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
-    });
-    if (error) {
-      toast({ title: "Magic link failed", description: error.message, variant: "destructive" });
-    } else {
-      setMagicLinkSent(true);
-      toast({ title: "Magic link sent!", description: "Check your email for a login link" });
-    }
-    setIsLoading(false);
-  };
+  // Success / confirmation screens
+  if (view === "verify-email" || view === "magic-sent" || view === "reset-sent") {
+    const configs = {
+      "verify-email": {
+        icon: <Mail className="w-8 h-8 text-primary" />,
+        title: "Check your inbox",
+        desc: `We've sent a verification link to ${email}. Click it to activate your account.`,
+        action: "Back to Login",
+      },
+      "magic-sent": {
+        icon: <Wand2 className="w-8 h-8 text-primary" />,
+        title: "Magic link sent!",
+        desc: `Check ${email} for a login link. It will take you straight to your dashboard.`,
+        action: "Back to Login",
+      },
+      "reset-sent": {
+        icon: <KeyRound className="w-8 h-8 text-primary" />,
+        title: "Reset email sent",
+        desc: `We've sent password reset instructions to ${email}. Check your inbox.`,
+        action: "Back to Login",
+      },
+    };
+    const c = configs[view];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateInputs()) return;
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'radial-gradient(ellipse at top, hsl(75 20% 14%), hsl(80 15% 10%))' }}>
+        <div className="w-full max-w-sm text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+            {c.icon}
+          </div>
+          <div>
+            <h1 className="text-2xl font-serif mb-2">{c.title}</h1>
+            <p className="text-muted-foreground text-sm leading-relaxed">{c.desc}</p>
+          </div>
+          <Button variant="outline" className="w-full" onClick={() => { setView("login"); clearErrors(); }}>
+            {c.action}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-    setIsLoading(true);
-
-    try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            throw new Error("Invalid email or password");
-          }
-          throw error;
-        }
-
-        toast({
-          title: "Welcome back!",
-          description: "Successfully logged in",
-        });
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
-        });
-
-        if (error) {
-          if (error.message.includes("User already registered")) {
-            throw new Error("An account with this email already exists");
-          }
-          throw error;
-        }
-
-        toast({
-          title: "Account created!",
-          description: "You can now log in to start mapping trees",
-        });
-        
-        setIsLogin(true);
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      toast({
-        title: isLogin ? "Login failed" : "Signup failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const isSignup = view === "signup";
+  const isForgot = view === "forgot";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background/95 to-muted px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <TreePine className="h-12 w-12 text-primary" />
+    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: 'radial-gradient(ellipse at top, hsl(75 20% 14%), hsl(80 15% 10%))' }}>
+      {/* Left branding panel — hidden on mobile */}
+      <div className="hidden md:flex md:w-2/5 lg:w-1/3 flex-col items-center justify-center p-10 relative overflow-hidden">
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(42 60% 18% / 0.4), hsl(75 20% 10% / 0.8))' }} />
+        <div className="relative z-10 text-center space-y-6">
+          <img src={teotagLogo} alt="S33D" className="w-24 h-24 rounded-full mx-auto border-2 border-primary/40 glow-subtle" />
+          <h2 className="text-3xl font-serif tracking-wider">S33D.life</h2>
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
+            Join the ancient grove. Map trees, collect Non-Fungible Twigs, and walk the Creator's Path.
+          </p>
+          <div className="flex justify-center gap-6 pt-4">
+            <div className="text-center">
+              <CheckCircle2 className="w-5 h-5 text-primary mx-auto mb-1" />
+              <span className="text-xs text-muted-foreground">Map Trees</span>
+            </div>
+            <div className="text-center">
+              <CheckCircle2 className="w-5 h-5 text-primary mx-auto mb-1" />
+              <span className="text-xs text-muted-foreground">Earn Staffs</span>
+            </div>
+            <div className="text-center">
+              <CheckCircle2 className="w-5 h-5 text-primary mx-auto mb-1" />
+              <span className="text-xs text-muted-foreground">Join Community</span>
+            </div>
           </div>
-          <h1 className="text-3xl font-serif text-foreground mb-2">Ancient Friends Map</h1>
-          <p className="text-muted-foreground">Join our community of tree guardians</p>
         </div>
+      </div>
 
-        <div className="bg-card border border-border rounded-lg p-8 shadow-lg">
-          <div className="flex gap-2 mb-6">
-            <Button
-              variant={isLogin ? "default" : "outline"}
-              onClick={() => setIsLogin(true)}
-              className="flex-1"
-            >
-              Login
-            </Button>
-            <Button
-              variant={!isLogin ? "default" : "outline"}
-              onClick={() => setIsLogin(false)}
-              className="flex-1"
-            >
-              Sign Up
-            </Button>
+      {/* Right form panel */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12 md:py-0">
+        <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="md:hidden text-center mb-8">
+            <img src={teotagLogo} alt="S33D" className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-primary/40" />
+            <h1 className="text-2xl font-serif">S33D.life</h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                required
-                minLength={6}
-              />
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isLogin ? "Logging in..." : "Creating account..."}
-                </>
+          <div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 md:p-8 shadow-xl">
+            {/* Header with back arrow for sub-views */}
+            <div className="mb-6">
+              {isForgot ? (
+                <div className="flex items-center gap-3 mb-2">
+                  <button onClick={() => { setView("login"); clearErrors(); }} className="text-muted-foreground hover:text-foreground transition-colors">
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <h2 className="text-xl font-serif">Reset Password</h2>
+                </div>
               ) : (
-                <>{isLogin ? "Login" : "Create Account"}</>
+                <>
+                  {/* Login / Sign Up tabs */}
+                  <div className="flex rounded-xl bg-secondary/50 p-1 mb-4">
+                    <button
+                      onClick={() => { setView("login"); clearErrors(); }}
+                      className={`flex-1 py-2 text-sm font-serif rounded-lg transition-all ${
+                        !isSignup ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={() => { setView("signup"); clearErrors(); }}
+                      className={`flex-1 py-2 text-sm font-serif rounded-lg transition-all ${
+                        isSignup ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    {isSignup ? "Create your grove account" : "Welcome back, tree guardian"}
+                  </p>
+                </>
               )}
-            </Button>
-          </form>
-
-          <div className="mt-6 space-y-3">
-          <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-              </div>
+              {isForgot && (
+                <p className="text-muted-foreground text-sm mt-1">Enter your email and we'll send reset instructions.</p>
+              )}
             </div>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              Continue with Google
-            </Button>
+            {/* Form */}
+            <form onSubmit={isForgot ? handleForgotPassword : isSignup ? handleSignup : handleLogin} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="grove.keeper@s33d.life"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(p => ({ ...p, email: undefined })); }}
+                  disabled={isLoading}
+                  className={fieldErrors.email ? "border-destructive" : ""}
+                  autoComplete="email"
+                />
+                {fieldErrors.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
+              </div>
 
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={handleMagicLink}
-              disabled={isLoading || magicLinkSent}
-            >
-              <Wand2 className="h-4 w-4" />
-              {magicLinkSent ? "Magic link sent — check your email" : "Send Magic Link"}
-            </Button>
+              {!isForgot && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); if (fieldErrors.password) setFieldErrors(p => ({ ...p, password: undefined })); }}
+                      disabled={isLoading}
+                      className={`pr-10 ${fieldErrors.password ? "border-destructive" : ""}`}
+                      autoComplete={isSignup ? "new-password" : "current-password"}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {fieldErrors.password && <p className="text-xs text-destructive">{fieldErrors.password}</p>}
+                </div>
+              )}
 
-            <WalletConnect compact />
+              {isSignup && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="confirm-password" className="text-xs uppercase tracking-wider text-muted-foreground">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => { setConfirmPassword(e.target.value); if (fieldErrors.confirm) setFieldErrors(p => ({ ...p, confirm: undefined })); }}
+                    disabled={isLoading}
+                    className={fieldErrors.confirm ? "border-destructive" : ""}
+                    autoComplete="new-password"
+                  />
+                  {fieldErrors.confirm && <p className="text-xs text-destructive">{fieldErrors.confirm}</p>}
+                </div>
+              )}
+
+              {/* Forgot password link (login only) */}
+              {!isSignup && !isForgot && (
+                <div className="text-right">
+                  <button type="button" onClick={() => { setView("forgot"); clearErrors(); }} className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </button>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full font-serif" disabled={isLoading}>
+                {isLoading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isForgot ? "Sending..." : isSignup ? "Creating account..." : "Logging in..."}</>
+                ) : (
+                  isForgot ? "Send Reset Link" : isSignup ? "Create Account" : "Login"
+                )}
+              </Button>
+            </form>
+
+            {/* Divider & social / alternative logins (not on forgot) */}
+            {!isForgot && (
+              <div className="mt-6 space-y-3">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card/80 px-3 text-muted-foreground">or</span>
+                  </div>
+                </div>
+
+                <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={isLoading}>
+                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google
+                </Button>
+
+                <Button variant="outline" className="w-full gap-2" onClick={handleMagicLink} disabled={isLoading}>
+                  <Wand2 className="h-4 w-4" />
+                  Send Magic Link
+                </Button>
+
+                <WalletConnect compact />
+              </div>
+            )}
           </div>
-        </div>
 
-        <div className="text-center mt-6">
-          <Button
-            variant="link"
-            onClick={() => navigate("/")}
-            className="text-muted-foreground"
-          >
-            Return to Home
-          </Button>
+          {/* Return home */}
+          <div className="text-center mt-6">
+            <button onClick={() => navigate("/")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              ← Return to Home
+            </button>
+          </div>
         </div>
       </div>
     </div>
