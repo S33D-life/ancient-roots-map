@@ -538,7 +538,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         <TreeImportExport />
       </div>
 
-      <div ref={mapContainer} className="absolute inset-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
+      <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)' }} />
 
       {/* Parchment vignette overlay */}
       <div className="absolute inset-0 pointer-events-none z-[1]" style={{
