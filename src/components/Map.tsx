@@ -83,6 +83,11 @@ interface Tree {
 }
 
 const GROVE_SOURCE_ID = 'grove-boundary-source';
+const ROOT_THREADS_SOURCE = 'root-threads-source';
+const ROOT_THREADS_LAYER = 'root-threads-layer';
+
+// Max distance (km) for root thread connections
+const ROOT_THREAD_MAX_KM = 80;
 const GROVE_FILL_ID = 'grove-boundary-fill';
 const GROVE_LINE_ID = 'grove-boundary-line';
 
@@ -608,6 +613,104 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       }
     };
   }, [filteredTrees, groveScale]);
+
+  // Draw golden root threads between nearby same-species trees
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+
+    const drawThreads = () => {
+      // Clean up existing
+      if (m.getLayer(ROOT_THREADS_LAYER)) m.removeLayer(ROOT_THREADS_LAYER);
+      if (m.getSource(ROOT_THREADS_SOURCE)) m.removeSource(ROOT_THREADS_SOURCE);
+
+      // Group trees by species
+      const bySpecies: Record<string, Tree[]> = {};
+      filteredTrees.forEach((t) => {
+        const key = t.species.toLowerCase();
+        if (!bySpecies[key]) bySpecies[key] = [];
+        bySpecies[key].push(t);
+      });
+
+      // Build line features connecting nearby same-species trees
+      const features: GeoJSON.Feature[] = [];
+      Object.values(bySpecies).forEach((group) => {
+        if (group.length < 2) return;
+        // For each tree, connect to its nearest same-species neighbours within range
+        for (let i = 0; i < group.length; i++) {
+          const a = group[i];
+          // Find nearest 3 neighbours to keep lines sparse and organic
+          const neighbours = group
+            .map((b, j) => ({ b, j, dist: i === j ? Infinity : haversineKm(a.latitude, a.longitude, b.latitude, b.longitude) }))
+            .filter((n) => n.dist <= ROOT_THREAD_MAX_KM && n.j > i) // j > i avoids duplicate lines
+            .sort((x, y) => x.dist - y.dist)
+            .slice(0, 3);
+
+          neighbours.forEach(({ b, dist }) => {
+            features.push({
+              type: 'Feature',
+              properties: { distance: dist, species: a.species },
+              geometry: {
+                type: 'LineString',
+                coordinates: [
+                  [a.longitude, a.latitude],
+                  [b.longitude, b.latitude],
+                ],
+              },
+            });
+          });
+        }
+      });
+
+      if (features.length === 0) return;
+
+      m.addSource(ROOT_THREADS_SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features },
+      });
+
+      m.addLayer({
+        id: ROOT_THREADS_LAYER,
+        type: 'line',
+        source: ROOT_THREADS_SOURCE,
+        minzoom: 5,
+        paint: {
+          'line-color': 'hsla(42, 75%, 50%, 0.5)',
+          'line-width': [
+            'interpolate', ['linear'], ['zoom'],
+            5, 0.3,
+            10, 1,
+            14, 2,
+          ],
+          'line-opacity': [
+            'interpolate', ['linear'], ['zoom'],
+            5, 0,
+            7, 0.15,
+            10, 0.35,
+            14, 0.5,
+          ],
+          'line-dasharray': [6, 4],
+        },
+      });
+    };
+
+    if (m.isStyleLoaded()) {
+      drawThreads();
+    } else {
+      m.once('style.load', drawThreads);
+    }
+
+    return () => {
+      try {
+        if (m.getStyle()) {
+          if (m.getLayer(ROOT_THREADS_LAYER)) m.removeLayer(ROOT_THREADS_LAYER);
+          if (m.getSource(ROOT_THREADS_SOURCE)) m.removeSource(ROOT_THREADS_SOURCE);
+        }
+      } catch {
+        // Map already removed
+      }
+    };
+  }, [filteredTrees]);
 
   const handleLocationSelect = (lat: number, lng: number, what3words: string) => {
     if (map.current) {
