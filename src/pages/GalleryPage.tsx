@@ -556,7 +556,7 @@ const GalleryPage = () => {
                   <img
                     src={treeRadioArt}
                     alt="Tree Radio"
-                    className="w-full h-56 md:h-72 object-cover"
+                    className="w-full h-48 md:h-56 object-cover object-center"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6">
