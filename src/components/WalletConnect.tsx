@@ -3,35 +3,37 @@ import walletBg from "@/assets/wallet-connect-bg.jpeg";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Wallet, CheckCircle2, TreeDeciduous } from "lucide-react";
+import { Loader2, Wallet, CheckCircle2, TreeDeciduous, ExternalLink } from "lucide-react";
+import { getOwnedStaffs, type OwnedStaff } from "@/utils/staffNftReader";
+import {
+  STAFF_CONTRACT_ADDRESS,
+  SPECIES_CODES,
+  SPECIES_MAP,
+  getBaseScanUrl,
+  getOpenSeaUrl,
+  type SpeciesCode,
+} from "@/config/staffContract";
 
-// Mock staff NFT data — will be replaced with real contract calls
-const MOCK_STAFF_NFTS = [
-  { tokenId: 1, name: "Oak Staff", code: "OAK-C0S13", species: "English Oak", image: "/images/staffs/oak.jpeg" },
-  { tokenId: 2, name: "Yew Staff", code: "YEW-A1S07", species: "Ancient Yew", image: "/images/staffs/yew.jpeg" },
-  { tokenId: 3, name: "Ash Staff", code: "ASH-B2S21", species: "Common Ash", image: "/images/staffs/ash.jpeg" },
-  { tokenId: 4, name: "Willow Staff", code: "WIL-D3S09", species: "Weeping Willow", image: "/images/staffs/wil.jpeg" },
+// Mock staff NFT data — used when contract address is not configured
+const MOCK_STAFF_NFTS: OwnedStaff[] = [
+  { tokenId: 1, speciesId: 0, circleId: 0, variantId: 1, staffNumber: 13, isOriginSpiral: true, code: "GOA-C0S13", name: "Goat Willow Staff", species: "Goat Willow", image: "/images/staffs/goa.jpeg" },
+  { tokenId: 9, speciesId: 8, circleId: 0, variantId: 1, staffNumber: 13, isOriginSpiral: true, code: "OAK-C0S13", name: "English Oak Staff", species: "English Oak", image: "/images/staffs/oak.jpeg" },
+  { tokenId: 15, speciesId: 14, circleId: 0, variantId: 1, staffNumber: 13, isOriginSpiral: true, code: "YEW-C0S13", name: "Ancient Yew Staff", species: "Ancient Yew", image: "/images/staffs/yew.jpeg" },
+  { tokenId: 16, speciesId: 15, circleId: 0, variantId: 1, staffNumber: 13, isOriginSpiral: true, code: "ASH-C0S13", name: "Common Ash Staff", species: "Common Ash", image: "/images/staffs/ash.jpeg" },
 ];
 
-interface StaffNFT {
-  tokenId: number;
-  name: string;
-  code: string;
-  species: string;
-  image: string;
-}
-
 interface WalletConnectProps {
-  onWalletLinked?: (address: string, staff: StaffNFT) => void;
+  onWalletLinked?: (address: string, staff: OwnedStaff) => void;
   compact?: boolean;
 }
 
 const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [ownedStaffs, setOwnedStaffs] = useState<StaffNFT[]>([]);
-  const [selectedStaff, setSelectedStaff] = useState<StaffNFT | null>(null);
+  const [ownedStaffs, setOwnedStaffs] = useState<OwnedStaff[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<OwnedStaff | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isLive, setIsLive] = useState(!!STAFF_CONTRACT_ADDRESS);
   const { toast } = useToast();
 
   const shortenAddress = (addr: string) =>
@@ -40,7 +42,6 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
   const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const openMetaMaskDeepLink = () => {
-    // Strip protocol and build MetaMask deep link to open the current dApp in MetaMask's browser
     const dappUrl = window.location.href.replace(/^https?:\/\//, "");
     window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
   };
@@ -56,22 +57,34 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
         const address = accounts[0] as string;
         setWalletAddress(address);
 
-        // Mock: simulate NFT ownership check with a short delay
         setIsVerifying(true);
-        await new Promise((r) => setTimeout(r, 1500));
 
-        // Mock: return 1-3 random staffs as "owned"
-        const count = Math.floor(Math.random() * 3) + 1;
-        const shuffled = [...MOCK_STAFF_NFTS].sort(() => 0.5 - Math.random());
-        setOwnedStaffs(shuffled.slice(0, count));
+        if (STAFF_CONTRACT_ADDRESS) {
+          // Real on-chain query
+          const staffs = await getOwnedStaffs(address);
+          setOwnedStaffs(staffs);
+          setIsLive(true);
+          toast({
+            title: "Wallet connected",
+            description: staffs.length > 0
+              ? `Found ${staffs.length} Non-Fungible Twig${staffs.length > 1 ? "s" : ""} on Base`
+              : "No Non-Fungible Twigs found in this wallet",
+          });
+        } else {
+          // Mock fallback
+          await new Promise((r) => setTimeout(r, 1500));
+          const count = Math.floor(Math.random() * 3) + 1;
+          const shuffled = [...MOCK_STAFF_NFTS].sort(() => 0.5 - Math.random());
+          setOwnedStaffs(shuffled.slice(0, count));
+          setIsLive(false);
+          toast({
+            title: "Wallet connected (demo mode)",
+            description: `Contract address not set — showing ${count} mock twig${count > 1 ? "s" : ""}`,
+          });
+        }
+
         setIsVerifying(false);
-
-        toast({
-          title: "Wallet connected",
-          description: `Found ${count} Non-Fungible Twig${count > 1 ? "s" : ""} in your wallet`,
-        });
       } else if (isMobile()) {
-        // On mobile without injected provider, deep-link into MetaMask app
         openMetaMaskDeepLink();
       } else {
         toast({
@@ -89,14 +102,15 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
       });
     } finally {
       setIsConnecting(false);
+      setIsVerifying(false);
     }
   };
 
-  const handleSelectStaff = (staff: StaffNFT) => {
+  const handleSelectStaff = (staff: OwnedStaff) => {
     setSelectedStaff(staff);
-    // Persist staff identity for use across the app
     localStorage.setItem("linked_staff_code", staff.code);
     localStorage.setItem("linked_staff_name", staff.name);
+    localStorage.setItem("linked_staff_token_id", String(staff.tokenId));
     onWalletLinked?.(walletAddress!, staff);
     toast({
       title: "Staff linked!",
@@ -138,7 +152,7 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
           <div>
             <h3 className="font-serif text-xl text-foreground mb-1">Connect Your Wallet</h3>
             <p className="text-sm text-muted-foreground">
-              Link your Ethereum wallet to verify your Non-Fungible Twig ownership
+              Link your Ethereum wallet to verify your Non-Fungible Twig ownership on Base
             </p>
           </div>
           <Button
@@ -168,7 +182,9 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
           <div>
             <p className="font-serif text-lg text-foreground">Searching the forest...</p>
             <p className="text-sm text-muted-foreground">
-              Verifying Non-Fungible Twigs for {shortenAddress(walletAddress)}
+              {STAFF_CONTRACT_ADDRESS
+                ? `Querying Base chain for ${shortenAddress(walletAddress)}`
+                : `Verifying Non-Fungible Twigs for ${shortenAddress(walletAddress)}`}
             </p>
           </div>
         </CardContent>
@@ -197,6 +213,26 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
               <p className="text-xs text-muted-foreground font-mono">{selectedStaff.code}</p>
               <p className="text-xs text-muted-foreground">{shortenAddress(walletAddress)}</p>
             </div>
+            {isLive && STAFF_CONTRACT_ADDRESS && (
+              <div className="flex flex-col gap-1">
+                <a
+                  href={getOpenSeaUrl(selectedStaff.tokenId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                >
+                  OpenSea <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+                <a
+                  href={getBaseScanUrl(selectedStaff.tokenId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                >
+                  BaseScan <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -210,7 +246,10 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-serif text-lg text-foreground">Your Non-Fungible Twigs</h3>
-            <p className="text-xs text-muted-foreground">{shortenAddress(walletAddress)}</p>
+            <p className="text-xs text-muted-foreground">
+              {shortenAddress(walletAddress)}
+              {!isLive && " · demo mode"}
+            </p>
           </div>
           <div className="flex items-center gap-1.5 text-primary text-sm">
             <TreeDeciduous className="w-4 h-4" />
@@ -237,7 +276,20 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
                 <p className="text-xs text-muted-foreground font-mono">{staff.code}</p>
                 <p className="text-xs text-muted-foreground">{staff.species}</p>
               </div>
-              <Wallet className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-[10px] text-muted-foreground">#{staff.tokenId}</span>
+                {isLive && STAFF_CONTRACT_ADDRESS && (
+                  <a
+                    href={getOpenSeaUrl(staff.tokenId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                  >
+                    View <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+              </div>
             </button>
           ))}
         </div>
