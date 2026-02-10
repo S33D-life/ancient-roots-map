@@ -289,7 +289,7 @@ const DashboardPage = () => {
         <div className="max-w-5xl mx-auto">
           {/* Page header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-serif text-mystical mb-1">My Grove</h1>
+            <h1 className="text-3xl md:text-4xl font-serif text-mystical mb-1">Hearth</h1>
             <p className="text-sm text-muted-foreground font-serif">
               Welcome back, {profile?.full_name || "Ancient Friend"}
             </p>
