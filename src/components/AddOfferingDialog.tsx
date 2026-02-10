@@ -51,6 +51,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [sealedByStaff, setSealedByStaff] = useState("");
   const [songSearch, setSongSearch] = useState("");
   const [songResults, setSongResults] = useState<iTunesResult[]>([]);
   const [songSearching, setSongSearching] = useState(false);
@@ -195,6 +196,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
         media_url: finalMediaUrl,
         nft_link: type === "nft" ? nftLink.trim() || null : null,
         created_by: user.id,
+        sealed_by_staff: sealedByStaff.trim() || null,
       });
       if (error) throw error;
 
@@ -203,6 +205,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
       setContent("");
       setMediaUrl("");
       setNftLink("");
+      setSealedByStaff("");
       clearSelectedFile();
       onOpenChange(false);
     } catch (err: any) {
@@ -487,6 +490,24 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
             />
             <p className="text-[10px] text-right text-muted-foreground/40">
               {content.length} / 5000
+            </p>
+          </div>
+
+          {/* Sealed by Staff */}
+          <div className="space-y-1.5">
+            <Label htmlFor="sealed-staff" className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
+              ⚘ Sealed by Staff
+            </Label>
+            <Input
+              id="sealed-staff"
+              value={sealedByStaff}
+              onChange={(e) => setSealedByStaff(e.target.value.slice(0, 50))}
+              placeholder="e.g. OAK-C1S03"
+              maxLength={50}
+              className="font-serif text-sm"
+            />
+            <p className="text-[10px] text-muted-foreground/50 font-serif">
+              Your staff identity that seals this offering
             </p>
           </div>
 

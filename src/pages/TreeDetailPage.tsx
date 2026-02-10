@@ -297,6 +297,17 @@ const TreeDetailPage = () => {
   );
 };
 
+/* ---------- Shared ---------- */
+
+const SealedByLabel = ({ staff }: { staff: string | null }) => {
+  if (!staff) return null;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[10px] text-primary/70 font-serif tracking-widest uppercase">
+      <span className="opacity-60">⚘</span> Sealed by {staff}
+    </span>
+  );
+};
+
 /* ---------- Sub-components ---------- */
 
 const EmptyOffering = ({
@@ -360,11 +371,14 @@ const PhotoGrid = ({
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+           <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
             <p className="text-sm font-serif text-foreground truncate">{offering.title}</p>
-            <p className="text-[10px] text-muted-foreground">
-              {new Date(offering.created_at).toLocaleDateString()}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-muted-foreground">
+                {new Date(offering.created_at).toLocaleDateString()}
+              </p>
+              <SealedByLabel staff={offering.sealed_by_staff} />
+            </div>
           </div>
         </div>
       ))}
@@ -396,13 +410,16 @@ const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingTy
           {offering.content}
         </div>
       )}
-      <p className="text-[10px] text-muted-foreground/60 mt-4 font-serif tracking-widest uppercase">
-        {new Date(offering.created_at).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })}
-      </p>
+      <div className="flex items-center justify-between mt-4">
+        <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
+          {new Date(offering.created_at).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+        <SealedByLabel staff={offering.sealed_by_staff} />
+      </div>
     </CardContent>
   </Card>
 );
@@ -424,7 +441,7 @@ const SongCard = ({ offering }: { offering: Offering }) => (
               <source src={offering.media_url} />
             </audio>
           )}
-          <div className="flex items-center gap-3 mt-3">
+          <div className="flex items-center flex-wrap gap-3 mt-3">
             <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
               {new Date(offering.created_at).toLocaleDateString("en-GB", {
                 day: "numeric",
@@ -443,6 +460,7 @@ const SongCard = ({ offering }: { offering: Offering }) => (
                 Apple Music
               </a>
             )}
+            <SealedByLabel staff={offering.sealed_by_staff} />
           </div>
         </div>
       </div>
@@ -470,13 +488,16 @@ const NftCard = ({ offering }: { offering: Offering }) => (
           View on marketplace →
         </a>
       )}
-      <p className="text-[10px] text-muted-foreground/60 mt-3 font-serif tracking-widest uppercase">
-        {new Date(offering.created_at).toLocaleDateString("en-GB", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })}
-      </p>
+      <div className="flex items-center justify-between mt-3">
+        <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
+          {new Date(offering.created_at).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </p>
+        <SealedByLabel staff={offering.sealed_by_staff} />
+      </div>
     </CardContent>
   </Card>
 );
