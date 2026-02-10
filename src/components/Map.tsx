@@ -212,20 +212,34 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     }
   }, []);
 
-  // Fetch trees from database
+  // Fetch trees and offering counts from database
   useEffect(() => {
     const fetchTrees = async () => {
-      const { data, error } = await supabase
-        .from('trees')
-        .select('*')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+      const [treesResult, offeringsResult] = await Promise.all([
+        supabase
+          .from('trees')
+          .select('*')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null),
+        supabase
+          .from('offerings')
+          .select('tree_id'),
+      ]);
 
-      if (error) {
-        console.error('Error fetching trees:', error);
+      if (treesResult.error) {
+        console.error('Error fetching trees:', treesResult.error);
         toast({ title: "Error loading trees", description: "Failed to load tree data", variant: "destructive" });
       } else {
-        setTrees(data || []);
+        setTrees(treesResult.data || []);
+      }
+
+      // Count offerings per tree
+      if (!offeringsResult.error && offeringsResult.data) {
+        const counts: TreeOfferings = {};
+        offeringsResult.data.forEach((o) => {
+          counts[o.tree_id] = (counts[o.tree_id] || 0) + 1;
+        });
+        setOfferingCounts(counts);
       }
     };
 
@@ -234,6 +248,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, () => fetchTrees())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'offerings' }, () => fetchTrees())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
