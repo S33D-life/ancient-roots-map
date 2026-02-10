@@ -37,8 +37,7 @@ const GrovesPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapToken, setMapToken] = useState<string>('');
-  const [tokenInput, setTokenInput] = useState<string>('');
+  const [mapToken, setMapToken] = useState<string>('pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterSpecies, setFilterSpecies] = useState<string>('all');
   const [filterScope, setFilterScope] = useState<string>('all');
@@ -61,17 +60,6 @@ const GrovesPage = () => {
     fetchProjects();
   }, []);
 
-  // Initialize Mapbox token from env, localStorage, or hardcoded default
-  useEffect(() => {
-    const envToken = (import.meta as any).env?.VITE_MAPBOX_ACCESS_TOKEN as string | undefined;
-    const stored = localStorage.getItem('mapbox_token') || '';
-    const defaultToken = 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
-    const token = (envToken || stored || defaultToken).trim();
-    if (token) {
-      setMapToken(token);
-      setTokenInput(token);
-    }
-  }, []);
 
   useEffect(() => {
     if (!mapContainer.current || map.current || !mapToken) return;
@@ -213,17 +201,6 @@ const GrovesPage = () => {
     }
   };
 
-  const handleSaveToken = (e: React.FormEvent) => {
-    e.preventDefault();
-    const t = tokenInput.trim();
-    if (!t) {
-      toast.error("Please paste a Mapbox public token");
-      return;
-    }
-    localStorage.setItem('mapbox_token', t);
-    setMapToken(t);
-    toast.success("Map token saved");
-  };
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -447,43 +424,10 @@ const GrovesPage = () => {
           </TabsList>
 
           <TabsContent value="map" className="mt-0">
-            {mapToken ? (
               <div
                 ref={mapContainer}
                 className="w-full h-[600px] rounded-lg border border-mystical shadow-lg"
               />
-            ) : (
-              <Card className="border-mystical">
-                <CardHeader>
-                  <CardTitle className="font-serif">Add Mapbox Token</CardTitle>
-                  <CardDescription>Provide your Mapbox public token to enable the map.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSaveToken} className="space-y-3">
-                    <div>
-                      <Label htmlFor="mapboxToken">Mapbox public token</Label>
-                      <Input
-                        id="mapboxToken"
-                        value={tokenInput}
-                        onChange={(e) => setTokenInput(e.target.value)}
-                        placeholder="pk.eyJ1Ijo..."
-                      />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button type="submit" variant="sacred">Save token</Button>
-                      <a
-                        href="https://account.mapbox.com/access-tokens/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary underline text-sm"
-                      >
-                        Get a token
-                      </a>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="list" className="mt-0">
