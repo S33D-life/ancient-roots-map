@@ -199,8 +199,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !species.trim()) {
-      toast({ title: "Missing fields", description: "Please fill in name and species", variant: "destructive" });
+    if (!species.trim()) {
+      toast({ title: "Missing fields", description: "Please fill in species", variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -212,7 +212,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       }
 
       const { data, error } = await supabase.from('trees').insert({
-        name: name.trim(),
+        name: name.trim() || species.trim(),
         species: species.trim(),
         description: description.trim() || null,
         what3words: what3words.trim() || '',
@@ -240,8 +240,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const goNext = () => {
     setTransitionDir("forward");
     if (step === "encounter") {
-      if (!name.trim() || !species.trim()) {
-        toast({ title: "Name your friend", description: "Give this tree a name and species before continuing", variant: "destructive" });
+      if (!species.trim()) {
+        toast({ title: "Species required", description: "Please enter the species before continuing", variant: "destructive" });
         return;
       }
       setStep("reflection");
@@ -317,8 +317,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           {step === "encounter" && !adjustMode && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name of this Ancient Friend *</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 200))} placeholder="e.g., The Old Oak of Glastonbury" maxLength={200} required className="font-serif" />
+                <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name of this Ancient Friend</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 200))} placeholder="e.g., The Old Oak of Glastonbury (optional)" maxLength={200} className="font-serif" />
               </div>
 
               <div className="space-y-2">
