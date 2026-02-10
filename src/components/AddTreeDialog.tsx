@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { MAPBOX_TOKEN } from "@/config/mapbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,7 +106,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   useEffect(() => {
     if (!adjustMode || !mapContainerRef.current || lat === null || lng === null) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
+    mapboxgl.accessToken = MAPBOX_TOKEN;
     circleAddedRef.current = false;
 
     const map = new mapboxgl.Map({

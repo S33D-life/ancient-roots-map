@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { MAPBOX_TOKEN } from "@/config/mapbox";
 import { escapeHtml } from "@/utils/escapeHtml";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +39,7 @@ const GrovesPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapToken, setMapToken] = useState<string>('pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg');
+  const [mapToken, setMapToken] = useState<string>(MAPBOX_TOKEN);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterSpecies, setFilterSpecies] = useState<string>('all');
   const [filterScope, setFilterScope] = useState<string>('all');

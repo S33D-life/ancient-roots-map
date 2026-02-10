@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
+import { MAPBOX_TOKEN } from "@/config/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
@@ -315,7 +316,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
