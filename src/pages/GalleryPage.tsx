@@ -1256,19 +1256,20 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">
-            {/* Wishing Tree banner */}
-            <div className="relative rounded-xl overflow-hidden border border-border">
-              <img
-                src={wishingTreeImage}
-                alt="Wishing Tree"
-                className="w-full h-32 md:h-44 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                <h2 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">
+            {/* Wishing Tree painting */}
+            <div className="flex items-start gap-4">
+              <div className="relative w-28 md:w-36 shrink-0 rounded-lg overflow-hidden border-2 border-border shadow-lg" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 0 0 3px hsl(var(--border))' }}>
+                <img
+                  src={wishingTreeImage}
+                  alt="Wishing Tree"
+                  className="w-full aspect-[3/4] object-cover"
+                />
+              </div>
+              <div className="pt-2">
+                <h2 className="text-xl md:text-2xl font-serif text-primary">
                   Wishing Tree
                 </h2>
-                <p className="text-sm font-serif text-foreground/80 drop-shadow">
+                <p className="text-xs font-serif text-muted-foreground mt-1">
                   Trees you dream of visiting someday
                 </p>
               </div>
