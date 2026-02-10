@@ -246,6 +246,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [timeOfDay] = useState<TimeOfDay>(getTimeOfDay);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const atmosphere = TIME_ATMOSPHERES[timeOfDay];
   const { toast } = useToast();
 
