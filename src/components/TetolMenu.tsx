@@ -60,17 +60,19 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
-      onClick={onClose}
+      className="fixed left-0 right-0 bottom-0 z-[90] flex items-start justify-center overflow-y-auto"
       style={{
+        top: '60px',
         background: visible
-          ? "radial-gradient(ellipse at 50% 60%, hsl(80 25% 12% / 0.98), hsl(80 15% 6% / 0.99))"
+          ? "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))"
           : "transparent",
         opacity: visible ? 1 : 0,
-        backdropFilter: visible ? "blur(12px)" : "none",
-        WebkitBackdropFilter: visible ? "blur(12px)" : "none",
+        backdropFilter: visible ? "blur(20px)" : "none",
+        WebkitBackdropFilter: visible ? "blur(20px)" : "none",
         transition: "opacity 0.5s ease-out, backdrop-filter 0.5s ease-out",
+        paddingTop: '2rem',
       }}
+      onClick={onClose}
     >
       {/* Floating leaves */}
       <FloatingLeaves visible={visible} />
