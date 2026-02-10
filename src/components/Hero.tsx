@@ -175,25 +175,10 @@ const Hero = () => {
 
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-32 text-center">
+      <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-center">
         <div className="max-w-4xl mx-auto space-y-8">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-            <Button variant="mystical" size="lg" className="min-w-[200px]" asChild>
-              <Link to="/map">
-                <MapPin className="w-5 h-5 mr-2" />
-                Arrive on the Atlas
-              </Link>
-            </Button>
-            <Button variant="sacred" size="lg" className="min-w-[200px]" asChild>
-              <Link to="/map?addTree=true">
-                <TreeDeciduous className="w-5 h-5 mr-2" />
-                Claim a Tree Encounter
-              </Link>
-            </Button>
-          </div>
-
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 pt-16 max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
             <div className="space-y-2">
               <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.trees.toLocaleString()}</div>
               <div className="text-sm text-muted-foreground">Ancient Trees</div>
@@ -207,6 +192,22 @@ const Hero = () => {
               <div className="text-sm text-muted-foreground">Nations</div>
             </div>
           </div>
+        </div>
+
+        {/* CTA buttons pinned near bottom */}
+        <div className="absolute bottom-24 left-0 right-0 flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
+          <Button variant="mystical" size="lg" className="min-w-[200px]" asChild>
+            <Link to="/map">
+              <MapPin className="w-5 h-5 mr-2" />
+              Arrive on the Atlas
+            </Link>
+          </Button>
+          <Button variant="sacred" size="lg" className="min-w-[200px]" asChild>
+            <Link to="/map?addTree=true">
+              <TreeDeciduous className="w-5 h-5 mr-2" />
+              Claim a Tree Encounter
+            </Link>
+          </Button>
         </div>
       </div>
 
