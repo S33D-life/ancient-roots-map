@@ -299,10 +299,25 @@ const TreeDetailPage = () => {
 
 /* ---------- Shared ---------- */
 
+const getStaffImageFromCode = (code: string): string | null => {
+  // Code format: "OAK-C1S03" → extract prefix before "-"
+  const prefix = code.split("-")[0]?.toLowerCase();
+  if (!prefix) return null;
+  return `/images/staffs/${prefix}.jpeg`;
+};
+
 const SealedByLabel = ({ staff }: { staff: string | null }) => {
   if (!staff) return null;
+  const img = getStaffImageFromCode(staff);
   return (
     <span className="inline-flex items-center gap-1.5 text-[10px] text-primary/70 font-serif tracking-widest uppercase">
+      {img && (
+        <img
+          src={img}
+          alt={staff}
+          className="w-4 h-4 rounded-full object-cover border border-primary/30"
+        />
+      )}
       <span className="opacity-60">⚘</span> Sealed by {staff}
     </span>
   );
