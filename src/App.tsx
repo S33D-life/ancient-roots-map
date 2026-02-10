@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
+import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
@@ -53,25 +54,27 @@ const App = () => {
         <StarryNight />
         
         <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/map" element={<MapPage />} />
-              <Route path="/tree/:id" element={<TreeDetailPage />} />
-              <Route path="/groves" element={<GrovesPage />} />
-              <Route path="/library" element={<GalleryPage />} />
-              <Route path="/gallery" element={<GalleryRedirect />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/golden-dream" element={<GoldenDreamPage />} />
-              <Route path="/council-of-life" element={<CouncilOfLifePage />} />
-              <Route path="/assets" element={<AssetsPage />} />
-              <Route path="/vault" element={<VaultPage />} />
-              <Route path="/radio" element={<RadioPage />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          <TetolLevelProvider>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/map" element={<MapPage />} />
+                <Route path="/tree/:id" element={<TreeDetailPage />} />
+                <Route path="/groves" element={<GrovesPage />} />
+                <Route path="/library" element={<GalleryPage />} />
+                <Route path="/gallery" element={<GalleryRedirect />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/golden-dream" element={<GoldenDreamPage />} />
+                <Route path="/council-of-life" element={<CouncilOfLifePage />} />
+                <Route path="/assets" element={<AssetsPage />} />
+                <Route path="/vault" element={<VaultPage />} />
+                <Route path="/radio" element={<RadioPage />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </TetolLevelProvider>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
