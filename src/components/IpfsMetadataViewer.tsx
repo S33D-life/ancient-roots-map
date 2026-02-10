@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { getMetadataUrl, getImageUrl, getBaseScanUrl, getOpenSeaUrl, STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, ACTIVE_RPC_URL, ACTIVE_CHAIN_ID, BASE_CHAIN_ID } from "@/config/staffContract";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, Loader2, ImageOff, Wallet, Copy, Check } from "lucide-react";
 
 interface NftAttribute {
@@ -92,9 +93,53 @@ const IpfsMetadataViewer = ({ tokenId, fallbackImage }: IpfsMetadataViewerProps)
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-primary/60" />
-        <p className="text-sm text-muted-foreground font-serif">Fetching on-chain metadata…</p>
+      <div className="flex flex-col animate-fade-in">
+        {/* Image skeleton */}
+        <Skeleton className="w-full aspect-square rounded-none" />
+
+        {/* Content skeleton */}
+        <div className="p-5 space-y-4">
+          {/* Title & description */}
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+
+          {/* Attributes grid */}
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-32" />
+            <div className="grid grid-cols-2 gap-2">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="h-14 rounded-lg" />
+              ))}
+            </div>
+          </div>
+
+          {/* Token info rows */}
+          <div className="space-y-1.5">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex justify-between pb-1.5">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
+          </div>
+
+          {/* Owner */}
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2">
+            <Skeleton className="h-8 flex-1 rounded-md" />
+            <Skeleton className="h-8 flex-1 rounded-md" />
+          </div>
+
+          <Skeleton className="h-3 w-36 mx-auto" />
+        </div>
       </div>
     );
   }
