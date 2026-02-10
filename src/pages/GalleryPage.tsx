@@ -20,6 +20,7 @@ import CreatorsPath from "@/components/CreatorsPath";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
+import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
@@ -1222,6 +1223,18 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="ledger" className="space-y-6">
+            {/* Ledger Window Banner */}
+            <div className="relative rounded-xl overflow-hidden border border-primary/20">
+              <img
+                src={councilLedgerWindow}
+                alt="Council of Life Ledger"
+                className="w-full h-40 md:h-56 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent flex items-end justify-center pb-5">
+                <h2 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg tracking-wide">Council of Life Ledger</h2>
+              </div>
+            </div>
+
             {/* Council of Life Window */}
             <div
               className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
