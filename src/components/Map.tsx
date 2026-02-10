@@ -849,6 +849,8 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         <TreeImportExport />
       </div>
 
+      <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
+
       <style>{`
         @keyframes ancientPulse {
           0%, 100% { filter: drop-shadow(0 0 2px hsla(42, 80%, 50%, 0.3)); }
