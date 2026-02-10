@@ -1,4 +1,4 @@
-import { Heart, TreeDeciduous } from "lucide-react";
+import { Heart, TreeDeciduous, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -28,13 +28,23 @@ const Footer = () => {
           </p>
         </div>
 
-        <div className="mt-4 flex justify-start">
+        <div className="mt-4 flex justify-start gap-4">
           <Link
             to="/assets"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             Assets
           </Link>
+          <button
+            onClick={() => {
+              localStorage.removeItem("ancient-friends-tour-seen");
+              window.location.href = "/";
+            }}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Restart Tour
+          </button>
         </div>
       </div>
     </footer>
