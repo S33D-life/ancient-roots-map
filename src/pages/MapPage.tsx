@@ -29,7 +29,7 @@ const MAP_CHOICES = [
 ];
 
 const SPECIES_QUICK = [
-  { key: "all", label: "All Species" },
+  { key: "all", label: "TETOL" },
   { key: "Oak", label: "Oak" },
   { key: "Yew", label: "Yew" },
   { key: "Beech", label: "Beech" },
