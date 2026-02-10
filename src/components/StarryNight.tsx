@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 
 const STAR_COUNT = 120;
-const SHOOTING_INTERVAL = 4000;
 
 const StarryNight = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,8 +26,6 @@ const StarryNight = () => {
       baseAlpha: number;
     }
 
-    // Shooting stars interface removed
-
     const stars: Star[] = Array.from({ length: STAR_COUNT }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -38,7 +35,18 @@ const StarryNight = () => {
       baseAlpha: Math.random() * 0.5 + 0.3,
     }));
 
-    // Shooting stars removed for cleaner aesthetic
+    let t = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      t += 1;
+
+      for (const s of stars) {
+        const alpha = s.baseAlpha + Math.sin(t * s.twinkleSpeed + s.phase) * 0.3;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(45, 80%, 90%, ${Math.max(0.05, alpha)})`;
+        ctx.fill();
+      }
 
       animationId = requestAnimationFrame(draw);
     };
@@ -50,7 +58,6 @@ const StarryNight = () => {
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
-      // Redistribute stars
       for (const s of stars) {
         s.x = Math.random() * width;
         s.y = Math.random() * height;
@@ -61,7 +68,6 @@ const StarryNight = () => {
 
     return () => {
       cancelAnimationFrame(animationId);
-      clearInterval(shootingTimer);
       window.removeEventListener("resize", handleResize);
     };
   }, []);
