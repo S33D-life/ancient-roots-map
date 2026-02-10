@@ -650,11 +650,21 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         </div>
       )}
 
-      {/* Parchment vignette overlay */}
+      {/* Living vignette — breathes with time of day */}
       <div className="absolute inset-0 pointer-events-none z-[1]" style={{
-        boxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
-        background: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
+        boxShadow: atmosphere.vignetteBoxShadow,
+        background: atmosphere.vignette,
+        animation: 'vignetteBreath 12s ease-in-out infinite',
+        transition: 'box-shadow 2s ease, background 2s ease',
       }} />
+
+      {/* Ambient glow layer — dusk warmth, dawn blush, night coolness */}
+      {atmosphere.ambientGlow !== 'none' && (
+        <div className="absolute inset-0 pointer-events-none z-[1]" style={{
+          background: atmosphere.ambientGlow,
+          animation: 'ambientDrift 20s ease-in-out infinite alternate',
+        }} />
+      )}
 
       {/* Drifting mist */}
       <MistOverlay />
