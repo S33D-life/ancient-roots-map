@@ -111,6 +111,7 @@ const GalleryPage = () => {
   const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string; tokenId: number } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
+  const [showMintingProgress, setShowMintingProgress] = useState(false);
    const [showSpiral, setShowSpiral] = useState(false);
   const [selectedGridStaff, setSelectedGridStaff] = useState<{ tokenId: number; code: string; speciesName: string; img: string } | null>(null);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
@@ -1137,9 +1138,6 @@ const GalleryPage = () => {
               </div>
             </div>
 
-            {/* Minting Status Dashboard */}
-            <MintingStatusDashboard />
-
             {/* Sacred Spiral of 36 — Toggle */}
             <div className="mb-12">
               <button
@@ -1363,6 +1361,22 @@ const GalleryPage = () => {
                   All 144 staffs minted as NFTs · Digital twins coming soon
                 </p>
               </div>
+            </div>
+
+            {/* Minting Progress — collapsible */}
+            <div>
+              <button
+                onClick={() => setShowMintingProgress(!showMintingProgress)}
+                className="w-full flex items-center justify-center gap-2 py-4 text-primary/80 hover:text-primary font-serif text-lg transition-colors group"
+              >
+                <span>{showMintingProgress ? 'Hide' : 'Show'} Minting Progress</span>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${showMintingProgress ? 'rotate-180' : ''}`} />
+              </button>
+              {showMintingProgress && (
+                <div className="animate-fade-in">
+                  <MintingStatusDashboard />
+                </div>
+              )}
             </div>
           </TabsContent>
 
