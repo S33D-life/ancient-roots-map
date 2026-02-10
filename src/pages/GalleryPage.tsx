@@ -552,18 +552,18 @@ const GalleryPage = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Hero artwork */}
-                <div className="relative rounded-xl overflow-hidden border border-primary/30">
+                <div className="relative rounded-xl overflow-hidden border border-primary/30 w-fit mx-auto">
                   <img
                     src={treeRadioArt}
                     alt="Tree Radio"
-                    className="w-full h-48 md:h-56 object-cover object-center"
+                    className="h-24 md:h-28 w-auto object-contain"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-2xl md:text-3xl font-serif text-primary tracking-wider" style={{ textShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}>
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-center">
+                    <h3 className="text-lg md:text-xl font-serif text-primary tracking-wider" style={{ textShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}>
                       Tree Radio
                     </h3>
-                    <p className="text-sm text-foreground/70 font-serif mt-1">
+                    <p className="text-xs text-foreground/70 font-serif mt-0.5">
                       Every tree has a song. Tune in on the Arboreal Atlas.
                     </p>
                   </div>
