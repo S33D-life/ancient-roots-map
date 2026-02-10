@@ -90,7 +90,7 @@ const OnboardingTour = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -16, scale: 0.96 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative w-full max-w-md bg-card border border-primary/30 rounded-2xl shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md bg-popover border-2 border-primary/50 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-none"
           >
             {/* Progress bar */}
             <div className="h-1 bg-muted">
@@ -117,8 +117,8 @@ const OnboardingTour = () => {
 
               {/* Content */}
               <div className="space-y-2">
-                <h3 className="text-xl font-serif font-bold text-foreground">{current.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{current.description}</p>
+                <h3 className="text-xl font-serif font-bold text-primary">{current.title}</h3>
+                <p className="text-sm text-card-foreground/90 leading-relaxed">{current.description}</p>
               </div>
 
               {/* Actions */}
