@@ -165,8 +165,8 @@ const AnimatedCounter = ({ target, label }: { target: number; label: string }) =
 
   return (
     <div className="space-y-2" ref={ref}>
-      <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{count.toLocaleString()}</div>
-      <div className="text-sm text-muted-foreground">{label}</div>
+      <div className="text-4xl md:text-4xl font-serif font-bold text-mystical">{count.toLocaleString()}</div>
+      <div className="text-xs md:text-sm text-muted-foreground">{label}</div>
     </div>
   );
 };
@@ -225,14 +225,14 @@ const Hero = () => {
 
         {/* CTA buttons pinned near bottom */}
         <div className="absolute bottom-24 left-0 right-0 flex flex-col items-center gap-4 px-4">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="mystical" size="lg" className="min-w-[200px]" asChild>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none">
+            <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base py-4 sm:py-3" asChild>
               <Link to="/map">
                 <MapPin className="w-5 h-5 mr-2" />
                 Arrive on the Atlas
               </Link>
             </Button>
-            <Button variant="sacred" size="lg" className="min-w-[200px]" asChild>
+            <Button variant="sacred" size="lg" className="min-w-[220px] w-full sm:w-auto text-base py-4 sm:py-3" asChild>
               <Link to="/map?addTree=true">
                 <TreeDeciduous className="w-5 h-5 mr-2" />
                 Claim a Tree Encounter
