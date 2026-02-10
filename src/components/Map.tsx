@@ -186,6 +186,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
+  const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
