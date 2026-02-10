@@ -84,7 +84,7 @@ const GoldenDreamPage = () => {
             <img
               src={goldenDreamBanner}
               alt="yOur Golden Dream"
-              className="w-full h-40 md:h-56 object-cover"
+              className="w-full h-32 md:h-40 object-cover"
             />
           </div>
 
