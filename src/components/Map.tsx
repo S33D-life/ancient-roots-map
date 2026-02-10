@@ -239,6 +239,8 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
   const [userId, setUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [timeOfDay] = useState<TimeOfDay>(getTimeOfDay);
+  const atmosphere = TIME_ATMOSPHERES[timeOfDay];
   const { toast } = useToast();
 
   // Get current user
