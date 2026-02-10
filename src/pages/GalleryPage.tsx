@@ -648,11 +648,11 @@ const GalleryPage = () => {
           <TabsContent value="gallery" className="space-y-8">
 
             {/* Ancient Friends Window Banner */}
-            <div className="relative w-full rounded-xl overflow-hidden border border-amber-700/40" style={{ maxHeight: '280px' }}>
+            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
               <img 
                 src={ancientFriendsWindow} 
                 alt="Ancient Friends" 
-                className="w-full h-full object-cover object-center"
+                className="w-full h-auto object-contain"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
