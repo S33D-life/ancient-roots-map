@@ -405,7 +405,15 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         attributionControl: false,
       });
 
-      m.on('load', () => setMapStatus("ready"));
+      m.on('load', () => {
+        setMapStatus("ready");
+        const c = m.getCenter();
+        setMapCenter({ lat: c.lat, lng: c.lng });
+      });
+      m.on('moveend', () => {
+        const c = m.getCenter();
+        setMapCenter({ lat: c.lat, lng: c.lng });
+      });
       m.on('error', (e) => {
         console.error('Mapbox error:', e);
         setMapStatus("error");
