@@ -651,6 +651,23 @@ const GalleryPage = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30 md:from-black/80 md:via-black/30 md:to-black/50" />
         </div>
 
+        {/* Mushrooms & Moss — dissolve after 3.3s */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none"
+          style={{
+            animation: 'mushroomDissolve 1.2s ease-out 3.3s forwards',
+          }}
+        >
+          <AmanitaFlush position="bottom" />
+        </div>
+        <style>{`
+          @keyframes mushroomDissolve {
+            0% { opacity: 1; filter: blur(0px); }
+            60% { opacity: 0.4; filter: blur(2px); }
+            100% { opacity: 0; filter: blur(6px); }
+          }
+        `}</style>
+
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
           <h1 className="text-5xl md:text-7xl font-serif text-amber-400/90 tracking-wider mb-4 text-center" style={{ textShadow: '0 0 40px hsl(35 80% 30% / 0.6)' }}>

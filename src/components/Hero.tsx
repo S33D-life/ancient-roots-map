@@ -4,7 +4,7 @@ import heroTree from "@/assets/hero-tree.jpg";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import AmanitaFlush from "@/components/AmanitaFlush";
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Fairy dust particle
