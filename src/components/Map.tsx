@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
+import MapIdleNudge from "./MapIdleNudge";
 
 type TimeOfDay = "dawn" | "day" | "dusk" | "night";
 
