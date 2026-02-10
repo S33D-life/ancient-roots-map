@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye } from "lucide-react";
 import {
   getSpiralStaffs,
   getGridStaffs,
@@ -31,6 +31,7 @@ import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
 import CreatorsPath from "@/components/CreatorsPath";
 import MintingStatusDashboard from "@/components/MintingStatusDashboard";
+import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
@@ -107,10 +108,11 @@ const GalleryPage = () => {
   const [activeString, setActiveString] = useState<"oak" | "yew" | "beech" | "ash" | "holly">("oak");
   const [spiralSort, setSpiralSort] = useState<string>("spiral");
   const [hoveredSpiralStaff, setHoveredSpiralStaff] = useState<string | null>(null);
-  const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string } | null>(null);
+  const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string; tokenId: number } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
-  const [showSpiral, setShowSpiral] = useState(false);
+   const [showSpiral, setShowSpiral] = useState(false);
+  const [selectedGridStaff, setSelectedGridStaff] = useState<{ tokenId: number; code: string; speciesName: string; img: string } | null>(null);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
   const [showBirdTribe, setShowBirdTribe] = useState(false);
   const [savedSongs, setSavedSongs] = useState<{ id: string; title: string; artist: string; link: string | null; notes: string | null; created_at: string }[]>([]);
@@ -1228,6 +1230,7 @@ const GalleryPage = () => {
                               length: staff.length,
                               weight: staff.weight,
                               image: staff.image,
+                              tokenId: i + 1,
                             })}
                           >
                             <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-primary/80 text-primary-foreground text-[6px] flex items-center justify-center font-bold z-10">
@@ -1293,7 +1296,7 @@ const GalleryPage = () => {
                 {(() => {
                   const allStaffs = getGridStaffs();
                   return allStaffs.map((staff, i) => (
-                    <Card key={i} id={`staff-grid-${i}`} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden">
+                    <Card key={i} id={`staff-grid-${i}`} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden" onClick={() => setSelectedGridStaff({ tokenId: staff.tokenId, code: staff.code, speciesName: staff.speciesName, img: staff.img })}>
                       <CardContent className="p-4 text-center">
                         <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors overflow-hidden">
                           <img src={staff.img} alt={`Staff ${staff.code}`} className="w-full h-full object-cover" />
@@ -1961,21 +1964,51 @@ const GalleryPage = () => {
                     getSpiralStaffs().findIndex(s => s.displayCode === selectedSpiralStaff.code) + 1
                   } on the sacred spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full mt-3 gap-2 font-serif text-xs"
-                  onClick={() => handleShare(
-                    `${selectedSpiralStaff.species} Staff`,
-                    `The ${selectedSpiralStaff.species} staff (${selectedSpiralStaff.code}) — ${selectedSpiralStaff.length}, ${selectedSpiralStaff.weight}. One of 144 sacred staffs.`,
-                    `${window.location.origin}/library`
-                  )}
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share Staff
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2 font-serif text-xs"
+                    onClick={() => handleShare(
+                      `${selectedSpiralStaff.species} Staff`,
+                      `The ${selectedSpiralStaff.species} staff (${selectedSpiralStaff.code}) — ${selectedSpiralStaff.length}, ${selectedSpiralStaff.weight}. One of 144 sacred staffs.`,
+                      `${window.location.origin}/library`
+                    )}
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2 font-serif text-xs"
+                    onClick={() => {
+                      setSelectedSpiralStaff(null);
+                      setSelectedGridStaff({
+                        tokenId: selectedSpiralStaff.tokenId,
+                        code: selectedSpiralStaff.code,
+                        speciesName: selectedSpiralStaff.species,
+                        img: selectedSpiralStaff.image,
+                      });
+                    }}
+                  >
+                    <Eye className="w-4 h-4" />
+                    On-Chain
+                  </Button>
+                </div>
               </div>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* Grid Staff IPFS Metadata Dialog */}
+      <Dialog open={!!selectedGridStaff} onOpenChange={(open) => !open && setSelectedGridStaff(null)}>
+        <DialogContent className="max-w-md p-0 overflow-hidden border-primary/40 max-h-[90vh] overflow-y-auto">
+          {selectedGridStaff && (
+            <IpfsMetadataViewer
+              tokenId={selectedGridStaff.tokenId}
+              fallbackImage={selectedGridStaff.img}
+            />
           )}
         </DialogContent>
       </Dialog>
