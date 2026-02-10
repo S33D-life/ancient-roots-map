@@ -6,6 +6,7 @@ const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
+import ChatPanel from "@/components/ChatPanel";
 import PasswordGate, { isAuthenticated } from "@/components/PasswordGate";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -52,6 +53,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <StarryNight />
+        <ChatPanel />
         
         <BrowserRouter>
           <TetolLevelProvider>
