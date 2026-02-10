@@ -3,12 +3,17 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 import goldenDreamSplash from "@/assets/golden-dream-splash.jpeg";
+import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
 const GoldenDreamPage = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [coverDismissed, setCoverDismissed] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,15 +78,34 @@ const GoldenDreamPage = () => {
               Full Screen
             </Button>
           </div>
-          <iframe
-            src="https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413"
-            width="100%"
-            height="800"
-            frameBorder="0"
-            allowFullScreen
-            className="rounded-xl border border-border/40"
-            title="yOur Golden Dream"
-          />
+          <div className="relative rounded-xl border border-border/40 overflow-hidden">
+            <iframe
+              src="https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413"
+              width="100%"
+              height="800"
+              frameBorder="0"
+              allowFullScreen
+              title="yOur Golden Dream"
+            />
+            {/* Night mode cover */}
+            {isDark && !coverDismissed && (
+              <div
+                className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-700"
+                onClick={() => setCoverDismissed(true)}
+              >
+                <img
+                  src={goldenDreamNight}
+                  alt="yOur Golden Dream"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-8 left-0 right-0 text-center">
+                  <p className="text-xs font-serif tracking-[0.3em] uppercase animate-pulse" style={{ color: 'hsl(40 60% 65%)' }}>
+                    Tap to enter
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </main>
       <Footer />
