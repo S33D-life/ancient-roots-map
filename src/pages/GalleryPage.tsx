@@ -175,6 +175,8 @@ const GalleryPage = () => {
     }
   };
 
+  const [wishlistPulseId, setWishlistPulseId] = useState<string | null>(null);
+
   const addToWishlist = async (treeId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -197,6 +199,8 @@ const GalleryPage = () => {
         return;
       }
 
+      setWishlistPulseId(treeId);
+      setTimeout(() => setWishlistPulseId(null), 600);
       toast.success("Tree added to your Wishing Tree!");
       fetchWishlist();
     } catch (error) {
@@ -723,7 +727,16 @@ const GalleryPage = () => {
                           }}
                           className="w-full"
                         >
-                          <Heart className="w-4 h-4 mr-2 text-[hsl(39,50%,72%)]" />
+                          <Heart
+                            className="w-4 h-4 mr-2 transition-all duration-300"
+                            style={wishlistPulseId === tree.id ? {
+                              transform: 'scale(1.3)',
+                              color: 'hsl(39, 80%, 55%)',
+                              filter: 'drop-shadow(0 0 8px hsl(39, 80%, 55% / 0.6))',
+                            } : {
+                              color: 'hsl(39, 50%, 72%)',
+                            }}
+                          />
                           Add to Wishing Tree
                         </Button>
                       </div>

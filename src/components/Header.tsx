@@ -156,8 +156,9 @@ const Header = () => {
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSearchOpen(true)} title="Search">
               <Search className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"}>
-              {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
+            <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden">
+              <Sunrise className={`w-4 h-4 absolute transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />
+              <Stars className={`w-4 h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
             </Button>
             {user ? (
               <Link
