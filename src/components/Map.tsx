@@ -618,14 +618,24 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       </div>
 
       <style>{`
+        @keyframes ancientPulse {
+          0%, 100% { filter: drop-shadow(0 0 2px hsla(42, 80%, 50%, 0.3)); }
+          50% { filter: drop-shadow(0 0 8px hsla(42, 80%, 50%, 0.6)); }
+        }
         .tree-popup .mapboxgl-popup-content {
           background: hsl(120, 40%, 15%);
           border: 1px solid hsl(45, 60%, 40%);
-          border-radius: 8px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+          border-radius: 10px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px hsla(45, 60%, 40%, 0.1);
+          padding: 0;
         }
         .tree-popup .mapboxgl-popup-tip {
           border-top-color: hsl(120, 40%, 15%);
+        }
+        .tree-popup .mapboxgl-popup-close-button {
+          color: hsl(45, 60%, 50%);
+          font-size: 18px;
+          padding: 4px 8px;
         }
       `}</style>
     </div>
