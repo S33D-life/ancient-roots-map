@@ -1,18 +1,44 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, BookOpen, Cherry, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 import goldenDreamSplash from "@/assets/golden-dream-splash.jpeg";
 import goldenDreamBanner from "@/assets/golden-dream-banner.jpeg";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
+
+const goldenDreamRooms = [
+  {
+    id: "current",
+    title: "Current Version",
+    description: "The living document of yOur Golden Dream",
+    icon: BookOpen,
+    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413",
+  },
+  {
+    id: "fruit",
+    title: "Popular Fruit",
+    description: "Next S33D likely to Sprout",
+    icon: Cherry,
+    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413",
+  },
+  {
+    id: "archives",
+    title: "Archives",
+    description: "Past versions of the Golden Dream",
+    icon: Archive,
+    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413",
+  },
+];
 
 const GoldenDreamPage = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverDismissed, setCoverDismissed] = useState(false);
+  const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
@@ -40,7 +66,8 @@ const GoldenDreamPage = () => {
     );
   }
 
-  if (isFullscreen) {
+  if (isFullscreen && activeRoom) {
+    const room = goldenDreamRooms.find((r) => r.id === activeRoom);
     return (
       <div className="fixed inset-0 z-50 bg-background">
         <Button
@@ -52,69 +79,122 @@ const GoldenDreamPage = () => {
           <Minimize2 className="h-4 w-4" />
         </Button>
         <iframe
-          src="https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413"
+          src={room?.notionUrl}
           width="100%"
           height="100%"
           frameBorder="0"
           allowFullScreen
-          title="yOur Golden Dream"
+          title={room?.title}
         />
       </div>
     );
   }
 
+  if (activeRoom) {
+    const room = goldenDreamRooms.find((r) => r.id === activeRoom);
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header />
+        <main className="pt-28 pb-8 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveRoom(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ← Back to Golden Dream
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setIsFullscreen(true)}
+              >
+                <Maximize2 className="h-4 w-4" />
+                Full Screen
+              </Button>
+            </div>
+
+            <div className="relative rounded-xl border border-border/40 overflow-hidden">
+              <iframe
+                src={room?.notionUrl}
+                width="100%"
+                height="800"
+                frameBorder="0"
+                allowFullScreen
+                title={room?.title}
+              />
+              {isDark && !coverDismissed && (
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-700"
+                  onClick={() => setCoverDismissed(true)}
+                >
+                  <img
+                    src={goldenDreamNight}
+                    alt="yOur Golden Dream"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-8 left-0 right-0 text-center">
+                    <p className="text-xs font-serif tracking-[0.3em] uppercase animate-pulse" style={{ color: 'hsl(40 60% 65%)' }}>
+                      Tap to enter
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Home screen
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="pt-28 pb-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-end mb-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => setIsFullscreen(true)}
-            >
-              <Maximize2 className="h-4 w-4" />
-              Full Screen
-            </Button>
-          </div>
-          {/* Banner */}
-          <div className="rounded-xl overflow-hidden border border-border/40 mb-4 flex justify-center">
-            <img
-              src={goldenDreamBanner}
-              alt="yOur Golden Dream"
-              className="w-auto max-w-full h-64 md:h-80 object-contain"
-            />
-          </div>
+      <main className="relative pt-20 pb-8">
+        {/* Background image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={goldenDreamBanner}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
+        </div>
 
-          <div className="relative rounded-xl border border-border/40 overflow-hidden">
-            <iframe
-              src="https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413"
-              width="100%"
-              height="800"
-              frameBorder="0"
-              allowFullScreen
-              title="yOur Golden Dream"
-            />
-            {/* Night mode cover */}
-            {isDark && !coverDismissed && (
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-700"
-                onClick={() => setCoverDismissed(true)}
-              >
-                <img
-                  src={goldenDreamNight}
-                  alt="yOur Golden Dream"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-8 left-0 right-0 text-center">
-                  <p className="text-xs font-serif tracking-[0.3em] uppercase animate-pulse" style={{ color: 'hsl(40 60% 65%)' }}>
-                    Tap to enter
-                  </p>
-                </div>
-              </div>
-            )}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-12">
+          <h1 className="text-4xl md:text-5xl font-serif text-center mb-3 tracking-wider drop-shadow-lg">
+            yOur Golden Dream
+          </h1>
+          <p className="text-center text-muted-foreground mb-12 text-lg font-serif italic">
+            A living vision for the future
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            {goldenDreamRooms.map((room) => {
+              const Icon = room.icon;
+              return (
+                <Card
+                  key={room.id}
+                  className="cursor-pointer bg-card/60 backdrop-blur-sm border-border/50 hover:bg-card/80 hover:border-primary/40 hover:glow-subtle transition-all duration-300 group"
+                  onClick={() => setActiveRoom(room.id)}
+                >
+                  <CardHeader className="text-center p-4 md:p-6">
+                    <Icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
+                    <CardTitle className="text-base md:text-lg font-serif tracking-wide">
+                      {room.title}
+                    </CardTitle>
+                    <CardDescription className="text-xs md:text-sm">
+                      {room.description}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </main>
