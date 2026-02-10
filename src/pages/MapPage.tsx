@@ -57,14 +57,14 @@ const MapPage = () => {
             splashPhase === "s33d" ? "opacity-100" : "opacity-0"
           }`}
         >
-          <img src={atlasSplash} alt="S33D" className="max-w-xs w-1/2 rounded-lg animate-fade-in" />
+          <img src={atlasSplash} alt="S33D" className="max-w-xs w-1/2 rounded-lg animate-fade-in" loading="eager" decoding="async" />
         </div>
         <div
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
             splashPhase === "ancient" ? "opacity-100" : splashPhase === "fading" ? "opacity-0" : "opacity-0"
           }`}
         >
-          <img src={atlasSplash2} alt="Ancient Friends" className="max-w-sm w-2/3 rounded-lg" />
+          <img src={atlasSplash2} alt="Ancient Friends" className="max-w-sm w-2/3 rounded-lg" loading="eager" decoding="async" />
         </div>
       </div>
     );
