@@ -109,6 +109,7 @@ const DashboardPage = () => {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [plantCount, setPlantCount] = useState(0);
+  const [offeringCount, setOfferingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -127,6 +128,7 @@ const DashboardPage = () => {
           fetchProfile(session.user.id);
           fetchUserTrees(session.user.id);
           fetchPlantCount(session.user.id);
+          fetchOfferingCount(session.user.id);
         }, 0);
       }
     });
@@ -140,6 +142,7 @@ const DashboardPage = () => {
         fetchProfile(session.user.id);
         fetchUserTrees(session.user.id);
         fetchPlantCount(session.user.id);
+        fetchOfferingCount(session.user.id);
       }
       setLoading(false);
     });
@@ -160,6 +163,11 @@ const DashboardPage = () => {
   const fetchPlantCount = async (userId: string) => {
     const { count } = await supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId);
     setPlantCount(count || 0);
+  };
+
+  const fetchOfferingCount = async (userId: string) => {
+    const { count } = await supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId);
+    setOfferingCount(count || 0);
   };
 
   const handleSignOut = async () => {
@@ -322,6 +330,7 @@ const DashboardPage = () => {
                 treeCount={trees.length}
                 wishlistCount={wishlistCount}
                 plantCount={plantCount}
+                offeringCount={offeringCount}
               />
             </TabsContent>
 

@@ -1,11 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { TreeDeciduous, Leaf, BookOpen, Star, Sprout, Map } from "lucide-react";
 import { Link } from "react-router-dom";
+import DashboardRewards from "./DashboardRewards";
 
 interface OverviewProps {
   treeCount: number;
   wishlistCount: number;
   plantCount: number;
+  offeringCount: number;
 }
 
 const stats = (props: OverviewProps) => [
@@ -20,6 +22,14 @@ const DashboardOverview = (props: OverviewProps) => {
 
   return (
     <div className="space-y-8">
+      {/* S33D Hearts Rewards */}
+      <DashboardRewards
+        treeCount={props.treeCount}
+        wishlistCount={props.wishlistCount}
+        plantCount={props.plantCount}
+        offeringCount={props.offeringCount}
+      />
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.map((stat) => (
