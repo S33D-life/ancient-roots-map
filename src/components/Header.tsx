@@ -146,7 +146,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* TEOTAG logo — single click goes home, double-click opens TETOL, hover opens search */}
           <div className="relative group">
-            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick} onMouseEnter={handleTeotagHover}>
+            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
               <img 
                 src={teotagLogo} 
                 alt="TEOTAG — Click to go home" 
