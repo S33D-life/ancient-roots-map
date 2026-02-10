@@ -144,14 +144,14 @@ const Header = () => {
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
-          {/* TEOTAG logo — single click opens guide, double-click opens TETOL */}
+          {/* TEOTAG logo — single click goes home, double-click opens TETOL, hover opens search */}
           <div className="relative group">
-            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
+            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick} onMouseEnter={handleTeotagHover}>
               <img 
                 src={teotagLogo} 
-                alt="TEOTAG — Click to ask the grove guide" 
+                alt="TEOTAG — Click to go home" 
                 className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300 hover:scale-105"
-                title="Click for TEOTAG guide · Double-click for TETOL"
+                title="Click for Home · Hover for Search · Double-click for TETOL"
               />
             </button>
             {/* Hover tooltip — desktop only */}
