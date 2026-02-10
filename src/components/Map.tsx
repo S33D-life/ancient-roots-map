@@ -368,10 +368,10 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
           <p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(45, 60%, 50%);">📍 ${tree.what3words}</p>
           ${tree.description ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%); line-height: 1.4;">${tree.description.substring(0, 100)}${tree.description.length > 100 ? '\u2026' : ''}</p>` : ''}
           <a href="/tree/${tree.id}" style="display: block; margin-top: 10px; padding: 6px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(42, 88%, 50%), hsl(45, 100%, 60%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.1em; font-weight: 600;">View Ancient Friend &#10230;</a>
-          <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;">
-            <a href="/tree/${tree.id}?add=photo" style="font-size: 10px; color: hsl(120, 60%, 50%); text-decoration: none; padding: 2px 6px; border: 1px solid hsla(120,60%,50%,0.3); border-radius: 4px;">+ Memory</a>
-            <a href="/tree/${tree.id}?add=song" style="font-size: 10px; color: hsl(200, 60%, 50%); text-decoration: none; padding: 2px 6px; border: 1px solid hsla(200,60%,50%,0.3); border-radius: 4px;">+ Song</a>
-            <a href="/tree/${tree.id}?add=story" style="font-size: 10px; color: hsl(280, 60%, 50%); text-decoration: none; padding: 2px 6px; border: 1px solid hsla(280,60%,50%,0.3); border-radius: 4px;">+ Musing</a>
+          <div style="margin-top: 8px; display: flex; gap: 8px; justify-content: center;">
+            <a href="/tree/${tree.id}?add=photo" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(120, 60%, 50%); text-decoration: none; border: 1px solid hsla(120,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Memory">📷</a>
+            <a href="/tree/${tree.id}?add=song" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(200, 60%, 50%); text-decoration: none; border: 1px solid hsla(200,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Song">🎵</a>
+            <a href="/tree/${tree.id}?add=story" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(280, 60%, 50%); text-decoration: none; border: 1px solid hsla(280,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Musing">💭</a>
           </div>
         </div>
       `);
@@ -489,30 +489,32 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       <ConversionStatus />
 
       {/* Top bar: view toggle + filters + count */}
-      <Card className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-background/95 backdrop-blur border-border shadow-lg">
-        <div className="flex items-center gap-3 p-3">
+      <Card className="absolute top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-10 bg-background/95 backdrop-blur border-border shadow-lg">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 sm:p-3">
           <Tabs value={viewMode} onValueChange={setViewMode}>
-            <TabsList className="bg-muted">
-              <TabsTrigger value="collective">Collective</TabsTrigger>
-              <TabsTrigger value="personal">Personal Groves</TabsTrigger>
+            <TabsList className="bg-muted w-full sm:w-auto">
+              <TabsTrigger value="collective" className="flex-1 sm:flex-initial text-xs sm:text-sm">Collective</TabsTrigger>
+              <TabsTrigger value="personal" className="flex-1 sm:flex-initial text-xs sm:text-sm">Personal Groves</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <MapFilters
-            speciesFilter={speciesFilter}
-            onSpeciesChange={setSpeciesFilter}
-            groveScale={groveScale}
-            onGroveScaleChange={setGroveScale}
-            treeCounts={treeCounts}
-            totalTrees={trees.length}
-          />
+          <div className="flex items-center gap-2 justify-between sm:justify-start">
+            <MapFilters
+              speciesFilter={speciesFilter}
+              onSpeciesChange={setSpeciesFilter}
+              groveScale={groveScale}
+              onGroveScaleChange={setGroveScale}
+              treeCounts={treeCounts}
+              totalTrees={trees.length}
+            />
 
-          <span className="text-sm text-muted-foreground whitespace-nowrap">
-            {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
-            {groveScale !== "all" && speciesFilter !== "all" && (
-              <span className="text-primary ml-1">({groveScale} grove)</span>
-            )}
-          </span>
+            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+              {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
+              {groveScale !== "all" && speciesFilter !== "all" && (
+                <span className="text-primary ml-1">({groveScale} grove)</span>
+              )}
+            </span>
+          </div>
         </div>
       </Card>
 

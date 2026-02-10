@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +44,8 @@ const TreeDetailPage = () => {
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<OfferingType>("photo");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   // Handle ?add=type query param
   useEffect(() => {
@@ -179,19 +182,43 @@ const TreeDetailPage = () => {
             </div>
 
             {tree.description && (
-              <p className="text-foreground/80 font-serif leading-relaxed border-l-2 border-primary/30 pl-4 my-4">
-                {tree.description}
-              </p>
+              <div className="border-l-2 border-primary/30 pl-4 my-4">
+                <p className={`text-foreground/80 font-serif leading-relaxed ${!descExpanded ? 'line-clamp-3' : ''}`}>
+                  {tree.description}
+                </p>
+                {tree.description.length > 150 && (
+                  <button
+                    onClick={() => setDescExpanded(!descExpanded)}
+                    className="text-primary/70 hover:text-primary text-sm font-serif mt-1 transition-colors"
+                  >
+                    {descExpanded ? 'Read less' : 'Read more...'}
+                  </button>
+                )}
+              </div>
             )}
 
-            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-4 font-serif">
-              {tree.nation && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌍 {tree.nation}</span>}
-              {tree.state && <span className="bg-secondary/50 px-3 py-1 rounded-full">📍 {tree.state}</span>}
-              {tree.bioregion && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌿 {tree.bioregion}</span>}
-              {tree.estimated_age && (
-                <span className="bg-secondary/50 px-3 py-1 rounded-full">🕰️ ~{tree.estimated_age} years</span>
-              )}
-            </div>
+            {/* Collapsible metadata details */}
+            {(tree.nation || tree.state || tree.bioregion || tree.estimated_age) && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setDetailsOpen(!detailsOpen)}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-serif transition-colors"
+                >
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`} />
+                  {detailsOpen ? 'Hide details' : 'Show details'}
+                </button>
+                {detailsOpen && (
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-3 font-serif animate-fade-in">
+                    {tree.nation && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌍 {tree.nation}</span>}
+                    {tree.state && <span className="bg-secondary/50 px-3 py-1 rounded-full">📍 {tree.state}</span>}
+                    {tree.bioregion && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌿 {tree.bioregion}</span>}
+                    {tree.estimated_age && (
+                      <span className="bg-secondary/50 px-3 py-1 rounded-full">🕰️ ~{tree.estimated_age} years</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
