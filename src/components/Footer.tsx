@@ -1,4 +1,4 @@
-import { Heart, TreeDeciduous, RotateCcw } from "lucide-react";
+import { Heart, TreeDeciduous, RotateCcw, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -36,6 +36,17 @@ const Footer = () => {
           >
             <RotateCcw className="w-3 h-3" />
             Restart Tour
+          </button>
+          <Dot />
+          <button
+            onClick={() => {
+              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+            }}
+            className="inline-flex items-center gap-1.5 hover:text-primary transition-colors"
+            title="Search (⌘K)"
+          >
+            <Search className="w-3 h-3" />
+            <span className="font-mono text-[10px] opacity-60">⌘K</span>
           </button>
           <Dot />
           <span className="text-xs text-muted-foreground/60">EST 2016 · hello@s33d.life</span>

@@ -144,15 +144,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            {/* ⌘K search hint */}
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border/50 bg-muted/30 text-muted-foreground text-xs hover:text-foreground hover:border-border transition-colors"
-              title="Search (⌘K)"
-            >
-              <Search className="w-3 h-3" />
-              <span className="font-mono text-[10px] opacity-60">⌘K</span>
-            </button>
+            {/* Mobile search button only */}
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSearchOpen(true)} title="Search">
               <Search className="w-4 h-4" />
             </Button>
