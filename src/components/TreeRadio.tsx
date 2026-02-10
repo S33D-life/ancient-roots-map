@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Radio, Play, Pause, SkipForward, Volume2, VolumeX, Music, X } from "lucide-react";
+import { Radio, Play, Pause, SkipForward, Volume2, VolumeX, Music, X, TreeDeciduous, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SongOffering {
@@ -72,8 +72,36 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   const [loading, setLoading] = useState(false);
   const [currentPreview, setCurrentPreview] = useState<ItunesPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [localSpecies, setLocalSpecies] = useState(speciesFilter);
+  const [availableSpecies, setAvailableSpecies] = useState<string[]>([]);
+  const [showTuner, setShowTuner] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const activeFilter = localSpecies;
+
+  // Fetch available species that have song offerings
+  useEffect(() => {
+    const fetchSpecies = async () => {
+      const { data } = await supabase
+        .from("offerings")
+        .select("tree_id")
+        .eq("type", "song");
+      if (!data || data.length === 0) return;
+
+      const treeIds = [...new Set(data.map((d) => d.tree_id))];
+      const { data: treesData } = await supabase
+        .from("trees")
+        .select("species")
+        .in("id", treeIds);
+
+      if (treesData) {
+        const unique = [...new Set(treesData.map((t) => t.species))].sort();
+        setAvailableSpecies(unique);
+      }
+    };
+    fetchSpecies();
+  }, []);
 
   // Fetch songs by species
   useEffect(() => {
@@ -91,7 +119,6 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
         return;
       }
 
-      // Get tree info for these songs
       const treeIds = [...new Set(songData.map((s) => s.tree_id))];
       const { data: treesData } = await supabase
         .from("trees")
@@ -114,8 +141,8 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
           };
         })
         .filter((s) => {
-          if (speciesFilter === "all") return true;
-          return s.species.toLowerCase().includes(speciesFilter.toLowerCase());
+          if (activeFilter === "all") return true;
+          return s.species.toLowerCase().includes(activeFilter.toLowerCase());
         });
 
       setSongs(enriched);
@@ -125,7 +152,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
     };
 
     fetchSongs();
-  }, [speciesFilter]);
+  }, [activeFilter]);
 
   // Fetch iTunes preview when current song changes
   useEffect(() => {
@@ -194,7 +221,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   }, [playlist.length]);
 
   const currentSong = playlist[currentIndex];
-  const stationName = speciesFilter === "all" ? "All Species" : speciesFilter;
+  const stationName = activeFilter === "all" ? "All Species" : activeFilter;
 
   return (
     <>
@@ -268,6 +295,57 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
               <button onClick={() => setIsOpen(false)} className="text-amber-300/40 hover:text-amber-300/80 transition-colors">
                 <X className="h-4 w-4" />
               </button>
+            </div>
+
+            {/* Grove Tuner */}
+            <div className="px-4 py-2 border-b relative" style={{ borderColor: "hsl(42 40% 25% / 0.3)" }}>
+              <button
+                onClick={() => setShowTuner(!showTuner)}
+                className="flex items-center gap-2 w-full text-left"
+              >
+                <TreeDeciduous className="h-3.5 w-3.5 text-amber-400/60" />
+                <span className="text-[11px] font-serif text-amber-300/70 tracking-wider flex-1">
+                  Tuned to: <span className="text-amber-200/90">{stationName}</span>
+                </span>
+                <ChevronDown className={`h-3 w-3 text-amber-400/50 transition-transform ${showTuner ? "rotate-180" : ""}`} />
+              </button>
+              <AnimatePresence>
+                {showTuner && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-2 pb-1 flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
+                      <button
+                        onClick={() => { setLocalSpecies("all"); setShowTuner(false); }}
+                        className={`text-[10px] font-serif px-2 py-1 rounded-full border transition-all ${
+                          activeFilter === "all"
+                            ? "bg-amber-400/20 border-amber-400/40 text-amber-200"
+                            : "border-amber-400/15 text-amber-300/50 hover:text-amber-300 hover:border-amber-400/30"
+                        }`}
+                      >
+                        All Species
+                      </button>
+                      {availableSpecies.map((sp) => (
+                        <button
+                          key={sp}
+                          onClick={() => { setLocalSpecies(sp); setShowTuner(false); }}
+                          className={`text-[10px] font-serif px-2 py-1 rounded-full border transition-all ${
+                            activeFilter.toLowerCase() === sp.toLowerCase()
+                              ? "bg-amber-400/20 border-amber-400/40 text-amber-200"
+                              : "border-amber-400/15 text-amber-300/50 hover:text-amber-300 hover:border-amber-400/30"
+                          }`}
+                        >
+                          {sp}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Content */}
