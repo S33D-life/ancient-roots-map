@@ -22,6 +22,7 @@ export type Database = {
           id: string
           media_url: string | null
           nft_link: string | null
+          sealed_by_staff: string | null
           title: string
           tree_id: string
           type: Database["public"]["Enums"]["offering_type"]
@@ -33,6 +34,7 @@ export type Database = {
           id?: string
           media_url?: string | null
           nft_link?: string | null
+          sealed_by_staff?: string | null
           title: string
           tree_id: string
           type: Database["public"]["Enums"]["offering_type"]
@@ -44,6 +46,7 @@ export type Database = {
           id?: string
           media_url?: string | null
           nft_link?: string | null
+          sealed_by_staff?: string | null
           title?: string
           tree_id?: string
           type?: Database["public"]["Enums"]["offering_type"]
