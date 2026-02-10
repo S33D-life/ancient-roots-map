@@ -23,6 +23,7 @@ import councilImage from "@/assets/council-of-life.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
+import ancientFriendsWindow from "@/assets/ancient-friends-window.jpeg";
 import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
@@ -626,6 +627,16 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="gallery" className="space-y-8">
+
+            {/* Ancient Friends Window Banner */}
+            <div className="relative w-full rounded-xl overflow-hidden border border-amber-700/40" style={{ maxHeight: '280px' }}>
+              <img 
+                src={ancientFriendsWindow} 
+                alt="Ancient Friends" 
+                className="w-full h-full object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
 
             <div className="flex flex-col md:flex-row gap-4">
               <Input
