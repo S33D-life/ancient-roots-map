@@ -171,31 +171,31 @@ const Header = () => {
           
           <nav className="hidden md:flex items-center gap-3 lg:gap-5">
             <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <TreeDeciduous className="w-4 h-4 shrink-0" />
+              <TreeDeciduous className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
-                <span className="font-serif text-xs lg:text-sm"><span className="hidden lg:inline">Ancient Friends </span>Atlas</span>
-                <span className="text-[8px] lg:text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Roots</span>
+                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">Ancient Friends </span>Atlas</span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
               </div>
             </Link>
             <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <BookOpen className="w-4 h-4 shrink-0" />
+              <BookOpen className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
-                <span className="font-serif text-xs lg:text-sm"><span className="hidden lg:inline">HeARTwood </span>Library</span>
-                <span className="text-[8px] lg:text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Heartwood</span>
+                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">HeARTwood </span>Library</span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Heartwood</span>
               </div>
             </Link>
             <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Leaf className="w-4 h-4 shrink-0" />
+              <Leaf className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
-                <span className="font-serif text-xs lg:text-sm">Council<span className="hidden lg:inline"> of Life</span></span>
-                <span className="text-[8px] lg:text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Canopy</span>
+                <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
               </div>
             </Link>
             <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Sparkles className="w-4 h-4 shrink-0" />
+              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
-                <span className="font-serif text-xs lg:text-sm"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
-                <span className="text-[8px] lg:text-[9px] font-serif tracking-[0.15em] uppercase text-muted-foreground/60 group-hover:text-primary/60 transition-colors">The Crown</span>
+                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
               </div>
             </Link>
           </nav>
@@ -234,7 +234,7 @@ const Header = () => {
               </Button>
             )}
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </Button>
           </div>
         </div>
@@ -258,7 +258,7 @@ const Header = () => {
                 {item.icon}
                 <div className="flex flex-col leading-tight">
                   <span className="font-serif">{item.label}</span>
-                  <span className="text-[9px] font-serif tracking-[0.12em] uppercase text-muted-foreground/50">{item.sub}</span>
+                  <span className="text-[10px] font-serif tracking-[0.12em] uppercase text-muted-foreground">{item.sub}</span>
                 </div>
               </Link>
             ))}
