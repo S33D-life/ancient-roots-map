@@ -221,7 +221,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   }, [playlist.length]);
 
   const currentSong = playlist[currentIndex];
-  const stationName = activeFilter === "all" ? "All Species" : activeFilter;
+  const stationName = activeFilter === "all" ? "TETOL" : activeFilter;
 
   return (
     <>
@@ -327,7 +327,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                             : "border-amber-400/15 text-amber-300/50 hover:text-amber-300 hover:border-amber-400/30"
                         }`}
                       >
-                        All Species
+                        TETOL
                       </button>
                       {availableSpecies.map((sp) => (
                         <button
