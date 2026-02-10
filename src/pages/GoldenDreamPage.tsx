@@ -80,11 +80,11 @@ const GoldenDreamPage = () => {
             </Button>
           </div>
           {/* Banner */}
-          <div className="rounded-xl overflow-hidden border border-border/40 mb-4">
+          <div className="rounded-xl overflow-hidden border border-border/40 mb-4 flex justify-center">
             <img
               src={goldenDreamBanner}
               alt="yOur Golden Dream"
-              className="w-1/2 h-64 md:h-80 object-cover"
+              className="w-[40%] h-64 md:h-80 object-cover"
             />
           </div>
 
