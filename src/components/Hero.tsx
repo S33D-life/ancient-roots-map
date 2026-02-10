@@ -133,6 +133,43 @@ const FallingLeaves = () => {
 };
 
 
+const AnimatedCounter = ({ target, label }: { target: number; label: string }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          const duration = 1500;
+          const start = performance.now();
+          const animate = (now: number) => {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.round(eased * target));
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return (
+    <div className="space-y-2" ref={ref}>
+      <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{count.toLocaleString()}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
+    </div>
+  );
+};
+
 const Hero = () => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
   const [stats, setStats] = useState({ trees: 0, species: 0, nations: 0 });
@@ -179,18 +216,9 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Stats */}
           <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.trees.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">Ancient Trees</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.species.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">Species Mapped</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-serif font-bold text-mystical">{stats.nations.toLocaleString()}</div>
-              <div className="text-sm text-muted-foreground">Nations</div>
-            </div>
+            <AnimatedCounter target={stats.trees} label="Ancient Trees" />
+            <AnimatedCounter target={stats.species} label="Species Mapped" />
+            <AnimatedCounter target={stats.nations} label="Nations" />
           </div>
         </div>
 

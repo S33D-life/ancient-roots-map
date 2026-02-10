@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -144,6 +144,18 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* ⌘K search hint */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-border/50 bg-muted/30 text-muted-foreground text-xs hover:text-foreground hover:border-border transition-colors"
+              title="Search (⌘K)"
+            >
+              <Search className="w-3 h-3" />
+              <span className="font-mono text-[10px] opacity-60">⌘K</span>
+            </button>
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSearchOpen(true)} title="Search">
+              <Search className="w-4 h-4" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"}>
               {isDark ? <Sunrise className="w-4 h-4" /> : <Stars className="w-4 h-4" />}
             </Button>
@@ -173,32 +185,41 @@ const Header = () => {
 
         {/* Mobile dropdown menu */}
         {mobileOpen && (
-          <nav className="md:hidden border-t border-mystical mt-2 pt-3 pb-2 flex flex-col gap-3 animate-fade-in">
-            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
-              <TreeDeciduous className="w-4 h-4" />
-              <MapPin className="w-4 h-4 -ml-1" />
-              <span className="font-serif">Ancient Friend Arboreal Atlas</span>
-            </Link>
-            <Link to="/gallery" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
-              <BookOpen className="w-4 h-4" />
-              <TreeDeciduous className="w-4 h-4 -ml-1" />
-              <span className="font-serif">HeARTwood Library</span>
-            </Link>
-            <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
-              <Leaf className="w-4 h-4" />
-              <span className="font-serif">Council of Life</span>
-            </Link>
-            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
-              <Sparkles className="w-4 h-4" />
-              <span className="font-serif">yOur Golden Dream</span>
-            </Link>
+          <nav className="md:hidden border-t border-mystical mt-2 pt-3 pb-2 flex flex-col gap-1 animate-fade-in">
+            {[
+              { to: "/map", icon: <><TreeDeciduous className="w-4 h-4" /><MapPin className="w-4 h-4 -ml-1" /></>, label: "Ancient Friend Arboreal Atlas" },
+              { to: "/gallery", icon: <><BookOpen className="w-4 h-4" /><TreeDeciduous className="w-4 h-4 -ml-1" /></>, label: "HeARTwood Library" },
+              { to: "/council-of-life", icon: <Leaf className="w-4 h-4" />, label: "Council of Life" },
+              { to: "/golden-dream", icon: <Sparkles className="w-4 h-4" />, label: "yOur Golden Dream" },
+            ].map((item, i) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-muted/30 opacity-0 animate-fade-in"
+                style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'forwards' }}
+                onClick={() => setMobileOpen(false)}
+              >
+                {item.icon}
+                <span className="font-serif">{item.label}</span>
+              </Link>
+            ))}
             {user ? (
-              <Link to="/dashboard" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <Link
+                to="/dashboard"
+                className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-muted/30 opacity-0 animate-fade-in"
+                style={{ animationDelay: '240ms', animationFillMode: 'forwards' }}
+                onClick={() => setMobileOpen(false)}
+              >
                 <img src={hearthIcon} alt="Hearth" className="w-6 h-6 rounded-full" />
                 <span className="font-serif">Hearth</span>
               </Link>
             ) : (
-              <Link to="/auth" className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-1.5" onClick={() => setMobileOpen(false)}>
+              <Link
+                to="/auth"
+                className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-muted/30 opacity-0 animate-fade-in"
+                style={{ animationDelay: '240ms', animationFillMode: 'forwards' }}
+                onClick={() => setMobileOpen(false)}
+              >
                 <User className="w-4 h-4" />
                 <span className="font-serif">Login</span>
               </Link>

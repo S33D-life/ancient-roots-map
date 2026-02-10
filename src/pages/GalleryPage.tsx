@@ -88,6 +88,7 @@ const GalleryPage = () => {
   const [hoveredSpiralStaff, setHoveredSpiralStaff] = useState<string | null>(null);
   const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
+  const [showAllStaffs, setShowAllStaffs] = useState(false);
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -524,18 +525,22 @@ const GalleryPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 mb-8">
-            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-9 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
-              <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
-              <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
-              <TabsTrigger value="music-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Music Room</TabsTrigger>
-              <TabsTrigger value="greenhouse" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Greenhouse</TabsTrigger>
-              <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
-              <TabsTrigger value="seed-cellar" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Seed Cellar</TabsTrigger>
-              <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
-              <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
-              <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
-            </TabsList>
+          <div className="relative -mx-4 px-4 mb-8">
+            <div className="overflow-x-auto scrollbar-hide">
+              <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-9 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
+                <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
+                <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
+                <TabsTrigger value="music-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Music Room</TabsTrigger>
+                <TabsTrigger value="greenhouse" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Greenhouse</TabsTrigger>
+                <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
+                <TabsTrigger value="seed-cellar" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Seed Cellar</TabsTrigger>
+                <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
+                <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
+                <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
+              </TabsList>
+            </div>
+            {/* Scroll hint gradient - mobile only */}
+            <div className="absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-background/80 to-transparent pointer-events-none md:hidden" />
           </div>
 
           {/* Music Room */}
@@ -983,10 +988,18 @@ const GalleryPage = () => {
               </div>
             </div>
 
-            {/* Full 144 Grid */}
+            {/* Full 144 Grid — Collapsible */}
             <div>
-              <h3 className="text-xl font-serif text-primary text-center mb-6">All 144 Staffs</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <button
+                onClick={() => setShowAllStaffs(!showAllStaffs)}
+                className="w-full flex items-center justify-center gap-2 py-4 text-primary/80 hover:text-primary font-serif text-lg transition-colors group"
+              >
+                <span>{showAllStaffs ? 'Hide' : 'Show'} All 144 Staffs</span>
+                <span className={`transition-transform duration-300 ${showAllStaffs ? 'rotate-180' : ''}`}>▼</span>
+              </button>
+              {showAllStaffs && (
+                <div className="animate-fade-in">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {(() => {
                   const gridImages: Record<number, { code: string; img: string }> = {
                     0: { code: "YEW", img: "/images/staffs/yew.jpeg" },
@@ -1155,13 +1168,14 @@ const GalleryPage = () => {
                     );
                   });
                 })()}
+                  </div>
+                </div>
+              )}
+              <div className="text-center pt-4">
+                <p className="text-sm text-muted-foreground">
+                  All 144 staffs minted as NFTs · Digital twins coming soon
+                </p>
               </div>
-            </div>
-
-            <div className="text-center pt-4">
-              <p className="text-sm text-muted-foreground">
-                All 144 staffs minted as NFTs · Digital twins coming soon
-              </p>
             </div>
           </TabsContent>
 
