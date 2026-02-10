@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, LayoutDashboard, Archive, Trophy } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, LayoutDashboard, Archive, Trophy, ScrollText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -17,6 +17,7 @@ import DashboardProfile from "@/components/dashboard/DashboardProfile";
 import Greenhouse from "@/components/Greenhouse";
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import DashboardLeaderboard from "@/components/dashboard/DashboardLeaderboard";
+import PersonalLegend from "@/components/dashboard/PersonalLegend";
 
 interface Tree {
   id: string;
@@ -258,6 +259,7 @@ const DashboardPage = () => {
 
   const TAB_ITEMS = [
     { value: "overview", label: "Overview", icon: LayoutDashboard },
+    { value: "legend", label: "Legend", icon: ScrollText },
     { value: "trees", label: "My Trees", icon: TreeDeciduous, count: trees.length },
     { value: "leaderboard", label: "Leaderboard", icon: Trophy },
     { value: "vault", label: "Vault", icon: Archive },
@@ -334,6 +336,9 @@ const DashboardPage = () => {
                 plantCount={plantCount}
                 offeringCount={offeringCount}
               />
+            </TabsContent>
+            <TabsContent value="legend">
+              {user && <PersonalLegend userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="trees">
