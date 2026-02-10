@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 import goldenDreamSplash from "@/assets/golden-dream-splash.jpeg";
-import goldenDreamBanner from "@/assets/golden-dream-banner.jpeg";
+import goldenDreamBanner from "@/assets/golden-dream-home-bg.jpeg";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 import goldenDreamSplash2 from "@/assets/golden-dream-splash-2.png";
 
