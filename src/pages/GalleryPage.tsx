@@ -660,7 +660,7 @@ const GalleryPage = () => {
                   </div>
 
                   <p className="text-[11px] text-muted-foreground/60 font-serif italic text-center pt-2">
-                    Curated by DJ Zambrezi — bring these songs as offerings on your next grove walk
+                    Curated by The Zambrezi Wizard for Earth Radio — bring these songs as offerings on your next grove walk
                   </p>
                 </div>
 
