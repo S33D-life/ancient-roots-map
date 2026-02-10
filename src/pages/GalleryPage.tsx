@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save } from "lucide-react";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -95,7 +95,9 @@ const GalleryPage = () => {
   const [showSpiral, setShowSpiral] = useState(false);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
   const [showBirdTribe, setShowBirdTribe] = useState(false);
-
+  const [savedSongs, setSavedSongs] = useState<{ id: string; title: string; artist: string; link: string | null; notes: string | null; created_at: string }[]>([]);
+  const [showSaveSongForm, setShowSaveSongForm] = useState(false);
+  const [newSong, setNewSong] = useState({ title: "", artist: "", link: "" });
   const birdTribeSongs = [
     { title: "In Between", artist: "Marya Stark" },
     { title: "There Is a Bird", artist: "Alexa Sunshine Rose" },
@@ -198,6 +200,7 @@ const GalleryPage = () => {
   useEffect(() => {
     fetchTrees();
     fetchWishlist();
+    fetchSavedSongs();
   }, []);
 
   useEffect(() => {
@@ -267,6 +270,58 @@ const GalleryPage = () => {
 
   const [wishlistPulseId, setWishlistPulseId] = useState<string | null>(null);
 
+  const fetchSavedSongs = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setSavedSongs([]); return; }
+      const { data, error } = await supabase
+        .from("saved_songs")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setSavedSongs(data || []);
+    } catch (error) {
+      console.error("Error fetching saved songs:", error);
+    }
+  };
+
+  const addSavedSong = async () => {
+    if (!newSong.title.trim() || !newSong.artist.trim()) {
+      toast.error("Title and artist are required");
+      return;
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please log in to save songs"); return; }
+      const { error } = await supabase.from("saved_songs").insert({
+        user_id: user.id,
+        title: newSong.title.trim(),
+        artist: newSong.artist.trim(),
+        link: newSong.link.trim() || null,
+      });
+      if (error) throw error;
+      toast.success("Song saved to your Earth Radio!");
+      setNewSong({ title: "", artist: "", link: "" });
+      setShowSaveSongForm(false);
+      fetchSavedSongs();
+    } catch (error) {
+      console.error("Error saving song:", error);
+      toast.error("Failed to save song");
+    }
+  };
+
+  const deleteSavedSong = async (id: string) => {
+    try {
+      const { error } = await supabase.from("saved_songs").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Song removed");
+      fetchSavedSongs();
+    } catch (error) {
+      console.error("Error deleting saved song:", error);
+      toast.error("Failed to remove song");
+    }
+  };
   const addToWishlist = async (treeId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -779,6 +834,88 @@ const GalleryPage = () => {
                   <p className="text-[11px] text-muted-foreground/60 font-serif italic text-center pt-2">
                     Curated by The Zambrezi Wizard for Earth Radio — bring these songs as offerings on your next grove walk
                   </p>
+                </div>
+
+                {/* My Saved Songs */}
+                <div className="mt-6 p-5 rounded-xl border border-primary/20 bg-card/40 backdrop-blur space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+                        <Save className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-lg text-primary tracking-wide">My Saved Songs</h4>
+                        <p className="text-xs text-muted-foreground font-serif">Your personal grove walk soundtrack</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 font-serif text-xs"
+                      onClick={() => setShowSaveSongForm(!showSaveSongForm)}
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Song
+                    </Button>
+                  </div>
+
+                  {showSaveSongForm && (
+                    <div className="space-y-3 p-4 rounded-lg border border-border/40 bg-background/50">
+                      <Input
+                        placeholder="Song title"
+                        value={newSong.title}
+                        onChange={(e) => setNewSong(s => ({ ...s, title: e.target.value }))}
+                        className="text-sm"
+                      />
+                      <Input
+                        placeholder="Artist"
+                        value={newSong.artist}
+                        onChange={(e) => setNewSong(s => ({ ...s, artist: e.target.value }))}
+                        className="text-sm"
+                      />
+                      <Input
+                        placeholder="Link (optional)"
+                        value={newSong.link}
+                        onChange={(e) => setNewSong(s => ({ ...s, link: e.target.value }))}
+                        className="text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={addSavedSong} className="font-serif text-xs">Save Song</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setShowSaveSongForm(false)} className="font-serif text-xs">Cancel</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {savedSongs.length === 0 ? (
+                    <p className="text-sm text-muted-foreground/60 font-serif italic text-center py-4">
+                      No saved songs yet. Add songs you want to carry on your next grove walk.
+                    </p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
+                      {savedSongs.map((song, i) => (
+                        <div key={song.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 group">
+                          <span className="w-6 text-center text-[10px] text-muted-foreground/60 font-serif">{i + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            {song.link ? (
+                              <a href={song.link} target="_blank" rel="noopener noreferrer" className="font-serif text-sm text-foreground/80 truncate block hover:text-primary transition-colors">
+                                {song.title}
+                              </a>
+                            ) : (
+                              <p className="font-serif text-sm text-foreground/80 truncate">{song.title}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground font-serif truncate">{song.artist}</p>
+                          </div>
+                          <button
+                            onClick={() => deleteSavedSong(song.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-destructive"
+                            title="Remove song"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* CTA to Atlas */}
