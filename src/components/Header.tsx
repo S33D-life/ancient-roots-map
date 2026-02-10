@@ -106,10 +106,17 @@ const Header = () => {
                 title="Hover to search · Double-click for TETOL"
               />
             </a>
-            <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50">
-              <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-4 shadow-lg max-w-xs animate-fade-in">
+            <div className="absolute top-1/2 -translate-y-1/2 left-full ml-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 -translate-x-2 group-hover:translate-x-0 z-50 hidden md:block">
+              <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in whitespace-nowrap">
                 <p className="text-sm font-serif text-foreground">
-                  <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove. Your AI guide through the living atlas.
+                  <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove
+                </p>
+              </div>
+            </div>
+            <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50 md:hidden">
+              <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in">
+                <p className="text-sm font-serif text-foreground">
+                  <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove
                 </p>
               </div>
             </div>
