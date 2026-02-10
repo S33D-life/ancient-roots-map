@@ -19,6 +19,12 @@ const MAP_CHOICES = [
     desc: "Your mapped trees",
     icon: Users,
   },
+  {
+    key: "encounter",
+    label: "Claim Tree Encounter",
+    desc: "Log a new tree find",
+    icon: TreeDeciduous,
+  },
 ];
 
 const SPECIES_QUICK = [
@@ -82,7 +88,7 @@ const MapPage = () => {
           {/* Map View */}
           <div className="w-full max-w-md mb-8">
             <h3 className="text-xs uppercase tracking-widest text-amber-300/50 mb-3 text-center">Map View</h3>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {MAP_CHOICES.map((choice) => {
                 const Icon = choice.icon;
                 const isActive = selectedView === choice.key;
