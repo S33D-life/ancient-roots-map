@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous } from "lucide-react";
-import heroS33d from "@/assets/hero-s33d.jpeg";
+import heroTree from "@/assets/hero-tree.jpg";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
