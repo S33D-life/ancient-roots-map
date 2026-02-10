@@ -762,6 +762,9 @@ const GalleryPage = () => {
                 <p className="text-foreground/80 max-w-2xl mx-auto text-sm">
                   144 hand-crafted staffs, each a unique companion for the Ancient Friends game.
                 </p>
+                <p className="text-foreground/60 max-w-xl mx-auto text-xs mt-1 italic">
+                  The first 36 form a sacred spiral — one for each founding species — a living model of the spiral of trees you'll meet on the journey.
+                </p>
               </div>
             </div>
 
