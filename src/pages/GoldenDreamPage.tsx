@@ -5,6 +5,7 @@ import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import goldenDreamSplash from "@/assets/golden-dream-splash.jpeg";
+import goldenDreamBanner from "@/assets/golden-dream-banner.jpeg";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
 const GoldenDreamPage = () => {
@@ -78,6 +79,15 @@ const GoldenDreamPage = () => {
               Full Screen
             </Button>
           </div>
+          {/* Banner */}
+          <div className="rounded-xl overflow-hidden border border-border/40 mb-4">
+            <img
+              src={goldenDreamBanner}
+              alt="yOur Golden Dream"
+              className="w-full h-40 md:h-56 object-cover"
+            />
+          </div>
+
           <div className="relative rounded-xl border border-border/40 overflow-hidden">
             <iframe
               src="https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413"
