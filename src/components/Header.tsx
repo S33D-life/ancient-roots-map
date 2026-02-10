@@ -8,7 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
-import GlobalSearch from "./GlobalSearch";
+import TeotagGuide from "./TeotagGuide";
+import TeotagWhisper from "./TeotagWhisper";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -17,23 +18,25 @@ const Header = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tetolOpen, setTetolOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     if (clickTimerRef.current) {
+      // Double-click → TETOL menu
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
       setTetolOpen(true);
     } else {
+      // Single-click → TEOTAG guide
       clickTimerRef.current = setTimeout(() => {
         clickTimerRef.current = null;
-        navigate("/");
+        setGuideOpen(true);
       }, 300);
     }
-  }, [navigate]);
+  }, []);
+
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return !document.documentElement.classList.contains('light');
@@ -53,12 +56,12 @@ const Header = () => {
     setIsDark(!isDark);
   };
 
-  // ⌘K / Ctrl+K shortcut for search
+  // ⌘K shortcut opens guide on search tab
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setSearchOpen((prev) => !prev);
+        setGuideOpen(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -106,9 +109,7 @@ const Header = () => {
     const pc = plantsRes.count || 0;
     const wc = wishlistRes.count || 0;
 
-    // Base: 10 per tree
     let total = tc * 10;
-    // Milestone bonuses (same thresholds as DashboardRewards)
     const milestones: [number, number, string][] = [
       [tc, 1, "10"], [tc, 5, "25"], [tc, 10, "50"], [tc, 25, "100"], [tc, 50, "200"], [tc, 100, "500"], [tc, 250, "1000"],
       [oc, 1, "5"], [oc, 10, "30"], [oc, 25, "75"], [oc, 50, "200"], [oc, 100, "500"],
@@ -136,34 +137,21 @@ const Header = () => {
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
-          <div
-            className="relative group"
-            onMouseEnter={() => {
-              hoverTimerRef.current = setTimeout(() => setSearchOpen(true), 400);
-            }}
-            onMouseLeave={() => {
-              if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
-            }}
-          >
+          {/* TEOTAG logo — single click opens guide, double-click opens TETOL */}
+          <div className="relative group">
             <a href="/" className="flex items-center gap-3" onClick={handleTeotagClick}>
               <img 
                 src={teotagLogo} 
-                alt="Teotag — hover to search, double-click for TETOL" 
-                className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer"
-                title="Hover to search · Double-click for TETOL"
+                alt="TEOTAG — Click to ask the grove guide" 
+                className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300 hover:scale-105"
+                title="Click for TEOTAG guide · Double-click for TETOL"
               />
             </a>
-            <div className="absolute top-1/2 -translate-y-1/2 left-full ml-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 -translate-x-2 group-hover:translate-x-0 z-50 hidden md:block">
+            {/* Hover tooltip — desktop only */}
+            <div className="absolute top-1/2 -translate-y-1/2 left-full ml-3 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-x-2 group-hover:translate-x-0 z-50 hidden md:block">
               <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in whitespace-nowrap">
                 <p className="text-sm font-serif text-foreground">
-                  <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove
-                </p>
-              </div>
-            </div>
-            <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50 md:hidden">
-              <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in">
-                <p className="text-sm font-serif text-foreground">
-                  <span className="text-primary font-bold">TEOTAG</span> — The Echo Of The Ancient Grove
+                  <span className="text-primary font-bold">TEOTAG</span> — Your grove guide
                 </p>
               </div>
             </div>
@@ -201,8 +189,8 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            {/* Mobile search button only */}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSearchOpen(true)} title="Search">
+            {/* Mobile search button opens guide on search tab */}
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setGuideOpen(true)} title="Search">
               <Search className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden">
@@ -293,7 +281,8 @@ const Header = () => {
         )}
       </div>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
-      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <TeotagGuide open={guideOpen} onClose={() => setGuideOpen(false)} />
+      <TeotagWhisper onOpenGuide={() => setGuideOpen(true)} />
     </header>
   );
 };
