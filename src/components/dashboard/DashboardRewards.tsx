@@ -1,4 +1,4 @@
-import { Heart, TreeDeciduous, Sprout, Star, BookOpen, Award, Crown, Flame, Sparkles } from "lucide-react";
+import { Heart, TreeDeciduous, Sprout, Star, BookOpen, Award, Crown, Flame, Sparkles, Gem, Shield, Zap, Sun } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
@@ -17,19 +17,34 @@ interface Milestone {
   icon: React.ElementType;
   hearts: number;
   category: "trees" | "offerings" | "seeds" | "wishlist";
+  legendary?: boolean;
 }
 
 const MILESTONES: Milestone[] = [
+  // Trees
   { label: "First Roots", description: "Map your first ancient tree", threshold: 1, icon: TreeDeciduous, hearts: 10, category: "trees" },
   { label: "Grove Keeper", description: "Map 5 ancient trees", threshold: 5, icon: TreeDeciduous, hearts: 25, category: "trees" },
   { label: "Forest Walker", description: "Map 10 ancient trees", threshold: 10, icon: TreeDeciduous, hearts: 50, category: "trees" },
   { label: "Ancient Cartographer", description: "Map 25 ancient trees", threshold: 25, icon: Crown, hearts: 100, category: "trees" },
   { label: "World Tree Mapper", description: "Map 50 ancient trees", threshold: 50, icon: Sparkles, hearts: 200, category: "trees" },
+  { label: "Ent Lord", description: "Map 100 ancient trees", threshold: 100, icon: Shield, hearts: 500, category: "trees", legendary: true },
+  { label: "Yggdrasil's Chosen", description: "Map 250 ancient trees", threshold: 250, icon: Sun, hearts: 1000, category: "trees", legendary: true },
+
+  // Offerings
   { label: "First Offering", description: "Leave your first offering", threshold: 1, icon: Flame, hearts: 5, category: "offerings" },
   { label: "Generous Spirit", description: "Leave 10 offerings", threshold: 10, icon: Flame, hearts: 30, category: "offerings" },
+  { label: "Sacred Scribe", description: "Leave 25 offerings", threshold: 25, icon: Zap, hearts: 75, category: "offerings" },
+  { label: "Oracle of the Grove", description: "Leave 50 offerings", threshold: 50, icon: Gem, hearts: 200, category: "offerings", legendary: true },
+  { label: "Keeper of All Songs", description: "Leave 100 offerings", threshold: 100, icon: Sun, hearts: 500, category: "offerings", legendary: true },
+
+  // Seeds
   { label: "Seed Sower", description: "Plant your first seed pod", threshold: 1, icon: Sprout, hearts: 5, category: "seeds" },
   { label: "Greenhouse Keeper", description: "Grow 5 seed pods", threshold: 5, icon: Sprout, hearts: 20, category: "seeds" },
+  { label: "Nursery Warden", description: "Grow 15 seed pods", threshold: 15, icon: Sprout, hearts: 60, category: "seeds" },
+
+  // Wishlist
   { label: "Wishing Well", description: "Add 3 wishes to the Wishing Tree", threshold: 3, icon: Star, hearts: 15, category: "wishlist" },
+  { label: "Dream Weaver", description: "Add 10 wishes to the Wishing Tree", threshold: 10, icon: Star, hearts: 50, category: "wishlist" },
 ];
 
 const getCategoryCount = (milestone: Milestone, props: RewardsProps) => {
@@ -119,12 +134,21 @@ const DashboardRewards = (props: RewardsProps) => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.08, duration: 0.35 }}
               >
-                <Card className="border-primary/30 bg-card/60 backdrop-blur hover:border-primary/50 transition-colors">
+                <Card className={`backdrop-blur hover:border-primary/50 transition-colors ${
+                  m.legendary
+                    ? "border-accent/50 bg-gradient-to-br from-accent/10 to-primary/10 ring-1 ring-accent/20"
+                    : "border-primary/30 bg-card/60"
+                }`}>
                   <CardContent className="flex flex-col items-center py-4 gap-2">
-                    <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center border border-primary/25">
-                      <m.icon className="w-5 h-5 text-primary" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${
+                      m.legendary
+                        ? "bg-gradient-to-br from-accent/25 to-primary/20 border-accent/40"
+                        : "bg-primary/15 border-primary/25"
+                    }`}>
+                      <m.icon className={`w-5 h-5 ${m.legendary ? "text-accent" : "text-primary"}`} />
                     </div>
-                    <span className="text-xs font-serif font-semibold text-foreground text-center leading-tight">{m.label}</span>
+                    <span className={`text-xs font-serif font-semibold text-center leading-tight ${m.legendary ? "text-accent" : "text-foreground"}`}>{m.label}</span>
+                    {m.legendary && <span className="text-[9px] uppercase tracking-widest text-accent/70 font-serif">Legendary</span>}
                     <span className="text-[10px] text-primary font-serif">+{m.hearts} 💚</span>
                   </CardContent>
                 </Card>
