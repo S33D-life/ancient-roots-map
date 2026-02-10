@@ -13,7 +13,7 @@ const goldenDreamRooms = [
   {
     id: "current",
     title: "Current Version",
-    description: "The living document of yOur Golden Dream",
+    description: "The Current S33D Blue Print",
     icon: BookOpen,
     notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413",
   },
