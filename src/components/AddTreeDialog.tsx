@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LocateFixed, Search, MapPin, Check } from "lucide-react";
-import { convertToCoordinates } from "@/utils/what3words";
+import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import mapboxgl from "mapbox-gl";
 
 interface AddTreeDialogProps {
@@ -45,11 +45,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const fetchWhat3words = async (latitude: number, longitude: number) => {
     setFetchingW3w(true);
     try {
-      const { data, error } = await supabase.functions.invoke('convert-what3words', {
-        body: { mode: 'coordinates-to-words', latitude, longitude }
-      });
-      if (!error && data?.words) {
-        setWhat3words(data.words);
+      const result = await convertToWhat3Words(latitude, longitude);
+      if (result) {
+        setWhat3words(result);
       }
     } catch (err) {
       console.error('Failed to fetch what3words:', err);
