@@ -20,7 +20,7 @@ const councilRooms = [
     title: "Join Council",
     description: "Become a member of the Council of Life",
     icon: Users,
-    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//1e415b58480d8042a722ef57e01e3228",
+    externalUrl: "https://t.me/s33dlife",
   },
   {
     id: "pod",
@@ -164,7 +164,13 @@ const CouncilOfLifePage = () => {
                 <Card
                   key={room.id}
                   className="cursor-pointer bg-card/60 backdrop-blur-sm border-border/50 hover:bg-card/80 hover:border-primary/40 hover:glow-subtle transition-all duration-300 group"
-                  onClick={() => setActiveRoom(room.id)}
+                  onClick={() => {
+                    if ('externalUrl' in room && room.externalUrl) {
+                      window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      setActiveRoom(room.id);
+                    }
+                  }}
                 >
                   <CardHeader className="text-center p-4 md:p-6">
                     <Icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
