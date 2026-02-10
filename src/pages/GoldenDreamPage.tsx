@@ -29,7 +29,7 @@ const goldenDreamRooms = [
     title: "Archives",
     description: "Past versions of the Golden Dream",
     icon: Archive,
-    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//21615b58480d802187b2cff864277413",
+    externalUrl: "https://www.icloud.com/iclouddrive/0a8LpBMrWx1WVlDW9HOdNI0-Q#Golden_Dream_V2.0",
   },
 ];
 
@@ -181,7 +181,13 @@ const GoldenDreamPage = () => {
                 <Card
                   key={room.id}
                   className="cursor-pointer bg-card/60 backdrop-blur-sm border-border/50 hover:bg-card/80 hover:border-primary/40 hover:glow-subtle transition-all duration-300 group"
-                  onClick={() => setActiveRoom(room.id)}
+                  onClick={() => {
+                    if ('externalUrl' in room && room.externalUrl) {
+                      window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      setActiveRoom(room.id);
+                    }
+                  }}
                 >
                   <CardHeader className="text-center p-4 md:p-6">
                     <Icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
