@@ -344,7 +344,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_tree_leaderboard: {
+        Args: { result_limit?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          tree_count: number
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       grove_scale:
