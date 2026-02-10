@@ -30,6 +30,7 @@ import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
 import CreatorsPath from "@/components/CreatorsPath";
+import MintingStatusDashboard from "@/components/MintingStatusDashboard";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
@@ -1116,6 +1117,9 @@ const GalleryPage = () => {
                 </p>
               </div>
             </div>
+
+            {/* Minting Status Dashboard */}
+            <MintingStatusDashboard />
 
             {/* Sacred Spiral of 36 — Toggle */}
             <div className="mb-12">
