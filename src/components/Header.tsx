@@ -30,13 +30,17 @@ const Header = () => {
       clickTimerRef.current = null;
       setTetolOpen(true);
     } else {
-      // Single-click → TEOTAG guide
+      // Single-click → navigate home
       clickTimerRef.current = setTimeout(() => {
         clickTimerRef.current = null;
-        setGuideTab("guide");
-        setGuideOpen(true);
+        navigate("/");
       }, 300);
     }
+  }, [navigate]);
+
+  const handleTeotagHover = useCallback(() => {
+    setGuideTab("search");
+    setGuideOpen(true);
   }, []);
 
   const [isDark, setIsDark] = useState(() => {
