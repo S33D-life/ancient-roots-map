@@ -14,7 +14,7 @@ interface TetolLevelInfo {
 const LEVEL_MAP: Record<TetolLevel, Omit<TetolLevelInfo, "level" | "className">> = {
   s33d: { label: "S33D", subtitle: "The seed of all journeys" },
   roots: { label: "The Roots", subtitle: "Ancient Friends Atlas" },
-  heartwood: { label: "The Heartwood", subtitle: "HeARTwood Library" },
+  heartwood: { label: "The Trunk", subtitle: "HeARTwood Library" },
   canopy: { label: "The Canopy", subtitle: "Council of Life" },
   crown: { label: "The Crown", subtitle: "yOur Golden Dream" },
   hearth: { label: "The Hearth", subtitle: "Your personal fire" },
