@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
+import { MAPBOX_TOKEN } from "@/config/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import MapSearch from "./MapSearch";
