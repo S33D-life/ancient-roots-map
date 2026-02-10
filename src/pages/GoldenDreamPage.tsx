@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import goldenDreamSplash from "@/assets/golden-dream-splash.jpeg";
 import goldenDreamBanner from "@/assets/golden-dream-banner.jpeg";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
+import goldenDreamSplash2 from "@/assets/golden-dream-splash-2.png";
 
 const goldenDreamRooms = [
   {
@@ -34,8 +35,8 @@ const goldenDreamRooms = [
 ];
 
 const GoldenDreamPage = () => {
-  const [showSplash, setShowSplash] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false);
+  const [splashPhase, setSplashPhase] = useState<"first" | "second" | "fading" | "done">("first");
+  const [, setFadeOut] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
@@ -43,25 +44,33 @@ const GoldenDreamPage = () => {
   const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFadeOut(true);
-      setTimeout(() => setShowSplash(false), 1000);
-    }, 3000);
-    return () => clearTimeout(timer);
+    const t1 = setTimeout(() => setSplashPhase("second"), 2000);
+    const t2 = setTimeout(() => setSplashPhase("fading"), 4500);
+    const t3 = setTimeout(() => setSplashPhase("done"), 5300);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  if (showSplash) {
+  if (splashPhase !== "done") {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center transition-opacity duration-1000 ${fadeOut ? "opacity-0" : "opacity-100"}`}
+        className="fixed inset-0 z-50"
         style={{ backgroundColor: "hsl(120 50% 10%)" }}
-        onClick={() => { setFadeOut(true); setTimeout(() => setShowSplash(false), 500); }}
+        onClick={() => setSplashPhase("done")}
       >
-        <img
-          src={goldenDreamSplash}
-          alt="yOur Golden Dream"
-          className="max-w-sm w-3/4 rounded-full animate-fade-in"
-        />
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
+            splashPhase === "first" ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          <img src={goldenDreamSplash} alt="yOur Golden Dream" className="max-w-sm w-3/4 rounded-full animate-fade-in" loading="eager" />
+        </div>
+        <div
+          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
+            splashPhase === "second" ? "opacity-100" : splashPhase === "fading" ? "opacity-0" : "opacity-0"
+          }`}
+        >
+          <img src={goldenDreamSplash2} alt="yOur Golden Dream" className="max-w-sm w-2/3 rounded-lg" loading="eager" />
+        </div>
       </div>
     );
   }
