@@ -18,6 +18,10 @@ import MistOverlay from "./MistOverlay";
 
 const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
+interface TreeOfferings {
+  [treeId: string]: number;
+}
+
 interface Tree {
   id: string;
   name: string;
@@ -28,6 +32,7 @@ interface Tree {
   description?: string;
   created_by?: string;
   nation?: string;
+  estimated_age?: number | null;
 }
 
 const GROVE_SOURCE_ID = 'grove-boundary-source';
@@ -180,6 +185,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
+  const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
@@ -206,20 +212,34 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     }
   }, []);
 
-  // Fetch trees from database
+  // Fetch trees and offering counts from database
   useEffect(() => {
     const fetchTrees = async () => {
-      const { data, error } = await supabase
-        .from('trees')
-        .select('*')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+      const [treesResult, offeringsResult] = await Promise.all([
+        supabase
+          .from('trees')
+          .select('*')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null),
+        supabase
+          .from('offerings')
+          .select('tree_id'),
+      ]);
 
-      if (error) {
-        console.error('Error fetching trees:', error);
+      if (treesResult.error) {
+        console.error('Error fetching trees:', treesResult.error);
         toast({ title: "Error loading trees", description: "Failed to load tree data", variant: "destructive" });
       } else {
-        setTrees(data || []);
+        setTrees(treesResult.data || []);
+      }
+
+      // Count offerings per tree
+      if (!offeringsResult.error && offeringsResult.data) {
+        const counts: TreeOfferings = {};
+        offeringsResult.data.forEach((o) => {
+          counts[o.tree_id] = (counts[o.tree_id] || 0) + 1;
+        });
+        setOfferingCounts(counts);
       }
     };
 
@@ -228,6 +248,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, () => fetchTrees())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'offerings' }, () => fetchTrees())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -332,7 +353,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     return () => { map.current?.remove(); };
   }, []);
 
-  // Add tree markers
+  // Add tree markers with visual hierarchy
   useEffect(() => {
     if (!map.current) return;
 
@@ -341,35 +362,80 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     markersRef.current = [];
 
     filteredTrees.forEach((tree) => {
+      const offerings = offeringCounts[tree.id] || 0;
+      const age = tree.estimated_age || 0;
+
+      // Visual hierarchy tiers
+      const isAncient = age >= 100;
+      const isStoried = offerings >= 3;
+      const isNotable = offerings >= 1 || age >= 50;
+
+      // Size based on significance
+      const size = isAncient ? 40 : isStoried ? 36 : isNotable ? 32 : 28;
+      const strokeColor = isAncient ? 'hsl(42, 90%, 55%)' : isStoried ? 'hsl(42, 70%, 50%)' : 'hsl(45, 60%, 40%)';
+      const strokeWidth = isAncient ? 2.5 : 2;
+      const fillColor = isAncient ? 'hsl(120, 45%, 28%)' : 'hsl(120, 40%, 25%)';
+      const leafColor = isAncient ? 'hsl(120, 55%, 40%)' : 'hsl(120, 60%, 35%)';
+
+      // Build marker SVG with optional crown ring for storied trees
+      const crownRing = isStoried ? `<circle cx="16" cy="16" r="15.5" fill="none" stroke="${strokeColor}" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.6"/>` : '';
+      const ageDot = isAncient ? `<circle cx="16" cy="5" r="2" fill="hsl(42, 95%, 60%)" opacity="0.9"/>` : '';
+
+      const svgContent = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        ${crownRing}
+        <circle cx="16" cy="16" r="14" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+        <path d="M16 8C13.8 8 12 9.8 12 12C12 13.5 12.7 14.8 13.8 15.6C12.7 16.4 12 17.7 12 19.2C12 21.4 13.8 23.2 16 23.2C18.2 23.2 20 21.4 20 19.2C20 17.7 19.3 16.4 18.2 15.6C19.3 14.8 20 13.5 20 12C20 9.8 18.2 8 16 8Z" fill="${leafColor}"/>
+        <rect x="14.5" y="22" width="3" height="6" fill="hsl(30, 40%, 30%)"/>
+        ${ageDot}
+      </svg>`;
+
       const el = document.createElement('div');
       el.className = 'tree-marker';
       el.style.cssText = `
-        width: 32px;
-        height: 32px;
-        background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0iaHNsKDEyMCwgNDAlLCAyNSUpIiBzdHJva2U9ImhzbCg0NSwgODAlLCA2MCUpIiBzdHJva2Utd2lkdGg9IjIiLz4KICA8cGF0aCBkPSJNMTYgOEMxMy44IDggMTIgOS44IDEyIDEyQzEyIDEzLjUgMTIuNyAxNC44IDEzLjggMTUuNkMxMi43IDE2LjQgMTIgMTcuNyAxMiAxOS4yQzEyIDIxLjQgMTMuOCAyMy4yIDE2IDIzLjJDMTguMiAyMy4yIDIwIDIxLjQgMjAgMTkuMkMyMCAxNy43IDE5LjMgMTYuNCAxOC4yIDE1LjZDMTkuMyAxNC44IDIwIDEzLjUgMjAgMTJDMjAgOS44IDE4LjIgOCAxNiA4WiIgZmlsbD0iaHNsKDEyMCwgNjAlLCAzNSUpIi8+CiAgPHJlY3QgeD0iMTQuNSIgeT0iMjIiIHdpZHRoPSIzIiBoZWlnaHQ9IjYiIGZpbGw9ImhzbCgzMCwgNDAlLCAzMCUpIi8+Cjwvc3ZnPg==');
+        width: ${size}px;
+        height: ${size}px;
+        background-image: url('data:image/svg+xml;base64,${btoa(svgContent)}');
         background-size: contain;
         cursor: pointer;
-        transition: filter 0.2s;
+        transition: filter 0.3s, transform 0.3s;
+        ${isAncient ? 'animation: ancientPulse 4s ease-in-out infinite;' : ''}
       `;
 
       el.addEventListener('mouseenter', () => {
-        el.style.filter = 'brightness(1.4) drop-shadow(0 0 4px hsl(45, 80%, 60%))';
+        el.style.filter = `brightness(1.4) drop-shadow(0 0 ${isAncient ? '8' : '4'}px ${strokeColor})`;
+        el.style.transform = 'scale(1.15)';
       });
       el.addEventListener('mouseleave', () => {
         el.style.filter = 'none';
+        el.style.transform = 'scale(1)';
       });
+
+      // Enriched popup with offering indicators
+      const offeringBadge = offerings > 0
+        ? `<div style="margin: 6px 0 0; display: flex; align-items: center; gap: 4px;">
+             <span style="font-size: 10px; color: hsl(42, 80%, 60%);">✦</span>
+             <span style="font-size: 10px; color: hsl(42, 60%, 55%);">${offerings} offering${offerings !== 1 ? 's' : ''} left here</span>
+           </div>`
+        : `<div style="margin: 6px 0 0;">
+             <span style="font-size: 10px; color: hsl(0, 0%, 50%); font-style: italic;">No offerings yet — be the first</span>
+           </div>`;
+
+      const ageBadge = age > 0
+        ? `<span style="display: inline-block; margin-left: 6px; padding: 1px 6px; font-size: 9px; border-radius: 999px; background: hsla(42, 80%, 50%, 0.15); color: hsl(42, 80%, 60%); border: 1px solid hsla(42, 80%, 50%, 0.3);">~${age} years</span>`
+        : '';
 
       const popup = new mapboxgl.Popup({
         offset: 25,
         closeButton: true,
         className: 'tree-popup',
       }).setHTML(`
-        <div style="padding: 10px; font-family: 'Cinzel', serif; min-width: 220px;">
-          <h3 style="margin: 0 0 4px 0; font-size: 16px; color: hsl(45, 80%, 60%);">${escapeHtml(tree.name)}</h3>
+        <div style="padding: 12px; font-family: 'Cinzel', serif; min-width: 230px;">
+          <h3 style="margin: 0 0 2px 0; font-size: 16px; color: hsl(45, 80%, 60%); line-height: 1.3;">${escapeHtml(tree.name)}${ageBadge}</h3>
           <p style="margin: 0 0 2px 0; font-size: 12px; color: hsl(120, 40%, 70%);">${escapeHtml(tree.species)}</p>
           <p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(45, 60%, 50%);">📍 ${escapeHtml(tree.what3words || '')}</p>
-          ${tree.description ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%); line-height: 1.4;">${escapeHtml(tree.description.substring(0, 100))}${tree.description.length > 100 ? '\u2026' : ''}</p>` : ''}
-          <a href="/tree/${encodeURIComponent(tree.id)}" style="display: block; margin-top: 10px; padding: 6px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(42, 88%, 50%), hsl(45, 100%, 60%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.1em; font-weight: 600;">View Ancient Friend &#10230;</a>
+          ${tree.description ? `<p style="margin: 6px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%); line-height: 1.4;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? '\u2026' : ''}</p>` : ''}
+          ${offeringBadge}
+          <a href="/tree/${encodeURIComponent(tree.id)}" style="display: block; margin-top: 10px; padding: 8px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(42, 88%, 50%), hsl(45, 100%, 60%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.1em; font-weight: 600;">View Ancient Friend &#10230;</a>
           <div style="margin-top: 8px; display: flex; gap: 8px; justify-content: center;">
             <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(120, 60%, 50%); text-decoration: none; border: 1px solid hsla(120,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Memory">📷</a>
             <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(200, 60%, 50%); text-decoration: none; border: 1px solid hsla(200,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Song">🎵</a>
@@ -396,7 +462,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       filteredTrees.forEach((t) => bounds.extend([t.longitude, t.latitude]));
       map.current.fitBounds(bounds, { padding: 80, duration: 1500 });
     }
-  }, [filteredTrees, groveScale]);
+  }, [filteredTrees, groveScale, offeringCounts]);
 
   // Draw grove boundary polygon
   useEffect(() => {
@@ -552,14 +618,24 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       </div>
 
       <style>{`
+        @keyframes ancientPulse {
+          0%, 100% { filter: drop-shadow(0 0 2px hsla(42, 80%, 50%, 0.3)); }
+          50% { filter: drop-shadow(0 0 8px hsla(42, 80%, 50%, 0.6)); }
+        }
         .tree-popup .mapboxgl-popup-content {
           background: hsl(120, 40%, 15%);
           border: 1px solid hsl(45, 60%, 40%);
-          border-radius: 8px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+          border-radius: 10px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px hsla(45, 60%, 40%, 0.1);
+          padding: 0;
         }
         .tree-popup .mapboxgl-popup-tip {
           border-top-color: hsl(120, 40%, 15%);
+        }
+        .tree-popup .mapboxgl-popup-close-button {
+          color: hsl(45, 60%, 50%);
+          font-size: 18px;
+          padding: 4px 8px;
         }
       `}</style>
     </div>
