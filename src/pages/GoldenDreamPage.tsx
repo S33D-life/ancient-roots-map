@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import TetolBreadcrumb from "@/components/TetolBreadcrumb";
+import TetolBridge from "@/components/TetolBridge";
 import { Maximize2, Minimize2, BookOpen, Cherry, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -165,6 +167,7 @@ const GoldenDreamPage = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main className="relative pt-20 pb-8">
+        <TetolBreadcrumb />
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -213,6 +216,7 @@ const GoldenDreamPage = () => {
             })}
           </div>
         </div>
+        <TetolBridge />
       </main>
       <Footer />
     </div>

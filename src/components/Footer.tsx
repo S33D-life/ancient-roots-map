@@ -1,12 +1,18 @@
 import { Heart, TreeDeciduous, RotateCcw, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import JourneyPulse from "@/components/JourneyPulse";
 
 const Footer = () => {
   const Dot = () => <span className="text-border/60 select-none" aria-hidden>·</span>;
 
   return (
     <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm mt-16">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-3">
+        {/* Journey Pulse — only shows when logged in */}
+        <div className="flex justify-center">
+          <JourneyPulse />
+        </div>
+
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <TreeDeciduous className="w-3.5 h-3.5 text-primary" />

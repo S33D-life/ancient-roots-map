@@ -61,7 +61,24 @@ All colors MUST be HSL.
     
     /* Transitions */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* TETOL Level Accents — default to primary */
+    --level-accent: 42 95% 55%;
   }
+
+  /* Level-specific accent colors */
+  .tetol-s33d { --level-accent: 42 95% 55%; }          /* Golden seed */
+  .tetol-roots { --level-accent: 120 45% 45%; }         /* Forest green */
+  .tetol-heartwood { --level-accent: 28 70% 50%; }      /* Warm amber */
+  .tetol-canopy { --level-accent: 195 60% 50%; }        /* Sky blue */
+  .tetol-crown { --level-accent: 45 100% 60%; }         /* Radiant gold */
+  .tetol-hearth { --level-accent: 15 80% 55%; }         /* Hearth orange */
+
+  .light .tetol-roots { --level-accent: 120 40% 35%; }
+  .light .tetol-heartwood { --level-accent: 28 60% 40%; }
+  .light .tetol-canopy { --level-accent: 195 50% 40%; }
+  .light .tetol-crown { --level-accent: 45 80% 45%; }
+  .light .tetol-hearth { --level-accent: 15 65% 45%; }
 
   .light {
     --background: 45 30% 95%;
