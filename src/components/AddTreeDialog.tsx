@@ -258,7 +258,18 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
       if (error) throw error;
 
-      toast({ title: "Tree added!", description: `${name} has been added to the map` });
+      toast({
+        title: "Tree added! 🌳",
+        description: `${name} has been added to the map`,
+        action: (
+          <Button variant="outline" size="sm" className="font-serif text-xs" onClick={() => {
+            // Bridge prompt to add an offering
+            window.dispatchEvent(new CustomEvent('open-offering-prompt', { detail: { treeName: name } }));
+          }}>
+            Leave an offering →
+          </Button>
+        ),
+      });
       setName("");
       setSpecies("");
       setDescription("");

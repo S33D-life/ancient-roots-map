@@ -1,4 +1,7 @@
 import { useState, lazy, Suspense } from "react";
+import { Navigate } from "react-router-dom";
+
+const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
@@ -56,7 +59,8 @@ const App = () => {
               <Route path="/map" element={<MapPage />} />
               <Route path="/tree/:id" element={<TreeDetailPage />} />
               <Route path="/groves" element={<GrovesPage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/library" element={<GalleryPage />} />
+              <Route path="/gallery" element={<GalleryRedirect />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/golden-dream" element={<GoldenDreamPage />} />

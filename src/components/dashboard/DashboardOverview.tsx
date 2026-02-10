@@ -14,7 +14,7 @@ const stats = (props: OverviewProps) => [
   { label: "Trees Logged", value: props.treeCount, icon: TreeDeciduous, color: "text-primary", link: "/map" },
   { label: "Wishlist", value: props.wishlistCount, icon: Star, color: "text-accent", link: null },
   { label: "Seed Pods", value: props.plantCount, icon: Sprout, color: "text-primary", link: null },
-  { label: "Scrolls Read", value: 0, icon: BookOpen, color: "text-accent", link: "/gallery" },
+  { label: "Scrolls Read", value: 0, icon: BookOpen, color: "text-accent", link: "/library" },
 ];
 
 const DashboardOverview = (props: OverviewProps) => {
@@ -62,7 +62,7 @@ const DashboardOverview = (props: OverviewProps) => {
             </div>
           </Link>
           <Link
-            to="/gallery"
+            to="/library"
             className="flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card/40 hover:border-primary/40 hover:bg-card/60 transition-all group"
           >
             <BookOpen className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />

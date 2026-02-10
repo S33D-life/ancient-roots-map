@@ -26,7 +26,7 @@ const steps = [
     title: "The HeARTwood Library",
     description:
       "Nine rooms of wonder — from the Staff Room's 144 ceremonial staffs to the Music Room's species-tuned radio stations and the Seed Cellar archive.",
-    cta: { label: "Enter the Library", to: "/gallery" },
+    cta: { label: "Enter the Library", to: "/library" },
   },
   {
     icon: Leaf,

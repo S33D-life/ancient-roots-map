@@ -193,7 +193,7 @@ const MapFilters = ({
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 <TreeDeciduous className="h-6 w-6 text-muted-foreground" />
               </div>
-              <span className="text-[10px] text-center leading-tight">All</span>
+              <span className="text-[10px] text-center leading-tight">TETOL</span>
             </button>
 
             {STAFF_SPECIES.map((staff) => {
