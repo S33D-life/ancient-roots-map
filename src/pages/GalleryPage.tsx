@@ -1263,26 +1263,25 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">
-            {/* Wishing Tree painting */}
-            <div className="flex items-start gap-4">
-              <div className="relative w-28 md:w-36 shrink-0 rounded-lg overflow-hidden border-2 border-border shadow-lg" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 0 0 3px hsl(var(--border))' }}>
-                <img
-                  src={wishingTreeImage}
-                  alt="Wishing Tree"
-                  className="w-full aspect-[3/4] object-cover"
-                />
+            <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
+              {/* Wishing Tree painting header */}
+              <div className="flex items-center gap-4 p-4 border-b border-border/30">
+                <div className="relative w-16 h-20 shrink-0 rounded-md overflow-hidden border border-border shadow" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                  <img
+                    src={wishingTreeImage}
+                    alt="Wishing Tree"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-lg md:text-xl font-serif text-primary">
+                    Wishing Tree
+                  </h2>
+                  <p className="text-xs font-serif text-muted-foreground">
+                    Trees you dream of visiting someday
+                  </p>
+                </div>
               </div>
-              <div className="pt-2">
-                <h2 className="text-xl md:text-2xl font-serif text-primary">
-                  Wishing Tree
-                </h2>
-                <p className="text-xs font-serif text-muted-foreground mt-1">
-                  Trees you dream of visiting someday
-                </p>
-              </div>
-            </div>
-
-            <Card className="border-mystical bg-card/50 backdrop-blur">
               <CardHeader className="sr-only">
                 <CardTitle>Wishing Tree</CardTitle>
               </CardHeader>
