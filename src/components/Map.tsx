@@ -785,7 +785,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
       <ConversionStatus />
 
       {/* Top bar: view toggle + filters + count */}
-      <Card className="absolute top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-10 bg-background/95 backdrop-blur border-border shadow-lg">
+      <Card className="absolute top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-10 bg-card/95 backdrop-blur border-border shadow-lg text-card-foreground">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 sm:p-3">
           <Tabs value={viewMode} onValueChange={setViewMode}>
             <TabsList className="bg-muted w-full sm:w-auto">

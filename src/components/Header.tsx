@@ -38,10 +38,7 @@ const Header = () => {
     }
   }, [navigate]);
 
-  const handleTeotagHover = useCallback(() => {
-    setGuideTab("search");
-    setGuideOpen(true);
-  }, []);
+  // Hover no longer opens search automatically — it was too aggressive and obscured the header
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -137,16 +134,19 @@ const Header = () => {
   const hearthImg = avatarUrl || hearthIcon;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md bg-card/95 dark:bg-card/95" style={{ background: 'var(--header-bg)' }}>
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md"
+        style={{
+          background: 'linear-gradient(180deg, hsl(28 35% 18% / 0.97), hsl(25 30% 14% / 0.95))',
+        }}
+      >
       <style>{`
-        :root { --header-bg: linear-gradient(180deg, hsl(28 35% 18% / 0.97), hsl(25 30% 14% / 0.95)); }
-        .light { --header-bg: linear-gradient(180deg, hsl(38 45% 92% / 0.97), hsl(35 35% 85% / 0.95)); }
+        .light header { background: linear-gradient(180deg, hsl(38 45% 92% / 0.97), hsl(35 35% 85% / 0.95)) !important; }
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           {/* TEOTAG logo — single click goes home, double-click opens TETOL, hover opens search */}
           <div className="relative group">
-            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick} onMouseEnter={handleTeotagHover}>
+            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
               <img 
                 src={teotagLogo} 
                 alt="TEOTAG — Click to go home" 
