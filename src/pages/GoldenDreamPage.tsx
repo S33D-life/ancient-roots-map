@@ -170,9 +170,10 @@ const GoldenDreamPage = () => {
           <img
             src={goldenDreamBanner}
             alt=""
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover brightness-125 saturate-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background/70" />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 30%, hsl(42 95% 55% / 0.25), transparent 60%)' }} />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 pt-16 pb-12">
