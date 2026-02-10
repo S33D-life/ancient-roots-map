@@ -27,14 +27,14 @@ const councilRooms = [
     title: "Host a Pod",
     description: "Start a local pod gathering",
     icon: Podcast,
-    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//1e415b58480d8042a722ef57e01e3228",
+    externalUrl: "https://t.me/s33dlife",
   },
   {
     id: "next",
     title: "Next Council",
     description: "Upcoming council dates and details",
     icon: CalendarDays,
-    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//1e415b58480d8042a722ef57e01e3228",
+    externalUrl: "https://t.me/s33dlife",
   },
 ];
 
