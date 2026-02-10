@@ -14,6 +14,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [heartsCount, setHeartsCount] = useState<number | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tetolOpen, setTetolOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -71,14 +72,22 @@ const Header = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchHearts(session.user.id);
+      if (session?.user) {
+        fetchHearts(session.user.id);
+        fetchAvatar(session.user.id);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
-        if (session?.user) fetchHearts(session.user.id);
-        else setHeartsCount(null);
+        if (session?.user) {
+          fetchHearts(session.user.id);
+          fetchAvatar(session.user.id);
+        } else {
+          setHeartsCount(null);
+          setAvatarUrl(null);
+        }
       }
     );
 
@@ -111,6 +120,13 @@ const Header = () => {
     }
     setHeartsCount(total);
   };
+
+  const fetchAvatar = async (userId: string) => {
+    const { data } = await supabase.from("profiles").select("avatar_url").eq("id", userId).single();
+    if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+  };
+
+  const hearthImg = avatarUrl || hearthIcon;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md bg-card/95 dark:bg-card/95" style={{ background: 'var(--header-bg)' }}>
@@ -188,7 +204,7 @@ const Header = () => {
                 to="/dashboard"
                 className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical"
               >
-                <img src={hearthIcon} alt="Hearth" className="w-8 h-8 rounded-full" />
+                <img src={hearthImg} alt="Hearth" className="w-8 h-8 rounded-full object-cover" />
                 <span className="font-serif">Hearth</span>
                 {heartsCount !== null && heartsCount > 0 && (
                   <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
@@ -240,7 +256,7 @@ const Header = () => {
                 style={{ animationDelay: '240ms', animationFillMode: 'forwards' }}
                 onClick={() => setMobileOpen(false)}
               >
-                <img src={hearthIcon} alt="Hearth" className="w-6 h-6 rounded-full" />
+                <img src={hearthImg} alt="Hearth" className="w-6 h-6 rounded-full object-cover" />
                 <span className="font-serif">Hearth</span>
                 {heartsCount !== null && heartsCount > 0 && (
                   <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
