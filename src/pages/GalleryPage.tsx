@@ -17,6 +17,7 @@ import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
 import CreatorsPath from "@/components/CreatorsPath";
+import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
 import { Progress } from "@/components/ui/progress";
@@ -472,6 +473,7 @@ const GalleryPage = () => {
             {[
               { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
               { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
+              { key: "greenhouse", label: "Greenhouse", desc: "Houseplants & Saplings" },
               { key: "wishlist", label: "Wishing Tree", desc: "Trees you dream to visit" },
               { key: "seed-cellar", label: "Seed Cellar", desc: "Living Data Archive" },
               { key: "creators-path", label: "Creator's Path", desc: "Your Journey" },
@@ -520,9 +522,10 @@ const GalleryPage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 mb-8">
-            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-4xl md:grid-cols-7 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
+            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-5xl md:grid-cols-8 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
               <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
               <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
+              <TabsTrigger value="greenhouse" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Greenhouse</TabsTrigger>
               <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
               <TabsTrigger value="seed-cellar" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Seed Cellar</TabsTrigger>
               <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
@@ -1253,6 +1256,10 @@ const GalleryPage = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="greenhouse" className="space-y-6">
+            <Greenhouse />
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">

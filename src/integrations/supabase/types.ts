@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      greenhouse_plants: {
+        Row: {
+          created_at: string
+          id: string
+          is_shared: boolean
+          name: string
+          notes: string | null
+          photo_url: string | null
+          species: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          name: string
+          notes?: string | null
+          photo_url?: string | null
+          species?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          name?: string
+          notes?: string | null
+          photo_url?: string | null
+          species?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       offerings: {
         Row: {
           content: string | null
