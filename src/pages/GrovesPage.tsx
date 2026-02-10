@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { escapeHtml } from "@/utils/escapeHtml";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
