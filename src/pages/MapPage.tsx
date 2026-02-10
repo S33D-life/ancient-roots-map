@@ -40,13 +40,14 @@ const SPECIES_QUICK = [
 const MapPage = () => {
   const [splashPhase, setSplashPhase] = useState<"s33d" | "ancient" | "fading" | "done">("s33d");
   const [showLanding, setShowLanding] = useState(true);
+  const [landingFading, setLandingFading] = useState(false);
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState("all");
 
   useEffect(() => {
-    const t1 = setTimeout(() => setSplashPhase("ancient"), 2000);
-    const t2 = setTimeout(() => setSplashPhase("fading"), 4500);
-    const t3 = setTimeout(() => setSplashPhase("done"), 5300);
+    const t1 = setTimeout(() => setSplashPhase("ancient"), 1400);
+    const t2 = setTimeout(() => setSplashPhase("fading"), 3000);
+    const t3 = setTimeout(() => setSplashPhase("done"), 3600);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
