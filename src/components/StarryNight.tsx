@@ -27,15 +27,7 @@ const StarryNight = () => {
       baseAlpha: number;
     }
 
-    interface ShootingStar {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-      maxLife: number;
-      size: number;
-    }
+    // Shooting stars interface removed
 
     const stars: Star[] = Array.from({ length: STAR_COUNT }, () => ({
       x: Math.random() * width,
