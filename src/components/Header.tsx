@@ -8,13 +8,16 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
+import GlobalSearch from "./GlobalSearch";
 
 const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tetolOpen, setTetolOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,6 +51,18 @@ const Header = () => {
     setIsDark(!isDark);
   };
 
+  // ⌘K / Ctrl+K shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
@@ -74,13 +89,21 @@ const Header = () => {
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
-          <div className="relative group">
+          <div
+            className="relative group"
+            onMouseEnter={() => {
+              hoverTimerRef.current = setTimeout(() => setSearchOpen(true), 400);
+            }}
+            onMouseLeave={() => {
+              if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+            }}
+          >
             <a href="/" className="flex items-center gap-3" onClick={handleTeotagClick}>
               <img 
                 src={teotagLogo} 
-                alt="Teotag" 
+                alt="Teotag — hover to search, double-click for TETOL" 
                 className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer"
-                title="Double-click for TETOL"
+                title="Hover to search · Double-click for TETOL"
               />
             </a>
             <div className="absolute top-full left-0 mt-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-300 translate-y-1 group-hover:translate-y-0 z-50">
@@ -177,6 +200,7 @@ const Header = () => {
         )}
       </div>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 };
