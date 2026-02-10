@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -363,15 +364,15 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         className: 'tree-popup',
       }).setHTML(`
         <div style="padding: 10px; font-family: 'Cinzel', serif; min-width: 220px;">
-          <h3 style="margin: 0 0 4px 0; font-size: 16px; color: hsl(45, 80%, 60%);">${tree.name}</h3>
-          <p style="margin: 0 0 2px 0; font-size: 12px; color: hsl(120, 40%, 70%);">${tree.species}</p>
-          <p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(45, 60%, 50%);">📍 ${tree.what3words}</p>
-          ${tree.description ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%); line-height: 1.4;">${tree.description.substring(0, 100)}${tree.description.length > 100 ? '\u2026' : ''}</p>` : ''}
-          <a href="/tree/${tree.id}" style="display: block; margin-top: 10px; padding: 6px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(42, 88%, 50%), hsl(45, 100%, 60%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.1em; font-weight: 600;">View Ancient Friend &#10230;</a>
+          <h3 style="margin: 0 0 4px 0; font-size: 16px; color: hsl(45, 80%, 60%);">${escapeHtml(tree.name)}</h3>
+          <p style="margin: 0 0 2px 0; font-size: 12px; color: hsl(120, 40%, 70%);">${escapeHtml(tree.species)}</p>
+          <p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(45, 60%, 50%);">📍 ${escapeHtml(tree.what3words || '')}</p>
+          ${tree.description ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: hsl(0, 0%, 70%); line-height: 1.4;">${escapeHtml(tree.description.substring(0, 100))}${tree.description.length > 100 ? '\u2026' : ''}</p>` : ''}
+          <a href="/tree/${encodeURIComponent(tree.id)}" style="display: block; margin-top: 10px; padding: 6px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(42, 88%, 50%), hsl(45, 100%, 60%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.1em; font-weight: 600;">View Ancient Friend &#10230;</a>
           <div style="margin-top: 8px; display: flex; gap: 8px; justify-content: center;">
-            <a href="/tree/${tree.id}?add=photo" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(120, 60%, 50%); text-decoration: none; border: 1px solid hsla(120,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Memory">📷</a>
-            <a href="/tree/${tree.id}?add=song" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(200, 60%, 50%); text-decoration: none; border: 1px solid hsla(200,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Song">🎵</a>
-            <a href="/tree/${tree.id}?add=story" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(280, 60%, 50%); text-decoration: none; border: 1px solid hsla(280,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Musing">💭</a>
+            <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(120, 60%, 50%); text-decoration: none; border: 1px solid hsla(120,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Memory">📷</a>
+            <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(200, 60%, 50%); text-decoration: none; border: 1px solid hsla(200,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Song">🎵</a>
+            <a href="/tree/${encodeURIComponent(tree.id)}?add=story" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 16px; color: hsl(280, 60%, 50%); text-decoration: none; border: 1px solid hsla(280,60%,50%,0.3); border-radius: 8px; transition: background 0.2s;" title="Add Musing">💭</a>
           </div>
         </div>
       `);
