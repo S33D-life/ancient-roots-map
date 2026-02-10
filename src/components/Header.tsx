@@ -19,6 +19,7 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tetolOpen, setTetolOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
@@ -32,6 +33,7 @@ const Header = () => {
       // Single-click → TEOTAG guide
       clickTimerRef.current = setTimeout(() => {
         clickTimerRef.current = null;
+        setGuideTab("guide");
         setGuideOpen(true);
       }, 300);
     }
@@ -61,6 +63,7 @@ const Header = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        setGuideTab("search");
         setGuideOpen(true);
       }
     };
@@ -190,7 +193,7 @@ const Header = () => {
 
           <div className="flex items-center gap-2">
             {/* Mobile search button opens guide on search tab */}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setGuideOpen(true)} title="Search">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => { setGuideTab("search"); setGuideOpen(true); }} title="Search">
               <Search className="w-4 h-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden">
@@ -281,7 +284,7 @@ const Header = () => {
         )}
       </div>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
-      <TeotagGuide open={guideOpen} onClose={() => setGuideOpen(false)} />
+      <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />
       <TeotagWhisper onOpenGuide={() => setGuideOpen(true)} />
     </header>
   );

@@ -38,14 +38,15 @@ const LEVEL_GREETINGS: Record<string, string> = {
 interface TeotagGuideProps {
   open: boolean;
   onClose: () => void;
+  initialTab?: Tab;
 }
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/teotag-guide`;
 
-const TeotagGuide = ({ open, onClose }: TeotagGuideProps) => {
+const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const navigate = useNavigate();
   const { level } = useTetolLevel();
-  const [tab, setTab] = useState<Tab>("guide");
+  const [tab, setTab] = useState<Tab>(initialTab || "guide");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -56,6 +57,13 @@ const TeotagGuide = ({ open, onClose }: TeotagGuideProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const hasGreeted = useRef(false);
+
+  // Sync tab when initialTab changes on open
+  useEffect(() => {
+    if (open && initialTab) {
+      setTab(initialTab);
+    }
+  }, [open, initialTab]);
 
   // Auto-greet on first open
   useEffect(() => {
