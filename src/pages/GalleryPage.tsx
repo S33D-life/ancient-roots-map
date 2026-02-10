@@ -22,6 +22,7 @@ import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
+import treeRadioArt from "@/assets/tree-radio-art.jpeg";
 import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
@@ -472,6 +473,7 @@ const GalleryPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl w-full">
             {[
               { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
+              { key: "music-room", label: "Music Room", desc: "Tree Radio" },
               { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
               { key: "greenhouse", label: "Greenhouse", desc: "Houseplants & Saplings" },
               { key: "wishlist", label: "Wishing Tree", desc: "Trees you dream to visit" },
@@ -522,8 +524,9 @@ const GalleryPage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 mb-8">
-            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-5xl md:grid-cols-8 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
+            <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-9 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
               <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
+              <TabsTrigger value="music-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Music Room</TabsTrigger>
               <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
               <TabsTrigger value="greenhouse" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Greenhouse</TabsTrigger>
               <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
@@ -534,7 +537,96 @@ const GalleryPage = () => {
             </TabsList>
           </div>
 
+          {/* Music Room */}
+          <TabsContent value="music-room" className="space-y-6">
+            <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-2xl font-serif text-primary tracking-wide flex items-center gap-3">
+                  <Music className="h-6 w-6" />
+                  Music Room
+                </CardTitle>
+                <CardDescription className="font-serif">
+                  Tune into Tree Radio — a shuffled stream of songs offered to the ancient groves
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Hero artwork */}
+                <div className="relative rounded-xl overflow-hidden border border-primary/30">
+                  <img
+                    src={treeRadioArt}
+                    alt="Tree Radio"
+                    className="w-full h-56 md:h-72 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-2xl md:text-3xl font-serif text-primary tracking-wider" style={{ textShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}>
+                      Tree Radio
+                    </h3>
+                    <p className="text-sm text-foreground/70 font-serif mt-1">
+                      Every tree has a song. Tune in on the Arboreal Atlas.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-4">
+                    <h4 className="font-serif text-lg text-primary/90 tracking-wide">How it works</h4>
+                    <div className="space-y-3 text-sm text-foreground/70 font-serif leading-relaxed">
+                      <p>
+                        When visitors offer a song to an ancient tree, it becomes part of that species' 
+                        living soundtrack. Tree Radio shuffles all songs shared with a species into a 
+                        continuous stream.
+                      </p>
+                      <p>
+                        Select a species filter on the Arboreal Atlas and tap the 
+                        <span className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs">
+                          <Music className="h-3 w-3" /> Tree Radio
+                        </span>
+                        button to start listening.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-serif text-lg text-primary/90 tracking-wide">Stations</h4>
+                    <div className="space-y-2">
+                      {["All Species", "Yew", "Oak", "Beech", "Ash", "Holly"].map((station) => (
+                        <div
+                          key={station}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card/30"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+                            <Music className="h-4 w-4 text-primary/70" />
+                          </div>
+                          <span className="font-serif text-sm text-foreground/80">{station} Radio</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA to Atlas */}
+                <div className="flex justify-center pt-4">
+                  <Button
+                    onClick={() => window.location.href = "/map"}
+                    className="gap-2 font-serif tracking-wider"
+                    style={{
+                      background: 'linear-gradient(135deg, hsl(28 40% 18%), hsl(35 50% 22%))',
+                      color: 'hsl(42 95% 55%)',
+                      border: '1px solid hsl(42 50% 35% / 0.5)',
+                    }}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    Open Tree Radio on the Atlas
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="gallery" className="space-y-8">
+
             <div className="flex flex-col md:flex-row gap-4">
               <Input
                 placeholder="Search by name, species, or what3words..."
