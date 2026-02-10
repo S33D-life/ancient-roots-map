@@ -21,6 +21,7 @@ const GoldenDreamPage = lazy(() => import("./pages/GoldenDreamPage"));
 const CouncilOfLifePage = lazy(() => import("./pages/CouncilOfLifePage"));
 const AssetsPage = lazy(() => import("./pages/AssetsPage"));
 const VaultPage = lazy(() => import("./pages/VaultPage"));
+const RadioPage = lazy(() => import("./pages/RadioPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ const App = () => {
               <Route path="/council-of-life" element={<CouncilOfLifePage />} />
               <Route path="/assets" element={<AssetsPage />} />
               <Route path="/vault" element={<VaultPage />} />
+              <Route path="/radio" element={<RadioPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

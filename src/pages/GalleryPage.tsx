@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2 } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio } from "lucide-react";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -608,9 +608,9 @@ const GalleryPage = () => {
                 </div>
 
                 {/* CTA to Atlas */}
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center gap-3 pt-4">
                   <Button
-                    onClick={() => window.location.href = "/map"}
+                    onClick={() => window.location.href = "/radio"}
                     className="gap-2 font-serif tracking-wider"
                     style={{
                       background: 'linear-gradient(135deg, hsl(28 40% 18%), hsl(35 50% 22%))',
@@ -618,8 +618,16 @@ const GalleryPage = () => {
                       border: '1px solid hsl(42 50% 35% / 0.5)',
                     }}
                   >
+                    <Radio className="h-4 w-4" />
+                    Open Tree Radio
+                  </Button>
+                  <Button
+                    onClick={() => window.location.href = "/map"}
+                    variant="ghost"
+                    className="gap-2 font-serif tracking-wider text-muted-foreground"
+                  >
                     <MapPin className="h-4 w-4" />
-                    Open Tree Radio on the Atlas
+                    Radio on the Atlas
                   </Button>
                 </div>
               </CardContent>
