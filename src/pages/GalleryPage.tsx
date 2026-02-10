@@ -91,6 +91,7 @@ const GalleryPage = () => {
   const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
+  const [showTreeLedger, setShowTreeLedger] = useState(false);
   const [offeringForm, setOfferingForm] = useState({
     title: "",
     type: "photo",
@@ -1265,169 +1266,185 @@ const GalleryPage = () => {
               </div>
             )}
 
-            <Card className="border-mystical bg-card/50 backdrop-blur">
-              <CardHeader>
-                <CardTitle className="text-2xl font-serif text-mystical">
-                  Tree Ledger
-                </CardTitle>
-                <CardDescription>
-                  Import and export tree data from what3words CSV files
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-serif font-semibold mb-3">Ledger Stats</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                        <p className="text-2xl font-bold text-mystical">{trees.length}</p>
-                        <p className="text-sm text-muted-foreground">Total Trees</p>
-                      </div>
-                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                        <p className="text-2xl font-bold text-mystical">{uniqueSpecies.length}</p>
-                        <p className="text-sm text-muted-foreground">Species</p>
-                      </div>
-                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                        <p className="text-2xl font-bold text-mystical">
-                          {new Set(trees.map(t => t.nation).filter(Boolean)).size}
-                        </p>
-                        <p className="text-sm text-muted-foreground">Nations</p>
-                      </div>
-                      <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                        <p className="text-2xl font-bold text-mystical">
-                          {new Set(trees.map(t => t.state).filter(Boolean)).size}
-                        </p>
-                        <p className="text-sm text-muted-foreground">States/Regions</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-mystical pt-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-lg font-serif font-semibold">Strings</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { key: "oak" as const, label: "Oak" },
-                          { key: "yew" as const, label: "Yew" },
-                          { key: "beech" as const, label: "Beech" },
-                          { key: "ash" as const, label: "Ash" },
-                          { key: "holly" as const, label: "Holly" },
-                        ].map((s) => (
-                          <Button
-                            key={s.key}
-                            variant={activeString === s.key ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setActiveString(s.key)}
-                          >
-                            {s.label} String
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                    <iframe
-                      src={
-                        {
-                          oak: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8023b4ade8b40e4b5156",
-                          yew: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80468a76dd551cff272b",
-                          beech: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80c6a871d19d6dc35bd3",
-                          ash: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8079b3e3d68121c9e133",
-                          holly: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d801eb6a8f4e80aa5a574",
-                        }[activeString]
-                      }
-                      width="100%"
-                      height="600"
-                      frameBorder="0"
-                      allowFullScreen
-                      className="rounded-lg border border-border"
-                    />
-                  </div>
-
-                  <div className="border-t border-mystical pt-4">
-                    <h3 className="text-lg font-serif font-semibold mb-3">Import Data</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Upload CSV files exported from what3words containing tree locations and data
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      <PhotoImport />
-                      
-                      <div className="relative">
-                        <input
-                          type="file"
-                          accept=".csv"
-                          onChange={handleImport}
-                          className="hidden"
-                          id="csv-upload-ledger"
-                          disabled={isImporting}
-                        />
-                        <label htmlFor="csv-upload-ledger">
-                          <Button
-                            variant="secondary"
-                            size="default"
-                            disabled={isImporting}
-                            className="cursor-pointer"
-                            asChild
-                          >
-                            <span>
-                              {isImporting ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <Upload className="h-4 w-4 mr-2" />
-                              )}
-                              Import what3words CSV
-                            </span>
-                          </Button>
-                        </label>
-                      </div>
-                    </div>
-                    
-                    {isImporting && importProgress.total > 0 && (
-                      <div className="mt-4 p-4 border border-mystical rounded-lg bg-background/50 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-foreground">
-                            Converting trees: {importProgress.current} / {importProgress.total}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {(() => {
-                              const elapsed = (Date.now() - importProgress.startTime) / 1000;
-                              const rate = importProgress.current / elapsed;
-                              const remaining = (importProgress.total - importProgress.current) / rate;
-                              const minutes = Math.floor(remaining / 60);
-                              const seconds = Math.floor(remaining % 60);
-                              return isFinite(remaining) && remaining > 0
-                                ? `Est. ${minutes}m ${seconds}s remaining`
-                                : 'Calculating...';
-                            })()}
-                          </span>
-                        </div>
-                        <Progress 
-                          value={importProgress.total ? (importProgress.current / importProgress.total) * 100 : 0} 
-                          className="h-2"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border-t border-mystical pt-4">
-                    <h3 className="text-lg font-serif font-semibold mb-3">Export Data</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Download all tree data as a CSV file for backup or external use
-                    </p>
-                    <Button
-                      variant="secondary"
-                      onClick={handleExport}
-                      disabled={isExporting}
-                    >
-                      {isExporting ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Download className="h-4 w-4 mr-2" />
-                      )}
-                      Export All Trees to CSV
-                    </Button>
-                  </div>
+            {/* Tree Ledger - Click to open */}
+            <div
+              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
+              onClick={() => setShowTreeLedger(!showTreeLedger)}
+            >
+              <div className="p-6 bg-card/50 backdrop-blur border-mystical">
+                <div className="flex flex-col items-center justify-center py-4">
+                  <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{showTreeLedger ? "Click to close" : "Click to open the Ledger"}</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+            {showTreeLedger && (
+              <div className="animate-fade-in">
+                <Card className="border-mystical bg-card/50 backdrop-blur">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-serif text-mystical">
+                      Tree Ledger
+                    </CardTitle>
+                    <CardDescription>
+                      Import and export tree data from what3words CSV files
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-serif font-semibold mb-3">Ledger Stats</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                            <p className="text-2xl font-bold text-mystical">{trees.length}</p>
+                            <p className="text-sm text-muted-foreground">Total Trees</p>
+                          </div>
+                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                            <p className="text-2xl font-bold text-mystical">{uniqueSpecies.length}</p>
+                            <p className="text-sm text-muted-foreground">Species</p>
+                          </div>
+                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                            <p className="text-2xl font-bold text-mystical">
+                              {new Set(trees.map(t => t.nation).filter(Boolean)).size}
+                            </p>
+                            <p className="text-sm text-muted-foreground">Nations</p>
+                          </div>
+                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
+                            <p className="text-2xl font-bold text-mystical">
+                              {new Set(trees.map(t => t.state).filter(Boolean)).size}
+                            </p>
+                            <p className="text-sm text-muted-foreground">States/Regions</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-mystical pt-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <h3 className="text-lg font-serif font-semibold">Strings</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { key: "oak" as const, label: "Oak" },
+                              { key: "yew" as const, label: "Yew" },
+                              { key: "beech" as const, label: "Beech" },
+                              { key: "ash" as const, label: "Ash" },
+                              { key: "holly" as const, label: "Holly" },
+                            ].map((s) => (
+                              <Button
+                                key={s.key}
+                                variant={activeString === s.key ? "default" : "outline"}
+                                size="sm"
+                                onClick={(e) => { e.stopPropagation(); setActiveString(s.key); }}
+                              >
+                                {s.label} String
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                        <iframe
+                          src={
+                            {
+                              oak: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8023b4ade8b40e4b5156",
+                              yew: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80468a76dd551cff272b",
+                              beech: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80c6a871d19d6dc35bd3",
+                              ash: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8079b3e3d68121c9e133",
+                              holly: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d801eb6a8f4e80aa5a574",
+                            }[activeString]
+                          }
+                          width="100%"
+                          height="600"
+                          frameBorder="0"
+                          allowFullScreen
+                          className="rounded-lg border border-border"
+                        />
+                      </div>
+
+                      <div className="border-t border-mystical pt-4">
+                        <h3 className="text-lg font-serif font-semibold mb-3">Import Data</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Upload CSV files exported from what3words containing tree locations and data
+                        </p>
+                        <div className="flex flex-wrap gap-3">
+                          <PhotoImport />
+                          
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept=".csv"
+                              onChange={handleImport}
+                              className="hidden"
+                              id="csv-upload-ledger"
+                              disabled={isImporting}
+                            />
+                            <label htmlFor="csv-upload-ledger">
+                              <Button
+                                variant="secondary"
+                                size="default"
+                                disabled={isImporting}
+                                className="cursor-pointer"
+                                asChild
+                              >
+                                <span>
+                                  {isImporting ? (
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <Upload className="h-4 w-4 mr-2" />
+                                  )}
+                                  Import what3words CSV
+                                </span>
+                              </Button>
+                            </label>
+                          </div>
+                        </div>
+                        
+                        {isImporting && importProgress.total > 0 && (
+                          <div className="mt-4 p-4 border border-mystical rounded-lg bg-background/50 space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-foreground">
+                                Converting trees: {importProgress.current} / {importProgress.total}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {(() => {
+                                  const elapsed = (Date.now() - importProgress.startTime) / 1000;
+                                  const rate = importProgress.current / elapsed;
+                                  const remaining = (importProgress.total - importProgress.current) / rate;
+                                  const minutes = Math.floor(remaining / 60);
+                                  const seconds = Math.floor(remaining % 60);
+                                  return isFinite(remaining) && remaining > 0
+                                    ? `Est. ${minutes}m ${seconds}s remaining`
+                                    : 'Calculating...';
+                                })()}
+                              </span>
+                            </div>
+                            <Progress 
+                              value={importProgress.total ? (importProgress.current / importProgress.total) * 100 : 0} 
+                              className="h-2"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-t border-mystical pt-4">
+                        <h3 className="text-lg font-serif font-semibold mb-3">Export Data</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Download all tree data as a CSV file for backup or external use
+                        </p>
+                        <Button
+                          variant="secondary"
+                          onClick={(e) => { e.stopPropagation(); handleExport(); }}
+                          disabled={isExporting}
+                        >
+                          {isExporting ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4 mr-2" />
+                          )}
+                          Export All Trees to CSV
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="greenhouse" className="space-y-6">
