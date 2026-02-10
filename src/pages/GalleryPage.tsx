@@ -13,7 +13,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2 } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink } from "lucide-react";
+import {
+  getSpiralStaffs,
+  getGridStaffs,
+  getSpeciesStaffCounts,
+  getCircleDescription,
+  getCircleStartIndex,
+  getDisplayCode,
+  isContractConfigured,
+  getBaseScanUrl,
+  getOpenSeaUrl,
+} from "@/utils/staffRoomData";
+import { SPECIES_CODES, SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import PhotoImport from "@/components/PhotoImport";
@@ -1134,90 +1146,15 @@ const GalleryPage = () => {
               </div>
               <div className="relative w-full max-w-3xl mx-auto overflow-hidden" style={{ height: '800px' }}>
                 {(() => {
-                  const staffImages: Record<string, string> = {
-                    OAK: "/images/staffs/oak.jpeg",
-                    HORN: "/images/staffs/horn.jpeg",
-                    HOL: "/images/staffs/hol.jpeg",
-                    HAW: "/images/staffs/haw.jpeg",
-                    PLA: "/images/staffs/pla.jpeg",
-                    ASH: "/images/staffs/ash.jpeg",
-                    GOA: "/images/staffs/goa.jpeg",
-                    ELD: "/images/staffs/eld.jpeg",
-                    BEE: "/images/staffs/bee.jpeg",
-                    APP: "/images/staffs/app.jpeg",
-                    ROSE: "/images/staffs/rose.jpeg",
-                    CHER: "/images/staffs/cher.jpeg",
-                    ROW: "/images/staffs/row.jpeg",
-                    ALD: "/images/staffs/ald.jpeg",
-                    SYC: "/images/staffs/syc.jpeg",
-                    BIR: "/images/staffs/bir.jpeg",
-                    HAZ: "/images/staffs/haz.jpeg",
-                    SWE: "/images/staffs/swe.jpeg",
-                    IVY: "/images/staffs/ivy.jpeg",
-                    PLUM: "/images/staffs/plum.jpeg",
-                    PINE: "/images/staffs/pine.jpeg",
-                    RHOD: "/images/staffs/rhod.jpeg",
-                    PRIV: "/images/staffs/priv.jpeg",
-                    WIL: "/images/staffs/wil.jpeg",
-                    BOX: "/images/staffs/box.jpeg",
-                    BUCK: "/images/staffs/buck.jpeg",
-                    YEW: "/images/staffs/yew.jpeg",
-                    DAWN: "/images/staffs/dawn.jpeg",
-                    BUD: "/images/staffs/bud.jpeg",
-                    CRAB: "/images/staffs/crab.jpeg",
-                    WITC: "/images/staffs/witc.jpeg",
-                    PEAR: "/images/staffs/pear.jpeg",
-                    JAPA: "/images/staffs/japa.jpeg",
-                    SLOE: "/images/staffs/sloe.jpeg",
-                    MED: "/images/staffs/med.jpeg",
-                    HORS: "/images/staffs/hors.jpeg",
-                  };
-                  const spiralStaffs = [
-                    { code: "YEW", species: "Yew", length: "161 cm", weight: "1,252 g" },
-                    { code: "OAK", species: "Oak", length: "119 cm", weight: "550 g" },
-                    { code: "HORN", species: "Hornbeam", length: "133 cm", weight: "990 g" },
-                    { code: "HOL", species: "Holly", length: "157 cm", weight: "600 g" },
-                    { code: "HAW", species: "Hawthorn", length: "102 cm", weight: "603 g" },
-                    { code: "PLA", species: "London Plane", length: "152 cm", weight: "1,844 g" },
-                    { code: "ASH", species: "Ash", length: "131 cm", weight: "816 g" },
-                    { code: "GOA", species: "Goat Willow", length: "119 cm", weight: "292 g" },
-                    { code: "ELD", species: "Elder", length: "127 cm", weight: "505 g" },
-                    { code: "BEE", species: "Beech", length: "128 cm", weight: "1,315 g" },
-                    { code: "APP", species: "Apple", length: "114 cm", weight: "1,000 g" },
-                    { code: "ROSE", species: "Rose", length: "122 cm", weight: "599 g" },
-                    { code: "CHER", species: "Cherry", length: "94 cm", weight: "433 g" },
-                    { code: "ROW", species: "Rowan", length: "138 cm", weight: "911 g" },
-                    { code: "ALD", species: "Alder", length: "93 cm", weight: "955 g" },
-                    { code: "SYC", species: "Sycamore", length: "124 cm", weight: "613 g" },
-                    { code: "BIR", species: "Birch", length: "144 cm", weight: "888 g" },
-                    { code: "HAZ", species: "Hazel", length: "99 cm", weight: "734 g" },
-                    { code: "SWE", species: "Sweet Chestnut", length: "98 cm", weight: "1,210 g" },
-                    { code: "IVY", species: "Ivy", length: "94 cm", weight: "901 g" },
-                    { code: "PLUM", species: "Plum", length: "103 cm", weight: "505 g" },
-                    { code: "PINE", species: "Pine", length: "159 cm", weight: "1,337 g" },
-                    { code: "RHOD", species: "Rhododendron", length: "116 cm", weight: "560 g" },
-                    { code: "PRIV", species: "Privet", length: "104 cm", weight: "666 g" },
-                    { code: "WIL", species: "Willow", length: "118 cm", weight: "646 g" },
-                    { code: "BOX", species: "Box", length: "161 cm", weight: "1,332 g" },
-                    { code: "BUCK", species: "Buckthorn", length: "161 cm", weight: "663 g" },
-                    { code: "DAWN", species: "Dawn Redwood", length: "142 cm", weight: "500 g" },
-                    { code: "BUD", species: "Buddleia", length: "115 cm", weight: "393 g" },
-                    { code: "CRAB", species: "Crab Apple", length: "119 cm", weight: "644 g" },
-                    { code: "WITC", species: "Witch Hazel", length: "84 cm", weight: "433 g" },
-                    { code: "PEAR", species: "Pear", length: "137 cm", weight: "848 g" },
-                    { code: "JAPA", species: "Japanese Maple", length: "103 cm", weight: "1,100 g" },
-                    { code: "SLOE", species: "Blackthorn", length: "177 cm", weight: "1,844 g" },
-                    { code: "MED", species: "Medlar", length: "109 cm", weight: "2,525 g" },
-                    { code: "HORS", species: "Horse Chestnut", length: "101 cm", weight: "1,333 g" },
-                  ];
+                  const spiralStaffs = getSpiralStaffs();
+                  const speciesStaffCounts = getSpeciesStaffCounts();
 
                   const parseNum = (s: string) => parseFloat(s.replace(/,/g, '')) || 0;
-
                   const sortedStaffs = [...spiralStaffs];
                   if (spiralSort !== "spiral") {
                     sortedStaffs.sort((a, b) => {
                       switch (spiralSort) {
-                        case "name": return a.code.localeCompare(b.code);
+                        case "name": return a.displayCode.localeCompare(b.displayCode);
                         case "species": return a.species.localeCompare(b.species);
                         case "weight-desc": return parseNum(b.weight) - parseNum(a.weight);
                         case "weight-asc": return parseNum(a.weight) - parseNum(b.weight);
@@ -1263,20 +1200,8 @@ const GalleryPage = () => {
                         ))}
                       </svg>
 
-                       {sortedStaffs.map((staff, i) => {
+                      {sortedStaffs.map((staff, i) => {
                         const { x: clampedX, y: clampedY } = positions[i];
-                        const hasImage = staffImages[staff.code];
-
-                        // Count total staffs for this species (1 original + circles)
-                        const speciesStaffCounts: Record<string, number> = {
-                          YEW: 37, OAK: 37, ASH: 13, BEE: 13, HOL: 13,
-                          HORN: 1, HAW: 1, PLA: 1, GOA: 1, ELD: 1, APP: 1,
-                          ROSE: 1, CHER: 1, ROW: 1, ALD: 1, SYC: 1, BIR: 1,
-                          HAZ: 1, SWE: 1, IVY: 1, PLUM: 1, PINE: 1, RHOD: 1,
-                          PRIV: 1, WIL: 1, BOX: 1, BUCK: 1, DAWN: 1, BUD: 1,
-                          CRAB: 1, WITC: 1, PEAR: 1, JAPA: 1, SLOE: 1, MED: 1,
-                          HORS: 1,
-                        };
                         const totalForSpecies = speciesStaffCounts[staff.code] || 1;
                         const isHovered = hoveredSpiralStaff === staff.code;
 
@@ -1294,32 +1219,27 @@ const GalleryPage = () => {
                             onMouseEnter={() => setHoveredSpiralStaff(staff.code)}
                             onMouseLeave={() => setHoveredSpiralStaff(null)}
                             onClick={() => setSelectedSpiralStaff({
-                              code: staff.code,
+                              code: staff.displayCode,
                               species: staff.species,
                               length: staff.length,
                               weight: staff.weight,
-                              image: hasImage || "",
+                              image: staff.image,
                             })}
                           >
                             <div className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-primary/80 text-primary-foreground text-[6px] flex items-center justify-center font-bold z-10">
                               {i + 1}
                             </div>
-                            <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border overflow-hidden flex items-center justify-center ${hasImage ? 'border-primary/60 bg-card/90 glow-subtle' : 'border-border bg-muted/30'}`}>
-                              {hasImage ? (
-                                <img src={hasImage} alt={`${staff.species} staff`} className="w-full h-full object-cover" />
-                              ) : (
-                                <Wand2 className="w-4 h-4 text-muted-foreground/30" />
-                              )}
+                            <div className={`w-10 h-14 sm:w-12 sm:h-16 rounded-md border overflow-hidden flex items-center justify-center border-primary/60 bg-card/90 glow-subtle`}>
+                              <img src={staff.image} alt={`${staff.species} staff`} className="w-full h-full object-cover" />
                             </div>
                             <span className="text-[8px] sm:text-[9px] font-serif text-foreground mt-0.5 whitespace-nowrap leading-tight">
-                              {staff.code}
+                              {staff.displayCode}
                             </span>
                             <span className="text-[7px] text-muted-foreground leading-tight">{staff.species}</span>
                             <Badge variant="outline" className="mt-0.5 text-[6px] px-1 py-0 leading-tight">
-                              {hasImage ? "Minted" : "Awaiting"}
+                              Minted
                             </Badge>
 
-                            {/* Hover tooltip */}
                             {isHovered && (
                               <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-card border border-primary/40 rounded-lg px-3 py-1.5 shadow-lg whitespace-nowrap z-50 animate-fade-in">
                                 <p className="text-[10px] font-serif font-bold text-primary">{staff.species}</p>
@@ -1331,12 +1251,7 @@ const GalleryPage = () => {
                                     className="mt-1 text-[9px] text-primary underline underline-offset-2 hover:text-accent transition-colors"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      const code = staff.code;
-                                      // Find the first circle staff index in grid for this species
-                                      const circleStartIndices: Record<string, number> = {
-                                        YEW: 36, OAK: 72, ASH: 108, BEE: 120, HOL: 132,
-                                      };
-                                      const idx = circleStartIndices[code];
+                                      const idx = getCircleStartIndex(staff.code);
                                       if (idx !== undefined) {
                                         const el = document.getElementById(`staff-grid-${idx}`);
                                         el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1372,188 +1287,49 @@ const GalleryPage = () => {
                 <div className="animate-fade-in">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {(() => {
-                  const gridImages: Record<number, { code: string; img: string }> = {
-                    0: { code: "YEW", img: "/images/staffs/yew.jpeg" },
-                    1: { code: "OAK", img: "/images/staffs/oak.jpeg" },
-                    2: { code: "HORN", img: "/images/staffs/horn.jpeg" },
-                    3: { code: "HOL", img: "/images/staffs/hol.jpeg" },
-                    4: { code: "HAW", img: "/images/staffs/haw.jpeg" },
-                    5: { code: "PLA", img: "/images/staffs/pla.jpeg" },
-                    6: { code: "ASH", img: "/images/staffs/ash.jpeg" },
-                    7: { code: "GOA", img: "/images/staffs/goa.jpeg" },
-                    8: { code: "ELD", img: "/images/staffs/eld.jpeg" },
-                    9: { code: "BEE", img: "/images/staffs/bee.jpeg" },
-                    10: { code: "APP", img: "/images/staffs/app.jpeg" },
-                    11: { code: "ROSE", img: "/images/staffs/rose.jpeg" },
-                    12: { code: "CHER", img: "/images/staffs/cher.jpeg" },
-                    13: { code: "ROW", img: "/images/staffs/row.jpeg" },
-                    14: { code: "ALD", img: "/images/staffs/ald.jpeg" },
-                    15: { code: "SYC", img: "/images/staffs/syc.jpeg" },
-                    16: { code: "BIR", img: "/images/staffs/bir.jpeg" },
-                    17: { code: "HAZ", img: "/images/staffs/haz.jpeg" },
-                    18: { code: "SWE", img: "/images/staffs/swe.jpeg" },
-                    19: { code: "IVY", img: "/images/staffs/ivy.jpeg" },
-                    20: { code: "PLUM", img: "/images/staffs/plum.jpeg" },
-                    21: { code: "PINE", img: "/images/staffs/pine.jpeg" },
-                    22: { code: "RHOD", img: "/images/staffs/rhod.jpeg" },
-                    23: { code: "PRIV", img: "/images/staffs/priv.jpeg" },
-                    24: { code: "WIL", img: "/images/staffs/wil.jpeg" },
-                    25: { code: "BOX", img: "/images/staffs/box.jpeg" },
-                    26: { code: "BUCK", img: "/images/staffs/buck.jpeg" },
-                    27: { code: "HORS", img: "/images/staffs/hors.jpeg" },
-                    28: { code: "DAWN", img: "/images/staffs/dawn.jpeg" },
-                    29: { code: "BUD", img: "/images/staffs/bud.jpeg" },
-                    30: { code: "CRAB", img: "/images/staffs/crab.jpeg" },
-                    31: { code: "WITC", img: "/images/staffs/witc.jpeg" },
-                    32: { code: "PEAR", img: "/images/staffs/pear.jpeg" },
-                    33: { code: "JAPA", img: "/images/staffs/japa.jpeg" },
-                    34: { code: "SLOE", img: "/images/staffs/sloe.jpeg" },
-                    35: { code: "MED", img: "/images/staffs/med.jpeg" },
-                    36: { code: "YEW-C1S1", img: "/images/staffs/yew-c1-s1.jpeg" },
-                    37: { code: "YEW-C1S2", img: "/images/staffs/yew-c1-s2.jpeg" },
-                    38: { code: "YEW-C1S3", img: "/images/staffs/yew-c1-s3.jpeg" },
-                    39: { code: "YEW-C1S4", img: "/images/staffs/yew-c1-s4.jpeg" },
-                    40: { code: "YEW-C1S5", img: "/images/staffs/yew-c1-s5.jpeg" },
-                    41: { code: "YEW-C1S6", img: "/images/staffs/yew-c1-s6.jpeg" },
-                    42: { code: "YEW-C1S7", img: "/images/staffs/yew-c1-s7.jpeg" },
-                    43: { code: "YEW-C1S8", img: "/images/staffs/yew-c1-s8.jpeg" },
-                    44: { code: "YEW-C1S9", img: "/images/staffs/yew-c1-s9.jpeg" },
-                    45: { code: "YEW-C1S10", img: "/images/staffs/yew-c1-s10.jpeg" },
-                    46: { code: "YEW-C1S11", img: "/images/staffs/yew-c1-s11.jpeg" },
-                    47: { code: "YEW-C1S12", img: "/images/staffs/yew-c1-s12.jpeg" },
-                    48: { code: "YEW-C2S1", img: "/images/staffs/yew-c2-s1.jpeg" },
-                    49: { code: "YEW-C2S2", img: "/images/staffs/yew-c2-s2.jpeg" },
-                    50: { code: "YEW-C2S3", img: "/images/staffs/yew-c2-s3.jpeg" },
-                    51: { code: "YEW-C2S4", img: "/images/staffs/yew-c2-s4.jpeg" },
-                    52: { code: "YEW-C2S5", img: "/images/staffs/yew-c2-s5.jpeg" },
-                    53: { code: "YEW-C2S6", img: "/images/staffs/yew-c2-s6.jpeg" },
-                    54: { code: "YEW-C2S7", img: "/images/staffs/yew-c2-s7.jpeg" },
-                    55: { code: "YEW-C2S8", img: "/images/staffs/yew-c2-s8.jpeg" },
-                    56: { code: "YEW-C2S9", img: "/images/staffs/yew-c2-s9.jpeg" },
-                    57: { code: "YEW-C2S10", img: "/images/staffs/yew-c2-s10.jpeg" },
-                    58: { code: "YEW-C2S11", img: "/images/staffs/yew-c2-s11.jpeg" },
-                    59: { code: "YEW-C2S12", img: "/images/staffs/yew-c2-s12.jpeg" },
-                    60: { code: "YEW-C3S1", img: "/images/staffs/yew-c3-s1.jpeg" },
-                    61: { code: "YEW-C3S2", img: "/images/staffs/yew-c3-s2.jpeg" },
-                    62: { code: "YEW-C3S3", img: "/images/staffs/yew-c3-s3.jpeg" },
-                    63: { code: "YEW-C3S4", img: "/images/staffs/yew-c3-s4.jpeg" },
-                    64: { code: "YEW-C3S5", img: "/images/staffs/yew-c3-s5.jpeg" },
-                    65: { code: "YEW-C3S6", img: "/images/staffs/yew-c3-s6.jpeg" },
-                    66: { code: "YEW-C3S7", img: "/images/staffs/yew-c3-s7.jpeg" },
-                    67: { code: "YEW-C3S8", img: "/images/staffs/yew-c3-s8.jpeg" },
-                    68: { code: "YEW-C3S9", img: "/images/staffs/yew-c3-s9.jpeg" },
-                    69: { code: "YEW-C3S10", img: "/images/staffs/yew-c3-s10.jpeg" },
-                    70: { code: "YEW-C3S11", img: "/images/staffs/yew-c3-s11.jpeg" },
-                    71: { code: "YEW-C3S12", img: "/images/staffs/yew-c3-s12.jpeg" },
-                    72: { code: "OAK-C1S1", img: "/images/staffs/oak-c1-s1.jpeg" },
-                    73: { code: "OAK-C1S2", img: "/images/staffs/oak-c1-s2.jpeg" },
-                    74: { code: "OAK-C1S3", img: "/images/staffs/oak-c1-s3.jpeg" },
-                    75: { code: "OAK-C1S4", img: "/images/staffs/oak-c1-s4.jpeg" },
-                    76: { code: "OAK-C1S5", img: "/images/staffs/oak-c1-s5.jpeg" },
-                    77: { code: "OAK-C1S6", img: "/images/staffs/oak-c1-s6.jpeg" },
-                    78: { code: "OAK-C1S7", img: "/images/staffs/oak-c1-s7.jpeg" },
-                    79: { code: "OAK-C1S8", img: "/images/staffs/oak-c1-s8.jpeg" },
-                    80: { code: "OAK-C1S9", img: "/images/staffs/oak-c1-s9.jpeg" },
-                    81: { code: "OAK-C1S10", img: "/images/staffs/oak-c1-s10.jpeg" },
-                    82: { code: "OAK-C1S11", img: "/images/staffs/oak-c1-s11.jpeg" },
-                    83: { code: "OAK-C1S12", img: "/images/staffs/oak-c1-s12.jpeg" },
-                    84: { code: "OAK-C2S1", img: "/images/staffs/oak-c2-s1.jpeg" },
-                    85: { code: "OAK-C2S2", img: "/images/staffs/oak-c2-s2.jpeg" },
-                    86: { code: "OAK-C2S3", img: "/images/staffs/oak-c2-s3.jpeg" },
-                    87: { code: "OAK-C2S4", img: "/images/staffs/oak-c2-s4.jpeg" },
-                    88: { code: "OAK-C2S5", img: "/images/staffs/oak-c2-s5.jpeg" },
-                    89: { code: "OAK-C2S6", img: "/images/staffs/oak-c2-s6.jpeg" },
-                    90: { code: "OAK-C2S7", img: "/images/staffs/oak-c2-s7.jpeg" },
-                    91: { code: "OAK-C2S8", img: "/images/staffs/oak-c2-s8.jpeg" },
-                    92: { code: "OAK-C2S9", img: "/images/staffs/oak-c2-s9.jpeg" },
-                    93: { code: "OAK-C2S10", img: "/images/staffs/oak-c2-s10.jpeg" },
-                    94: { code: "OAK-C2S11", img: "/images/staffs/oak-c2-s11.jpeg" },
-                    95: { code: "OAK-C2S12", img: "/images/staffs/oak-c2-s12.jpeg" },
-                    96: { code: "OAK-C3S1", img: "/images/staffs/oak-c3-s1.jpeg" },
-                    97: { code: "OAK-C3S2", img: "/images/staffs/oak-c3-s2.jpeg" },
-                    98: { code: "OAK-C3S3", img: "/images/staffs/oak-c3-s3.jpeg" },
-                    99: { code: "OAK-C3S4", img: "/images/staffs/oak-c3-s4.jpeg" },
-                    100: { code: "OAK-C3S5", img: "/images/staffs/oak-c3-s5.jpeg" },
-                    101: { code: "OAK-C3S6", img: "/images/staffs/oak-c3-s6.jpeg" },
-                    102: { code: "OAK-C3S7", img: "/images/staffs/oak-c3-s7.jpeg" },
-                    103: { code: "OAK-C3S8", img: "/images/staffs/oak-c3-s8.jpeg" },
-                    104: { code: "OAK-C3S9", img: "/images/staffs/oak-c3-s9.jpeg" },
-                    105: { code: "OAK-C3S10", img: "/images/staffs/oak-c3-s10.jpeg" },
-                    106: { code: "OAK-C3S11", img: "/images/staffs/oak-c3-s11.jpeg" },
-                    107: { code: "OAK-C3S12", img: "/images/staffs/oak-c3-s12.jpeg" },
-                    108: { code: "ASH-C1S1", img: "/images/staffs/ash-c1-s1.jpeg" },
-                    109: { code: "ASH-C1S2", img: "/images/staffs/ash-c1-s2.jpeg" },
-                    110: { code: "ASH-C1S3", img: "/images/staffs/ash-c1-s3.jpeg" },
-                    111: { code: "ASH-C1S4", img: "/images/staffs/ash-c1-s4.jpeg" },
-                    112: { code: "ASH-C1S5", img: "/images/staffs/ash-c1-s5.jpeg" },
-                    113: { code: "ASH-C1S6", img: "/images/staffs/ash-c1-s6.jpeg" },
-                    114: { code: "ASH-C1S7", img: "/images/staffs/ash-c1-s7.jpeg" },
-                    115: { code: "ASH-C1S8", img: "/images/staffs/ash-c1-s8.jpeg" },
-                    116: { code: "ASH-C1S9", img: "/images/staffs/ash-c1-s9.jpeg" },
-                    117: { code: "ASH-C1S10", img: "/images/staffs/ash-c1-s10.jpeg" },
-                    118: { code: "ASH-C1S11", img: "/images/staffs/ash-c1-s11.jpeg" },
-                    119: { code: "ASH-C1S12", img: "/images/staffs/ash-c1-s12.jpeg" },
-                    120: { code: "BEE-C1S1", img: "/images/staffs/bee-c1-s1.jpeg" },
-                    121: { code: "BEE-C1S2", img: "/images/staffs/bee-c1-s2.jpeg" },
-                    122: { code: "BEE-C1S3", img: "/images/staffs/bee-c1-s3.jpeg" },
-                    123: { code: "BEE-C1S4", img: "/images/staffs/bee-c1-s4.jpeg" },
-                    124: { code: "BEE-C1S5", img: "/images/staffs/bee-c1-s5.jpeg" },
-                    125: { code: "BEE-C1S6", img: "/images/staffs/bee-c1-s6.jpeg" },
-                    126: { code: "BEE-C1S7", img: "/images/staffs/bee-c1-s7.jpeg" },
-                    127: { code: "BEE-C1S8", img: "/images/staffs/bee-c1-s8.jpeg" },
-                    128: { code: "BEE-C1S9", img: "/images/staffs/bee-c1-s9.jpeg" },
-                    129: { code: "BEE-C1S10", img: "/images/staffs/bee-c1-s10.jpeg" },
-                    130: { code: "BEE-C1S11", img: "/images/staffs/bee-c1-s11.jpeg" },
-                    131: { code: "BEE-C1S12", img: "/images/staffs/bee-c1-s12.jpeg" },
-                    132: { code: "HOL-C1S1", img: "/images/staffs/hol-c1-s1.jpeg" },
-                    133: { code: "HOL-C1S2", img: "/images/staffs/hol-c1-s2.jpeg" },
-                    134: { code: "HOL-C1S3", img: "/images/staffs/hol-c1-s3.jpeg" },
-                    135: { code: "HOL-C1S4", img: "/images/staffs/hol-c1-s4.jpeg" },
-                    136: { code: "HOL-C1S5", img: "/images/staffs/hol-c1-s5.jpeg" },
-                    137: { code: "HOL-C1S6", img: "/images/staffs/hol-c1-s6.jpeg" },
-                    138: { code: "HOL-C1S7", img: "/images/staffs/hol-c1-s7.jpeg" },
-                    139: { code: "HOL-C1S8", img: "/images/staffs/hol-c1-s8.jpeg" },
-                    140: { code: "HOL-C1S9", img: "/images/staffs/hol-c1-s9.jpeg" },
-                    141: { code: "HOL-C1S10", img: "/images/staffs/hol-c1-s10.jpeg" },
-                    142: { code: "HOL-C1S11", img: "/images/staffs/hol-c1-s11.jpeg" },
-                    143: { code: "HOL-C1S12", img: "/images/staffs/hol-c1-s12.jpeg" },
-                  };
-                  return Array.from({ length: 144 }, (_, i) => {
-                    const staffData = gridImages[i];
-                    return (
-                      <Card key={i} id={`staff-grid-${i}`} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden">
-                        <CardContent className="p-4 text-center">
-                          <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors overflow-hidden">
-                            {staffData ? (
-                              <img src={staffData.img} alt={`Staff ${staffData.code}`} className="w-full h-full object-cover" />
-                            ) : (
-                              <Wand2 className="w-8 h-8 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                            )}
-                          </div>
-                          <p className="text-sm font-serif font-medium text-foreground">Staff #{String(i + 1).padStart(3, '0')}</p>
-                          <Badge variant="outline" className="mt-1 text-xs">
-                            {staffData ? "Minted" : "Awaiting Mint"}
-                          </Badge>
-                          {staffData && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleShare(
-                                  `Staff ${staffData.code}`,
-                                  `Staff ${staffData.code} — one of 144 sacred staffs from the Ancient Friends collection`,
-                                   `${window.location.origin}/library`
-                                );
-                              }}
-                              className="mt-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
-                              title="Share this staff"
+                  const allStaffs = getGridStaffs();
+                  return allStaffs.map((staff, i) => (
+                    <Card key={i} id={`staff-grid-${i}`} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden">
+                      <CardContent className="p-4 text-center">
+                        <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors overflow-hidden">
+                          <img src={staff.img} alt={`Staff ${staff.code}`} className="w-full h-full object-cover" />
+                        </div>
+                        <p className="text-sm font-serif font-medium text-foreground">
+                          {staff.code.includes("-") ? staff.code : `${staff.speciesName}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">#{String(staff.tokenId).padStart(3, '0')}</p>
+                        <Badge variant="outline" className="mt-1 text-xs">Minted</Badge>
+                        {isContractConfigured() && (
+                          <div className="flex justify-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a
+                              href={getBaseScanUrl(staff.tokenId)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1 rounded hover:bg-primary/10"
+                              title="View on BaseScan"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-primary transition-colors" />
-                            </button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  });
+                              <ExternalLink className="w-3 h-3 text-muted-foreground hover:text-primary" />
+                            </a>
+                          </div>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShare(
+                              `Staff ${staff.code}`,
+                              `Staff ${staff.code} — one of 144 sacred staffs from the Ancient Friends collection`,
+                              `${window.location.origin}/library`
+                            );
+                          }}
+                          className="mt-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
+                          title="Share this staff"
+                        >
+                          <Share2 className="w-3.5 h-3.5 text-muted-foreground hover:text-primary transition-colors" />
+                        </button>
+                      </CardContent>
+                    </Card>
+                  ));
                 })()}
                   </div>
                 </div>
@@ -2162,27 +1938,23 @@ const GalleryPage = () => {
                   <div className="flex justify-between border-b border-border/40 pb-2">
                     <span className="text-muted-foreground">Total in Collection</span>
                     <span className="text-foreground font-semibold">
-                      {({
-                        YEW: 37, OAK: 37, ASH: 13, BEE: 13, HOL: 13,
-                      } as Record<string, number>)[selectedSpiralStaff.code] || 1} staff{(({
-                        YEW: 37, OAK: 37, ASH: 13, BEE: 13, HOL: 13,
-                      } as Record<string, number>)[selectedSpiralStaff.code] || 1) > 1 ? 's' : ''}
+                      {(() => {
+                        const counts = getSpeciesStaffCounts();
+                        const total = counts[selectedSpiralStaff.code] || 1;
+                        return `${total} staff${total > 1 ? 's' : ''}`;
+                      })()}
                     </span>
                   </div>
                   <div className="flex justify-between pb-2">
                     <span className="text-muted-foreground">Circles</span>
                     <span className="text-foreground">
-                      {({
-                        YEW: "3 circles (36 + original)", OAK: "3 circles (36 + original)",
-                        ASH: "1 circle (12 + original)", BEE: "1 circle (12 + original)",
-                        HOL: "1 circle (12 + original)",
-                      } as Record<string, string>)[selectedSpiralStaff.code] || "Original only"}
+                      {getCircleDescription(selectedSpiralStaff.code)}
                     </span>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground italic pt-2">
                   The {selectedSpiralStaff.species} staff — position #{
-                    ["YEW","OAK","HORN","HOL","HAW","PLA","ASH","GOA","ELD","BEE","APP","ROSE","CHER","ROW","ALD","SYC","BIR","HAZ","SWE","IVY","PLUM","PINE","RHOD","PRIV","WIL","BOX","BUCK","DAWN","BUD","CRAB","WITC","PEAR","JAPA","SLOE","MED","HORS"].indexOf(selectedSpiralStaff.code) + 1
+                    getSpiralStaffs().findIndex(s => s.displayCode === selectedSpiralStaff.code) + 1
                   } on the sacred spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.
                 </p>
                 <Button
