@@ -18,6 +18,10 @@ import MistOverlay from "./MistOverlay";
 
 const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
+interface TreeOfferings {
+  [treeId: string]: number;
+}
+
 interface Tree {
   id: string;
   name: string;
@@ -28,6 +32,7 @@ interface Tree {
   description?: string;
   created_by?: string;
   nation?: string;
+  estimated_age?: number | null;
 }
 
 const GROVE_SOURCE_ID = 'grove-boundary-source';
