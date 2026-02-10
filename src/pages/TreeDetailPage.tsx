@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -254,23 +255,29 @@ const TreeDetailPage = () => {
                   onImageClick={(i) => setLightboxIndex(i)}
                 />
               ) : type === "poem" || type === "story" ? (
-                <div className="space-y-4">
+                <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
                   {getOfferingsByType(type).map((offering) => (
-                    <LiteraryCard key={offering.id} offering={offering} type={type} />
+                    <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                      <LiteraryCard offering={offering} type={type} />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               ) : type === "song" ? (
-                <div className="space-y-4">
+                <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
                   {getOfferingsByType(type).map((offering) => (
-                    <SongCard key={offering.id} offering={offering} />
+                    <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                      <SongCard offering={offering} />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2">
+                <motion.div className="grid gap-4 md:grid-cols-2" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
                   {getOfferingsByType(type).map((offering) => (
-                    <NftCard key={offering.id} offering={offering} />
+                    <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                      <NftCard offering={offering} />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
             </TabsContent>
           ))}
@@ -363,10 +370,17 @@ const PhotoGrid = ({
 }) => {
   const photoIndex = offerings.filter((o) => o.media_url);
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+    <motion.div
+      className="grid grid-cols-2 md:grid-cols-3 gap-3"
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+    >
       {offerings.map((offering) => (
-        <div
+        <motion.div
           key={offering.id}
+          variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
           className="group relative rounded-lg overflow-hidden border border-border/50 cursor-pointer aspect-square"
           onClick={() => {
             const idx = photoIndex.findIndex((p) => p.id === offering.id);
@@ -395,9 +409,9 @@ const PhotoGrid = ({
               <SealedByLabel staff={offering.sealed_by_staff} />
             </div>
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
