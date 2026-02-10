@@ -111,6 +111,7 @@ const GalleryPage = () => {
   const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string; tokenId: number } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
+  const [showMintingProgress, setShowMintingProgress] = useState(false);
    const [showSpiral, setShowSpiral] = useState(false);
   const [selectedGridStaff, setSelectedGridStaff] = useState<{ tokenId: number; code: string; speciesName: string; img: string } | null>(null);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
