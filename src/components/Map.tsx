@@ -725,6 +725,14 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
           0%, 100% { filter: drop-shadow(0 0 2px hsla(42, 80%, 50%, 0.3)); }
           50% { filter: drop-shadow(0 0 8px hsla(42, 80%, 50%, 0.6)); }
         }
+        @keyframes vignetteBreath {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.85; }
+        }
+        @keyframes ambientDrift {
+          0% { opacity: 0.6; transform: scale(1); }
+          100% { opacity: 1; transform: scale(1.05); }
+        }
         .tree-popup .mapboxgl-popup-content {
           background: hsl(120, 40%, 15%);
           border: 1px solid hsl(45, 60%, 40%);
