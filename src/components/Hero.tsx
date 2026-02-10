@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous } from "lucide-react";
-import heroS33d from "@/assets/hero-s33d.jpeg";
+import heroTree from "@/assets/hero-tree.jpg";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
@@ -200,7 +200,7 @@ const Hero = () => {
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-top scale-110"
-        style={{ backgroundImage: `url(${heroS33d})` }}
+        style={{ backgroundImage: `url(${heroTree})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/60 to-background/95" />
       </div>
