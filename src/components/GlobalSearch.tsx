@@ -184,9 +184,9 @@ const GlobalSearch = ({ open, onClose }: GlobalSearchProps) => {
       className="fixed inset-0 z-[110] flex items-start justify-center pt-[10vh] md:pt-[15vh]"
       onClick={onClose}
       style={{
-        background: "radial-gradient(ellipse at 50% 30%, hsl(80 15% 10% / 0.95), hsl(80 15% 6% / 0.98))",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
+        background: "radial-gradient(ellipse at 50% 30%, hsl(80 15% 10% / 0.7), hsl(80 15% 6% / 0.75))",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
       }}
     >
       <div
