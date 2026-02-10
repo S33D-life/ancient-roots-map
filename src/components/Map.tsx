@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
+import MapIdleNudge from "./MapIdleNudge";
 
 type TimeOfDay = "dawn" | "day" | "dusk" | "night";
 
@@ -245,6 +246,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [timeOfDay] = useState<TimeOfDay>(getTimeOfDay);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const atmosphere = TIME_ATMOSPHERES[timeOfDay];
   const { toast } = useToast();
 
@@ -403,7 +405,15 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         attributionControl: false,
       });
 
-      m.on('load', () => setMapStatus("ready"));
+      m.on('load', () => {
+        setMapStatus("ready");
+        const c = m.getCenter();
+        setMapCenter({ lat: c.lat, lng: c.lng });
+      });
+      m.on('moveend', () => {
+        const c = m.getCenter();
+        setMapCenter({ lat: c.lat, lng: c.lng });
+      });
       m.on('error', (e) => {
         console.error('Mapbox error:', e);
         setMapStatus("error");
@@ -838,6 +848,8 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         </div>
         <TreeImportExport />
       </div>
+
+      <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
 
       <style>{`
         @keyframes ancientPulse {
