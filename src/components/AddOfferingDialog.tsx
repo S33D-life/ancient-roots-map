@@ -51,7 +51,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const [sealedByStaff, setSealedByStaff] = useState("");
+  const [sealedByStaff, setSealedByStaff] = useState(() => {
+    return localStorage.getItem("linked_staff_code") || "";
+  });
   const [songSearch, setSongSearch] = useState("");
   const [songResults, setSongResults] = useState<iTunesResult[]>([]);
   const [songSearching, setSongSearching] = useState(false);

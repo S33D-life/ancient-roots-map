@@ -84,6 +84,9 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
 
   const handleSelectStaff = (staff: StaffNFT) => {
     setSelectedStaff(staff);
+    // Persist staff identity for use across the app
+    localStorage.setItem("linked_staff_code", staff.code);
+    localStorage.setItem("linked_staff_name", staff.name);
     onWalletLinked?.(walletAddress!, staff);
     toast({
       title: "Staff linked!",
