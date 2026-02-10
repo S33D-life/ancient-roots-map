@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { getMetadataUrl, getImageUrl, getBaseScanUrl, getOpenSeaUrl, STAFF_CONTRACT_ADDRESS } from "@/config/staffContract";
+import { ethers } from "ethers";
+import { getMetadataUrl, getImageUrl, getBaseScanUrl, getOpenSeaUrl, STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, ACTIVE_RPC_URL, ACTIVE_CHAIN_ID, BASE_CHAIN_ID } from "@/config/staffContract";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Loader2, ImageOff } from "lucide-react";
+import { ExternalLink, Loader2, ImageOff, Wallet, Copy, Check } from "lucide-react";
 
 interface NftAttribute {
   trait_type: string;
@@ -26,6 +27,9 @@ const IpfsMetadataViewer = ({ tokenId, fallbackImage }: IpfsMetadataViewerProps)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [owner, setOwner] = useState<string | null>(null);
+  const [ownerLoading, setOwnerLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -45,6 +49,40 @@ const IpfsMetadataViewer = ({ tokenId, fallbackImage }: IpfsMetadataViewerProps)
     };
     fetchMetadata();
   }, [tokenId]);
+
+  useEffect(() => {
+    if (!STAFF_CONTRACT_ADDRESS) return;
+    const fetchOwner = async () => {
+      setOwnerLoading(true);
+      try {
+        const provider = new ethers.JsonRpcProvider(ACTIVE_RPC_URL);
+        const contract = new ethers.Contract(STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, provider);
+        const addr = await contract.ownerOf(tokenId);
+        setOwner(addr);
+      } catch {
+        setOwner(null);
+      } finally {
+        setOwnerLoading(false);
+      }
+    };
+    fetchOwner();
+  }, [tokenId]);
+
+  const truncateAddress = (addr: string) =>
+    `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+
+  const copyAddress = () => {
+    if (!owner) return;
+    navigator.clipboard.writeText(owner);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const ownerExplorerUrl = owner
+    ? ACTIVE_CHAIN_ID === BASE_CHAIN_ID
+      ? `https://basescan.org/address/${owner}`
+      : `https://sepolia.basescan.org/address/${owner}`
+    : null;
 
   const ipfsImage = metadata?.image
     ? metadata.image.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/")
@@ -138,7 +176,44 @@ const IpfsMetadataViewer = ({ tokenId, fallbackImage }: IpfsMetadataViewerProps)
           </div>
         </div>
 
-        {/* External links */}
+        {/* Owner lookup */}
+        <div className="space-y-1.5">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-serif">Current Owner</p>
+          {ownerLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Looking up owner…</span>
+            </div>
+          ) : owner ? (
+            <div className="flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-primary/70 shrink-0" />
+              <a
+                href={ownerExplorerUrl || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-sm text-foreground hover:text-primary transition-colors truncate"
+                title={owner}
+              >
+                {truncateAddress(owner)}
+              </a>
+              <button
+                onClick={copyAddress}
+                className="shrink-0 p-1 rounded hover:bg-muted/50 transition-colors"
+                title="Copy full address"
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-primary" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+                )}
+              </button>
+            </div>
+          ) : !STAFF_CONTRACT_ADDRESS ? (
+            <p className="text-sm text-muted-foreground/60 italic">Contract not yet deployed</p>
+          ) : (
+            <p className="text-sm text-muted-foreground/60 italic">Not yet minted</p>
+          )}
+        </div>
         {STAFF_CONTRACT_ADDRESS && (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 gap-1.5 text-xs font-serif" asChild>
