@@ -20,7 +20,7 @@ const councilRooms = [
     title: "Join Council",
     description: "Become a member of the Council of Life",
     icon: Users,
-    notionUrl: "https://t.me/s/s33dlife",
+    externalUrl: "https://t.me/s33dlife",
   },
   {
     id: "pod",
