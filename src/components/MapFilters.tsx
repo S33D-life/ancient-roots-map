@@ -123,7 +123,7 @@ const MapFilters = ({
           </p>
           <Tabs value={groveScale} onValueChange={(v) => onGroveScaleChange(v as GroveScale)}>
             <TabsList className="grid grid-cols-5 w-full bg-muted">
-              <TabsTrigger value="all" className="text-xs px-1">All</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs px-1">TETOL</TabsTrigger>
               <TabsTrigger value="local" className="text-xs px-1">Local</TabsTrigger>
               <TabsTrigger value="regional" className="text-xs px-1">Regional</TabsTrigger>
               <TabsTrigger value="national" className="text-xs px-1">National</TabsTrigger>
