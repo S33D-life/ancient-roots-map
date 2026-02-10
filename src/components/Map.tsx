@@ -340,18 +340,31 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: VINTAGE_MAP_STYLE,
-      center: [0, 20],
-      zoom: 2,
-      attributionControl: false,
-    });
+    try {
+      const m = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: VINTAGE_MAP_STYLE,
+        center: [0, 20],
+        zoom: 2,
+        attributionControl: false,
+      });
 
-    map.current.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
-    map.current.addControl(new mapboxgl.AttributionControl({ compact: true }));
+      m.on('load', () => setMapStatus("ready"));
+      m.on('error', (e) => {
+        console.error('Mapbox error:', e);
+        setMapStatus("error");
+      });
 
-    return () => { map.current?.remove(); };
+      m.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+      m.addControl(new mapboxgl.AttributionControl({ compact: true }));
+
+      map.current = m;
+    } catch (err) {
+      console.error('Map initialization failed:', err);
+      setMapStatus("error");
+    }
+
+    return () => { map.current?.remove(); map.current = null; };
   }, []);
 
   // Add tree markers with visual hierarchy
