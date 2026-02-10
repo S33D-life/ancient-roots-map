@@ -701,6 +701,22 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         </div>
       </Card>
 
+      {/* Time-of-day whisper */}
+      <div className="absolute top-[72px] right-4 z-10 animate-fade-in" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
+        <span className="font-serif text-xs px-2.5 py-1 rounded-full" style={{
+          background: 'hsla(30, 30%, 12%, 0.7)',
+          color: 'hsla(42, 60%, 60%, 0.7)',
+          border: '1px solid hsla(42, 40%, 30%, 0.3)',
+          backdropFilter: 'blur(4px)',
+        }}>
+          {timeOfDay === 'dawn' && '🌅'}
+          {timeOfDay === 'day' && '☀️'}
+          {timeOfDay === 'dusk' && '🌇'}
+          {timeOfDay === 'night' && '✦'}
+          {' '}{atmosphere.label}
+        </span>
+      </div>
+
       <MapSearch onLocationSelect={handleLocationSelect} />
 
       <div className="absolute bottom-2 left-2 z-10">
