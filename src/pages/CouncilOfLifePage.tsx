@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import councilSplash from "@/assets/council-splash.png";
+import councilSplashFire from "@/assets/council-splash-fire.png";
 
 const CouncilOfLifePage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -23,12 +23,12 @@ const CouncilOfLifePage = () => {
     return (
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-1000 ${fadeOut ? "opacity-0" : "opacity-100"}`}
-        style={{ backgroundColor: "hsl(160, 40%, 10%)" }}
+        style={{ backgroundColor: "hsl(25, 30%, 8%)" }}
       >
         <img
-          src={councilSplash}
+          src={councilSplashFire}
           alt="Council of Life"
-          className="max-w-md w-[80%] rounded-xl shadow-2xl animate-scale-in"
+          className="max-w-2xl w-[90%] rounded-xl shadow-2xl animate-scale-in"
         />
       </div>
     );
