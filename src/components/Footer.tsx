@@ -12,12 +12,6 @@ const Footer = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link
-              to="/assets"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Assets
-            </Link>
             <a
               href="https://giveth.io/project/s33dlife"
               target="_blank"
@@ -30,8 +24,17 @@ const Footer = () => {
           </div>
 
           <p className="text-xs text-muted-foreground/60">
-            © {new Date().getFullYear()} s33d.life · hello@s33d.life
+            EST 2016 · hello@s33d.life
           </p>
+        </div>
+
+        <div className="mt-4 flex justify-start">
+          <Link
+            to="/assets"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            Assets
+          </Link>
         </div>
       </div>
     </footer>
