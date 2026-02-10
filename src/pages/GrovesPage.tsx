@@ -61,11 +61,12 @@ const GrovesPage = () => {
     fetchProjects();
   }, []);
 
-  // Initialize Mapbox token from env or localStorage
+  // Initialize Mapbox token from env, localStorage, or hardcoded default
   useEffect(() => {
     const envToken = (import.meta as any).env?.VITE_MAPBOX_ACCESS_TOKEN as string | undefined;
     const stored = localStorage.getItem('mapbox_token') || '';
-    const token = (envToken || stored || '').trim();
+    const defaultToken = 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
+    const token = (envToken || stored || defaultToken).trim();
     if (token) {
       setMapToken(token);
       setTokenInput(token);
