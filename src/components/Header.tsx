@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search } from "lucide-react";
+import { Menu, MapPin, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -13,6 +13,7 @@ import GlobalSearch from "./GlobalSearch";
 const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [heartsCount, setHeartsCount] = useState<number | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tetolOpen, setTetolOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -70,16 +71,46 @@ const Header = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) fetchHearts(session.user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) fetchHearts(session.user.id);
+        else setHeartsCount(null);
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchHearts = async (userId: string) => {
+    const [treesRes, offeringsRes, plantsRes, wishlistRes] = await Promise.all([
+      supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
+      supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
+      supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
+      supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
+    ]);
+    const tc = treesRes.count || 0;
+    const oc = offeringsRes.count || 0;
+    const pc = plantsRes.count || 0;
+    const wc = wishlistRes.count || 0;
+
+    // Base: 10 per tree
+    let total = tc * 10;
+    // Milestone bonuses (same thresholds as DashboardRewards)
+    const milestones: [number, number, string][] = [
+      [tc, 1, "10"], [tc, 5, "25"], [tc, 10, "50"], [tc, 25, "100"], [tc, 50, "200"], [tc, 100, "500"], [tc, 250, "1000"],
+      [oc, 1, "5"], [oc, 10, "30"], [oc, 25, "75"], [oc, 50, "200"], [oc, 100, "500"],
+      [pc, 1, "5"], [pc, 5, "20"], [pc, 15, "60"],
+      [wc, 3, "15"], [wc, 10, "50"],
+    ];
+    for (const [count, threshold, hearts] of milestones) {
+      if (count >= threshold) total += parseInt(hearts);
+    }
+    setHeartsCount(total);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md bg-card/95 dark:bg-card/95" style={{ background: 'var(--header-bg)' }}>
@@ -159,6 +190,12 @@ const Header = () => {
               >
                 <img src={hearthIcon} alt="Hearth" className="w-8 h-8 rounded-full" />
                 <span className="font-serif">Hearth</span>
+                {heartsCount !== null && heartsCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                    <Heart className="w-3 h-3 fill-primary/40" />
+                    {heartsCount}
+                  </span>
+                )}
               </Link>
             ) : (
               <Button
@@ -205,6 +242,12 @@ const Header = () => {
               >
                 <img src={hearthIcon} alt="Hearth" className="w-6 h-6 rounded-full" />
                 <span className="font-serif">Hearth</span>
+                {heartsCount !== null && heartsCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                    <Heart className="w-3 h-3 fill-primary/40" />
+                    {heartsCount}
+                  </span>
+                )}
               </Link>
             ) : (
               <Link
