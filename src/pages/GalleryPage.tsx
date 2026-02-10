@@ -944,6 +944,26 @@ const GalleryPage = () => {
                                 <p className="text-[9px] text-muted-foreground">
                                   {totalForSpecies} staff{totalForSpecies > 1 ? 's' : ''} total · {staff.length} · {staff.weight}
                                 </p>
+                                {totalForSpecies > 1 && (
+                                  <button
+                                    className="mt-1 text-[9px] text-primary underline underline-offset-2 hover:text-accent transition-colors"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const code = staff.code;
+                                      // Find the first circle staff index in grid for this species
+                                      const circleStartIndices: Record<string, number> = {
+                                        YEW: 36, OAK: 72, ASH: 108, BEE: 120, HOL: 132,
+                                      };
+                                      const idx = circleStartIndices[code];
+                                      if (idx !== undefined) {
+                                        const el = document.getElementById(`staff-grid-${idx}`);
+                                        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                      }
+                                    }}
+                                  >
+                                    View {totalForSpecies - 1} Circle staffs ↓
+                                  </button>
+                                )}
                               </div>
                             )}
                           </div>
@@ -1109,7 +1129,7 @@ const GalleryPage = () => {
                   return Array.from({ length: 144 }, (_, i) => {
                     const staffData = gridImages[i];
                     return (
-                      <Card key={i} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden">
+                      <Card key={i} id={`staff-grid-${i}`} className="border-mystical hover:shadow-elegant transition-mystical group cursor-pointer overflow-hidden">
                         <CardContent className="p-4 text-center">
                           <div className="w-full aspect-[3/4] rounded-md bg-muted/50 border border-border flex items-center justify-center mb-3 group-hover:border-primary transition-colors overflow-hidden">
                             {staffData ? (
