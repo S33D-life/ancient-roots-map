@@ -264,7 +264,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[100] bg-background/60 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md"
         onClick={onClose}
       />
 
