@@ -75,7 +75,7 @@ const StarryNight = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none dark:opacity-100 opacity-0 transition-opacity duration-700"
+      className="fixed inset-0 z-0 pointer-events-none dark:opacity-100 opacity-0 transition-opacity duration-700 map-hidden-stars"
       aria-hidden="true"
     />
   );
