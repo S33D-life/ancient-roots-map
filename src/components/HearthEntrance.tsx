@@ -10,7 +10,7 @@ interface HearthEntranceProps {
   onComplete: () => void;
 }
 
-const DURATION = 2500;
+const DURATION = 1500;
 
 const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -90,20 +90,20 @@ const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
       const breathe = 0.85 + Math.sin(elapsed * 0.003) * 0.15;
 
       // Hearth glow — warm pulse
-      const glowR = 60 * ease * breathe;
+      const glowR = 40 * ease * breathe;
       const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-      g1.addColorStop(0, `hsla(30, 80%, 50%, ${0.5 * ease})`);
-      g1.addColorStop(0.4, `hsla(25, 70%, 35%, ${0.25 * ease})`);
-      g1.addColorStop(0.7, `hsla(20, 50%, 20%, ${0.1 * ease})`);
+      g1.addColorStop(0, `hsla(30, 70%, 45%, ${0.3 * ease})`);
+      g1.addColorStop(0.4, `hsla(25, 55%, 30%, ${0.15 * ease})`);
+      g1.addColorStop(0.7, `hsla(20, 40%, 18%, ${0.06 * ease})`);
       g1.addColorStop(1, "transparent");
       ctx.fillStyle = g1;
       ctx.fillRect(cx - glowR, cy - glowR, glowR * 2, glowR * 2);
 
       // Inner ember core
-      const coreR = 8 * ease * breathe;
+      const coreR = 5 * ease * breathe;
       const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
-      g2.addColorStop(0, `hsla(35, 95%, 65%, ${0.9 * ease})`);
-      g2.addColorStop(0.5, `hsla(28, 85%, 50%, ${0.5 * ease})`);
+      g2.addColorStop(0, `hsla(35, 85%, 60%, ${0.6 * ease})`);
+      g2.addColorStop(0.5, `hsla(28, 70%, 45%, ${0.3 * ease})`);
       g2.addColorStop(1, "transparent");
       ctx.fillStyle = g2;
       ctx.beginPath();
@@ -119,7 +119,7 @@ const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
       ctx.fillRect(0, 0, w, h);
 
       // Spawn sparks
-      if (Math.random() < 0.3 * ease) {
+      if (Math.random() < 0.15 * ease) {
         sparks.push(spawnSpark(cx, cy));
       }
 
