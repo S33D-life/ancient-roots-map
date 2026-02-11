@@ -117,16 +117,39 @@ const DashboardWanderers = ({ userId }: Props) => {
     searchTimer.current = setTimeout(() => search(q), 350);
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback for insecure contexts / permission denied
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch { /* noop */ }
+      document.body.removeChild(ta);
+      return true;
+    }
+  };
+
   const generateInvite = async () => {
     const { data, error } = await supabase
       .from("invite_links")
       .insert({ created_by: userId })
       .select("code")
       .single();
+    if (error) {
+      toast({ title: "Error", description: "Could not create invite link", variant: "destructive" });
+      return;
+    }
     if (data) {
+      const link = `${window.location.origin}/auth?invite=${data.code}`;
       setInviteCode(data.code);
-      navigator.clipboard.writeText(`${window.location.origin}/auth?invite=${data.code}`);
-      toast({ title: "Invite link copied!", description: "Share it with fellow wanderers" });
+      await copyToClipboard(link);
+      toast({ title: "Invite link copied!", description: link });
     }
   };
 
