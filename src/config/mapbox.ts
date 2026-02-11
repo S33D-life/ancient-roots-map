@@ -1,7 +1,3 @@
-// Mapbox public token - centralized for easy rotation
-// To restrict: configure URL restrictions in Mapbox dashboard
-const token = import.meta.env.VITE_MAPBOX_TOKEN;
-if (!token) {
-  console.warn('VITE_MAPBOX_TOKEN is not configured – map features will be unavailable.');
-}
-export const MAPBOX_TOKEN = token ?? '';
+// Mapbox PUBLIC token - this is a publishable key (like Supabase anon key),
+// safe for client-side use. Restrict via URL allowlist in Mapbox dashboard.
+export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiZWR0aHVybG93IiwiYSI6ImNtaHVqYmpodzAwaTEybHNiejQ0dWF1dTcifQ.4hKTe_0HtkKJa3CCjbHMMg';
