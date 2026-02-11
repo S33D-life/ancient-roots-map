@@ -57,7 +57,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <StarryNight />
-        <ChatPanel />
+        {/* <ChatPanel /> */}
         
         <BrowserRouter>
           <TetolLevelProvider>
