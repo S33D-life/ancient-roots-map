@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
 import Header from "@/components/Header";
@@ -102,6 +103,13 @@ const GalleryPage = () => {
     setActiveTab(tab);
     navigate(`/library/${tab}`, { replace: true });
   };
+
+  const swipeHandlers = useSwipeNavigation({
+    items: VALID_ROOMS,
+    activeItem: activeTab,
+    onNavigate: handleTabChange,
+  });
+
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [offerings, setOfferings] = useState<Offering[]>([]);
@@ -759,6 +767,7 @@ const GalleryPage = () => {
             <div className="absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-background/80 to-transparent pointer-events-none md:hidden" />
           </div>
 
+          <div {...swipeHandlers} className="touch-pan-y">
           {/* Music Room */}
           <TabsContent value="music-room" className="space-y-6">
             <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
@@ -1753,6 +1762,7 @@ const GalleryPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          </div>
         </Tabs>
       </main>
 
