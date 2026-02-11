@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams } from "react-router-dom";
-import mapboxgl from "mapbox-gl";
-import { MAPBOX_TOKEN } from "@/config/mapbox";
-import "mapbox-gl/dist/mapbox-gl.css";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { getMapStyle } from "@/config/mapbox";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
 import MapSearch from "./MapSearch";
@@ -18,6 +18,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
 import MapIdleNudge from "./MapIdleNudge";
+import { lazy, Suspense } from "react";
+
+const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
 
 /* ── WebGL detection ── */
 function isWebGLSupported(): boolean {
@@ -73,8 +76,6 @@ const TIME_ATMOSPHERES: Record<TimeOfDay, {
     label: 'Starlight',
   },
 };
-
-const VINTAGE_MAP_STYLE = 'mapbox://styles/mapbox/outdoors-v12';
 
 interface TreeOfferings {
   [treeId: string]: number;
@@ -154,7 +155,6 @@ function createGroveBoundary(trees: Tree[], bufferKm: number): GeoJSON.Feature |
   if (points.length === 0) return null;
 
   if (points.length === 1) {
-    // Single point → circle approximation
     const [lng, lat] = points[0];
     const coords: [number, number][] = [];
     for (let i = 0; i <= 64; i++) {
@@ -171,7 +171,6 @@ function createGroveBoundary(trees: Tree[], bufferKm: number): GeoJSON.Feature |
   }
 
   if (points.length === 2) {
-    // Two points → elongated capsule
     const hull = points;
     const expanded = expandHull(hull, bufferKm);
     return {
@@ -199,7 +198,6 @@ function expandHull(hull: [number, number][], bufferKm: number): [number, number
 
   for (let i = 0; i < n; i++) {
     const [lng, lat] = hull[i];
-    // Compute outward normal direction from centroid
     const cx = hull.reduce((s, p) => s + p[0], 0) / n;
     const cy = hull.reduce((s, p) => s + p[1], 0) / n;
     const dx = lng - cx;
@@ -208,10 +206,6 @@ function expandHull(hull: [number, number][], bufferKm: number): [number, number
     const normDx = dx / dist;
     const normDy = dy / dist;
 
-    const dLat = (bufferKm / 111.32) * normDy;
-    const dLng = (bufferKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * normDx;
-
-    // Add arc points around the corner for smoothness
     const baseAngle = Math.atan2(normDy, normDx);
     for (let j = -2; j <= 2; j++) {
       const angle = baseAngle + (j * Math.PI) / 10;
@@ -221,9 +215,8 @@ function expandHull(hull: [number, number][], bufferKm: number): [number, number
     }
   }
 
-  // Close the polygon with a convex hull of the expanded points
   const finalHull = convexHull(result);
-  finalHull.push(finalHull[0]); // close ring
+  finalHull.push(finalHull[0]);
   return finalHull;
 }
 
@@ -253,13 +246,13 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const autoAddTree = searchParams.get("addTree") === "true";
   const deepLinkHandled = useRef(false);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
-  const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const [mapError, setMapError] = useState<string>("");
-  const [debugInfo, setDebugInfo] = useState({ token: false, style: false, webgl: false, width: 0, height: 0, error: "" });
+  const [debugInfo, setDebugInfo] = useState({ style: false, webgl: false, width: 0, height: 0, error: "" });
   const [showDebug, setShowDebug] = useState(false);
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
@@ -312,7 +305,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         setTrees(treesResult.data || []);
       }
 
-      // Count offerings per tree
       if (!offeringsResult.error && offeringsResult.data) {
         const counts: TreeOfferings = {};
         offeringsResult.data.forEach((o) => {
@@ -347,25 +339,22 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const filteredTrees = useMemo(() => {
     let filtered = trees;
 
-    // View mode
     if (viewMode === "personal" && userId) {
       filtered = filtered.filter((t) => t.created_by === userId);
     }
 
-    // Species filter
     if (speciesFilter !== "all") {
       filtered = filtered.filter(
         (t) => t.species.toLowerCase() === speciesFilter.toLowerCase()
       );
     }
 
-    // Grove scale filtering
     if (groveScale !== "all" && speciesFilter !== "all") {
       const speciesTrees = filtered;
 
       if (groveScale === "local") {
-        // 12 nearest of same species from user location or map center
-        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        const mc = map.current ? map.current.getCenter() : null;
+        const center = userLocation || (mc ? { lat: mc.lat, lng: mc.lng } : null);
         if (center) {
           const withDist = speciesTrees.map((t) => ({
             ...t,
@@ -375,19 +364,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           filtered = withDist.slice(0, 12);
         }
       } else if (groveScale === "regional") {
-        // Within 200km of user/center
-        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        const mc = map.current ? map.current.getCenter() : null;
+        const center = userLocation || (mc ? { lat: mc.lat, lng: mc.lng } : null);
         if (center) {
           filtered = speciesTrees.filter(
             (t) => haversineKm(center.lat, center.lng, t.latitude, t.longitude) <= 200
           );
         }
       } else if (groveScale === "national") {
-        // Same nation — requires user location to determine country, or just group by nation
-        // We show all of the same species in the same nation as the user's nearest tree
-        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        const mc = map.current ? map.current.getCenter() : null;
+        const center = userLocation || (mc ? { lat: mc.lat, lng: mc.lng } : null);
         if (center && speciesTrees.length > 0) {
-          // Find nearest tree to determine nation
           let nearest = speciesTrees[0];
           let nearestDist = Infinity;
           speciesTrees.forEach((t) => {
@@ -399,7 +386,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           }
         }
       } else if (groveScale === "continental") {
-        const center = userLocation || (map.current ? map.current.getCenter() : null);
+        const mc = map.current ? map.current.getCenter() : null;
+        const center = userLocation || (mc ? { lat: mc.lat, lng: mc.lng } : null);
         if (center) {
           const userContinent = getContinent(center.lat, center.lng);
           filtered = speciesTrees.filter(
@@ -412,30 +400,20 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     return filtered;
   }, [trees, viewMode, speciesFilter, groveScale, userId, userLocation]);
 
-  // Initialize map with robust checks
+  // Initialize map — MapLibre GL (no token needed)
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    const hasToken = !!MAPBOX_TOKEN && MAPBOX_TOKEN.startsWith("pk.");
     const webgl = isWebGLSupported();
 
-    if (!hasToken) {
-      console.warn("[Atlas] No valid Mapbox token found");
-      setMapError("Missing or invalid Mapbox token");
-      setDebugInfo(prev => ({ ...prev, token: false, error: "No valid token" }));
-      setMapStatus("error");
-      return;
-    }
-
     if (!webgl) {
-      console.warn("[Atlas] WebGL not supported");
-      setMapError("WebGL is not supported by your browser");
+      console.warn("[Atlas] WebGL not supported — falling back to Leaflet");
       setDebugInfo(prev => ({ ...prev, webgl: false, error: "WebGL unsupported" }));
-      setMapStatus("error");
+      setMapStatus("leaflet");
       return;
     }
 
-    setDebugInfo(prev => ({ ...prev, token: true, webgl: true }));
+    setDebugInfo(prev => ({ ...prev, webgl: true }));
 
     // Use rAF to ensure layout is settled before init
     const rafId = requestAnimationFrame(() => {
@@ -452,16 +430,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         return;
       }
 
-      mapboxgl.accessToken = MAPBOX_TOKEN;
-
       try {
-        const m = new mapboxgl.Map({
+        const style = getMapStyle();
+        const m = new maplibregl.Map({
           container,
-          style: VINTAGE_MAP_STYLE,
+          style: style as any,
           center: [0, 20],
           zoom: 2,
           attributionControl: false,
-          failIfMajorPerformanceCaveat: false,
         });
 
         m.on('load', () => {
@@ -469,7 +445,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           setDebugInfo(prev => ({ ...prev, style: true }));
           const c = m.getCenter();
           setMapCenter({ lat: c.lat, lng: c.lng });
-          // Force resize in case container changed during load
           m.resize();
         });
         m.on('moveend', () => {
@@ -477,15 +452,20 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           setMapCenter({ lat: c.lat, lng: c.lng });
         });
         m.on('error', (e) => {
-          console.error('[Atlas] Mapbox error:', e);
+          console.error('[Atlas] MapLibre error:', e);
           const msg = (e as any)?.error?.message || (e as any)?.message || "Unknown map error";
           setMapError(msg);
           setDebugInfo(prev => ({ ...prev, error: msg }));
-          setMapStatus("error");
+          // Don't set error status for non-critical tile errors
+          if (msg.includes('Source') || msg.includes('AJAXError')) {
+            console.warn('[Atlas] Non-critical tile error, map may still function');
+          } else {
+            setMapStatus("error");
+          }
         });
 
-        m.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
-        m.addControl(new mapboxgl.AttributionControl({ compact: true }));
+        m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+        m.addControl(new maplibregl.AttributionControl({ compact: true }));
 
         map.current = m;
       } catch (err) {
@@ -493,7 +473,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         console.error('[Atlas] Map initialization failed:', msg);
         setMapError(msg);
         setDebugInfo(prev => ({ ...prev, error: msg }));
-        setMapStatus("error");
+        // Fall back to Leaflet on init failure
+        setMapStatus("leaflet");
       }
     });
 
@@ -557,19 +538,16 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       const offerings = offeringCounts[tree.id] || 0;
       const age = tree.estimated_age || 0;
 
-      // Visual hierarchy tiers
       const isAncient = age >= 100;
       const isStoried = offerings >= 3;
       const isNotable = offerings >= 1 || age >= 50;
 
-      // Size based on significance
       const size = isAncient ? 40 : isStoried ? 36 : isNotable ? 32 : 28;
       const strokeColor = isAncient ? 'hsl(42, 90%, 55%)' : isStoried ? 'hsl(42, 70%, 50%)' : 'hsl(45, 60%, 40%)';
       const strokeWidth = isAncient ? 2.5 : 2;
       const fillColor = isAncient ? 'hsl(120, 45%, 28%)' : 'hsl(120, 40%, 25%)';
       const leafColor = isAncient ? 'hsl(120, 55%, 40%)' : 'hsl(120, 60%, 35%)';
 
-      // Build marker SVG with optional crown ring for storied trees
       const crownRing = isStoried ? `<circle cx="16" cy="16" r="15.5" fill="none" stroke="${strokeColor}" stroke-width="0.8" stroke-dasharray="3 2" opacity="0.6"/>` : '';
       const ageDot = isAncient ? `<circle cx="16" cy="5" r="2" fill="hsl(42, 95%, 60%)" opacity="0.9"/>` : '';
 
@@ -602,7 +580,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         el.style.transform = 'scale(1)';
       });
 
-      // Enriched popup with offering indicators
       const offeringBadge = offerings > 0
         ? `<div style="margin: 6px 0 0; display: flex; align-items: center; gap: 4px;">
              <span style="font-size: 10px; color: hsl(42, 80%, 60%);">✦</span>
@@ -616,7 +593,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         ? `<span style="display: inline-block; margin-left: 6px; padding: 1px 6px; font-size: 9px; border-radius: 999px; background: hsla(42, 80%, 50%, 0.15); color: hsl(42, 80%, 60%); border: 1px solid hsla(42, 80%, 50%, 0.3);">~${age} years</span>`
         : '';
 
-      const popup = new mapboxgl.Popup({
+      const popup = new maplibregl.Popup({
         offset: 25,
         closeButton: true,
         className: 'tree-popup',
@@ -636,7 +613,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </div>
       `);
 
-      const marker = new mapboxgl.Marker(el)
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([tree.longitude, tree.latitude])
         .setPopup(popup)
         .addTo(map.current!);
@@ -650,7 +627,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
     // Fit bounds if grove scale is active and we have trees
     if (groveScale !== "all" && filteredTrees.length > 1) {
-      const bounds = new mapboxgl.LngLatBounds();
+      const bounds = new maplibregl.LngLatBounds();
       filteredTrees.forEach((t) => bounds.extend([t.longitude, t.latitude]));
       map.current.fitBounds(bounds, { padding: 80, duration: 1500 });
     }
@@ -662,15 +639,12 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     if (!m) return;
 
     const drawBoundary = () => {
-      // Remove existing layers and source
       if (m.getLayer(GROVE_FILL_ID)) m.removeLayer(GROVE_FILL_ID);
       if (m.getLayer(GROVE_LINE_ID)) m.removeLayer(GROVE_LINE_ID);
       if (m.getSource(GROVE_SOURCE_ID)) m.removeSource(GROVE_SOURCE_ID);
 
-      // Only draw when grove scale is active and we have 1+ trees
       if (groveScale === "all" || filteredTrees.length === 0) return;
 
-      // Buffer size scales with grove level
       const bufferKm =
         groveScale === "local" ? 5 :
         groveScale === "regional" ? 20 :
@@ -687,7 +661,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         },
       });
 
-      // Translucent fill
       m.addLayer({
         id: GROVE_FILL_ID,
         type: 'fill',
@@ -701,7 +674,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         },
       });
 
-      // Glowing border line
       m.addLayer({
         id: GROVE_LINE_ID,
         type: 'line',
@@ -718,11 +690,10 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       });
     };
 
-    // If map style is loaded, draw immediately; otherwise wait
     if (m.isStyleLoaded()) {
       drawBoundary();
     } else {
-      m.once('style.load', drawBoundary);
+      m.once('load', drawBoundary);
     }
 
     return () => {
@@ -744,11 +715,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     if (!m) return;
 
     const drawThreads = () => {
-      // Clean up existing
       if (m.getLayer(ROOT_THREADS_LAYER)) m.removeLayer(ROOT_THREADS_LAYER);
       if (m.getSource(ROOT_THREADS_SOURCE)) m.removeSource(ROOT_THREADS_SOURCE);
 
-      // Group trees by species
       const bySpecies: Record<string, Tree[]> = {};
       filteredTrees.forEach((t) => {
         const key = t.species.toLowerCase();
@@ -756,17 +725,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         bySpecies[key].push(t);
       });
 
-      // Build line features connecting nearby same-species trees
       const features: GeoJSON.Feature[] = [];
       Object.values(bySpecies).forEach((group) => {
         if (group.length < 2) return;
-        // For each tree, connect to its nearest same-species neighbours within range
         for (let i = 0; i < group.length; i++) {
           const a = group[i];
-          // Find nearest 3 neighbours to keep lines sparse and organic
           const neighbours = group
             .map((b, j) => ({ b, j, dist: i === j ? Infinity : haversineKm(a.latitude, a.longitude, b.latitude, b.longitude) }))
-            .filter((n) => n.dist <= ROOT_THREAD_MAX_KM && n.j > i) // j > i avoids duplicate lines
+            .filter((n) => n.dist <= ROOT_THREAD_MAX_KM && n.j > i)
             .sort((x, y) => x.dist - y.dist)
             .slice(0, 3);
 
@@ -821,7 +787,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     if (m.isStyleLoaded()) {
       drawThreads();
     } else {
-      m.once('style.load', drawThreads);
+      m.once('load', drawThreads);
     }
 
     return () => {
@@ -836,18 +802,16 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     };
   }, [filteredTrees]);
 
-  // Draw golden Creator's Paths — journeys between trees where users left offerings
+  // Draw golden Creator's Paths
   useEffect(() => {
     const m = map.current;
     if (!m || mapStatus !== 'ready') return;
 
     const drawCreatorPaths = async () => {
-      // Clean up existing
       if (m.getLayer(CREATOR_PATHS_GLOW_LAYER)) m.removeLayer(CREATOR_PATHS_GLOW_LAYER);
       if (m.getLayer(CREATOR_PATHS_LAYER)) m.removeLayer(CREATOR_PATHS_LAYER);
       if (m.getSource(CREATOR_PATHS_SOURCE)) m.removeSource(CREATOR_PATHS_SOURCE);
 
-      // Fetch offerings with tree locations, grouped by creator
       const { data: offerings, error } = await supabase
         .from('offerings')
         .select('tree_id, created_by, created_at')
@@ -856,23 +820,19 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
       if (error || !offerings || offerings.length === 0) return;
 
-      // Build a tree lookup from our current trees
       const treeLookup: Record<string, Tree> = {};
       trees.forEach((t) => { treeLookup[t.id] = t; });
 
-      // Group offerings by creator in chronological order
       const byCreator: Record<string, string[]> = {};
       offerings.forEach((o) => {
         if (!o.created_by) return;
         if (!byCreator[o.created_by]) byCreator[o.created_by] = [];
-        // Only add if the tree has coordinates and isn't already the last in the sequence
         const last = byCreator[o.created_by];
         if (treeLookup[o.tree_id] && (last.length === 0 || last[last.length - 1] !== o.tree_id)) {
           last.push(o.tree_id);
         }
       });
 
-      // Build graceful curved line features for each creator's path
       const features: GeoJSON.Feature[] = [];
       const isCurrentUser = (id: string) => id === userId;
 
@@ -885,18 +845,15 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         });
         if (coords.length < 2) return;
 
-        // Create a smooth bezier-like path by adding midpoints with slight offsets
         const smoothCoords: [number, number][] = [coords[0]];
         for (let i = 0; i < coords.length - 1; i++) {
           const [x1, y1] = coords[i];
           const [x2, y2] = coords[i + 1];
-          // Add a curved midpoint offset perpendicular to the line
           const mx = (x1 + x2) / 2;
           const my = (y1 + y2) / 2;
           const dx = x2 - x1;
           const dy = y2 - y1;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          // Offset perpendicular — alternating sides for organic feel
           const offset = dist * 0.08 * (i % 2 === 0 ? 1 : -1);
           const perpX = -dy / (dist || 1) * offset;
           const perpY = dx / (dist || 1) * offset;
@@ -924,7 +881,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         data: { type: 'FeatureCollection', features },
       });
 
-      // Glow layer underneath
       m.addLayer({
         id: CREATOR_PATHS_GLOW_LAYER,
         type: 'line',
@@ -958,7 +914,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         },
       });
 
-      // Main path line
       m.addLayer({
         id: CREATOR_PATHS_LAYER,
         type: 'line',
@@ -995,7 +950,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     if (m.isStyleLoaded()) {
       drawCreatorPaths();
     } else {
-      m.once('style.load', drawCreatorPaths);
+      m.once('load', drawCreatorPaths);
     }
 
     return () => {
@@ -1016,6 +971,21 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       map.current.flyTo({ center: [lng, lat], zoom: 15, duration: 2000 });
     }
   };
+
+  // Leaflet fallback mode
+  if (mapStatus === "leaflet") {
+    return (
+      <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
+        <Suspense fallback={
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="font-serif text-sm" style={{ color: 'hsl(42, 60%, 55%)' }}>Loading Lite Mode…</p>
+          </div>
+        }>
+          <LeafletFallbackMap trees={filteredTrees} />
+        </Suspense>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
@@ -1049,6 +1019,13 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
                   Retry
                 </button>
                 <button
+                  onClick={() => setMapStatus("leaflet")}
+                  className="px-4 py-2 rounded-lg font-serif text-sm transition-colors"
+                  style={{ background: 'hsl(120, 30%, 20%)', color: 'hsl(120, 50%, 65%)', border: '1px solid hsl(120, 40%, 30%)' }}
+                >
+                  Lite Mode
+                </button>
+                <button
                   onClick={() => setShowDebug(!showDebug)}
                   className="px-3 py-2 rounded-lg font-serif text-xs transition-colors"
                   style={{ background: 'hsl(0, 0%, 15%)', color: 'hsl(42, 30%, 60%)', border: '1px solid hsl(0, 0%, 25%)' }}
@@ -1058,7 +1035,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
               </div>
               {showDebug && (
                 <div className="mt-3 text-left text-[10px] font-mono p-3 rounded-lg w-full" style={{ background: 'hsl(0, 0%, 8%)', color: 'hsl(42, 30%, 55%)', border: '1px solid hsl(0, 0%, 20%)' }}>
-                  <p>token: {debugInfo.token ? "✓" : "✗"}</p>
+                  <p>renderer: MapLibre GL (open-source)</p>
                   <p>style: {debugInfo.style ? "✓ loaded" : "✗ not loaded"}</p>
                   <p>webgl: {debugInfo.webgl ? "✓" : "✗ unsupported"}</p>
                   <p>container: {debugInfo.width}×{debugInfo.height}</p>
@@ -1070,7 +1047,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </div>
       )}
 
-      {/* Living vignette — desktop only, removed on mobile to ensure map visibility */}
+      {/* Living vignette — desktop only */}
       <div className="absolute inset-0 pointer-events-none z-[1] hidden md:block" style={{
         boxShadow: atmosphere.vignetteBoxShadow,
         background: atmosphere.vignette,
@@ -1218,17 +1195,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           0% { opacity: 0.6; transform: scale(1); }
           100% { opacity: 1; transform: scale(1.05); }
         }
-        .tree-popup .mapboxgl-popup-content {
+        .tree-popup .maplibregl-popup-content {
           background: hsl(120, 40%, 15%);
           border: 1px solid hsl(45, 60%, 40%);
           border-radius: 10px;
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px hsla(45, 60%, 40%, 0.1);
           padding: 0;
         }
-        .tree-popup .mapboxgl-popup-tip {
+        .tree-popup .maplibregl-popup-tip {
           border-top-color: hsl(120, 40%, 15%);
         }
-        .tree-popup .mapboxgl-popup-close-button {
+        .tree-popup .maplibregl-popup-close-button {
           color: hsl(45, 60%, 50%);
           font-size: 18px;
           padding: 4px 8px;

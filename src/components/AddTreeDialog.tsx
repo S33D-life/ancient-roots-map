@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MAPBOX_TOKEN } from "@/config/mapbox";
+import { getMapStyle } from "@/config/mapbox";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
-import mapboxgl from "mapbox-gl";
+import maplibregl from "maplibre-gl";
 
 interface AddTreeDialogProps {
   open: boolean;
@@ -50,8 +50,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const { toast } = useToast();
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markerRef = useRef<maplibregl.Marker | null>(null);
   const circleAddedRef = useRef(false);
 
   // Reset on close
@@ -121,18 +121,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   // Satellite map for adjustment
   useEffect(() => {
     if (!adjustMode || !mapContainerRef.current || lat === null || lng === null) return;
-    mapboxgl.accessToken = MAPBOX_TOKEN;
     circleAddedRef.current = false;
 
-    const map = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/satellite-streets-v12",
+      style: getMapStyle() as any,
       center: [lng, lat],
       zoom: 19,
       maxZoom: 22,
     });
 
-    const marker = new mapboxgl.Marker({ color: "hsl(42, 95%, 55%)", draggable: true })
+    const markerEl = document.createElement('div');
+    markerEl.style.cssText = 'width:24px;height:24px;border-radius:50%;background:hsl(42,95%,55%);border:2px solid white;cursor:grab;';
+    const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
       .setLngLat([lng, lat])
       .addTo(map);
 
