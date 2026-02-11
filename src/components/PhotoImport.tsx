@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
+import { extractExifDate } from "@/utils/exifDate";
 import { Camera, Loader2 } from "lucide-react";
 
 const PhotoImport = () => {
@@ -32,6 +33,9 @@ const PhotoImport = () => {
       
       reader.onload = async () => {
         const base64Image = reader.result as string;
+
+        // Extract EXIF date from photo
+        const exifDate = await extractExifDate(file);
 
         toast({
           title: "Analyzing image...",
@@ -81,7 +85,8 @@ const PhotoImport = () => {
             what3words,
             latitude: coords.coordinates.lat,
             longitude: coords.coordinates.lng,
-            photoData: base64Image
+            photoData: base64Image,
+            photoDate: exifDate ?? null,
           }));
 
           setIsProcessing(false);
