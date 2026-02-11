@@ -24,19 +24,8 @@ const Header = () => {
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    if (clickTimerRef.current) {
-      // Double-click → TETOL menu
-      clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-      setTetolOpen(true);
-    } else {
-      // Single-click → navigate home
-      clickTimerRef.current = setTimeout(() => {
-        clickTimerRef.current = null;
-        navigate("/");
-      }, 300);
-    }
-  }, [navigate]);
+    setTetolOpen(true);
+  }, []);
 
   // Hover no longer opens search automatically — it was too aggressive and obscured the header
 
