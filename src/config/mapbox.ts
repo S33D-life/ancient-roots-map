@@ -2,10 +2,12 @@
 // No API token required for the default style.
 // Optional: set VITE_MAPTILER_KEY for higher-quality MapTiler vector tiles.
 
+import type { StyleSpecification } from "maplibre-gl";
+
 export const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || '';
 
 // Free style options (no API key needed)
-export const FREE_STYLE: maplibregl.StyleSpecification = {
+export const FREE_STYLE: StyleSpecification = {
   version: 8,
   name: "Ancient Friends Atlas",
   sources: {
@@ -42,7 +44,7 @@ export const FREE_STYLE: maplibregl.StyleSpecification = {
 };
 
 // If user provides a MapTiler key, use their outdoor style for a richer look
-export function getMapStyle(): string | maplibregl.StyleSpecification {
+export function getMapStyle(): string | StyleSpecification {
   if (MAPTILER_KEY) {
     return `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${MAPTILER_KEY}`;
   }
@@ -50,5 +52,4 @@ export function getMapStyle(): string | maplibregl.StyleSpecification {
 }
 
 // Re-export for backward compatibility
-import maplibregl from "maplibre-gl";
-export { maplibregl };
+export { default as maplibregl } from "maplibre-gl";
