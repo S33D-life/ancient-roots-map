@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 import CrownEntrance from "@/components/CrownEntrance";
+import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
@@ -36,14 +37,14 @@ const goldenDreamRooms = [
 ];
 
 const GoldenDreamPage = () => {
-  const [showEntrance, setShowEntrance] = useState(true);
+  const { showEntrance, dismissEntrance } = useEntranceOnce("golden-dream");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+  const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
     return <CrownEntrance onComplete={handleEntranceComplete} />;

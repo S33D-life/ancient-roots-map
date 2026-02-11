@@ -7,6 +7,7 @@ import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays } from "
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import CanopyEntrance from "@/components/CanopyEntrance";
+import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 
 const councilRooms = [
@@ -42,10 +43,10 @@ const councilRooms = [
 
 const CouncilOfLifePage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showEntrance, setShowEntrance] = useState(true);
+  const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
 
-  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+  const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
     return <CanopyEntrance onComplete={handleEntranceComplete} />;

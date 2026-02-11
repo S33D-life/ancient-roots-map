@@ -1,14 +1,15 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 import OnboardingTour from "@/components/OnboardingTour";
 import TetolBridge from "@/components/TetolBridge";
 import S33dEntrance from "@/components/S33dEntrance";
+import { useEntranceOnce } from "@/hooks/use-entrance-once";
 
 const Index = () => {
-  const [showEntrance, setShowEntrance] = useState(true);
-  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+  const { showEntrance, dismissEntrance } = useEntranceOnce("index");
+  const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
     return <S33dEntrance onComplete={handleEntranceComplete} />;
