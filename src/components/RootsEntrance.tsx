@@ -46,10 +46,10 @@ interface SoilParticle {
   phase: number;
 }
 
-const DURATION = 5000;
-const MAX_ROOTS = 120;
-const THREAD_COUNT = 40;
-const PARTICLE_COUNT = 35;
+const DURATION = 7000;
+const MAX_ROOTS = 200;
+const THREAD_COUNT = 85;
+const PARTICLE_COUNT = 45;
 
 const RootsEntrance = ({ onComplete }: RootsEntranceProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
