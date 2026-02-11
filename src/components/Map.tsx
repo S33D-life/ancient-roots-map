@@ -763,24 +763,26 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         </div>
       )}
 
-      {/* Living vignette — breathes with time of day */}
-      <div className="absolute inset-0 pointer-events-none z-[1]" style={{
+      {/* Living vignette — desktop only, removed on mobile to ensure map visibility */}
+      <div className="absolute inset-0 pointer-events-none z-[1] hidden md:block" style={{
         boxShadow: atmosphere.vignetteBoxShadow,
         background: atmosphere.vignette,
         animation: 'vignetteBreath 12s ease-in-out infinite',
         transition: 'box-shadow 2s ease, background 2s ease',
       }} />
 
-      {/* Ambient glow layer — dusk warmth, dawn blush, night coolness */}
+      {/* Ambient glow layer — desktop only */}
       {atmosphere.ambientGlow !== 'none' && (
-        <div className="absolute inset-0 pointer-events-none z-[1]" style={{
+        <div className="absolute inset-0 pointer-events-none z-[1] hidden md:block" style={{
           background: atmosphere.ambientGlow,
           animation: 'ambientDrift 20s ease-in-out infinite alternate',
         }} />
       )}
 
-      {/* Drifting mist */}
-      <MistOverlay />
+      {/* Drifting mist — desktop only */}
+      <div className="hidden md:block">
+        <MistOverlay />
+      </div>
 
       <ConversionStatus />
 
@@ -832,7 +834,8 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
 
       <MapSearch onLocationSelect={handleLocationSelect} />
 
-      <div className="absolute bottom-2 left-2 z-10">
+      {/* Bottom controls — hidden on mobile, shown on desktop */}
+      <div className="absolute bottom-2 left-2 z-10 hidden md:block">
         <FindMeButton
           autoOpen={autoAddTree}
           onLocationFound={(lat, lng) => {
@@ -842,11 +845,25 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         />
       </div>
 
-      <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-2">
+      <div className="absolute bottom-4 right-4 z-10 hidden md:flex flex-col items-end gap-2">
         <div className="relative">
           <TreeRadio speciesFilter={speciesFilter} />
         </div>
         <TreeImportExport />
+      </div>
+
+      {/* Mobile: minimal bottom bar with key actions */}
+      <div className="absolute bottom-2 left-2 right-2 z-10 flex md:hidden items-center gap-2">
+        <FindMeButton
+          autoOpen={autoAddTree}
+          onLocationFound={(lat, lng) => {
+            setUserLocation({ lat, lng });
+            map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
+          }}
+        />
+        <div className="ml-auto">
+          <TreeRadio speciesFilter={speciesFilter} />
+        </div>
       </div>
 
       <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />

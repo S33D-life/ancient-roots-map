@@ -78,7 +78,7 @@ const MapPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'radial-gradient(ellipse at center, hsl(100 20% 32%), hsl(95 25% 24%) 60%, hsl(90 22% 16%) 100%)' }}>
+    <div className="fixed inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
       <Header />
       {/* Map always renders — provides instant spatial context */}
       <Map initialView={selectedView} initialSpecies={selectedSpecies} />
