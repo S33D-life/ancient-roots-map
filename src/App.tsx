@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
+const AtlasRedirect = () => <Navigate to="/map" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
@@ -61,6 +62,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/map" element={<MapPage />} />
+                <Route path="/atlas" element={<AtlasRedirect />} />
                 <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
                 <Route path="/library" element={<GalleryPage />} />
