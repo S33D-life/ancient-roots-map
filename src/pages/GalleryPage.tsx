@@ -36,6 +36,7 @@ import CreatorsPath from "@/components/CreatorsPath";
 import MintingStatusDashboard from "@/components/MintingStatusDashboard";
 import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
 import StaffRoomGallery from "@/components/StaffRoomGallery";
+import EarthRadioRoom from "@/components/EarthRadioRoom";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import councilImage from "@/assets/council-of-life.jpeg";
@@ -752,46 +753,9 @@ const GalleryPage = () => {
           </div>
 
           <div {...swipeHandlers} className="touch-pan-y">
-          {/* Music Room — now at /radio */}
+          {/* Music Room — Earth Radio powered by offerings */}
           <TabsContent value="music-room" className="space-y-6">
-            <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-2xl font-serif text-primary tracking-wide flex items-center gap-3">
-                  <Music className="h-6 w-6" />
-                  Music Room
-                </CardTitle>
-                <CardDescription className="font-serif">
-                  Tune into Tree Radio — a shuffled stream of songs offered to the ancient groves
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center gap-4 py-8">
-                <p className="text-sm text-muted-foreground font-serif text-center max-w-md">
-                  The Music Room has moved to its own dedicated space. Visit Earth Radio for curated playlists, Bird Tribe songs, and your saved grove walk soundtrack.
-                </p>
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => window.location.href = "/radio"}
-                    className="gap-2 font-serif tracking-wider"
-                    style={{
-                      background: 'linear-gradient(135deg, hsl(28 40% 18%), hsl(35 50% 22%))',
-                      color: 'hsl(42 95% 55%)',
-                      border: '1px solid hsl(42 50% 35% / 0.5)',
-                    }}
-                  >
-                    <Radio className="h-4 w-4" />
-                    Open Earth Radio
-                  </Button>
-                  <Button
-                    onClick={() => window.location.href = "/map"}
-                    variant="ghost"
-                    className="gap-2 font-serif tracking-wider text-muted-foreground"
-                  >
-                    <MapPin className="h-4 w-4" />
-                    Radio on the Atlas
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <EarthRadioRoom />
           </TabsContent>
 
           <TabsContent value="gallery" className="space-y-8">
