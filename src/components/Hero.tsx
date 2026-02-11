@@ -305,7 +305,7 @@ const Hero = () => {
         </div>
 
         {/* Bottom stack: CTA buttons → Teotag → Ancient Friend */}
-        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center gap-4 px-4">
+        <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3 px-4">
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none">
             <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base py-4 sm:py-3" asChild>
@@ -335,7 +335,7 @@ const Hero = () => {
             className="w-full max-w-xs"
           >
             <div
-              className="rounded-xl px-4 py-3 backdrop-blur-md border flex items-center gap-3"
+              className="rounded-xl px-4 py-2.5 backdrop-blur-md border flex items-center gap-3"
               style={{
                 background: 'hsl(var(--card) / 0.7)',
                 borderColor: 'hsl(var(--border) / 0.4)',
