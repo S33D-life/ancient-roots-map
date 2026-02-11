@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart } from "lucide-react";
+import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -16,7 +16,7 @@ const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [heartsCount, setHeartsCount] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  
   const [tetolOpen, setTetolOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
@@ -144,22 +144,28 @@ const Header = () => {
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
-          {/* TEOTAG logo — single click goes home, double-click opens TETOL, hover opens search */}
-          <div className="relative group">
-            <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
-              <img 
-                src={teotagLogo} 
-                alt="TEOTAG — Click to go home" 
-                className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300 hover:scale-105"
-                title="Click for Home · Hover for Search · Double-click for TETOL"
-              />
-            </button>
-            {/* Hover tooltip — desktop only */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-full ml-3 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-x-2 group-hover:translate-x-0 z-50 hidden md:block">
-              <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in whitespace-nowrap">
-                <p className="text-sm font-serif text-foreground">
-                  <span className="text-primary font-bold">TEOTAG</span> — Your grove guide
-                </p>
+          {/* Left side: Search button (mobile) + Desktop TEOTAG logo */}
+          <div className="flex items-center gap-2">
+            {/* Mobile search button — top left */}
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => { setGuideTab("search"); setGuideOpen(true); }} title="Search">
+              <Search className="w-5 h-5" />
+            </Button>
+            {/* Desktop TEOTAG logo */}
+            <div className="relative group hidden md:block">
+              <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
+                <img 
+                  src={teotagLogo} 
+                  alt="TEOTAG — Click to go home" 
+                  className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300 hover:scale-105"
+                  title="Click for Home · Double-click for TETOL"
+                />
+              </button>
+              <div className="absolute top-1/2 -translate-y-1/2 left-full ml-3 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-x-2 group-hover:translate-x-0 z-50">
+                <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in whitespace-nowrap">
+                  <p className="text-sm font-serif text-foreground">
+                    <span className="text-primary font-bold">TEOTAG</span> — Your grove guide
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -196,10 +202,6 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            {/* Mobile search button opens guide on search tab */}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => { setGuideTab("search"); setGuideOpen(true); }} title="Search">
-              <Search className="w-4 h-4" />
-            </Button>
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden">
               <Sunrise className={`w-4 h-4 absolute transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />
               <Stars className={`w-4 h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
@@ -228,64 +230,18 @@ const Header = () => {
                 <Link to="/auth">Login</Link>
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
-              <Menu className="w-6 h-6" />
-            </Button>
+            {/* Mobile TEOTAG logo — top right, opens TETOL menu directly */}
+            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={() => setTetolOpen(true)}>
+              <img 
+                src={teotagLogo} 
+                alt="TEOTAG — Open navigation" 
+                className="w-10 h-10 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300"
+              />
+            </button>
           </div>
         </div>
 
-        {/* Mobile dropdown menu */}
-        {mobileOpen && (
-          <nav className="md:hidden border-t border-mystical mt-2 pt-3 pb-2 flex flex-col gap-1 animate-fade-in">
-            {[
-              { to: "/map", icon: <TreeDeciduous className="w-4 h-4" />, label: "Ancient Friends Atlas", sub: "The Roots" },
-              { to: "/library", icon: <BookOpen className="w-4 h-4" />, label: "HeARTwood Library", sub: "The Heartwood" },
-              { to: "/council-of-life", icon: <Leaf className="w-4 h-4" />, label: "Council of Life", sub: "The Canopy" },
-              { to: "/golden-dream", icon: <Sparkles className="w-4 h-4" />, label: "yOur Golden Dream", sub: "The Crown" },
-            ].map((item, i) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-muted/30 opacity-0 animate-fade-in"
-                style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'forwards' }}
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.icon}
-                <div className="flex flex-col leading-tight">
-                  <span className="font-serif">{item.label}</span>
-                  <span className="text-[10px] font-serif tracking-[0.12em] uppercase text-muted-foreground">{item.sub}</span>
-                </div>
-              </Link>
-            ))}
-            {user ? (
-              <Link
-                to="/dashboard"
-                className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-muted/30 opacity-0 animate-fade-in"
-                style={{ animationDelay: '240ms', animationFillMode: 'forwards' }}
-                onClick={() => setMobileOpen(false)}
-              >
-                <img src={hearthImg} alt="Hearth" className="w-6 h-6 rounded-full object-cover" />
-                <span className="font-serif">Hearth</span>
-                {heartsCount !== null && heartsCount > 0 && (
-                  <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
-                    <Heart className="w-3 h-3 fill-primary/40" />
-                    {heartsCount}
-                  </span>
-                )}
-              </Link>
-            ) : (
-              <Link
-                to="/auth"
-                className="text-foreground hover:text-primary transition-mystical flex items-center gap-2 px-2 py-3 rounded-lg hover:bg-muted/30 opacity-0 animate-fade-in"
-                style={{ animationDelay: '240ms', animationFillMode: 'forwards' }}
-                onClick={() => setMobileOpen(false)}
-              >
-                <User className="w-4 h-4" />
-                <span className="font-serif">Login</span>
-              </Link>
-            )}
-          </nav>
-        )}
+      
       </div>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
       <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />
