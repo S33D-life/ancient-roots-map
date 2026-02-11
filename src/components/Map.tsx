@@ -48,31 +48,31 @@ const TIME_ATMOSPHERES: Record<TimeOfDay, {
   label: string;
 }> = {
   dawn: {
-    mapFilter: 'sepia(0.15) saturate(1.05) brightness(0.95) hue-rotate(-3deg)',
-    vignette: 'radial-gradient(ellipse at center, transparent 60%, hsla(25, 50%, 25%, 0.15) 85%, hsla(20, 45%, 15%, 0.3) 100%)',
-    vignetteBoxShadow: 'inset 0 0 80px 30px hsla(25, 45%, 18%, 0.25)',
-    ambientGlow: 'radial-gradient(ellipse at 30% 80%, hsla(30, 70%, 45%, 0.05) 0%, transparent 60%)',
+    mapFilter: 'sepia(0.08) brightness(1.0)',
+    vignette: 'radial-gradient(ellipse at center, transparent 70%, hsla(25, 50%, 25%, 0.08) 90%, hsla(20, 45%, 15%, 0.15) 100%)',
+    vignetteBoxShadow: 'inset 0 0 40px 15px hsla(25, 45%, 18%, 0.1)',
+    ambientGlow: 'none',
     label: 'Dawn',
   },
   day: {
-    mapFilter: 'sepia(0.1) saturate(1.05) brightness(1.0)',
-    vignette: 'radial-gradient(ellipse at center, transparent 65%, hsla(35, 45%, 20%, 0.08) 90%, hsla(30, 40%, 12%, 0.18) 100%)',
-    vignetteBoxShadow: 'inset 0 0 60px 20px hsla(30, 40%, 15%, 0.15)',
+    mapFilter: 'none',
+    vignette: 'radial-gradient(ellipse at center, transparent 75%, hsla(35, 45%, 20%, 0.05) 95%, hsla(30, 40%, 12%, 0.1) 100%)',
+    vignetteBoxShadow: 'inset 0 0 30px 10px hsla(30, 40%, 15%, 0.08)',
     ambientGlow: 'none',
     label: 'Day',
   },
   dusk: {
-    mapFilter: 'sepia(0.2) saturate(1.1) brightness(0.88) hue-rotate(-8deg)',
-    vignette: 'radial-gradient(ellipse at center, transparent 50%, hsla(20, 55%, 18%, 0.2) 80%, hsla(15, 50%, 10%, 0.4) 100%)',
-    vignetteBoxShadow: 'inset 0 0 100px 40px hsla(20, 50%, 12%, 0.35)',
-    ambientGlow: 'radial-gradient(ellipse at 70% 90%, hsla(25, 80%, 40%, 0.06) 0%, transparent 55%)',
+    mapFilter: 'sepia(0.1) brightness(0.95)',
+    vignette: 'radial-gradient(ellipse at center, transparent 60%, hsla(20, 55%, 18%, 0.1) 85%, hsla(15, 50%, 10%, 0.2) 100%)',
+    vignetteBoxShadow: 'inset 0 0 60px 20px hsla(20, 50%, 12%, 0.15)',
+    ambientGlow: 'none',
     label: 'Dusk',
   },
   night: {
-    mapFilter: 'sepia(0.15) saturate(0.9) brightness(0.72) hue-rotate(-10deg) contrast(1.05)',
-    vignette: 'radial-gradient(ellipse at center, transparent 45%, hsla(240, 30%, 10%, 0.25) 75%, hsla(240, 35%, 5%, 0.5) 100%)',
-    vignetteBoxShadow: 'inset 0 0 120px 50px hsla(240, 30%, 6%, 0.5)',
-    ambientGlow: 'radial-gradient(ellipse at 50% 40%, hsla(220, 40%, 30%, 0.04) 0%, transparent 50%)',
+    mapFilter: 'sepia(0.1) brightness(0.85) hue-rotate(-5deg)',
+    vignette: 'radial-gradient(ellipse at center, transparent 55%, hsla(240, 30%, 10%, 0.15) 80%, hsla(240, 35%, 5%, 0.3) 100%)',
+    vignetteBoxShadow: 'inset 0 0 80px 30px hsla(240, 30%, 6%, 0.25)',
+    ambientGlow: 'none',
     label: 'Starlight',
   },
 };
@@ -990,7 +990,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   return (
     <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
       {/* Map canvas — no CSS filter on mobile to prevent WebGL rendering issues */}
-      <div ref={mapContainer} className="absolute inset-0" style={isMobile ? { zIndex: 0 } : { zIndex: 0, filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
+      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: '#faf7f0' }} />
 
       {/* Loading / Error overlay */}
       {mapStatus !== "ready" && (
@@ -1048,7 +1048,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       )}
 
       {/* Living vignette — desktop only */}
-      <div className="absolute inset-0 pointer-events-none z-[1] hidden md:block" style={{
+      <div className="absolute inset-0 pointer-events-none z-[2] hidden md:block" style={{
         boxShadow: atmosphere.vignetteBoxShadow,
         background: atmosphere.vignette,
         animation: 'vignetteBreath 12s ease-in-out infinite',
