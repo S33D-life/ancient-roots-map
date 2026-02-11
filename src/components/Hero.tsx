@@ -293,62 +293,6 @@ const Hero = () => {
       {/* Fairy Dust (dark) / Falling Leaves (light) */}
       {isDark ? <FairyDust /> : <FallingLeaves />}
 
-      {/* Ancient Friend reveal overlay — bottom left */}
-      <div
-        className="absolute bottom-56 md:bottom-28 left-4 md:left-8 z-[3] transition-all duration-700 ease-out"
-        style={{
-          opacity: isHovering ? 1 : 0,
-          transform: isHovering ? 'translateY(0)' : 'translateY(8px)',
-        }}
-      >
-        <div
-          className="rounded-xl px-5 py-4 backdrop-blur-md border max-w-xs"
-          style={{
-            background: 'hsl(var(--card) / 0.75)',
-            borderColor: 'hsl(var(--border) / 0.5)',
-          }}
-        >
-          <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] mb-1 font-serif">
-            Today's Ancient Friend
-          </p>
-          <h3 className="font-serif text-lg text-primary leading-tight">
-            {currentFriend.name}
-          </h3>
-          <p className="text-xs text-muted-foreground italic mt-0.5">
-            {currentFriend.species}
-          </p>
-          <Link
-            to={`/tree/${currentFriend.treeId}`}
-            className="inline-flex items-center gap-1.5 mt-3 text-xs font-serif text-accent hover:text-primary transition-colors"
-          >
-            <TreeDeciduous className="w-3.5 h-3.5" />
-            Visit this Ancient Friend
-            <ExternalLink className="w-3 h-3 opacity-60" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Mobile: tap hint — always visible on small screens */}
-      <Link
-        to={`/tree/${currentFriend.treeId}`}
-        className="absolute bottom-56 left-4 right-4 z-[3] md:hidden"
-      >
-        <div
-          className="rounded-xl px-4 py-3 backdrop-blur-md border flex items-center gap-3"
-          style={{
-            background: 'hsl(var(--card) / 0.7)',
-            borderColor: 'hsl(var(--border) / 0.4)',
-          }}
-        >
-          <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground font-serif">Today's Ancient Friend</p>
-            <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
-          </div>
-          <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        </div>
-      </Link>
-
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-center">
         <div className="max-w-4xl mx-auto space-y-8">
@@ -360,8 +304,9 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* CTA buttons pinned near bottom */}
-        <div className="absolute bottom-24 left-0 right-0 flex flex-col items-center gap-4 px-4">
+        {/* Bottom stack: CTA buttons → Teotag → Ancient Friend */}
+        <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center gap-4 px-4">
+          {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none">
             <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base py-4 sm:py-3" asChild>
               <Link to="/map">
@@ -376,11 +321,35 @@ const Hero = () => {
               </Link>
             </Button>
           </div>
+
+          {/* Centred Teotag logo */}
           <img 
             src={teotagLogo} 
             alt="Teotag" 
-            className="w-14 h-14 rounded-full border-2 border-primary/40 shadow-lg mt-2 opacity-90"
+            className="w-14 h-14 rounded-full border-2 border-primary/40 shadow-lg opacity-90"
           />
+
+          {/* Ancient Friend details below Teotag */}
+          <Link
+            to={`/tree/${currentFriend.treeId}`}
+            className="w-full max-w-xs"
+          >
+            <div
+              className="rounded-xl px-4 py-3 backdrop-blur-md border flex items-center gap-3"
+              style={{
+                background: 'hsl(var(--card) / 0.7)',
+                borderColor: 'hsl(var(--border) / 0.4)',
+              }}
+            >
+              <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-xs text-muted-foreground font-serif">Today's Ancient Friend</p>
+                <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
+                <p className="text-xs text-muted-foreground italic">{currentFriend.species}</p>
+              </div>
+              <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </div>
+          </Link>
         </div>
       </div>
 
