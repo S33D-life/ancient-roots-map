@@ -416,6 +416,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     setDebugInfo(prev => ({ ...prev, webgl: true }));
 
     // Use rAF to ensure layout is settled before init
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const rafId = requestAnimationFrame(() => {
       const container = mapContainer.current;
       if (!container) return;
@@ -440,12 +441,49 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           attributionControl: false,
         });
 
+        // Auto-fallback: if map doesn't reach "ready" within 6s, switch to Leaflet
+        timeoutId = setTimeout(() => {
+          if (mapStatus === "loading") {
+            console.warn('[Atlas] MapLibre timed out — falling back to Leaflet');
+            setMapStatus("leaflet");
+            m.remove();
+            map.current = null;
+          }
+        }, 6000);
+
         m.on('load', () => {
+          clearTimeout(timeoutId);
           setMapStatus("ready");
           setDebugInfo(prev => ({ ...prev, style: true }));
           const c = m.getCenter();
           setMapCenter({ lat: c.lat, lng: c.lng });
           m.resize();
+
+          // Verify WebGL actually rendered pixels after a short delay
+          setTimeout(() => {
+            try {
+              const canvas = m.getCanvas();
+              const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+              if (gl) {
+                const pixel = new Uint8Array(4);
+                gl.readPixels(
+                  Math.floor(canvas.width / 2),
+                  Math.floor(canvas.height / 2),
+                  1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel
+                );
+                // If center pixel is fully transparent or pure black, WebGL likely failed
+                const allZero = pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0 && pixel[3] === 0;
+                if (allZero) {
+                  console.warn('[Atlas] WebGL canvas appears blank — falling back to Leaflet');
+                  setMapStatus("leaflet");
+                  m.remove();
+                  map.current = null;
+                }
+              }
+            } catch (e) {
+              console.warn('[Atlas] Pixel check failed:', e);
+            }
+          }, 2000);
         });
         m.on('moveend', () => {
           const c = m.getCenter();
@@ -460,7 +498,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           if (msg.includes('Source') || msg.includes('AJAXError')) {
             console.warn('[Atlas] Non-critical tile error, map may still function');
           } else {
-            setMapStatus("error");
+            clearTimeout(timeoutId);
+            setMapStatus("leaflet");
           }
         });
 
@@ -479,6 +518,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     });
 
     return () => {
+      clearTimeout(timeoutId);
       cancelAnimationFrame(rafId);
       map.current?.remove();
       map.current = null;
@@ -975,7 +1015,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   // Leaflet fallback mode
   if (mapStatus === "leaflet") {
     return (
-      <div className="absolute inset-0 z-[1] bg-background">
+      <div className="absolute inset-0 z-[1]">
         <Suspense fallback={
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
@@ -988,9 +1028,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   }
 
   return (
-    <div className="absolute inset-0 z-[1] bg-background">
-      {/* Map canvas */}
-      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: "hsl(var(--background))" }} />
+    <div className="absolute inset-0 z-[1]">
+      {/* Map canvas — no opaque background so WebGL canvas is always visible */}
+      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0 }} />
 
       {/* Loading / Error overlay (kept non-occluding) */}
       {mapStatus !== "ready" && (
