@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,90 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus, Loader2, Leaf, ImagePlus, X, Share2, Lock, Trash2, Sprout, Sun,
 } from "lucide-react";
+
+/* ---------- Floating Pollen / Light Motes ---------- */
+const MOTE_COUNT = 35;
+
+interface Mote {
+  x: number; y: number; r: number; dx: number; dy: number;
+  alpha: number; phase: number; speed: number;
+}
+
+const GreenhouseMotes = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let raf: number;
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const w = () => canvas.width;
+    const h = () => canvas.height;
+
+    const motes: Mote[] = Array.from({ length: MOTE_COUNT }, () => ({
+      x: Math.random() * (canvas.width || 600),
+      y: Math.random() * (canvas.height || 400),
+      r: Math.random() * 2.5 + 1,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: -(Math.random() * 0.15 + 0.05),
+      alpha: Math.random() * 0.4 + 0.15,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.008 + 0.003,
+    }));
+
+    let t = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, w(), h());
+      t += 1;
+      for (const m of motes) {
+        m.x += m.dx + Math.sin(t * m.speed + m.phase) * 0.15;
+        m.y += m.dy;
+        const a = m.alpha + Math.sin(t * m.speed * 1.5 + m.phase) * 0.12;
+        // wrap
+        if (m.y < -10) { m.y = h() + 10; m.x = Math.random() * w(); }
+        if (m.x < -10) m.x = w() + 10;
+        if (m.x > w() + 10) m.x = -10;
+
+        // warm pollen glow
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(50, 70%, 80%, ${Math.max(0.05, a)})`;
+        ctx.fill();
+
+        // soft halo
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(90, 40%, 85%, ${Math.max(0.01, a * 0.2)})`;
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 1 }}
+      aria-hidden="true"
+    />
+  );
+};
 
 interface Plant {
   id: string;
@@ -98,6 +182,10 @@ const Greenhouse = () => {
           `,
         }}
       />
+      {/* Floating pollen / light motes */}
+      <div className="absolute inset-0 -z-[5] rounded-2xl overflow-hidden">
+        <GreenhouseMotes />
+      </div>
 
       {/* Glass panel frame */}
       <div
