@@ -363,6 +363,33 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          ancient_friend_index: number
+          created_at: string
+          id: string
+          ip_hash: string | null
+          user_id: string | null
+          visitor_number: number
+        }
+        Insert: {
+          ancient_friend_index: number
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          user_id?: string | null
+          visitor_number: number
+        }
+        Update: {
+          ancient_friend_index?: number
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          user_id?: string | null
+          visitor_number?: number
+        }
+        Relationships: []
+      }
       tree_projects: {
         Row: {
           api_url: string | null
@@ -582,6 +609,14 @@ export type Database = {
           display_name: string
           tree_count: number
           user_id: string
+        }[]
+      }
+      record_visit: {
+        Args: { p_user_id?: string }
+        Returns: {
+          ancient_friend_index: number
+          total_visits: number
+          visitor_number: number
         }[]
       }
     }

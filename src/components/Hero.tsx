@@ -208,18 +208,34 @@ const Hero = () => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
   const [stats, setStats] = useState({ trees: 0, species: 0, nations: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [visitorNumber, setVisitorNumber] = useState<number | null>(null);
+  const [friendIndex, setFriendIndex] = useState(0);
+  const visitRecorded = useRef(false);
 
-  // Random selection on each mount — seeded by session
-  const currentFriend = useMemo(() => {
-    const idx = Math.floor(Math.random() * ANCIENT_FRIENDS_GALLERY.length);
-    return ANCIENT_FRIENDS_GALLERY[idx];
+  // Record visit and get assigned Ancient Friend
+  useEffect(() => {
+    if (visitRecorded.current) return;
+    visitRecorded.current = true;
+    const recordVisit = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data, error } = await supabase.rpc('record_visit', {
+        p_user_id: user?.id ?? null,
+      });
+      if (data && data.length > 0) {
+        setVisitorNumber(data[0].visitor_number);
+        setFriendIndex(data[0].ancient_friend_index);
+      }
+    };
+    recordVisit();
   }, []);
+
+  const currentFriend = ANCIENT_FRIENDS_GALLERY[friendIndex];
 
   // Preload the next image to avoid flicker on re-visits
   const nextFriend = useMemo(() => {
-    const nextIdx = (ANCIENT_FRIENDS_GALLERY.indexOf(currentFriend) + 1) % ANCIENT_FRIENDS_GALLERY.length;
+    const nextIdx = (friendIndex + 1) % ANCIENT_FRIENDS_GALLERY.length;
     return ANCIENT_FRIENDS_GALLERY[nextIdx];
-  }, [currentFriend]);
+  }, [friendIndex]);
 
   // Preload both images
   useEffect(() => {
@@ -343,7 +359,9 @@ const Hero = () => {
             >
               <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-xs text-muted-foreground font-serif">Today's Ancient Friend</p>
+                <p className="text-xs text-muted-foreground font-serif">
+                  {visitorNumber ? `Visit #${visitorNumber.toLocaleString()}` : "Today's Ancient Friend"}
+                </p>
                 <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
                 <p className="text-xs text-muted-foreground italic">{currentFriend.species}</p>
               </div>
