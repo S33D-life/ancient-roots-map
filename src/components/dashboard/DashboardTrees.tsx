@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { TreeDeciduous, Upload, Download, Loader2, ImagePlus } from "lucide-react";
+import { TreeDeciduous, Upload, Download, Loader2, ImagePlus, MapPin, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhotoImport from "@/components/PhotoImport";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,8 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
   const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const [extractingPhoto, setExtractingPhoto] = useState(false);
+  const [photoStatus, setPhotoStatus] = useState("");
+  const [addedTree, setAddedTree] = useState<{ id: string; name: string } | null>(null);
   const dragCounter = useRef(0);
 
   const handlePhotoDrop = useCallback(async (file: File) => {
@@ -43,18 +45,28 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
       return;
     }
     setExtractingPhoto(true);
+    setAddedTree(null);
+    setPhotoStatus("Reading image…");
     try {
+      // Check auth first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Not signed in", description: "Please sign in to add trees", variant: "destructive" });
+        return;
+      }
+
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      toast({ title: "Analyzing image…", description: "Extracting what3words address" });
 
-      // Extract EXIF date from photo
+      // Extract EXIF date
       const exifDate = await extractExifDate(file);
 
+      // Step 1: Extract what3words
+      setPhotoStatus("Extracting what3words…");
       const { data, error } = await supabase.functions.invoke('extract-what3words-from-image', { body: { imageData: base64 } });
       if (error) throw error;
       if (!data.success) {
@@ -63,28 +75,65 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
       }
       const w3w = data.what3words;
       toast({ title: "Address detected!", description: `///${w3w}` });
-      // Store for the add-tree form and navigate to map
+
+      // Step 2: Convert to coordinates
+      setPhotoStatus("Resolving coordinates…");
       let coords: { lat: number; lng: number } | null = null;
       try {
         const result = await convertToCoordinates(w3w);
         if (result?.coordinates) coords = result.coordinates;
       } catch {}
-      localStorage.setItem('pendingTreeData', JSON.stringify({
+
+      // Step 3: Auto-create the tree
+      setPhotoStatus("Planting Ancient Friend…");
+      const treeName = w3w; // Use w3w as default name; user can edit later
+      const { data: treeData, error: treeError } = await supabase.from('trees').insert({
+        name: treeName,
+        species: 'Unknown',
         what3words: w3w,
         latitude: coords?.lat ?? null,
         longitude: coords?.lng ?? null,
-        photoData: base64,
-        photoDate: exifDate ?? null,
-      }));
-      toast({ title: "Tree data ready 🌳", description: "Opening the Atlas to add your Ancient Friend" });
-      navigate("/map?addTree=true");
+        created_by: user.id,
+        ...(exifDate ? { created_at: exifDate } : {}),
+      }).select('id').single();
+      if (treeError) throw treeError;
+
+      // Step 4: Upload photo and create offering
+      setPhotoStatus("Adding photo offering…");
+      const blob = await file.arrayBuffer();
+      const ext = file.name.split('.').pop() || 'jpg';
+      const storagePath = `${user.id}/${treeData.id}/photo-${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('offerings')
+        .upload(storagePath, new Uint8Array(blob), { contentType: file.type });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        // Tree was created, just skip the offering
+        toast({ title: "Tree added, but photo upload failed", description: uploadError.message, variant: "destructive" });
+      } else {
+        const { data: urlData } = supabase.storage.from('offerings').getPublicUrl(storagePath);
+        await supabase.from('offerings').insert({
+          tree_id: treeData.id,
+          type: 'photo',
+          title: 'First encounter',
+          media_url: urlData.publicUrl,
+          created_by: user.id,
+          ...(exifDate ? { created_at: exifDate } : {}),
+        });
+      }
+
+      setAddedTree({ id: treeData.id, name: treeName });
+      setPhotoStatus("");
+      toast({ title: "Ancient Friend planted! 🌳", description: `${w3w} — with photo offering` });
     } catch (err) {
       console.error('Photo drop error:', err);
-      toast({ title: "Extraction failed", description: "Could not process the image", variant: "destructive" });
+      toast({ title: "Failed", description: "Could not process the photo", variant: "destructive" });
+      setPhotoStatus("");
     } finally {
       setExtractingPhoto(false);
     }
-  }, [toast, navigate]);
+  }, [toast]);
 
   const onDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -161,15 +210,46 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
         {extractingPhoto ? (
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
-            <span className="text-xs font-serif text-muted-foreground">Extracting what3words from photo…</span>
+            <span className="text-xs font-serif text-muted-foreground">{photoStatus || 'Processing…'}</span>
+          </div>
+        ) : addedTree ? (
+          <div className="flex flex-col items-center gap-3">
+            <TreeDeciduous className="h-6 w-6" style={{ color: 'hsl(120, 50%, 50%)' }} />
+            <span className="text-xs font-serif" style={{ color: 'hsl(42, 80%, 60%)' }}>
+              🌳 {addedTree.name} — planted with photo
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-serif gap-1.5 h-7"
+                onClick={(e) => { e.stopPropagation(); navigate(`/tree/${addedTree.id}`); }}
+              >
+                <Eye className="h-3 w-3" /> View in Gallery
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-serif gap-1.5 h-7"
+                onClick={(e) => { e.stopPropagation(); navigate(`/map?focus=${addedTree.id}`); }}
+              >
+                <MapPin className="h-3 w-3" /> View on Map
+              </Button>
+            </div>
+            <button
+              className="text-[10px] text-muted-foreground/60 font-serif underline"
+              onClick={(e) => { e.stopPropagation(); setAddedTree(null); }}
+            >
+              Drop another photo
+            </button>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <ImagePlus className="h-6 w-6" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(0, 0%, 40%)' }} />
             <span className="text-xs font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(0, 0%, 50%)' }}>
-              {isDragging ? 'Drop your what3words photo here' : 'Drag a what3words photo here to add an Ancient Friend'}
+              {isDragging ? 'Drop your what3words photo here' : 'Drop a what3words photo to auto-add an Ancient Friend'}
             </span>
-            <span className="text-[10px] text-muted-foreground/60 font-serif">or tap to browse</span>
+            <span className="text-[10px] text-muted-foreground/60 font-serif">extracts location · adds tree · saves photo as first offering</span>
           </div>
         )}
       </div>
