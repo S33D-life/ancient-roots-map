@@ -6,6 +6,7 @@ import mapboxgl from "mapbox-gl";
 import { MAPBOX_TOKEN } from "@/config/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
+import { convertToCoordinates } from "@/utils/what3words";
 import MapSearch from "./MapSearch";
 import MapFilters, { GroveScale } from "./MapFilters";
 import TreeImportExport from "./TreeImportExport";
@@ -230,11 +231,16 @@ function getContinent(lat: number, lng: number): string {
 interface MapProps {
   initialView?: string;
   initialSpecies?: string;
+  initialW3w?: string;
+  initialLat?: number;
+  initialLng?: number;
+  initialZoom?: number;
 }
 
-const Map = ({ initialView, initialSpecies }: MapProps) => {
+const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom }: MapProps) => {
   const [searchParams] = useSearchParams();
   const autoAddTree = searchParams.get("addTree") === "true";
+  const deepLinkHandled = useRef(false);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -433,7 +439,36 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
     return () => { map.current?.remove(); map.current = null; };
   }, []);
 
-  // Add tree markers with visual hierarchy
+  // Handle deep-link params (w3w, lat/lng/zoom)
+  useEffect(() => {
+    if (!map.current || mapStatus !== "ready" || deepLinkHandled.current) return;
+    deepLinkHandled.current = true;
+
+    if (initialLat !== undefined && initialLng !== undefined) {
+      map.current.flyTo({
+        center: [initialLng, initialLat],
+        zoom: initialZoom ?? 15,
+        duration: 2000,
+      });
+    } else if (initialW3w) {
+      convertToCoordinates(initialW3w).then((result) => {
+        if (result && map.current) {
+          map.current.flyTo({
+            center: [result.coordinates.lng, result.coordinates.lat],
+            zoom: initialZoom ?? 16,
+            duration: 2000,
+          });
+          toast({ title: `///${initialW3w}`, description: "Navigated to what3words location" });
+        } else {
+          toast({ title: "Could not resolve address", description: `///${initialW3w}`, variant: "destructive" });
+        }
+      }).catch(() => {
+        toast({ title: "What3words unavailable", description: "Could not resolve the address right now", variant: "destructive" });
+      });
+    }
+  }, [mapStatus, initialLat, initialLng, initialZoom, initialW3w, toast]);
+
+
   useEffect(() => {
     if (!map.current) return;
 

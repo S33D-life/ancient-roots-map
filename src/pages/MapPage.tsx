@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
 import atlasSplash from "@/assets/atlas-splash.jpeg";
@@ -38,18 +39,29 @@ const SPECIES_QUICK = [
 ];
 
 const MapPage = () => {
-  const [splashPhase, setSplashPhase] = useState<"s33d" | "ancient" | "fading" | "done">("s33d");
-  const [showLanding, setShowLanding] = useState(true);
+  const [searchParams] = useSearchParams();
+  const paramW3w = searchParams.get("w3w") || undefined;
+  const paramLat = searchParams.get("lat") ? parseFloat(searchParams.get("lat")!) : undefined;
+  const paramLng = searchParams.get("lng") ? parseFloat(searchParams.get("lng")!) : undefined;
+  const paramZoom = searchParams.get("zoom") ? parseFloat(searchParams.get("zoom")!) : undefined;
+  const paramSpecies = searchParams.get("species") || undefined;
+
+  // If deep-link params exist, skip the landing screen
+  const hasDeepLink = !!(paramW3w || paramLat || paramSpecies);
+
+  const [splashPhase, setSplashPhase] = useState<"s33d" | "ancient" | "fading" | "done">(hasDeepLink ? "done" : "s33d");
+  const [showLanding, setShowLanding] = useState(!hasDeepLink);
   const [landingFading, setLandingFading] = useState(false);
   const [selectedView, setSelectedView] = useState("collective");
-  const [selectedSpecies, setSelectedSpecies] = useState("all");
+  const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
 
   useEffect(() => {
+    if (hasDeepLink) return;
     const t1 = setTimeout(() => setSplashPhase("ancient"), 1400);
     const t2 = setTimeout(() => setSplashPhase("fading"), 3000);
     const t3 = setTimeout(() => setSplashPhase("done"), 3600);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
+  }, [hasDeepLink]);
 
   if (splashPhase !== "done") {
     return (
@@ -80,7 +92,7 @@ const MapPage = () => {
   return (
     <div className="fixed inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
       {/* Map fills the entire viewport — Header overlays on top */}
-      <Map initialView={selectedView} initialSpecies={selectedSpecies} />
+      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} />
       <Header />
 
       {/* Landing overlay — fades to reveal map beneath */}
