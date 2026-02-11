@@ -975,10 +975,10 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   // Leaflet fallback mode
   if (mapStatus === "leaflet") {
     return (
-      <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
+      <div className="absolute inset-0 z-[1]" style={{ background: "transparent" }}>
         <Suspense fallback={
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="font-serif text-sm" style={{ color: 'hsl(42, 60%, 55%)' }}>Loading Lite Mode…</p>
+            <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
           <LeafletFallbackMap trees={filteredTrees} />
@@ -988,53 +988,50 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   }
 
   return (
-    <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
-      {/* Map canvas — no CSS filter on mobile to prevent WebGL rendering issues */}
+    <div className="absolute inset-0 z-[1]" style={{ background: "transparent" }}>
+      {/* Map canvas */}
       <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: '#faf7f0' }} />
 
-      {/* Loading / Error overlay */}
+      {/* Loading / Error overlay (kept non-occluding) */}
       {mapStatus !== "ready" && (
-        <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, hsl(120, 30%, 12%), hsl(100, 25%, 8%))' }}>
+        <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 pointer-events-none" style={{ background: "transparent" }}>
           {mapStatus === "loading" && (
             <>
-              <div className="w-10 h-10 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: 'hsl(42, 80%, 55%)', borderRightColor: 'hsl(42, 80%, 55% / 0.3)' }} />
-              <p className="font-serif text-sm" style={{ color: 'hsl(42, 60%, 55%)' }}>Summoning the Atlas…</p>
+              <div className="w-10 h-10 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: 'hsl(var(--primary))', borderRightColor: 'hsl(var(--primary) / 0.25)' }} />
+              <p className="font-serif text-sm text-foreground">Loading map…</p>
             </>
           )}
           {mapStatus === "error" && (
             <div className="flex flex-col items-center gap-3 pointer-events-auto px-6 text-center max-w-sm">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'hsl(0, 40%, 20%)', border: '1px solid hsl(0, 50%, 35%)' }}>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-card border border-border">
                 <span className="text-xl">🌿</span>
               </div>
-              <p className="font-serif text-base" style={{ color: 'hsl(42, 60%, 55%)' }}>The Atlas could not awaken</p>
-              <p className="text-xs" style={{ color: 'hsl(42, 30%, 50%)' }}>
+              <p className="font-serif text-base text-foreground">The Atlas could not awaken</p>
+              <p className="text-xs text-muted-foreground">
                 {mapError || "Map tiles failed to load. This may be a network issue or WebGL compatibility problem."}
               </p>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-5 py-2 rounded-lg font-serif text-sm transition-colors"
-                  style={{ background: 'hsl(42, 60%, 25%)', color: 'hsl(42, 80%, 70%)', border: '1px solid hsl(42, 50%, 35%)' }}
+                  className="px-5 py-2 rounded-lg font-serif text-sm transition-colors bg-primary text-primary-foreground border border-border"
                 >
                   Retry
                 </button>
                 <button
                   onClick={() => setMapStatus("leaflet")}
-                  className="px-4 py-2 rounded-lg font-serif text-sm transition-colors"
-                  style={{ background: 'hsl(120, 30%, 20%)', color: 'hsl(120, 50%, 65%)', border: '1px solid hsl(120, 40%, 30%)' }}
+                  className="px-4 py-2 rounded-lg font-serif text-sm transition-colors bg-secondary text-secondary-foreground border border-border"
                 >
                   Lite Mode
                 </button>
                 <button
                   onClick={() => setShowDebug(!showDebug)}
-                  className="px-3 py-2 rounded-lg font-serif text-xs transition-colors"
-                  style={{ background: 'hsl(0, 0%, 15%)', color: 'hsl(42, 30%, 60%)', border: '1px solid hsl(0, 0%, 25%)' }}
+                  className="px-3 py-2 rounded-lg font-serif text-xs transition-colors bg-card text-foreground border border-border"
                 >
                   Debug
                 </button>
               </div>
               {showDebug && (
-                <div className="mt-3 text-left text-[10px] font-mono p-3 rounded-lg w-full" style={{ background: 'hsl(0, 0%, 8%)', color: 'hsl(42, 30%, 55%)', border: '1px solid hsl(0, 0%, 20%)' }}>
+                <div className="mt-3 text-left text-[10px] font-mono p-3 rounded-lg w-full bg-card text-foreground border border-border">
                   <p>renderer: MapLibre GL (open-source)</p>
                   <p>style: {debugInfo.style ? "✓ loaded" : "✗ not loaded"}</p>
                   <p>webgl: {debugInfo.webgl ? "✓" : "✗ unsupported"}</p>
@@ -1047,26 +1044,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </div>
       )}
 
-      {/* Living vignette — desktop only */}
-      <div className="absolute inset-0 pointer-events-none z-[2] hidden md:block" style={{
-        boxShadow: atmosphere.vignetteBoxShadow,
-        background: atmosphere.vignette,
-        animation: 'vignetteBreath 12s ease-in-out infinite',
-        transition: 'box-shadow 2s ease, background 2s ease',
-      }} />
-
-      {/* Ambient glow layer — desktop only */}
-      {atmosphere.ambientGlow !== 'none' && (
-        <div className="absolute inset-0 pointer-events-none z-[1] hidden md:block" style={{
-          background: atmosphere.ambientGlow,
-          animation: 'ambientDrift 20s ease-in-out infinite alternate',
-        }} />
-      )}
-
-      {/* Drifting mist — desktop only */}
-      <div className="hidden md:block">
-        <MistOverlay />
-      </div>
+      {/* Atmospheric overlays disabled to ensure unobstructed map visibility */}
 
       <ConversionStatus />
 
@@ -1095,16 +1073,10 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </Card>
       </div>
 
-      {/* Mobile: single compact row beneath header */}
       <div className="flex md:hidden absolute top-[52px] left-2 right-2 z-10 items-center gap-1.5">
         <button
           onClick={() => setViewMode(viewMode === 'collective' ? 'personal' : 'collective')}
-          className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-serif backdrop-blur-md border transition-colors"
-          style={{
-            background: 'hsla(30, 30%, 12%, 0.85)',
-            borderColor: 'hsla(42, 50%, 35%, 0.5)',
-            color: 'hsl(42, 70%, 65%)',
-          }}
+          className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-serif backdrop-blur-md border border-border bg-card/80 text-foreground transition-colors"
         >
           {viewMode === 'collective' ? '🌍 All' : '🌿 Mine'}
         </button>
@@ -1118,24 +1090,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             totalTrees={trees.length}
           />
         </div>
-        <span className="ml-auto text-[11px] font-serif px-2 py-1 rounded-full backdrop-blur-md"
-          style={{
-            background: 'hsla(30, 30%, 12%, 0.75)',
-            color: 'hsl(42, 50%, 55%)',
-          }}
-        >
+        <span className="ml-auto text-[11px] font-serif px-2 py-1 rounded-full backdrop-blur-md border border-border bg-card/70 text-muted-foreground">
           {filteredTrees.length} trees
         </span>
       </div>
 
       {/* Time-of-day whisper — desktop only */}
       <div className="absolute top-[72px] right-4 z-10 animate-fade-in hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
-        <span className="font-serif text-xs px-2.5 py-1 rounded-full" style={{
-          background: 'hsla(30, 30%, 12%, 0.7)',
-          color: 'hsla(42, 60%, 60%, 0.7)',
-          border: '1px solid hsla(42, 40%, 30%, 0.3)',
-          backdropFilter: 'blur(4px)',
-        }}>
+        <span className="font-serif text-xs px-2.5 py-1 rounded-full border border-border bg-card/70 text-muted-foreground backdrop-blur-sm">
           {timeOfDay === 'dawn' && '🌅'}
           {timeOfDay === 'day' && '☀️'}
           {timeOfDay === 'dusk' && '🌇'}
