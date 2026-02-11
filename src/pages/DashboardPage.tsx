@@ -271,7 +271,7 @@ const DashboardPage = () => {
   const TAB_ITEMS = [
     { value: "legend", label: "Legend", icon: ScrollText },
     { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
-    { value: "leaderboard", label: "Leaderboard", icon: Trophy },
+    { value: "leaderboard", label: "Fellowship", icon: Trophy },
     { value: "profile", label: "Settings", icon: Settings },
   ];
 
