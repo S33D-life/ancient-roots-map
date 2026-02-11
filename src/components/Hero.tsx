@@ -1,11 +1,44 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, TreeDeciduous } from "lucide-react";
-import heroTree from "@/assets/hero-tree.jpg";
+import { MapPin, TreeDeciduous, ExternalLink } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+// Ancient Friends gallery — each entry is a painterly tree background
+// linked to a real Ancient Friend in the database
+const ANCIENT_FRIENDS_GALLERY = [
+  {
+    image: "/images/hero-trees/ancient-oak-mist.jpeg",
+    name: "Grandfather Oak",
+    species: "Quercus robur",
+    treeId: "a1b2c3d4-1111-4aaa-bbbb-000000000001",
+  },
+  {
+    image: "/images/hero-trees/ancient-yew-twilight.jpeg",
+    name: "Fortingall Yew",
+    species: "Taxus baccata",
+    treeId: "2e4ef3b8-01b7-4f8c-925f-924b259a0df5",
+  },
+  {
+    image: "/images/hero-trees/sequoia-ember.jpeg",
+    name: "General Sherman",
+    species: "Sequoiadendron giganteum",
+    treeId: "5f58348b-9893-4023-8745-948c80933672",
+  },
+  {
+    image: "/images/hero-trees/baobab-dawn.jpeg",
+    name: "Big Tree Baobab",
+    species: "Adansonia digitata",
+    treeId: "bce00dc1-3de0-41be-85bf-d9ad2d276421",
+  },
+  {
+    image: "/images/hero-trees/cherry-blossom-mist.jpeg",
+    name: "Jōmon Sugi",
+    species: "Cryptomeria japonica",
+    treeId: "ad0cb057-1430-4088-89af-5f9b7dd2ecf5",
+  },
+];
 
 // Fairy dust particle
 interface Particle {
@@ -174,6 +207,27 @@ const AnimatedCounter = ({ target, label }: { target: number; label: string }) =
 const Hero = () => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
   const [stats, setStats] = useState({ trees: 0, species: 0, nations: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Random selection on each mount — seeded by session
+  const currentFriend = useMemo(() => {
+    const idx = Math.floor(Math.random() * ANCIENT_FRIENDS_GALLERY.length);
+    return ANCIENT_FRIENDS_GALLERY[idx];
+  }, []);
+
+  // Preload the next image to avoid flicker on re-visits
+  const nextFriend = useMemo(() => {
+    const nextIdx = (ANCIENT_FRIENDS_GALLERY.indexOf(currentFriend) + 1) % ANCIENT_FRIENDS_GALLERY.length;
+    return ANCIENT_FRIENDS_GALLERY[nextIdx];
+  }, [currentFriend]);
+
+  // Preload both images
+  useEffect(() => {
+    const img1 = new Image();
+    img1.src = currentFriend.image;
+    const img2 = new Image();
+    img2.src = nextFriend.image;
+  }, [currentFriend, nextFriend]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -196,13 +250,41 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
+    <section
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Background — rotating Ancient Friend portrait */}
       <div
-        className="absolute inset-0 bg-cover bg-top scale-110"
-        style={{ backgroundImage: `url(${heroTree})` }}
+        className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-[20s] ease-linear"
+        style={{
+          backgroundImage: `url(${currentFriend.image})`,
+          transform: isHovering ? 'scale(1.08)' : 'scale(1.05)',
+        }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/75 via-background/60 to-background/95" />
+        {/* Cinematic overlay — ensures UI readability */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `
+              linear-gradient(to bottom, 
+                hsl(var(--background) / 0.7) 0%, 
+                hsl(var(--background) / 0.45) 30%,
+                hsl(var(--background) / 0.35) 50%,
+                hsl(var(--background) / 0.5) 70%,
+                hsl(var(--background) / 0.92) 100%
+              )
+            `,
+          }}
+        />
+        {/* Soft vignette edges */}
+        <div
+          className="absolute inset-0"
+          style={{
+            boxShadow: 'inset 0 0 150px 60px hsl(var(--background) / 0.6)',
+          }}
+        />
       </div>
 
       {/* Sacred Geometry Overlay */}
@@ -211,6 +293,61 @@ const Hero = () => {
       {/* Fairy Dust (dark) / Falling Leaves (light) */}
       {isDark ? <FairyDust /> : <FallingLeaves />}
 
+      {/* Ancient Friend reveal overlay — bottom left */}
+      <div
+        className="absolute bottom-36 md:bottom-28 left-4 md:left-8 z-[3] transition-all duration-700 ease-out"
+        style={{
+          opacity: isHovering ? 1 : 0,
+          transform: isHovering ? 'translateY(0)' : 'translateY(8px)',
+        }}
+      >
+        <div
+          className="rounded-xl px-5 py-4 backdrop-blur-md border max-w-xs"
+          style={{
+            background: 'hsl(var(--card) / 0.75)',
+            borderColor: 'hsl(var(--border) / 0.5)',
+          }}
+        >
+          <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] mb-1 font-serif">
+            Today's Ancient Friend
+          </p>
+          <h3 className="font-serif text-lg text-primary leading-tight">
+            {currentFriend.name}
+          </h3>
+          <p className="text-xs text-muted-foreground italic mt-0.5">
+            {currentFriend.species}
+          </p>
+          <Link
+            to={`/tree/${currentFriend.treeId}`}
+            className="inline-flex items-center gap-1.5 mt-3 text-xs font-serif text-accent hover:text-primary transition-colors"
+          >
+            <TreeDeciduous className="w-3.5 h-3.5" />
+            Visit this Ancient Friend
+            <ExternalLink className="w-3 h-3 opacity-60" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Mobile: tap hint — always visible on small screens */}
+      <Link
+        to={`/tree/${currentFriend.treeId}`}
+        className="absolute bottom-36 left-4 right-4 z-[3] md:hidden"
+      >
+        <div
+          className="rounded-xl px-4 py-3 backdrop-blur-md border flex items-center gap-3"
+          style={{
+            background: 'hsl(var(--card) / 0.7)',
+            borderColor: 'hsl(var(--border) / 0.4)',
+          }}
+        >
+          <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground font-serif">Today's Ancient Friend</p>
+            <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
+          </div>
+          <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        </div>
+      </Link>
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-center">
@@ -249,7 +386,6 @@ const Hero = () => {
 
       {/* Bottom Fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
-
     </section>
   );
 };
