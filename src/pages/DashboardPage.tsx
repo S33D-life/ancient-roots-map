@@ -342,17 +342,6 @@ const DashboardPage = () => {
 
             <TabsContent value="pod">
               <div className="space-y-10">
-                {/* Section: Wanderers */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users className="w-5 h-5 text-accent" />
-                    <h3 className="font-serif text-lg text-accent tracking-wide">Wanderers</h3>
-                  </div>
-                  {user && <DashboardWanderers userId={user.id} />}
-                </div>
-
-                <div className="border-t border-border/30" />
-
                 {/* Section: My Trees */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
@@ -416,7 +405,27 @@ const DashboardPage = () => {
             </TabsContent>
 
             <TabsContent value="leaderboard">
-              <DashboardLeaderboard currentUserId={user?.id} />
+              <div className="space-y-10">
+                {/* Section: Wanderers */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-5 h-5 text-accent" />
+                    <h3 className="font-serif text-lg text-accent tracking-wide">Fellow Wanderers</h3>
+                  </div>
+                  {user && <DashboardWanderers userId={user.id} />}
+                </div>
+
+                <div className="border-t border-border/30" />
+
+                {/* Section: Leaderboard */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Trophy className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg text-primary tracking-wide">Community Leaderboard</h3>
+                  </div>
+                  <DashboardLeaderboard currentUserId={user?.id} />
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="profile">
