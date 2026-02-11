@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map } from "lucide-react";
 import {
   getSpiralStaffs,
   getGridStaffs,
@@ -985,6 +985,23 @@ const GalleryPage = () => {
                           />
                           Wishing Tree
                         </Button>
+                        {(tree.latitude || tree.what3words) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (tree.latitude && tree.longitude) {
+                                navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16`);
+                              } else if (tree.what3words) {
+                                navigate(`/map?w3w=${tree.what3words}`);
+                              }
+                            }}
+                            title="View on Map"
+                          >
+                            <Map className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
