@@ -69,6 +69,7 @@ const App = () => {
                 <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
                 <Route path="/library" element={<GalleryPage />} />
+                <Route path="/library/:room" element={<GalleryPage />} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
