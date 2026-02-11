@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2 } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe } from "lucide-react";
 import {
   getSpiralStaffs,
   getGridStaffs,
@@ -69,6 +69,7 @@ interface Tree {
   estimated_age: number | null;
   grove_scale: string | null;
   created_at: string;
+  created_by: string | null;
 }
 
 interface Offering {
@@ -121,6 +122,12 @@ const GalleryPage = () => {
   const [isOfferingDialogOpen, setIsOfferingDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [galleryView, setGalleryView] = useState<"collective" | "individual" | "tribe">("collective");
+  const [staffFilter, setStaffFilter] = useState<string>("all");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [tribeUserIds, setTribeUserIds] = useState<string[]>([]);
+  const [staffCodes, setStaffCodes] = useState<string[]>([]);
+  const [treesWithStaff, setTreesWithStaff] = useState<Record<string, string[]>>({});
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
@@ -237,6 +244,8 @@ const GalleryPage = () => {
     fetchTrees();
     fetchWishlist();
     fetchSavedSongs();
+    fetchCurrentUser();
+    fetchStaffCodes();
   }, []);
 
   useEffect(() => {
@@ -259,6 +268,53 @@ const GalleryPage = () => {
       toast.error("Failed to load trees");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+        // Fetch tribe (follows + companions)
+        const [followsRes, companionsRes] = await Promise.all([
+          supabase.from("follows").select("following_id").eq("follower_id", user.id),
+          supabase.from("grove_companions").select("requester_id, recipient_id").or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`).eq("status", "accepted"),
+        ]);
+        const tribeIds = new Set<string>();
+        followsRes.data?.forEach(f => tribeIds.add(f.following_id));
+        companionsRes.data?.forEach(c => {
+          tribeIds.add(c.requester_id === user.id ? c.recipient_id : c.requester_id);
+        });
+        setTribeUserIds(Array.from(tribeIds));
+      }
+    } catch (err) {
+      console.error("Error fetching user/tribe:", err);
+    }
+  };
+
+  const fetchStaffCodes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("offerings")
+        .select("sealed_by_staff, tree_id")
+        .not("sealed_by_staff", "is", null);
+      if (error) throw error;
+      const codes = new Set<string>();
+      const treeStaffMap: Record<string, string[]> = {};
+      (data || []).forEach(o => {
+        if (o.sealed_by_staff) {
+          codes.add(o.sealed_by_staff);
+          if (!treeStaffMap[o.tree_id]) treeStaffMap[o.tree_id] = [];
+          if (!treeStaffMap[o.tree_id].includes(o.sealed_by_staff)) {
+            treeStaffMap[o.tree_id].push(o.sealed_by_staff);
+          }
+        }
+      });
+      setStaffCodes(Array.from(codes).sort());
+      setTreesWithStaff(treeStaffMap);
+    } catch (err) {
+      console.error("Error fetching staff codes:", err);
     }
   };
 
@@ -624,8 +680,19 @@ const GalleryPage = () => {
       tree.what3words.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesSpecies = speciesFilter === "all" || tree.species === speciesFilter;
+
+    // View filter
+    let matchesView = true;
+    if (galleryView === "individual") {
+      matchesView = tree.created_by === currentUserId;
+    } else if (galleryView === "tribe") {
+      matchesView = tribeUserIds.includes(tree.created_by || "");
+    }
+
+    // Staff filter
+    const matchesStaff = staffFilter === "all" || (treesWithStaff[tree.id]?.includes(staffFilter) ?? false);
     
-    return matchesSearch && matchesSpecies;
+    return matchesSearch && matchesSpecies && matchesView && matchesStaff;
   });
 
   const getOfferingIcon = (type: string) => {
@@ -795,6 +862,30 @@ const GalleryPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
 
+            {/* View Toggle */}
+            <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'hsla(30, 20%, 15%, 0.6)', border: '1px solid hsla(42, 40%, 30%, 0.3)' }}>
+              {([
+                { key: "collective" as const, label: "Collectively", icon: Globe, desc: "All mapped trees" },
+                { key: "individual" as const, label: "Individually", icon: User, desc: "Your mapped trees" },
+                { key: "tribe" as const, label: "Your Tribe", icon: Users, desc: "Your connections' trees" },
+              ]).map(v => (
+                <button
+                  key={v.key}
+                  onClick={() => setGalleryView(v.key)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-serif transition-all flex-1 justify-center"
+                  style={{
+                    background: galleryView === v.key ? 'hsla(42, 70%, 50%, 0.15)' : 'transparent',
+                    color: galleryView === v.key ? 'hsl(42, 80%, 60%)' : 'hsla(42, 20%, 60%, 0.7)',
+                    border: galleryView === v.key ? '1px solid hsla(42, 60%, 50%, 0.3)' : '1px solid transparent',
+                  }}
+                  title={v.desc}
+                >
+                  <v.icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{v.label}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="flex flex-col md:flex-row gap-4">
               <Input
                 placeholder="Search by name, species, or what3words..."
@@ -815,6 +906,21 @@ const GalleryPage = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {staffCodes.length > 0 && (
+                <Select value={staffFilter} onValueChange={setStaffFilter}>
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectValue placeholder="Filter by staff" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Staffs</SelectItem>
+                    {staffCodes.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             {loading ? (
