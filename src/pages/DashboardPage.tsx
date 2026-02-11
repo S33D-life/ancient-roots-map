@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 import hearthBg from "@/assets/hearth-bg.jpeg";
+import HearthEntrance from "@/components/HearthEntrance";
 import Footer from "@/components/Footer";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
@@ -115,6 +116,7 @@ const DashboardPage = () => {
   const [plantCount, setPlantCount] = useState(0);
   const [offeringCount, setOfferingCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showEntrance, setShowEntrance] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
@@ -250,6 +252,12 @@ const DashboardPage = () => {
       setIsExporting(false);
     }
   };
+
+  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+
+  if (showEntrance) {
+    return <HearthEntrance onComplete={handleEntranceComplete} />;
+  }
 
   if (loading) {
     return (
