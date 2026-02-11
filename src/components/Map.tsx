@@ -44,9 +44,9 @@ const TIME_ATMOSPHERES: Record<TimeOfDay, {
     label: 'Dawn',
   },
   day: {
-    mapFilter: 'sepia(0.35) saturate(1.2) brightness(0.92) hue-rotate(-10deg) contrast(1.05)',
-    vignette: 'radial-gradient(ellipse at center, transparent 50%, hsla(35, 45%, 20%, 0.25) 80%, hsla(30, 40%, 12%, 0.5) 100%)',
-    vignetteBoxShadow: 'inset 0 0 120px 60px hsla(30, 40%, 15%, 0.6), inset 0 0 300px 100px hsla(30, 30%, 10%, 0.3)',
+    mapFilter: 'sepia(0.25) saturate(1.1) brightness(1.0) hue-rotate(-8deg) contrast(1.02)',
+    vignette: 'radial-gradient(ellipse at center, transparent 55%, hsla(35, 45%, 20%, 0.15) 85%, hsla(30, 40%, 12%, 0.35) 100%)',
+    vignetteBoxShadow: 'inset 0 0 100px 40px hsla(30, 40%, 15%, 0.3), inset 0 0 250px 80px hsla(30, 30%, 10%, 0.15)',
     ambientGlow: 'none',
     label: 'Day',
   },
