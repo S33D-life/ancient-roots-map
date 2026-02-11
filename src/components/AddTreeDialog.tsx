@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
+import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus } from "lucide-react";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import maplibregl from "maplibre-gl";
 
@@ -47,7 +47,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [originLng, setOriginLng] = useState<number | null>(null);
   const [savedTreeId, setSavedTreeId] = useState<string | null>(null);
   const [transitionDir, setTransitionDir] = useState<"forward" | "back">("forward");
+  const [isDragging, setIsDragging] = useState(false);
+  const [extractingPhoto, setExtractingPhoto] = useState(false);
   const { toast } = useToast();
+  const dragCounter = useRef(0);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -199,6 +202,75 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
   };
 
+  // Drag-and-drop what3words photo extraction
+  const handlePhotoDrop = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Invalid file", description: "Please drop an image file", variant: "destructive" });
+      return;
+    }
+    setExtractingPhoto(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      toast({ title: "Analyzing image…", description: "Extracting what3words address from photo" });
+
+      const { data, error } = await supabase.functions.invoke('extract-what3words-from-image', {
+        body: { imageData: base64 },
+      });
+      if (error) throw error;
+      if (!data.success) {
+        toast({ title: "No address found", description: data.error || "Could not find a what3words address in the image", variant: "destructive" });
+        return;
+      }
+
+      const w3w = data.what3words;
+      setWhat3words(w3w);
+      toast({ title: "Address detected!", description: `///​${w3w}` });
+
+      // Auto-convert to coordinates
+      try {
+        const result = await convertToCoordinates(w3w);
+        if (result?.coordinates) {
+          setLat(result.coordinates.lat);
+          setLng(result.coordinates.lng);
+        }
+      } catch (coordErr: any) {
+        if (coordErr?.message === 'quota_exceeded') {
+          toast({ title: "Quota reached", description: "Coordinates will be converted later", variant: "destructive" });
+        }
+      }
+    } catch (err) {
+      console.error('Photo drop error:', err);
+      toast({ title: "Extraction failed", description: "Could not process the image", variant: "destructive" });
+    } finally {
+      setExtractingPhoto(false);
+    }
+  }, [toast]);
+
+  const onDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.types.includes('Files')) setIsDragging(true);
+  }, []);
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) setIsDragging(false);
+  }, []);
+  const onDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); }, []);
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+    const file = e.dataTransfer.files?.[0];
+    if (file) handlePhotoDrop(file);
+  }, [handlePhotoDrop]);
+
   const handleSubmit = async () => {
     if (!species.trim()) {
       toast({ title: "Missing fields", description: "Please fill in species", variant: "destructive" });
@@ -316,43 +388,90 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         }}>
           {/* ─── ENCOUNTER STEP ─── */}
           {step === "encounter" && !adjustMode && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name of this Ancient Friend</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 200))} placeholder="e.g., The Old Oak of Glastonbury (optional)" maxLength={200} className="font-serif" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
-                <Input id="species" value={species} onChange={(e) => setSpecies(e.target.value.slice(0, 200))} placeholder="e.g., Quercus robur (English Oak)" maxLength={200} required className="font-serif" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="what3words" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">
-                  what3words {fetchingW3w && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
-                </Label>
-                <div className="flex gap-2">
-                  <Input id="what3words" value={what3words} onChange={(e) => setWhat3words(e.target.value)} placeholder="filled.count.soap" className="flex-1 font-serif" />
-                  <Button type="button" variant="outline" size="icon" onClick={handleLookupW3w} disabled={lookingUpW3w || !what3words.trim()}>
-                    {lookingUpW3w ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                  </Button>
+            <div
+              onDragEnter={onDragEnter}
+              onDragLeave={onDragLeave}
+              onDragOver={onDragOver}
+              onDrop={onDrop}
+            >
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name of this Ancient Friend</Label>
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 200))} placeholder="e.g., The Old Oak of Glastonbury (optional)" maxLength={200} className="font-serif" />
                 </div>
-              </div>
 
-              <Button type="button" variant="outline" className="w-full gap-2 font-serif" onClick={handleFindMe} disabled={findingMe}>
-                {findingMe ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
-                Find Me — Use My Location
-              </Button>
-
-              {lat && lng && (
-                <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg p-2" style={{ background: 'hsla(120, 30%, 20%, 0.3)', border: '1px solid hsla(120, 30%, 30%, 0.3)' }}>
-                  <span className="font-mono">📍 {lat.toFixed(6)}, {lng.toFixed(6)}</span>
-                  <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => startAdjustMode(lat, lng)}>
-                    <MapPin className="h-3 w-3 mr-1" /> Adjust
-                  </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
+                  <Input id="species" value={species} onChange={(e) => setSpecies(e.target.value.slice(0, 200))} placeholder="e.g., Quercus robur (English Oak)" maxLength={200} required className="font-serif" />
                 </div>
-              )}
-            </>
+
+                <div className="space-y-2">
+                  <Label htmlFor="what3words" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">
+                    what3words {fetchingW3w && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input id="what3words" value={what3words} onChange={(e) => setWhat3words(e.target.value)} placeholder="filled.count.soap" className="flex-1 font-serif" />
+                    <Button type="button" variant="outline" size="icon" onClick={handleLookupW3w} disabled={lookingUpW3w || !what3words.trim()}>
+                      {lookingUpW3w ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Drop zone for what3words photo */}
+                <div
+                  className={`relative rounded-lg border-2 border-dashed p-4 text-center transition-all cursor-pointer ${
+                    isDragging
+                      ? 'border-primary bg-primary/10 scale-[1.02]'
+                      : 'border-border/50 hover:border-border'
+                  }`}
+                  style={{
+                    background: isDragging
+                      ? 'hsla(42, 80%, 50%, 0.08)'
+                      : 'hsla(0, 0%, 100%, 0.02)',
+                  }}
+                  onClick={() => {
+                    if (!extractingPhoto) {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) handlePhotoDrop(file);
+                      };
+                      input.click();
+                    }
+                  }}
+                >
+                  {extractingPhoto ? (
+                    <div className="flex flex-col items-center gap-2 py-1">
+                      <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                      <span className="text-xs font-serif text-muted-foreground">Extracting address from photo…</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-1.5 py-1">
+                      <ImagePlus className="h-5 w-5" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(0, 0%, 45%)' }} />
+                      <span className="text-xs font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(0, 0%, 50%)' }}>
+                        {isDragging ? 'Drop photo here' : 'Drag a what3words photo here, or tap to browse'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <Button type="button" variant="outline" className="w-full gap-2 font-serif" onClick={handleFindMe} disabled={findingMe}>
+                  {findingMe ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+                  Find Me — Use My Location
+                </Button>
+
+                {lat && lng && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg p-2" style={{ background: 'hsla(120, 30%, 20%, 0.3)', border: '1px solid hsla(120, 30%, 30%, 0.3)' }}>
+                    <span className="font-mono">📍 {lat.toFixed(6)}, {lng.toFixed(6)}</span>
+                    <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => startAdjustMode(lat, lng)}>
+                      <MapPin className="h-3 w-3 mr-1" /> Adjust
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* ─── ADJUST MAP (within encounter) ─── */}
