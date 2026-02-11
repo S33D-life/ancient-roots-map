@@ -1,10 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
@@ -13,6 +12,7 @@ import TeotagWhisper from "./TeotagWhisper";
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [heartsCount, setHeartsCount] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -136,16 +136,23 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Left side: Hearth button (mobile) + Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
-            {/* Mobile Hearth button — top left */}
-            <Link to={user ? "/dashboard" : "/auth"} className="md:hidden flex items-center">
+            {/* Mobile Hearth button — top left, toggles dashboard */}
+            <button
+              type="button"
+              className="md:hidden flex items-center bg-transparent border-none p-0"
+              onClick={() => {
+                if (!user) { navigate("/auth"); return; }
+                navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
+              }}
+            >
               {user ? (
                 <img src={hearthImg} alt="Hearth" className="w-9 h-9 rounded-full object-cover border border-primary/30" />
               ) : (
-                <Button variant="ghost" size="icon" title="Login">
-                  <Flame className="w-5 h-5 text-primary" />
+                <Button variant="ghost" size="icon" title="Login" asChild>
+                  <span><Flame className="w-5 h-5 text-primary" /></span>
                 </Button>
               )}
-            </Link>
+            </button>
             {/* Desktop TEOTAG logo */}
             <div className="relative group hidden md:block">
               <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
@@ -203,9 +210,10 @@ const Header = () => {
               <Stars className={`w-4 h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
             </Button>
             {user ? (
-              <Link
-                to="/dashboard"
-                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical"
+              <button
+                type="button"
+                onClick={() => navigate(location.pathname === "/dashboard" ? "/" : "/dashboard")}
+                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer"
               >
                 <img src={hearthImg} alt="Hearth" className="w-8 h-8 rounded-full object-cover" />
                 <span className="font-serif">Hearth</span>
@@ -215,7 +223,7 @@ const Header = () => {
                     {heartsCount}
                   </span>
                 )}
-              </Link>
+              </button>
             ) : (
               <Button
                 variant="sacred"
