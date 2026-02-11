@@ -1666,7 +1666,7 @@ const GalleryPage = () => {
             <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
               {/* Wishing Tree painting header */}
               <div className="flex items-center gap-4 p-4 border-b border-border/30">
-                <div className="relative w-16 h-20 shrink-0 rounded-md overflow-hidden border border-border shadow" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+                <div className="relative w-48 h-60 shrink-0 rounded-md overflow-hidden border border-border shadow" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
                   <img
                     src={wishingTreeImage}
                     alt="Wishing Tree"
