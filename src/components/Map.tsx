@@ -1023,6 +1023,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         }>
           <LeafletFallbackMap trees={filteredTrees} offeringCounts={offeringCounts} />
         </Suspense>
+        <button
+          onClick={() => { map.current = null; setMapStatus("loading"); }}
+          className="absolute bottom-6 right-4 z-[1000] flex items-center gap-1.5 px-3 py-1.5 rounded-full font-serif text-xs transition-all hover:brightness-125"
+          style={{ background: "hsla(30,30%,12%,0.85)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(4px)" }}
+          title="Switch to WebGL mode"
+        >
+          🗺️ Try WebGL
+        </button>
       </div>
     );
   }
@@ -1164,6 +1172,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           <TreeRadio speciesFilter={speciesFilter} />
         </div>
         <TreeImportExport />
+        <button
+          onClick={() => { map.current?.remove(); map.current = null; setMapStatus("leaflet"); }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-serif text-xs transition-all hover:brightness-125"
+          style={{ background: "hsla(30,30%,12%,0.85)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(4px)" }}
+          title="Switch to Lite Mode (Leaflet)"
+        >
+          🍃 Lite Mode
+        </button>
       </div>
 
       {/* Mobile: compact bottom bar */}
