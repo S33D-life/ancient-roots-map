@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
@@ -6,7 +6,7 @@ import TetolBridge from "@/components/TetolBridge";
 import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import councilSplashFire from "@/assets/council-splash-fire.png";
+import CanopyEntrance from "@/components/CanopyEntrance";
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 
 const councilRooms = [
@@ -42,32 +42,13 @@ const councilRooms = [
 
 const CouncilOfLifePage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false);
+  const [showEntrance, setShowEntrance] = useState(true);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fadeTimer = setTimeout(() => setFadeOut(true), 3000);
-    const hideTimer = setTimeout(() => setShowSplash(false), 4000);
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
-    };
-  }, []);
+  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
 
-  if (showSplash) {
-    return (
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-1000 ${fadeOut ? "opacity-0" : "opacity-100"}`}
-        style={{ backgroundColor: "hsl(25, 30%, 8%)" }}
-      >
-        <img
-          src={councilSplashFire}
-          alt="Council of Life"
-          className="max-w-2xl w-[90%] rounded-xl shadow-2xl animate-scale-in"
-        />
-      </div>
-    );
+  if (showEntrance) {
+    return <CanopyEntrance onComplete={handleEntranceComplete} />;
   }
 
   if (isFullscreen && activeRoom) {
