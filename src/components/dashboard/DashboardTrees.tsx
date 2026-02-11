@@ -8,6 +8,7 @@ import PhotoImport from "@/components/PhotoImport";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
 import { useToast } from "@/hooks/use-toast";
+import { extractExifDate } from "@/utils/exifDate";
 
 interface Tree {
   id: string;
@@ -50,6 +51,10 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
         reader.readAsDataURL(file);
       });
       toast({ title: "Analyzing image…", description: "Extracting what3words address" });
+
+      // Extract EXIF date from photo
+      const exifDate = await extractExifDate(file);
+
       const { data, error } = await supabase.functions.invoke('extract-what3words-from-image', { body: { imageData: base64 } });
       if (error) throw error;
       if (!data.success) {
@@ -69,6 +74,7 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
         latitude: coords?.lat ?? null,
         longitude: coords?.lng ?? null,
         photoData: base64,
+        photoDate: exifDate ?? null,
       }));
       toast({ title: "Tree data ready 🌳", description: "Opening the Atlas to add your Ancient Friend" });
       navigate("/map?addTree=true");

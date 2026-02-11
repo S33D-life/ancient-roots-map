@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { extractExifDate } from "@/utils/exifDate";
 import { getMapStyle } from "@/config/mapbox";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [transitionDir, setTransitionDir] = useState<"forward" | "back">("forward");
   const [isDragging, setIsDragging] = useState(false);
   const [extractingPhoto, setExtractingPhoto] = useState(false);
+  const [photoDate, setPhotoDate] = useState<string | null>(null);
   const { toast } = useToast();
   const dragCounter = useRef(0);
 
@@ -70,6 +72,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setLng(initLng);
       setAdjustMode(false);
       setSavedTreeId(null);
+      setPhotoDate(null);
     }
   }, [open]);
 
@@ -217,6 +220,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         reader.readAsDataURL(file);
       });
 
+      // Extract EXIF date from photo
+      const exifDate = await extractExifDate(file);
+      if (exifDate) {
+        setPhotoDate(exifDate);
+        toast({ title: "Photo date found", description: new Date(exifDate).toLocaleDateString() });
+      }
+
       toast({ title: "Analyzing image…", description: "Extracting what3words address from photo" });
 
       const { data, error } = await supabase.functions.invoke('extract-what3words-from-image', {
@@ -293,6 +303,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         longitude: lng,
         estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
         created_by: user.id,
+        ...(photoDate ? { created_at: photoDate } : {}),
       }).select('id').single();
 
       if (error) throw error;
