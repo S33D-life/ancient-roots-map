@@ -1124,10 +1124,6 @@ const GalleryPage = () => {
 
           <TabsContent value="staff-room" className="space-y-8">
             {/* Staff Room Window Banner */}
-            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
-              <img src={staffRoomWindow} alt="The Staff Room" className="w-full h-auto object-contain" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
 
             {/* Sacred Spiral of 36 — Toggle */}
             <div className="mb-12">
