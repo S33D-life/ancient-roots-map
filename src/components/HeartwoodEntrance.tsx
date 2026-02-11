@@ -50,8 +50,8 @@ const HeartwoodEntrance = ({ onComplete }: HeartwoodEntranceProps) => {
     let animId: number;
     let embers: Ember[] = [];
     let startTime = performance.now();
-    const DURATION = 3200; // total animation time ms
-    const RING_COUNT = 18;
+    const DURATION = 5200; // slower, meditative pacing
+    const RING_COUNT = 28;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -82,7 +82,7 @@ const HeartwoodEntrance = ({ onComplete }: HeartwoodEntranceProps) => {
     };
 
     // Pre-seed embers
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 60; i++) {
       const e = spawnEmber();
       e.life = Math.random() * e.maxLife * 0.5;
       embers.push(e);
