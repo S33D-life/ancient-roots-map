@@ -636,7 +636,7 @@ const GalleryPage = () => {
             className="max-h-[70vh] md:max-h-full md:h-full w-auto md:w-full object-contain md:object-cover animate-fade-in"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-          <AmanitaFlush position="bottom" />
+          <div className="hidden md:block"><AmanitaFlush position="bottom" /></div>
         </div>
       </div>
     );
@@ -654,7 +654,7 @@ const GalleryPage = () => {
 
         {/* Mushrooms & Moss — dissolve after 3.3s */}
         <div
-          className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none hidden md:block"
           style={{
             animation: 'mushroomDissolve 1.2s ease-out 3.3s forwards',
           }}
