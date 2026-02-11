@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Loader2, Leaf, ImagePlus, X, Share2, Lock, Trash2, Sprout,
+  Plus, Loader2, Leaf, ImagePlus, X, Share2, Lock, Trash2, Sprout, Sun,
 } from "lucide-react";
 
 interface Plant {
@@ -44,7 +43,6 @@ const Greenhouse = () => {
   const fetchPlants = async (uid: string | null) => {
     setLoading(true);
     try {
-      // Fetch user's own plants
       if (uid) {
         const { data } = await supabase
           .from("greenhouse_plants")
@@ -53,8 +51,6 @@ const Greenhouse = () => {
           .order("created_at", { ascending: false });
         setPlants((data as Plant[]) || []);
       }
-
-      // Fetch community shared plants
       const { data: shared } = await supabase
         .from("greenhouse_plants")
         .select("*")
@@ -90,86 +86,214 @@ const Greenhouse = () => {
   const displayPlants = viewMode === "mine" ? plants : communityPlants;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
-            <Sprout className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl md:text-2xl font-serif text-primary">🌿 Greenhouse</h2>
-            <p className="text-xs text-muted-foreground font-serif">Your houseplants & saplings</p>
-          </div>
-        </div>
-        {userId && (
-          <Button onClick={() => setAddOpen(true)} size="sm" className="font-serif text-xs tracking-wider gap-1.5">
-            <Plus className="h-3 w-3" />
-            Add Plant
-          </Button>
-        )}
-      </div>
+    <div className="relative min-h-[60vh]">
+      {/* Ambient daylight gradient background */}
+      <div
+        className="absolute inset-0 -z-10 rounded-2xl overflow-hidden"
+        style={{
+          background: `
+            radial-gradient(ellipse at 30% 20%, hsla(90, 40%, 85%, 0.4) 0%, transparent 50%),
+            radial-gradient(ellipse at 70% 80%, hsla(140, 30%, 80%, 0.3) 0%, transparent 50%),
+            linear-gradient(180deg, hsla(80, 25%, 95%, 0.9) 0%, hsla(90, 20%, 92%, 0.8) 50%, hsla(100, 15%, 88%, 0.7) 100%)
+          `,
+        }}
+      />
 
-      {/* View toggle */}
-      <div className="flex gap-2">
-        <Button
-          variant={viewMode === "mine" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setViewMode("mine")}
-          className="font-serif text-xs tracking-wider gap-1.5"
-        >
-          <Lock className="h-3 w-3" />
-          My Plants ({plants.length})
-        </Button>
-        <Button
-          variant={viewMode === "community" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setViewMode("community")}
-          className="font-serif text-xs tracking-wider gap-1.5"
-        >
-          <Share2 className="h-3 w-3" />
-          Community ({communityPlants.length})
-        </Button>
-      </div>
-
-      {/* Plant grid */}
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
-      ) : displayPlants.length === 0 ? (
+      {/* Glass panel frame */}
+      <div
+        className="relative rounded-2xl overflow-hidden"
+        style={{
+          border: '1px solid hsla(90, 30%, 70%, 0.4)',
+          boxShadow: '0 4px 30px hsla(90, 20%, 40%, 0.08), inset 0 1px 0 hsla(60, 40%, 95%, 0.5)',
+        }}
+      >
+        {/* Header — warm wood shelf */}
         <div
-          className="rounded-xl border border-dashed border-primary/30 p-12 text-center"
-          style={{ background: "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.06), transparent 70%)" }}
+          className="px-6 py-5"
+          style={{
+            background: 'linear-gradient(180deg, hsla(30, 35%, 88%, 0.95) 0%, hsla(35, 30%, 85%, 0.9) 100%)',
+            borderBottom: '1px solid hsla(30, 30%, 70%, 0.3)',
+          }}
         >
-          <Leaf className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-          <p className="text-muted-foreground font-serif mb-2">
-            {viewMode === "mine"
-              ? userId
-                ? "No plants yet. Add your first houseplant or sapling!"
-                : "Log in to start your greenhouse."
-              : "No shared plants yet. Be the first to share!"}
-          </p>
-          {viewMode === "mine" && userId && (
-            <Button variant="outline" size="sm" onClick={() => setAddOpen(true)} className="font-serif text-xs">
-              <Plus className="h-3 w-3 mr-1" />
-              Add Plant
-            </Button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <motion.div
+                animate={{ rotate: [0, 3, -3, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, hsla(120, 35%, 65%, 0.25), hsla(90, 40%, 75%, 0.2))',
+                  border: '1px solid hsla(120, 30%, 60%, 0.3)',
+                  boxShadow: '0 2px 8px hsla(120, 30%, 50%, 0.1)',
+                }}
+              >
+                <Sprout className="h-5 w-5" style={{ color: 'hsl(120, 35%, 45%)' }} />
+              </motion.div>
+              <div>
+                <h2 className="text-xl font-serif tracking-wide" style={{ color: 'hsl(30, 30%, 25%)' }}>
+                  Greenhouse
+                </h2>
+                <p className="text-xs font-serif tracking-wider" style={{ color: 'hsl(30, 20%, 50%)' }}>
+                  Your houseplants &amp; saplings
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Daylight indicator */}
+              <motion.div
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                style={{
+                  background: 'hsla(45, 60%, 90%, 0.6)',
+                  border: '1px solid hsla(45, 50%, 75%, 0.3)',
+                }}
+              >
+                <Sun className="h-3 w-3" style={{ color: 'hsl(40, 70%, 50%)' }} />
+                <span className="text-[10px] font-serif tracking-widest" style={{ color: 'hsl(40, 40%, 40%)' }}>
+                  DAYLIGHT
+                </span>
+              </motion.div>
+
+              {userId && (
+                <Button
+                  onClick={() => setAddOpen(true)}
+                  size="sm"
+                  className="font-serif text-xs tracking-wider gap-1.5 rounded-xl shadow-sm"
+                  style={{
+                    background: 'linear-gradient(135deg, hsl(120, 30%, 50%), hsl(140, 35%, 45%))',
+                    color: 'hsl(0, 0%, 100%)',
+                    border: '1px solid hsla(120, 25%, 55%, 0.5)',
+                  }}
+                >
+                  <Plus className="h-3 w-3" />
+                  Add Plant
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* View toggle — frosted glass tabs */}
+        <div className="px-6 py-3" style={{ background: 'hsla(90, 20%, 93%, 0.7)' }}>
+          <div
+            className="inline-flex rounded-xl p-1 gap-1"
+            style={{
+              background: 'hsla(90, 15%, 88%, 0.6)',
+              border: '1px solid hsla(90, 20%, 80%, 0.4)',
+            }}
+          >
+            <button
+              onClick={() => setViewMode("mine")}
+              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
+              style={{
+                background: viewMode === "mine" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
+                color: viewMode === "mine" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
+                boxShadow: viewMode === "mine" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
+              }}
+            >
+              <Leaf className="h-3 w-3" />
+              My Plants ({plants.length})
+            </button>
+            <button
+              onClick={() => setViewMode("community")}
+              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
+              style={{
+                background: viewMode === "community" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
+                color: viewMode === "community" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
+                boxShadow: viewMode === "community" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
+              }}
+            >
+              <Share2 className="h-3 w-3" />
+              Community ({communityPlants.length})
+            </button>
+          </div>
+        </div>
+
+        {/* Plant grid — breathing space */}
+        <div className="px-6 py-6" style={{ background: 'hsla(90, 15%, 95%, 0.5)' }}>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Loader2 className="h-6 w-6" style={{ color: 'hsl(120, 30%, 55%)' }} />
+              </motion.div>
+              <p className="text-xs font-serif tracking-wider" style={{ color: 'hsl(90, 20%, 55%)' }}>
+                Tending the greenhouse…
+              </p>
+            </div>
+          ) : displayPlants.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl p-12 text-center"
+              style={{
+                background: `
+                  radial-gradient(ellipse at 50% 80%, hsla(120, 30%, 85%, 0.3) 0%, transparent 60%),
+                  hsla(0, 0%, 100%, 0.4)
+                `,
+                border: '1px dashed hsla(120, 25%, 65%, 0.4)',
+              }}
+            >
+              <motion.div
+                animate={{ y: [0, -4, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Leaf className="h-12 w-12 mx-auto mb-4" style={{ color: 'hsla(120, 25%, 65%, 0.4)' }} />
+              </motion.div>
+              <p className="font-serif text-sm mb-1" style={{ color: 'hsl(30, 20%, 40%)' }}>
+                {viewMode === "mine"
+                  ? userId
+                    ? "A quiet space, ready for growth."
+                    : "Log in to start your greenhouse."
+                  : "No shared plants yet. Be the first to share!"}
+              </p>
+              <p className="text-xs mb-4" style={{ color: 'hsl(90, 15%, 55%)' }}>
+                {viewMode === "mine" && userId && "Add your first houseplant or sapling to begin."}
+              </p>
+              {viewMode === "mine" && userId && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAddOpen(true)}
+                  className="font-serif text-xs rounded-xl"
+                  style={{
+                    borderColor: 'hsla(120, 25%, 60%, 0.4)',
+                    color: 'hsl(120, 30%, 40%)',
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Plant
+                </Button>
+              )}
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              <AnimatePresence mode="popLayout">
+                {displayPlants.map((plant, i) => (
+                  <motion.div
+                    key={plant.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
+                  >
+                    <PlantCard
+                      plant={plant}
+                      isOwner={plant.user_id === userId}
+                      onToggleShare={() => toggleShare(plant)}
+                      onDelete={() => deletePlant(plant.id)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           )}
         </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {displayPlants.map((plant) => (
-            <PlantCard
-              key={plant.id}
-              plant={plant}
-              isOwner={plant.user_id === userId}
-              onToggleShare={() => toggleShare(plant)}
-              onDelete={() => deletePlant(plant.id)}
-            />
-          ))}
-        </div>
-      )}
+      </div>
 
       {userId && (
         <AddPlantDialog
@@ -183,7 +307,7 @@ const Greenhouse = () => {
   );
 };
 
-/* ---------- Plant Card ---------- */
+/* ---------- Plant Card — glass terracotta pot ---------- */
 
 const PlantCard = ({
   plant,
@@ -196,53 +320,97 @@ const PlantCard = ({
   onToggleShare: () => void;
   onDelete: () => void;
 }) => (
-  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/40 transition-colors">
-    <div className="aspect-square relative bg-secondary/20">
+  <div
+    className="rounded-2xl overflow-hidden group transition-all duration-500"
+    style={{
+      background: 'hsla(0, 0%, 100%, 0.65)',
+      border: '1px solid hsla(90, 25%, 75%, 0.4)',
+      boxShadow: '0 2px 12px hsla(90, 20%, 40%, 0.06)',
+    }}
+  >
+    {/* Image area — soft rounded container */}
+    <div className="aspect-[4/3] relative overflow-hidden" style={{ background: 'hsla(90, 15%, 90%, 0.5)' }}>
       {plant.photo_url ? (
         <img
           src={plant.photo_url}
           alt={plant.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           loading="lazy"
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
-          <Leaf className="h-10 w-10 text-muted-foreground/20" />
+          <motion.div
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Leaf className="h-10 w-10" style={{ color: 'hsla(120, 20%, 70%, 0.4)' }} />
+          </motion.div>
         </div>
       )}
       {plant.is_shared && (
-        <Badge className="absolute top-2 right-2 text-[9px] bg-primary/80 font-serif tracking-wider">
-          Shared
-        </Badge>
+        <div
+          className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-serif tracking-widest flex items-center gap-1"
+          style={{
+            background: 'hsla(0, 0%, 100%, 0.85)',
+            color: 'hsl(120, 30%, 40%)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid hsla(120, 25%, 70%, 0.3)',
+          }}
+        >
+          <Share2 className="h-2.5 w-2.5" />
+          SHARED
+        </div>
       )}
+      {/* Soft bottom gradient for text readability */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-12 pointer-events-none"
+        style={{
+          background: 'linear-gradient(transparent, hsla(0, 0%, 100%, 0.4))',
+        }}
+      />
     </div>
-    <CardContent className="p-3">
-      <h4 className="font-serif text-sm text-primary truncate">{plant.name}</h4>
+
+    {/* Info — warm wood-toned card bottom */}
+    <div className="p-3.5" style={{ background: 'linear-gradient(180deg, hsla(0, 0%, 100%, 0.3), hsla(30, 20%, 95%, 0.3))' }}>
+      <h4 className="font-serif text-sm truncate" style={{ color: 'hsl(30, 25%, 25%)' }}>
+        {plant.name}
+      </h4>
       {plant.species && (
-        <p className="text-[11px] text-muted-foreground italic truncate">{plant.species}</p>
+        <p className="text-[11px] italic truncate mt-0.5" style={{ color: 'hsl(90, 15%, 50%)' }}>
+          {plant.species}
+        </p>
       )}
       {isOwner && (
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/30">
+        <div
+          className="flex items-center justify-between mt-2.5 pt-2.5"
+          style={{ borderTop: '1px solid hsla(90, 20%, 80%, 0.4)' }}
+        >
           <button
             onClick={onToggleShare}
-            className="text-[10px] text-muted-foreground hover:text-primary transition-colors font-serif flex items-center gap-1"
+            className="text-[10px] font-serif flex items-center gap-1 transition-colors duration-200"
+            style={{ color: 'hsl(90, 20%, 50%)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(120, 35%, 40%)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 20%, 50%)')}
           >
             {plant.is_shared ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
             {plant.is_shared ? "Make Private" : "Share"}
           </button>
           <button
             onClick={onDelete}
-            className="text-[10px] text-muted-foreground hover:text-destructive transition-colors"
+            className="text-[10px] transition-colors duration-200 p-1 rounded-lg"
+            style={{ color: 'hsl(90, 15%, 60%)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(0, 60%, 50%)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 15%, 60%)')}
           >
             <Trash2 className="h-3 w-3" />
           </button>
         </div>
       )}
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 );
 
-/* ---------- Add Plant Dialog ---------- */
+/* ---------- Add Plant Dialog — glass greenhouse panel ---------- */
 
 const AddPlantDialog = ({
   open,
@@ -317,25 +485,45 @@ const AddPlantDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border max-w-md p-0">
+      <DialogContent
+        className="max-w-md p-0 rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, hsla(80, 25%, 95%, 0.98), hsla(90, 20%, 92%, 0.98))',
+          border: '1px solid hsla(90, 25%, 78%, 0.5)',
+          boxShadow: '0 20px 60px hsla(90, 20%, 20%, 0.15), 0 1px 3px hsla(0, 0%, 0%, 0.04)',
+        }}
+      >
+        {/* Warm wood accent bar */}
         <div
-          className="h-0.5"
-          style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent)" }}
+          className="h-1"
+          style={{
+            background: 'linear-gradient(90deg, hsla(120, 30%, 60%, 0.3), hsl(120, 35%, 55%), hsla(120, 30%, 60%, 0.3))',
+          }}
         />
+
         <div className="px-6 pt-5 pb-0">
           <DialogHeader>
-            <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-              <span className="text-2xl">🌱</span> Add Plant
+            <DialogTitle className="font-serif text-xl tracking-wide flex items-center gap-2.5" style={{ color: 'hsl(30, 25%, 25%)' }}>
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{
+                  background: 'hsla(120, 30%, 85%, 0.5)',
+                  border: '1px solid hsla(120, 25%, 70%, 0.3)',
+                }}
+              >
+                <Sprout className="h-4 w-4" style={{ color: 'hsl(120, 35%, 45%)' }} />
+              </div>
+              Add Plant
             </DialogTitle>
-            <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
+            <p className="text-xs font-serif tracking-wider mt-1" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Log a houseplant or sapling in your greenhouse
             </p>
           </DialogHeader>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-2">
+        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-3">
           <div className="space-y-1.5">
-            <Label className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
+            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Name *
             </Label>
             <Input
@@ -344,12 +532,17 @@ const AddPlantDialog = ({
               placeholder="e.g. Kitchen Fern"
               maxLength={100}
               required
-              className="font-serif"
+              className="font-serif rounded-xl"
+              style={{
+                background: 'hsla(0, 0%, 100%, 0.7)',
+                borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                color: 'hsl(30, 20%, 25%)',
+              }}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
+            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Species
             </Label>
             <Input
@@ -357,30 +550,38 @@ const AddPlantDialog = ({
               onChange={(e) => setSpecies(e.target.value.slice(0, 100))}
               placeholder="e.g. Nephrolepis exaltata"
               maxLength={100}
-              className="font-serif italic"
+              className="font-serif italic rounded-xl"
+              style={{
+                background: 'hsla(0, 0%, 100%, 0.7)',
+                borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                color: 'hsl(30, 20%, 25%)',
+              }}
             />
           </div>
 
-          {/* Photo */}
+          {/* Photo upload */}
           <div className="space-y-1.5">
-            <Label className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
+            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Photo
             </Label>
             {previewUrl ? (
-              <div className="relative rounded-lg overflow-hidden border border-border">
+              <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid hsla(90, 20%, 80%, 0.5)' }}>
                 <img src={previewUrl} alt="Preview" className="w-full h-40 object-cover" />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-2 right-2 h-7 w-7"
+                  className="absolute top-2 right-2 h-7 w-7 rounded-lg"
                   onClick={() => { setPreviewUrl(null); setPhotoUrl(null); }}
                 >
                   <X className="h-4 w-4" />
                 </Button>
                 {uploading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/60">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <div
+                    className="absolute inset-0 flex items-center justify-center"
+                    style={{ background: 'hsla(0, 0%, 100%, 0.7)', backdropFilter: 'blur(4px)' }}
+                  >
+                    <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(120, 30%, 50%)' }} />
                   </div>
                 )}
               </div>
@@ -388,10 +589,22 @@ const AddPlantDialog = ({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full rounded-lg border-2 border-dashed border-border/50 hover:border-primary/40 transition-colors p-6 text-center"
+                className="w-full rounded-xl p-6 text-center transition-all duration-300"
+                style={{
+                  border: '2px dashed hsla(120, 25%, 70%, 0.4)',
+                  background: 'hsla(120, 20%, 95%, 0.3)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'hsla(120, 30%, 55%, 0.5)';
+                  e.currentTarget.style.background = 'hsla(120, 25%, 92%, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'hsla(120, 25%, 70%, 0.4)';
+                  e.currentTarget.style.background = 'hsla(120, 20%, 95%, 0.3)';
+                }}
               >
-                <ImagePlus className="h-6 w-6 mx-auto mb-2 text-muted-foreground/40" />
-                <p className="text-xs text-muted-foreground font-serif">Click to upload a photo</p>
+                <ImagePlus className="h-6 w-6 mx-auto mb-2" style={{ color: 'hsla(120, 20%, 65%, 0.5)' }} />
+                <p className="text-xs font-serif" style={{ color: 'hsl(90, 15%, 55%)' }}>Click to upload a photo</p>
               </button>
             )}
             <input
@@ -405,7 +618,7 @@ const AddPlantDialog = ({
 
           {/* Notes */}
           <div className="space-y-1.5">
-            <Label className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
+            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Notes
             </Label>
             <Input
@@ -413,15 +626,39 @@ const AddPlantDialog = ({
               onChange={(e) => setNotes(e.target.value.slice(0, 500))}
               placeholder="Any notes about this plant..."
               maxLength={500}
-              className="font-serif"
+              className="font-serif rounded-xl"
+              style={{
+                background: 'hsla(0, 0%, 100%, 0.7)',
+                borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                color: 'hsl(30, 20%, 25%)',
+              }}
             />
           </div>
 
-          <div className="flex gap-2 pt-1">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="font-serif text-xs">
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="font-serif text-xs rounded-xl"
+              style={{
+                borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                color: 'hsl(90, 15%, 45%)',
+                background: 'hsla(0, 0%, 100%, 0.5)',
+              }}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || uploading} className="flex-1 font-serif text-xs tracking-wider gap-1.5">
+            <Button
+              type="submit"
+              disabled={loading || uploading}
+              className="flex-1 font-serif text-xs tracking-wider gap-1.5 rounded-xl"
+              style={{
+                background: 'linear-gradient(135deg, hsl(120, 30%, 50%), hsl(140, 35%, 45%))',
+                color: 'hsl(0, 0%, 100%)',
+                border: '1px solid hsla(120, 25%, 55%, 0.5)',
+              }}
+            >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sprout className="h-3 w-3" />}
               {uploading ? "Uploading..." : "Add Plant"}
             </Button>
