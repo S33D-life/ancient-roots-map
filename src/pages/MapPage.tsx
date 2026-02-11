@@ -79,9 +79,9 @@ const MapPage = () => {
 
   return (
     <div className="fixed inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
-      <Header />
-      {/* Map always renders — provides instant spatial context */}
+      {/* Map fills the entire viewport — Header overlays on top */}
       <Map initialView={selectedView} initialSpecies={selectedSpecies} />
+      <Header />
 
       {/* Landing overlay — fades to reveal map beneath */}
       {showLanding && (
