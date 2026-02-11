@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf, Search, MapPin, BookOpen, BarChart3, Loader2 } from "lucide-react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TetolMenuProps {
   open: boolean;
@@ -38,17 +39,60 @@ const treeItems = [
   },
 ];
 
+const STATIC_PAGES = [
+  { id: "page-atlas", title: "Ancient Friends Atlas", subtitle: "Map of ancient trees", icon: MapPin, route: "/map" },
+  { id: "page-library", title: "HeARTwood Library", subtitle: "Rooms & scrolls", icon: BookOpen, route: "/library" },
+  { id: "page-council", title: "Council of Life", subtitle: "Community council", icon: Leaf, route: "/council-of-life" },
+  { id: "page-dream", title: "yOur Golden Dream", subtitle: "Vision & offerings", icon: Sparkles, route: "/golden-dream" },
+  { id: "page-dashboard", title: "My Grove (Hearth)", subtitle: "Dashboard & profile", icon: Sprout, route: "/dashboard" },
+  { id: "page-groves", title: "Groves & Projects", subtitle: "Tree projects", icon: TreeDeciduous, route: "/groves" },
+];
+
 const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [treeResults, setTreeResults] = useState<{ id: string; name: string; species: string }[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (open) {
       requestAnimationFrame(() => setVisible(true));
     } else {
       setVisible(false);
+      setSearchQuery("");
+      setTreeResults([]);
     }
   }, [open]);
+
+  // Search trees from DB
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setTreeResults([]);
+      return;
+    }
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      const { data } = await supabase
+        .from("trees")
+        .select("id, name, species")
+        .or(`name.ilike.%${searchQuery}%,species.ilike.%${searchQuery}%`)
+        .limit(5);
+      setTreeResults(data || []);
+      setSearchLoading(false);
+    }, 300);
+  }, [searchQuery]);
+
+  const filteredPages = searchQuery.trim()
+    ? STATIC_PAGES.filter(
+        (p) =>
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   if (!open) return null;
 
@@ -93,11 +137,75 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
           TETOL
         </h1>
         <p
-          className="text-[10px] md:text-xs font-serif tracking-[0.35em] mb-8 text-center uppercase"
+          className="text-[10px] md:text-xs font-serif tracking-[0.35em] mb-4 text-center uppercase"
           style={{ color: "hsl(var(--muted-foreground))" }}
         >
           The Ethereal Tree of Life
         </p>
+
+        {/* Search bar */}
+        <div className="w-72 md:w-80 mb-6 relative" onClick={(e) => e.stopPropagation()}>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "hsl(var(--muted-foreground))" }} />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search trees, pages…"
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm font-serif bg-background/20 backdrop-blur-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+              style={{ borderColor: "hsl(var(--border) / 0.4)" }}
+            />
+            {searchLoading && (
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin" style={{ color: "hsl(var(--primary))" }} />
+            )}
+          </div>
+
+          {/* Search results */}
+          {searchQuery.trim() && (filteredPages.length > 0 || treeResults.length > 0) && (
+            <div className="absolute top-full mt-2 w-full rounded-xl border shadow-xl overflow-hidden z-50" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border) / 0.4)" }}>
+              {filteredPages.length > 0 && (
+                <div className="p-2">
+                  <p className="text-[10px] font-serif tracking-widest uppercase px-2 py-1" style={{ color: "hsl(var(--muted-foreground))" }}>Pages</p>
+                  {filteredPages.map((page) => {
+                    const Icon = page.icon;
+                    return (
+                      <button
+                        key={page.id}
+                        onClick={(e) => handleItemClick(page.route, e)}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-primary/10 transition-colors"
+                      >
+                        <Icon className="w-4 h-4 shrink-0" style={{ color: "hsl(var(--primary))" }} />
+                        <div>
+                          <p className="text-sm font-serif" style={{ color: "hsl(var(--foreground))" }}>{page.title}</p>
+                          <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>{page.subtitle}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {treeResults.length > 0 && (
+                <div className="p-2 border-t" style={{ borderColor: "hsl(var(--border) / 0.3)" }}>
+                  <p className="text-[10px] font-serif tracking-widest uppercase px-2 py-1" style={{ color: "hsl(var(--muted-foreground))" }}>Trees</p>
+                  {treeResults.map((tree) => (
+                    <button
+                      key={tree.id}
+                      onClick={(e) => handleItemClick(`/tree/${tree.id}`, e)}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-primary/10 transition-colors"
+                    >
+                      <TreeDeciduous className="w-4 h-4 shrink-0" style={{ color: "hsl(80 35% 50%)" }} />
+                      <div>
+                        <p className="text-sm font-serif" style={{ color: "hsl(var(--foreground))" }}>{tree.name}</p>
+                        <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>{tree.species}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Tree visualization */}
         <div className="relative flex flex-col items-center w-64 md:w-72">
