@@ -1128,11 +1128,11 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="greenhouse" className="space-y-6">
+            <Greenhouse />
             <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
               <img src={greenhouseWindow} alt="Greenhouse" className="w-full h-auto object-contain" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
-            <Greenhouse />
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">
