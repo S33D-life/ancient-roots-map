@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { MAPBOX_TOKEN } from "@/config/mapbox";
+import { getMapStyle } from "@/config/mapbox";
 import { escapeHtml } from "@/utils/escapeHtml";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,8 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, MapPin, ExternalLink } from "lucide-react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 interface TreeProject {
   id: string;
@@ -38,8 +38,7 @@ const GrovesPage = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapToken, setMapToken] = useState<string>(MAPBOX_TOKEN);
+  const map = useRef<maplibregl.Map | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filterSpecies, setFilterSpecies] = useState<string>('all');
   const [filterScope, setFilterScope] = useState<string>('all');
@@ -64,24 +63,22 @@ const GrovesPage = () => {
 
 
   useEffect(() => {
-    if (!mapContainer.current || map.current || !mapToken) return;
+    if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = mapToken;
-    
-    map.current = new mapboxgl.Map({
+    map.current = new maplibregl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/outdoors-v12",
+      style: getMapStyle() as any,
       center: [-98, 39],
       zoom: 3,
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    map.current.addControl(new maplibregl.NavigationControl(), "top-right");
 
     return () => {
       map.current?.remove();
       map.current = null;
     };
-  }, [mapToken]);
+  }, []);
 
   // Filter projects based on search and filters
   const filteredProjects = projects.filter((project) => {
@@ -128,7 +125,7 @@ const GrovesPage = () => {
           box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         `;
 
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
           <div style="padding: 8px;">
             <h3 style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(project.name)}</h3>
             <p style="font-size: 12px; margin-bottom: 4px;">${escapeHtml(project.description || "")}</p>
@@ -136,7 +133,7 @@ const GrovesPage = () => {
           </div>
         `);
 
-        new mapboxgl.Marker(el)
+        new maplibregl.Marker({ element: el })
           .setLngLat([project.longitude, project.latitude])
           .setPopup(popup)
           .addTo(map.current!);
