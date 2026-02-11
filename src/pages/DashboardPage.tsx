@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, LayoutDashboard, Archive, Trophy, ScrollText, Users } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -269,12 +269,9 @@ const DashboardPage = () => {
   }
 
   const TAB_ITEMS = [
-    { value: "overview", label: "Overview", icon: LayoutDashboard },
     { value: "legend", label: "Legend", icon: ScrollText },
-    { value: "wanderers", label: "Wanderers", icon: Users },
     { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
     { value: "leaderboard", label: "Leaderboard", icon: Trophy },
-    { value: "vault", label: "Vault", icon: Archive },
     { value: "profile", label: "Settings", icon: Settings },
   ];
 
@@ -319,7 +316,7 @@ const DashboardPage = () => {
             </p>
           </div>
 
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs defaultValue="legend" className="space-y-6">
             {/* Tab navigation — scrollable on mobile */}
             <TabsList className="w-full justify-start bg-card/50 backdrop-blur border border-border/50 rounded-xl p-1 overflow-x-auto flex-nowrap">
               {TAB_ITEMS.map((tab) => (
@@ -339,23 +336,23 @@ const DashboardPage = () => {
               ))}
             </TabsList>
 
-            <TabsContent value="overview">
-              <DashboardOverview
-                treeCount={trees.length}
-                wishlistCount={wishlistCount}
-                plantCount={plantCount}
-                offeringCount={offeringCount}
-              />
-            </TabsContent>
             <TabsContent value="legend">
               {user && <PersonalLegend userId={user.id} />}
-            </TabsContent>
-            <TabsContent value="wanderers">
-              {user && <DashboardWanderers userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="pod">
               <div className="space-y-10">
+                {/* Section: Wanderers */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-5 h-5 text-accent" />
+                    <h3 className="font-serif text-lg text-accent tracking-wide">Wanderers</h3>
+                  </div>
+                  {user && <DashboardWanderers userId={user.id} />}
+                </div>
+
+                <div className="border-t border-border/30" />
+
                 {/* Section: My Trees */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
@@ -404,15 +401,22 @@ const DashboardPage = () => {
                   </div>
                   <Greenhouse />
                 </div>
+
+                <div className="border-t border-border/30" />
+
+                {/* Section: Vault */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Archive className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg text-primary tracking-wide">Heartwood Vault</h3>
+                  </div>
+                  {user && <DashboardVault userId={user.id} />}
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="leaderboard">
               <DashboardLeaderboard currentUserId={user?.id} />
-            </TabsContent>
-
-            <TabsContent value="vault">
-              {user && <DashboardVault userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="profile">
