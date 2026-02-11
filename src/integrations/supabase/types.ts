@@ -110,6 +110,27 @@ export type Database = {
           },
         ]
       }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       greenhouse_plants: {
         Row: {
           created_at: string
@@ -145,6 +166,95 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      grove_companions: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_id: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invite_links: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          uses_count: number
+        }
+        Insert: {
+          code?: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      offering_tags: {
+        Row: {
+          created_at: string
+          id: string
+          offering_id: string
+          tagged_by: string
+          tagged_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offering_id: string
+          tagged_by: string
+          tagged_user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offering_id?: string
+          tagged_by?: string
+          tagged_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offering_tags_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       offerings: {
         Row: {
@@ -196,23 +306,29 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           full_name: string | null
           id: string
+          is_discoverable: boolean
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id: string
+          is_discoverable?: boolean
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
+          is_discoverable?: boolean
           updated_at?: string
         }
         Relationships: []

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, ImagePlus, X, Sparkles, Search, Music, ExternalLink, Play, Pause } from "lucide-react";
+import { Loader2, Camera, ImagePlus, X, Sparkles, Search, Music, ExternalLink, Play, Pause, UserPlus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -64,6 +67,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
+  const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
+  const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
+  const [tagQuery, setTagQuery] = useState("");
+  const tagTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cfg = typeConfig[type];
 
@@ -190,7 +197,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
         }
       }
 
-      const { error } = await supabase.from("offerings").insert({
+      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
         tree_id: treeId,
         type,
         title: title.trim(),
@@ -199,8 +206,19 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
         nft_link: type === "nft" ? nftLink.trim() || null : null,
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
-      });
+      }).select("id").single();
       if (error) throw error;
+
+      // Save tags
+      if (taggedUsers.length > 0 && insertedOffering) {
+        await supabase.from("offering_tags").insert(
+          taggedUsers.map((t) => ({
+            offering_id: insertedOffering.id,
+            tagged_user_id: t.id,
+            tagged_by: user.id,
+          }))
+        );
+      }
 
       toast({
         title: `${cfg.singular} added! ✨`,
@@ -216,6 +234,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
       setMediaUrl("");
       setNftLink("");
       setSealedByStaff("");
+      setTaggedUsers([]);
       clearSelectedFile();
       onOpenChange(false);
     } catch (err: any) {
@@ -501,6 +520,60 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
             <p className="text-[10px] text-right text-muted-foreground/40">
               {content.length} / 5000
             </p>
+          </div>
+
+          {/* Tag Fellow Wanderers */}
+          <div className="space-y-2">
+            <Label className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
+              <UserPlus className="w-3 h-3 inline mr-1" /> Tag Wanderers
+            </Label>
+            {taggedUsers.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {taggedUsers.map((u) => (
+                  <Badge key={u.id} variant="secondary" className="gap-1 text-[10px] pr-1">
+                    <Avatar className="h-4 w-4">
+                      <AvatarImage src={u.avatar_url || undefined} />
+                      <AvatarFallback className="text-[8px]">{(u.full_name || "?")[0]}</AvatarFallback>
+                    </Avatar>
+                    {u.full_name || "Wanderer"}
+                    <button type="button" className="ml-0.5 hover:text-destructive" onClick={() => setTaggedUsers((prev) => prev.filter((p) => p.id !== u.id))}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+              <Input
+                value={tagQuery}
+                onChange={(e) => {
+                  setTagQuery(e.target.value);
+                  if (tagTimerRef.current) clearTimeout(tagTimerRef.current);
+                  tagTimerRef.current = setTimeout(() => searchTags(e.target.value), 350);
+                }}
+                placeholder="Search wanderers to tag..."
+                className="pl-9 text-xs font-serif h-8"
+              />
+            </div>
+            {tagResults.length > 0 && (
+              <div className="max-h-32 overflow-y-auto rounded-lg border border-border/50 divide-y divide-border/30 bg-card">
+                {tagResults.filter((r) => !taggedUsers.some((t) => t.id === r.id)).map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className="flex items-center gap-2 w-full p-2 hover:bg-primary/5 text-left"
+                    onClick={() => { setTaggedUsers((prev) => [...prev, r]); setTagQuery(""); clearTagResults(); }}
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={r.avatar_url || undefined} />
+                      <AvatarFallback className="text-[8px]">{(r.full_name || "?")[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs font-serif">{r.full_name || "Wanderer"}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sealed by Staff */}
