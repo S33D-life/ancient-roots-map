@@ -1142,18 +1142,9 @@ const GalleryPage = () => {
 
           <TabsContent value="staff-room" className="space-y-8">
             {/* Staff Room Window Banner */}
-            <div className="relative rounded-xl overflow-hidden h-56 md:h-72 mb-8">
-              <img src={staffRoomWindow} alt="The Staff Room" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-              <div className="relative z-10 flex flex-col items-center justify-end h-full pb-6 text-center px-4">
-                <h2 className="text-2xl md:text-3xl font-serif font-bold text-mystical mb-2">The Staff Room</h2>
-                <p className="text-foreground/80 max-w-2xl mx-auto text-sm">
-                  144 hand-crafted staffs, each a unique companion for the Ancient Friends game.
-                </p>
-                <p className="text-foreground/60 max-w-xl mx-auto text-xs mt-1 italic">
-                  The first 36 form a sacred spiral — one for each founding species — a living model of the spiral of trees you'll meet on the journey.
-                </p>
-              </div>
+            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
+              <img src={staffRoomWindow} alt="The Staff Room" className="w-full h-auto object-contain" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
 
             {/* Sacred Spiral of 36 — Toggle */}
@@ -1429,15 +1420,9 @@ const GalleryPage = () => {
 
           <TabsContent value="ledger" className="space-y-6">
             {/* Ledger Window Banner */}
-            <div className="relative rounded-xl overflow-hidden border border-primary/20">
-              <img
-                src={councilLedgerWindow}
-                alt="Council of Life Ledger"
-                className="w-full h-40 md:h-56 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent flex items-end justify-center pb-5">
-                <h2 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg tracking-wide">Council of Life Ledger</h2>
-              </div>
+            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
+              <img src={councilLedgerWindow} alt="Council of Life Ledger" className="w-full h-auto object-contain" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
 
             {/* Council of Life Window */}
@@ -1651,13 +1636,9 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="greenhouse" className="space-y-6">
-            <div className="relative rounded-xl overflow-hidden border border-primary/20 max-w-sm mx-auto">
-              <img
-                src={greenhouseWindow}
-                alt="Greenhouse"
-                className="w-full h-32 md:h-40 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
+              <img src={greenhouseWindow} alt="Greenhouse" className="w-full h-auto object-contain" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
             <Greenhouse />
           </TabsContent>
