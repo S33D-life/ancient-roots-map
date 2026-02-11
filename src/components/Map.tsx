@@ -88,6 +88,9 @@ interface Tree {
 const GROVE_SOURCE_ID = 'grove-boundary-source';
 const ROOT_THREADS_SOURCE = 'root-threads-source';
 const ROOT_THREADS_LAYER = 'root-threads-layer';
+const CREATOR_PATHS_SOURCE = 'creator-paths-source';
+const CREATOR_PATHS_LAYER = 'creator-paths-layer';
+const CREATOR_PATHS_GLOW_LAYER = 'creator-paths-glow-layer';
 
 // Max distance (km) for root thread connections
 const ROOT_THREAD_MAX_KM = 80;
@@ -722,19 +725,19 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         source: ROOT_THREADS_SOURCE,
         minzoom: 5,
         paint: {
-          'line-color': 'hsla(42, 75%, 50%, 0.5)',
+          'line-color': 'hsla(220, 15%, 65%, 0.4)',
           'line-width': [
             'interpolate', ['linear'], ['zoom'],
-            5, 0.3,
-            10, 1,
-            14, 2,
+            5, 0.2,
+            10, 0.8,
+            14, 1.5,
           ],
           'line-opacity': [
             'interpolate', ['linear'], ['zoom'],
             5, 0,
-            7, 0.15,
-            10, 0.35,
-            14, 0.5,
+            7, 0.1,
+            10, 0.25,
+            14, 0.4,
           ],
           'line-dasharray': [6, 4],
         },
@@ -758,6 +761,181 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       }
     };
   }, [filteredTrees]);
+
+  // Draw golden Creator's Paths — journeys between trees where users left offerings
+  useEffect(() => {
+    const m = map.current;
+    if (!m || mapStatus !== 'ready') return;
+
+    const drawCreatorPaths = async () => {
+      // Clean up existing
+      if (m.getLayer(CREATOR_PATHS_GLOW_LAYER)) m.removeLayer(CREATOR_PATHS_GLOW_LAYER);
+      if (m.getLayer(CREATOR_PATHS_LAYER)) m.removeLayer(CREATOR_PATHS_LAYER);
+      if (m.getSource(CREATOR_PATHS_SOURCE)) m.removeSource(CREATOR_PATHS_SOURCE);
+
+      // Fetch offerings with tree locations, grouped by creator
+      const { data: offerings, error } = await supabase
+        .from('offerings')
+        .select('tree_id, created_by, created_at')
+        .not('created_by', 'is', null)
+        .order('created_at', { ascending: true });
+
+      if (error || !offerings || offerings.length === 0) return;
+
+      // Build a tree lookup from our current trees
+      const treeLookup: Record<string, Tree> = {};
+      trees.forEach((t) => { treeLookup[t.id] = t; });
+
+      // Group offerings by creator in chronological order
+      const byCreator: Record<string, string[]> = {};
+      offerings.forEach((o) => {
+        if (!o.created_by) return;
+        if (!byCreator[o.created_by]) byCreator[o.created_by] = [];
+        // Only add if the tree has coordinates and isn't already the last in the sequence
+        const last = byCreator[o.created_by];
+        if (treeLookup[o.tree_id] && (last.length === 0 || last[last.length - 1] !== o.tree_id)) {
+          last.push(o.tree_id);
+        }
+      });
+
+      // Build graceful curved line features for each creator's path
+      const features: GeoJSON.Feature[] = [];
+      const isCurrentUser = (id: string) => id === userId;
+
+      Object.entries(byCreator).forEach(([creatorId, treeIds]) => {
+        if (treeIds.length < 2) return;
+        const coords: [number, number][] = [];
+        treeIds.forEach((tid) => {
+          const t = treeLookup[tid];
+          if (t) coords.push([t.longitude, t.latitude]);
+        });
+        if (coords.length < 2) return;
+
+        // Create a smooth bezier-like path by adding midpoints with slight offsets
+        const smoothCoords: [number, number][] = [coords[0]];
+        for (let i = 0; i < coords.length - 1; i++) {
+          const [x1, y1] = coords[i];
+          const [x2, y2] = coords[i + 1];
+          // Add a curved midpoint offset perpendicular to the line
+          const mx = (x1 + x2) / 2;
+          const my = (y1 + y2) / 2;
+          const dx = x2 - x1;
+          const dy = y2 - y1;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          // Offset perpendicular — alternating sides for organic feel
+          const offset = dist * 0.08 * (i % 2 === 0 ? 1 : -1);
+          const perpX = -dy / (dist || 1) * offset;
+          const perpY = dx / (dist || 1) * offset;
+          smoothCoords.push([mx + perpX, my + perpY]);
+          smoothCoords.push(coords[i + 1]);
+        }
+
+        features.push({
+          type: 'Feature',
+          properties: {
+            isWalked: isCurrentUser(creatorId) ? 1 : 0,
+            creatorId,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: smoothCoords,
+          },
+        });
+      });
+
+      if (features.length === 0) return;
+
+      m.addSource(CREATOR_PATHS_SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features },
+      });
+
+      // Glow layer underneath
+      m.addLayer({
+        id: CREATOR_PATHS_GLOW_LAYER,
+        type: 'line',
+        source: CREATOR_PATHS_SOURCE,
+        minzoom: 3,
+        paint: {
+          'line-color': [
+            'case',
+            ['==', ['get', 'isWalked'], 1],
+            'hsla(42, 90%, 55%, 0.25)',
+            'hsla(220, 20%, 70%, 0.15)',
+          ],
+          'line-width': [
+            'interpolate', ['linear'], ['zoom'],
+            3, 2,
+            8, 6,
+            14, 10,
+          ],
+          'line-blur': [
+            'interpolate', ['linear'], ['zoom'],
+            3, 2,
+            8, 4,
+            14, 6,
+          ],
+          'line-opacity': [
+            'interpolate', ['linear'], ['zoom'],
+            3, 0.15,
+            6, 0.3,
+            10, 0.5,
+          ],
+        },
+      });
+
+      // Main path line
+      m.addLayer({
+        id: CREATOR_PATHS_LAYER,
+        type: 'line',
+        source: CREATOR_PATHS_SOURCE,
+        minzoom: 3,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': [
+            'case',
+            ['==', ['get', 'isWalked'], 1],
+            'hsl(42, 90%, 58%)',
+            'hsl(220, 15%, 72%)',
+          ],
+          'line-width': [
+            'interpolate', ['linear'], ['zoom'],
+            3, 0.5,
+            8, 1.5,
+            14, 3,
+          ],
+          'line-opacity': [
+            'interpolate', ['linear'], ['zoom'],
+            3, 0.3,
+            6, 0.5,
+            10, 0.75,
+            14, 0.9,
+          ],
+        },
+      });
+    };
+
+    if (m.isStyleLoaded()) {
+      drawCreatorPaths();
+    } else {
+      m.once('style.load', drawCreatorPaths);
+    }
+
+    return () => {
+      try {
+        if (m.getStyle()) {
+          if (m.getLayer(CREATOR_PATHS_GLOW_LAYER)) m.removeLayer(CREATOR_PATHS_GLOW_LAYER);
+          if (m.getLayer(CREATOR_PATHS_LAYER)) m.removeLayer(CREATOR_PATHS_LAYER);
+          if (m.getSource(CREATOR_PATHS_SOURCE)) m.removeSource(CREATOR_PATHS_SOURCE);
+        }
+      } catch {
+        // Map already removed
+      }
+    };
+  }, [trees, userId, mapStatus]);
 
   const handleLocationSelect = (lat: number, lng: number, what3words: string) => {
     if (map.current) {
