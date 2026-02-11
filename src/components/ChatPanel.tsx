@@ -77,7 +77,9 @@ const ChatPanel = () => {
   };
 
   // Don't render if not authenticated
-  if (!userId) return null;
+  // Hide on map page — chat is accessible via TETOL menu instead
+  const isMapPage = window.location.pathname === '/map';
+  if (!userId || isMapPage) return null;
 
   return (
     <>
