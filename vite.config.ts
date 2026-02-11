@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
+    include: ["maplibre-gl"],
     esbuildOptions: {
       target: "es2022",
     },
