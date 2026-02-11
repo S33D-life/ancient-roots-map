@@ -1054,12 +1054,48 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
       {/* Loading / Error overlay (kept non-occluding) */}
       {mapStatus !== "ready" && (
-        <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 pointer-events-none" style={{ background: "transparent" }}>
+        <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 pointer-events-none" style={{
+          background: mapStatus === "loading"
+            ? 'radial-gradient(ellipse at center, hsla(30, 20%, 8%, 0.95) 0%, hsla(30, 20%, 6%, 0.98) 100%)'
+            : 'transparent',
+        }}>
           {mapStatus === "loading" && (
-            <>
-              <div className="w-10 h-10 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: 'hsl(var(--primary))', borderRightColor: 'hsl(var(--primary) / 0.25)' }} />
-              <p className="font-serif text-sm text-foreground">Loading map…</p>
-            </>
+            <div className="flex flex-col items-center gap-5 animate-fade-in">
+              <div className="relative">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{
+                  background: 'radial-gradient(circle, hsla(120, 40%, 25%, 0.4), transparent 70%)',
+                }}>
+                  <span className="text-3xl" style={{ filter: 'drop-shadow(0 0 8px hsla(42, 80%, 50%, 0.4))' }}>🌳</span>
+                </div>
+                <div className="absolute inset-[-8px] rounded-full border-2 border-transparent animate-spin" style={{
+                  borderTopColor: 'hsl(42, 80%, 55%)',
+                  borderRightColor: 'hsla(42, 80%, 55%, 0.15)',
+                  animationDuration: '2.5s',
+                }} />
+                <div className="absolute inset-[-16px] rounded-full border border-transparent animate-spin" style={{
+                  borderTopColor: 'hsla(120, 50%, 45%, 0.3)',
+                  animationDuration: '4s',
+                  animationDirection: 'reverse',
+                }} />
+              </div>
+              <div className="flex flex-col items-center gap-1.5">
+                <p className="font-serif text-sm tracking-wide" style={{ color: 'hsl(42, 70%, 60%)' }}>
+                  Awakening the Atlas…
+                </p>
+                <p className="font-serif text-xs" style={{ color: 'hsla(42, 40%, 55%, 0.6)' }}>
+                  Preparing ancient cartography
+                </p>
+              </div>
+              <div className="flex gap-1.5 mt-1">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="w-1.5 h-1.5 rounded-full animate-pulse" style={{
+                    background: 'hsl(42, 70%, 55%)',
+                    animationDelay: `${i * 0.4}s`,
+                    animationDuration: '1.2s',
+                  }} />
+                ))}
+              </div>
+            </div>
           )}
           {mapStatus === "error" && (
             <div className="flex flex-col items-center gap-3 pointer-events-auto px-6 text-center max-w-sm">
