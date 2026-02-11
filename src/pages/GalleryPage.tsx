@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
+import HeartwoodEntrance from "@/components/HeartwoodEntrance";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,7 +96,6 @@ const GalleryPage = () => {
   const navigate = useNavigate();
   const roomParam = (roomPathParam && VALID_ROOMS.includes(roomPathParam)) ? roomPathParam : searchParams.get("room");
   const [showSplash, setShowSplash] = useState(!roomParam);
-  const [splashFading, setSplashFading] = useState(false);
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
 
@@ -227,13 +227,7 @@ const GalleryPage = () => {
     nft_link: "",
   });
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSplashFading(true);
-      setTimeout(() => setShowSplash(false), 800);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Splash is now handled by HeartwoodEntrance component
 
   useEffect(() => {
     fetchTrees();
@@ -643,19 +637,7 @@ const GalleryPage = () => {
 
   if (showSplash) {
     return (
-      <div 
-        className={`fixed inset-0 z-50 flex items-center justify-center bg-black transition-opacity duration-700 ${splashFading ? 'opacity-0' : 'opacity-100'}`}
-      >
-        <div className="relative w-full h-full overflow-hidden flex items-center justify-center bg-black">
-          <img 
-            src={(() => { const h = new Date().getHours(); return h >= 18 || h < 6 ? heartwoodSplashNight : heartwoodSplashDay; })()} 
-            alt="Welcome to Heartwood, A Library of Love" 
-            className="max-h-[70vh] md:max-h-full md:h-full w-auto md:w-full object-contain md:object-cover animate-fade-in"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-          <div className="hidden md:block"><AmanitaFlush position="bottom" /></div>
-        </div>
-      </div>
+      <HeartwoodEntrance onComplete={() => setShowSplash(false)} />
     );
   }
 
