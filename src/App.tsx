@@ -3,7 +3,10 @@ import { Navigate } from "react-router-dom";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
-const AtlasRedirect = () => <Navigate to="/map" replace />;
+const AtlasRedirect = () => {
+  const search = window.location.search;
+  return <Navigate to={`/map${search}`} replace />;
+};
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
