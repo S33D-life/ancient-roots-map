@@ -57,11 +57,13 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isExtracting, setIsExtracting] = useState(false);
 
-  // Single-photo legacy states (kept for backward compat with inline species edit after adding)
+  // Review mode states
   const [reviewMode, setReviewMode] = useState(false);
-  const [reviewEditId, setReviewEditId] = useState<string | null>(null);
+  const [reviewIndex, setReviewIndex] = useState(0);
   const [reviewSpeciesInput, setReviewSpeciesInput] = useState("");
+  const [reviewNameInput, setReviewNameInput] = useState("");
   const [reviewSaving, setReviewSaving] = useState(false);
+  const [reviewIdentified, setReviewIdentified] = useState<Set<string>>(new Set());
 
   const updateQueueItem = useCallback((index: number, updates: Partial<QueueItem>) => {
     setQueue(prev => prev.map((item, i) => i === index ? { ...item, ...updates } : item));
@@ -249,29 +251,38 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
     if (files.length > 0) handleMultiPhotoDrop(files);
   }, [handleMultiPhotoDrop]);
 
-  const unknownTrees = trees.filter(t => !t.species || t.species.toLowerCase() === 'unknown');
+  // Filter unknown trees, excluding ones already identified in this session
+  const unknownTrees = trees.filter(t => 
+    (!t.species || t.species.toLowerCase() === 'unknown') && !reviewIdentified.has(t.id)
+  );
 
-  const handleReviewSave = useCallback(async (treeId: string) => {
-    if (!reviewSpeciesInput.trim()) return;
+  const currentReviewTree = reviewMode ? unknownTrees[reviewIndex] : null;
+
+  const handleReviewSave = useCallback(async () => {
+    if (!currentReviewTree || !reviewSpeciesInput.trim()) return;
     setReviewSaving(true);
     try {
+      const newName = reviewNameInput.trim() || reviewSpeciesInput.trim();
       const { error } = await supabase.from('trees').update({
         species: reviewSpeciesInput.trim(),
-        name: reviewSpeciesInput.trim(),
-      }).eq('id', treeId);
+        name: newName,
+      }).eq('id', currentReviewTree.id);
       if (error) throw error;
-      toast({ title: "Species updated", description: reviewSpeciesInput.trim() });
-      setReviewEditId(null);
+      toast({ title: "✓ Identified", description: `${newName} — ${reviewSpeciesInput.trim()}` });
+      
+      // Mark as identified and advance
+      setReviewIdentified(prev => new Set(prev).add(currentReviewTree.id));
       setReviewSpeciesInput("");
-      window.location.reload();
+      setReviewNameInput("");
+      // reviewIndex stays the same since the identified tree drops out of unknownTrees
     } catch (err: any) {
       toast({ title: "Update failed", description: err.message, variant: "destructive" });
     } finally {
       setReviewSaving(false);
     }
-  }, [reviewSpeciesInput, toast]);
+  }, [currentReviewTree, reviewSpeciesInput, reviewNameInput, toast]);
 
-  const displayTrees = reviewMode ? unknownTrees : trees;
+  
 
   return (
     <div className="space-y-6">
@@ -299,7 +310,7 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
             <Button
               variant={reviewMode ? "mystical" : "outline"}
               size="sm"
-              onClick={() => { setReviewMode(!reviewMode); setReviewEditId(null); }}
+              onClick={() => { setReviewMode(!reviewMode); setReviewIndex(0); setReviewSpeciesInput(""); setReviewNameInput(""); setReviewIdentified(new Set()); }}
               className="font-serif text-xs gap-1.5"
             >
               <Search className="h-3.5 w-3.5" />
@@ -314,10 +325,13 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
       </div>
 
       {/* Review mode banner */}
-      {reviewMode && (
-        <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 text-center">
+      {reviewMode && unknownTrees.length > 0 && (
+        <div className="rounded-xl border border-accent/30 bg-accent/5 p-3 text-center">
           <p className="text-xs font-serif text-accent">
-            🔍 Showing <strong>{unknownTrees.length}</strong> Ancient Friend{unknownTrees.length !== 1 ? 's' : ''} with unknown species — tap the pencil to identify
+            🔍 <strong>{reviewIndex + 1}</strong> of <strong>{unknownTrees.length}</strong> to identify
+            {reviewIdentified.size > 0 && (
+              <span className="ml-2 text-muted-foreground">({reviewIdentified.size} done this session)</span>
+            )}
           </p>
         </div>
       )}
@@ -567,18 +581,127 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
         </div>
       )}
 
-      {/* Tree grid */}
+      {/* Tree grid or focused review */}
       {!hasQueue && (
-        displayTrees.length === 0 ? (
-          reviewMode ? (
+        reviewMode ? (
+          unknownTrees.length === 0 ? (
             <div className="rounded-xl border border-dashed border-accent/30 p-12 text-center">
               <Check className="w-12 h-12 mx-auto mb-3 text-accent/40" />
-              <p className="text-muted-foreground font-serif mb-3">All Ancient Friends have been identified! 🌿</p>
-              <Button variant="outline" size="sm" onClick={() => setReviewMode(false)} className="font-serif text-xs">
+              <p className="text-muted-foreground font-serif mb-3">
+                All Ancient Friends have been identified! 🌿
+                {reviewIdentified.size > 0 && (
+                  <span className="block text-xs mt-1 text-accent/60">{reviewIdentified.size} identified this session</span>
+                )}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => { setReviewMode(false); window.location.reload(); }} className="font-serif text-xs">
                 Back to all trees
               </Button>
             </div>
-          ) : (
+          ) : currentReviewTree ? (
+            <div className="rounded-xl border-2 border-accent/30 bg-card/60 backdrop-blur p-6 space-y-4 max-w-lg mx-auto">
+              {/* Tree info */}
+              <div className="text-center space-y-1">
+                <TreeDeciduous className="h-8 w-8 mx-auto text-accent/60" />
+                <h3 className="font-serif text-lg text-primary">{currentReviewTree.name}</h3>
+                {currentReviewTree.what3words && (
+                  <p className="text-xs text-muted-foreground">📍 {currentReviewTree.what3words}</p>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  Added {new Date(currentReviewTree.created_at).toLocaleDateString()}
+                </p>
+              </div>
+
+              {/* Species input */}
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-serif">Species</label>
+                <Input
+                  value={reviewSpeciesInput}
+                  onChange={(e) => setReviewSpeciesInput(e.target.value.slice(0, 200))}
+                  placeholder="e.g., English Oak, Yew, Beech…"
+                  className="h-9 text-sm font-serif"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && reviewSpeciesInput.trim()) {
+                      e.preventDefault();
+                      handleReviewSave();
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Name input */}
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-serif">Name <span className="text-muted-foreground/40">(optional)</span></label>
+                <Input
+                  value={reviewNameInput}
+                  onChange={(e) => setReviewNameInput(e.target.value.slice(0, 200))}
+                  placeholder="Leave blank to use species as name"
+                  className="h-9 text-sm font-serif"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && reviewSpeciesInput.trim()) {
+                      e.preventDefault();
+                      handleReviewSave();
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-1">
+                <Button
+                  variant="mystical"
+                  size="sm"
+                  className="flex-1 font-serif text-xs gap-1.5"
+                  disabled={reviewSaving || !reviewSpeciesInput.trim()}
+                  onClick={handleReviewSave}
+                >
+                  {reviewSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                  Identify & Next
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-serif text-xs gap-1"
+                  onClick={() => {
+                    if (reviewIndex < unknownTrees.length - 1) {
+                      setReviewIndex(reviewIndex + 1);
+                    } else {
+                      setReviewIndex(0);
+                    }
+                    setReviewSpeciesInput("");
+                    setReviewNameInput("");
+                  }}
+                >
+                  <SkipForward className="h-3 w-3" /> Skip
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-serif text-xs gap-1"
+                  onClick={() => navigate(`/tree/${currentReviewTree.id}`)}
+                >
+                  <Eye className="h-3 w-3" /> View
+                </Button>
+              </div>
+
+              {/* Navigation dots for small lists */}
+              {unknownTrees.length <= 10 && unknownTrees.length > 1 && (
+                <div className="flex justify-center gap-1.5 pt-1">
+                  {unknownTrees.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setReviewIndex(i); setReviewSpeciesInput(""); setReviewNameInput(""); }}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        i === reviewIndex ? 'bg-accent scale-125' : 'bg-border hover:bg-muted-foreground/30'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null
+        ) : (
+          trees.length === 0 ? (
             <div className="rounded-xl border border-dashed border-primary/30 p-12 text-center" style={{ background: "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.06), transparent 70%)" }}>
               <TreeDeciduous className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
               <p className="text-muted-foreground font-serif mb-3">No trees logged yet</p>
@@ -586,71 +709,26 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
                 Arrive on the Atlas
               </Button>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {trees.map((tree) => (
+                <Card
+                  key={tree.id}
+                  className="border-border/50 bg-card/40 backdrop-blur hover:border-primary/30 transition-colors cursor-pointer group"
+                  onClick={() => navigate(`/tree/${tree.id}`)}
+                >
+                  <CardContent className="p-4">
+                    <h3 className="font-serif text-sm text-primary group-hover:text-mystical transition-colors mb-1">{tree.name}</h3>
+                    <p className="text-xs text-muted-foreground italic">{tree.species}</p>
+                    {tree.what3words && <p className="text-xs text-muted-foreground mt-1">📍 {tree.what3words}</p>}
+                    <p className="text-[10px] text-muted-foreground mt-2">
+                      Added {new Date(tree.created_at).toLocaleDateString()}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displayTrees.map((tree) => (
-              <Card
-                key={tree.id}
-                className={`border-border/50 bg-card/40 backdrop-blur hover:border-primary/30 transition-colors cursor-pointer group ${
-                  reviewMode ? 'border-accent/20' : ''
-                }`}
-                onClick={() => {
-                  if (reviewEditId !== tree.id) navigate(`/tree/${tree.id}`);
-                }}
-              >
-                <CardContent className="p-4">
-                  <h3 className="font-serif text-sm text-primary group-hover:text-mystical transition-colors mb-1">{tree.name}</h3>
-
-                  {reviewMode && reviewEditId === tree.id ? (
-                    <div className="flex items-center gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-                      <Input
-                        value={reviewSpeciesInput}
-                        onChange={(e) => setReviewSpeciesInput(e.target.value.slice(0, 200))}
-                        placeholder="e.g., English Oak"
-                        className="h-7 text-xs font-serif flex-1"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') { e.preventDefault(); handleReviewSave(tree.id); }
-                          if (e.key === 'Escape') { setReviewEditId(null); }
-                        }}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        disabled={reviewSaving || !reviewSpeciesInput.trim()}
-                        onClick={() => handleReviewSave(tree.id)}
-                      >
-                        {reviewSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-xs text-muted-foreground italic">{tree.species}</p>
-                      {reviewMode && (
-                        <button
-                          className="text-accent hover:text-accent/80 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setReviewEditId(tree.id);
-                            setReviewSpeciesInput("");
-                          }}
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {tree.what3words && <p className="text-xs text-muted-foreground mt-1">📍 {tree.what3words}</p>}
-                  <p className="text-[10px] text-muted-foreground mt-2">
-                    Added {new Date(tree.created_at).toLocaleDateString()}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         )
       )}
     </div>
