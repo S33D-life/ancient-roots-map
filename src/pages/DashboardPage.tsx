@@ -263,11 +263,9 @@ const DashboardPage = () => {
     { value: "overview", label: "Overview", icon: LayoutDashboard },
     { value: "legend", label: "Legend", icon: ScrollText },
     { value: "wanderers", label: "Wanderers", icon: Users },
-    { value: "trees", label: "My Trees", icon: TreeDeciduous, count: trees.length },
+    { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
     { value: "leaderboard", label: "Leaderboard", icon: Trophy },
     { value: "vault", label: "Vault", icon: Archive },
-    { value: "wishlist", label: "Wishlist", icon: Star, count: wishlistCount },
-    { value: "seedpods", label: "Seed Pods", icon: Sprout, count: plantCount },
     { value: "profile", label: "Settings", icon: Settings },
   ];
 
@@ -347,15 +345,57 @@ const DashboardPage = () => {
               {user && <DashboardWanderers userId={user.id} />}
             </TabsContent>
 
-            <TabsContent value="trees">
-              <DashboardTrees
-                trees={trees}
-                isImporting={isImporting}
-                isExporting={isExporting}
-                importProgress={importProgress}
-                onImport={handleImport}
-                onExport={handleExport}
-              />
+            <TabsContent value="pod">
+              <div className="space-y-10">
+                {/* Section: My Trees */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <TreeDeciduous className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg text-primary tracking-wide">My Trees</h3>
+                    {trees.length > 0 && (
+                      <span className="text-xs bg-primary/15 text-primary rounded-full px-2 py-0.5 font-serif">{trees.length}</span>
+                    )}
+                  </div>
+                  <DashboardTrees
+                    trees={trees}
+                    isImporting={isImporting}
+                    isExporting={isExporting}
+                    importProgress={importProgress}
+                    onImport={handleImport}
+                    onExport={handleExport}
+                  />
+                </div>
+
+                <div className="border-t border-border/30" />
+
+                {/* Section: Wishlist */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Star className="w-5 h-5 text-accent" />
+                    <h3 className="font-serif text-lg text-accent tracking-wide">Wishlist</h3>
+                    {wishlistCount > 0 && (
+                      <span className="text-xs bg-accent/15 text-accent rounded-full px-2 py-0.5 font-serif">{wishlistCount}</span>
+                    )}
+                  </div>
+                  {user && (
+                    <DashboardWishlist userId={user.id} onCountChange={setWishlistCount} />
+                  )}
+                </div>
+
+                <div className="border-t border-border/30" />
+
+                {/* Section: Seed Pods */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sprout className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg text-primary tracking-wide">Seed Pods</h3>
+                    {plantCount > 0 && (
+                      <span className="text-xs bg-primary/15 text-primary rounded-full px-2 py-0.5 font-serif">{plantCount}</span>
+                    )}
+                  </div>
+                  <Greenhouse />
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="leaderboard">
@@ -364,16 +404,6 @@ const DashboardPage = () => {
 
             <TabsContent value="vault">
               {user && <DashboardVault userId={user.id} />}
-            </TabsContent>
-
-            <TabsContent value="wishlist">
-              {user && (
-                <DashboardWishlist userId={user.id} onCountChange={setWishlistCount} />
-              )}
-            </TabsContent>
-
-            <TabsContent value="seedpods">
-              <Greenhouse />
             </TabsContent>
 
             <TabsContent value="profile">
