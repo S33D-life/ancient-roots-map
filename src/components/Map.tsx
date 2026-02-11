@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams } from "react-router-dom";
@@ -18,6 +18,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
 import MapIdleNudge from "./MapIdleNudge";
+
+/* ── WebGL detection ── */
+function isWebGLSupported(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(canvas.getContext("webgl") || canvas.getContext("webgl2") || canvas.getContext("experimental-webgl"));
+  } catch { return false; }
+}
 
 type TimeOfDay = "dawn" | "day" | "dusk" | "night";
 
@@ -250,6 +258,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [mapError, setMapError] = useState<string>("");
+  const [debugInfo, setDebugInfo] = useState({ token: false, style: false, webgl: false, width: 0, height: 0, error: "" });
+  const [showDebug, setShowDebug] = useState(false);
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
@@ -401,45 +412,108 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     return filtered;
   }, [trees, viewMode, speciesFilter, groveScale, userId, userLocation]);
 
-  // Initialize map
+  // Initialize map with robust checks
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    const hasToken = !!MAPBOX_TOKEN && MAPBOX_TOKEN.startsWith("pk.");
+    const webgl = isWebGLSupported();
 
-    try {
-      const m = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: VINTAGE_MAP_STYLE,
-        center: [0, 20],
-        zoom: 2,
-        attributionControl: false,
-      });
-
-      m.on('load', () => {
-        setMapStatus("ready");
-        const c = m.getCenter();
-        setMapCenter({ lat: c.lat, lng: c.lng });
-      });
-      m.on('moveend', () => {
-        const c = m.getCenter();
-        setMapCenter({ lat: c.lat, lng: c.lng });
-      });
-      m.on('error', (e) => {
-        console.error('Mapbox error:', e);
-        setMapStatus("error");
-      });
-
-      m.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
-      m.addControl(new mapboxgl.AttributionControl({ compact: true }));
-
-      map.current = m;
-    } catch (err) {
-      console.error('Map initialization failed:', err);
+    if (!hasToken) {
+      console.warn("[Atlas] No valid Mapbox token found");
+      setMapError("Missing or invalid Mapbox token");
+      setDebugInfo(prev => ({ ...prev, token: false, error: "No valid token" }));
       setMapStatus("error");
+      return;
     }
 
-    return () => { map.current?.remove(); map.current = null; };
+    if (!webgl) {
+      console.warn("[Atlas] WebGL not supported");
+      setMapError("WebGL is not supported by your browser");
+      setDebugInfo(prev => ({ ...prev, webgl: false, error: "WebGL unsupported" }));
+      setMapStatus("error");
+      return;
+    }
+
+    setDebugInfo(prev => ({ ...prev, token: true, webgl: true }));
+
+    // Use rAF to ensure layout is settled before init
+    const rafId = requestAnimationFrame(() => {
+      const container = mapContainer.current;
+      if (!container) return;
+
+      const { width, height } = container.getBoundingClientRect();
+      setDebugInfo(prev => ({ ...prev, width, height }));
+
+      if (width === 0 || height === 0) {
+        console.warn(`[Atlas] Container has zero dimensions: ${width}×${height}`);
+        setMapError(`Map container has zero size (${width}×${height}). Layout may be collapsed.`);
+        setMapStatus("error");
+        return;
+      }
+
+      mapboxgl.accessToken = MAPBOX_TOKEN;
+
+      try {
+        const m = new mapboxgl.Map({
+          container,
+          style: VINTAGE_MAP_STYLE,
+          center: [0, 20],
+          zoom: 2,
+          attributionControl: false,
+          failIfMajorPerformanceCaveat: false,
+        });
+
+        m.on('load', () => {
+          setMapStatus("ready");
+          setDebugInfo(prev => ({ ...prev, style: true }));
+          const c = m.getCenter();
+          setMapCenter({ lat: c.lat, lng: c.lng });
+          // Force resize in case container changed during load
+          m.resize();
+        });
+        m.on('moveend', () => {
+          const c = m.getCenter();
+          setMapCenter({ lat: c.lat, lng: c.lng });
+        });
+        m.on('error', (e) => {
+          console.error('[Atlas] Mapbox error:', e);
+          const msg = (e as any)?.error?.message || (e as any)?.message || "Unknown map error";
+          setMapError(msg);
+          setDebugInfo(prev => ({ ...prev, error: msg }));
+          setMapStatus("error");
+        });
+
+        m.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+        m.addControl(new mapboxgl.AttributionControl({ compact: true }));
+
+        map.current = m;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('[Atlas] Map initialization failed:', msg);
+        setMapError(msg);
+        setDebugInfo(prev => ({ ...prev, error: msg }));
+        setMapStatus("error");
+      }
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      map.current?.remove();
+      map.current = null;
+    };
+  }, []);
+
+  // Resize map on visibility/tab changes
+  useEffect(() => {
+    const handleResize = () => { map.current?.resize(); };
+    const handleVisibility = () => { if (!document.hidden) map.current?.resize(); };
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
 
   // Handle deep-link params (w3w, lat/lng/zoom)
@@ -958,21 +1032,39 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             </>
           )}
           {mapStatus === "error" && (
-            <div className="flex flex-col items-center gap-3 pointer-events-auto px-6 text-center">
+            <div className="flex flex-col items-center gap-3 pointer-events-auto px-6 text-center max-w-sm">
               <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'hsl(0, 40%, 20%)', border: '1px solid hsl(0, 50%, 35%)' }}>
                 <span className="text-xl">🌿</span>
               </div>
               <p className="font-serif text-base" style={{ color: 'hsl(42, 60%, 55%)' }}>The Atlas could not awaken</p>
-              <p className="text-xs max-w-xs" style={{ color: 'hsl(42, 30%, 50%)' }}>
-                Map tiles failed to load. This may be a temporary network issue or a WebGL compatibility problem.
+              <p className="text-xs" style={{ color: 'hsl(42, 30%, 50%)' }}>
+                {mapError || "Map tiles failed to load. This may be a network issue or WebGL compatibility problem."}
               </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-2 px-5 py-2 rounded-lg font-serif text-sm transition-colors"
-                style={{ background: 'hsl(42, 60%, 25%)', color: 'hsl(42, 80%, 70%)', border: '1px solid hsl(42, 50%, 35%)' }}
-              >
-                Try Again
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-5 py-2 rounded-lg font-serif text-sm transition-colors"
+                  style={{ background: 'hsl(42, 60%, 25%)', color: 'hsl(42, 80%, 70%)', border: '1px solid hsl(42, 50%, 35%)' }}
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={() => setShowDebug(!showDebug)}
+                  className="px-3 py-2 rounded-lg font-serif text-xs transition-colors"
+                  style={{ background: 'hsl(0, 0%, 15%)', color: 'hsl(42, 30%, 60%)', border: '1px solid hsl(0, 0%, 25%)' }}
+                >
+                  Debug
+                </button>
+              </div>
+              {showDebug && (
+                <div className="mt-3 text-left text-[10px] font-mono p-3 rounded-lg w-full" style={{ background: 'hsl(0, 0%, 8%)', color: 'hsl(42, 30%, 55%)', border: '1px solid hsl(0, 0%, 20%)' }}>
+                  <p>token: {debugInfo.token ? "✓" : "✗"}</p>
+                  <p>style: {debugInfo.style ? "✓ loaded" : "✗ not loaded"}</p>
+                  <p>webgl: {debugInfo.webgl ? "✓" : "✗ unsupported"}</p>
+                  <p>container: {debugInfo.width}×{debugInfo.height}</p>
+                  <p>error: {debugInfo.error || "none"}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
