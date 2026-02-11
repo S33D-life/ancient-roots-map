@@ -24,6 +24,7 @@ const Header = () => {
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setTetolOpen(true);
   }, []);
 
@@ -225,7 +226,7 @@ const Header = () => {
               </Button>
             )}
             {/* Mobile TEOTAG logo — top right, opens TETOL menu directly */}
-            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={() => setTetolOpen(true)}>
+            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}>
               <img 
                 src={teotagLogo} 
                 alt="TEOTAG — Open navigation" 
