@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
+import RootsEntrance from "@/components/RootsEntrance";
 
 const MapPage = () => {
   const [searchParams] = useSearchParams();
@@ -13,6 +14,13 @@ const MapPage = () => {
 
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
+  const [showEntrance, setShowEntrance] = useState(true);
+
+  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+
+  if (showEntrance) {
+    return <RootsEntrance onComplete={handleEntranceComplete} />;
+  }
 
   return (
     <div className="fixed inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
