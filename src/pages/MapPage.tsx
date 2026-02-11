@@ -50,7 +50,7 @@ const MapPage = () => {
   const hasDeepLink = !!(paramW3w || paramLat || paramSpecies);
 
   const [splashPhase, setSplashPhase] = useState<"s33d" | "ancient" | "fading" | "done">(hasDeepLink ? "done" : "s33d");
-  const [showLanding, setShowLanding] = useState(!hasDeepLink);
+  const [showLanding, setShowLanding] = useState(false);
   const [landingFading, setLandingFading] = useState(false);
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
@@ -110,7 +110,7 @@ const MapPage = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
           </div>
 
-          <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
+          <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-16 pb-8 px-4">
             <Compass className="w-12 h-12 text-amber-400/80 mb-4 animate-fade-in" style={{ filter: 'drop-shadow(0 0 12px hsl(35 80% 40% / 0.5))' }} />
             <h1 className="text-4xl md:text-5xl font-serif text-amber-400/90 tracking-wider mb-2 text-center animate-fade-in" style={{ textShadow: '0 0 30px hsl(35 80% 30% / 0.5)', animationDelay: '0.1s' }}>
               ARBOREAL ATLAS
