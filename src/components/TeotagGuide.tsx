@@ -269,7 +269,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
       />
 
       {/* Panel */}
-      <div className="fixed right-0 top-0 bottom-0 z-[101] w-full max-w-md flex flex-col bg-card border-l border-border shadow-2xl animate-slide-in-right">
+      <div className="fixed right-0 top-0 bottom-0 z-[101] w-full max-w-md flex flex-col bg-card border-l border-border shadow-2xl animate-slide-in-right" style={{ backgroundColor: 'hsl(var(--card))' }}>
         {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b border-border/60">
           <img
