@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams } from "react-router-dom";
 import mapboxgl from "mapbox-gl";
@@ -248,6 +249,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   const [timeOfDay] = useState<TimeOfDay>(getTimeOfDay);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const atmosphere = TIME_ATMOSPHERES[timeOfDay];
+  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   // Get current user
@@ -730,8 +732,8 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
 
   return (
     <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
-      {/* Map canvas — rendered first so it sits at the bottom of the stacking order */}
-      <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
+      {/* Map canvas — no CSS filter on mobile to prevent WebGL rendering issues */}
+      <div ref={mapContainer} className="absolute inset-0 z-0" style={isMobile ? undefined : { filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
 
       {/* Loading / Error overlay */}
       {mapStatus !== "ready" && (
@@ -786,17 +788,16 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
 
       <ConversionStatus />
 
-      {/* Top bar: view toggle + filters + count */}
-      <Card className="absolute top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-10 bg-card/95 backdrop-blur border-border shadow-lg text-card-foreground">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 sm:p-3">
-          <Tabs value={viewMode} onValueChange={setViewMode}>
-            <TabsList className="bg-muted w-full sm:w-auto">
-              <TabsTrigger value="collective" className="flex-1 sm:flex-initial text-xs sm:text-sm">Collective</TabsTrigger>
-              <TabsTrigger value="personal" className="flex-1 sm:flex-initial text-xs sm:text-sm">Personal Groves</TabsTrigger>
-            </TabsList>
-          </Tabs>
-
-          <div className="flex items-center gap-2 justify-between sm:justify-start">
+      {/* Top bar — desktop: full toolbar, mobile: minimal floating pills */}
+      <div className="hidden md:block absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <Card className="bg-card/95 backdrop-blur border-border shadow-lg text-card-foreground">
+          <div className="flex items-center gap-3 p-3">
+            <Tabs value={viewMode} onValueChange={setViewMode}>
+              <TabsList className="bg-muted">
+                <TabsTrigger value="collective" className="text-sm">Collective</TabsTrigger>
+                <TabsTrigger value="personal" className="text-sm">Personal Groves</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <MapFilters
               speciesFilter={speciesFilter}
               onSpeciesChange={setSpeciesFilter}
@@ -805,19 +806,48 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
               treeCounts={treeCounts}
               totalTrees={trees.length}
             />
-
-            <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
               {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
-              {groveScale !== "all" && speciesFilter !== "all" && (
-                <span className="text-primary ml-1">({groveScale} grove)</span>
-              )}
             </span>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
-      {/* Time-of-day whisper */}
-      <div className="absolute top-[72px] right-4 z-10 animate-fade-in" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
+      {/* Mobile: single compact row beneath header */}
+      <div className="flex md:hidden absolute top-[52px] left-2 right-2 z-10 items-center gap-1.5">
+        <button
+          onClick={() => setViewMode(viewMode === 'collective' ? 'personal' : 'collective')}
+          className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-serif backdrop-blur-md border transition-colors"
+          style={{
+            background: 'hsla(30, 30%, 12%, 0.85)',
+            borderColor: 'hsla(42, 50%, 35%, 0.5)',
+            color: 'hsl(42, 70%, 65%)',
+          }}
+        >
+          {viewMode === 'collective' ? '🌍 All' : '🌿 Mine'}
+        </button>
+        <div className="shrink-0">
+          <MapFilters
+            speciesFilter={speciesFilter}
+            onSpeciesChange={setSpeciesFilter}
+            groveScale={groveScale}
+            onGroveScaleChange={setGroveScale}
+            treeCounts={treeCounts}
+            totalTrees={trees.length}
+          />
+        </div>
+        <span className="ml-auto text-[11px] font-serif px-2 py-1 rounded-full backdrop-blur-md"
+          style={{
+            background: 'hsla(30, 30%, 12%, 0.75)',
+            color: 'hsl(42, 50%, 55%)',
+          }}
+        >
+          {filteredTrees.length} trees
+        </span>
+      </div>
+
+      {/* Time-of-day whisper — desktop only */}
+      <div className="absolute top-[72px] right-4 z-10 animate-fade-in hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
         <span className="font-serif text-xs px-2.5 py-1 rounded-full" style={{
           background: 'hsla(30, 30%, 12%, 0.7)',
           color: 'hsla(42, 60%, 60%, 0.7)',
@@ -852,16 +882,18 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
         <TreeImportExport />
       </div>
 
-      {/* Mobile: minimal bottom bar with key actions */}
-      <div className="absolute bottom-2 left-2 right-2 z-10 flex md:hidden items-center gap-2">
-        <FindMeButton
-          autoOpen={autoAddTree}
-          onLocationFound={(lat, lng) => {
-            setUserLocation({ lat, lng });
-            map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
-          }}
-        />
-        <div className="ml-auto">
+      {/* Mobile: compact bottom bar */}
+      <div className="absolute bottom-3 left-2 right-2 z-10 flex md:hidden items-center gap-2">
+        <div className="shrink-0">
+          <FindMeButton
+            autoOpen={autoAddTree}
+            onLocationFound={(lat, lng) => {
+              setUserLocation({ lat, lng });
+              map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
+            }}
+          />
+        </div>
+        <div className="ml-auto shrink-0">
           <TreeRadio speciesFilter={speciesFilter} />
         </div>
       </div>
