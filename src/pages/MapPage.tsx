@@ -24,7 +24,7 @@ const MapPage = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[1]" style={{ background: "transparent" }}>
+    <div className="fixed inset-0 z-[10] bg-background">
       <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} />
       <Header />
     </div>

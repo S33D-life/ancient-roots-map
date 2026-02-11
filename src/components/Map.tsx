@@ -975,7 +975,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   // Leaflet fallback mode
   if (mapStatus === "leaflet") {
     return (
-      <div className="absolute inset-0 z-[1]" style={{ background: "transparent" }}>
+      <div className="absolute inset-0 z-[1] bg-background">
         <Suspense fallback={
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
@@ -988,9 +988,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   }
 
   return (
-    <div className="absolute inset-0 z-[1]" style={{ background: "transparent" }}>
+    <div className="absolute inset-0 z-[1] bg-background">
       {/* Map canvas */}
-      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: '#faf7f0' }} />
+      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: "hsl(var(--background))" }} />
 
       {/* Loading / Error overlay (kept non-occluding) */}
       {mapStatus !== "ready" && (
