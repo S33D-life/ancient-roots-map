@@ -295,7 +295,7 @@ const Hero = () => {
 
       {/* Ancient Friend reveal overlay — bottom left */}
       <div
-        className="absolute bottom-36 md:bottom-28 left-4 md:left-8 z-[3] transition-all duration-700 ease-out"
+        className="absolute bottom-56 md:bottom-28 left-4 md:left-8 z-[3] transition-all duration-700 ease-out"
         style={{
           opacity: isHovering ? 1 : 0,
           transform: isHovering ? 'translateY(0)' : 'translateY(8px)',
@@ -331,7 +331,7 @@ const Hero = () => {
       {/* Mobile: tap hint — always visible on small screens */}
       <Link
         to={`/tree/${currentFriend.treeId}`}
-        className="absolute bottom-36 left-4 right-4 z-[3] md:hidden"
+        className="absolute bottom-56 left-4 right-4 z-[3] md:hidden"
       >
         <div
           className="rounded-xl px-4 py-3 backdrop-blur-md border flex items-center gap-3"
