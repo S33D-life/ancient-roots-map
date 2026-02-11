@@ -768,7 +768,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   return (
     <div className="absolute inset-0 z-[1]" style={{ background: 'hsl(100 20% 10%)' }}>
       {/* Map canvas — no CSS filter on mobile to prevent WebGL rendering issues */}
-      <div ref={mapContainer} className="absolute inset-0 z-0" style={isMobile ? undefined : { filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
+      <div ref={mapContainer} className="absolute inset-0" style={isMobile ? { zIndex: 0 } : { zIndex: 0, filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
 
       {/* Loading / Error overlay */}
       {mapStatus !== "ready" && (
