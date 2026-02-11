@@ -729,7 +729,7 @@ const Map = ({ initialView, initialSpecies }: MapProps) => {
   };
 
   return (
-    <div className="relative w-full" style={{ height: '100dvh' }}>
+    <div className="relative w-full z-[1]" style={{ height: '100dvh', background: 'hsl(100 20% 10%)' }}>
       {/* Map canvas — rendered first so it sits at the bottom of the stacking order */}
       <div ref={mapContainer} className="absolute inset-0 z-0" style={{ filter: atmosphere.mapFilter, transition: 'filter 2s ease' }} />
 
