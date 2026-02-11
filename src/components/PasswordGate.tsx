@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
+// NOTE: This is a lightweight welcome gate, NOT a security boundary.
+// Real access control is enforced server-side via Supabase RLS policies.
+// The password is intentionally simple and client-side only.
 const PASSWORD = "Love";
 const STORAGE_KEY = "af-auth";
 
