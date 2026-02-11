@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart } from "lucide-react";
+import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import { useEffect, useState, useRef, useCallback } from "react";
@@ -59,13 +59,12 @@ const Header = () => {
     setIsDark(!isDark);
   };
 
-  // ⌘K shortcut opens guide on search tab
+  // ⌘K shortcut opens TETOL menu (which now contains search)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setGuideTab("search");
-        setGuideOpen(true);
+        setTetolOpen(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -144,12 +143,18 @@ const Header = () => {
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
-          {/* Left side: Search button (mobile) + Desktop TEOTAG logo */}
+          {/* Left side: Hearth button (mobile) + Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
-            {/* Mobile search button — top left */}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => { setGuideTab("search"); setGuideOpen(true); }} title="Search">
-              <Search className="w-5 h-5" />
-            </Button>
+            {/* Mobile Hearth button — top left */}
+            <Link to={user ? "/dashboard" : "/auth"} className="md:hidden flex items-center">
+              {user ? (
+                <img src={hearthImg} alt="Hearth" className="w-9 h-9 rounded-full object-cover border border-primary/30" />
+              ) : (
+                <Button variant="ghost" size="icon" title="Login">
+                  <Flame className="w-5 h-5 text-primary" />
+                </Button>
+              )}
+            </Link>
             {/* Desktop TEOTAG logo */}
             <div className="relative group hidden md:block">
               <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
