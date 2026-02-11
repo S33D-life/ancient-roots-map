@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2 } from "lucide-react";
 import {
   getSpiralStaffs,
   getGridStaffs,
@@ -101,6 +101,7 @@ const GalleryPage = () => {
   const { showEntrance: showSplash, dismissEntrance: dismissSplash } = useEntranceOnce("gallery", !roomParam);
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -734,8 +735,8 @@ const GalleryPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <div className="relative -mx-4 px-4 mb-8">
-            <div className="overflow-x-auto scrollbar-hide">
+          <div className="relative -mx-4 px-4 mb-8 flex items-center gap-2">
+            <div className="overflow-x-auto scrollbar-hide flex-1">
               <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-9 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
                 <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
                 <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
@@ -748,11 +749,35 @@ const GalleryPage = () => {
                 <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
               </TabsList>
             </div>
+            {/* Fullscreen toggle */}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="shrink-0 p-2 rounded-lg border border-border bg-card/80 text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
+              title={isFullscreen ? "Exit fullscreen" : "Fullscreen mode"}
+            >
+              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </button>
             {/* Scroll hint gradient - mobile only */}
-            <div className="absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-background/80 to-transparent pointer-events-none md:hidden" />
+            <div className="absolute top-0 right-10 bottom-0 w-12 bg-gradient-to-l from-background/80 to-transparent pointer-events-none md:hidden" />
           </div>
 
-          <div {...swipeHandlers} className="touch-pan-y">
+          <div
+            {...swipeHandlers}
+            className={isFullscreen
+              ? "fixed inset-0 z-50 bg-background overflow-y-auto touch-pan-y p-4 pt-16"
+              : "touch-pan-y"
+            }
+          >
+            {/* Fullscreen close button */}
+            {isFullscreen && (
+              <button
+                onClick={() => setIsFullscreen(false)}
+                className="fixed top-4 right-4 z-[60] p-2 rounded-lg border border-border bg-card/90 text-muted-foreground hover:text-foreground hover:bg-card transition-colors backdrop-blur-sm"
+                title="Exit fullscreen"
+              >
+                <Minimize2 className="h-5 w-5" />
+              </button>
+            )}
           {/* Music Room — Earth Radio powered by offerings */}
           <TabsContent value="music-room" className="space-y-6">
             <EarthRadioRoom />
