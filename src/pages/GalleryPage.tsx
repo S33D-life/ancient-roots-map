@@ -752,7 +752,7 @@ const GalleryPage = () => {
           </div>
 
           <div {...swipeHandlers} className="touch-pan-y">
-          {/* Music Room */}
+          {/* Music Room — now at /radio */}
           <TabsContent value="music-room" className="space-y-6">
             <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
               <CardHeader>
@@ -764,222 +764,11 @@ const GalleryPage = () => {
                   Tune into Tree Radio — a shuffled stream of songs offered to the ancient groves
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Hero artwork */}
-                <div className="relative rounded-xl overflow-hidden border border-primary/30 w-fit mx-auto">
-                  <img
-                    src={treeRadioArt}
-                    alt="Tree Radio"
-                    className="h-24 md:h-28 w-auto object-contain"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 text-center">
-                    <h3 className="text-lg md:text-xl font-serif text-primary tracking-wider" style={{ textShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}>
-                      Tree Radio
-                    </h3>
-                    <p className="text-xs text-foreground/70 font-serif mt-0.5">
-                      Every tree has a song. Tune in on the Arboreal Atlas.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-4">
-                    <h4 className="font-serif text-lg text-primary/90 tracking-wide">How it works</h4>
-                    <div className="space-y-3 text-sm text-foreground/70 font-serif leading-relaxed">
-                      <p>
-                        When visitors offer a song to an ancient tree, it becomes part of that species' 
-                        living soundtrack. Tree Radio shuffles all songs shared with a species into a 
-                        continuous stream.
-                      </p>
-                      <p>
-                        Select a species filter on the Arboreal Atlas and tap the 
-                        <span className="inline-flex items-center gap-1 mx-1 px-2 py-0.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs">
-                          <Music className="h-3 w-3" /> Tree Radio
-                        </span>
-                        button to start listening.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="font-serif text-lg text-primary/90 tracking-wide">Stations</h4>
-                    <div className="space-y-2">
-                      {["All Species", "Yew", "Oak", "Beech", "Ash", "Holly"].map((station) => (
-                        <div
-                          key={station}
-                          className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card/30"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
-                            <Music className="h-4 w-4 text-primary/70" />
-                          </div>
-                          <span className="font-serif text-sm text-foreground/80">{station} Radio</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* DJ Zambrezi's Song List */}
-                <div className="mt-6 p-5 rounded-xl border border-primary/20 bg-primary/5 backdrop-blur space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
-                      <Music className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-serif text-lg text-primary tracking-wide">The Zambrezi Wizard's Earth Radio</h4>
-                      <p className="text-xs text-muted-foreground font-serif">Songs to carry to the trees on your next visit</p>
-                    </div>
-                  </div>
-
-                  {/* Curated Picks */}
-                  <div className="space-y-2">
-                    <h5 className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Curated Picks</h5>
-                    {[
-                      { title: "Opening", artist: "Penguin Cafe", album: "Handfuls of Night", link: "https://music.apple.com/gb/album/opening/1600717991?i=1600717992", species: "All Species" },
-                      { title: "We All Come from God", artist: "Penguin Cafe", album: "Rain Before 7...", link: "https://music.apple.com/gb/album/we-all-come-from-god/1625918325?i=1625918336", species: "Oak" },
-                      { title: "Music for a Found Harmonium", artist: "Penguin Cafe Orchestra", album: "Broadcasting from Home", link: "https://music.apple.com/gb/album/music-for-a-found-harmonium/724033807?i=724033817", species: "Yew" },
-                      { title: "Air à Danser", artist: "Penguin Cafe Orchestra", album: "Signs of Life", link: "https://music.apple.com/gb/album/air-%C3%A0-danser/724017583?i=724017746", species: "Ash" },
-                      { title: "Solaris", artist: "Penguin Cafe", album: "The Imperfect Sea", link: "https://music.apple.com/gb/album/solaris/1209606498?i=1209606748", species: "Beech" },
-                    ].map((song, i) => (
-                      <a key={i} href={song.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-lg border border-border/40 bg-card/30 hover:bg-primary/10 hover:border-primary/30 transition-colors group">
-                        <span className="w-6 text-center text-xs text-muted-foreground font-serif">{i + 1}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-serif text-sm text-foreground/90 truncate group-hover:text-primary transition-colors">{song.title}</p>
-                          <p className="text-xs text-muted-foreground font-serif truncate">{song.artist} · {song.album}</p>
-                        </div>
-                        <Badge variant="outline" className="text-[10px] font-serif shrink-0">{song.species}</Badge>
-                        <LinkIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-                      </a>
-                    ))}
-                  </div>
-
-                  {/* Bird Tribe Playlist */}
-                  <div className="space-y-2 pt-2 border-t border-border/30">
-                    <button
-                      onClick={() => setShowBirdTribe(!showBirdTribe)}
-                      className="flex items-center gap-2 w-full text-left group"
-                    >
-                      <ChevronDown className={`h-4 w-4 text-primary transition-transform ${showBirdTribe ? 'rotate-0' : '-rotate-90'}`} />
-                      <h5 className="text-xs uppercase tracking-widest text-muted-foreground font-serif group-hover:text-primary transition-colors">
-                        Bird Tribe Playlist
-                      </h5>
-                      <span className="text-[10px] text-muted-foreground/50 font-serif ml-auto">
-                        {birdTribeSongs.length} songs
-                      </span>
-                    </button>
-                    {showBirdTribe && (
-                      <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-1">
-                        {birdTribeSongs.map((song, i) => (
-                          <a
-                            key={i}
-                            href="https://music.apple.com/gb/playlist/bird-tribe/pl.u-6mo4zkmU4ZzeVZ"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 hover:bg-primary/10 hover:border-primary/30 transition-colors group"
-                          >
-                            <span className="w-6 text-center text-[10px] text-muted-foreground/60 font-serif">{i + 1}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-serif text-sm text-foreground/80 truncate group-hover:text-primary transition-colors">{song.title}</p>
-                              <p className="text-xs text-muted-foreground font-serif truncate">{song.artist}</p>
-                            </div>
-                            <LinkIcon className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <p className="text-[11px] text-muted-foreground/60 font-serif italic text-center pt-2">
-                    Curated by The Zambrezi Wizard for Earth Radio — bring these songs as offerings on your next grove walk
-                  </p>
-                </div>
-
-                {/* My Saved Songs */}
-                <div className="mt-6 p-5 rounded-xl border border-primary/20 bg-card/40 backdrop-blur space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
-                        <Save className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-serif text-lg text-primary tracking-wide">My Saved Songs</h4>
-                        <p className="text-xs text-muted-foreground font-serif">Your personal grove walk soundtrack</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 font-serif text-xs"
-                      onClick={() => setShowSaveSongForm(!showSaveSongForm)}
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Song
-                    </Button>
-                  </div>
-
-                  {showSaveSongForm && (
-                    <div className="space-y-3 p-4 rounded-lg border border-border/40 bg-background/50">
-                      <Input
-                        placeholder="Song title"
-                        value={newSong.title}
-                        onChange={(e) => setNewSong(s => ({ ...s, title: e.target.value }))}
-                        className="text-sm"
-                      />
-                      <Input
-                        placeholder="Artist"
-                        value={newSong.artist}
-                        onChange={(e) => setNewSong(s => ({ ...s, artist: e.target.value }))}
-                        className="text-sm"
-                      />
-                      <Input
-                        placeholder="Link (optional)"
-                        value={newSong.link}
-                        onChange={(e) => setNewSong(s => ({ ...s, link: e.target.value }))}
-                        className="text-sm"
-                      />
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={addSavedSong} className="font-serif text-xs">Save Song</Button>
-                        <Button size="sm" variant="ghost" onClick={() => setShowSaveSongForm(false)} className="font-serif text-xs">Cancel</Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {savedSongs.length === 0 ? (
-                    <p className="text-sm text-muted-foreground/60 font-serif italic text-center py-4">
-                      No saved songs yet. Add songs you want to carry on your next grove walk.
-                    </p>
-                  ) : (
-                    <div className="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
-                      {savedSongs.map((song, i) => (
-                        <div key={song.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/30 bg-card/20 group">
-                          <span className="w-6 text-center text-[10px] text-muted-foreground/60 font-serif">{i + 1}</span>
-                          <div className="flex-1 min-w-0">
-                            {song.link ? (
-                              <a href={song.link} target="_blank" rel="noopener noreferrer" className="font-serif text-sm text-foreground/80 truncate block hover:text-primary transition-colors">
-                                {song.title}
-                              </a>
-                            ) : (
-                              <p className="font-serif text-sm text-foreground/80 truncate">{song.title}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground font-serif truncate">{song.artist}</p>
-                          </div>
-                          <button
-                            onClick={() => deleteSavedSong(song.id)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:text-destructive"
-                            title="Remove song"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* CTA to Atlas */}
-                <div className="flex justify-center gap-3 pt-4">
+              <CardContent className="flex flex-col items-center gap-4 py-8">
+                <p className="text-sm text-muted-foreground font-serif text-center max-w-md">
+                  The Music Room has moved to its own dedicated space. Visit Earth Radio for curated playlists, Bird Tribe songs, and your saved grove walk soundtrack.
+                </p>
+                <div className="flex gap-3">
                   <Button
                     onClick={() => window.location.href = "/radio"}
                     className="gap-2 font-serif tracking-wider"
@@ -990,7 +779,7 @@ const GalleryPage = () => {
                     }}
                   >
                     <Radio className="h-4 w-4" />
-                    Open Tree Radio
+                    Open Earth Radio
                   </Button>
                   <Button
                     onClick={() => window.location.href = "/map"}
