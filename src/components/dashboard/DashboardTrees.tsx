@@ -2,12 +2,13 @@ import { useState, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { TreeDeciduous, Upload, Download, Loader2, ImagePlus, MapPin, Eye } from "lucide-react";
+import { TreeDeciduous, Upload, Download, Loader2, ImagePlus, MapPin, Eye, Pencil, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PhotoImport from "@/components/PhotoImport";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 import { extractExifDate } from "@/utils/exifDate";
 
 interface Tree {
@@ -37,6 +38,9 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
   const [extractingPhoto, setExtractingPhoto] = useState(false);
   const [photoStatus, setPhotoStatus] = useState("");
   const [addedTree, setAddedTree] = useState<{ id: string; name: string } | null>(null);
+  const [editingSpecies, setEditingSpecies] = useState(false);
+  const [speciesInput, setSpeciesInput] = useState("Unknown");
+  const [savingSpecies, setSavingSpecies] = useState(false);
   const dragCounter = useRef(0);
 
   const handlePhotoDrop = useCallback(async (file: File) => {
@@ -154,6 +158,24 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
     if (file) handlePhotoDrop(file);
   }, [handlePhotoDrop]);
 
+  const handleSaveSpecies = useCallback(async () => {
+    if (!addedTree || !speciesInput.trim()) return;
+    setSavingSpecies(true);
+    try {
+      const { error } = await supabase.from('trees').update({
+        species: speciesInput.trim(),
+        name: speciesInput.trim(),
+      }).eq('id', addedTree.id);
+      if (error) throw error;
+      setEditingSpecies(false);
+      toast({ title: "Species updated", description: speciesInput.trim() });
+    } catch (err: any) {
+      toast({ title: "Update failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingSpecies(false);
+    }
+  }, [addedTree, speciesInput, toast]);
+
   return (
     <div className="space-y-6">
       {/* Import/Export bar */}
@@ -213,17 +235,54 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
             <span className="text-xs font-serif text-muted-foreground">{photoStatus || 'Processing…'}</span>
           </div>
         ) : addedTree ? (
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
             <TreeDeciduous className="h-6 w-6" style={{ color: 'hsl(120, 50%, 50%)' }} />
             <span className="text-xs font-serif" style={{ color: 'hsl(42, 80%, 60%)' }}>
               🌳 {addedTree.name} — planted with photo
             </span>
+            {/* Inline species editor */}
+            <div className="flex items-center gap-2 w-full max-w-xs">
+              {editingSpecies ? (
+                <>
+                  <Input
+                    value={speciesInput}
+                    onChange={(e) => setSpeciesInput(e.target.value.slice(0, 200))}
+                    placeholder="e.g., Quercus robur"
+                    className="h-7 text-xs font-serif flex-1"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSaveSpecies();
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                    disabled={savingSpecies || !speciesInput.trim()}
+                    onClick={handleSaveSpecies}
+                  >
+                    {savingSpecies ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                  </Button>
+                </>
+              ) : (
+                <button
+                  className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setEditingSpecies(true)}
+                >
+                  <span>Species: <span className="italic">{speciesInput}</span></span>
+                  <Pencil className="h-3 w-3" />
+                </button>
+              )}
+            </div>
             <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 className="text-xs font-serif gap-1.5 h-7"
-                onClick={(e) => { e.stopPropagation(); navigate(`/tree/${addedTree.id}`); }}
+                onClick={() => navigate(`/tree/${addedTree.id}`)}
               >
                 <Eye className="h-3 w-3" /> View in Gallery
               </Button>
@@ -231,14 +290,14 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
                 variant="outline"
                 size="sm"
                 className="text-xs font-serif gap-1.5 h-7"
-                onClick={(e) => { e.stopPropagation(); navigate(`/map?focus=${addedTree.id}`); }}
+                onClick={() => navigate(`/map?focus=${addedTree.id}`)}
               >
                 <MapPin className="h-3 w-3" /> View on Map
               </Button>
             </div>
             <button
               className="text-[10px] text-muted-foreground/60 font-serif underline"
-              onClick={(e) => { e.stopPropagation(); setAddedTree(null); }}
+              onClick={() => { setAddedTree(null); setEditingSpecies(false); setSpeciesInput("Unknown"); }}
             >
               Drop another photo
             </button>
