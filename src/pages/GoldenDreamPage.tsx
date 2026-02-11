@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
@@ -7,10 +7,9 @@ import { Maximize2, Minimize2, BookOpen, Cherry, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
-import goldenDreamSplash from "@/assets/golden-dream-splash.jpeg";
+import CrownEntrance from "@/components/CrownEntrance";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
-import goldenDreamSplash2 from "@/assets/golden-dream-splash-2.png";
 
 const goldenDreamRooms = [
   {
@@ -37,44 +36,17 @@ const goldenDreamRooms = [
 ];
 
 const GoldenDreamPage = () => {
-  const [splashPhase, setSplashPhase] = useState<"first" | "second" | "fading" | "done">("first");
-  const [, setFadeOut] = useState(false);
+  const [showEntrance, setShowEntrance] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  useEffect(() => {
-    const t1 = setTimeout(() => setSplashPhase("second"), 2000);
-    const t2 = setTimeout(() => setSplashPhase("fading"), 4500);
-    const t3 = setTimeout(() => setSplashPhase("done"), 5300);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
+  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
 
-  if (splashPhase !== "done") {
-    return (
-      <div
-        className="fixed inset-0 z-50"
-        style={{ backgroundColor: "hsl(120 50% 10%)" }}
-        onClick={() => setSplashPhase("done")}
-      >
-        <div
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
-            splashPhase === "first" ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <img src={goldenDreamSplash} alt="yOur Golden Dream" className="max-w-sm w-3/4 rounded-full animate-fade-in" loading="eager" />
-        </div>
-        <div
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
-            splashPhase === "second" ? "opacity-100" : splashPhase === "fading" ? "opacity-0" : "opacity-0"
-          }`}
-        >
-          <img src={goldenDreamSplash2} alt="yOur Golden Dream" className="max-w-sm w-2/3 rounded-lg" loading="eager" />
-        </div>
-      </div>
-    );
+  if (showEntrance) {
+    return <CrownEntrance onComplete={handleEntranceComplete} />;
   }
 
   if (isFullscreen && activeRoom) {
