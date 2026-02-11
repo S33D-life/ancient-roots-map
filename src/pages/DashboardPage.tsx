@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -116,7 +117,7 @@ const DashboardPage = () => {
   const [plantCount, setPlantCount] = useState(0);
   const [offeringCount, setOfferingCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showEntrance, setShowEntrance] = useState(true);
+  const { showEntrance, dismissEntrance } = useEntranceOnce("dashboard");
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
@@ -253,7 +254,7 @@ const DashboardPage = () => {
     }
   };
 
-  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+  const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
     return <HearthEntrance onComplete={handleEntranceComplete} />;

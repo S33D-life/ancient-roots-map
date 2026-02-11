@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
 import RootsEntrance from "@/components/RootsEntrance";
+import { useEntranceOnce } from "@/hooks/use-entrance-once";
 
 const MapPage = () => {
   const [searchParams] = useSearchParams();
@@ -14,9 +15,9 @@ const MapPage = () => {
 
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
-  const [showEntrance, setShowEntrance] = useState(true);
+  const { showEntrance, dismissEntrance } = useEntranceOnce("map");
 
-  const handleEntranceComplete = useCallback(() => setShowEntrance(false), []);
+  const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
     return <RootsEntrance onComplete={handleEntranceComplete} />;

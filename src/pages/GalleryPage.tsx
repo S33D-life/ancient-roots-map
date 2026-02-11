@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
@@ -95,7 +96,7 @@ const GalleryPage = () => {
   const { room: roomPathParam } = useParams<{ room?: string }>();
   const navigate = useNavigate();
   const roomParam = (roomPathParam && VALID_ROOMS.includes(roomPathParam)) ? roomPathParam : searchParams.get("room");
-  const [showSplash, setShowSplash] = useState(!roomParam);
+  const { showEntrance: showSplash, dismissEntrance: dismissSplash } = useEntranceOnce("gallery", !roomParam);
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
 
@@ -637,7 +638,7 @@ const GalleryPage = () => {
 
   if (showSplash) {
     return (
-      <HeartwoodEntrance onComplete={() => setShowSplash(false)} />
+      <HeartwoodEntrance onComplete={() => dismissSplash()} />
     );
   }
 
