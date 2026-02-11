@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,13 +86,22 @@ interface WishlistItem {
   trees: Tree;
 }
 
+const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger"];
+
 const GalleryPage = () => {
   const [searchParams] = useSearchParams();
-  const roomParam = searchParams.get("room");
+  const { room: roomPathParam } = useParams<{ room?: string }>();
+  const navigate = useNavigate();
+  const roomParam = (roomPathParam && VALID_ROOMS.includes(roomPathParam)) ? roomPathParam : searchParams.get("room");
   const [showSplash, setShowSplash] = useState(!roomParam);
   const [splashFading, setSplashFading] = useState(false);
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    navigate(`/library/${tab}`, { replace: true });
+  };
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [offerings, setOfferings] = useState<Offering[]>([]);
@@ -731,7 +740,7 @@ const GalleryPage = () => {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <div className="relative -mx-4 px-4 mb-8">
             <div className="overflow-x-auto scrollbar-hide">
               <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-9 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
