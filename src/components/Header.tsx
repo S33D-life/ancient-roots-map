@@ -123,6 +123,7 @@ const Header = () => {
   const hearthImg = avatarUrl || hearthIcon;
 
   return (
+    <>
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md"
         style={{
           background: 'linear-gradient(180deg, hsl(28 35% 18% / 0.97), hsl(25 30% 14% / 0.95))',
@@ -238,10 +239,11 @@ const Header = () => {
 
       
       </div>
+      </header>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
       <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />
       <TeotagWhisper onOpenGuide={() => setGuideOpen(true)} />
-    </header>
+    </>
   );
 };
 
