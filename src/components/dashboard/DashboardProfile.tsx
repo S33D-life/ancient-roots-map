@@ -4,15 +4,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 
 interface Profile {
   full_name: string | null;
   avatar_url: string | null;
+  bio: string | null;
+  is_discoverable: boolean;
 }
 
 interface DashboardProfileProps {
@@ -24,6 +28,8 @@ interface DashboardProfileProps {
 
 const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: DashboardProfileProps) => {
   const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [isDiscoverable, setIsDiscoverable] = useState(profile?.is_discoverable ?? true);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { toast } = useToast();
@@ -38,13 +44,17 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName.trim() || null })
+      .update({
+        full_name: fullName.trim() || null,
+        bio: bio.trim() || null,
+        is_discoverable: isDiscoverable,
+      })
       .eq("id", user.id);
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Profile updated!" });
-      onProfileUpdate({ ...profile!, full_name: fullName.trim() || null });
+      onProfileUpdate({ ...profile!, full_name: fullName.trim() || null, bio: bio.trim() || null, is_discoverable: isDiscoverable });
     }
     setSaving(false);
   };
@@ -133,6 +143,30 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
               <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Email</Label>
               <Input value={user.email || ""} disabled className="font-serif opacity-60" />
               <p className="text-[10px] text-muted-foreground">Email cannot be changed here</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Bio</Label>
+              <Textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value.slice(0, 280))}
+                placeholder="A few words about your journey..."
+                maxLength={280}
+                rows={3}
+                className="font-serif resize-none"
+              />
+              <p className="text-[10px] text-muted-foreground text-right">{bio.length}/280</p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/20 p-3">
+              <div className="flex items-center gap-2">
+                {isDiscoverable ? <Eye className="h-4 w-4 text-primary/70" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                <div>
+                  <Label className="text-xs font-serif tracking-wider cursor-pointer">Discoverable</Label>
+                  <p className="text-[10px] text-muted-foreground">Allow fellow wanderers to find you</p>
+                </div>
+              </div>
+              <Switch checked={isDiscoverable} onCheckedChange={setIsDiscoverable} />
             </div>
 
             <Button
