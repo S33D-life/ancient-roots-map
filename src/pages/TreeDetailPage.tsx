@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import type { Database } from "@/integrations/supabase/types";
@@ -37,6 +37,7 @@ const offeringLabels: Record<OfferingType, string> = {
 
 const TreeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tree, setTree] = useState<Tree | null>(null);
   const [offerings, setOfferings] = useState<Offering[]>([]);
@@ -165,6 +166,22 @@ const TreeDetailPage = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                {(tree.latitude || tree.what3words) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 font-serif text-xs gap-1.5"
+                    onClick={() => {
+                      if (tree.latitude && tree.longitude) {
+                        navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16`);
+                      } else if (tree.what3words) {
+                        navigate(`/map?w3w=${tree.what3words}`);
+                      }
+                    }}
+                  >
+                    <Map className="h-3.5 w-3.5" /> View on Map
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
