@@ -1,4 +1,5 @@
 import { convertToCoordinates } from './what3words';
+import { enrichSpecies } from '@/data/treeSpecies';
 
 export interface TreeCSVRow {
   name: string;
@@ -56,10 +57,13 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
       // Clean what3words address (remove /// prefix)
       const cleanWhat3words = what3wordsAddress.replace(/^\/\/\//, '');
 
+      const enriched = enrichSpecies(species);
+
       const treeRow: TreeCSVRow = {
         name: notes || cleanWhat3words,
-        species: species,
+        species: enriched.species,
         what3words: cleanWhat3words,
+        lineage: enriched.lineage,
         description: notes || '',
       };
 
@@ -93,10 +97,13 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
         // Clean what3words address (remove /// prefix if present)
         const cleanWhat3words = what3wordsAddress.replace(/^\/\/\//, '');
 
+        const enriched = enrichSpecies(species);
+
         treeRow = {
           name: label || cleanWhat3words,
-          species: species,
+          species: enriched.species,
           what3words: cleanWhat3words,
+          lineage: enriched.lineage,
           description: label || '',
         };
       } else {
@@ -107,11 +114,13 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
 
         if (!row[nameKey] || !row[speciesKey] || !row[what3wordsKey]) continue;
 
+        const enriched = enrichSpecies(row[speciesKey]);
+
         treeRow = {
           name: row[nameKey],
-          species: row[speciesKey],
+          species: enriched.species,
           what3words: row[what3wordsKey],
-          lineage: row.lineage,
+          lineage: row.lineage || enriched.lineage,
           description: row.description,
           state: row.state,
           nation: row.nation,

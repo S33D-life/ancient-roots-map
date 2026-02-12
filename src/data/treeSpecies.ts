@@ -246,6 +246,47 @@ export function getAllFamilies(): string[] {
 }
 
 /**
+ * Try to match a species string to a known entry.
+ * Returns the best match or undefined.
+ */
+export function matchSpecies(input: string): TreeSpecies | undefined {
+  if (!input) return undefined;
+  const q = input.toLowerCase().trim();
+
+  // Exact match on common name or alias
+  for (const sp of TREE_SPECIES) {
+    if (sp.common.toLowerCase() === q) return sp;
+    if (sp.aliases?.some(a => a.toLowerCase() === q)) return sp;
+  }
+  // Exact match on scientific name
+  for (const sp of TREE_SPECIES) {
+    if (sp.scientific.toLowerCase() === q) return sp;
+  }
+  // Partial: input is a substring of common name or vice versa
+  for (const sp of TREE_SPECIES) {
+    const c = sp.common.toLowerCase();
+    if (c.includes(q) || q.includes(c)) return sp;
+  }
+  return undefined;
+}
+
+/**
+ * Enrich a species string: returns { species, lineage } where lineage
+ * is the scientific name if a match is found.
+ */
+export function enrichSpecies(input: string): { species: string; lineage?: string; family?: string } {
+  const match = matchSpecies(input);
+  if (match) {
+    return {
+      species: match.common,
+      lineage: match.scientific,
+      family: match.family,
+    };
+  }
+  return { species: input };
+}
+
+/**
  * Search species by common name, scientific name, or aliases.
  * Returns matches sorted by relevance (starts-with first, then includes).
  */
@@ -265,7 +306,6 @@ export function searchSpecies(query: string, limit = 12): TreeSpecies[] {
       if (name === q) { bestScore = 100; break; }
       if (name.startsWith(q)) { bestScore = Math.max(bestScore, 80); }
       else if (name.includes(q)) { bestScore = Math.max(bestScore, 60); }
-      // Match individual words
       const words = name.split(/\s+/);
       for (const w of words) {
         if (w.startsWith(q)) { bestScore = Math.max(bestScore, 70); }
