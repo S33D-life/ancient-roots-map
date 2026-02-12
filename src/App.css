@@ -3,3 +3,16 @@
   width: 100%;
   min-height: 100dvh;
 }
+
+/* Offering glow pulse animation */
+.offering-glow-outer {
+  animation: offering-pulse 2.5s ease-in-out infinite;
+}
+@keyframes offering-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+.offering-count-badge {
+  background: transparent !important;
+  border: none !important;
+}

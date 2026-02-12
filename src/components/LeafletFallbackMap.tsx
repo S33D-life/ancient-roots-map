@@ -223,6 +223,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   const groveLayerRef = useRef<L.LayerGroup | null>(null);
   const seedLayerRef = useRef<L.LayerGroup | null>(null);
   const rootThreadLayerRef = useRef<L.LayerGroup | null>(null);
+  const offeringGlowLayerRef = useRef<L.LayerGroup | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
   const [locating, setLocating] = useState(false);
@@ -240,6 +241,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   const [showSeeds, setShowSeeds] = useState(true);
   const [showGroves, setShowGroves] = useState(false);
   const [showRootThreads, setShowRootThreads] = useState(false);
+  const [showOfferingGlow, setShowOfferingGlow] = useState(false);
   const [layerPanelOpen, setLayerPanelOpen] = useState(false);
 
   const speciesCounts = useMemo(() => {
@@ -613,6 +615,80 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     };
   }, [filteredTrees, showRootThreads]);
 
+  // Offering glow layer — golden pulsing circles on trees with recent offerings
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (offeringGlowLayerRef.current) {
+      map.removeLayer(offeringGlowLayerRef.current);
+      offeringGlowLayerRef.current = null;
+    }
+
+    if (!showOfferingGlow) return;
+
+    const glowLayer = L.layerGroup();
+    const currentOfferings = offeringCountsRef.current;
+
+    filteredTrees.forEach((tree) => {
+      const count = currentOfferings[tree.id] || 0;
+      if (count === 0) return;
+
+      // Radius scales with offering count, capped
+      const radius = Math.min(12 + count * 3, 36);
+      const intensity = Math.min(0.25 + count * 0.08, 0.7);
+
+      // Outer glow ring
+      L.circleMarker([tree.latitude, tree.longitude], {
+        radius: radius + 6,
+        color: "hsl(42, 85%, 55%)",
+        fillColor: "hsl(42, 90%, 60%)",
+        fillOpacity: intensity * 0.3,
+        weight: 0,
+        interactive: false,
+        className: "offering-glow-outer",
+      }).addTo(glowLayer);
+
+      // Inner glow
+      L.circleMarker([tree.latitude, tree.longitude], {
+        radius,
+        color: "hsl(42, 85%, 55%)",
+        fillColor: "hsl(42, 90%, 65%)",
+        fillOpacity: intensity,
+        weight: 1.5,
+        opacity: 0.6,
+        interactive: false,
+        className: "offering-glow-inner",
+      }).addTo(glowLayer);
+
+      // Count badge
+      const badgeIcon = L.divIcon({
+        html: `<span style="
+          background: hsl(42, 80%, 50%);
+          color: hsl(30, 10%, 10%);
+          font-size: 9px;
+          font-weight: 700;
+          border-radius: 50%;
+          width: 18px; height: 18px;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 6px hsla(42, 90%, 55%, 0.6);
+          font-family: monospace;
+        ">${count}</span>`,
+        className: "offering-count-badge",
+        iconSize: L.point(18, 18),
+        iconAnchor: L.point(9, -4),
+      });
+      L.marker([tree.latitude, tree.longitude], { icon: badgeIcon, interactive: false }).addTo(glowLayer);
+    });
+
+    glowLayer.addTo(map);
+    offeringGlowLayerRef.current = glowLayer;
+
+    return () => {
+      if (map.hasLayer(glowLayer)) map.removeLayer(glowLayer);
+    };
+  }, [filteredTrees, showOfferingGlow]);
+
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
@@ -749,6 +825,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
               { label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(!showSeeds) },
               { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
               { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
+              { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
             ].map((layer) => (
               <button
                 key={layer.label}
