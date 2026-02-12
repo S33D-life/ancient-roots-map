@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { X, Heart, MapPin, TreePine, Calendar, Compass, SlidersHorizontal, ChevronLeft, ChevronRight, Minimize2 } from "lucide-react";
+import { X, Heart, MapPin, TreePine, Calendar, Compass, SlidersHorizontal, Minimize2, Undo2, Camera, Music, BookOpen, Image } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,15 @@ interface Tree {
   created_by: string | null;
 }
 
+interface OfferingCounts {
+  photo: number;
+  poem: number;
+  song: number;
+  story: number;
+  nft: number;
+  total: number;
+}
+
 interface AncientFriendsExplorerProps {
   trees: Tree[];
   onClose: () => void;
@@ -40,33 +49,77 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** Species-specific gradient backgrounds for trees without photos */
+const speciesGradients: Record<string, { bg: string; emoji: string }> = {
+  Oak: { bg: "radial-gradient(ellipse at 40% 30%, hsla(28, 50%, 22%, 0.9), hsla(28, 30%, 10%, 1))", emoji: "🌳" },
+  Yew: { bg: "radial-gradient(ellipse at 40% 30%, hsla(150, 30%, 18%, 0.9), hsla(160, 25%, 8%, 1))", emoji: "🌲" },
+  Ash: { bg: "radial-gradient(ellipse at 40% 30%, hsla(45, 20%, 20%, 0.9), hsla(40, 15%, 9%, 1))", emoji: "🍂" },
+  Beech: { bg: "radial-gradient(ellipse at 40% 30%, hsla(80, 30%, 18%, 0.9), hsla(75, 25%, 8%, 1))", emoji: "🌿" },
+  Birch: { bg: "radial-gradient(ellipse at 40% 30%, hsla(200, 15%, 25%, 0.9), hsla(210, 10%, 12%, 1))", emoji: "🌳" },
+  Willow: { bg: "radial-gradient(ellipse at 40% 30%, hsla(140, 35%, 20%, 0.9), hsla(145, 30%, 8%, 1))", emoji: "🌿" },
+  Pine: { bg: "radial-gradient(ellipse at 40% 30%, hsla(160, 40%, 15%, 0.9), hsla(165, 35%, 7%, 1))", emoji: "🌲" },
+  Cherry: { bg: "radial-gradient(ellipse at 40% 30%, hsla(340, 35%, 22%, 0.9), hsla(340, 25%, 10%, 1))", emoji: "🌸" },
+  Holly: { bg: "radial-gradient(ellipse at 40% 30%, hsla(120, 40%, 16%, 0.9), hsla(125, 35%, 7%, 1))", emoji: "🎄" },
+  Hawthorn: { bg: "radial-gradient(ellipse at 40% 30%, hsla(15, 35%, 20%, 0.9), hsla(10, 25%, 9%, 1))", emoji: "🌺" },
+  Rowan: { bg: "radial-gradient(ellipse at 40% 30%, hsla(5, 40%, 20%, 0.9), hsla(0, 30%, 10%, 1))", emoji: "🍁" },
+  Sycamore: { bg: "radial-gradient(ellipse at 40% 30%, hsla(90, 25%, 20%, 0.9), hsla(85, 20%, 9%, 1))", emoji: "🍃" },
+  Elder: { bg: "radial-gradient(ellipse at 40% 30%, hsla(270, 20%, 18%, 0.9), hsla(280, 15%, 8%, 1))", emoji: "🫐" },
+  Hazel: { bg: "radial-gradient(ellipse at 40% 30%, hsla(35, 40%, 20%, 0.9), hsla(30, 30%, 9%, 1))", emoji: "🌰" },
+  Apple: { bg: "radial-gradient(ellipse at 40% 30%, hsla(100, 35%, 20%, 0.9), hsla(95, 25%, 9%, 1))", emoji: "🍎" },
+  default: { bg: "radial-gradient(ellipse at center, hsla(120, 30%, 25%, 0.4), hsla(28, 20%, 10%, 0.9))", emoji: "🌳" },
+};
+
+function getSpeciesStyle(species: string) {
+  // Match by first word (handles "English Oak", "Pedunculate Oak" etc.)
+  const key = Object.keys(speciesGradients).find((k) =>
+    species.toLowerCase().includes(k.toLowerCase())
+  );
+  return speciesGradients[key || "default"];
+}
+
 const TreeCard = ({
   tree,
   photoUrl,
+  offeringCounts,
+  wishlistCount,
   style,
   onSwipe,
+  onTap,
   isTop,
 }: {
   tree: Tree;
   photoUrl?: string;
+  offeringCounts?: OfferingCounts;
+  wishlistCount?: number;
   style?: React.CSSProperties;
   onSwipe: (dir: "left" | "right") => void;
+  onTap: () => void;
   isTop: boolean;
 }) => {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-18, 18]);
   const leftOpacity = useTransform(x, [-120, 0], [1, 0]);
   const rightOpacity = useTransform(x, [0, 120], [0, 1]);
-
-  // Parallax: photo shifts opposite to drag, slight scale
   const photoX = useTransform(x, [-200, 0, 200], [20, 0, -20]);
   const photoScale = useTransform(x, [-200, 0, 200], [1.08, 1.05, 1.08]);
+
+  const [dragged, setDragged] = useState(false);
+
+  const handleDragStart = () => setDragged(false);
+  const handleDrag = () => setDragged(true);
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (Math.abs(info.offset.x) > 100) {
       onSwipe(info.offset.x > 0 ? "right" : "left");
     }
   };
+
+  const handleClick = () => {
+    if (!dragged) onTap();
+  };
+
+  const speciesStyle = getSpeciesStyle(tree.species);
+  const counts = offeringCounts;
 
   return (
     <motion.div
@@ -82,7 +135,10 @@ const TreeCard = ({
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.8}
+      onDragStart={isTop ? handleDragStart : undefined}
+      onDrag={isTop ? handleDrag : undefined}
       onDragEnd={isTop ? handleDragEnd : undefined}
+      onClick={isTop ? handleClick : undefined}
       initial={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.7 }}
       animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.7 }}
       exit={{
@@ -138,11 +194,9 @@ const TreeCard = ({
           ) : (
             <div
               className="absolute inset-0 flex items-center justify-center"
-              style={{
-                background: "radial-gradient(ellipse at center, hsla(120, 30%, 25%, 0.4), hsla(28, 20%, 10%, 0.9))",
-              }}
+              style={{ background: speciesStyle.bg }}
             >
-              <span className="text-6xl sm:text-7xl block mb-2">🌳</span>
+              <span className="text-6xl sm:text-7xl block mb-2">{speciesStyle.emoji}</span>
             </div>
           )}
           <Badge
@@ -156,6 +210,25 @@ const TreeCard = ({
           >
             {tree.species}
           </Badge>
+
+          {/* Community signals badge */}
+          {counts && counts.total > 0 && (
+            <div
+              className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-serif"
+              style={{
+                background: "hsla(0, 0%, 0%, 0.55)",
+                color: "hsl(42, 60%, 65%)",
+                border: "1px solid hsla(42, 40%, 30%, 0.3)",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              {counts.photo > 0 && <span className="flex items-center gap-0.5"><Camera className="w-3 h-3" />{counts.photo}</span>}
+              {counts.song > 0 && <span className="flex items-center gap-0.5"><Music className="w-3 h-3" />{counts.song}</span>}
+              {(counts.poem + counts.story) > 0 && <span className="flex items-center gap-0.5"><BookOpen className="w-3 h-3" />{counts.poem + counts.story}</span>}
+              {counts.nft > 0 && <span className="flex items-center gap-0.5"><Image className="w-3 h-3" />{counts.nft}</span>}
+            </div>
+          )}
+
           <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[hsl(22,25%,8%)] to-transparent z-[1]" />
         </div>
 
@@ -201,6 +274,36 @@ const TreeCard = ({
             )}
           </div>
 
+          {/* Community engagement row */}
+          {((wishlistCount && wishlistCount > 0) || (counts && counts.total > 0)) && (
+            <div className="flex items-center gap-3 flex-wrap">
+              {wishlistCount && wishlistCount > 0 && (
+                <span
+                  className="text-xs font-serif flex items-center gap-1 px-2 py-0.5 rounded-full"
+                  style={{
+                    background: "hsla(42, 70%, 45%, 0.12)",
+                    color: "hsl(42, 60%, 60%)",
+                    border: "1px solid hsla(42, 50%, 40%, 0.2)",
+                  }}
+                >
+                  <Heart className="w-3 h-3" /> {wishlistCount} wishlisted
+                </span>
+              )}
+              {counts && counts.total > 0 && (
+                <span
+                  className="text-xs font-serif px-2 py-0.5 rounded-full"
+                  style={{
+                    background: "hsla(120, 30%, 30%, 0.12)",
+                    color: "hsl(120, 30%, 55%)",
+                    border: "1px solid hsla(120, 25%, 35%, 0.2)",
+                  }}
+                >
+                  {counts.total} offering{counts.total !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+          )}
+
           {tree.description && (
             <p
               className="text-sm leading-relaxed line-clamp-4 font-serif"
@@ -210,7 +313,12 @@ const TreeCard = ({
             </p>
           )}
 
-          <div className="mt-auto" />
+          {/* Tap hint */}
+          {isTop && (
+            <p className="text-[10px] font-serif text-center mt-auto pt-2" style={{ color: "hsla(42, 30%, 50%, 0.5)" }}>
+              tap to view full profile
+            </p>
+          )}
         </div>
       </div>
     </motion.div>
@@ -226,31 +334,58 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
   const [maxDistanceKm, setMaxDistanceKm] = useState(50000);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [treePhotos, setTreePhotos] = useState<Record<string, string>>({});
+  const [offeringCounts, setOfferingCounts] = useState<Record<string, OfferingCounts>>({});
+  const [wishlistCounts, setWishlistCounts] = useState<Record<string, number>>({});
+  const [swipeHistory, setSwipeHistory] = useState<{ index: number; dir: "left" | "right" }[]>([]);
 
-  // Fetch photo offerings for all trees
+  // Fetch photo offerings + offering type counts for all trees
   useEffect(() => {
     const treeIds = trees.map((t) => t.id);
     if (!treeIds.length) return;
+
+    // Fetch all offerings to build photo map + counts
     supabase
       .from("offerings")
-      .select("tree_id, media_url")
-      .eq("type", "photo")
-      .not("media_url", "is", null)
+      .select("tree_id, media_url, type")
       .in("tree_id", treeIds)
       .then(({ data }) => {
         if (!data) return;
         const photoMap: Record<string, string> = {};
-        // Use the first photo found per tree
+        const countsMap: Record<string, OfferingCounts> = {};
+
         for (const row of data) {
-          if (row.media_url && !photoMap[row.tree_id]) {
+          // First photo per tree
+          if (row.media_url && row.type === "photo" && !photoMap[row.tree_id]) {
             photoMap[row.tree_id] = row.media_url;
           }
+          // Offering counts
+          if (!countsMap[row.tree_id]) {
+            countsMap[row.tree_id] = { photo: 0, poem: 0, song: 0, story: 0, nft: 0, total: 0 };
+          }
+          const c = countsMap[row.tree_id];
+          if (row.type in c) (c as any)[row.type]++;
+          c.total++;
         }
         setTreePhotos(photoMap);
+        setOfferingCounts(countsMap);
+      });
+
+    // Fetch wishlist counts per tree
+    supabase
+      .from("tree_wishlist")
+      .select("tree_id")
+      .in("tree_id", treeIds)
+      .then(({ data }) => {
+        if (!data) return;
+        const wc: Record<string, number> = {};
+        for (const row of data) {
+          wc[row.tree_id] = (wc[row.tree_id] || 0) + 1;
+        }
+        setWishlistCounts(wc);
       });
   }, [trees]);
 
-  // Try to get user location for proximity filtering
+  // Try to get user location
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -270,26 +405,42 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
     [trees]
   );
 
+  // Smart ordering: photos first, then by offering richness, then estimated age
   const filteredTrees = useMemo(() => {
-    return trees.filter((tree) => {
+    const filtered = trees.filter((tree) => {
       if (speciesFilter !== "all" && tree.species !== speciesFilter) return false;
-
       if (tree.estimated_age != null) {
         if (tree.estimated_age < ageRange[0] || tree.estimated_age > ageRange[1]) return false;
       }
-
       if (userLocation && tree.latitude && tree.longitude && maxDistanceKm < 50000) {
         const dist = getDistanceKm(userLocation.lat, userLocation.lng, tree.latitude, tree.longitude);
         if (dist > maxDistanceKm) return false;
       }
-
       return true;
     });
-  }, [trees, speciesFilter, ageRange, maxDistanceKm, userLocation]);
+
+    // Sort: photos first → offering count desc → estimated age desc → name
+    return filtered.sort((a, b) => {
+      const aHasPhoto = treePhotos[a.id] ? 1 : 0;
+      const bHasPhoto = treePhotos[b.id] ? 1 : 0;
+      if (bHasPhoto !== aHasPhoto) return bHasPhoto - aHasPhoto;
+
+      const aOfferings = offeringCounts[a.id]?.total || 0;
+      const bOfferings = offeringCounts[b.id]?.total || 0;
+      if (bOfferings !== aOfferings) return bOfferings - aOfferings;
+
+      const aAge = a.estimated_age || 0;
+      const bAge = b.estimated_age || 0;
+      if (bAge !== aAge) return bAge - aAge;
+
+      return a.name.localeCompare(b.name);
+    });
+  }, [trees, speciesFilter, ageRange, maxDistanceKm, userLocation, treePhotos, offeringCounts]);
 
   // Reset index when filters change
   useEffect(() => {
     setCurrentIndex(0);
+    setSwipeHistory([]);
   }, [speciesFilter, ageRange, maxDistanceKm]);
 
   const handleSwipe = useCallback(
@@ -298,14 +449,23 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
       if (dir === "right" && tree) {
         onWishlist(tree.id);
       }
+      setSwipeHistory((prev) => [...prev, { index: currentIndex, dir }]);
       setCurrentIndex((prev) => prev + 1);
     },
     [currentIndex, filteredTrees, onWishlist]
   );
 
-  const handleButtonSwipe = (dir: "left" | "right") => {
-    handleSwipe(dir);
-  };
+  const handleUndo = useCallback(() => {
+    if (swipeHistory.length === 0) return;
+    const last = swipeHistory[swipeHistory.length - 1];
+    setSwipeHistory((prev) => prev.slice(0, -1));
+    setCurrentIndex(last.index);
+  }, [swipeHistory]);
+
+  const handleTapDetail = useCallback(() => {
+    const tree = filteredTrees[currentIndex];
+    if (tree) navigate(`/tree/${tree.id}`);
+  }, [currentIndex, filteredTrees, navigate]);
 
   const currentTree = filteredTrees[currentIndex];
   const nextTree = filteredTrees[currentIndex + 1];
@@ -460,7 +620,7 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
               Try adjusting your filters to discover more
             </p>
             <button
-              onClick={() => setCurrentIndex(0)}
+              onClick={() => { setCurrentIndex(0); setSwipeHistory([]); }}
               className="mt-4 px-5 py-2 rounded-full text-sm font-serif transition-all active:scale-95"
               style={{
                 background: "hsla(42, 80%, 50%, 0.15)",
@@ -478,7 +638,10 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
                 key={nextTree.id}
                 tree={nextTree}
                 photoUrl={treePhotos[nextTree.id]}
+                offeringCounts={offeringCounts[nextTree.id]}
+                wishlistCount={wishlistCounts[nextTree.id]}
                 onSwipe={() => {}}
+                onTap={() => {}}
                 isTop={false}
               />
             )}
@@ -487,7 +650,10 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
                 key={currentTree.id}
                 tree={currentTree}
                 photoUrl={treePhotos[currentTree.id]}
+                offeringCounts={offeringCounts[currentTree.id]}
+                wishlistCount={wishlistCounts[currentTree.id]}
                 onSwipe={handleSwipe}
+                onTap={handleTapDetail}
                 isTop
               />
             )}
@@ -497,9 +663,9 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
 
       {/* Bottom actions */}
       {!isEnd && (
-        <div className="flex items-center justify-center gap-6 pb-6 pt-2 z-10">
+        <div className="flex items-center justify-center gap-5 pb-6 pt-2 z-10">
           <button
-            onClick={() => handleButtonSwipe("left")}
+            onClick={() => handleSwipe("left")}
             className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
               background: "hsla(0, 50%, 40%, 0.2)",
@@ -510,6 +676,21 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
             <X className="w-6 h-6" />
           </button>
 
+          {/* Undo button */}
+          <button
+            onClick={handleUndo}
+            disabled={swipeHistory.length === 0}
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-25"
+            style={{
+              background: "hsla(270, 30%, 30%, 0.2)",
+              border: "1.5px solid hsla(270, 30%, 45%, 0.3)",
+              color: "hsl(270, 40%, 65%)",
+            }}
+            title="Undo last swipe"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+
           <button
             onClick={() => {
               if (currentTree?.latitude && currentTree?.longitude) {
@@ -518,19 +699,19 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
                 navigate(`/map?w3w=${currentTree.what3words}`);
               }
             }}
-            className="w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
               background: "hsla(200, 50%, 40%, 0.2)",
-              border: "2px solid hsla(200, 50%, 50%, 0.3)",
+              border: "1.5px solid hsla(200, 50%, 50%, 0.3)",
               color: "hsl(200, 50%, 60%)",
             }}
             title="View on map"
           >
-            <MapPin className="w-5 h-5" />
+            <MapPin className="w-4.5 h-4.5" />
           </button>
 
           <button
-            onClick={() => handleButtonSwipe("right")}
+            onClick={() => handleSwipe("right")}
             className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
               background: "hsla(42, 70%, 45%, 0.2)",
