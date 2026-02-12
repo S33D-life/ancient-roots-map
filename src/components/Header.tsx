@@ -28,6 +28,13 @@ const Header = () => {
     setTetolOpen(true);
   }, []);
 
+  // Listen for custom event from Hero Teotag logo
+  useEffect(() => {
+    const handler = () => setTetolOpen(true);
+    window.addEventListener("open-tetol", handler);
+    return () => window.removeEventListener("open-tetol", handler);
+  }, []);
+
   // Hover no longer opens search automatically — it was too aggressive and obscured the header
 
   const [isDark, setIsDark] = useState(() => {
