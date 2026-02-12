@@ -29,6 +29,7 @@ interface AddOfferingDialogProps {
   onOpenChange: (open: boolean) => void;
   treeId: string;
   type: OfferingType;
+  meetingId?: string | null;
 }
 
 const typeConfig: Record<
@@ -44,7 +45,7 @@ const typeConfig: Record<
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDialogProps) => {
+const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddOfferingDialogProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
@@ -206,6 +207,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type }: AddOfferingDial
         nft_link: type === "nft" ? nftLink.trim() || null : null,
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
+        meeting_id: meetingId || null,
       }).select("id").single();
       if (error) throw error;
 
