@@ -366,6 +366,7 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
   const [swipeHistory, setSwipeHistory] = useState<{ index: number; dir: "left" | "right" }[]>([]);
   const [planterNames, setPlanterNames] = useState<Record<string, string>>({});
   const [seedCounts, setSeedCounts] = useState<Record<string, number>>({});
+  const [heartBurst, setHeartBurst] = useState(false);
 
   // Fetch photo offerings + offering type counts for all trees
   useEffect(() => {
@@ -522,6 +523,8 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
       const tree = filteredTrees[currentIndex];
       if (dir === "right" && tree) {
         onWishlist(tree.id);
+        setHeartBurst(true);
+        setTimeout(() => setHeartBurst(false), 900);
       }
       setSwipeHistory((prev) => [...prev, { index: currentIndex, dir }]);
       setCurrentIndex((prev) => prev + 1);
@@ -738,6 +741,44 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
           </AnimatePresence>
         )}
       </div>
+
+      {/* Heart burst animation */}
+      <AnimatePresence>
+        {heartBurst && (
+          <div className="fixed inset-0 z-[110] pointer-events-none flex items-center justify-center">
+            {Array.from({ length: 12 }).map((_, i) => {
+              const angle = (i / 12) * 360;
+              const rad = (angle * Math.PI) / 180;
+              const dist = 80 + Math.random() * 60;
+              return (
+                <motion.span
+                  key={i}
+                  className="absolute text-lg"
+                  initial={{ opacity: 1, scale: 0.5, x: 0, y: 0 }}
+                  animate={{
+                    opacity: 0,
+                    scale: 1 + Math.random() * 0.6,
+                    x: Math.cos(rad) * dist,
+                    y: Math.sin(rad) * dist,
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7 + Math.random() * 0.3, ease: "easeOut" }}
+                >
+                  {["💛", "✨", "💚", "🤍"][i % 4]}
+                </motion.span>
+              );
+            })}
+            <motion.span
+              className="text-4xl"
+              initial={{ opacity: 1, scale: 0.3 }}
+              animate={{ opacity: 0, scale: 2 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              💛
+            </motion.span>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom actions */}
       {!isEnd && (
