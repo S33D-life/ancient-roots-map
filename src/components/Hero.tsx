@@ -338,12 +338,18 @@ const Hero = () => {
             </Button>
           </div>
 
-          {/* Centred Teotag logo */}
-          <img 
-            src={teotagLogo} 
-            alt="Teotag" 
-            className="w-14 h-14 rounded-full border-2 border-primary/40 shadow-lg opacity-90"
-          />
+          {/* Centred Teotag logo — opens TETOL menu */}
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("open-tetol"))}
+            className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
+            aria-label="Open TETOL navigation"
+          >
+            <img 
+              src={teotagLogo} 
+              alt="Teotag" 
+              className="w-14 h-14 rounded-full border-2 border-primary/40 shadow-lg opacity-90 cursor-pointer"
+            />
+          </button>
 
           {/* Ancient Friend details below Teotag */}
           <Link
