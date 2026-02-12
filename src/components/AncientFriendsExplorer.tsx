@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { X, Heart, MapPin, TreePine, Calendar, Compass, SlidersHorizontal, Minimize2, Undo2, Camera, Music, BookOpen, Image, Sprout, User } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -525,6 +527,16 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
         onWishlist(tree.id);
         setHeartBurst(true);
         setTimeout(() => setHeartBurst(false), 900);
+        toast({
+          title: `💛 ${tree.name} wishlisted`,
+          description: "Added to your Wishing Tree",
+          action: (
+            <ToastAction altText="View Wishlist" onClick={() => navigate("/library/wishing-tree")}>
+              View Wishlist
+            </ToastAction>
+          ),
+          duration: 3000,
+        });
       }
       setSwipeHistory((prev) => [...prev, { index: currentIndex, dir }]);
       setCurrentIndex((prev) => prev + 1);
