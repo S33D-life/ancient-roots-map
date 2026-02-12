@@ -97,7 +97,7 @@ const LiteMapFilters = ({
   return (
     <>
       {/* Top bar — offset left to accommodate search button */}
-      <div className="absolute top-2 left-14 right-2 z-[1000] flex items-center gap-1.5 animate-fade-in">
+      <div className="absolute top-14 left-14 right-2 z-[1000] flex items-center gap-1.5 animate-fade-in">
         {/* Perspective chips */}
         {PERSPECTIVES.map((p) => (
           <button
@@ -147,7 +147,7 @@ const LiteMapFilters = ({
       {/* Perspective label — subtle context indicator */}
       {perspective !== "collective" && (
         <div
-          className="absolute top-12 left-2 z-[1000] px-2 py-0.5 rounded-full text-[9px] font-serif animate-fade-in"
+          className="absolute top-[6.5rem] left-2 z-[1000] px-2 py-0.5 rounded-full text-[9px] font-serif animate-fade-in"
           style={{
             background: "hsla(42, 80%, 50%, 0.12)",
             color: "hsl(42, 70%, 58%)",

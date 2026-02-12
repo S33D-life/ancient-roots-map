@@ -616,7 +616,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       {/* Discovery cue */}
       {discoveryCount > 0 && (
         <div
-          className="absolute top-12 left-1/2 -translate-x-1/2 z-[1001] px-3 py-1.5 rounded-full font-serif text-[11px] animate-fade-in"
+          className="absolute top-[6.5rem] left-1/2 -translate-x-1/2 z-[1001] px-3 py-1.5 rounded-full font-serif text-[11px] animate-fade-in"
           style={{
             background: "hsla(120, 40%, 15%, 0.9)",
             color: "hsl(42, 80%, 60%)",
@@ -751,7 +751,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
 
       {/* Lite Mode badge */}
       <div
-        className="absolute top-12 right-2 z-[1000] px-2 py-1 rounded-full font-serif flex items-center gap-1"
+        className="absolute top-[8.5rem] right-2 z-[1000] px-2 py-1 rounded-full font-serif flex items-center gap-1"
         style={{
           background: "hsla(30, 30%, 12%, 0.85)",
           color: "hsl(42, 55%, 58%)",
