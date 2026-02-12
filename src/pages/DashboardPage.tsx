@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,6 +108,40 @@ const HearthEmbers = () => {
     return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[1]" />;
+};
+
+
+interface PodSectionProps {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  count?: number;
+  accent?: boolean;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}
+
+const PodSection = ({ icon: Icon, label, count, accent, defaultOpen = false, children }: PodSectionProps) => {
+  const [open, setOpen] = useState(defaultOpen);
+  const colorClass = accent ? "text-accent" : "text-primary";
+  const bgClass = accent ? "bg-accent/15 text-accent" : "bg-primary/15 text-primary";
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger className="w-full group">
+        <div className="flex items-center gap-2 py-3 border-b border-border/30 cursor-pointer select-none">
+          <Icon className={`w-5 h-5 ${colorClass}`} />
+          <h3 className={`font-serif text-lg ${colorClass} tracking-wide flex-1 text-left`}>{label}</h3>
+          {count !== undefined && count > 0 && (
+            <span className={`text-xs ${bgClass} rounded-full px-2 py-0.5 font-serif`}>{count}</span>
+          )}
+          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-4">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
 };
 
 const DashboardPage = () => {
@@ -341,27 +377,14 @@ const DashboardPage = () => {
             </TabsContent>
 
             <TabsContent value="pod">
-              <div className="space-y-10">
+              <div className="space-y-6">
                 {/* Section: Vault */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Archive className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg text-primary tracking-wide">Heartwood Vault</h3>
-                  </div>
+                <PodSection icon={Archive} label="Heartwood Vault" defaultOpen>
                   {user && <DashboardVault userId={user.id} />}
-                </div>
-
-                <div className="border-t border-border/30" />
+                </PodSection>
 
                 {/* Section: My Trees */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <TreeDeciduous className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg text-primary tracking-wide">My Trees</h3>
-                    {trees.length > 0 && (
-                      <span className="text-xs bg-primary/15 text-primary rounded-full px-2 py-0.5 font-serif">{trees.length}</span>
-                    )}
-                  </div>
+                <PodSection icon={TreeDeciduous} label="My Trees" count={trees.length}>
                   <DashboardTrees
                     trees={trees}
                     isImporting={isImporting}
@@ -370,37 +393,19 @@ const DashboardPage = () => {
                     onImport={handleImport}
                     onExport={handleExport}
                   />
-                </div>
-
-                <div className="border-t border-border/30" />
+                </PodSection>
 
                 {/* Section: Wishlist */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Star className="w-5 h-5 text-accent" />
-                    <h3 className="font-serif text-lg text-accent tracking-wide">Wishlist</h3>
-                    {wishlistCount > 0 && (
-                      <span className="text-xs bg-accent/15 text-accent rounded-full px-2 py-0.5 font-serif">{wishlistCount}</span>
-                    )}
-                  </div>
+                <PodSection icon={Star} label="Wishlist" count={wishlistCount} accent>
                   {user && (
                     <DashboardWishlist userId={user.id} onCountChange={setWishlistCount} />
                   )}
-                </div>
-
-                <div className="border-t border-border/30" />
+                </PodSection>
 
                 {/* Section: Seed Pods */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sprout className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg text-primary tracking-wide">Seed Pods</h3>
-                    {plantCount > 0 && (
-                      <span className="text-xs bg-primary/15 text-primary rounded-full px-2 py-0.5 font-serif">{plantCount}</span>
-                    )}
-                  </div>
+                <PodSection icon={Sprout} label="Seed Pods" count={plantCount}>
                   <Greenhouse />
-                </div>
+                </PodSection>
               </div>
             </TabsContent>
 
