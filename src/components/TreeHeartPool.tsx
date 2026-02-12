@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
+import WindfallCelebration from "./WindfallCelebration";
 
 interface TreeHeartPoolProps {
   treeId: string;
@@ -11,6 +12,8 @@ interface TreeHeartPoolProps {
 const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
   const [pool, setPool] = useState<{ total_hearts: number; windfall_count: number; last_windfall_at: string | null } | null>(null);
   const [claimedAmount, setClaimedAmount] = useState<number | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const prevWindfallCount = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchPool = async () => {
@@ -31,6 +34,15 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
     return () => { supabase.removeChannel(channel); };
   }, [treeId]);
 
+  // Detect windfall count change → trigger celebration
+  useEffect(() => {
+    if (!pool) return;
+    if (prevWindfallCount.current !== null && pool.windfall_count > prevWindfallCount.current) {
+      setShowCelebration(true);
+    }
+    prevWindfallCount.current = pool.windfall_count;
+  }, [pool?.windfall_count]);
+
   // Try to claim pending windfall on visit
   useEffect(() => {
     if (!userId || !pool || pool.total_hearts === 0) return;
@@ -42,11 +54,14 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
       });
       if (!error && data && data > 0) {
         setClaimedAmount(data);
+        setShowCelebration(true);
         setTimeout(() => setClaimedAmount(null), 5000);
       }
     };
     claimWindfall();
   }, [treeId, userId, pool?.windfall_count]);
+
+  const handleCelebrationComplete = useCallback(() => setShowCelebration(false), []);
 
   if (!pool || pool.total_hearts === 0) return null;
 
@@ -55,6 +70,7 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
 
   return (
     <div className="relative rounded-xl border border-border overflow-hidden bg-card/60 backdrop-blur p-5">
+      <WindfallCelebration active={showCelebration} onComplete={handleCelebrationComplete} />
       {/* Windfall claimed toast */}
       {claimedAmount != null && claimedAmount > 0 && (
         <motion.div
