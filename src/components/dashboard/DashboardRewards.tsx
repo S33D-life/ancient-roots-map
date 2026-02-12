@@ -8,6 +8,8 @@ interface RewardsProps {
   wishlistCount: number;
   plantCount: number;
   offeringCount: number;
+  seedHeartsEarned?: number;
+  seedsRemaining?: number;
 }
 
 interface Milestone {
@@ -60,10 +62,11 @@ const DashboardRewards = (props: RewardsProps) => {
   const earnedMilestones = MILESTONES.filter(m => getCategoryCount(m, props) >= m.threshold);
   const nextMilestones = MILESTONES.filter(m => getCategoryCount(m, props) < m.threshold);
 
-  // Base hearts: 10 per tree mapped
+  // Base hearts: 10 per tree mapped + seed hearts
   const baseHearts = props.treeCount * 10;
   const bonusHearts = earnedMilestones.reduce((sum, m) => sum + m.hearts, 0);
-  const totalHearts = baseHearts + bonusHearts;
+  const seedHearts = props.seedHeartsEarned || 0;
+  const totalHearts = baseHearts + bonusHearts + seedHearts;
 
   // Next milestone to unlock
   const nextMilestone = nextMilestones[0];
@@ -99,6 +102,16 @@ const DashboardRewards = (props: RewardsProps) => {
                 <p className="text-xs text-muted-foreground font-serif">
                   + {bonusHearts} milestone bonus
                 </p>
+                {seedHearts > 0 && (
+                  <p className="text-xs text-muted-foreground font-serif">
+                    + {seedHearts} seed hearts 🌱
+                  </p>
+                )}
+                {props.seedsRemaining !== undefined && (
+                  <p className="text-xs text-primary/70 font-serif mt-1">
+                    🌱 {props.seedsRemaining} seeds today
+                  </p>
+                )}
               </div>
             </div>
 

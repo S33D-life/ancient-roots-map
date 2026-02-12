@@ -303,6 +303,53 @@ export type Database = {
           },
         ]
       }
+      planted_seeds: {
+        Row: {
+          blooms_at: string
+          collected_at: string | null
+          collected_by: string | null
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          planted_at: string
+          planter_id: string
+          tree_id: string
+        }
+        Insert: {
+          blooms_at?: string
+          collected_at?: string | null
+          collected_by?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          planted_at?: string
+          planter_id: string
+          tree_id: string
+        }
+        Update: {
+          blooms_at?: string
+          collected_at?: string | null
+          collected_by?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          planted_at?: string
+          planter_id?: string
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planted_seeds_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

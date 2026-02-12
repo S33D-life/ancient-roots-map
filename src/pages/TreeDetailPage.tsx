@@ -4,6 +4,7 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import SeedPlanter from "@/components/SeedPlanter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,11 @@ const TreeDetailPage = () => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
+  }, []);
 
   // Handle ?add=type query param
   useEffect(() => {
@@ -269,6 +275,16 @@ const TreeDetailPage = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Seed Economy */}
+        <div className="mb-10">
+          <SeedPlanter
+            treeId={id!}
+            treeLat={tree.latitude}
+            treeLng={tree.longitude}
+            userId={userId}
+          />
         </div>
 
         {/* Offerings Section */}
