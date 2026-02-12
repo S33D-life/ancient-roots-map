@@ -176,45 +176,48 @@ const DevQAPanel = () => {
       // 2. Seed meetings with various timestamps
       const meetingInserts: any[] = [];
       const treeIds = trees.map(t => t.id);
+      const nowISO = new Date().toISOString();
 
-      // Active meetings
+      // Active meetings (created now)
       for (let i = 0; i < 5; i++) {
         meetingInserts.push({
           user_id: user.id,
           tree_id: treeIds[i % treeIds.length],
+          created_at: nowISO,
+          expires_at: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
         });
       }
 
-      // Expiring soon (manually set created_at 11h15m ago)
-      const expiringTime = new Date(Date.now() - 11.25 * 60 * 60 * 1000).toISOString();
+      // Expiring soon (created 11h15m ago)
+      const expiringCreated = new Date(Date.now() - 11.25 * 60 * 60 * 1000);
       for (let i = 0; i < 5; i++) {
         meetingInserts.push({
           user_id: user.id,
           tree_id: treeIds[(i + 5) % treeIds.length],
-          created_at: expiringTime,
-          expires_at: new Date(new Date(expiringTime).getTime() + 12 * 60 * 60 * 1000).toISOString(),
+          created_at: expiringCreated.toISOString(),
+          expires_at: new Date(expiringCreated.getTime() + 12 * 60 * 60 * 1000).toISOString(),
         });
       }
 
       // Expired (12h01m ago)
-      const expiredTime = new Date(Date.now() - 12.02 * 60 * 60 * 1000).toISOString();
+      const expiredCreated = new Date(Date.now() - 12.02 * 60 * 60 * 1000);
       for (let i = 0; i < 10; i++) {
         meetingInserts.push({
           user_id: user.id,
           tree_id: treeIds[i % treeIds.length],
-          created_at: expiredTime,
-          expires_at: new Date(new Date(expiredTime).getTime() + 12 * 60 * 60 * 1000).toISOString(),
+          created_at: expiredCreated.toISOString(),
+          expires_at: new Date(expiredCreated.getTime() + 12 * 60 * 60 * 1000).toISOString(),
         });
       }
 
       // Old expired (3 days ago)
-      const oldTime = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+      const oldCreated = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
       for (let i = 0; i < 10; i++) {
         meetingInserts.push({
           user_id: user.id,
           tree_id: treeIds[i % treeIds.length],
-          created_at: oldTime,
-          expires_at: new Date(new Date(oldTime).getTime() + 12 * 60 * 60 * 1000).toISOString(),
+          created_at: oldCreated.toISOString(),
+          expires_at: new Date(oldCreated.getTime() + 12 * 60 * 60 * 1000).toISOString(),
         });
       }
 
