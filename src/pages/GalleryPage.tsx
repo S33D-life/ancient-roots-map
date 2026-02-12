@@ -1083,7 +1083,7 @@ const GalleryPage = () => {
             {showCouncilEmbed && (
               <div className="animate-fade-in">
                 <iframe
-                  src="https://clammy-viscount-ddb.notion.site/ebd//1e415b58480d8042a722ef57e01e3228"
+                  src="https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228"
                   width="100%"
                   height="600"
                   frameBorder="0"
@@ -1170,11 +1170,11 @@ const GalleryPage = () => {
                         <iframe
                           src={
                             {
-                              oak: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8023b4ade8b40e4b5156",
-                              yew: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80468a76dd551cff272b",
-                              beech: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d80c6a871d19d6dc35bd3",
-                              ash: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d8079b3e3d68121c9e133",
-                              holly: "https://clammy-viscount-ddb.notion.site/ebd//2fc15b58480d801eb6a8f4e80aa5a574",
+                              oak: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d8023b4ade8b40e4b5156",
+                              yew: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d80468a76dd551cff272b",
+                              beech: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d80c6a871d19d6dc35bd3",
+                              ash: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d8079b3e3d68121c9e133",
+                              holly: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d801eb6a8f4e80aa5a574",
                             }[activeString]
                           }
                           width="100%"
