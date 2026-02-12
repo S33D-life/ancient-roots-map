@@ -5,8 +5,9 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
-import { Navigation, Loader2, Compass, TreePine, Plus } from "lucide-react";
+import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
 import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
+import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 
 interface Tree {
@@ -152,6 +153,28 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/* ── Convex hull (Graham scan) ── */
+function convexHull(points: [number, number][]): [number, number][] {
+  if (points.length < 3) return points;
+  const sorted = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  function cross(O: [number, number], A: [number, number], B: [number, number]) {
+    return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
+  }
+  const lower: [number, number][] = [];
+  for (const p of sorted) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper: [number, number][] = [];
+  for (const p of sorted.reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  upper.pop();
+  lower.pop();
+  return lower.concat(upper);
+}
+
 /* ── CSS ── */
 const LITE_CSS = `
 .leaflet-tree-marker{background:transparent!important;border:none!important}
@@ -197,6 +220,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   const clusterRef = useRef<any>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const userAccuracyRef = useRef<L.Circle | null>(null);
+  const groveLayerRef = useRef<L.LayerGroup | null>(null);
+  const seedLayerRef = useRef<L.LayerGroup | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
   const [locating, setLocating] = useState(false);
@@ -209,6 +234,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   // Filter state
   const [species, setSpecies] = useState("all");
   const [perspective, setPerspective] = useState<LitePerspective>("collective");
+
+  // Layer visibility toggles
+  const [showSeeds, setShowSeeds] = useState(true);
+  const [showGroves, setShowGroves] = useState(false);
+  const [layerPanelOpen, setLayerPanelOpen] = useState(false);
 
   const speciesCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -229,7 +259,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     return result;
   }, [trees, species, perspective, userId]);
 
-  // Stable reference for offering counts to avoid unnecessary rebuilds
+  // Stable reference for offering counts
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
 
@@ -257,13 +287,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19, subdomains: "abcd", keepBuffer: 4 }
     ).addTo(map);
 
+    // Tile error handling — show toast-style overlay on sustained failure
+    let tileErrors = 0;
+    map.on('tileerror', () => {
+      tileErrors++;
+      if (tileErrors > 10) {
+        console.warn('[Lite] Sustained tile errors:', tileErrors);
+      }
+    });
+
     L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
     mapRef.current = map;
     requestAnimationFrame(() => map.invalidateSize());
 
-    // Auto-locate on first load — silent fail
+    // Auto-locate on first load
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -283,6 +322,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       clusterRef.current = null;
       userMarkerRef.current = null;
       userAccuracyRef.current = null;
+      groveLayerRef.current = null;
+      seedLayerRef.current = null;
     };
   }, []);
 
@@ -311,14 +352,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       .addTo(map);
   }
 
-  // Discovery detection — count new trees entering filtered view
+  // Discovery detection
   useEffect(() => {
     const currentIds = new Set(filteredTrees.map((t) => t.id));
     const prev = prevTreeIdsRef.current;
     let newCount = 0;
     currentIds.forEach((id) => { if (!prev.has(id)) newCount++; });
-
-    // Always update ref so detection stays fresh
     prevTreeIdsRef.current = currentIds;
 
     if (prev.size > 0 && newCount > 0) {
@@ -328,7 +367,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     }
   }, [filteredTrees]);
 
-  // Update markers when filteredTrees change
+  // Update tree markers when filteredTrees change
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -381,7 +420,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     map.addLayer(clusterGroup);
     clusterRef.current = clusterGroup;
 
-    // Only auto-fit on first load, not on every filter change
+    // Only auto-fit on first load
     if (!hasFittedRef.current && filteredTrees.length > 0) {
       hasFittedRef.current = true;
       if (userLatLng && filteredTrees.length > 3) {
@@ -403,7 +442,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   // Render bloomed seed heart markers
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || bloomedSeeds.length === 0) return;
+    if (!map) return;
+
+    // Clean up previous seed layer
+    if (seedLayerRef.current) {
+      map.removeLayer(seedLayerRef.current);
+      seedLayerRef.current = null;
+    }
+
+    if (!showSeeds || bloomedSeeds.length === 0) return;
+
+    const seedLayer = L.layerGroup();
 
     const treeCoordMap: Record<string, { lat: number; lng: number }> = {};
     trees.forEach((t) => {
@@ -415,7 +464,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       seedsByTree[s.tree_id] = (seedsByTree[s.tree_id] || 0) + 1;
     });
 
-    const markers: L.Marker[] = [];
     Object.entries(seedsByTree).forEach(([treeId, count]) => {
       const coords = treeCoordMap[treeId];
       if (!coords) return;
@@ -434,14 +482,71 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         <a href="/tree/${encodeURIComponent(treeId)}" style="display:block;padding:8px 0;text-align:center;font-size:12px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(120,50%,45%),hsl(80,60%,50%));border-radius:6px;text-decoration:none;letter-spacing:0.06em;font-weight:600;">Collect Hearts ⟶</a>
       </div>`;
 
-      const marker = L.marker([coords.lat, coords.lng], { icon, zIndexOffset: 500 })
+      L.marker([coords.lat, coords.lng], { icon, zIndexOffset: 500 })
         .bindPopup(popupHtml, { className: 'atlas-leaflet-popup', maxWidth: 240, closeButton: true })
-        .addTo(map);
-      markers.push(marker);
+        .addTo(seedLayer);
     });
 
-    return () => { markers.forEach((m) => map.removeLayer(m)); };
-  }, [bloomedSeeds, trees]);
+    seedLayer.addTo(map);
+    seedLayerRef.current = seedLayer;
+
+    return () => {
+      if (map.hasLayer(seedLayer)) map.removeLayer(seedLayer);
+    };
+  }, [bloomedSeeds, trees, showSeeds]);
+
+  // Draw grove boundary polygons when showGroves is on
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (groveLayerRef.current) {
+      map.removeLayer(groveLayerRef.current);
+      groveLayerRef.current = null;
+    }
+
+    if (!showGroves || filteredTrees.length < 3) return;
+
+    const groveLayer = L.layerGroup();
+
+    // Group by species
+    const bySpecies: Record<string, Tree[]> = {};
+    filteredTrees.forEach((t) => {
+      const key = t.species.toLowerCase();
+      if (!bySpecies[key]) bySpecies[key] = [];
+      bySpecies[key].push(t);
+    });
+
+    Object.entries(bySpecies).forEach(([speciesKey, group]) => {
+      if (group.length < 3) return;
+
+      const points: [number, number][] = group.map((t) => [t.longitude, t.latitude]);
+      const hull = convexHull(points);
+      if (hull.length < 3) return;
+
+      // Convert to Leaflet [lat, lng] and close the ring
+      const latlngs = hull.map(([lng, lat]) => [lat, lng] as [number, number]);
+      latlngs.push(latlngs[0]);
+
+      const hue = getSpeciesHue(speciesKey);
+
+      L.polygon(latlngs, {
+        color: `hsla(${hue}, 50%, 45%, 0.5)`,
+        fillColor: `hsla(${hue}, 40%, 35%, 0.12)`,
+        fillOpacity: 1,
+        weight: 2,
+        dashArray: "6 4",
+        interactive: false,
+      }).addTo(groveLayer);
+    });
+
+    groveLayer.addTo(map);
+    groveLayerRef.current = groveLayer;
+
+    return () => {
+      if (map.hasLayer(groveLayer)) map.removeLayer(groveLayer);
+    };
+  }, [filteredTrees, showGroves]);
 
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
@@ -470,10 +575,33 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     }
   }, [filteredTrees]);
 
+  const handleSearchSelect = useCallback((tree: Tree) => {
+    if (!mapRef.current) return;
+    mapRef.current.flyTo([tree.latitude, tree.longitude], 16, { duration: 1.2 });
+    // Open popup after flyTo completes
+    setTimeout(() => {
+      const map = mapRef.current;
+      if (!map || !clusterRef.current) return;
+      // Find and open the marker popup
+      clusterRef.current.eachLayer((layer: any) => {
+        const ll = layer.getLatLng?.();
+        if (ll && Math.abs(ll.lat - tree.latitude) < 0.0001 && Math.abs(ll.lng - tree.longitude) < 0.0001) {
+          // Zoom to see individual markers then open popup
+          clusterRef.current.zoomToShowLayer(layer, () => {
+            layer.openPopup();
+          });
+        }
+      });
+    }, 1300);
+  }, []);
+
   return (
     <div className={className || "absolute inset-0"} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" style={{ background: '#f0ede6' }} />
       <style>{LITE_CSS}</style>
+
+      {/* Search */}
+      <LiteMapSearch trees={trees} onSelect={handleSearchSelect} />
 
       {/* Filters */}
       <LiteMapFilters
@@ -500,11 +628,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         </div>
       )}
 
-      {/* Empty state when filters match nothing */}
+      {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] flex flex-col items-center gap-2 animate-fade-in"
-        >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] flex flex-col items-center gap-2 animate-fade-in">
           <div
             className="w-14 h-14 rounded-full flex items-center justify-center"
             style={{ background: "hsla(30, 30%, 12%, 0.9)", border: "1px solid hsla(42, 40%, 30%, 0.4)" }}
@@ -525,7 +651,64 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         </div>
       )}
 
-      {/* Bottom controls: add-tree left, locate centred, compass right */}
+      {/* Layer toggles panel */}
+      <div className="absolute bottom-20 right-3 z-[1000] flex flex-col items-end gap-2">
+        <button
+          onClick={() => setLayerPanelOpen(!layerPanelOpen)}
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
+          style={{
+            ...btnBase,
+            color: layerPanelOpen ? "hsl(42, 90%, 55%)" : "hsl(42, 60%, 60%)",
+            background: layerPanelOpen ? "hsla(42, 50%, 20%, 0.95)" : btnBase.background,
+          }}
+          title="Toggle Layers"
+        >
+          <Layers className="w-[18px] h-[18px]" />
+        </button>
+
+        {layerPanelOpen && (
+          <div
+            className="rounded-xl overflow-hidden animate-fade-in"
+            style={{
+              background: "hsla(30, 20%, 8%, 0.96)",
+              border: "1px solid hsla(42, 40%, 30%, 0.4)",
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+              minWidth: "160px",
+            }}
+          >
+            <div className="px-3 py-2 border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
+              <p className="text-[10px] font-serif" style={{ color: "hsl(42, 50%, 55%)" }}>Map Layers</p>
+            </div>
+            {[
+              { label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(!showSeeds) },
+              { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
+            ].map((layer) => (
+              <button
+                key={layer.label}
+                onClick={layer.toggle}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors"
+                style={{ color: layer.active ? "hsl(42, 80%, 60%)" : "hsl(42, 40%, 45%)" }}
+                onMouseOver={(e) => (e.currentTarget.style.background = "hsla(42, 50%, 40%, 0.1)")}
+                onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <div
+                  className="w-4 h-4 rounded-sm border flex items-center justify-center transition-all"
+                  style={{
+                    borderColor: layer.active ? "hsl(42, 80%, 55%)" : "hsla(42, 40%, 30%, 0.5)",
+                    background: layer.active ? "hsla(42, 80%, 50%, 0.2)" : "transparent",
+                  }}
+                >
+                  {layer.active && <span className="text-[10px]">✓</span>}
+                </div>
+                <span className="text-[12px] font-serif">{layer.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom controls: add-tree left, locate centred */}
       <div className="absolute bottom-20 left-3 z-[1000]">
         <button
           onClick={() => {
@@ -546,7 +729,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         </button>
       </div>
 
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[1000]">
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
         <button
           onClick={handleFindMe}
           disabled={locating}
@@ -556,9 +739,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         >
           {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
         </button>
-      </div>
-
-      <div className="absolute bottom-20 right-3 z-[1000]">
         <button
           onClick={handleCompassReset}
           className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
@@ -569,7 +749,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         </button>
       </div>
 
-      {/* Lite Mode badge — top area */}
+      {/* Lite Mode badge */}
       <div
         className="absolute top-12 right-2 z-[1000] px-2 py-1 rounded-full font-serif flex items-center gap-1"
         style={{
