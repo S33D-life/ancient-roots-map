@@ -215,8 +215,22 @@ const BookOfferingFlow = ({ treeId, onComplete, onCancel }: BookOfferingFlowProp
                     <BookOpen className="h-5 w-5 text-primary/50" />
                   </div>
                   <p className="text-xs text-muted-foreground/60 font-serif">
-                    Search by title or author to discover stories
+                    Search by title or author, or browse by genre
                   </p>
+
+                  {/* Genre browsing tags */}
+                  <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                    {Object.keys(genreColors).map((genre) => (
+                      <button
+                        key={genre}
+                        type="button"
+                        onClick={() => handleSearch(genre)}
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-serif tracking-wide transition-all hover:scale-105 active:scale-95 ${genreColors[genre]}`}
+                      >
+                        {genre}
+                      </button>
+                    ))}
+                  </div>
 
                   {/* Recent books */}
                   {recentBooks.length > 0 && (
