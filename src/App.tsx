@@ -33,6 +33,7 @@ const VaultPage = lazy(() => import("./pages/VaultPage"));
 const RadioPage = lazy(() => import("./pages/RadioPage"));
 const VisitsPage = lazy(() => import("./pages/VisitsPage"));
 const ReferralsPage = lazy(() => import("./pages/ReferralsPage"));
+const InstallPage = lazy(() => import("./pages/InstallPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -50,11 +51,11 @@ const App = () => {
   const [authed, setAuthed] = useState(isAuthenticated());
 
   // /map and /atlas bypass the password gate for public discovery
-  const isMapRoute = typeof window !== 'undefined' && (
-    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?')
+  const isPublicRoute = typeof window !== 'undefined' && (
+    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?')
   );
 
-  if (!authed && !isMapRoute) {
+  if (!authed && !isPublicRoute) {
     return <PasswordGate onSuccess={() => setAuthed(true)} />;
   }
 
@@ -63,7 +64,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {!isMapRoute && <StarryNight />}
+        {!isPublicRoute && <StarryNight />}
         {/* <ChatPanel /> */}
         
         <BrowserRouter>
@@ -87,6 +88,7 @@ const App = () => {
                 <Route path="/radio" element={<RadioPage />} />
                 <Route path="/visits" element={<VisitsPage />} />
                 <Route path="/referrals" element={<ReferralsPage />} />
+                <Route path="/install" element={<InstallPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
