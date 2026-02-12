@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { extractExifDate } from "@/utils/exifDate";
 import { getMapStyle } from "@/config/mapbox";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -52,6 +53,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [extractingPhoto, setExtractingPhoto] = useState(false);
   const [photoDate, setPhotoDate] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const dragCounter = useRef(0);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -289,8 +291,23 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+
+      // If not logged in, store tree data and redirect to auth
       if (!user) {
-        toast({ title: "Not authenticated", description: "Please sign in to add trees", variant: "destructive" });
+        const pendingTree = {
+          name: name.trim() || species.trim(),
+          species: species.trim(),
+          description: description.trim() || null,
+          what3words: what3words.trim() || '',
+          latitude: lat,
+          longitude: lng,
+          estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
+          ...(photoDate ? { created_at: photoDate } : {}),
+        };
+        localStorage.setItem("s33d_pending_tree", JSON.stringify(pendingTree));
+        onOpenChange(false);
+        toast({ title: "Sign in to save your tree", description: "Your encounter has been preserved — sign in to plant it in the Atlas" });
+        navigate("/auth?returnTo=/map");
         return;
       }
 
@@ -309,7 +326,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       if (error) throw error;
       setSavedTreeId(data.id);
 
-      toast({ title: "Tree added! 🌳", description: `${name} has joined the Ancient Friends` });
+      toast({ title: "Tree added! 🌳", description: `${name || species} has joined the Ancient Friends` });
 
       // Auto-advance to offering step
       setTransitionDir("forward");
