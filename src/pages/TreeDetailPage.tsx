@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/MeetingTimer";
+import OfferingHistory from "@/components/OfferingHistory";
 import type { Database } from "@/integrations/supabase/types";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -53,6 +54,7 @@ const TreeDetailPage = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
   const [meetingStatus, setMeetingStatus] = useState<TimerStatus>("none");
+  const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -91,7 +93,16 @@ const TreeDetailPage = () => {
       else setOfferings(data || []);
     };
 
-    Promise.all([fetchTree(), fetchOfferings()]).then(() => setLoading(false));
+    const fetchMeetings = async () => {
+      const { data, error } = await supabase
+        .from("meetings")
+        .select("*")
+        .eq("tree_id", id)
+        .order("created_at", { ascending: false });
+      if (!error && data) setAllMeetings(data as Meeting[]);
+    };
+
+    Promise.all([fetchTree(), fetchOfferings(), fetchMeetings()]).then(() => setLoading(false));
 
     const channel = supabase
       .channel(`offerings-${id}`)
@@ -409,6 +420,26 @@ const TreeDetailPage = () => {
             </TabsContent>
           ))}
         </Tabs>
+
+        {/* Offering History — grouped by meeting */}
+        {userId && allMeetings.length > 0 && (
+          <div className="mt-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                className="h-px flex-1"
+                style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }}
+              />
+              <h2 className="text-xl font-serif text-primary tracking-widest uppercase">
+                Offering History
+              </h2>
+              <div
+                className="h-px flex-1"
+                style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }}
+              />
+            </div>
+            <OfferingHistory offerings={offerings} meetings={allMeetings} />
+          </div>
+        )}
       </div>
 
       {/* Lightbox */}
