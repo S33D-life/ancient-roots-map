@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, TreePine, Wallet, Wand2, Mail, ArrowLeft, Eye, EyeOff, CheckCircle2, KeyRound } from "lucide-react";
+import { Loader2, TreePine, Wallet, Wand2, Mail, ArrowLeft, Eye, EyeOff, CheckCircle2, KeyRound, Gift } from "lucide-react";
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag.jpeg";
+import { recordReferral } from "@/hooks/use-referrals";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -24,12 +25,29 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string }>({});
+  const [inviteCode, setInviteCode] = useState("");
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Pre-fill invite code from URL
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const code = searchParams.get("invite");
+    if (code) {
+      setInviteCode(code);
+      setView("signup"); // auto-switch to signup if arriving via invite
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
+        // Record referral on first sign-in if invite code was stored
+        const storedCode = localStorage.getItem("s33d_invite_code");
+        if (storedCode && session.user) {
+          await recordReferral(session.user.id, storedCode);
+          localStorage.removeItem("s33d_invite_code");
+        }
         navigate("/dashboard");
       }
     });
@@ -88,7 +106,7 @@ const AuthPage = () => {
     if (!validate("signup")) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/dashboard` },
@@ -98,6 +116,10 @@ const AuthPage = () => {
           throw new Error("An account with this email already exists. Try logging in.");
         }
         throw error;
+      }
+      // Store invite code so we can record the referral after email verification
+      if (inviteCode.trim() && data.user) {
+        localStorage.setItem("s33d_invite_code", inviteCode.trim());
       }
       setView("verify-email");
     } catch (err) {
@@ -340,9 +362,25 @@ const AuthPage = () => {
                   />
                   {fieldErrors.confirm && <p className="text-xs text-destructive">{fieldErrors.confirm}</p>}
                 </div>
+               )}
+
+              {isSignup && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="invite-code" className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                    <Gift className="w-3 h-3" /> Invite Code <span className="text-muted-foreground/50">(optional)</span>
+                  </Label>
+                  <Input
+                    id="invite-code"
+                    type="text"
+                    placeholder="Enter invite code from a friend"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value)}
+                    disabled={isLoading}
+                    className="font-mono text-sm"
+                  />
+                </div>
               )}
 
-              {/* Forgot password link (login only) */}
               {!isSignup && !isForgot && (
                 <div className="text-right">
                   <button type="button" onClick={() => { setView("forgot"); clearErrors(); }} className="text-xs text-primary hover:underline">
