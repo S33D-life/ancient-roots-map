@@ -414,22 +414,21 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // On iOS Safari, WebGL context can be created but tiles often fail to render
-    // or context gets lost under memory pressure. Detect iOS for faster fallback.
+    // Detect iOS for tighter timeouts and canvas pixel validation
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
     const webgl = isWebGLSupported();
 
-    // On iOS, prefer Leaflet by default — WebGL frequently fails silently
-    // with blank canvases or context loss under memory pressure.
-    // Users can still try WebGL via the "Try WebGL" button.
-    if (!webgl || isIOS) {
-      const reason = !webgl ? "WebGL unsupported" : "iOS — defaulting to Leaflet for reliability";
-      console.warn(`[Atlas] ${reason}`);
-      setDebugInfo(prev => ({ ...prev, webgl, error: reason }));
+    if (!webgl) {
+      console.warn('[Atlas] WebGL unsupported — using Leaflet');
+      setDebugInfo(prev => ({ ...prev, webgl: false, error: 'WebGL unsupported' }));
       setMapStatus("leaflet");
       return;
+    }
+
+    if (isIOS) {
+      console.log('[Atlas] iOS detected — attempting WebGL with aggressive validation');
     }
 
     setDebugInfo(prev => ({ ...prev, webgl: true }));
@@ -520,6 +519,33 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         let idleFired = false;
         m.once('idle', () => { idleFired = true; });
 
+        // Canvas pixel validation — catches iOS blank-but-initialized state
+        function canvasHasContent(): boolean {
+          try {
+            const cvs = m.getCanvas();
+            if (!cvs) return false;
+            const gl = cvs.getContext("webgl2") || cvs.getContext("webgl");
+            if (!gl) return false;
+            const w = gl.drawingBufferWidth;
+            const h = gl.drawingBufferHeight;
+            // Sample 5 points across the canvas
+            const points = [
+              [Math.floor(w / 2), Math.floor(h / 2)],
+              [Math.floor(w / 4), Math.floor(h / 4)],
+              [Math.floor(3 * w / 4), Math.floor(h / 4)],
+              [Math.floor(w / 4), Math.floor(3 * h / 4)],
+              [Math.floor(3 * w / 4), Math.floor(3 * h / 4)],
+            ];
+            for (const [sx, sy] of points) {
+              const px = new Uint8Array(4);
+              gl.readPixels(sx, sy, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+              // Non-black, non-transparent pixel = content rendered
+              if (px[0] > 10 || px[1] > 10 || px[2] > 10) return true;
+            }
+            return false;
+          } catch { return false; }
+        }
+
         setTimeout(() => {
           if (aborted) return;
 
@@ -531,6 +557,21 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
           // Secondary check: did the map reach idle (tiles painted)?
           if (idleFired) {
+            // On iOS, also verify canvas has actual pixel content
+            if (isIOS && !canvasHasContent()) {
+              console.warn('[Atlas] iOS: idle fired but canvas is blank — retrying');
+              // Give one more second for tiles to paint
+              setTimeout(() => {
+                if (aborted) return;
+                if (canvasHasContent()) {
+                  setMapStatus("ready");
+                  console.log('[Atlas] iOS: MapLibre ready after pixel recheck');
+                } else {
+                  fallbackToLeaflet("iOS: canvas blank despite idle");
+                }
+              }, 1500);
+              return;
+            }
             setMapStatus("ready");
             console.log('[Atlas] MapLibre ready — idle confirmed');
             return;
@@ -541,6 +582,10 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           const retryTimeout = setTimeout(() => {
             if (aborted) return;
             if (idleFired) {
+              if (isIOS && !canvasHasContent()) {
+                fallbackToLeaflet("iOS: canvas blank after extended wait");
+                return;
+              }
               setMapStatus("ready");
               console.log('[Atlas] MapLibre ready after extended wait');
             } else {
@@ -552,6 +597,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           m.once('idle', () => {
             if (aborted) return;
             clearTimeout(retryTimeout);
+            if (isIOS && !canvasHasContent()) {
+              setTimeout(() => {
+                if (aborted) return;
+                if (canvasHasContent()) {
+                  setMapStatus("ready");
+                } else {
+                  fallbackToLeaflet("iOS: late idle but canvas still blank");
+                }
+              }, 1000);
+              return;
+            }
             setMapStatus("ready");
             console.log('[Atlas] MapLibre ready — late idle');
           });
