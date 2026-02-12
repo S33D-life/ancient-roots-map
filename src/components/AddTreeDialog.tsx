@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { extractExifDate } from "@/utils/exifDate";
 import { getMapStyle } from "@/config/mapbox";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus } from "lucide-react";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import maplibregl from "maplibre-gl";
+import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
 
 interface AddTreeDialogProps {
   open: boolean;
@@ -35,6 +36,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [step, setStep] = useState<RitualStep>("encounter");
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
+  const [showSpeciesSuggestions, setShowSpeciesSuggestions] = useState(false);
+  const speciesSuggestions = useMemo(() => searchSpecies(species), [species]);
   const [description, setDescription] = useState("");
   const [estimatedAge, setEstimatedAge] = useState("");
   const [what3words, setWhat3words] = useState(initialW3w || "");
@@ -428,9 +431,53 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 200))} placeholder="e.g., The Old Oak of Glastonbury (optional)" maxLength={200} className="font-serif" />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 relative">
                   <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
-                  <Input id="species" value={species} onChange={(e) => setSpecies(e.target.value.slice(0, 200))} placeholder="e.g., Quercus robur (English Oak)" maxLength={200} required className="font-serif" />
+                  <Input
+                    id="species"
+                    value={species}
+                    onChange={(e) => {
+                      setSpecies(e.target.value.slice(0, 200));
+                      setShowSpeciesSuggestions(true);
+                    }}
+                    onFocus={() => setShowSpeciesSuggestions(true)}
+                    placeholder="Start typing… e.g. Oak, Yew, Birch"
+                    maxLength={200}
+                    required
+                    className="font-serif"
+                    autoComplete="off"
+                  />
+                  {showSpeciesSuggestions && speciesSuggestions.length > 0 && (
+                    <div
+                      className="absolute left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
+                      style={{
+                        background: "hsl(30, 15%, 12%)",
+                        borderColor: "hsla(42, 40%, 30%, 0.5)",
+                      }}
+                    >
+                      {speciesSuggestions.map((sp) => (
+                        <button
+                          key={sp.scientific}
+                          type="button"
+                          className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/5 flex flex-col gap-0.5"
+                          onClick={() => {
+                            setSpecies(sp.common);
+                            setShowSpeciesSuggestions(false);
+                          }}
+                        >
+                          <span className="font-serif" style={{ color: "hsl(42, 75%, 60%)" }}>{sp.common}</span>
+                          <span className="text-[11px] italic" style={{ color: "hsla(42, 40%, 55%, 0.7)" }}>
+                            {sp.scientific} · {sp.family}
+                          </span>
+                          {sp.aliases && sp.aliases.length > 0 && (
+                            <span className="text-[10px]" style={{ color: "hsla(0, 0%, 100%, 0.35)" }}>
+                              Also: {sp.aliases.join(", ")}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
