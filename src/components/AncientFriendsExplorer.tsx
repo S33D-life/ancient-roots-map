@@ -58,6 +58,10 @@ const TreeCard = ({
   const leftOpacity = useTransform(x, [-120, 0], [1, 0]);
   const rightOpacity = useTransform(x, [0, 120], [0, 1]);
 
+  // Parallax: photo shifts opposite to drag, slight scale
+  const photoX = useTransform(x, [-200, 0, 200], [20, 0, -20]);
+  const photoScale = useTransform(x, [-200, 0, 200], [1.08, 1.05, 1.08]);
+
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (Math.abs(info.offset.x) > 100) {
       onSwipe(info.offset.x > 0 ? "right" : "left");
@@ -119,16 +123,25 @@ const TreeCard = ({
       {/* Card content */}
       <div className="relative h-full flex flex-col">
         {/* Top image area */}
-        <div
-          className="relative flex-shrink-0 h-[40%] flex items-center justify-center overflow-hidden"
-          style={{
-            background: photoUrl
-              ? `url(${photoUrl}) center/cover no-repeat`
-              : "radial-gradient(ellipse at center, hsla(120, 30%, 25%, 0.4), hsla(28, 20%, 10%, 0.9))",
-          }}
-        >
-          {!photoUrl && (
-            <div className="text-center">
+        <div className="relative flex-shrink-0 h-[40%] overflow-hidden">
+          {photoUrl ? (
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url(${photoUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                x: isTop ? photoX : 0,
+                scale: isTop ? photoScale : 1.05,
+              }}
+            />
+          ) : (
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                background: "radial-gradient(ellipse at center, hsla(120, 30%, 25%, 0.4), hsla(28, 20%, 10%, 0.9))",
+              }}
+            >
               <span className="text-6xl sm:text-7xl block mb-2">🌳</span>
             </div>
           )}
@@ -143,7 +156,7 @@ const TreeCard = ({
           >
             {tree.species}
           </Badge>
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[hsl(22,25%,8%)] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[hsl(22,25%,8%)] to-transparent z-[1]" />
         </div>
 
         {/* Info section */}
