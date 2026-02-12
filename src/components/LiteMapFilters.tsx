@@ -96,8 +96,8 @@ const LiteMapFilters = ({
 
   return (
     <>
-      {/* Top bar */}
-      <div className="absolute top-2 left-2 right-2 z-[1000] flex items-center gap-1.5 animate-fade-in">
+      {/* Top bar — offset left to accommodate search button */}
+      <div className="absolute top-2 left-14 right-2 z-[1000] flex items-center gap-1.5 animate-fade-in">
         {/* Perspective chips */}
         {PERSPECTIVES.map((p) => (
           <button
