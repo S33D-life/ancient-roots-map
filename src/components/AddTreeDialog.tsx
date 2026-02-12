@@ -426,11 +426,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
               onDrop={onDrop}
             >
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name of this Ancient Friend</Label>
-                  <Input id="name" value={name} onChange={(e) => setName(e.target.value.slice(0, 200))} placeholder="e.g., The Old Oak of Glastonbury (optional)" maxLength={200} className="font-serif" />
-                </div>
-
                 <div className="space-y-2 relative">
                   <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
                   <Input
@@ -579,8 +574,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
             <>
               <div className="text-center py-2">
                 <TreeDeciduous className="w-8 h-8 mx-auto mb-2" style={{ color: 'hsl(120, 50%, 45%)' }} />
-                <p className="font-serif text-sm text-foreground">{name}</p>
-                <p className="font-serif text-xs text-muted-foreground">{species}</p>
+                <p className="font-serif text-sm text-foreground">{species}</p>
+                {what3words && <p className="font-serif text-xs text-muted-foreground">/{what3words}</p>}
               </div>
 
               <div className="space-y-2">
@@ -629,11 +624,42 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
               <div>
                 <h3 className="font-serif text-base" style={{ color: 'hsl(42, 75%, 60%)' }}>
-                  {name} has been planted in the Atlas
+                  {name || species} has been planted in the Atlas
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1 font-serif">
-                  Would you like to leave an offering for those who visit?
+                  Give this ancient friend a name, then leave an offering
                 </p>
+              </div>
+
+              {/* Name field — now in the offering step */}
+              <div className="space-y-2 text-left max-w-xs mx-auto">
+                <Label htmlFor="tree-name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name this Ancient Friend</Label>
+                <Input
+                  id="tree-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value.slice(0, 200))}
+                  placeholder="e.g., The Old Oak of Glastonbury"
+                  maxLength={200}
+                  className="font-serif"
+                />
+                {name.trim() && name.trim() !== species.trim() && savedTreeId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs font-serif gap-1.5"
+                    onClick={async () => {
+                      try {
+                        const { error } = await supabase.from('trees').update({ name: name.trim() }).eq('id', savedTreeId);
+                        if (error) throw error;
+                        toast({ title: "Name saved ✨", description: `Now known as "${name.trim()}"` });
+                      } catch (err: any) {
+                        toast({ title: "Could not save name", description: err.message, variant: "destructive" });
+                      }
+                    }}
+                  >
+                    <Check className="h-3 w-3" /> Save Name
+                  </Button>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
