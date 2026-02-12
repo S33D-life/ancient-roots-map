@@ -81,6 +81,15 @@ interface TreeOfferings {
   [treeId: string]: number;
 }
 
+interface BloomedSeed {
+  id: string;
+  tree_id: string;
+  latitude: number | null;
+  longitude: number | null;
+  blooms_at: string;
+  planter_id: string;
+}
+
 interface Tree {
   id: string;
   name: string;
@@ -250,6 +259,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
+  const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
+  const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const mapStatusRef = useRef(mapStatus);
   // Keep ref in sync so timeouts/callbacks read current value
@@ -315,6 +326,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         setTrees(treesResult.data || []);
       }
 
+      // Fetch bloomed, uncollected seeds
+      const { data: seedData } = await supabase
+        .from('planted_seeds')
+        .select('id, tree_id, latitude, longitude, blooms_at, planter_id')
+        .is('collected_by', null)
+        .lte('blooms_at', new Date().toISOString());
+      setBloomedSeeds(seedData || []);
+
       if (!offeringsResult.error && offeringsResult.data) {
         const counts: TreeOfferings = {};
         offeringsResult.data.forEach((o) => {
@@ -330,6 +349,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       .channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, () => fetchTrees())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'offerings' }, () => fetchTrees())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'planted_seeds' }, () => fetchTrees())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -801,6 +821,51 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     }
   }, [filteredTrees, groveScale, offeringCounts]);
 
+  // Render glowing seed heart markers for bloomed, uncollected seeds
+  useEffect(() => {
+    if (!map.current) return;
+
+    seedMarkersRef.current.forEach((m) => m.remove());
+    seedMarkersRef.current = [];
+
+    const treeCoordMap: Record<string, { lat: number; lng: number }> = {};
+    trees.forEach((t) => {
+      if (t.latitude && t.longitude) treeCoordMap[t.id] = { lat: t.latitude, lng: t.longitude };
+    });
+
+    const seedsByTree: Record<string, number> = {};
+    bloomedSeeds.forEach((s) => {
+      seedsByTree[s.tree_id] = (seedsByTree[s.tree_id] || 0) + 1;
+    });
+
+    Object.entries(seedsByTree).forEach(([treeId, count]) => {
+      const coords = treeCoordMap[treeId];
+      if (!coords) return;
+
+      const el = document.createElement('div');
+      el.className = 'seed-heart-marker';
+      el.innerHTML = `<span class="seed-heart-icon">💚</span>${count > 1 ? `<span class="seed-heart-count">${count}</span>` : ''}`;
+      el.title = `${count} bloomed heart${count !== 1 ? 's' : ''} ready to collect!`;
+
+      const popup = new maplibregl.Popup({ offset: 20, closeButton: true, className: 'tree-popup' })
+        .setHTML(`
+          <div style="padding: 12px; font-family: 'Cinzel', serif; min-width: 180px; text-align: center;">
+            <p style="margin: 0; font-size: 20px;">💚</p>
+            <p style="margin: 6px 0 2px; font-size: 14px; color: hsl(120, 50%, 60%); font-weight: 700;">${count} Bloomed Heart${count !== 1 ? 's' : ''}</p>
+            <p style="margin: 0 0 8px; font-size: 11px; color: hsl(42, 50%, 55%);">Ready to collect — visit this tree!</p>
+            <a href="/tree/${encodeURIComponent(treeId)}" style="display: block; padding: 8px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(120, 50%, 45%), hsl(80, 60%, 50%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.06em; font-weight: 600;">Collect Hearts ⟶</a>
+          </div>
+        `);
+
+      const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([coords.lng, coords.lat])
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      seedMarkersRef.current.push(marker);
+    });
+  }, [bloomedSeeds, trees]);
+
   // Draw grove boundary polygon
   useEffect(() => {
     const m = map.current;
@@ -1149,7 +1214,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} userId={userId} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} userId={userId} bloomedSeeds={bloomedSeeds} />
         </Suspense>
         <button
           onClick={() => {
@@ -1407,6 +1472,37 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           color: hsl(45, 60%, 50%);
           font-size: 18px;
           padding: 4px 8px;
+        }
+        .seed-heart-marker {
+          position: relative;
+          cursor: pointer;
+          animation: seedHeartPulse 2s ease-in-out infinite;
+          z-index: 5;
+          filter: drop-shadow(0 0 6px hsla(120, 60%, 50%, 0.5));
+        }
+        .seed-heart-icon {
+          font-size: 22px;
+          display: block;
+        }
+        .seed-heart-count {
+          position: absolute;
+          top: -4px;
+          right: -8px;
+          background: hsl(120, 50%, 40%);
+          color: hsl(0, 0%, 100%);
+          font-size: 9px;
+          font-weight: 700;
+          font-family: sans-serif;
+          min-width: 16px;
+          height: 16px;
+          line-height: 16px;
+          text-align: center;
+          border-radius: 99px;
+          border: 1.5px solid hsl(120, 40%, 15%);
+        }
+        @keyframes seedHeartPulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px hsla(120, 60%, 50%, 0.4)); }
+          50% { transform: scale(1.15); filter: drop-shadow(0 0 10px hsla(120, 60%, 50%, 0.7)); }
         }
       `}</style>
     </div>

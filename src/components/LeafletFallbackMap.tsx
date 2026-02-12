@@ -25,11 +25,21 @@ interface TreeOfferings {
   [treeId: string]: number;
 }
 
+interface BloomedSeed {
+  id: string;
+  tree_id: string;
+  latitude: number | null;
+  longitude: number | null;
+  blooms_at: string;
+  planter_id: string;
+}
+
 interface LeafletFallbackMapProps {
   trees: Tree[];
   offeringCounts?: TreeOfferings;
   className?: string;
   userId?: string | null;
+  bloomedSeeds?: BloomedSeed[];
 }
 
 /* ── Marker tier ── */
@@ -158,6 +168,9 @@ const LITE_CSS = `
 .marker-ancient{animation:ancientGlow 3.5s ease-in-out infinite;will-change:filter}
 .user-dot{animation:userPulse 2.5s ease-in-out infinite}
 .atlas-leaflet-popup .leaflet-popup-content-wrapper{background:hsl(30,15%,10%)!important;border:1px solid hsla(42,40%,30%,0.4)!important;border-radius:12px!important;box-shadow:0 6px 24px rgba(0,0,0,0.5),0 0 12px hsla(42,60%,40%,0.08)!important;padding:0!important}
+@keyframes seedHeartGlow{0%,100%{transform:scale(1);filter:drop-shadow(0 0 4px hsla(120,60%,50%,0.4))}50%{transform:scale(1.15);filter:drop-shadow(0 0 10px hsla(120,60%,50%,0.7))}}
+.seed-heart-leaflet{background:transparent!important;border:none!important;display:flex;align-items:center;justify-content:center;position:relative;animation:seedHeartGlow 2s ease-in-out infinite;cursor:pointer}
+.seed-heart-leaflet .seed-count{position:absolute;top:-4px;right:-6px;background:hsl(120,50%,40%);color:#fff;font-size:9px;font-weight:700;font-family:sans-serif;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:99px;border:1.5px solid hsl(120,40%,15%)}
 .atlas-leaflet-popup .leaflet-popup-content{margin:0!important}
 .atlas-leaflet-popup .leaflet-popup-tip{background:hsl(30,15%,10%)!important;border:1px solid hsla(42,40%,30%,0.4)!important}
 .atlas-leaflet-popup .leaflet-popup-close-button{color:hsl(42,60%,55%)!important;font-size:18px!important;top:6px!important;right:8px!important}
@@ -178,7 +191,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, bloomedSeeds = [] }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -386,6 +399,49 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
   }, [filteredTrees, userLatLng]);
+
+  // Render bloomed seed heart markers
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || bloomedSeeds.length === 0) return;
+
+    const treeCoordMap: Record<string, { lat: number; lng: number }> = {};
+    trees.forEach((t) => {
+      if (t.latitude && t.longitude) treeCoordMap[t.id] = { lat: t.latitude, lng: t.longitude };
+    });
+
+    const seedsByTree: Record<string, number> = {};
+    bloomedSeeds.forEach((s) => {
+      seedsByTree[s.tree_id] = (seedsByTree[s.tree_id] || 0) + 1;
+    });
+
+    const markers: L.Marker[] = [];
+    Object.entries(seedsByTree).forEach(([treeId, count]) => {
+      const coords = treeCoordMap[treeId];
+      if (!coords) return;
+
+      const icon = L.divIcon({
+        className: 'seed-heart-leaflet',
+        html: `<span style="font-size:22px;">💚</span>${count > 1 ? `<span class="seed-count">${count}</span>` : ''}`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+      });
+
+      const popupHtml = `<div style="padding:12px;font-family:'Cinzel',serif;min-width:180px;text-align:center;">
+        <p style="margin:0;font-size:20px;">💚</p>
+        <p style="margin:6px 0 2px;font-size:14px;color:hsl(120,50%,60%);font-weight:700;">${count} Bloomed Heart${count !== 1 ? 's' : ''}</p>
+        <p style="margin:0 0 8px;font-size:11px;color:hsl(42,50%,55%);">Ready to collect — visit this tree!</p>
+        <a href="/tree/${encodeURIComponent(treeId)}" style="display:block;padding:8px 0;text-align:center;font-size:12px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(120,50%,45%),hsl(80,60%,50%));border-radius:6px;text-decoration:none;letter-spacing:0.06em;font-weight:600;">Collect Hearts ⟶</a>
+      </div>`;
+
+      const marker = L.marker([coords.lat, coords.lng], { icon, zIndexOffset: 500 })
+        .bindPopup(popupHtml, { className: 'atlas-leaflet-popup', maxWidth: 240, closeButton: true })
+        .addTo(map);
+      markers.push(marker);
+    });
+
+    return () => { markers.forEach((m) => map.removeLayer(m)); };
+  }, [bloomedSeeds, trees]);
 
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
