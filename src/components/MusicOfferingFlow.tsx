@@ -173,8 +173,9 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
   // Debounce
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Step: "search" | "confirm"
+  // Step: "search" | "confirm" — now merged: selection shows inline below search
   const step = selectedSong || customMode ? "confirm" : "search";
+  const showSearchResults = !selectedSong && !customMode;
 
   // Fetch recent songs on mount
   useEffect(() => {
@@ -298,30 +299,30 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
 
   return (
     <div className="space-y-4">
+      {/* Search always visible */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+        <Input
+          value={query}
+          onChange={(e) => { handleQueryChange(e.target.value); if (selectedSong) { setSelectedSong(null); setCustomMode(false); } }}
+          placeholder="Search songs, artists, albums..."
+          className="pl-10 pr-10 font-serif h-12 text-sm bg-secondary/20 border-border/30 focus:border-primary/50"
+          autoFocus={!selectedSong}
+        />
+        {searching && (
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary/60" />
+        )}
+      </div>
       <AnimatePresence mode="wait">
-        {step === "search" ? (
+        {showSearchResults ? (
           <motion.div
             key="search"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="space-y-4"
           >
-            {/* Search input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-              <Input
-                value={query}
-                onChange={(e) => handleQueryChange(e.target.value)}
-                placeholder="Search songs, artists, albums..."
-                className="pl-10 pr-10 font-serif h-12 text-sm bg-secondary/20 border-border/30 focus:border-primary/50"
-                autoFocus
-              />
-              {searching && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary/60" />
-              )}
-            </div>
 
             {/* Empty state */}
             {!query && !hasSearched && (
@@ -460,16 +461,16 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
             )}
           </motion.div>
         ) : (
-          /* ---------- Confirm Step ---------- */
+          /* ---------- Confirm (inline below search) ---------- */
           <motion.div
             key="confirm"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.25 }}
-            className="space-y-5"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-4"
           >
-            {/* Back button */}
+            {/* Back to search */}
             <button
               type="button"
               onClick={handleBack}

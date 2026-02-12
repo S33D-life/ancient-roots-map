@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import MusicOfferingFlow, { type SelectedSongData } from "@/components/MusicOfferingFlow";
 import VoiceOfferingFlow, { type VoiceOfferingData } from "@/components/VoiceOfferingFlow";
 import BookOfferingFlow, { type BookOfferingData } from "@/components/BookOfferingFlow";
+import OfferingCelebration from "@/components/OfferingCelebration";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -60,6 +61,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
   const [tagQuery, setTagQuery] = useState("");
   const tagTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState({ emoji: "✨", message: "", subtitle: "" });
 
   const cfg = typeConfig[type];
 
@@ -160,15 +163,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
         );
       }
 
-      toast({
-        title: `${cfg.singular} added! ✨`,
-        description: `Your ${cfg.singular.toLowerCase()} has been sealed`,
-        action: (
-          <Button variant="outline" size="sm" className="font-serif text-xs" asChild>
-            <a href={`/tree/${treeId}`}>View on map →</a>
-          </Button>
-        ),
-      });
+      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed!`, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
+      setShowCelebration(true);
+      setTimeout(() => {
+        setShowCelebration(false);
+        onOpenChange(false);
+      }, 2000);
       setTitle("");
       setContent("");
       setMediaUrl("");
@@ -176,7 +176,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
       setSealedByStaff("");
       setTaggedUsers([]);
       clearSelectedFile();
-      onOpenChange(false);
+      return; // onOpenChange handled by celebration timeout
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -217,13 +217,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
         );
       }
 
-      toast({
-        title: "Song offering sealed! 🎵",
-        description: `"${data.title}" by ${data.artist} has been offered`,
-      });
+      setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
+      setShowCelebration(true);
       setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
       clearSelectedFile();
-      onOpenChange(false);
+      setTimeout(() => { setShowCelebration(false); onOpenChange(false); }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -263,13 +261,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
         );
       }
 
-      toast({
-        title: "Voice offering sealed! 🎙️",
-        description: "Your voice has been offered to this Ancient Friend",
-      });
+      setCelebrationMsg({ emoji: "🎙️", message: "Voice offering sealed!", subtitle: "Your voice has been offered" });
+      setShowCelebration(true);
       setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
       clearSelectedFile();
-      onOpenChange(false);
+      setTimeout(() => { setShowCelebration(false); onOpenChange(false); }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -282,6 +278,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
           <div
             className="h-0.5"
             style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent)" }}
@@ -320,6 +317,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
           <div
             className="h-0.5"
             style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }}
@@ -390,13 +388,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
         );
       }
 
-      toast({
-        title: "Book offering sealed! 📖",
-        description: `"${data.title}" by ${data.author} has been placed in the living archive`,
-      });
+      setCelebrationMsg({ emoji: "📖", message: "Book offering sealed!", subtitle: `"${data.title}" by ${data.author}` });
+      setShowCelebration(true);
       setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
       clearSelectedFile();
-      onOpenChange(false);
+      setTimeout(() => { setShowCelebration(false); onOpenChange(false); }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -409,6 +405,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
           <div
             className="h-0.5"
             style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3), transparent)" }}
@@ -446,6 +443,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+        <OfferingCelebration
+          active={showCelebration}
+          emoji={celebrationMsg.emoji}
+          message={celebrationMsg.message}
+          subtitle={celebrationMsg.subtitle}
+          onComplete={() => setShowCelebration(false)}
+        />
         {/* Header with accent */}
         <div
           className="h-0.5"
