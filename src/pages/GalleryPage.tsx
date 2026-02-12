@@ -3,6 +3,7 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
+import AncientFriendsExplorer from "@/components/AncientFriendsExplorer";
 import HeartwoodEntrance from "@/components/HeartwoodEntrance";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,6 +104,7 @@ const GalleryPage = () => {
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showExplorer, setShowExplorer] = useState(false);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -861,6 +863,28 @@ const GalleryPage = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
+
+            {/* Explore button */}
+            <button
+              onClick={() => setShowExplorer(true)}
+              className="w-full py-3 rounded-xl text-sm font-serif tracking-wide transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              style={{
+                background: 'linear-gradient(135deg, hsla(42, 70%, 45%, 0.2), hsla(28, 50%, 30%, 0.2))',
+                color: 'hsl(42, 80%, 60%)',
+                border: '1px solid hsla(42, 60%, 50%, 0.3)',
+              }}
+            >
+              🌿 Explore — Swipe through Ancient Friends
+            </button>
+
+            {/* Explorer overlay */}
+            {showExplorer && (
+              <AncientFriendsExplorer
+                trees={filteredTrees}
+                onClose={() => setShowExplorer(false)}
+                onWishlist={addToWishlist}
+              />
+            )}
 
             {/* View Toggle */}
             <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'hsla(30, 20%, 15%, 0.6)', border: '1px solid hsla(42, 40%, 30%, 0.3)' }}>
