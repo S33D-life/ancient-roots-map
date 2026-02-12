@@ -157,6 +157,7 @@ const LITE_CSS = `
 .leaflet-control-zoom a{background:hsla(30,30%,12%,0.9)!important;color:hsl(42,60%,60%)!important;border:1px solid hsla(42,40%,30%,0.4)!important;border-radius:8px!important;width:34px!important;height:34px!important;line-height:34px!important;font-size:16px!important;transition:background .15s!important}
 .leaflet-control-zoom a:active{background:hsla(42,40%,20%,0.9)!important}
 .leaflet-control-zoom{border:none!important;border-radius:8px!important;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.25)!important}
+@media(max-width:768px){.leaflet-control-zoom{display:none!important}}
 .leaflet-control-attribution{font-size:9px!important;background:hsla(30,20%,10%,0.7)!important;color:hsl(42,40%,50%)!important;border-radius:4px 0 0 0!important;padding:2px 6px!important}
 .leaflet-control-attribution a{color:hsl(42,50%,55%)!important}
 `;
@@ -454,15 +455,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
         </button>
       </div>
 
-      {/* Lite Mode badge */}
+      {/* Lite Mode badge — top area, after filters */}
       <div
-        className="absolute bottom-6 left-3 z-[1000] px-2.5 py-1 rounded-full font-serif flex items-center gap-1.5"
+        className="absolute top-12 right-2 z-[1000] px-2 py-1 rounded-full font-serif flex items-center gap-1"
         style={{
           background: "hsla(30, 30%, 12%, 0.85)",
           color: "hsl(42, 55%, 58%)",
           border: "1px solid hsla(42, 40%, 30%, 0.4)",
           backdropFilter: "blur(6px)",
-          fontSize: "11px",
+          fontSize: "10px",
         }}
       >
         🍃 Lite
