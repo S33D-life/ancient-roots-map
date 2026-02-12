@@ -1149,7 +1149,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={filteredTrees} offeringCounts={offeringCounts} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} userId={userId} />
         </Suspense>
         <button
           onClick={() => {

@@ -6,6 +6,7 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { Navigation, Loader2 } from "lucide-react";
+import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
 
 interface Tree {
   id: string;
@@ -16,6 +17,7 @@ interface Tree {
   what3words: string;
   description?: string;
   estimated_age?: number | null;
+  created_by?: string;
 }
 
 interface TreeOfferings {
@@ -26,6 +28,7 @@ interface LeafletFallbackMapProps {
   trees: Tree[];
   offeringCounts?: TreeOfferings;
   className?: string;
+  userId?: string | null;
 }
 
 /* ── Marker tier classification ── */
@@ -38,7 +41,7 @@ function getTreeTier(age: number, offerings: number): Tier {
   return "seedling";
 }
 
-/* ── Pre-built SVG data URIs cached per tier (avoids btoa on every marker) ── */
+/* ── Pre-built SVG data URIs cached per tier ── */
 const SVG_CACHE: Record<string, string> = {};
 
 function getSvgDataUri(tier: Tier): string {
@@ -66,16 +69,14 @@ function getSvgDataUri(tier: Tier): string {
 
 const MARKER_SIZES: Record<Tier, number> = { ancient: 40, storied: 34, notable: 30, seedling: 24 };
 
-/* ── Popup HTML (compact, fast) ── */
+/* ── Popup HTML ── */
 function buildPopupHtml(tree: Tree, offerings: number, age: number): string {
   const ageBadge = age > 0
     ? `<span style="margin-left:6px;padding:1px 6px;font-size:10px;border-radius:99px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,60%);border:1px solid hsla(42,80%,50%,0.25);font-family:sans-serif;vertical-align:middle;">~${age}y</span>`
     : "";
-
   const offeringLine = offerings > 0
     ? `<p style="margin:6px 0 0;font-size:11px;color:hsl(42,60%,55%);font-family:sans-serif;">✦ ${offerings} offering${offerings !== 1 ? "s" : ""}</p>`
     : `<p style="margin:6px 0 0;font-size:11px;color:hsl(0,0%,48%);font-style:italic;font-family:sans-serif;">No offerings yet</p>`;
-
   const desc = tree.description
     ? `<p style="margin:6px 0 0;font-size:11px;color:hsl(0,0%,68%);line-height:1.45;font-family:sans-serif;">${escapeHtml(tree.description.substring(0, 100))}${tree.description.length > 100 ? "…" : ""}</p>`
     : "";
@@ -94,7 +95,7 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number): string {
   </div>`;
 }
 
-/* ── Styles (minimal, no heavy filters on mobile) ── */
+/* ── CSS ── */
 const LITE_CSS = `
 .leaflet-tree-marker{background:transparent!important;border:none!important}
 .tree-cluster{display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:'Cinzel',serif;font-weight:700;color:hsl(45,80%,60%);text-shadow:0 1px 2px rgba(0,0,0,0.5);border:2px solid hsla(42,70%,50%,0.55);transition:transform .15s ease-out,box-shadow .15s ease-out}
@@ -116,13 +117,46 @@ const LITE_CSS = `
 .leaflet-control-attribution a{color:hsl(42,50%,55%)!important}
 `;
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const clusterRef = useRef<any>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const [locating, setLocating] = useState(false);
 
-  // Pre-compute icon instances by tier (reuse across markers)
+  // Filter state — managed locally for fast, lightweight filtering
+  const [species, setSpecies] = useState("all");
+  const [perspective, setPerspective] = useState<LitePerspective>("collective");
+
+  // Compute species counts from all trees
+  const speciesCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    trees.forEach((t) => {
+      const key = t.species.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return counts;
+  }, [trees]);
+
+  // Apply filters client-side
+  const filteredTrees = useMemo(() => {
+    let result = trees;
+
+    // Perspective filter
+    if (perspective === "personal" && userId) {
+      result = result.filter((t) => t.created_by === userId);
+    }
+    // "tribe" — for now show all (same as collective until social graph is wired)
+
+    // Species filter
+    if (species !== "all") {
+      result = result.filter((t) => t.species.toLowerCase() === species.toLowerCase());
+    }
+
+    return result;
+  }, [trees, species, perspective, userId]);
+
+  // Pre-compute icon instances by tier
   const iconCache = useMemo(() => {
     const cache: Record<Tier, L.DivIcon> = {} as any;
     const tiers: Tier[] = ["ancient", "storied", "notable", "seedling"];
@@ -139,6 +173,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
     return cache;
   }, []);
 
+  // Initialize map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -152,34 +187,47 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
       tapTolerance: 15,
     } as any);
 
-    // Retina-aware tiles
     const isRetina = window.devicePixelRatio > 1;
     L.tileLayer(
       isRetina
         ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
         : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      {
-        attribution: '&copy; OSM &copy; CARTO',
-        maxZoom: 19,
-        subdomains: "abcd",
-        // Keep tiles in memory for smoother panning
-        keepBuffer: 4,
-      }
+      { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19, subdomains: "abcd", keepBuffer: 4 }
     ).addTo(map);
 
     L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // ── Cluster group with performance tuning ──
+    mapRef.current = map;
+    requestAnimationFrame(() => map.invalidateSize());
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      clusterRef.current = null;
+      userMarkerRef.current = null;
+    };
+  }, []);
+
+  // Update markers when filteredTrees change (no full map re-init)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    // Remove old cluster layer
+    if (clusterRef.current) {
+      map.removeLayer(clusterRef.current);
+    }
+
     const clusterGroup = (L as any).markerClusterGroup({
       maxClusterRadius: 50,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       animate: true,
-      animateAddingMarkers: false, // Faster initial load
+      animateAddingMarkers: false,
       disableClusteringAtZoom: 16,
-      chunkedLoading: true,       // Non-blocking marker addition
+      chunkedLoading: true,
       chunkInterval: 100,
       chunkDelay: 10,
       iconCreateFunction: (cluster: any) => {
@@ -194,43 +242,30 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
       },
     });
 
-    // ── Add markers using cached icons ──
-    trees.forEach((tree) => {
+    filteredTrees.forEach((tree) => {
       const offerings = offeringCounts[tree.id] || 0;
       const age = tree.estimated_age || 0;
       const tier = getTreeTier(age, offerings);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon: iconCache[tier] });
-      // Lazy popup — only build HTML on first open
       marker.bindPopup(() => buildPopupHtml(tree, offerings, age), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
         autoPanPadding: L.point(20, 60),
       });
-
       clusterGroup.addLayer(marker);
     });
 
     map.addLayer(clusterGroup);
+    clusterRef.current = clusterGroup;
 
-    // Fit bounds with animation
-    if (trees.length > 0) {
-      const bounds = L.latLngBounds(trees.map((t) => [t.latitude, t.longitude]));
+    // Fit bounds
+    if (filteredTrees.length > 0) {
+      const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
-
-    mapRef.current = map;
-
-    // Invalidate size after a frame to handle dynamic containers
-    requestAnimationFrame(() => map.invalidateSize());
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-      userMarkerRef.current = null;
-    };
-  }, [trees, offeringCounts, iconCache]);
+  }, [filteredTrees, offeringCounts, iconCache]);
 
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
@@ -238,7 +273,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        // Remove previous user marker
         if (userMarkerRef.current && mapRef.current) {
           mapRef.current.removeLayer(userMarkerRef.current);
         }
@@ -262,10 +296,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
   return (
     <div className={className || "absolute inset-0"} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" style={{ background: '#f0ede6' }} />
-
       <style>{LITE_CSS}</style>
 
-      {/* Find Me — thumb-friendly bottom-right placement */}
+      {/* Filters */}
+      <LiteMapFilters
+        species={species}
+        onSpeciesChange={setSpecies}
+        perspective={perspective}
+        onPerspectiveChange={setPerspective}
+        speciesCounts={speciesCounts}
+        totalVisible={filteredTrees.length}
+      />
+
+      {/* Find Me */}
       <button
         onClick={handleFindMe}
         disabled={locating}
@@ -282,7 +325,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
         {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
       </button>
 
-      {/* Lite Mode badge — compact */}
+      {/* Lite Mode badge */}
       <div
         className="absolute bottom-6 left-3 z-[1000] px-2.5 py-1 rounded-full font-serif flex items-center gap-1.5"
         style={{
@@ -293,7 +336,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
           fontSize: "11px",
         }}
       >
-        🍃 {trees.length} ancient friends
+        🍃 Lite
       </div>
     </div>
   );
