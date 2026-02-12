@@ -16,6 +16,8 @@ interface HeartTx {
 
 interface Props {
   userId: string;
+  externalFilter?: string | null;
+  onFilterChange?: (filter: string) => void;
 }
 
 const TYPE_CONFIG: Record<string, { emoji: string; label: string; color: string }> = {
@@ -26,11 +28,19 @@ const TYPE_CONFIG: Record<string, { emoji: string; label: string; color: string 
 
 type FilterType = "all" | "wanderer" | "sower" | "windfall";
 
-const VaultHeartLedger = ({ userId }: Props) => {
+const VaultHeartLedger = ({ userId, externalFilter, onFilterChange }: Props) => {
   const [transactions, setTransactions] = useState<HeartTx[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [internalFilter, setInternalFilter] = useState<FilterType>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Sync external filter
+  const filter: FilterType = (externalFilter as FilterType) || internalFilter;
+
+  const handleFilterChange = (f: FilterType) => {
+    setInternalFilter(f);
+    onFilterChange?.(f === "all" ? "" : f);
+  };
 
   useEffect(() => {
     const fetchTx = async () => {
@@ -102,7 +112,7 @@ const VaultHeartLedger = ({ userId }: Props) => {
                   ? "bg-primary/15 text-primary border border-primary/30"
                   : "text-muted-foreground"
               }`}
-              onClick={() => setFilter(f.value)}
+              onClick={() => handleFilterChange(f.value)}
             >
               {f.label}
             </Button>
