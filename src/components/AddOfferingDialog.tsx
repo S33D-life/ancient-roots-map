@@ -7,22 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, ImagePlus, X, Sparkles, Search, Music, ExternalLink, Play, Pause, UserPlus } from "lucide-react";
+import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import MusicOfferingFlow, { type SelectedSongData } from "@/components/MusicOfferingFlow";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
-
-interface iTunesResult {
-  trackId: number;
-  trackName: string;
-  artistName: string;
-  collectionName: string;
-  artworkUrl100: string;
-  previewUrl: string;
-  trackViewUrl: string;
-}
 
 interface AddOfferingDialogProps {
   open: boolean;
@@ -58,15 +49,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
   const [sealedByStaff, setSealedByStaff] = useState(() => {
     return localStorage.getItem("linked_staff_code") || "";
   });
-  const [songSearch, setSongSearch] = useState("");
-  const [songResults, setSongResults] = useState<iTunesResult[]>([]);
-  const [songSearching, setSongSearching] = useState(false);
-  const [selectedSong, setSelectedSong] = useState<iTunesResult | null>(null);
-  const [playingPreview, setPlayingPreview] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { toast } = useToast();
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
@@ -75,57 +59,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
 
   const cfg = typeConfig[type];
 
-  // iTunes music search
-  const searchMusic = useCallback(async (query: string) => {
-    if (!query.trim()) { setSongResults([]); return; }
-    setSongSearching(true);
-    try {
-      const res = await fetch(
-        `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=8`
-      );
-      const data = await res.json();
-      setSongResults(data.results || []);
-    } catch {
-      setSongResults([]);
-    } finally {
-      setSongSearching(false);
-    }
-  }, []);
 
-  const handleSongSearchChange = (value: string) => {
-    setSongSearch(value);
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => searchMusic(value), 400);
-  };
-
-  const selectSong = (song: iTunesResult) => {
-    setSelectedSong(song);
-    setTitle(song.trackName);
-    setContent(`${song.artistName} — ${song.collectionName}`);
-    setMediaUrl(song.previewUrl || "");
-    setNftLink(song.trackViewUrl || "");
-    setSongResults([]);
-    setSongSearch("");
-    stopPreview();
-  };
-
-  const togglePreview = (url: string) => {
-    if (playingPreview === url) {
-      stopPreview();
-    } else {
-      stopPreview();
-      const audio = new Audio(url);
-      audio.play();
-      audio.onended = () => setPlayingPreview(null);
-      audioRef.current = audio;
-      setPlayingPreview(url);
-    }
-  };
-
-  const stopPreview = () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    setPlayingPreview(null);
-  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -246,6 +180,91 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
     }
   };
 
+  // Song offering via MusicOfferingFlow
+  const handleSongComplete = async (data: SelectedSongData) => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
+        return;
+      }
+
+      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
+        tree_id: treeId,
+        type: "song" as const,
+        title: data.title,
+        content: data.message || `${data.artist}${data.album ? ` — ${data.album}` : ""}`,
+        media_url: data.previewUrl || null,
+        nft_link: data.externalUrl || null,
+        created_by: user.id,
+        sealed_by_staff: sealedByStaff.trim() || null,
+        meeting_id: meetingId || null,
+      }).select("id").single();
+      if (error) throw error;
+
+      if (taggedUsers.length > 0 && insertedOffering) {
+        await supabase.from("offering_tags").insert(
+          taggedUsers.map((t) => ({
+            offering_id: insertedOffering.id,
+            tagged_user_id: t.id,
+            tagged_by: user.id,
+          }))
+        );
+      }
+
+      toast({
+        title: "Song offering sealed! 🎵",
+        description: `"${data.title}" by ${data.artist} has been offered`,
+      });
+      setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
+      clearSelectedFile();
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // For song type, render dedicated flow
+  if (type === "song") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <div
+            className="h-0.5"
+            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent)" }}
+          />
+          <div className="px-6 pt-5 pb-0">
+            <DialogHeader>
+              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
+                <span className="text-2xl">🎵</span>
+                Song Offering
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
+                Offer a song to this Ancient Friend
+              </p>
+            </DialogHeader>
+          </div>
+          <div className="px-6 pb-6 mt-2">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <MusicOfferingFlow
+                treeId={treeId}
+                onComplete={handleSongComplete}
+                onCancel={() => onOpenChange(false)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
@@ -357,134 +376,6 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
                     className="text-xs"
                   />
                 </>
-              )}
-            </div>
-          )}
-
-          {/* Song Search */}
-          {type === "song" && (
-            <div className="space-y-3">
-              <Label className="font-serif text-xs tracking-widest uppercase text-muted-foreground">
-                Search Apple Music
-              </Label>
-
-              {/* Selected song preview */}
-              {selectedSong && (
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/30 bg-primary/5">
-                  <img
-                    src={selectedSong.artworkUrl100}
-                    alt={selectedSong.trackName}
-                    className="w-12 h-12 rounded-md object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-serif text-sm text-foreground truncate">{selectedSong.trackName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{selectedSong.artistName}</p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 shrink-0"
-                    onClick={() => { setSelectedSong(null); setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-
-              {/* Search input */}
-              {!selectedSong && (
-                <>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                    <Input
-                      value={songSearch}
-                      onChange={(e) => handleSongSearchChange(e.target.value)}
-                      placeholder="Search by song, artist, or album..."
-                      className="pl-9 font-serif"
-                    />
-                    {songSearching && (
-                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
-
-                  {/* Results */}
-                  {songResults.length > 0 && (
-                    <div className="max-h-56 overflow-y-auto rounded-lg border border-border/50 divide-y divide-border/30 bg-card">
-                      {songResults.map((song) => (
-                        <div
-                          key={song.trackId}
-                          className="flex items-center gap-3 p-2.5 hover:bg-primary/5 cursor-pointer transition-colors group"
-                          onClick={() => selectSong(song)}
-                        >
-                          <div className="relative shrink-0">
-                            <img
-                              src={song.artworkUrl100}
-                              alt={song.trackName}
-                              className="w-10 h-10 rounded object-cover"
-                            />
-                            {song.previewUrl && (
-                              <button
-                                type="button"
-                                className="absolute inset-0 flex items-center justify-center bg-black/40 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={(e) => { e.stopPropagation(); togglePreview(song.previewUrl); }}
-                              >
-                                {playingPreview === song.previewUrl ? (
-                                  <Pause className="h-4 w-4 text-white" />
-                                ) : (
-                                  <Play className="h-4 w-4 text-white" />
-                                )}
-                              </button>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-serif text-foreground truncate">{song.trackName}</p>
-                            <p className="text-[11px] text-muted-foreground truncate">{song.artistName} — {song.collectionName}</p>
-                          </div>
-                          <Music className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {songSearch && !songSearching && songResults.length === 0 && (
-                    <p className="text-xs text-muted-foreground/60 font-serif text-center py-3">
-                      No results found. Try a different search.
-                    </p>
-                  )}
-
-                  {/* Manual URL fallback */}
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-border/40" />
-                    </div>
-                    <div className="relative flex justify-center text-[10px]">
-                      <span className="bg-card px-2 text-muted-foreground/60 font-serif tracking-wider">
-                        or paste an audio URL
-                      </span>
-                    </div>
-                  </div>
-                  <Input
-                    type="url"
-                    value={mediaUrl}
-                    onChange={(e) => setMediaUrl(e.target.value)}
-                    placeholder="https://example.com/song.mp3"
-                    className="text-xs"
-                  />
-                </>
-              )}
-
-              {/* Apple Music link if selected */}
-              {selectedSong?.trackViewUrl && (
-                <a
-                  href={selectedSong.trackViewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[11px] text-primary/70 hover:text-primary font-serif tracking-wider"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  View on Apple Music
-                </a>
               )}
             </div>
           )}
