@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_catalog: {
+        Row: {
+          author: string
+          cover_url: string | null
+          created_at: string
+          genre: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          author: string
+          cover_url?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          author?: string
+          cover_url?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -872,6 +899,17 @@ export type Database = {
           visitor_number: number
         }[]
       }
+      search_books: {
+        Args: { query: string; result_limit?: number }
+        Returns: {
+          author: string
+          cover_url: string
+          genre: string
+          id: string
+          similarity: number
+          title: string
+        }[]
+      }
       search_songs: {
         Args: { query: string; result_limit?: number }
         Returns: {
@@ -899,7 +937,14 @@ export type Database = {
         | "bioregional"
         | "species"
         | "lineage"
-      offering_type: "photo" | "poem" | "song" | "story" | "nft" | "voice"
+      offering_type:
+        | "photo"
+        | "poem"
+        | "song"
+        | "story"
+        | "nft"
+        | "voice"
+        | "book"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1036,7 +1081,7 @@ export const Constants = {
         "species",
         "lineage",
       ],
-      offering_type: ["photo", "poem", "song", "story", "nft", "voice"],
+      offering_type: ["photo", "poem", "song", "story", "nft", "voice", "book"],
     },
   },
 } as const
