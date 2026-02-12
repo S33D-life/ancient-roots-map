@@ -13,6 +13,7 @@ import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sp
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import maplibregl from "maplibre-gl";
 import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
+import OfferingCelebration from "@/components/OfferingCelebration";
 
 interface AddTreeDialogProps {
   open: boolean;
@@ -52,6 +53,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [originLng, setOriginLng] = useState<number | null>(null);
   const [savedTreeId, setSavedTreeId] = useState<string | null>(null);
   const [transitionDir, setTransitionDir] = useState<"forward" | "back">("forward");
+  const [showCelebration, setShowCelebration] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [extractingPhoto, setExtractingPhoto] = useState(false);
   const [photoDate, setPhotoDate] = useState<string | null>(null);
@@ -329,7 +331,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       if (error) throw error;
       setSavedTreeId(data.id);
 
-      toast({ title: "Tree added! 🌳", description: `${name || species} has joined the Ancient Friends` });
+      setShowCelebration(true);
 
       // Auto-advance to offering step
       setTransitionDir("forward");
@@ -366,6 +368,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) setAdjustMode(false); onOpenChange(v); }}>
       <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+        <OfferingCelebration
+          active={showCelebration}
+          emoji="🌳"
+          message="Tree planted in the Atlas!"
+          subtitle={`${name || species} has joined the Ancient Friends`}
+          onComplete={() => setShowCelebration(false)}
+        />
         {/* Ritual Header */}
         <div className="px-6 pt-6 pb-4" style={{
           background: 'linear-gradient(135deg, hsla(120, 30%, 12%, 0.95), hsla(30, 25%, 10%, 0.95))',

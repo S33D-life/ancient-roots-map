@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -23,6 +23,8 @@ import DashboardVault from "@/components/dashboard/DashboardVault";
 import DashboardLeaderboard from "@/components/dashboard/DashboardLeaderboard";
 import PersonalLegend from "@/components/dashboard/PersonalLegend";
 import DashboardWanderers from "@/components/dashboard/DashboardWanderers";
+import GrovePulse from "@/components/GrovePulse";
+import HearthHearts from "@/components/HearthHearts";
 
 interface Tree {
   id: string;
@@ -304,12 +306,13 @@ const DashboardPage = () => {
     );
   }
 
-  const TAB_ITEMS = [
-    { value: "legend", label: "Legend", icon: ScrollText },
-    { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
-    { value: "leaderboard", label: "Fellowship", icon: Trophy },
-    { value: "profile", label: "Settings", icon: Settings },
-  ];
+    const TAB_ITEMS = [
+      { value: "legend", label: "Legend", icon: ScrollText },
+      { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
+      { value: "hearts", label: "Hearts", icon: Heart },
+      { value: "leaderboard", label: "Fellowship", icon: Trophy },
+      { value: "profile", label: "Settings", icon: Settings },
+    ];
 
   return (
     <div className="min-h-screen relative">
@@ -373,7 +376,16 @@ const DashboardPage = () => {
             </TabsList>
 
             <TabsContent value="legend">
-              {user && <PersonalLegend userId={user.id} />}
+              {user && (
+                <div className="space-y-8">
+                  <GrovePulse userId={user.id} />
+                  <PersonalLegend userId={user.id} />
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="hearts">
+              {user && <HearthHearts userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="pod">

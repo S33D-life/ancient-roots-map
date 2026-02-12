@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, BookOpen, Leaf, Sparkles, TreeDeciduous, ChevronRight, X } from "lucide-react";
+import { MapPin, BookOpen, Leaf, Sparkles, TreeDeciduous, ChevronRight, X, Heart, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -16,30 +16,30 @@ const steps = [
   },
   {
     icon: MapPin,
-    title: "The Arboreal Atlas",
+    title: "Find a Tree",
     description:
-      "Explore our collective map of ancient trees. Add your own encounters, leave offerings of poetry, song, and story at each tree's roots.",
+      "Open the Atlas and map an ancient tree you've encountered. Drop a pin, share its species, and tell its story.",
     cta: { label: "Open the Atlas", to: "/map" },
   },
   {
-    icon: BookOpen,
-    title: "The HeARTwood Library",
+    icon: Music,
+    title: "Leave an Offering",
     description:
-      "Nine rooms of wonder — from the Staff Room's 144 ceremonial staffs to the Music Room's species-tuned radio stations and the Seed Cellar archive.",
-    cta: { label: "Enter the Library", to: "/library" },
+      "Visit any tree and leave a gift — a photo, a poem, a song, or a memory. Each offering enriches the living archive.",
+    cta: { label: "Explore the Library", to: "/library" },
   },
   {
-    icon: Leaf,
-    title: "Council of Life",
+    icon: Heart,
+    title: "Plant a Seed",
     description:
-      "A space for collective governance and ecological dialogue, where voices gather to protect and celebrate the living world.",
-    cta: { label: "Join the Council", to: "/council-of-life" },
+      "Plant seeds near trees and collect hearts when others find them. Every seed is a gift that blooms into shared rewards.",
+    cta: null,
   },
   {
     icon: Sparkles,
-    title: "Join the Grove",
+    title: "Begin Your Legend",
     description:
-      "Create your Hearth, claim tree encounters, and become part of a growing community dedicated to the ancient friends who root our world.",
+      "Create your Hearth, watch your grove pulse with life, and become part of a community tending the world's most ancient friends.",
     cta: { label: "Create your Hearth", to: "/auth" },
   },
 ];
