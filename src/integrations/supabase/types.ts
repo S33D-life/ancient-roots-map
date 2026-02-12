@@ -899,7 +899,7 @@ export type Database = {
         | "bioregional"
         | "species"
         | "lineage"
-      offering_type: "photo" | "poem" | "song" | "story" | "nft"
+      offering_type: "photo" | "poem" | "song" | "story" | "nft" | "voice"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1036,7 +1036,7 @@ export const Constants = {
         "species",
         "lineage",
       ],
-      offering_type: ["photo", "poem", "song", "story", "nft"],
+      offering_type: ["photo", "poem", "song", "story", "nft", "voice"],
     },
   },
 } as const

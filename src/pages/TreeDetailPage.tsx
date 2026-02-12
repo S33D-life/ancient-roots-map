@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/MeetingTimer";
@@ -29,6 +29,7 @@ const offeringIcons: Record<OfferingType, React.ReactNode> = {
   poem: <FileText className="h-4 w-4" />,
   story: <MessageSquare className="h-4 w-4" />,
   nft: <Sparkles className="h-4 w-4" />,
+  voice: <Mic className="h-4 w-4" />,
 };
 
 const offeringLabels: Record<OfferingType, string> = {
@@ -37,6 +38,7 @@ const offeringLabels: Record<OfferingType, string> = {
   poem: "Poems",
   story: "Musings",
   nft: "NFTs",
+  voice: "Voices",
 };
 
 const TreeDetailPage = () => {
