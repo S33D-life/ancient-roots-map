@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { X, Heart, MapPin, TreePine, Calendar, Compass, SlidersHorizontal, ChevronLeft, ChevronRight, Minimize2 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -41,11 +42,13 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
 
 const TreeCard = ({
   tree,
+  photoUrl,
   style,
   onSwipe,
   isTop,
 }: {
   tree: Tree;
+  photoUrl?: string;
   style?: React.CSSProperties;
   onSwipe: (dir: "left" | "right") => void;
   isTop: boolean;
@@ -115,27 +118,32 @@ const TreeCard = ({
 
       {/* Card content */}
       <div className="relative h-full flex flex-col">
-        {/* Top gradient with species image area */}
+        {/* Top image area */}
         <div
-          className="relative flex-shrink-0 h-[35%] flex items-center justify-center"
+          className="relative flex-shrink-0 h-[40%] flex items-center justify-center overflow-hidden"
           style={{
-            background: "radial-gradient(ellipse at center, hsla(120, 30%, 25%, 0.4), hsla(28, 20%, 10%, 0.9))",
+            background: photoUrl
+              ? `url(${photoUrl}) center/cover no-repeat`
+              : "radial-gradient(ellipse at center, hsla(120, 30%, 25%, 0.4), hsla(28, 20%, 10%, 0.9))",
           }}
         >
-          <div className="text-center">
-            <span className="text-6xl sm:text-7xl block mb-2">🌳</span>
-            <Badge
-              className="font-serif text-sm px-3 py-1"
-              style={{
-                background: "hsla(42, 80%, 50%, 0.15)",
-                color: "hsl(42, 80%, 60%)",
-                border: "1px solid hsla(42, 60%, 50%, 0.3)",
-              }}
-            >
-              {tree.species}
-            </Badge>
-          </div>
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[hsl(22,25%,8%)] to-transparent" />
+          {!photoUrl && (
+            <div className="text-center">
+              <span className="text-6xl sm:text-7xl block mb-2">🌳</span>
+            </div>
+          )}
+          <Badge
+            className="absolute top-4 left-4 font-serif text-sm px-3 py-1 z-10"
+            style={{
+              background: "hsla(0, 0%, 0%, 0.55)",
+              color: "hsl(42, 80%, 60%)",
+              border: "1px solid hsla(42, 60%, 50%, 0.3)",
+              backdropFilter: "blur(4px)",
+            }}
+          >
+            {tree.species}
+          </Badge>
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[hsl(22,25%,8%)] to-transparent" />
         </div>
 
         {/* Info section */}
@@ -202,15 +210,39 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
   const [showFilters, setShowFilters] = useState(false);
   const [speciesFilter, setSpeciesFilter] = useState("all");
   const [ageRange, setAgeRange] = useState([0, 5000]);
-  const [maxDistanceKm, setMaxDistanceKm] = useState(50000); // default: whole planet
+  const [maxDistanceKm, setMaxDistanceKm] = useState(50000);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [treePhotos, setTreePhotos] = useState<Record<string, string>>({});
+
+  // Fetch photo offerings for all trees
+  useEffect(() => {
+    const treeIds = trees.map((t) => t.id);
+    if (!treeIds.length) return;
+    supabase
+      .from("offerings")
+      .select("tree_id, media_url")
+      .eq("type", "photo")
+      .not("media_url", "is", null)
+      .in("tree_id", treeIds)
+      .then(({ data }) => {
+        if (!data) return;
+        const photoMap: Record<string, string> = {};
+        // Use the first photo found per tree
+        for (const row of data) {
+          if (row.media_url && !photoMap[row.tree_id]) {
+            photoMap[row.tree_id] = row.media_url;
+          }
+        }
+        setTreePhotos(photoMap);
+      });
+  }, [trees]);
 
   // Try to get user location for proximity filtering
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {} // silently fail
+        () => {}
       );
     }
   }, []);
@@ -432,6 +464,7 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
               <TreeCard
                 key={nextTree.id}
                 tree={nextTree}
+                photoUrl={treePhotos[nextTree.id]}
                 onSwipe={() => {}}
                 isTop={false}
               />
@@ -440,6 +473,7 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
               <TreeCard
                 key={currentTree.id}
                 tree={currentTree}
+                photoUrl={treePhotos[currentTree.id]}
                 onSwipe={handleSwipe}
                 isTop
               />
