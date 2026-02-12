@@ -583,17 +583,16 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
           // Secondary check: did the map reach idle (tiles painted)?
           if (idleFired) {
-            // On iOS, also verify canvas has actual pixel content
-            if (isIOS && !canvasHasContent()) {
-              console.warn('[Atlas] iOS: idle fired but canvas is blank — retrying');
-              // Give one more second for tiles to paint
+            // Verify canvas has actual pixel content (all browsers, not just iOS)
+            if (!canvasHasContent()) {
+              console.warn('[Atlas] idle fired but canvas is blank — retrying');
               setTimeout(() => {
                 if (aborted) return;
                 if (canvasHasContent()) {
                   setMapStatus("ready");
-                  console.log('[Atlas] iOS: MapLibre ready after pixel recheck');
+                  console.log('[Atlas] MapLibre ready after pixel recheck');
                 } else {
-                  fallbackToLeaflet("iOS: canvas blank despite idle");
+                  fallbackToLeaflet("canvas blank despite idle");
                 }
               }, 1500);
               return;
@@ -608,8 +607,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           const retryTimeout = setTimeout(() => {
             if (aborted) return;
             if (idleFired) {
-              if (isIOS && !canvasHasContent()) {
-                fallbackToLeaflet("iOS: canvas blank after extended wait");
+              if (!canvasHasContent()) {
+                fallbackToLeaflet("canvas blank after extended wait");
                 return;
               }
               setMapStatus("ready");
@@ -623,13 +622,13 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           m.once('idle', () => {
             if (aborted) return;
             clearTimeout(retryTimeout);
-            if (isIOS && !canvasHasContent()) {
+            if (!canvasHasContent()) {
               setTimeout(() => {
                 if (aborted) return;
                 if (canvasHasContent()) {
                   setMapStatus("ready");
                 } else {
-                  fallbackToLeaflet("iOS: late idle but canvas still blank");
+                  fallbackToLeaflet("late idle but canvas still blank");
                 }
               }, 1000);
               return;
@@ -1222,7 +1221,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             map.current = null;
             setMapStatus("loading");
           }}
-          className="absolute top-2 right-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
+          className="absolute top-[6.5rem] right-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
           style={{ background: "hsla(30,30%,12%,0.88)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(6px)" }}
           title="Switch to WebGL mode"
         >
@@ -1438,7 +1437,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             }}
           />
         </div>
-        <div className="ml-auto shrink-0">
+        <div className="ml-auto shrink-0 flex items-center gap-2">
+          <button
+            onClick={() => { map.current?.remove(); map.current = null; setMapStatus("leaflet"); }}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all active:scale-95"
+            style={{ background: "hsla(30,30%,12%,0.88)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(6px)" }}
+          >
+            🍃 Lite
+          </button>
           <TreeRadio speciesFilter={speciesFilter} />
         </div>
       </div>
