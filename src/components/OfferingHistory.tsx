@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Clock, Camera, Music, FileText, MessageSquare, Sparkles, Timer, Package } from "lucide-react";
+import { Clock, Camera, Music, FileText, MessageSquare, Sparkles, Timer, Package, Mic } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -26,6 +26,7 @@ const typeIcons: Record<OfferingType, React.ReactNode> = {
   poem: <FileText className="h-3 w-3" />,
   story: <MessageSquare className="h-3 w-3" />,
   nft: <Sparkles className="h-3 w-3" />,
+  voice: <Mic className="h-3 w-3" />,
 };
 
 function formatDate(iso: string) {

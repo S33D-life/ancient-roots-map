@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus } from "lucide-react";
+import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import MusicOfferingFlow, { type SelectedSongData } from "@/components/MusicOfferingFlow";
+import VoiceOfferingFlow, { type VoiceOfferingData } from "@/components/VoiceOfferingFlow";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -32,6 +33,7 @@ const typeConfig: Record<
   poem: { singular: "Poem", contentLabel: "Poem", placeholder: "Write your poem here...", emoji: "📜" },
   story: { singular: "Musing", contentLabel: "Your Thoughts", placeholder: "Share your thoughts about this tree...", emoji: "✍️" },
   nft: { singular: "NFT", contentLabel: "Description", placeholder: "Describe this NFT...", emoji: "✨" },
+  voice: { singular: "Voice", contentLabel: "Reflection", placeholder: "What inspired this offering?", emoji: "🎙️" },
 };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -227,6 +229,52 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
     }
   };
 
+  // Voice offering via VoiceOfferingFlow
+  const handleVoiceComplete = async (data: VoiceOfferingData) => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
+        return;
+      }
+
+      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
+        tree_id: treeId,
+        type: "voice" as const,
+        title: `Voice Offering (${Math.floor(data.duration / 60)}:${(data.duration % 60).toString().padStart(2, "0")})`,
+        content: data.message || null,
+        media_url: data.audioUrl,
+        created_by: user.id,
+        sealed_by_staff: sealedByStaff.trim() || null,
+        meeting_id: meetingId || null,
+      }).select("id").single();
+      if (error) throw error;
+
+      if (taggedUsers.length > 0 && insertedOffering) {
+        await supabase.from("offering_tags").insert(
+          taggedUsers.map((t) => ({
+            offering_id: insertedOffering.id,
+            tagged_user_id: t.id,
+            tagged_by: user.id,
+          }))
+        );
+      }
+
+      toast({
+        title: "Voice offering sealed! 🎙️",
+        description: "Your voice has been offered to this Ancient Friend",
+      });
+      setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
+      clearSelectedFile();
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // For song type, render dedicated flow
   if (type === "song") {
     return (
@@ -264,6 +312,45 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
       </Dialog>
     );
   }
+
+  // For voice type, render dedicated flow
+  if (type === "voice") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <div
+            className="h-0.5"
+            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }}
+          />
+          <div className="px-6 pt-5 pb-0">
+            <DialogHeader>
+              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
+                <span className="text-2xl">🎙️</span>
+                Voice Offering
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
+                Speak your offering to this Ancient Friend
+              </p>
+            </DialogHeader>
+          </div>
+          <div className="px-6 pb-6 mt-2">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <VoiceOfferingFlow
+                treeId={treeId}
+                onComplete={handleVoiceComplete}
+                onCancel={() => onOpenChange(false)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
