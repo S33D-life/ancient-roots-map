@@ -431,9 +431,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
         </div>
       )}
 
-      {/* Bottom-right controls stack: compass, locate */}
-      <div className="absolute bottom-20 right-3 z-[1000] flex flex-col gap-2">
-        {/* Compass reset */}
+      {/* Bottom controls: compass right, locate centred */}
+      <div className="absolute bottom-20 right-3 z-[1000]">
         <button
           onClick={handleCompassReset}
           className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
@@ -442,8 +441,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
         >
           <Compass className="w-[18px] h-[18px]" />
         </button>
+      </div>
 
-        {/* Find Me */}
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[1000]">
         <button
           onClick={handleFindMe}
           disabled={locating}
