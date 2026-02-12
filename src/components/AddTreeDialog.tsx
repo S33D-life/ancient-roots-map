@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import maplibregl from "maplibre-gl";
 import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
@@ -54,6 +55,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [savedTreeId, setSavedTreeId] = useState<string | null>(null);
   const [transitionDir, setTransitionDir] = useState<"forward" | "back">("forward");
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showFirstTreeMilestone, setShowFirstTreeMilestone] = useState(false);
+  const [collectiveCount, setCollectiveCount] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [extractingPhoto, setExtractingPhoto] = useState(false);
   const [photoDate, setPhotoDate] = useState<string | null>(null);
@@ -333,6 +336,30 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
       setShowCelebration(true);
 
+      // Check if this is the user's first tree for milestone moment
+      const { count: userTreeCount } = await supabase
+        .from("trees")
+        .select("*", { count: "exact", head: true })
+        .eq("created_by", user.id);
+      
+      // Fetch collective count for echo
+      const { count: totalTrees } = await supabase
+        .from("trees")
+        .select("*", { count: "exact", head: true });
+      setCollectiveCount(totalTrees || 0);
+
+      if (userTreeCount === 1) {
+        // First tree — show milestone after celebration
+        setTimeout(() => setShowFirstTreeMilestone(true), 2400);
+      }
+
+      // Store last visited tree for Hearth return pill
+      sessionStorage.setItem("s33d_last_tree", JSON.stringify({
+        id: data.id,
+        name: name.trim() || species.trim(),
+        species: species.trim(),
+      }));
+
       // Auto-advance to offering step
       setTransitionDir("forward");
       setStep("offering");
@@ -372,9 +399,63 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           active={showCelebration}
           emoji="🌳"
           message="Tree planted in the Atlas!"
-          subtitle={`${name || species} has joined the Ancient Friends`}
+          subtitle={collectiveCount ? `Now part of ${collectiveCount} Ancient Friends` : `${name || species} has joined the Ancient Friends`}
           onComplete={() => setShowCelebration(false)}
         />
+
+        {/* First-tree milestone overlay */}
+        <AnimatePresence>
+          {showFirstTreeMilestone && (
+            <motion.div
+              className="fixed inset-0 z-[101] flex items-center justify-center bg-black/60 backdrop-blur-sm cursor-pointer"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              onClick={() => setShowFirstTreeMilestone(false)}
+            >
+              <motion.div
+                className="text-center px-8 py-10 rounded-2xl max-w-sm"
+                style={{
+                  background: "linear-gradient(135deg, hsla(120, 25%, 12%, 0.95), hsla(42, 30%, 10%, 0.95))",
+                  border: "1px solid hsla(42, 60%, 40%, 0.3)",
+                  boxShadow: "0 0 60px hsla(42, 80%, 50%, 0.15)",
+                }}
+                initial={{ scale: 0.8, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <motion.p
+                  className="text-3xl mb-3"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: [0, 1.3, 1] }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                  🌱
+                </motion.p>
+                <h2
+                  className="font-serif text-xl tracking-wider mb-2"
+                  style={{ color: "hsl(42, 80%, 65%)" }}
+                >
+                  Your grove has begun
+                </h2>
+                <p
+                  className="font-serif text-sm leading-relaxed"
+                  style={{ color: "hsl(42, 40%, 60%)" }}
+                >
+                  This is the first tree in your personal grove. Every offering you give, every seed you plant, will grow from this root.
+                </p>
+                <p
+                  className="font-serif text-[10px] tracking-[0.2em] uppercase mt-4"
+                  style={{ color: "hsl(42, 30%, 45%)" }}
+                >
+                  Tap to continue
+                </p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
         {/* Ritual Header */}
         <div className="px-6 pt-6 pb-4" style={{
           background: 'linear-gradient(135deg, hsla(120, 30%, 12%, 0.95), hsla(30, 25%, 10%, 0.95))',

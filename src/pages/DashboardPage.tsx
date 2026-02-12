@@ -25,6 +25,32 @@ import PersonalLegend from "@/components/dashboard/PersonalLegend";
 import DashboardWanderers from "@/components/dashboard/DashboardWanderers";
 import GrovePulse from "@/components/GrovePulse";
 import HearthHearts from "@/components/HearthHearts";
+import { Link } from "react-router-dom";
+import { MapPin } from "lucide-react";
+
+/** Contextual pill showing the last tree the user visited, for easy return */
+const ReturnPill = () => {
+  const [lastTree, setLastTree] = useState<{ id: string; name: string; species: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("s33d_last_tree");
+      if (raw) setLastTree(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  if (!lastTree) return null;
+
+  return (
+    <Link
+      to={`/tree/${lastTree.id}`}
+      className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-full text-xs font-serif tracking-wide bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+    >
+      <MapPin className="w-3 h-3" />
+      Return to {lastTree.name}
+    </Link>
+  );
+};
 
 interface Tree {
   id: string;
@@ -353,6 +379,8 @@ const DashboardPage = () => {
             <p className="text-sm text-muted-foreground font-serif">
               Welcome back, {profile?.full_name || "Ancient Friend"}
             </p>
+            {/* Return pill — contextual link back to last visited tree */}
+            <ReturnPill />
           </div>
 
           <Tabs defaultValue="legend" className="space-y-6">
