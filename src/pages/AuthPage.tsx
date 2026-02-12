@@ -48,16 +48,39 @@ const AuthPage = () => {
           await recordReferral(session.user.id, storedCode);
           localStorage.removeItem("s33d_invite_code");
         }
-        navigate("/dashboard");
+
+        // Save pending tree if one was captured before auth
+        const pendingTreeJson = localStorage.getItem("s33d_pending_tree");
+        if (pendingTreeJson && session.user) {
+          try {
+            const pendingTree = JSON.parse(pendingTreeJson);
+            const { error } = await supabase.from("trees").insert({
+              ...pendingTree,
+              created_by: session.user.id,
+            });
+            if (!error) {
+              localStorage.removeItem("s33d_pending_tree");
+              toast({ title: "Tree planted! 🌳", description: `${pendingTree.name} has been saved to the Atlas` });
+            }
+          } catch (e) {
+            console.error("Failed to save pending tree:", e);
+          }
+        }
+
+        const returnTo = searchParams.get("returnTo");
+        navigate(returnTo || "/dashboard");
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
+      if (session) {
+        const returnTo = searchParams.get("returnTo");
+        navigate(returnTo || "/dashboard");
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams, toast]);
 
   const clearErrors = () => setFieldErrors({});
 
