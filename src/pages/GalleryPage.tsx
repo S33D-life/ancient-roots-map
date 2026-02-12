@@ -41,6 +41,7 @@ import EarthRadioRoom from "@/components/EarthRadioRoom";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
 import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
+import HeartEconomySummary from "@/components/HeartEconomySummary";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
 import greenhouseWindow from "@/assets/greenhouse-window.jpeg";
@@ -1171,6 +1172,11 @@ const GalleryPage = () => {
                             <p className="text-sm text-muted-foreground">States/Regions</p>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Heart Economy Summary */}
+                      <div className="border-t border-mystical pt-4">
+                        <HeartEconomySummary />
                       </div>
 
                       <div className="border-t border-mystical pt-4">
