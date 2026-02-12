@@ -486,23 +486,30 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
       return true;
     });
 
-    // Sort: photos first → offering count desc → estimated age desc → name
+    // Smart ordering: photos first → engagement richness → estimated age → name
     return filtered.sort((a, b) => {
+      // 1. Trees with photos always surface first
       const aHasPhoto = treePhotos[a.id] ? 1 : 0;
       const bHasPhoto = treePhotos[b.id] ? 1 : 0;
       if (bHasPhoto !== aHasPhoto) return bHasPhoto - aHasPhoto;
 
-      const aOfferings = offeringCounts[a.id]?.total || 0;
-      const bOfferings = offeringCounts[b.id]?.total || 0;
-      if (bOfferings !== aOfferings) return bOfferings - aOfferings;
+      // 2. Engagement richness: offerings (×3) + wishlists (×2) + seeds (×1)
+      const aScore = (offeringCounts[a.id]?.total || 0) * 3
+        + (wishlistCounts[a.id] || 0) * 2
+        + (seedCounts[a.id] || 0);
+      const bScore = (offeringCounts[b.id]?.total || 0) * 3
+        + (wishlistCounts[b.id] || 0) * 2
+        + (seedCounts[b.id] || 0);
+      if (bScore !== aScore) return bScore - aScore;
 
+      // 3. Estimated age descending (ancient trees first)
       const aAge = a.estimated_age || 0;
       const bAge = b.estimated_age || 0;
       if (bAge !== aAge) return bAge - aAge;
 
       return a.name.localeCompare(b.name);
     });
-  }, [trees, speciesFilter, ageRange, maxDistanceKm, userLocation, treePhotos, offeringCounts]);
+  }, [trees, speciesFilter, ageRange, maxDistanceKm, userLocation, treePhotos, offeringCounts, wishlistCounts, seedCounts]);
 
   // Reset index when filters change
   useEffect(() => {
