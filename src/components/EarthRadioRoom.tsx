@@ -9,6 +9,31 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
+import TREE_SPECIES from "@/data/treeSpecies";
+
+/* ── Species name helpers ────────────────────────────────── */
+
+const speciesLookup = new Map(
+  TREE_SPECIES.map(s => [s.common.toLowerCase(), s])
+);
+const scientificLookup = new Map(
+  TREE_SPECIES.map(s => [s.scientific.toLowerCase(), s])
+);
+
+function resolveSpecies(raw: string): { common: string; latin: string } {
+  const lower = raw.toLowerCase().trim();
+  const byCommon = speciesLookup.get(lower);
+  if (byCommon) return { common: byCommon.common, latin: byCommon.scientific };
+  const byLatin = scientificLookup.get(lower);
+  if (byLatin) return { common: byLatin.common, latin: byLatin.scientific };
+  // Check aliases
+  for (const sp of TREE_SPECIES) {
+    if (sp.aliases?.some(a => a.toLowerCase() === lower)) {
+      return { common: sp.common, latin: sp.scientific };
+    }
+  }
+  return { common: raw, latin: "" };
+}
 
 /* ── Types ───────────────────────────────────────────────── */
 
@@ -151,13 +176,16 @@ const EarthRadioRoom = () => {
     });
 
     const speciesStations: Station[] = Array.from(speciesMap.entries())
-      .map(([species, songs]) => ({
-        type: "species" as StationType,
-        id: species,
-        label: `${species} Radio`,
-        species,
-        songCount: songs.length,
-      }))
+      .map(([species, songs]) => {
+        const resolved = resolveSpecies(species);
+        return {
+          type: "species" as StationType,
+          id: species,
+          label: `${resolved.common} Radio`,
+          species: resolved.common,
+          songCount: songs.length,
+        };
+      })
       .sort((a, b) => b.songCount - a.songCount);
 
     const treeStations: Station[] = Array.from(treeMap.entries())
@@ -432,18 +460,26 @@ const EarthRadioRoom = () => {
           <div className="rounded-xl border border-primary/20 bg-card/50 backdrop-blur overflow-hidden">
             {/* Station header */}
             <div className="px-5 py-3 border-b border-border/30 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 {activeStation?.type === "species" ? (
-                  <Leaf className="h-4 w-4 text-primary" />
+                  <Leaf className="h-4 w-4 text-primary flex-shrink-0" />
                 ) : activeStation?.type === "tree" ? (
-                  <TreeDeciduous className="h-4 w-4 text-primary" />
+                  <TreeDeciduous className="h-4 w-4 text-primary flex-shrink-0" />
                 ) : (
-                  <Radio className="h-4 w-4 text-primary" />
+                  <Radio className="h-4 w-4 text-primary flex-shrink-0" />
                 )}
-                <span className="font-serif text-sm text-foreground tracking-wider">
+                <span className="font-serif text-sm text-foreground tracking-wider truncate">
                   {activeStation?.label || "TETOL Radio"}
                 </span>
-                <Badge variant="outline" className="text-[10px] font-serif ml-2">
+                {activeStation && activeStation.type !== "all" && (() => {
+                  const resolved = resolveSpecies(activeStation.type === "species" ? activeStation.id : activeStation.species);
+                  return resolved.latin ? (
+                    <span className="text-[10px] text-muted-foreground/60 font-serif italic truncate hidden sm:inline">
+                      {resolved.latin}
+                    </span>
+                  ) : null;
+                })()}
+                <Badge variant="outline" className="text-[10px] font-serif ml-auto flex-shrink-0">
                   {activeStation?.type === "all" ? "All" : activeStation?.type === "species" ? "Species" : "Local"}
                 </Badge>
               </div>
@@ -509,13 +545,19 @@ const EarthRadioRoom = () => {
                   <p className="text-sm text-muted-foreground font-serif truncate mt-1">
                     {preview?.artistName || currentSong?.content || ""}
                   </p>
-                  <p className="text-xs text-primary/50 font-serif mt-2 italic flex items-center gap-1 justify-center md:justify-start">
-                    <TreeDeciduous className="h-3 w-3 inline" />
-                    offered to {currentSong?.tree_name}
-                    {activeStation?.type === "species" && (
-                      <span className="text-primary/30"> · {currentSong?.species}</span>
-                    )}
-                  </p>
+                  {currentSong && (() => {
+                    const resolved = resolveSpecies(currentSong.species);
+                    return (
+                      <p className="text-xs text-primary/50 font-serif mt-2 italic flex items-center gap-1 justify-center md:justify-start flex-wrap">
+                        <TreeDeciduous className="h-3 w-3 inline" />
+                        offered to {currentSong.tree_name}
+                        <span className="text-primary/30">· {resolved.common}</span>
+                        {resolved.latin && (
+                          <span className="text-primary/20 text-[10px]">({resolved.latin})</span>
+                        )}
+                      </p>
+                    );
+                  })()}
 
                   {/* View tree link */}
                   {currentSong && (
@@ -645,11 +687,14 @@ function StationButton({
         {icon}
       </span>
       <span className="flex-1 truncate">{station.label}</span>
-      {showSpecies && (
-        <Badge variant="outline" className="text-[9px] py-0 px-1.5 font-serif">
-          {station.species}
-        </Badge>
-      )}
+      {showSpecies && (() => {
+        const resolved = resolveSpecies(station.species);
+        return (
+          <Badge variant="outline" className="text-[9px] py-0 px-1.5 font-serif">
+            {resolved.common}
+          </Badge>
+        );
+      })()}
       <span className="text-[10px] text-muted-foreground/50">
         {station.songCount}
       </span>
