@@ -16,7 +16,7 @@ const councilRooms = [
     title: "Council Records",
     description: "Browse the archives of past councils",
     icon: ScrollText,
-    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd//1e415b58480d8042a722ef57e01e3228",
+    notionUrl: "https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228",
   },
   {
     id: "join",

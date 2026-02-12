@@ -19,7 +19,7 @@ const AssetsPage = () => {
           <Minimize2 className="h-4 w-4" />
         </Button>
         <iframe
-          src="https://clammy-viscount-ddb.notion.site/ebd//24515b58480d80e7808cdda1195e863a"
+          src="https://clammy-viscount-ddb.notion.site/ebd/24515b58480d80e7808cdda1195e863a"
           width="100%"
           height="100%"
           frameBorder="0"
@@ -47,7 +47,7 @@ const AssetsPage = () => {
             </Button>
           </div>
           <iframe
-            src="https://clammy-viscount-ddb.notion.site/ebd//24515b58480d80e7808cdda1195e863a"
+            src="https://clammy-viscount-ddb.notion.site/ebd/24515b58480d80e7808cdda1195e863a"
             width="100%"
             height="800"
             frameBorder="0"
