@@ -21,6 +21,7 @@ const Header = () => {
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hasPendingActivity, setHasPendingActivity] = useState(false);
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -78,6 +79,7 @@ const Header = () => {
       if (session?.user) {
         fetchHearts(session.user.id);
         fetchAvatar(session.user.id);
+        checkPendingActivity(session.user.id);
       }
     });
 
@@ -87,6 +89,7 @@ const Header = () => {
         if (session?.user) {
           fetchHearts(session.user.id);
           fetchAvatar(session.user.id);
+          checkPendingActivity(session.user.id);
         } else {
           setHeartsCount(null);
           setAvatarUrl(null);
@@ -96,6 +99,17 @@ const Header = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkPendingActivity = async (userId: string) => {
+    // Check for bloomed seeds not yet collected
+    const { count: bloomedSeeds } = await supabase
+      .from("planted_seeds")
+      .select("*", { count: "exact", head: true })
+      .eq("planter_id", userId)
+      .is("collected_at", null)
+      .lte("blooms_at", new Date().toISOString());
+    setHasPendingActivity((bloomedSeeds || 0) > 0);
+  };
 
   const fetchHearts = async (userId: string) => {
     const [treesRes, offeringsRes, plantsRes, wishlistRes, heartTxRes] = await Promise.all([
@@ -144,6 +158,10 @@ const Header = () => {
       >
       <style>{`
         .light header { background: linear-gradient(180deg, hsl(38 45% 92% / 0.97), hsl(35 35% 85% / 0.95)) !important; }
+        @keyframes emberPulse {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.3); }
+        }
       `}</style>
       <div className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
@@ -152,14 +170,26 @@ const Header = () => {
             {/* Mobile Hearth button — top left, toggles dashboard */}
             <button
               type="button"
-              className="md:hidden flex items-center bg-transparent border-none p-0"
+              className="md:hidden flex items-center bg-transparent border-none p-0 relative"
               onClick={() => {
                 if (!user) { navigate("/auth"); return; }
                 navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
               }}
             >
               {user ? (
-                <img src={hearthImg} alt="Hearth" className="w-9 h-9 rounded-full object-cover border border-primary/30" />
+                <div className="relative">
+                  <img src={hearthImg} alt="Hearth" className="w-9 h-9 rounded-full object-cover border border-primary/30" />
+                  {hasPendingActivity && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
+                      style={{
+                        background: "hsl(25, 90%, 55%)",
+                        boxShadow: "0 0 8px hsla(25, 90%, 55%, 0.6)",
+                        animation: "emberPulse 2s ease-in-out infinite",
+                      }}
+                    />
+                  )}
+                </div>
               ) : (
                 <Button variant="ghost" size="icon" title="Login" asChild>
                   <span><Flame className="w-5 h-5 text-primary" /></span>
@@ -226,9 +256,21 @@ const Header = () => {
               <button
                 type="button"
                 onClick={() => navigate(location.pathname === "/dashboard" ? "/" : "/dashboard")}
-                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer"
+                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer group"
               >
-                <img src={hearthImg} alt="Hearth" className="w-8 h-8 rounded-full object-cover" />
+                <div className="relative">
+                  <img src={hearthImg} alt="Hearth" className="w-8 h-8 rounded-full object-cover" />
+                  {hasPendingActivity && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
+                      style={{
+                        background: "hsl(25, 90%, 55%)",
+                        boxShadow: "0 0 8px hsla(25, 90%, 55%, 0.6)",
+                        animation: "emberPulse 2s ease-in-out infinite",
+                      }}
+                    />
+                  )}
+                </div>
                 <span className="font-serif">Hearth</span>
                 {heartsCount !== null && heartsCount > 0 && (
                   <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
