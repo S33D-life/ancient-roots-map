@@ -226,6 +226,26 @@ const TREE_SPECIES: TreeSpecies[] = [
 export default TREE_SPECIES;
 
 /**
+ * Map of common species names (lowercase) → botanical family.
+ */
+const familyMap = new Map<string, string>();
+for (const sp of TREE_SPECIES) {
+  familyMap.set(sp.common.toLowerCase(), sp.family);
+  sp.aliases?.forEach(a => familyMap.set(a.toLowerCase(), sp.family));
+}
+
+export function getFamilyForSpecies(speciesName: string): string | undefined {
+  return familyMap.get(speciesName.toLowerCase());
+}
+
+/** Get all unique families from the database, sorted alphabetically. */
+export function getAllFamilies(): string[] {
+  const families = new Set<string>();
+  for (const sp of TREE_SPECIES) families.add(sp.family);
+  return Array.from(families).sort();
+}
+
+/**
  * Search species by common name, scientific name, or aliases.
  * Returns matches sorted by relevance (starts-with first, then includes).
  */

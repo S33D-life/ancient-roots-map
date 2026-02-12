@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
-import { Filter, X, ChevronDown } from "lucide-react";
+import { Filter, X, ChevronDown, Leaf } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getFamilyForSpecies } from "@/data/treeSpecies";
 
 export type LitePerspective = "collective" | "personal" | "tribe";
 
@@ -54,10 +55,38 @@ const LiteMapFilters = ({
   totalVisible,
 }: LiteMapFiltersProps) => {
   const [panelOpen, setPanelOpen] = useState(false);
+  const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+
+  const speciesWithFamilies = useMemo(
+    () =>
+      STAFF_SPECIES.map((s) => ({
+        ...s,
+        family: getFamilyForSpecies(s.species) || "Other",
+      })),
+    []
+  );
+
+  const availableFamilies = useMemo(() => {
+    const fams = new Map<string, number>();
+    for (const s of speciesWithFamilies) {
+      const count = speciesCounts[s.species.toLowerCase()] || 0;
+      if (count > 0) {
+        fams.set(s.family, (fams.get(s.family) || 0) + count);
+      }
+    }
+    return Array.from(fams.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([name, count]) => ({ name, count }));
+  }, [speciesWithFamilies, speciesCounts]);
 
   const availableSpecies = useMemo(
-    () => STAFF_SPECIES.filter((s) => (speciesCounts[s.species.toLowerCase()] || 0) > 0),
-    [speciesCounts]
+    () =>
+      speciesWithFamilies.filter((s) => {
+        const hasCount = (speciesCounts[s.species.toLowerCase()] || 0) > 0;
+        const matchesFamily = !familyFilter || s.family === familyFilter;
+        return hasCount && matchesFamily;
+      }),
+    [speciesWithFamilies, speciesCounts, familyFilter]
   );
 
   const handleSpeciesSelect = useCallback((s: string) => {
@@ -153,7 +182,34 @@ const LiteMapFilters = ({
           </span>
         </button>
 
-        <ScrollArea className="px-3 pb-4" style={{ maxHeight: "calc(45vh - 40px)" }}>
+        {/* Family filter chips */}
+        <div className="px-3 pb-2 flex gap-1.5 flex-wrap">
+          <button
+            onClick={() => setFamilyFilter(null)}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
+            style={chipStyle(!familyFilter)}
+          >
+            <Leaf className="w-2.5 h-2.5" /> All Families
+          </button>
+          {availableFamilies.map((f) => (
+            <button
+              key={f.name}
+              onClick={() => setFamilyFilter(familyFilter === f.name ? null : f.name)}
+              className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
+              style={chipStyle(familyFilter === f.name)}
+            >
+              {f.name}
+              <span
+                className="text-[8px] rounded-full px-1"
+                style={{ background: "hsla(42, 60%, 45%, 0.2)" }}
+              >
+                {f.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <ScrollArea className="px-3 pb-4" style={{ maxHeight: "calc(45vh - 80px)" }}>
           <div className="grid grid-cols-5 gap-2">
             {/* TETOL */}
             <button
