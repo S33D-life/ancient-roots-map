@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
       },
       manifest: {
         name: "Ancient Friends — A Living Map of Ancient Trees",
-        short_name: "Ancient Friends",
+        short_name: "S33D",
         description: "Map and honor ancient trees worldwide. Connect with sacred groves.",
         theme_color: "#1a1f14",
         background_color: "#1a1f14",
