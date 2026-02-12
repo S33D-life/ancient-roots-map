@@ -35,6 +35,10 @@ const RadioPage = lazy(() => import("./pages/RadioPage"));
 const VisitsPage = lazy(() => import("./pages/VisitsPage"));
 const ReferralsPage = lazy(() => import("./pages/ReferralsPage"));
 const InstallPage = lazy(() => import("./pages/InstallPage"));
+const ShareSimulatorPage = lazy(() => import("./pages/ShareSimulatorPage"));
+const IncomingSharePage = lazy(() => import("./pages/IncomingSharePage"));
+const TestLabPage = lazy(() => import("./pages/TestLabPage"));
+const DocsPage = lazy(() => import("./pages/DocsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -91,6 +95,10 @@ const App = () => {
                 <Route path="/visits" element={<VisitsPage />} />
                 <Route path="/referrals" element={<ReferralsPage />} />
                 <Route path="/install" element={<InstallPage />} />
+                <Route path="/share-simulator" element={<ShareSimulatorPage />} />
+                <Route path="/incoming-share" element={<IncomingSharePage />} />
+                <Route path="/test-lab" element={<TestLabPage />} />
+                <Route path="/docs" element={<DocsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
