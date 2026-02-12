@@ -472,15 +472,69 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           m.resize();
           console.log('[Atlas] MapLibre loaded successfully');
 
-          // Background verify: if tiles never arrive after 6s, fall back
-          setTimeout(() => {
-            if (!tilesLoaded && mapStatusRef.current !== "leaflet") {
-              console.warn('[Atlas] Tiles never rendered — falling back to Leaflet');
-              setMapStatus("leaflet");
-              m.remove();
-              map.current = null;
+          // Validate tiles actually rendered by sampling canvas pixels
+          const validateTiles = () => {
+            if (mapStatusRef.current === "leaflet") return;
+            try {
+              const canvas = m.getCanvas();
+              if (!canvas) { fallbackToLeaflet("No canvas found"); return; }
+              const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+              if (!gl) { fallbackToLeaflet("No WebGL context on canvas"); return; }
+
+              const w = canvas.width;
+              const h = canvas.height;
+              if (w === 0 || h === 0) { fallbackToLeaflet("Canvas has zero dimensions"); return; }
+
+              // Sample center, top-left quadrant, and bottom-right quadrant
+              const samples = [
+                [Math.floor(w / 2), Math.floor(h / 2)],
+                [Math.floor(w / 4), Math.floor(h / 4)],
+                [Math.floor((3 * w) / 4), Math.floor((3 * h) / 4)],
+              ];
+              const pixels = new Uint8Array(4);
+              let allBlank = true;
+
+              for (const [sx, sy] of samples) {
+                gl.readPixels(sx, sy, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                // Check if pixel is not black/transparent
+                if (pixels[0] > 10 || pixels[1] > 10 || pixels[2] > 10) {
+                  allBlank = false;
+                  break;
+                }
+              }
+
+              if (allBlank) {
+                console.warn('[Atlas] Canvas pixels are blank after load — retrying once');
+                // Give one more chance after another render cycle
+                setTimeout(() => {
+                  if (mapStatusRef.current === "leaflet") return;
+                  let stillBlank = true;
+                  for (const [sx, sy] of samples) {
+                    gl.readPixels(sx, sy, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                    if (pixels[0] > 10 || pixels[1] > 10 || pixels[2] > 10) {
+                      stillBlank = false;
+                      break;
+                    }
+                  }
+                  if (stillBlank) {
+                    fallbackToLeaflet("Canvas still blank after retry");
+                  }
+                }, 4000);
+              }
+            } catch (err) {
+              console.warn('[Atlas] Pixel validation error:', err);
             }
-          }, 6000);
+          };
+
+          function fallbackToLeaflet(reason: string) {
+            console.warn(`[Atlas] Auto-fallback to Leaflet: ${reason}`);
+            setMapStatus("leaflet");
+            m.remove();
+            map.current = null;
+          }
+
+          // Check after tiles have had time to render
+          setTimeout(validateTiles, 3000);
         });
         m.on('moveend', () => {
           const c = m.getCenter();
