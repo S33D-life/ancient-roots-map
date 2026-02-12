@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic } from "lucide-react";
+import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic, BookOpen } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import MusicOfferingFlow, { type SelectedSongData } from "@/components/MusicOfferingFlow";
 import VoiceOfferingFlow, { type VoiceOfferingData } from "@/components/VoiceOfferingFlow";
+import BookOfferingFlow, { type BookOfferingData } from "@/components/BookOfferingFlow";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -34,6 +35,7 @@ const typeConfig: Record<
   story: { singular: "Musing", contentLabel: "Your Thoughts", placeholder: "Share your thoughts about this tree...", emoji: "✍️" },
   nft: { singular: "NFT", contentLabel: "Description", placeholder: "Describe this NFT...", emoji: "✨" },
   voice: { singular: "Voice", contentLabel: "Reflection", placeholder: "What inspired this offering?", emoji: "🎙️" },
+  book: { singular: "Book", contentLabel: "Reflection", placeholder: "Why are you offering this story?", emoji: "📖" },
 };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -342,6 +344,95 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, type, meetingId }: AddO
               <VoiceOfferingFlow
                 treeId={treeId}
                 onComplete={handleVoiceComplete}
+                onCancel={() => onOpenChange(false)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Book offering via BookOfferingFlow
+  const handleBookComplete = async (data: BookOfferingData) => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
+        return;
+      }
+
+      const contentParts = [data.author];
+      if (data.genre) contentParts.push(`Genre: ${data.genre}`);
+      if (data.quote) contentParts.push(`\n"${data.quote}"`);
+      if (data.reflection) contentParts.push(`\n${data.reflection}`);
+
+      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
+        tree_id: treeId,
+        type: "book" as const,
+        title: data.title,
+        content: contentParts.join("\n"),
+        media_url: data.coverUrl || null,
+        created_by: user.id,
+        sealed_by_staff: sealedByStaff.trim() || null,
+        meeting_id: meetingId || null,
+      }).select("id").single();
+      if (error) throw error;
+
+      if (taggedUsers.length > 0 && insertedOffering) {
+        await supabase.from("offering_tags").insert(
+          taggedUsers.map((t) => ({
+            offering_id: insertedOffering.id,
+            tagged_user_id: t.id,
+            tagged_by: user.id,
+          }))
+        );
+      }
+
+      toast({
+        title: "Book offering sealed! 📖",
+        description: `"${data.title}" by ${data.author} has been placed in the living archive`,
+      });
+      setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
+      clearSelectedFile();
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // For book type, render dedicated flow
+  if (type === "book") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <div
+            className="h-0.5"
+            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3), transparent)" }}
+          />
+          <div className="px-6 pt-5 pb-0">
+            <DialogHeader>
+              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
+                <span className="text-2xl">📖</span>
+                Book Offering
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
+                Place a story in this Ancient Friend's living archive
+              </p>
+            </DialogHeader>
+          </div>
+          <div className="px-6 pb-6 mt-2">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <BookOfferingFlow
+                treeId={treeId}
+                onComplete={handleBookComplete}
                 onCancel={() => onOpenChange(false)}
               />
             )}
