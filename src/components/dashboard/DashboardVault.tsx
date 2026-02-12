@@ -8,6 +8,7 @@ import VaultSproutingSeeds from "./vault/VaultSproutingSeeds";
 import VaultHeartLedger from "./vault/VaultHeartLedger";
 import VaultTreeReservoirs from "./vault/VaultTreeReservoirs";
 import VaultLotteryTracker from "./vault/VaultLotteryTracker";
+import VaultParticles from "./vault/VaultParticles";
 
 interface Props {
   userId: string;
@@ -68,11 +69,12 @@ const DashboardVault = ({ userId }: Props) => {
 
   return (
     <motion.div
-      className="space-y-5"
+      className="relative space-y-5"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
+      <VaultParticles />
       {/* Section header */}
       <div className="flex items-center gap-2.5">
         <Archive className="w-5 h-5 text-primary" />
