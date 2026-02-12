@@ -559,6 +559,45 @@ export type Database = {
         }
         Relationships: []
       }
+      song_catalog: {
+        Row: {
+          album: string | null
+          artist: string
+          artwork_url: string | null
+          created_at: string
+          external_url: string | null
+          genre: string | null
+          id: string
+          preview_url: string | null
+          source: string
+          title: string
+        }
+        Insert: {
+          album?: string | null
+          artist: string
+          artwork_url?: string | null
+          created_at?: string
+          external_url?: string | null
+          genre?: string | null
+          id?: string
+          preview_url?: string | null
+          source?: string
+          title: string
+        }
+        Update: {
+          album?: string | null
+          artist?: string
+          artwork_url?: string | null
+          created_at?: string
+          external_url?: string | null
+          genre?: string | null
+          id?: string
+          preview_url?: string | null
+          source?: string
+          title?: string
+        }
+        Relationships: []
+      }
       tree_heart_pools: {
         Row: {
           last_windfall_at: string | null
@@ -807,6 +846,15 @@ export type Database = {
         Args: { p_tree_id: string; p_user_id: string }
         Returns: number
       }
+      get_recent_tree_songs: {
+        Args: { p_tree_id: string; result_limit?: number }
+        Returns: {
+          artist: string
+          created_at: string
+          media_url: string
+          title: string
+        }[]
+      }
       get_tree_leaderboard: {
         Args: { result_limit?: number }
         Returns: {
@@ -824,6 +872,23 @@ export type Database = {
           visitor_number: number
         }[]
       }
+      search_songs: {
+        Args: { query: string; result_limit?: number }
+        Returns: {
+          album: string
+          artist: string
+          artwork_url: string
+          external_url: string
+          genre: string
+          id: string
+          preview_url: string
+          similarity: number
+          source: string
+          title: string
+        }[]
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       grove_scale:
