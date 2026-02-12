@@ -269,6 +269,41 @@ export type Database = {
         }
         Relationships: []
       }
+      meetings: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          notes: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          notes?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          notes?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offering_tags: {
         Row: {
           created_at: string
@@ -308,6 +343,7 @@ export type Database = {
           created_by: string | null
           id: string
           media_url: string | null
+          meeting_id: string | null
           nft_link: string | null
           sealed_by_staff: string | null
           title: string
@@ -320,6 +356,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           media_url?: string | null
+          meeting_id?: string | null
           nft_link?: string | null
           sealed_by_staff?: string | null
           title: string
@@ -332,6 +369,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           media_url?: string | null
+          meeting_id?: string | null
           nft_link?: string | null
           sealed_by_staff?: string | null
           title?: string
@@ -339,6 +377,13 @@ export type Database = {
           type?: Database["public"]["Enums"]["offering_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "offerings_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "offerings_tree_id_fkey"
             columns: ["tree_id"]
