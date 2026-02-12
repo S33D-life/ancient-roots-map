@@ -222,6 +222,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   const userAccuracyRef = useRef<L.Circle | null>(null);
   const groveLayerRef = useRef<L.LayerGroup | null>(null);
   const seedLayerRef = useRef<L.LayerGroup | null>(null);
+  const rootThreadLayerRef = useRef<L.LayerGroup | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
   const [locating, setLocating] = useState(false);
@@ -238,6 +239,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
   // Layer visibility toggles
   const [showSeeds, setShowSeeds] = useState(true);
   const [showGroves, setShowGroves] = useState(false);
+  const [showRootThreads, setShowRootThreads] = useState(false);
   const [layerPanelOpen, setLayerPanelOpen] = useState(false);
 
   const speciesCounts = useMemo(() => {
@@ -548,6 +550,69 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     };
   }, [filteredTrees, showGroves]);
 
+  // Draw root threads — golden dashed lines between same-species trees within 80km
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (rootThreadLayerRef.current) {
+      map.removeLayer(rootThreadLayerRef.current);
+      rootThreadLayerRef.current = null;
+    }
+
+    if (!showRootThreads || filteredTrees.length < 2) return;
+
+    const threadLayer = L.layerGroup();
+
+    const bySpecies: Record<string, Tree[]> = {};
+    filteredTrees.forEach((t) => {
+      const key = t.species.toLowerCase();
+      if (!bySpecies[key]) bySpecies[key] = [];
+      bySpecies[key].push(t);
+    });
+
+    const MAX_DIST_KM = 80;
+    const drawn = new Set<string>();
+
+    Object.entries(bySpecies).forEach(([, group]) => {
+      if (group.length < 2) return;
+
+      for (let i = 0; i < group.length; i++) {
+        for (let j = i + 1; j < group.length; j++) {
+          const a = group[i];
+          const b = group[j];
+          const dist = haversineKm(a.latitude, a.longitude, b.latitude, b.longitude);
+          if (dist > MAX_DIST_KM) continue;
+
+          const pairKey = [a.id, b.id].sort().join("-");
+          if (drawn.has(pairKey)) continue;
+          drawn.add(pairKey);
+
+          const opacity = Math.max(0.15, 0.6 * (1 - dist / MAX_DIST_KM));
+          const weight = dist < 20 ? 2 : 1.5;
+
+          L.polyline(
+            [[a.latitude, a.longitude], [b.latitude, b.longitude]],
+            {
+              color: "hsl(42, 80%, 55%)",
+              weight,
+              opacity,
+              dashArray: "6 8",
+              interactive: false,
+            }
+          ).addTo(threadLayer);
+        }
+      }
+    });
+
+    threadLayer.addTo(map);
+    rootThreadLayerRef.current = threadLayer;
+
+    return () => {
+      if (map.hasLayer(threadLayer)) map.removeLayer(threadLayer);
+    };
+  }, [filteredTrees, showRootThreads]);
+
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
@@ -683,6 +748,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
             {[
               { label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(!showSeeds) },
               { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
+              { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
             ].map((layer) => (
               <button
                 key={layer.label}
