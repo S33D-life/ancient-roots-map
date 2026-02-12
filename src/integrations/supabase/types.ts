@@ -333,6 +333,38 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          invite_link_id: string | null
+          invitee_id: string
+          inviter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_link_id?: string | null
+          invitee_id: string
+          inviter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_link_id?: string | null
+          invitee_id?: string
+          inviter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_invite_link_id_fkey"
+            columns: ["invite_link_id"]
+            isOneToOne: false
+            referencedRelation: "invite_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_songs: {
         Row: {
           artist: string

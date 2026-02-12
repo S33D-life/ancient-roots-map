@@ -32,6 +32,7 @@ const AssetsPage = lazy(() => import("./pages/AssetsPage"));
 const VaultPage = lazy(() => import("./pages/VaultPage"));
 const RadioPage = lazy(() => import("./pages/RadioPage"));
 const VisitsPage = lazy(() => import("./pages/VisitsPage"));
+const ReferralsPage = lazy(() => import("./pages/ReferralsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -85,6 +86,7 @@ const App = () => {
                 <Route path="/vault" element={<VaultPage />} />
                 <Route path="/radio" element={<RadioPage />} />
                 <Route path="/visits" element={<VisitsPage />} />
+                <Route path="/referrals" element={<ReferralsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

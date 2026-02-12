@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useFollows, useCompanions, useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
+import { useReferrals } from "@/hooks/use-referrals";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Search, UserPlus, UserMinus, Heart, HeartHandshake, Check, X, Loader2, Users, Copy, TreeDeciduous } from "lucide-react";
+import { Search, UserPlus, UserMinus, Heart, HeartHandshake, Check, X, Loader2, Users, Copy, TreeDeciduous, Gift, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Props {
@@ -81,6 +83,7 @@ const DashboardWanderers = ({ userId }: Props) => {
   const { following, followers, loading: followLoading, follow, unfollow, isFollowing, refresh: refreshFollows } = useFollows(userId);
   const { companions, loading: compLoading, sendRequest, respond, remove, isCompanion, pendingFor, refresh: refreshCompanions } = useCompanions(userId);
   const { results, searching, search, clearResults } = useWandererSearch();
+  const { referrals, referredBy, totalTreesFromReferrals, loading: refLoading } = useReferrals(userId);
   const [searchQuery, setSearchQuery] = useState("");
   const [profiles, setProfiles] = useState<Record<string, WandererProfile>>({});
   const [inviteCode, setInviteCode] = useState<string | null>(null);
@@ -204,6 +207,60 @@ const DashboardWanderers = ({ userId }: Props) => {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Referral Impact */}
+      <Card className="bg-card/50 backdrop-blur border-border/40">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-serif text-lg flex items-center gap-2">
+            <Gift className="w-5 h-5 text-primary" />
+            Referral Impact
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="text-center p-3 rounded-xl bg-primary/5 border border-primary/10">
+              <p className="text-2xl font-serif text-primary">{referrals.length}</p>
+              <p className="text-[10px] text-muted-foreground">Wanderers Invited</p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-primary/5 border border-primary/10">
+              <p className="text-2xl font-serif text-primary">{totalTreesFromReferrals}</p>
+              <p className="text-[10px] text-muted-foreground">Trees They Mapped</p>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-primary/5 border border-primary/10">
+              <p className="text-2xl font-serif text-primary">{totalTreesFromReferrals * 10}</p>
+              <p className="text-[10px] text-muted-foreground">Hearts Inspired</p>
+            </div>
+          </div>
+          {referredBy && (
+            <p className="text-xs text-muted-foreground font-serif text-center mb-3">
+              You were invited by <span className="text-primary">{referredBy.name || "a fellow wanderer"}</span>
+            </p>
+          )}
+          {referrals.length > 0 && (
+            <div className="space-y-1.5 max-h-32 overflow-y-auto mb-3">
+              {referrals.slice(0, 5).map((r) => (
+                <div key={r.id} className="flex items-center gap-2 text-xs">
+                  <Avatar className="h-5 w-5">
+                    <AvatarImage src={r.invitee_avatar || undefined} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-[8px]">
+                      {(r.invitee_name || "?")[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-serif text-foreground truncate flex-1">{r.invitee_name || "Wanderer"}</span>
+                  <span className="text-muted-foreground flex items-center gap-0.5">
+                    <TreeDeciduous className="w-3 h-3" /> {r.invitee_trees}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          <Link to="/referrals">
+            <Button variant="outline" size="sm" className="w-full font-serif text-xs gap-1">
+              View Full Impact <ArrowRight className="w-3 h-3" />
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 
