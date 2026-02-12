@@ -414,7 +414,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Detect iOS for tighter timeouts and canvas pixel validation
+    // Detect iOS for immediate Leaflet default
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
@@ -427,9 +427,15 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       return;
     }
 
-    if (isIOS) {
-      console.log('[Atlas] iOS detected — attempting WebGL with aggressive validation');
+    // On iOS, default to Leaflet instantly for reliability.
+    // Only attempt WebGL if user explicitly clicked "Try WebGL".
+    if (isIOS && !sessionStorage.getItem('atlas-try-webgl')) {
+      console.log('[Atlas] iOS — instant Leaflet for reliability');
+      setMapStatus("leaflet");
+      return;
     }
+    // Clear the flag after use
+    sessionStorage.removeItem('atlas-try-webgl');
 
     setDebugInfo(prev => ({ ...prev, webgl: true }));
 
@@ -1146,7 +1152,11 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           <LeafletFallbackMap trees={filteredTrees} offeringCounts={offeringCounts} />
         </Suspense>
         <button
-          onClick={() => { map.current = null; setMapStatus("loading"); }}
+          onClick={() => {
+            sessionStorage.setItem('atlas-try-webgl', '1');
+            map.current = null;
+            setMapStatus("loading");
+          }}
           className="absolute bottom-6 right-4 z-[1000] flex items-center gap-1.5 px-3 py-1.5 rounded-full font-serif text-xs transition-all hover:brightness-125"
           style={{ background: "hsla(30,30%,12%,0.85)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(4px)" }}
           title="Switch to WebGL mode"
@@ -1205,6 +1215,18 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
                   }} />
                 ))}
               </div>
+              {/* Quick escape back to Lite Mode while WebGL is loading */}
+              <button
+                onClick={() => {
+                  map.current?.remove();
+                  map.current = null;
+                  setMapStatus("leaflet");
+                }}
+                className="mt-3 pointer-events-auto px-4 py-2 rounded-full font-serif text-xs transition-all hover:brightness-125"
+                style={{ background: "hsla(120,30%,18%,0.6)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.4)" }}
+              >
+                🍃 Back to Lite Mode
+              </button>
             </div>
           )}
           {mapStatus === "error" && (
