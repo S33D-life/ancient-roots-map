@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import SeedPlanter from "@/components/SeedPlanter";
+import TreeHeartPool from "@/components/TreeHeartPool";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -278,13 +279,18 @@ const TreeDetailPage = () => {
         </div>
 
         {/* Seed Economy */}
-        <div className="mb-10">
+        <div className="mb-6">
           <SeedPlanter
             treeId={id!}
             treeLat={tree.latitude}
             treeLng={tree.longitude}
             userId={userId}
           />
+        </div>
+
+        {/* Tree Heart Pool */}
+        <div className="mb-10">
+          <TreeHeartPool treeId={id!} userId={userId} />
         </div>
 
         {/* Offerings Section */}

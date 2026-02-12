@@ -98,23 +98,21 @@ const Header = () => {
   }, []);
 
   const fetchHearts = async (userId: string) => {
-    const [treesRes, offeringsRes, plantsRes, wishlistRes, seedHeartsRes] = await Promise.all([
+    const [treesRes, offeringsRes, plantsRes, wishlistRes, heartTxRes] = await Promise.all([
       supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
       supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
       supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
       supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
-      // Count seed hearts: collected seeds where user is planter or collector
-      supabase.from("planted_seeds").select("id, planter_id, collected_by").not("collected_by", "is", null),
+      // Sum heart transactions for this user (wanderer, sower, windfall)
+      supabase.from("heart_transactions").select("amount").eq("user_id", userId),
     ]);
     const tc = treesRes.count || 0;
     const oc = offeringsRes.count || 0;
     const pc = plantsRes.count || 0;
     const wc = wishlistRes.count || 0;
 
-    // Count seed hearts for this user
-    const seedHearts = (seedHeartsRes.data || []).filter(
-      (s: any) => s.planter_id === userId || s.collected_by === userId
-    ).length;
+    // Sum all heart transaction amounts for this user
+    const heartTxTotal = (heartTxRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
 
     let total = tc * 10;
     const milestones: [number, number, string][] = [
@@ -126,7 +124,7 @@ const Header = () => {
     for (const [count, threshold, hearts] of milestones) {
       if (count >= threshold) total += parseInt(hearts);
     }
-    total += seedHearts;
+    total += heartTxTotal;
     setHeartsCount(total);
   };
 

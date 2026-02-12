@@ -194,6 +194,51 @@ export type Database = {
         }
         Relationships: []
       }
+      heart_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          heart_type: string
+          id: string
+          seed_id: string | null
+          tree_id: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          heart_type: string
+          id?: string
+          seed_id?: string | null
+          tree_id: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          heart_type?: string
+          id?: string
+          seed_id?: string | null
+          tree_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heart_transactions_seed_id_fkey"
+            columns: ["seed_id"]
+            isOneToOne: false
+            referencedRelation: "planted_seeds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heart_transactions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_links: {
         Row: {
           code: string
@@ -469,6 +514,38 @@ export type Database = {
         }
         Relationships: []
       }
+      tree_heart_pools: {
+        Row: {
+          last_windfall_at: string | null
+          total_hearts: number
+          tree_id: string
+          updated_at: string
+          windfall_count: number
+        }
+        Insert: {
+          last_windfall_at?: string | null
+          total_hearts?: number
+          tree_id: string
+          updated_at?: string
+          windfall_count?: number
+        }
+        Update: {
+          last_windfall_at?: string | null
+          total_hearts?: number
+          tree_id?: string
+          updated_at?: string
+          windfall_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_heart_pools_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: true
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_projects: {
         Row: {
           api_url: string | null
@@ -681,6 +758,10 @@ export type Database = {
     }
     Functions: {
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
+      claim_windfall_hearts: {
+        Args: { p_tree_id: string; p_user_id: string }
+        Returns: number
+      }
       get_tree_leaderboard: {
         Args: { result_limit?: number }
         Returns: {
