@@ -41,6 +41,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bug_reports: {
+        Row: {
+          actual: string
+          created_at: string
+          expected: string
+          id: string
+          severity: string
+          status: string
+          steps: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          actual: string
+          created_at?: string
+          expected: string
+          id?: string
+          severity?: string
+          status?: string
+          steps: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          actual?: string
+          created_at?: string
+          expected?: string
+          id?: string
+          severity?: string
+          status?: string
+          steps?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -130,6 +166,72 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "chat_rooms_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      draft_seeds: {
+        Row: {
+          artist: string | null
+          confidence: string
+          created_at: string
+          id: string
+          note: string | null
+          offering_id: string | null
+          raw_payload: string | null
+          status: string
+          title: string | null
+          track_id: string | null
+          track_url: string | null
+          tree_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist?: string | null
+          confidence?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          offering_id?: string | null
+          raw_payload?: string | null
+          status?: string
+          title?: string | null
+          track_id?: string | null
+          track_url?: string | null
+          tree_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist?: string | null
+          confidence?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          offering_id?: string | null
+          raw_payload?: string | null
+          status?: string
+          title?: string | null
+          track_id?: string | null
+          track_url?: string | null
+          tree_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draft_seeds_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "draft_seeds_tree_id_fkey"
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
@@ -556,6 +658,45 @@ export type Database = {
           notes?: string | null
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      seed_ingest_logs: {
+        Row: {
+          confidence: string
+          created_at: string
+          errors: string[] | null
+          id: string
+          parsed_artist: string | null
+          parsed_title: string | null
+          parsed_track_id: string | null
+          parsed_url: string | null
+          raw_payload: string
+          user_id: string | null
+        }
+        Insert: {
+          confidence?: string
+          created_at?: string
+          errors?: string[] | null
+          id?: string
+          parsed_artist?: string | null
+          parsed_title?: string | null
+          parsed_track_id?: string | null
+          parsed_url?: string | null
+          raw_payload: string
+          user_id?: string | null
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          errors?: string[] | null
+          id?: string
+          parsed_artist?: string | null
+          parsed_title?: string | null
+          parsed_track_id?: string | null
+          parsed_url?: string | null
+          raw_payload?: string
+          user_id?: string | null
         }
         Relationships: []
       }
