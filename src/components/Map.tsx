@@ -461,41 +461,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           const c = m.getCenter();
           setMapCenter({ lat: c.lat, lng: c.lng });
           m.resize();
-
-          // Verify WebGL actually rendered pixels after tiles have had time to load
-          setTimeout(() => {
-            // Only check if we're still in "ready" state (user hasn't manually switched)
-            if (mapStatusRef.current !== "ready") return;
-            try {
-              const canvas = m.getCanvas();
-              const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
-              if (gl) {
-                // Sample multiple points to reduce false positives
-                const points = [
-                  [Math.floor(canvas.width / 2), Math.floor(canvas.height / 2)],
-                  [Math.floor(canvas.width / 4), Math.floor(canvas.height / 4)],
-                  [Math.floor(canvas.width * 3 / 4), Math.floor(canvas.height * 3 / 4)],
-                ];
-                let allBlank = true;
-                for (const [x, y] of points) {
-                  const pixel = new Uint8Array(4);
-                  gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-                  if (pixel[0] !== 0 || pixel[1] !== 0 || pixel[2] !== 0 || pixel[3] !== 0) {
-                    allBlank = false;
-                    break;
-                  }
-                }
-                if (allBlank) {
-                  console.warn('[Atlas] WebGL canvas appears blank — falling back to Leaflet');
-                  setMapStatus("leaflet");
-                  m.remove();
-                  map.current = null;
-                }
-              }
-            } catch (e) {
-              console.warn('[Atlas] Pixel check failed:', e);
-            }
-          }, 4000);
+          console.log('[Atlas] MapLibre loaded successfully');
         });
         m.on('moveend', () => {
           const c = m.getCenter();

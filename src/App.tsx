@@ -48,7 +48,12 @@ const PageLoader = () => (
 const App = () => {
   const [authed, setAuthed] = useState(isAuthenticated());
 
-  if (!authed) {
+  // /map and /atlas bypass the password gate for public discovery
+  const isMapRoute = typeof window !== 'undefined' && (
+    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?')
+  );
+
+  if (!authed && !isMapRoute) {
     return <PasswordGate onSuccess={() => setAuthed(true)} />;
   }
 
@@ -57,7 +62,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <StarryNight />
+        {!isMapRoute && <StarryNight />}
         {/* <ChatPanel /> */}
         
         <BrowserRouter>
