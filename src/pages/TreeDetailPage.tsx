@@ -15,6 +15,7 @@ import {
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
+import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/MeetingTimer";
 import type { Database } from "@/integrations/supabase/types";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -50,6 +51,8 @@ const TreeDetailPage = () => {
   const [descExpanded, setDescExpanded] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
+  const [meetingStatus, setMeetingStatus] = useState<TimerStatus>("none");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -278,6 +281,17 @@ const TreeDetailPage = () => {
           </div>
         </div>
 
+        {/* Meeting Timer */}
+        <div className="mb-6">
+          <MeetingTimer
+            treeId={id!}
+            treeName={tree.name}
+            userId={userId}
+            onMeetingChange={setActiveMeeting}
+            onStatusChange={setMeetingStatus}
+          />
+        </div>
+
         {/* Seed Economy */}
         <div className="mb-6">
           <SeedPlanter
@@ -312,6 +326,19 @@ const TreeDetailPage = () => {
           />
         </div>
 
+        {/* Gate: offerings require active/expiring meeting */}
+        {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
+          <div className="mb-6 p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
+            <p className="text-sm text-muted-foreground font-serif">
+              {meetingStatus === "expired"
+                ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
+                : meetingStatus === "none"
+                ? "Meet this Ancient Friend to open a 12-hour offering window."
+                : "This meeting cannot be used for offerings."}
+            </p>
+          </div>
+        )}
+
         <Tabs defaultValue="photo" className="w-full">
           <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg">
             {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
@@ -338,7 +365,9 @@ const TreeDetailPage = () => {
                 <Button
                   size="sm"
                   onClick={() => handleAddOffering(type)}
+                  disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
                   className="font-serif tracking-wider text-xs gap-1.5"
+                  title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
                 >
                   <Sparkles className="h-3 w-3" />
                   Add {offeringLabels[type].slice(0, -1)}
