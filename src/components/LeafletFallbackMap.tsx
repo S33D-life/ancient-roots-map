@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
+import { Navigation, Loader2 } from "lucide-react";
 
 interface Tree {
   id: string;
@@ -167,6 +168,7 @@ const CLUSTER_CSS = `
 const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const [locating, setLocating] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -247,23 +249,64 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className }: LeafletFa
     };
   }, [trees, offeringCounts]);
 
+  const handleFindMe = useCallback(() => {
+    if (!navigator.geolocation || !mapRef.current) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        mapRef.current?.flyTo([latitude, longitude], 12, { duration: 1.5 });
+        // Drop a user marker
+        const userIcon = L.divIcon({
+          className: "leaflet-tree-marker",
+          html: `<div style="width:20px;height:20px;border-radius:50%;background:hsl(42,90%,55%);border:3px solid hsl(30,15%,10%);box-shadow:0 0 12px hsla(42,90%,55%,0.6);"></div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        });
+        L.marker([latitude, longitude], { icon: userIcon })
+          .bindPopup(`<div style="padding:8px;font-family:sans-serif;font-size:12px;color:hsl(45,60%,50%);background:hsl(30,15%,10%);border-radius:6px;">📍 You are here</div>`, { className: "atlas-leaflet-popup" })
+          .addTo(mapRef.current!);
+        setLocating(false);
+      },
+      () => { setLocating(false); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
   return (
-    <div className={className || "absolute inset-0"}>
+    <div className={className || "absolute inset-0"} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" />
 
       <style>{CLUSTER_CSS}</style>
 
-      {/* Atmospheric vignette */}
+      {/* Atmospheric vignette — lighter on mobile */}
       <div
-        className="absolute inset-0 pointer-events-none z-[400]"
+        className="absolute inset-0 pointer-events-none z-[400] hidden md:block"
         style={{ background: "radial-gradient(ellipse at center, transparent 55%, hsla(30, 20%, 8%, 0.35) 100%)" }}
       />
 
-      {/* Top edge shadow */}
+      {/* Top edge shadow — hidden on mobile for max map visibility */}
       <div
-        className="absolute top-0 left-0 right-0 h-20 pointer-events-none z-[400]"
+        className="absolute top-0 left-0 right-0 h-20 pointer-events-none z-[400] hidden md:block"
         style={{ background: "linear-gradient(to bottom, hsla(30, 20%, 8%, 0.4), transparent)" }}
       />
+
+      {/* Find Me button */}
+      <button
+        onClick={handleFindMe}
+        disabled={locating}
+        className="absolute top-20 right-3 z-[1000] flex items-center justify-center w-10 h-10 rounded-full transition-all hover:brightness-125 active:scale-95"
+        style={{
+          background: "hsla(30, 30%, 12%, 0.9)",
+          color: "hsl(42, 60%, 60%)",
+          border: "1px solid hsla(42, 40%, 30%, 0.5)",
+          backdropFilter: "blur(6px)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+        }}
+        title="Find my location"
+      >
+        {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
+      </button>
 
       {/* Lite Mode badge */}
       <div
