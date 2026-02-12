@@ -5,8 +5,9 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
-import { Navigation, Loader2, Compass, TreePine } from "lucide-react";
+import { Navigation, Loader2, Compass, TreePine, Plus } from "lucide-react";
 import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
+import AddTreeDialog from "./AddTreeDialog";
 
 interface Tree {
   id: string;
@@ -189,6 +190,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
   const [located, setLocated] = useState(false);
   const [userLatLng, setUserLatLng] = useState<[number, number] | null>(null);
   const [discoveryCount, setDiscoveryCount] = useState(0);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   // Filter state
   const [species, setSpecies] = useState("all");
@@ -466,15 +469,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
         </div>
       )}
 
-      {/* Bottom controls: compass right, locate centred */}
-      <div className="absolute bottom-20 right-3 z-[1000]">
+      {/* Bottom controls: add-tree left, locate centred, compass right */}
+      <div className="absolute bottom-20 left-3 z-[1000]">
         <button
-          onClick={handleCompassReset}
+          onClick={() => {
+            const map = mapRef.current;
+            if (map) {
+              const c = map.getCenter();
+              setAddTreeCoords({ lat: c.lat, lng: c.lng });
+            } else {
+              setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+            }
+            setAddDialogOpen(true);
+          }}
           className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
-          style={{ ...btnBase, color: "hsl(42, 60%, 60%)" }}
-          title="Reset view"
+          style={{ ...btnBase, color: "hsl(42, 80%, 55%)" }}
+          title="Add Ancient Friend"
         >
-          <Compass className="w-[18px] h-[18px]" />
+          <Plus className="w-[20px] h-[20px]" />
         </button>
       </div>
 
@@ -487,6 +499,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
           title="Find my location"
         >
           {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
+        </button>
+      </div>
+
+      <div className="absolute bottom-20 right-3 z-[1000]">
+        <button
+          onClick={handleCompassReset}
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
+          style={{ ...btnBase, color: "hsl(42, 60%, 60%)" }}
+          title="Reset view"
+        >
+          <Compass className="w-[18px] h-[18px]" />
         </button>
       </div>
 
@@ -503,6 +526,14 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
       >
         🍃 Lite
       </div>
+
+      {/* Add Tree Dialog */}
+      <AddTreeDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        latitude={addTreeCoords?.lat ?? null}
+        longitude={addTreeCoords?.lng ?? null}
+      />
     </div>
   );
 };
