@@ -46,21 +46,25 @@ const TeotagWhisper = ({ onOpenGuide }: TeotagWhisperProps) => {
   const { level } = useTetolLevel();
   const [whisper, setWhisper] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
+  const [fading, setFading] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+
+  const fadeOut = useCallback(() => {
+    setFading(true);
+    setTimeout(() => { setVisible(false); setFading(false); }, 500);
+  }, []);
 
   const showWhisper = useCallback(() => {
     const pool = WHISPERS[level] || WHISPERS.s33d;
     const text = pool[Math.floor(Math.random() * pool.length)];
     setWhisper(text);
+    setFading(false);
     setVisible(true);
 
-    // Auto-dismiss after 8 seconds
-    const timer = setTimeout(() => {
-      setVisible(false);
-    }, 8000);
-
+    // Auto-dismiss after 6 seconds with fade
+    const timer = setTimeout(fadeOut, 6000);
     return () => clearTimeout(timer);
-  }, [level]);
+  }, [level, fadeOut]);
 
   useEffect(() => {
     // Show a whisper 5 seconds after level change (only if not dismissed)
@@ -78,8 +82,8 @@ const TeotagWhisper = ({ onOpenGuide }: TeotagWhisperProps) => {
 
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setVisible(false);
-    setDismissed(true);
+    setFading(true);
+    setTimeout(() => { setVisible(false); setFading(false); setDismissed(true); }, 300);
   };
 
   if (!visible || !whisper) return null;
@@ -87,7 +91,7 @@ const TeotagWhisper = ({ onOpenGuide }: TeotagWhisperProps) => {
   return (
     <div
       onClick={handleClick}
-      className="fixed bottom-24 right-4 z-[90] max-w-[280px] cursor-pointer animate-fade-in group"
+      className={`fixed bottom-24 right-4 z-[90] max-w-[280px] cursor-pointer group transition-opacity duration-500 ${fading ? 'opacity-0' : 'opacity-100 animate-fade-in'}`}
     >
       <div className="relative bg-card/95 backdrop-blur-md border border-border/60 rounded-2xl rounded-br-md px-4 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-primary/30">
         <div className="flex items-start gap-2.5">
