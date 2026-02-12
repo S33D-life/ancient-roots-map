@@ -5,7 +5,7 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
-import { Navigation, Loader2, Compass } from "lucide-react";
+import { Navigation, Loader2, Compass, TreePine } from "lucide-react";
 import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
 
 interface Tree {
@@ -86,15 +86,24 @@ function getSvgDataUri(tier: Tier, species?: string): string {
 
 const MARKER_SIZES: Record<Tier, number> = { ancient: 40, storied: 34, notable: 30, seedling: 24 };
 
-function makeIcon(tier: Tier, species?: string): L.DivIcon {
+/* ── Icon cache (module-level) ── */
+const ICON_CACHE: Record<string, L.DivIcon> = {};
+
+function getOrCreateIcon(tier: Tier, species: string): L.DivIcon {
+  const hue = getSpeciesHue(species);
+  const cacheKey = `${tier}-${hue}`;
+  if (ICON_CACHE[cacheKey]) return ICON_CACHE[cacheKey];
+
   const size = MARKER_SIZES[tier];
   const uri = getSvgDataUri(tier, species);
-  return L.divIcon({
+  const icon = L.divIcon({
     className: "leaflet-tree-marker",
     html: `<div class="marker-wrap ${tier === 'ancient' ? 'marker-ancient' : ''}" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;transition:transform .15s ease-out;"></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
+  ICON_CACHE[cacheKey] = icon;
+  return icon;
 }
 
 /* ── Popup HTML ── */
@@ -145,7 +154,6 @@ const LITE_CSS = `
 @keyframes ancientGlow{0%,100%{filter:drop-shadow(0 0 3px hsla(42,90%,55%,0.25))}50%{filter:drop-shadow(0 0 8px hsla(42,90%,55%,0.6))}}
 @keyframes popIn{0%{opacity:0;transform:scale(0.92) translateY(4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes userPulse{0%,100%{box-shadow:0 0 10px hsla(42,90%,55%,0.5),0 0 20px hsla(42,90%,55%,0.15)}50%{box-shadow:0 0 14px hsla(42,90%,55%,0.7),0 0 28px hsla(42,90%,55%,0.25)}}
-@keyframes discoveryPing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(2.5);opacity:0}}
 .marker-ancient{animation:ancientGlow 3.5s ease-in-out infinite;will-change:filter}
 .user-dot{animation:userPulse 2.5s ease-in-out infinite}
 .atlas-leaflet-popup .leaflet-popup-content-wrapper{background:hsl(30,15%,10%)!important;border:1px solid hsla(42,40%,30%,0.4)!important;border-radius:12px!important;box-shadow:0 6px 24px rgba(0,0,0,0.5),0 0 12px hsla(42,60%,40%,0.08)!important;padding:0!important}
@@ -176,6 +184,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
   const userMarkerRef = useRef<L.Marker | null>(null);
   const userAccuracyRef = useRef<L.Circle | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
+  const hasFittedRef = useRef(false);
   const [locating, setLocating] = useState(false);
   const [located, setLocated] = useState(false);
   const [userLatLng, setUserLatLng] = useState<[number, number] | null>(null);
@@ -204,10 +213,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
     return result;
   }, [trees, species, perspective, userId]);
 
-  // Icon cache — per species+tier for species-aware coloring
-  const getIcon = useCallback((tier: Tier, sp: string) => {
-    return makeIcon(tier, sp);
-  }, []);
+  // Stable reference for offering counts to avoid unnecessary rebuilds
+  const offeringCountsRef = useRef(offeringCounts);
+  offeringCountsRef.current = offeringCounts;
 
   // Initialize map once
   useEffect(() => {
@@ -239,14 +247,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
     mapRef.current = map;
     requestAnimationFrame(() => map.invalidateSize());
 
-    // Auto-locate on first load — gentle, no prompt needed, silent fail
+    // Auto-locate on first load — silent fail
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude];
           setUserLatLng(latlng);
           setLocated(true);
-          // Place subtle user dot
           placeUserMarker(map, latlng, pos.coords.accuracy);
         },
         () => { /* silent */ },
@@ -264,11 +271,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
   }, []);
 
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
-    // Remove previous
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
     if (userAccuracyRef.current) map.removeLayer(userAccuracyRef.current);
 
-    // Accuracy circle (subtle)
     if (accuracy && accuracy < 2000) {
       userAccuracyRef.current = L.circle(latlng, {
         radius: Math.min(accuracy, 500),
@@ -290,18 +295,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
       .addTo(map);
   }
 
-  // Discovery detection — count new trees entering view
+  // Discovery detection — count new trees entering filtered view
   useEffect(() => {
     const currentIds = new Set(filteredTrees.map((t) => t.id));
     const prev = prevTreeIdsRef.current;
     let newCount = 0;
     currentIds.forEach((id) => { if (!prev.has(id)) newCount++; });
+
+    // Always update ref so detection stays fresh
+    prevTreeIdsRef.current = currentIds;
+
     if (prev.size > 0 && newCount > 0) {
       setDiscoveryCount(newCount);
       const t = setTimeout(() => setDiscoveryCount(0), 2500);
       return () => clearTimeout(t);
     }
-    prevTreeIdsRef.current = currentIds;
   }, [filteredTrees]);
 
   // Update markers when filteredTrees change
@@ -336,14 +344,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
       },
     });
 
+    const currentOfferings = offeringCountsRef.current;
+
     filteredTrees.forEach((tree) => {
-      const offerings = offeringCounts[tree.id] || 0;
+      const offerings = currentOfferings[tree.id] || 0;
       const age = tree.estimated_age || 0;
       const tier = getTreeTier(age, offerings);
-      const icon = getIcon(tier, tree.species);
+      const icon = getOrCreateIcon(tier, tree.species);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
-      marker.bindPopup(() => buildPopupHtml(tree, offerings, age), {
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
@@ -355,10 +365,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
     map.addLayer(clusterGroup);
     clusterRef.current = clusterGroup;
 
-    // Smart fit: if user located, fit to nearby trees; otherwise fit all
-    if (filteredTrees.length > 0) {
+    // Only auto-fit on first load, not on every filter change
+    if (!hasFittedRef.current && filteredTrees.length > 0) {
+      hasFittedRef.current = true;
       if (userLatLng && filteredTrees.length > 3) {
-        // Find trees within 50km of user, fit to those if any
         const nearby = filteredTrees.filter(
           (t) => haversineKm(userLatLng[0], userLatLng[1], t.latitude, t.longitude) < 50
         );
@@ -372,7 +382,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
       const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
-  }, [filteredTrees, offeringCounts, getIcon, userLatLng]);
+  }, [filteredTrees, userLatLng]);
 
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
@@ -416,7 +426,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
         totalVisible={filteredTrees.length}
       />
 
-      {/* Discovery cue — brief toast when new trees enter filtered view */}
+      {/* Discovery cue */}
       {discoveryCount > 0 && (
         <div
           className="absolute top-12 left-1/2 -translate-x-1/2 z-[1001] px-3 py-1.5 rounded-full font-serif text-[11px] animate-fade-in"
@@ -428,6 +438,31 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
           }}
         >
           ✦ {discoveryCount} new {discoveryCount === 1 ? "tree" : "trees"} discovered
+        </div>
+      )}
+
+      {/* Empty state when filters match nothing */}
+      {filteredTrees.length === 0 && trees.length > 0 && (
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] flex flex-col items-center gap-2 animate-fade-in"
+        >
+          <div
+            className="w-14 h-14 rounded-full flex items-center justify-center"
+            style={{ background: "hsla(30, 30%, 12%, 0.9)", border: "1px solid hsla(42, 40%, 30%, 0.4)" }}
+          >
+            <TreePine className="w-6 h-6" style={{ color: "hsl(42, 55%, 55%)" }} />
+          </div>
+          <p className="font-serif text-[12px] text-center max-w-[200px]" style={{ color: "hsl(42, 55%, 55%)" }}>
+            No trees match this view.
+            <br />
+            <button
+              onClick={() => { setSpecies("all"); setPerspective("collective"); }}
+              className="underline mt-1 inline-block transition-colors"
+              style={{ color: "hsl(42, 80%, 60%)" }}
+            >
+              Show all trees
+            </button>
+          </p>
         </div>
       )}
 
@@ -455,7 +490,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId }: L
         </button>
       </div>
 
-      {/* Lite Mode badge — top area, after filters */}
+      {/* Lite Mode badge — top area */}
       <div
         className="absolute top-12 right-2 z-[1000] px-2 py-1 rounded-full font-serif flex items-center gap-1"
         style={{
