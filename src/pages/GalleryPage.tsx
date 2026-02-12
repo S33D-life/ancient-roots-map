@@ -40,6 +40,7 @@ import StaffRoomGallery from "@/components/StaffRoomGallery";
 import EarthRadioRoom from "@/components/EarthRadioRoom";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
+import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
 import greenhouseWindow from "@/assets/greenhouse-window.jpeg";
@@ -1088,6 +1089,9 @@ const GalleryPage = () => {
               <img src={councilLedgerWindow} alt="Council of Life Ledger" className="w-full h-auto object-contain" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
+
+            {/* Heart Reservoir Rankings */}
+            <TreeReservoirLeaderboard />
 
             {/* Council of Life Window */}
             <div
