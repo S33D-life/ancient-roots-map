@@ -410,26 +410,14 @@ const DashboardPage = () => {
             </TabsContent>
 
             <TabsContent value="leaderboard">
-              <div className="space-y-10">
-                {/* Section: Wanderers */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users className="w-5 h-5 text-accent" />
-                    <h3 className="font-serif text-lg text-accent tracking-wide">Fellow Wanderers</h3>
-                  </div>
+              <div className="space-y-6">
+                <PodSection icon={Users} label="Fellow Wanderers" accent defaultOpen>
                   {user && <DashboardWanderers userId={user.id} />}
-                </div>
+                </PodSection>
 
-                <div className="border-t border-border/30" />
-
-                {/* Section: Leaderboard */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Trophy className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg text-primary tracking-wide">Community Leaderboard</h3>
-                  </div>
+                <PodSection icon={Trophy} label="Community Leaderboard">
                   <DashboardLeaderboard currentUserId={user?.id} />
-                </div>
+                </PodSection>
               </div>
             </TabsContent>
 
