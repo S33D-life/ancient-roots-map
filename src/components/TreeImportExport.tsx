@@ -47,7 +47,8 @@ const TreeImportExport = () => {
         return;
       }
 
-      // Insert trees without coordinates - they'll be converted later
+      // Enrich species and insert trees without coordinates - they'll be converted later
+      const enrichedCount = csvRows.filter(t => t.lineage).length;
       const treesToInsert = csvRows.map(tree => ({
         ...tree,
         created_by: user.id,
@@ -63,7 +64,7 @@ const TreeImportExport = () => {
 
       toast({
         title: "Import successful",
-        description: `Successfully imported ${csvRows.length} trees. Use "Convert Coordinates" to add locations.`,
+        description: `Imported ${csvRows.length} trees${enrichedCount > 0 ? ` (${enrichedCount} enriched with scientific names)` : ''}. Use "Convert Coordinates" to add locations.`,
       });
 
       // Reset the input
