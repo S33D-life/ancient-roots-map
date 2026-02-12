@@ -27,6 +27,7 @@ interface SeedEconomy {
   allSeeds: PlantedSeed[];
   totalSeedHeartsEarned: number;
   refreshSeeds: () => Promise<void>;
+  heartBreakdown: { wanderer: number; sower: number; windfall: number };
 }
 
 /** Haversine distance in meters */
@@ -51,18 +52,29 @@ function getLocalMidnight(): Date {
 export function useSeedEconomy(userId: string | null): SeedEconomy {
   const [allSeeds, setAllSeeds] = useState<PlantedSeed[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heartBreakdown, setHeartBreakdown] = useState<{ wanderer: number; sower: number; windfall: number }>({ wanderer: 0, sower: 0, windfall: 0 });
 
   const fetchSeeds = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
 
-    const { data, error } = await supabase
-      .from("planted_seeds")
-      .select("*")
-      .order("planted_at", { ascending: false });
+    const [seedsRes, heartsRes] = await Promise.all([
+      supabase.from("planted_seeds").select("*").order("planted_at", { ascending: false }),
+      supabase.from("heart_transactions").select("heart_type, amount").eq("user_id", userId),
+    ]);
 
-    if (!error && data) {
-      setAllSeeds(data as PlantedSeed[]);
+    if (!seedsRes.error && seedsRes.data) {
+      setAllSeeds(seedsRes.data as PlantedSeed[]);
     }
+
+    // Build breakdown from heart_transactions
+    const bd = { wanderer: 0, sower: 0, windfall: 0 };
+    for (const h of (heartsRes.data || []) as { heart_type: string; amount: number }[]) {
+      if (h.heart_type === "wanderer") bd.wanderer += h.amount;
+      else if (h.heart_type === "sower") bd.sower += h.amount;
+      else if (h.heart_type === "windfall") bd.windfall += h.amount;
+    }
+    setHeartBreakdown(bd);
+
     setLoading(false);
   }, [userId]);
 
@@ -89,13 +101,8 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
 
   const seedsRemaining = Math.max(0, SEEDS_PER_DAY - seedsUsedToday);
 
-  // Seed hearts earned: count collected seeds where user is planter OR collector
-  const totalSeedHeartsEarned = userId
-    ? allSeeds.filter(s =>
-        s.collected_by !== null &&
-        (s.planter_id === userId || s.collected_by === userId)
-      ).length
-    : 0;
+  // Total from heart_transactions
+  const totalSeedHeartsEarned = heartBreakdown.wanderer + heartBreakdown.sower + heartBreakdown.windfall;
 
   const plantSeed = useCallback(async (treeId: string, treeLat: number, treeLng: number): Promise<boolean> => {
     if (!userId || seedsRemaining <= 0) return false;
@@ -209,6 +216,7 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     allSeeds,
     totalSeedHeartsEarned,
     refreshSeeds: fetchSeeds,
+    heartBreakdown,
   };
 }
 

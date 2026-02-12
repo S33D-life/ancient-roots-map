@@ -29,18 +29,16 @@ const JourneyPulse = () => {
   }, []);
 
   const fetchStats = async (uid: string) => {
-    const [treesRes, offeringsRes, seedHeartsRes] = await Promise.all([
+    const [treesRes, offeringsRes, heartTxRes] = await Promise.all([
       supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", uid),
       supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", uid),
-      supabase.from("planted_seeds").select("id, planter_id, collected_by").not("collected_by", "is", null),
+      supabase.from("heart_transactions").select("amount").eq("user_id", uid),
     ]);
 
     const trees = treesRes.count || 0;
     const offerings = offeringsRes.count || 0;
-    const seedHearts = (seedHeartsRes.data || []).filter(
-      (s: any) => s.planter_id === uid || s.collected_by === uid
-    ).length;
-    const hearts = trees * 10 + seedHearts;
+    const heartTxTotal = (heartTxRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
+    const hearts = trees * 10 + heartTxTotal;
 
     setStats({ trees, offerings, hearts });
   };
