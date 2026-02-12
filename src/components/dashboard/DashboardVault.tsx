@@ -1,87 +1,48 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Archive, Scroll, Gem, Music, Image, FileText, ExternalLink, Trash2, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Archive, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-
-type VaultItemType = "memory" | "poem" | "song" | "artifact" | "scroll" | "link";
-
-interface VaultItem {
-  id: string;
-  title: string;
-  type: VaultItemType;
-  content: string | null;
-  url: string | null;
-  created_at: string;
-}
-
-const TYPE_META: Record<VaultItemType, { label: string; icon: typeof Gem; color: string }> = {
-  memory: { label: "Memory", icon: Image, color: "text-green-400" },
-  poem: { label: "Poem", icon: FileText, color: "text-violet-400" },
-  song: { label: "Song", icon: Music, color: "text-amber-400" },
-  artifact: { label: "Artifact", icon: Gem, color: "text-cyan-400" },
-  scroll: { label: "Scroll", icon: Scroll, color: "text-orange-400" },
-  link: { label: "Link", icon: ExternalLink, color: "text-blue-400" },
-};
+import { useSeedEconomy } from "@/hooks/use-seed-economy";
+import VaultHeartBalance from "./vault/VaultHeartBalance";
+import VaultSproutingSeeds from "./vault/VaultSproutingSeeds";
+import VaultHeartLedger from "./vault/VaultHeartLedger";
+import VaultTreeReservoirs from "./vault/VaultTreeReservoirs";
+import VaultLotteryTracker from "./vault/VaultLotteryTracker";
 
 interface Props {
   userId: string;
 }
 
 const DashboardVault = ({ userId }: Props) => {
-  const [items, setItems] = useState<VaultItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addOpen, setAddOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: "", type: "memory" as VaultItemType, content: "", url: "" });
-  const { toast } = useToast();
+  const [treeCount, setTreeCount] = useState(0);
+  const [offeringCount, setOfferingCount] = useState(0);
+  const [plantCount, setPlantCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
-  const fetchItems = async () => {
-    const { data, error } = await supabase
-      .from("vault_items")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    if (!error && data) setItems(data as VaultItem[]);
-    setLoading(false);
-  };
+  const {
+    heartBreakdown,
+    allSeeds,
+    seedsRemaining,
+    totalSeedHeartsEarned,
+  } = useSeedEconomy(userId);
 
-  useEffect(() => { fetchItems(); }, [userId]);
-
-  const handleAdd = async () => {
-    if (!form.title.trim()) return;
-    setSaving(true);
-    const { error } = await supabase.from("vault_items").insert({
-      user_id: userId,
-      title: form.title.trim(),
-      type: form.type,
-      content: form.content.trim() || null,
-      url: form.url.trim() || null,
-    });
-    if (error) {
-      toast({ title: "Failed to save", variant: "destructive" });
-    } else {
-      toast({ title: "Saved to Vault" });
-      setForm({ title: "", type: "memory", content: "", url: "" });
-      setAddOpen(false);
-      fetchItems();
-    }
-    setSaving(false);
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("vault_items").delete().eq("id", id);
-    if (!error) {
-      setItems(prev => prev.filter(i => i.id !== id));
-      toast({ title: "Removed from Vault" });
-    }
-  };
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const [treesRes, offeringsRes, plantsRes, wishlistRes] = await Promise.all([
+        supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
+        supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
+        supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
+      ]);
+      setTreeCount(treesRes.count || 0);
+      setOfferingCount(offeringsRes.count || 0);
+      setPlantCount(plantsRes.count || 0);
+      setWishlistCount(wishlistRes.count || 0);
+      setLoading(false);
+    };
+    fetchCounts();
+  }, [userId]);
 
   if (loading) {
     return (
@@ -91,129 +52,64 @@ const DashboardVault = ({ userId }: Props) => {
     );
   }
 
+  // Calculate total hearts matching the Header's formula
+  const baseHearts = treeCount * 10;
+  const milestones: [number, number, number][] = [
+    [treeCount, 1, 10], [treeCount, 5, 25], [treeCount, 10, 50],
+    [treeCount, 25, 100], [treeCount, 50, 200], [treeCount, 100, 500], [treeCount, 250, 1000],
+    [offeringCount, 1, 5], [offeringCount, 10, 30], [offeringCount, 25, 75],
+    [offeringCount, 50, 200], [offeringCount, 100, 500],
+    [plantCount, 1, 5], [plantCount, 5, 20], [plantCount, 15, 60],
+    [wishlistCount, 3, 15], [wishlistCount, 10, 50],
+  ];
+  const milestoneHearts = milestones.reduce((sum, [count, threshold, hearts]) =>
+    count >= threshold ? sum + hearts : sum, 0);
+  const totalHearts = baseHearts + milestoneHearts + totalSeedHeartsEarned;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <motion.div
+      className="space-y-5"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      {/* Section header */}
+      <div className="flex items-center gap-2.5">
+        <Archive className="w-5 h-5 text-primary" />
         <div>
-          <h2 className="text-xl font-serif text-foreground flex items-center gap-2">
-            <Archive className="w-5 h-5 text-primary" />
-            Heartwood Vault
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Your personal trove of memories, poems, songs, and sacred keepsakes.
+          <h2 className="text-lg font-serif text-foreground tracking-wide">Heartwood Vault</h2>
+          <p className="text-[11px] text-muted-foreground font-serif">
+            Your living treasury of Hearts, Seeds, and Tree Bonds
           </p>
         </div>
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button variant="mystical" size="sm">
-              <Plus className="w-4 h-4 mr-1" /> Add to Vault
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="font-serif">Add to your Vault</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <Input
-                placeholder="Title"
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              />
-              <Select value={form.type} onValueChange={(v: VaultItemType) => setForm(f => ({ ...f, type: v }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(TYPE_META) as VaultItemType[]).map(t => (
-                    <SelectItem key={t} value={t}>{TYPE_META[t].label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Textarea
-                placeholder="Notes, poem text, or description…"
-                value={form.content}
-                onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                rows={3}
-              />
-              <Input
-                placeholder="Link / URL (optional)"
-                value={form.url}
-                onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
-              />
-              <Button onClick={handleAdd} disabled={saving || !form.title.trim()} className="w-full" variant="mystical">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                Save to Vault
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      {/* Items grid */}
-      {items.length === 0 ? (
-        <Card className="border-mystical bg-card/40 backdrop-blur">
-          <CardContent className="py-12 text-center">
-            <Archive className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-            <p className="text-muted-foreground font-serif">Your vault is empty.</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">Add memories, poems, songs, and keepsakes to begin your collection.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((item, i) => {
-            const meta = TYPE_META[item.type as VaultItemType] || TYPE_META.memory;
-            const Icon = meta.icon;
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Card className="border-mystical bg-card/50 backdrop-blur hover:shadow-elegant transition-all group">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 ${meta.color}`} />
-                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{meta.label}</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <CardTitle className="text-sm font-serif">{item.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    {item.content && (
-                      <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">{item.content}</p>
-                    )}
-                    {item.url && (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2"
-                      >
-                        <ExternalLink className="w-3 h-3" /> Open link
-                      </a>
-                    )}
-                    <p className="text-[10px] text-muted-foreground/50 mt-2">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
-    </div>
+      {/* Primary: Heart Balance Ring */}
+      <VaultHeartBalance
+        total={totalHearts}
+        wanderer={heartBreakdown.wanderer}
+        sower={heartBreakdown.sower}
+        windfall={heartBreakdown.windfall}
+        baseHearts={baseHearts}
+        milestoneHearts={milestoneHearts}
+        seedsRemaining={seedsRemaining}
+      />
+
+      {/* Active Seeds / Bloom Timers */}
+      <VaultSproutingSeeds seeds={allSeeds} userId={userId} />
+
+      {/* Two-column layout for mid sections on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Heart Ledger */}
+        <VaultHeartLedger userId={userId} />
+
+        {/* Lottery Tracker */}
+        <VaultLotteryTracker userId={userId} />
+      </div>
+
+      {/* Tree Reservoirs */}
+      <VaultTreeReservoirs />
+    </motion.div>
   );
 };
 
