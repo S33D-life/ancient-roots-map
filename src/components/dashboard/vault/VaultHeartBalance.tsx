@@ -9,10 +9,18 @@ interface VaultHeartBalanceProps {
   baseHearts: number;
   milestoneHearts: number;
   seedsRemaining: number;
+  activeFilter?: string | null;
+  onSegmentClick?: (label: string) => void;
 }
 
+const LABEL_TO_FILTER: Record<string, string> = {
+  "Wanderer": "wanderer",
+  "Sower": "sower",
+  "Windfall": "windfall",
+};
+
 const VaultHeartBalance = ({
-  total, wanderer, sower, windfall, baseHearts, milestoneHearts, seedsRemaining,
+  total, wanderer, sower, windfall, baseHearts, milestoneHearts, seedsRemaining, activeFilter, onSegmentClick,
 }: VaultHeartBalanceProps) => {
   const segments = [
     { label: "Mapped", value: baseHearts, color: "hsl(42, 95%, 55%)" },
@@ -64,25 +72,32 @@ const VaultHeartBalance = ({
                 strokeWidth="10"
                 opacity="0.3"
               />
-              {segments.map((seg, i) => {
+               {segments.map((seg, i) => {
                 const segLen = (seg.value / ringTotal) * circumference;
                 const offset = cumulativeOffset;
                 cumulativeOffset += segLen;
+                const filterKey = LABEL_TO_FILTER[seg.label];
+                const isActive = activeFilter && filterKey === activeFilter;
+                const isDimmed = activeFilter && !isActive && filterKey;
                 return (
                   <motion.circle
                     key={seg.label}
                     cx="80" cy="80" r={radius}
                     fill="none"
                     stroke={seg.color}
-                    strokeWidth="10"
+                    strokeWidth={isActive ? "13" : "10"}
                     strokeLinecap="round"
                     strokeDasharray={`${segLen} ${circumference - segLen}`}
                     strokeDashoffset={-offset}
                     transform="rotate(-90 80 80)"
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    animate={{ opacity: isDimmed ? 0.25 : 1 }}
                     transition={{ delay: 0.2 + i * 0.1, duration: 0.6 }}
-                    style={{ filter: `drop-shadow(0 0 4px ${seg.color})` }}
+                    style={{
+                      filter: `drop-shadow(0 0 ${isActive ? "8px" : "4px"} ${seg.color})`,
+                      cursor: filterKey ? "pointer" : "default",
+                    }}
+                    onClick={() => filterKey && onSegmentClick?.(filterKey)}
                   />
                 );
               })}
@@ -106,22 +121,33 @@ const VaultHeartBalance = ({
 
           {/* Breakdown */}
           <div className="flex-1 space-y-2 w-full">
-            {segments.map((seg, i) => (
-              <motion.div
-                key={seg.label}
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, x: 12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.06 }}
-              >
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: seg.color, boxShadow: `0 0 6px ${seg.color}` }}
-                />
-                <span className="text-xs font-serif text-muted-foreground flex-1">{seg.label}</span>
-                <span className="text-xs font-serif tabular-nums text-foreground">{seg.value}</span>
-              </motion.div>
-            ))}
+            {segments.map((seg, i) => {
+              const filterKey = LABEL_TO_FILTER[seg.label];
+              const isActive = activeFilter && filterKey === activeFilter;
+              return (
+                <motion.div
+                  key={seg.label}
+                  className={`flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 transition-all ${
+                    filterKey ? "cursor-pointer hover:bg-card/60" : ""
+                  } ${isActive ? "bg-card/80 ring-1 ring-primary/30" : ""}`}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.06 }}
+                  onClick={() => filterKey && onSegmentClick?.(filterKey)}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 transition-transform"
+                    style={{
+                      backgroundColor: seg.color,
+                      boxShadow: `0 0 6px ${seg.color}`,
+                      transform: isActive ? "scale(1.3)" : "scale(1)",
+                    }}
+                  />
+                  <span className="text-xs font-serif text-muted-foreground flex-1">{seg.label}</span>
+                  <span className="text-xs font-serif tabular-nums text-foreground">{seg.value}</span>
+                </motion.div>
+              );
+            })}
 
             {/* Daily seeds remaining */}
             <div className="pt-2 mt-2 border-t border-border/30">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Archive, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -20,6 +20,11 @@ const DashboardVault = ({ userId }: Props) => {
   const [offeringCount, setOfferingCount] = useState(0);
   const [plantCount, setPlantCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [heartFilter, setHeartFilter] = useState<string | null>(null);
+
+  const handleSegmentClick = useCallback((label: string) => {
+    setHeartFilter(prev => prev === label ? null : label);
+  }, []);
 
   const {
     heartBreakdown,
@@ -95,6 +100,8 @@ const DashboardVault = ({ userId }: Props) => {
         baseHearts={baseHearts}
         milestoneHearts={milestoneHearts}
         seedsRemaining={seedsRemaining}
+        activeFilter={heartFilter}
+        onSegmentClick={handleSegmentClick}
       />
 
       {/* Active Seeds / Bloom Timers */}
@@ -103,7 +110,11 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Two-column layout for mid sections on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Heart Ledger */}
-        <VaultHeartLedger userId={userId} />
+        <VaultHeartLedger
+          userId={userId}
+          externalFilter={heartFilter}
+          onFilterChange={(f) => setHeartFilter(f || null)}
+        />
 
         {/* Lottery Tracker */}
         <VaultLotteryTracker userId={userId} />
