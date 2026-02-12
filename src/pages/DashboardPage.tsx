@@ -342,6 +342,17 @@ const DashboardPage = () => {
 
             <TabsContent value="pod">
               <div className="space-y-10">
+                {/* Section: Vault */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Archive className="w-5 h-5 text-primary" />
+                    <h3 className="font-serif text-lg text-primary tracking-wide">Heartwood Vault</h3>
+                  </div>
+                  {user && <DashboardVault userId={user.id} />}
+                </div>
+
+                <div className="border-t border-border/30" />
+
                 {/* Section: My Trees */}
                 <div>
                   <div className="flex items-center gap-2 mb-4">
@@ -389,17 +400,6 @@ const DashboardPage = () => {
                     )}
                   </div>
                   <Greenhouse />
-                </div>
-
-                <div className="border-t border-border/30" />
-
-                {/* Section: Vault */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Archive className="w-5 h-5 text-primary" />
-                    <h3 className="font-serif text-lg text-primary tracking-wide">Heartwood Vault</h3>
-                  </div>
-                  {user && <DashboardVault userId={user.id} />}
                 </div>
               </div>
             </TabsContent>
