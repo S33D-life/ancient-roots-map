@@ -1,4 +1,4 @@
-import { Heart, TreeDeciduous, RotateCcw, Search } from "lucide-react";
+import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
 
@@ -54,6 +54,11 @@ const Footer = () => {
             <Search className="w-3 h-3" />
             <span className="font-mono text-[10px] opacity-60">⌘K</span>
           </button>
+          <Dot />
+          <Link to="/install" className="inline-flex items-center gap-1.5 hover:text-primary transition-colors">
+            <Smartphone className="w-3 h-3" />
+            Plant this app
+          </Link>
           <Dot />
           <span className="text-xs text-muted-foreground/60">EST 2016 · hello@s33d.life</span>
         </div>
