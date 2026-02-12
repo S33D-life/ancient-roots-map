@@ -454,6 +454,15 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           }
         }, 10000);
 
+        // Track whether tiles have actually rendered
+        let tilesLoaded = false;
+        m.on('sourcedata', (e) => {
+          if (e.isSourceLoaded && !tilesLoaded) {
+            tilesLoaded = true;
+            console.log('[Atlas] Tiles confirmed loaded');
+          }
+        });
+
         m.on('load', () => {
           clearTimeout(timeoutId);
           setMapStatus("ready");
@@ -462,6 +471,16 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           setMapCenter({ lat: c.lat, lng: c.lng });
           m.resize();
           console.log('[Atlas] MapLibre loaded successfully');
+
+          // Background verify: if tiles never arrive after 6s, fall back
+          setTimeout(() => {
+            if (!tilesLoaded && mapStatusRef.current !== "leaflet") {
+              console.warn('[Atlas] Tiles never rendered — falling back to Leaflet');
+              setMapStatus("leaflet");
+              m.remove();
+              map.current = null;
+            }
+          }, 6000);
         });
         m.on('moveend', () => {
           const c = m.getCenter();
@@ -1016,7 +1035,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   return (
     <div className="absolute inset-0 z-[1]">
       {/* Map canvas — no opaque background so WebGL canvas is always visible */}
-      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0 }} />
+      <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: '#faf7f0' }} />
 
       {/* Loading / Error overlay (kept non-occluding) */}
       {mapStatus !== "ready" && (
