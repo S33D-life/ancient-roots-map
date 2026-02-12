@@ -10,18 +10,11 @@ interface TetolMenuProps {
 
 const treeItems = [
   {
-    to: "/golden-dream",
-    label: "yOur Golden Dream",
-    subtitle: "The Crown",
-    icon: Crown,
-    zone: "crown",
-  },
-  {
-    to: "/council-of-life",
-    label: "Council of Life",
-    subtitle: "The Canopy",
-    icon: Leaf,
-    zone: "canopy",
+    to: "/map",
+    label: "Ancient Friends",
+    subtitle: "The Roots",
+    icon: TreeDeciduous,
+    zone: "roots",
   },
   {
     to: "/library",
@@ -31,11 +24,18 @@ const treeItems = [
     zone: "trunk",
   },
   {
-    to: "/map",
-    label: "Ancient Friends",
-    subtitle: "The Roots",
-    icon: TreeDeciduous,
-    zone: "roots",
+    to: "/council-of-life",
+    label: "Council of Life",
+    subtitle: "The Canopy",
+    icon: Leaf,
+    zone: "canopy",
+  },
+  {
+    to: "/golden-dream",
+    label: "yOur Golden Dream",
+    subtitle: "The Crown",
+    icon: Crown,
+    zone: "crown",
   },
 ];
 
