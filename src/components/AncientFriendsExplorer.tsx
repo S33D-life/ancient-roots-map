@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { X, Heart, MapPin, TreePine, Calendar, Compass, SlidersHorizontal, Minimize2, Undo2, Camera, Music, BookOpen, Image } from "lucide-react";
+import { X, Heart, MapPin, TreePine, Calendar, Compass, SlidersHorizontal, Minimize2, Undo2, Camera, Music, BookOpen, Image, Sprout, User } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
@@ -85,12 +85,16 @@ const TreeCard = ({
   style,
   onSwipe,
   onTap,
+  planterName,
+  seedCount,
   isTop,
 }: {
   tree: Tree;
   photoUrl?: string;
   offeringCounts?: OfferingCounts;
   wishlistCount?: number;
+  planterName?: string;
+  seedCount?: number;
   style?: React.CSSProperties;
   onSwipe: (dir: "left" | "right") => void;
   onTap: () => void;
@@ -275,34 +279,57 @@ const TreeCard = ({
           </div>
 
           {/* Community engagement row */}
-          {((wishlistCount && wishlistCount > 0) || (counts && counts.total > 0)) && (
-            <div className="flex items-center gap-3 flex-wrap">
-              {wishlistCount && wishlistCount > 0 && (
-                <span
-                  className="text-xs font-serif flex items-center gap-1 px-2 py-0.5 rounded-full"
-                  style={{
-                    background: "hsla(42, 70%, 45%, 0.12)",
-                    color: "hsl(42, 60%, 60%)",
-                    border: "1px solid hsla(42, 50%, 40%, 0.2)",
-                  }}
-                >
-                  <Heart className="w-3 h-3" /> {wishlistCount} wishlisted
-                </span>
-              )}
-              {counts && counts.total > 0 && (
-                <span
-                  className="text-xs font-serif px-2 py-0.5 rounded-full"
-                  style={{
-                    background: "hsla(120, 30%, 30%, 0.12)",
-                    color: "hsl(120, 30%, 55%)",
-                    border: "1px solid hsla(120, 25%, 35%, 0.2)",
-                  }}
-                >
-                  {counts.total} offering{counts.total !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-          )}
+          {/* Community engagement signals */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {planterName && (
+              <span
+                className="text-xs font-serif flex items-center gap-1 px-2 py-0.5 rounded-full"
+                style={{
+                  background: "hsla(200, 30%, 30%, 0.12)",
+                  color: "hsl(200, 40%, 62%)",
+                  border: "1px solid hsla(200, 30%, 40%, 0.2)",
+                }}
+              >
+                <User className="w-3 h-3" /> {planterName}
+              </span>
+            )}
+            {wishlistCount != null && wishlistCount > 0 && (
+              <span
+                className="text-xs font-serif flex items-center gap-1 px-2 py-0.5 rounded-full"
+                style={{
+                  background: "hsla(42, 70%, 45%, 0.12)",
+                  color: "hsl(42, 60%, 60%)",
+                  border: "1px solid hsla(42, 50%, 40%, 0.2)",
+                }}
+              >
+                <Heart className="w-3 h-3" /> {wishlistCount} wishlisted
+              </span>
+            )}
+            {counts && counts.total > 0 && (
+              <span
+                className="text-xs font-serif px-2 py-0.5 rounded-full"
+                style={{
+                  background: "hsla(120, 30%, 30%, 0.12)",
+                  color: "hsl(120, 30%, 55%)",
+                  border: "1px solid hsla(120, 25%, 35%, 0.2)",
+                }}
+              >
+                {counts.total} offering{counts.total !== 1 ? "s" : ""}
+              </span>
+            )}
+            {seedCount != null && seedCount > 0 && (
+              <span
+                className="text-xs font-serif flex items-center gap-1 px-2 py-0.5 rounded-full"
+                style={{
+                  background: "hsla(80, 40%, 30%, 0.12)",
+                  color: "hsl(80, 40%, 55%)",
+                  border: "1px solid hsla(80, 30%, 35%, 0.2)",
+                }}
+              >
+                <Sprout className="w-3 h-3" /> {seedCount} seed{seedCount !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
 
           {tree.description && (
             <p
@@ -337,6 +364,8 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
   const [offeringCounts, setOfferingCounts] = useState<Record<string, OfferingCounts>>({});
   const [wishlistCounts, setWishlistCounts] = useState<Record<string, number>>({});
   const [swipeHistory, setSwipeHistory] = useState<{ index: number; dir: "left" | "right" }[]>([]);
+  const [planterNames, setPlanterNames] = useState<Record<string, string>>({});
+  const [seedCounts, setSeedCounts] = useState<Record<string, number>>({});
 
   // Fetch photo offerings + offering type counts for all trees
   useEffect(() => {
@@ -382,6 +411,44 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
           wc[row.tree_id] = (wc[row.tree_id] || 0) + 1;
         }
         setWishlistCounts(wc);
+      });
+
+    // Fetch creator profiles (who planted each tree)
+    const creatorIds = [...new Set(trees.filter(t => t.created_by).map(t => t.created_by!))];
+    if (creatorIds.length > 0) {
+      supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", creatorIds)
+        .then(({ data }) => {
+          if (!data) return;
+          const nameMap: Record<string, string> = {};
+          for (const p of data) {
+            if (p.full_name) nameMap[p.id] = p.full_name;
+          }
+          // Map tree id → planter name
+          const treeNameMap: Record<string, string> = {};
+          for (const t of trees) {
+            if (t.created_by && nameMap[t.created_by]) {
+              treeNameMap[t.id] = nameMap[t.created_by];
+            }
+          }
+          setPlanterNames(treeNameMap);
+        });
+    }
+
+    // Fetch seed counts per tree
+    supabase
+      .from("planted_seeds")
+      .select("tree_id")
+      .in("tree_id", treeIds)
+      .then(({ data }) => {
+        if (!data) return;
+        const sc: Record<string, number> = {};
+        for (const row of data) {
+          sc[row.tree_id] = (sc[row.tree_id] || 0) + 1;
+        }
+        setSeedCounts(sc);
       });
   }, [trees]);
 
@@ -640,6 +707,8 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
                 photoUrl={treePhotos[nextTree.id]}
                 offeringCounts={offeringCounts[nextTree.id]}
                 wishlistCount={wishlistCounts[nextTree.id]}
+                planterName={planterNames[nextTree.id]}
+                seedCount={seedCounts[nextTree.id]}
                 onSwipe={() => {}}
                 onTap={() => {}}
                 isTop={false}
@@ -652,6 +721,8 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
                 photoUrl={treePhotos[currentTree.id]}
                 offeringCounts={offeringCounts[currentTree.id]}
                 wishlistCount={wishlistCounts[currentTree.id]}
+                planterName={planterNames[currentTree.id]}
+                seedCount={seedCounts[currentTree.id]}
                 onSwipe={handleSwipe}
                 onTap={handleTapDetail}
                 isTop
