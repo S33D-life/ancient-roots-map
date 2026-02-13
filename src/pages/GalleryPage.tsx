@@ -953,27 +953,20 @@ const GalleryPage = () => {
 
           <TabsContent value="gallery" className="space-y-8">
 
-            {/* Ancient Friends Window Banner */}
-            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
+            {/* Ancient Friends Window — tap to explore */}
+            <button
+              onClick={() => setShowExplorer(true)}
+              className="relative max-w-[75%] mx-auto rounded-xl overflow-hidden border border-amber-700/40 block hover:scale-[1.02] focus:scale-[1.02] transition-transform duration-300 focus:outline-none group cursor-pointer"
+            >
               <img 
                 src={ancientFriendsWindow} 
-                alt="Ancient Friends" 
+                alt="Ancient Friends — tap to explore" 
                 className="w-full h-auto object-contain"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
-
-            {/* Explore button */}
-            <button
-              onClick={() => setShowExplorer(true)}
-              className="w-full py-3 rounded-xl text-sm font-serif tracking-wide transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-              style={{
-                background: 'linear-gradient(135deg, hsla(42, 70%, 45%, 0.2), hsla(28, 50%, 30%, 0.2))',
-                color: 'hsl(42, 80%, 60%)',
-                border: '1px solid hsla(42, 60%, 50%, 0.3)',
-              }}
-            >
-              🌿 Explore — Swipe through Ancient Friends
+              <span className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-serif tracking-widest opacity-70 group-hover:opacity-100 transition-opacity" style={{ color: 'hsl(42 80% 60%)' }}>
+                🌿 Tap to Explore
+              </span>
             </button>
 
             {/* Explorer overlay */}
