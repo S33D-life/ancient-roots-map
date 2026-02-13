@@ -15,6 +15,7 @@ import {
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
+import ProposeEditDrawer from "@/components/ProposeEditDrawer";
 import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/MeetingTimer";
 import OfferingHistory from "@/components/OfferingHistory";
 import type { Database } from "@/integrations/supabase/types";
@@ -59,6 +60,7 @@ const TreeDetailPage = () => {
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
   const [meetingStatus, setMeetingStatus] = useState<TimerStatus>("none");
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
+  const [proposeEditOpen, setProposeEditOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -190,7 +192,15 @@ const TreeDetailPage = () => {
                   {tree.species}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 font-serif text-xs gap-1.5"
+                  onClick={() => setProposeEditOpen(true)}
+                >
+                  <FileText className="h-3.5 w-3.5" /> Propose Edit
+                </Button>
                 {(tree.latitude || tree.what3words) && (
                   <Button
                     variant="outline"
@@ -464,6 +474,12 @@ const TreeDetailPage = () => {
         treeId={id!}
         type={selectedType}
         meetingId={activeMeeting?.id}
+      />
+
+      <ProposeEditDrawer
+        open={proposeEditOpen}
+        onOpenChange={setProposeEditOpen}
+        tree={tree}
       />
     </div>
   );

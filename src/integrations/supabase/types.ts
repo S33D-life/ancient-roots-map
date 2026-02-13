@@ -1174,6 +1174,107 @@ export type Database = {
         }
         Relationships: []
       }
+      tree_change_log: {
+        Row: {
+          change_set: Json
+          id: string
+          merged_at: string
+          merged_by: string
+          merged_from_proposal_id: string | null
+          previous_values: Json
+          tree_id: string
+        }
+        Insert: {
+          change_set?: Json
+          id?: string
+          merged_at?: string
+          merged_by: string
+          merged_from_proposal_id?: string | null
+          previous_values?: Json
+          tree_id: string
+        }
+        Update: {
+          change_set?: Json
+          id?: string
+          merged_at?: string
+          merged_by?: string
+          merged_from_proposal_id?: string | null
+          previous_values?: Json
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_change_log_merged_from_proposal_id_fkey"
+            columns: ["merged_from_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "tree_edit_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_change_log_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_edit_proposals: {
+        Row: {
+          confidence: string
+          created_at: string
+          evidence: Json
+          flags: string[] | null
+          id: string
+          proposed_by: string
+          proposed_changes: Json
+          reason: string
+          reviewer_id: string | null
+          reviewer_note: string | null
+          status: string
+          tree_id: string
+          updated_at: string
+        }
+        Insert: {
+          confidence?: string
+          created_at?: string
+          evidence?: Json
+          flags?: string[] | null
+          id?: string
+          proposed_by: string
+          proposed_changes?: Json
+          reason: string
+          reviewer_id?: string | null
+          reviewer_note?: string | null
+          status?: string
+          tree_id: string
+          updated_at?: string
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          evidence?: Json
+          flags?: string[] | null
+          id?: string
+          proposed_by?: string
+          proposed_changes?: Json
+          reason?: string
+          reviewer_id?: string | null
+          reviewer_note?: string | null
+          status?: string
+          tree_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_edit_proposals_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_heart_pools: {
         Row: {
           last_windfall_at: string | null
