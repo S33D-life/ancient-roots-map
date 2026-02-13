@@ -12,12 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import ProposeEditDrawer from "@/components/ProposeEditDrawer";
 import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/MeetingTimer";
 import OfferingHistory from "@/components/OfferingHistory";
+import BirdsongOfferingFlow from "@/components/BirdsongOfferingFlow";
+import BirdsongTab from "@/components/BirdsongTab";
 import type { Database } from "@/integrations/supabase/types";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -61,6 +63,8 @@ const TreeDetailPage = () => {
   const [meetingStatus, setMeetingStatus] = useState<TimerStatus>("none");
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
   const [proposeEditOpen, setProposeEditOpen] = useState(false);
+  const [birdsongOpen, setBirdsongOpen] = useState(false);
+  const [birdsongCount, setBirdsongCount] = useState(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -108,7 +112,15 @@ const TreeDetailPage = () => {
       if (!error && data) setAllMeetings(data as Meeting[]);
     };
 
-    Promise.all([fetchTree(), fetchOfferings(), fetchMeetings()]).then(() => setLoading(false));
+    const fetchBirdsongCount = async () => {
+      const { count } = await supabase
+        .from("birdsong_offerings")
+        .select("id", { count: "exact", head: true })
+        .eq("tree_id", id);
+      setBirdsongCount(count || 0);
+    };
+
+    Promise.all([fetchTree(), fetchOfferings(), fetchMeetings(), fetchBirdsongCount()]).then(() => setLoading(false));
 
     const channel = supabase
       .channel(`offerings-${id}`)
@@ -332,6 +344,21 @@ const TreeDetailPage = () => {
           <TreeHeartPool treeId={id!} userId={userId} />
         </div>
 
+        {/* Birdsong Offering Button */}
+        <div className="mb-6">
+          <Button
+            onClick={() => setBirdsongOpen(true)}
+            variant="outline"
+            className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+          >
+            <Bird className="h-4 w-4" />
+            Offer a Birdsong
+            {birdsongCount > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
+            )}
+          </Button>
+        </div>
+
         {/* Offerings Section */}
         <div className="flex items-center gap-3 mb-6">
           <div
@@ -379,6 +406,14 @@ const TreeDetailPage = () => {
                 </span>
               </TabsTrigger>
             ))}
+            <TabsTrigger
+              value="birdsong"
+              className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            >
+              <Bird className="h-4 w-4" />
+              Birdsong
+              <span className="text-[10px] opacity-60">({birdsongCount})</span>
+            </TabsTrigger>
           </TabsList>
 
           {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
@@ -435,7 +470,35 @@ const TreeDetailPage = () => {
               )}
             </TabsContent>
           ))}
+
+          <TabsContent value="birdsong">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
+              <Button
+                size="sm"
+                onClick={() => setBirdsongOpen(true)}
+                className="font-serif tracking-wider text-xs gap-1.5"
+              >
+                <Bird className="h-3 w-3" />
+                Add Birdsong
+              </Button>
+            </div>
+            <BirdsongTab treeId={id!} />
+          </TabsContent>
         </Tabs>
+
+        {/* Birdsong Offering Flow */}
+        {tree && (
+          <BirdsongOfferingFlow
+            treeId={id!}
+            treeName={tree.name}
+            treeLat={tree.latitude ? Number(tree.latitude) : null}
+            treeLng={tree.longitude ? Number(tree.longitude) : null}
+            open={birdsongOpen}
+            onOpenChange={setBirdsongOpen}
+            onOfferingSaved={() => setBirdsongCount((c) => c + 1)}
+          />
+        )}
 
         {/* Offering History — grouped by meeting */}
         {userId && allMeetings.length > 0 && (
