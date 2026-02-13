@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => ({
     }),
   ].filter(Boolean),
   resolve: {
-    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "framer-motion"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
