@@ -91,8 +91,13 @@ const BirdsongOfferingFlow = ({
         }
 
         const data = response.data;
-        setPredictions(data.predictions || []);
+        const preds = data.predictions || [];
+        setPredictions(preds);
         setModelVersion(data.modelVersion || "");
+        // Auto-select top prediction if confidence is high enough
+        if (preds.length > 0 && preds[0].confidence >= 0.5) {
+          setSelectedSpecies(preds[0]);
+        }
         setStep("confirm");
       } catch (err) {
         console.error("Identification error:", err);
@@ -246,7 +251,9 @@ const BirdsongOfferingFlow = ({
                 {predictions.length > 0 ? (
                   <>
                     <p className="text-sm text-muted-foreground font-serif">
-                      Select the species you heard:
+                      {selectedSpecies && selectedSpecies.confidence >= 0.5
+                        ? "🎯 Auto-identified! Confirm or choose another:"
+                        : "Select the species you heard:"}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {predictions.map((p, i) => (
@@ -255,11 +262,14 @@ const BirdsongOfferingFlow = ({
                           onClick={() => handleSelectSpecies(p)}
                           className={`px-3 py-2 rounded-lg border text-sm font-serif transition-all ${
                             selectedSpecies === p
-                              ? "bg-primary/20 border-primary text-primary"
+                              ? "bg-primary/20 border-primary text-primary ring-1 ring-primary/40"
                               : "bg-secondary/30 border-border/50 text-foreground/80 hover:border-primary/40"
                           }`}
                         >
-                          <div className="font-medium">{p.speciesCommon}</div>
+                          <div className="font-medium flex items-center gap-1.5">
+                            {selectedSpecies === p && <Check className="h-3.5 w-3.5" />}
+                            {p.speciesCommon}
+                          </div>
                           <div className="text-[10px] opacity-60 flex items-center gap-1">
                             {p.speciesScientific && <span className="italic">{p.speciesScientific}</span>}
                             <Badge variant="outline" className="text-[9px] h-4 px-1">
