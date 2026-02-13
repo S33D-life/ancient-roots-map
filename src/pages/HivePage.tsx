@@ -215,6 +215,7 @@ const HivePage = () => {
               <TabsTrigger value="treasury" className="font-serif text-xs tracking-wider">
                 <TrendingUp className="w-3.5 h-3.5 mr-1.5" /> Treasury
               </TabsTrigger>
+              {/* Deep treasury link is at /hive/{family}/treasury */}
               <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider">
                 <Music className="w-3.5 h-3.5 mr-1.5" /> Offerings
               </TabsTrigger>
@@ -256,6 +257,13 @@ const HivePage = () => {
             {/* Treasury Tab */}
             <TabsContent value="treasury">
               <div className="space-y-6">
+                <div className="flex justify-end">
+                  <Link to={`/hive/${family}/treasury`}>
+                    <Button variant="outline" size="sm" className="font-serif text-xs gap-1.5">
+                      <TrendingUp className="w-3.5 h-3.5" /> Full Treasury View
+                    </Button>
+                  </Link>
+                </div>
                 {/* Heart Flows */}
                 <Card className="bg-card/60 backdrop-blur border-border/40">
                   <CardContent className="p-6">
