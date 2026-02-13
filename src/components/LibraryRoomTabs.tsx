@@ -10,8 +10,8 @@ interface RoomTab {
 }
 
 const ROOMS: RoomTab[] = [
-  { value: "staff-room", label: "Staff Room", icon: <Wand2 className="w-4 h-4" /> },
   { value: "gallery", label: "Ancient Friends", icon: <Globe className="w-4 h-4" /> },
+  { value: "staff-room", label: "Staff Room", icon: <Wand2 className="w-4 h-4" /> },
   { value: "music-room", label: "Music Room", icon: <Music className="w-4 h-4" /> },
   { value: "greenhouse", label: "Greenhouse", icon: <Sprout className="w-4 h-4" /> },
   { value: "wishlist", label: "Wishing Tree", icon: <Star className="w-4 h-4" /> },
