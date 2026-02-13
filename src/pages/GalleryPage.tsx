@@ -234,6 +234,7 @@ const GalleryPage = () => {
   const [hoveredSpiralStaff, setHoveredSpiralStaff] = useState<string | null>(null);
   const [selectedSpiralStaff, setSelectedSpiralStaff] = useState<{ code: string; species: string; length: string; weight: string; image: string; tokenId: number } | null>(null);
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
+  const [showSeedCellarEmbed, setShowSeedCellarEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
   const [showMintingProgress, setShowMintingProgress] = useState(false);
    const [showSpiral, setShowSpiral] = useState(false);
@@ -1187,28 +1188,36 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="seed-cellar" className="space-y-6">
-            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
-              <img src={seedCellarWindow} alt="Seed Cellar" className="w-full h-auto object-contain" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Interactive entrance image */}
+            <div
+              className="relative rounded-xl overflow-hidden cursor-pointer group border border-amber-700/40 hover:border-primary/60 transition-all duration-500"
+              onClick={() => setShowSeedCellarEmbed(!showSeedCellarEmbed)}
+            >
+              <img
+                src={seedCellarWindow}
+                alt="Seed Cellar"
+                className="w-full h-64 md:h-96 object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
+                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">🌱 The Seed Cellar</h3>
+                <p className="text-sm text-foreground/70 mt-1 font-serif">
+                  {showSeedCellarEmbed ? "Click to close" : "Enter the living data archive"}
+                </p>
+              </div>
             </div>
-            <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-2xl font-serif text-primary tracking-wide">
-                  🌱 The Seed Cellar
-                </CardTitle>
-                <CardDescription className="font-serif">
-                  A living data archive — seeds of knowledge waiting to sprout
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <iframe
-                  src="https://airtable.com/embed/appE4ajI4oqPaV8hl/shrTq2DuEhwOJblAB?viewControls=on"
-                  className="w-full border-t border-border"
-                  style={{ height: '70vh', minHeight: 500, background: 'transparent' }}
-                  title="The Seed Cellar"
-                />
-              </CardContent>
-            </Card>
+
+            {showSeedCellarEmbed && (
+              <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden animate-fade-in">
+                <CardContent className="p-0">
+                  <iframe
+                    src="https://airtable.com/embed/appE4ajI4oqPaV8hl/shrTq2DuEhwOJblAB?viewControls=on"
+                    className="w-full border-t border-border"
+                    style={{ height: '70vh', minHeight: 500, background: 'transparent' }}
+                    title="The Seed Cellar"
+                  />
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="ledger" className="space-y-6">
