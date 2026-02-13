@@ -42,6 +42,7 @@ const DocsPage = lazy(() => import("./pages/DocsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const StaffDetailPage = lazy(() => import("./pages/StaffDetailPage"));
 const CuratorPage = lazy(() => import("./pages/CuratorPage"));
+const SyncDashboardPage = lazy(() => import("./pages/SyncDashboardPage"));
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,7 @@ const App = () => {
                 <Route path="/test-lab" element={<TestLabPage />} />
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/curator" element={<CuratorPage />} />
+                <Route path="/sync" element={<SyncDashboardPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

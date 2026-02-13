@@ -1,1 +1,4 @@
 project_id = "mwzcuczfedrjplndggiv"
+
+[functions.ipfs-sync]
+verify_jwt = false
