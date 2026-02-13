@@ -47,6 +47,10 @@ interface LeafletFallbackMapProps {
   className?: string;
   userId?: string | null;
   bloomedSeeds?: BloomedSeed[];
+  initialLat?: number;
+  initialLng?: number;
+  initialZoom?: number;
+  initialW3w?: string;
 }
 
 /* ── Marker tier ── */
@@ -280,7 +284,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, className, userId, bloomedSeeds = [] }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -379,8 +383,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
     mapRef.current = map;
     requestAnimationFrame(() => map.invalidateSize());
 
-    // Auto-locate on first load
-    if (navigator.geolocation) {
+    // Deep-link: fly to coordinates or w3w if provided
+    let deepLinked = false;
+    if (initialLat !== undefined && initialLng !== undefined) {
+      deepLinked = true;
+      setTimeout(() => map.setView([initialLat, initialLng], initialZoom ?? 16), 300);
+    } else if (initialW3w) {
+      deepLinked = true;
+      import("@/utils/what3words").then(({ convertToCoordinates }) => {
+        convertToCoordinates(initialW3w).then((result) => {
+          if (result && result.coordinates) {
+            map.setView([result.coordinates.lat, result.coordinates.lng], initialZoom ?? 16);
+          }
+        }).catch(() => {});
+      });
+    }
+
+    // Auto-locate on first load (skip if deep-linked)
+    if (!deepLinked && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude];
