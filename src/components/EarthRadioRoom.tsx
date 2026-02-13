@@ -3,9 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Radio, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX,
-  Music, TreeDeciduous, Signal, Leaf, Eye,
+  Music, TreeDeciduous, Leaf, Eye, Shuffle,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
@@ -26,7 +25,6 @@ function resolveSpecies(raw: string): { common: string; latin: string } {
   if (byCommon) return { common: byCommon.common, latin: byCommon.scientific };
   const byLatin = scientificLookup.get(lower);
   if (byLatin) return { common: byLatin.common, latin: byLatin.scientific };
-  // Check aliases
   for (const sp of TREE_SPECIES) {
     if (sp.aliases?.some(a => a.toLowerCase() === lower)) {
       return { common: sp.common, latin: sp.scientific };
@@ -58,7 +56,7 @@ interface ItunesPreview {
 type StationType = "species" | "tree" | "all";
 interface Station {
   type: StationType;
-  id: string; // species name or tree_id
+  id: string;
   label: string;
   species: string;
   songCount: number;
@@ -80,7 +78,7 @@ async function fetchItunes(query: string): Promise<ItunesPreview | null> {
       const r = data.results[0];
       return {
         previewUrl: r.previewUrl,
-        artworkUrl: r.artworkUrl100?.replace("100x100", "300x300") || r.artworkUrl100,
+        artworkUrl: r.artworkUrl100?.replace("100x100", "600x600") || r.artworkUrl100,
         artistName: r.artistName,
         trackName: r.trackName,
       };
@@ -98,6 +96,29 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+/* ── Waveform visualizer ─────────────────────────────────── */
+
+function WaveformBars({ active, barCount = 5 }: { active: boolean; barCount?: number }) {
+  return (
+    <div className="flex items-end gap-[3px] h-4">
+      {Array.from({ length: barCount }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="w-[3px] rounded-full bg-primary"
+          animate={active ? {
+            height: [4, 12 + Math.random() * 6, 6, 14 + Math.random() * 4, 4],
+          } : { height: 4 }}
+          transition={active ? {
+            duration: 0.8 + i * 0.1,
+            repeat: Infinity,
+            ease: "easeInOut",
+          } : { duration: 0.3 }}
+        />
+      ))}
+    </div>
+  );
+}
+
 /* ── Component ───────────────────────────────────────────── */
 
 const EarthRadioRoom = () => {
@@ -111,22 +132,17 @@ const EarthRadioRoom = () => {
   const [volume, setVolume] = useState(0.7);
   const [preview, setPreview] = useState<ItunesPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
-
-  // Station state
   const [activeStation, setActiveStation] = useState<Station | null>(null);
-  const [tunerOpen, setTunerOpen] = useState(true);
+  const [tunerOpen, setTunerOpen] = useState(false);
+  const [trackChanging, setTrackChanging] = useState(false);
 
-  // Audio refs for crossfade
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Audio-reactive "signal" bars
-  const [signalLevel, setSignalLevel] = useState(0);
-
   /* ── Fetch all song offerings with tree data ── */
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       setLoading(true);
       const { data: songData } = await supabase
         .from("offerings")
@@ -146,23 +162,18 @@ const EarthRadioRoom = () => {
       const enriched: SongOffering[] = songData.map(s => {
         const tree = treeMap.get(s.tree_id);
         return {
-          id: s.id,
-          title: s.title,
-          content: s.content,
-          media_url: s.media_url,
-          tree_id: s.tree_id,
-          tree_name: tree?.name || "Unknown Tree",
-          species: tree?.species || "Unknown",
-          created_at: s.created_at,
+          id: s.id, title: s.title, content: s.content, media_url: s.media_url,
+          tree_id: s.tree_id, tree_name: tree?.name || "Unknown Tree",
+          species: tree?.species || "Unknown", created_at: s.created_at,
         };
       });
       setAllSongs(enriched);
       setLoading(false);
     };
-    fetch();
+    load();
   }, []);
 
-  /* ── Build stations from songs ── */
+  /* ── Build stations ── */
   const { speciesStations, treeStations, allStation } = useMemo(() => {
     const speciesMap = new Map<string, SongOffering[]>();
     const treeMap = new Map<string, { name: string; species: string; songs: SongOffering[] }>();
@@ -170,7 +181,6 @@ const EarthRadioRoom = () => {
     allSongs.forEach(s => {
       if (!speciesMap.has(s.species)) speciesMap.set(s.species, []);
       speciesMap.get(s.species)!.push(s);
-
       if (!treeMap.has(s.tree_id)) treeMap.set(s.tree_id, { name: s.tree_name, species: s.species, songs: [] });
       treeMap.get(s.tree_id)!.songs.push(s);
     });
@@ -178,87 +188,59 @@ const EarthRadioRoom = () => {
     const speciesStations: Station[] = Array.from(speciesMap.entries())
       .map(([species, songs]) => {
         const resolved = resolveSpecies(species);
-        return {
-          type: "species" as StationType,
-          id: species,
-          label: `${resolved.common} Radio`,
-          species: resolved.common,
-          songCount: songs.length,
-        };
+        return { type: "species" as StationType, id: species, label: `${resolved.common} Radio`, species: resolved.common, songCount: songs.length };
       })
       .sort((a, b) => b.songCount - a.songCount);
 
     const treeStations: Station[] = Array.from(treeMap.entries())
-      .map(([id, data]) => ({
-        type: "tree" as StationType,
-        id,
-        label: data.name,
-        species: data.species,
-        songCount: data.songs.length,
-      }))
+      .map(([id, data]) => ({ type: "tree" as StationType, id, label: data.name, species: data.species, songCount: data.songs.length }))
       .sort((a, b) => b.songCount - a.songCount);
 
-    const allStation: Station = {
-      type: "all",
-      id: "all",
-      label: "TETOL Radio",
-      species: "All",
-      songCount: allSongs.length,
-    };
-
+    const allStation: Station = { type: "all", id: "all", label: "TETOL Radio", species: "All", songCount: allSongs.length };
     return { speciesStations, treeStations, allStation };
   }, [allSongs]);
 
-  /* ── Set default station once data loads ── */
+  /* ── Default station ── */
   useEffect(() => {
-    if (!loading && allSongs.length > 0 && !activeStation) {
-      setActiveStation(allStation);
-    }
+    if (!loading && allSongs.length > 0 && !activeStation) setActiveStation(allStation);
   }, [loading, allSongs.length]);
 
-  /* ── Update playlist when station changes ── */
+  /* ── Playlist from station ── */
   useEffect(() => {
     if (!activeStation) return;
     let filtered: SongOffering[];
-    if (activeStation.type === "all") {
-      filtered = allSongs;
-    } else if (activeStation.type === "species") {
-      filtered = allSongs.filter(s => s.species === activeStation.id);
-    } else {
-      filtered = allSongs.filter(s => s.tree_id === activeStation.id);
-    }
+    if (activeStation.type === "all") filtered = allSongs;
+    else if (activeStation.type === "species") filtered = allSongs.filter(s => s.species === activeStation.id);
+    else filtered = allSongs.filter(s => s.tree_id === activeStation.id);
 
-    // Algorithm: balance recency + variety, avoid repetition
     const recent = filtered.slice(0, Math.ceil(filtered.length * 0.4));
     const rest = filtered.slice(Math.ceil(filtered.length * 0.4));
-    const curated = [...shuffle(recent), ...shuffle(rest)];
-
-    setPlaylist(curated);
+    setPlaylist([...shuffle(recent), ...shuffle(rest)]);
     setCurrentIndex(0);
   }, [activeStation, allSongs]);
 
-  /* ── Fetch iTunes preview on track change ── */
+  /* ── iTunes preview ── */
   useEffect(() => {
     if (!playlist.length) return;
     const song = playlist[currentIndex];
     if (!song) return;
     setPreviewLoading(true);
     setPreview(null);
+    setTrackChanging(true);
     fetchItunes(extractSearch(song.title)).then(p => {
       setPreview(p);
       setPreviewLoading(false);
+      setTimeout(() => setTrackChanging(false), 600);
     });
   }, [currentIndex, playlist]);
 
   /* ── Crossfade audio ── */
   useEffect(() => {
     if (!preview?.previewUrl) return;
-
     const newAudio = new Audio(preview.previewUrl);
     newAudio.volume = 0;
     newAudio.muted = isMuted;
 
-    // Fade out old, fade in new
     if (audioRef.current) {
       const oldAudio = audioRef.current;
       const fadeSteps = 20;
@@ -270,47 +252,27 @@ const EarthRadioRoom = () => {
         const progress = step / fadeSteps;
         oldAudio.volume = Math.max(0, volume * (1 - progress));
         newAudio.volume = Math.min(volume, volume * progress);
-        if (step >= fadeSteps) {
-          clearInterval(fadeIntervalRef.current!);
-          oldAudio.pause();
-        }
+        if (step >= fadeSteps) { clearInterval(fadeIntervalRef.current!); oldAudio.pause(); }
       }, fadeDuration / fadeSteps);
     } else {
       newAudio.volume = volume;
     }
 
     audioRef.current = newAudio;
-    newAudio.addEventListener("ended", () => {
-      setCurrentIndex(prev => (prev + 1) % playlist.length);
-    });
-
+    newAudio.addEventListener("ended", () => setCurrentIndex(prev => (prev + 1) % playlist.length));
     if (isPlaying) newAudio.play().catch(() => {});
-
-    return () => {
-      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-    };
+    return () => { if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current); };
   }, [preview?.previewUrl]);
 
-  // Sync play/pause
   useEffect(() => {
     if (!audioRef.current) return;
     if (isPlaying) audioRef.current.play().catch(() => {});
     else audioRef.current.pause();
   }, [isPlaying]);
 
-  // Sync volume
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
-
-  // Signal level animation
-  useEffect(() => {
-    if (!isPlaying) { setSignalLevel(0); return; }
-    const interval = setInterval(() => {
-      setSignalLevel(Math.random() * 0.6 + 0.4);
-    }, 300);
-    return () => clearInterval(interval);
-  }, [isPlaying]);
 
   const skipNext = useCallback(() => {
     if (!playlist.length) return;
@@ -326,258 +288,375 @@ const EarthRadioRoom = () => {
 
   const currentSong = playlist[currentIndex];
 
-  /* ── Render ───────────────────────────────────── */
-
+  /* ── Loading ── */
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="font-serif text-sm text-muted-foreground tracking-widest">Tuning in…</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full"
+          />
+          <p className="font-serif text-sm text-muted-foreground tracking-[0.2em]">Tuning in…</p>
         </div>
       </div>
     );
   }
 
+  /* ── Empty state ── */
   if (allSongs.length === 0) {
     return (
-      <div className="text-center py-16">
-        <Radio className="h-12 w-12 text-primary/20 mx-auto mb-4" />
-        <h3 className="font-serif text-lg text-foreground/70 mb-2">No broadcasts yet</h3>
-        <p className="text-sm text-muted-foreground font-serif max-w-md mx-auto">
-          Song offerings at mapped trees become radio stations. Visit the Atlas and offer a song to a tree to begin broadcasting.
+      <div className="text-center py-16 px-6">
+        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+          <Radio className="h-8 w-8 text-primary/40" />
+        </div>
+        <h3 className="font-serif text-xl text-foreground mb-2">No broadcasts yet</h3>
+        <p className="text-sm text-muted-foreground font-serif max-w-sm mx-auto leading-relaxed">
+          Song offerings at mapped trees become living radio stations. Visit the Atlas and offer a song to a tree to begin broadcasting.
         </p>
-        <Button variant="ghost" className="mt-4 font-serif" onClick={() => navigate("/map")}>
+        <Button variant="ghost" className="mt-6 font-serif gap-2" onClick={() => navigate("/map")}>
+          <TreeDeciduous className="h-4 w-4" />
           Visit the Atlas
         </Button>
       </div>
     );
   }
 
+  const resolved = currentSong ? resolveSpecies(currentSong.species) : null;
+
   return (
-    <div className="space-y-0">
-      {/* ── The Radio Console — single hero image with overlaid controls ── */}
-      <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-xl">
-        {/* Background art — the tree radio console */}
-        <img
-          src={treeRadioArt}
-          alt="Earth Radio"
-          className="w-full h-auto object-cover"
-        />
+    <div className="space-y-6">
+      {/* ── Hero Console ── */}
+      <div className="relative rounded-2xl overflow-hidden border border-primary/20 shadow-2xl">
+        {/* Background art with ambient motion */}
+        <motion.div
+          className="relative"
+          animate={isPlaying ? { scale: [1, 1.01, 1] } : {}}
+          transition={isPlaying ? { duration: 8, repeat: Infinity, ease: "easeInOut" } : {}}
+        >
+          <img src={treeRadioArt} alt="Earth Radio" className="w-full h-auto object-cover" />
+        </motion.div>
 
-        {/* Subtle overlay for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+        {/* Gradient overlay — stronger for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/10" />
 
-        {/* ── Overlaid Now Playing + Controls ── */}
+        {/* Playing glow ring around the console */}
+        {isPlaying && (
+          <motion.div
+            className="absolute inset-0 rounded-2xl pointer-events-none"
+            animate={{ boxShadow: [
+              "inset 0 0 30px hsl(var(--primary) / 0.05)",
+              "inset 0 0 60px hsl(var(--primary) / 0.12)",
+              "inset 0 0 30px hsl(var(--primary) / 0.05)",
+            ]}}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+
+        {/* ── Station Badge — top-left corner ── */}
+        <div className="absolute top-3 left-3 md:top-4 md:left-4">
+          <motion.button
+            onClick={() => setTunerOpen(!tunerOpen)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border border-primary/30 bg-background/60"
+            whileTap={{ scale: 0.95 }}
+          >
+            <Radio className="h-3.5 w-3.5 text-primary" />
+            <span className="font-serif text-xs text-foreground tracking-wider">
+              {activeStation?.label || "Earth Radio"}
+            </span>
+            <WaveformBars active={isPlaying} barCount={3} />
+          </motion.button>
+        </div>
+
+        {/* ── Now Playing + Controls — bottom overlay ── */}
         <div className="absolute inset-x-0 bottom-0 p-4 md:p-6 lg:p-8">
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
-            {/* Album art */}
-            <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0 shadow-lg backdrop-blur-sm bg-card/30">
+          <div className="flex items-end gap-4 md:gap-6">
+            {/* Album Artwork — prominent */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={preview?.artworkUrl || "placeholder"}
+                initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -8 }}
+                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="relative w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0 shadow-xl"
+              >
+                {previewLoading ? (
+                  <div className="w-full h-full flex items-center justify-center bg-card/80 backdrop-blur">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full"
+                    />
+                  </div>
+                ) : preview?.artworkUrl ? (
+                  <img src={preview.artworkUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-card/80">
+                    <Music className="h-10 w-10 text-primary/25" />
+                  </div>
+                )}
+                {/* Playing pulse ring */}
+                {isPlaying && (
+                  <motion.div
+                    className="absolute inset-0 rounded-xl border-2 border-primary/40 pointer-events-none"
+                    animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.03, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Track Info */}
+            <div className="flex-1 min-w-0 pb-1">
+              {/* Track title — large, high contrast */}
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={preview?.artworkUrl || "placeholder"}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full h-full"
+                <motion.h3
+                  key={preview?.trackName || currentSong?.title || "none"}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.35 }}
+                  className="text-lg md:text-2xl font-serif text-foreground truncate leading-tight"
+                  style={{ textShadow: "0 2px 12px hsl(var(--background) / 0.8)" }}
                 >
-                  {previewLoading ? (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                      <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    </div>
-                  ) : preview?.artworkUrl ? (
-                    <img src={preview.artworkUrl} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted/30">
-                      <Music className="h-8 w-8 text-primary/20" />
-                    </div>
-                  )}
-                </motion.div>
+                  {preview?.trackName || currentSong?.title || "—"}
+                </motion.h3>
               </AnimatePresence>
-              {isPlaying && (
-                <div className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-pulse pointer-events-none" />
+
+              {/* Artist */}
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={preview?.artistName || "none"}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
+                  className="text-sm md:text-base text-foreground/70 font-serif truncate mt-1"
+                  style={{ textShadow: "0 1px 8px hsl(var(--background) / 0.6)" }}
+                >
+                  {preview?.artistName || currentSong?.content || ""}
+                </motion.p>
+              </AnimatePresence>
+
+              {/* Offering context — subtle, collapsible detail */}
+              {currentSong && resolved && (
+                <p className="text-xs text-primary/50 font-serif mt-2 flex items-center gap-1.5 flex-wrap"
+                   style={{ textShadow: "0 1px 6px hsl(var(--background) / 0.5)" }}>
+                  <TreeDeciduous className="h-3 w-3 text-primary/40 flex-shrink-0" />
+                  <span>offered to <span className="text-primary/70">{currentSong.tree_name}</span></span>
+                  {resolved.latin && (
+                    <span className="text-primary/30 italic">· {resolved.latin}</span>
+                  )}
+                </p>
               )}
-            </div>
 
-            {/* Track info + controls */}
-            <div className="flex-1 text-center md:text-left min-w-0">
-              <p className="text-[10px] text-foreground/50 font-serif uppercase tracking-[0.2em] mb-0.5">
-                {activeStation?.label || "Earth Radio"}
-              </p>
-              <h3 className="text-base md:text-xl font-serif text-foreground truncate drop-shadow-md">
-                {preview?.trackName || currentSong?.title || "—"}
-              </h3>
-              <p className="text-xs text-foreground/60 font-serif truncate mt-0.5 drop-shadow-sm">
-                {preview?.artistName || currentSong?.content || ""}
-              </p>
-              {currentSong && (() => {
-                const resolved = resolveSpecies(currentSong.species);
-                return (
-                  <p className="text-[10px] text-primary/60 font-serif mt-1 italic flex items-center gap-1 justify-center md:justify-start flex-wrap drop-shadow-sm">
-                    <TreeDeciduous className="h-3 w-3 inline" />
-                    offered to {currentSong.tree_name}
-                    <span className="text-primary/40">· {resolved.common}</span>
-                  </p>
-                );
-              })()}
-
-              {/* Transport controls */}
-              <div className="flex items-center justify-center md:justify-start gap-4 mt-3">
-                <button
+              {/* ── Transport Controls ── */}
+              <div className="flex items-center gap-3 mt-4">
+                {/* Mute */}
+                <motion.button
                   onClick={() => setIsMuted(!isMuted)}
-                  className="text-foreground/50 hover:text-foreground transition-colors"
+                  whileTap={{ scale: 0.85 }}
+                  className="text-foreground/40 hover:text-foreground/80 transition-colors p-1"
                   aria-label={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </button>
-                <button onClick={skipPrev} className="text-foreground/50 hover:text-foreground transition-colors" aria-label="Previous track">
-                  <SkipBack className="h-4 w-4" />
-                </button>
-                <button
+                </motion.button>
+
+                {/* Previous */}
+                <motion.button
+                  onClick={skipPrev}
+                  whileTap={{ scale: 0.85 }}
+                  className="text-foreground/40 hover:text-foreground/80 transition-colors p-1"
+                  aria-label="Previous track"
+                >
+                  <SkipBack className="h-5 w-5" />
+                </motion.button>
+
+                {/* Play/Pause — hero button */}
+                <motion.button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all hover:scale-105 backdrop-blur-sm"
+                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.08 }}
+                  className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border-2 transition-colors backdrop-blur-sm"
                   style={{
-                    background: "linear-gradient(135deg, hsl(var(--primary) / 0.25), hsl(var(--primary) / 0.1))",
+                    background: isPlaying
+                      ? "linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.15))"
+                      : "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.08))",
                     borderColor: isPlaying ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary) / 0.3)",
-                    boxShadow: isPlaying ? "0 0 24px hsl(var(--primary) / 0.25)" : "none",
+                    boxShadow: isPlaying
+                      ? "0 0 28px hsl(var(--primary) / 0.25), 0 0 8px hsl(var(--primary) / 0.15)"
+                      : "none",
                   }}
                   aria-label={isPlaying ? "Pause" : "Play"}
                 >
-                  {isPlaying ? <Pause className="h-5 w-5 text-primary" /> : <Play className="h-5 w-5 text-primary ml-0.5" />}
-                </button>
-                <button onClick={skipNext} className="text-foreground/50 hover:text-foreground transition-colors" aria-label="Next track">
-                  <SkipForward className="h-4 w-4" />
-                </button>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={isPlaying ? "pause" : "play"}
+                      initial={{ scale: 0.5, opacity: 0, rotate: -30 }}
+                      animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                      exit={{ scale: 0.5, opacity: 0, rotate: 30 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {isPlaying
+                        ? <Pause className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                        : <Play className="h-5 w-5 md:h-6 md:w-6 text-primary ml-0.5" />}
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.button>
+
+                {/* Next */}
+                <motion.button
+                  onClick={skipNext}
+                  whileTap={{ scale: 0.85 }}
+                  className="text-foreground/40 hover:text-foreground/80 transition-colors p-1"
+                  aria-label="Next track"
+                >
+                  <SkipForward className="h-5 w-5" />
+                </motion.button>
+
+                {/* Volume slider — desktop */}
                 <input
                   type="range" min="0" max="1" step="0.05"
                   value={isMuted ? 0 : volume}
                   onChange={e => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
-                  className="w-16 h-1 accent-primary opacity-60 hover:opacity-100 transition-opacity hidden sm:block"
+                  className="w-20 h-1 accent-primary opacity-50 hover:opacity-100 transition-opacity hidden sm:block ml-1"
                   aria-label="Volume"
                 />
               </div>
             </div>
 
-            {/* Signal bars */}
-            <div className="hidden md:flex items-end gap-0.5 h-5 flex-shrink-0">
-              {[0.3, 0.5, 0.7, 0.9, 1.0].map((threshold, i) => (
-                <div
-                  key={i}
-                  className="w-1 rounded-full transition-all duration-300"
-                  style={{
-                    height: `${6 + i * 3}px`,
-                    backgroundColor: signalLevel >= threshold
-                      ? "hsl(var(--primary))"
-                      : "hsl(var(--muted-foreground) / 0.2)",
-                  }}
-                />
-              ))}
+            {/* Waveform visualizer — desktop */}
+            <div className="hidden md:flex items-center pb-2">
+              <WaveformBars active={isPlaying} barCount={7} />
             </div>
           </div>
 
-          {/* Playlist info */}
-          <div className="mt-3 pt-2 border-t border-foreground/10 flex items-center justify-between text-[10px] text-foreground/40 font-serif">
-            <span>{currentIndex + 1} / {playlist.length} in rotation</span>
-            <span>{allSongs.length} offerings · {speciesStations.length} species · {treeStations.length} trees</span>
-            <button
+          {/* Rotation info bar */}
+          <div className="mt-3 pt-2 border-t border-foreground/10 flex items-center justify-between text-[10px] text-foreground/35 font-serif">
+            <span className="tracking-wider">{currentIndex + 1} / {playlist.length} in rotation</span>
+            <span className="hidden sm:inline">{allSongs.length} offerings · {speciesStations.length} species</span>
+            <motion.button
               onClick={() => { setPlaylist(shuffle(playlist)); setCurrentIndex(0); }}
-              className="hover:text-foreground/70 transition-colors tracking-wider"
+              whileTap={{ scale: 0.9, rotate: 180 }}
+              className="hover:text-foreground/60 transition-colors flex items-center gap-1"
             >
-              ⟳ Shuffle
-            </button>
+              <Shuffle className="h-3 w-3" />
+              <span className="tracking-wider">Shuffle</span>
+            </motion.button>
           </div>
         </div>
       </div>
 
-      {/* ── Station Tuner — below the console ── */}
-      <div className="rounded-xl border border-primary/20 bg-card/50 backdrop-blur overflow-hidden mt-6">
+      {/* ── Station Tuner ── */}
+      <motion.div
+        className="rounded-xl border border-primary/15 bg-card/40 backdrop-blur-sm overflow-hidden"
+        layout
+      >
         <button
-          className="w-full px-4 py-3 flex items-center justify-between text-left"
+          className="w-full px-4 py-3.5 flex items-center justify-between text-left group"
           onClick={() => setTunerOpen(!tunerOpen)}
         >
-          <span className="font-serif text-sm text-primary tracking-wider flex items-center gap-2">
-            <TreeDeciduous className="h-4 w-4" />
+          <span className="font-serif text-sm text-primary/90 tracking-wider flex items-center gap-2.5">
+            <Radio className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
             Station Tuner
           </span>
-          <span className={`text-primary/50 text-xs transition-transform ${tunerOpen ? "rotate-180" : ""}`}>▼</span>
+          <motion.span
+            animate={{ rotate: tunerOpen ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-primary/40 text-xs"
+          >
+            ▼
+          </motion.span>
         </button>
 
         <AnimatePresence>
           {tunerOpen && (
             <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="overflow-hidden"
             >
-              <div className="px-4 pb-4 space-y-3">
+              <div className="px-4 pb-4 space-y-4">
                 {/* All station */}
                 <StationButton
                   station={allStation}
                   isActive={activeStation?.id === "all"}
-                  onClick={() => setActiveStation(allStation)}
+                  onClick={() => { setActiveStation(allStation); setTunerOpen(false); }}
                   icon={<Radio className="h-3.5 w-3.5" />}
+                  isPlaying={isPlaying && activeStation?.id === "all"}
                 />
 
                 {/* Species */}
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-widest mb-2">
-                    Species Broadcasts
-                  </p>
-                  <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
-                    {speciesStations.map(s => (
-                      <StationButton
-                        key={s.id}
-                        station={s}
-                        isActive={activeStation?.id === s.id && activeStation?.type === "species"}
-                        onClick={() => setActiveStation(s)}
-                        icon={<Leaf className="h-3 w-3" />}
-                      />
-                    ))}
+                {speciesStations.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-muted-foreground/70 font-serif uppercase tracking-[0.2em] mb-2 px-1">
+                      Species Broadcasts
+                    </p>
+                    <div className="space-y-1 max-h-40 overflow-y-auto pr-1 scrollbar-thin">
+                      {speciesStations.map(s => (
+                        <StationButton
+                          key={s.id}
+                          station={s}
+                          isActive={activeStation?.id === s.id && activeStation?.type === "species"}
+                          onClick={() => { setActiveStation(s); setTunerOpen(false); }}
+                          icon={<Leaf className="h-3 w-3" />}
+                          isPlaying={isPlaying && activeStation?.id === s.id}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Individual trees */}
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-widest mb-2">
-                    Individual Trees
-                  </p>
-                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                    {treeStations.map(s => (
-                      <StationButton
-                        key={s.id}
-                        station={s}
-                        isActive={activeStation?.id === s.id && activeStation?.type === "tree"}
-                        onClick={() => setActiveStation(s)}
-                        icon={<TreeDeciduous className="h-3 w-3" />}
-                        showSpecies
-                      />
-                    ))}
+                {/* Trees */}
+                {treeStations.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-muted-foreground/70 font-serif uppercase tracking-[0.2em] mb-2 px-1">
+                      Individual Trees
+                    </p>
+                    <div className="space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+                      {treeStations.map(s => {
+                        const r = resolveSpecies(s.species);
+                        return (
+                          <StationButton
+                            key={s.id}
+                            station={s}
+                            isActive={activeStation?.id === s.id && activeStation?.type === "tree"}
+                            onClick={() => { setActiveStation(s); setTunerOpen(false); }}
+                            icon={<TreeDeciduous className="h-3 w-3" />}
+                            subtitle={r.common}
+                            isPlaying={isPlaying && activeStation?.id === s.id}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       {/* Visit tree link */}
       {currentSong && (
-        <div className="text-center mt-4">
+        <div className="text-center">
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs font-serif gap-1 text-muted-foreground"
+            className="text-xs font-serif gap-1.5 text-muted-foreground hover:text-foreground"
             onClick={() => navigate(`/tree/${currentSong.tree_id}`)}
           >
-            <Eye className="h-3 w-3" />
+            <Eye className="h-3.5 w-3.5" />
             Visit this Ancient Friend
           </Button>
         </div>
       )}
 
-      {/* CSS for radio bars */}
+      {/* CSS for radio bars fallback */}
       <style>{`
         @keyframes radioBar {
           0% { height: 3px; }
@@ -591,58 +670,43 @@ const EarthRadioRoom = () => {
 /* ── Station Button ── */
 
 function StationButton({
-  station,
-  isActive,
-  onClick,
-  icon,
-  showSpecies,
+  station, isActive, onClick, icon, subtitle, isPlaying,
 }: {
   station: Station;
   isActive: boolean;
   onClick: () => void;
   icon: React.ReactNode;
-  showSpecies?: boolean;
+  subtitle?: string;
+  isPlaying?: boolean;
 }) {
   return (
-    <button
+    <motion.button
       onClick={onClick}
-      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-xs font-serif ${
+      whileTap={{ scale: 0.97 }}
+      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all text-xs font-serif ${
         isActive
-          ? "bg-primary/15 border border-primary/30 text-foreground"
-          : "hover:bg-muted/50 text-muted-foreground hover:text-foreground border border-transparent"
+          ? "bg-primary/10 border border-primary/25 text-foreground"
+          : "hover:bg-muted/30 text-muted-foreground hover:text-foreground border border-transparent"
       }`}
       aria-pressed={isActive}
     >
-      <span className={isActive ? "text-primary" : "text-muted-foreground/60"}>
+      <span className={`flex-shrink-0 ${isActive ? "text-primary" : "text-muted-foreground/50"}`}>
         {icon}
       </span>
-      <span className="flex-1 truncate">{station.label}</span>
-      {showSpecies && (() => {
-        const resolved = resolveSpecies(station.species);
-        return (
-          <Badge variant="outline" className="text-[9px] py-0 px-1.5 font-serif">
-            {resolved.common}
-          </Badge>
-        );
-      })()}
-      <span className="text-[10px] text-muted-foreground/50">
+      <div className="flex-1 min-w-0">
+        <span className="block truncate">{station.label}</span>
+        {subtitle && (
+          <span className="block text-[10px] text-muted-foreground/50 truncate">{subtitle}</span>
+        )}
+      </div>
+      <span className="text-[10px] text-muted-foreground/40 tabular-nums flex-shrink-0">
         {station.songCount}
       </span>
-      {isActive && (
-        <span className="flex gap-0.5">
-          {[0, 1, 2].map(i => (
-            <span
-              key={i}
-              className="w-0.5 bg-primary rounded-full"
-              style={{
-                animation: `radioBar 0.8s ease-in-out ${i * 0.15}s infinite alternate`,
-                height: "8px",
-              }}
-            />
-          ))}
-        </span>
+      {isActive && isPlaying && <WaveformBars active barCount={3} />}
+      {isActive && !isPlaying && (
+        <div className="w-2 h-2 rounded-full bg-primary/40 flex-shrink-0" />
       )}
-    </button>
+    </motion.button>
   );
 }
 
