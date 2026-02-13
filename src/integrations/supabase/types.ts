@@ -378,6 +378,44 @@ export type Database = {
           },
         ]
       }
+      daily_reward_caps: {
+        Row: {
+          checkin_count: number
+          created_at: string
+          id: string
+          last_checkin_at: string | null
+          reward_date: string
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          checkin_count?: number
+          created_at?: string
+          id?: string
+          last_checkin_at?: string | null
+          reward_date?: string
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          checkin_count?: number
+          created_at?: string
+          id?: string
+          last_checkin_at?: string | null
+          reward_date?: string
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_reward_caps_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       digital_fire_votes: {
         Row: {
           created_at: string
@@ -593,6 +631,50 @@ export type Database = {
           },
           {
             foreignKeyName: "heart_transactions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      influence_transactions: {
+        Row: {
+          action_type: string
+          amount: number
+          created_at: string
+          id: string
+          reason: string | null
+          scope: string
+          species_family: string | null
+          tree_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string | null
+          scope?: string
+          species_family?: string | null
+          tree_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string | null
+          scope?: string
+          species_family?: string | null
+          tree_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_transactions_tree_id_fkey"
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
@@ -1011,6 +1093,44 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      species_heart_transactions: {
+        Row: {
+          action_type: string
+          amount: number
+          created_at: string
+          id: string
+          species_family: string
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          action_type?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          species_family: string
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          species_family?: string
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_heart_transactions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       staffs: {
         Row: {
