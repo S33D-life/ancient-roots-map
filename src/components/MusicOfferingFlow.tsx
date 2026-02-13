@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { parseAppleMusicInput } from "@/utils/appleMusicParser";
 import {
   Search, Music, Play, Pause, X, Check, ChevronRight,
   Plus, Disc3, Loader2, Sparkles, ExternalLink, Clock,
@@ -153,6 +154,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
   const [itunesResults, setItunesResults] = useState<CatalogSong[]>([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [linkResolving, setLinkResolving] = useState(false);
 
   // Recent songs for this tree
   const [recentSongs, setRecentSongs] = useState<{ title: string; artist: string }[]>([]);
@@ -222,9 +224,50 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
     }
   }, []);
 
+  // Resolve Apple Music link by track ID lookup
+  const resolveAppleMusicLink = useCallback(async (input: string) => {
+    const parsed = parseAppleMusicInput(input);
+    if (!parsed.trackId) return false;
+
+    setLinkResolving(true);
+    setSearching(true);
+    setHasSearched(true);
+    try {
+      const res = await fetch(
+        `https://itunes.apple.com/lookup?id=${parsed.trackId}&entity=song`
+      );
+      const data = await res.json();
+      if (data.results && data.results.length > 0) {
+        const track = data.results.find((r: any) => r.wrapperType === "track") || data.results[0];
+        if (track) {
+          const song = normalizeITunes(track as iTunesResult);
+          handleSelect(song);
+          setLinkResolving(false);
+          setSearching(false);
+          return true;
+        }
+      }
+    } catch {
+      // fall through to normal search
+    }
+    setLinkResolving(false);
+    setSearching(false);
+    return false;
+  }, []);
+
   const handleQueryChange = (value: string) => {
     setQuery(value);
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+
+    // Detect Apple Music links
+    if (/music\.apple\.com|itunes\.apple\.com/i.test(value)) {
+      searchTimerRef.current = setTimeout(async () => {
+        const resolved = await resolveAppleMusicLink(value);
+        if (!resolved) performSearch(value);
+      }, 200);
+      return;
+    }
+
     searchTimerRef.current = setTimeout(() => performSearch(value), 300);
   };
 
@@ -305,7 +348,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
         <Input
           value={query}
           onChange={(e) => { handleQueryChange(e.target.value); if (selectedSong) { setSelectedSong(null); setCustomMode(false); } }}
-          placeholder="Search songs, artists, albums..."
+          placeholder="Search songs or paste an Apple Music link..."
           className="pl-10 pr-10 font-serif h-12 text-sm bg-secondary/20 border-border/30 focus:border-primary/50"
           autoFocus={!selectedSong}
         />
@@ -336,9 +379,9 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                 </div>
                 <div>
                   <p className="text-sm font-serif text-foreground/80">Choose a song for this Ancient Friend</p>
-                  <p className="text-[11px] text-muted-foreground/60 mt-1">
-                    Search our catalog of {">"}90 curated songs or Apple Music
-                  </p>
+                    <p className="text-[11px] text-muted-foreground/60 mt-1">
+                      Search our catalog, Apple Music, or paste a link
+                    </p>
                 </div>
 
                 {/* Recent songs for this tree */}
