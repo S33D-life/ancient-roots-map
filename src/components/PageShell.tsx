@@ -9,15 +9,20 @@ import { motion } from "framer-motion";
 interface PageShellProps {
   children: React.ReactNode;
   className?: string;
+  /** Slower, more cinematic entrance for feature pages */
+  cinematic?: boolean;
 }
 
-const PageShell = ({ children, className = "" }: PageShellProps) => {
+const PageShell = ({ children, className = "", cinematic = false }: PageShellProps) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: cinematic ? 16 : 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{
+        duration: cinematic ? 0.5 : 0.3,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
       className={className}
     >
       {children}
