@@ -85,6 +85,10 @@ interface TreePhotos {
   [treeId: string]: string;
 }
 
+interface BirdsongCounts {
+  [treeId: string]: number;
+}
+
 interface BloomedSeed {
   id: string;
   tree_id: string;
@@ -265,6 +269,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [treePhotos, setTreePhotos] = useState<TreePhotos>({});
+  const [birdsongCounts, setBirdsongCounts] = useState<BirdsongCounts>({});
   const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
@@ -314,7 +319,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   // Fetch trees and offering counts from database
   useEffect(() => {
     const fetchTrees = async () => {
-      const [treesResult, offeringsResult] = await Promise.all([
+      const [treesResult, offeringsResult, birdsongResult] = await Promise.all([
         supabase
           .from('trees')
           .select('*')
@@ -323,6 +328,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         supabase
           .from('offerings')
           .select('tree_id, type, media_url'),
+        supabase
+          .from('birdsong_offerings')
+          .select('tree_id'),
       ]);
 
       if (treesResult.error) {
@@ -351,6 +359,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         });
         setOfferingCounts(counts);
         setTreePhotos(photos);
+      }
+
+      if (!birdsongResult.error && birdsongResult.data) {
+        const bCounts: BirdsongCounts = {};
+        birdsongResult.data.forEach((b: any) => {
+          bCounts[b.tree_id] = (bCounts[b.tree_id] || 0) + 1;
+        });
+        setBirdsongCounts(bCounts);
       }
     };
 
@@ -994,7 +1010,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} />
         </Suspense>
       </div>
     );

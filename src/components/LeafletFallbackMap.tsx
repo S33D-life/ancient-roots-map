@@ -33,6 +33,10 @@ interface TreeOfferings {
   [treeId: string]: number;
 }
 
+interface BirdsongCounts {
+  [treeId: string]: number;
+}
+
 interface BloomedSeed {
   id: string;
   tree_id: string;
@@ -50,6 +54,7 @@ interface LeafletFallbackMapProps {
   trees: Tree[];
   offeringCounts?: TreeOfferings;
   treePhotos?: TreePhotos;
+  birdsongCounts?: BirdsongCounts;
   className?: string;
   userId?: string | null;
   bloomedSeeds?: BloomedSeed[];
@@ -117,29 +122,36 @@ const MARKER_SIZES: Record<Tier, number> = { ancient: 40, storied: 34, notable: 
 /* ── Icon cache (module-level) ── */
 const ICON_CACHE: Record<string, L.DivIcon> = {};
 
-function getOrCreateIcon(tier: Tier, species: string): L.DivIcon {
+function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number): L.DivIcon {
   const hue = getSpeciesHue(species);
-  const cacheKey = `${tier}-${hue}`;
+  const hasBirdsong = (birdsongCount ?? 0) > 0;
+  const cacheKey = `${tier}-${hue}-${hasBirdsong ? birdsongCount : 0}`;
   if (ICON_CACHE[cacheKey]) return ICON_CACHE[cacheKey];
 
   const size = MARKER_SIZES[tier];
   const uri = getSvgDataUri(tier, species);
+  const birdBadge = hasBirdsong
+    ? `<span class="birdsong-badge" style="position:absolute;top:-4px;right:-6px;display:flex;align-items:center;gap:1px;background:hsla(200,60%,18%,0.92);border:1.5px solid hsla(200,50%,45%,0.6);border-radius:99px;padding:1px 4px;font-size:9px;font-family:sans-serif;color:hsl(200,60%,70%);line-height:1;white-space:nowrap;pointer-events:none;"><span style="font-size:10px;">🐦</span>${birdsongCount! > 1 ? birdsongCount : ''}</span>`
+    : '';
   const icon = L.divIcon({
     className: "leaflet-tree-marker",
-    html: `<div class="marker-wrap ${tier === 'ancient' ? 'marker-ancient' : ''}" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;transition:transform .15s ease-out;"></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    html: `<div style="position:relative;display:inline-block;"><div class="marker-wrap ${tier === 'ancient' ? 'marker-ancient' : ''}" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;transition:transform .15s ease-out;"></div>${birdBadge}</div>`,
+    iconSize: [size + 8, size + 8],
+    iconAnchor: [(size + 8) / 2, (size + 8) / 2],
   });
   ICON_CACHE[cacheKey] = icon;
   return icon;
 }
 
 /* ── Popup HTML ── */
-function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string): string {
+function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number): string {
   const ageText = age > 0 ? `~${age} years` : "Age unknown";
   const offeringText = offerings > 0
     ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span> offering${offerings !== 1 ? "s" : ""}`
     : `<span style="color:hsl(0,0%,50%);font-style:italic;">No offerings yet</span>`;
+  const birdsongLine = (birdsongCount ?? 0) > 0
+    ? `<span style="display:flex;align-items:center;gap:3px;">🐦 <span style="color:hsl(200,60%,65%);">${birdsongCount} birdsong${birdsongCount !== 1 ? 's' : ''}</span></span>`
+    : "";
   const desc = tree.description
     ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
     : "";
@@ -166,6 +178,7 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
       <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,58%);">
         <span style="display:flex;align-items:center;gap:3px;">🌿 ${ageText}</span>
         <span style="display:flex;align-items:center;gap:3px;">${offeringText}</span>
+        ${birdsongLine}
       </div>
       ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(tree.what3words)}</p>` : ""}
       ${desc}
@@ -297,7 +310,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -356,6 +369,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
   offeringCountsRef.current = offeringCounts;
   const treePhotosRef = useRef(treePhotos);
   treePhotosRef.current = treePhotos;
+  const birdsongCountsRef = useRef(birdsongCounts);
+  birdsongCountsRef.current = birdsongCounts;
 
   // Initialize map once
   useEffect(() => {
@@ -510,15 +525,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
     });
 
     const currentOfferings = offeringCountsRef.current;
+    const currentBirdsong = birdsongCountsRef.current;
 
     filteredTrees.forEach((tree) => {
       const offerings = currentOfferings[tree.id] || 0;
       const age = tree.estimated_age || 0;
+      const bCount = currentBirdsong[tree.id] || 0;
       const tier = getTreeTier(age, offerings);
-      const icon = getOrCreateIcon(tier, tree.species);
+      const icon = getOrCreateIcon(tier, tree.species, bCount);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id]), {
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
