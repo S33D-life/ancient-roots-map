@@ -16,7 +16,7 @@ interface StaffQRCodeProps {
 export default function StaffQRCode({ staffCode, size = 96, className }: StaffQRCodeProps) {
   const [copied, setCopied] = useState(false);
 
-  const staffUrl = `${window.location.origin}/library/staff-room?staff=${encodeURIComponent(staffCode)}`;
+  const staffUrl = `${window.location.origin}/staff/${encodeURIComponent(staffCode)}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size * 2}x${size * 2}&data=${encodeURIComponent(staffUrl)}&bgcolor=0a0a08&color=c8a96e&margin=1&format=svg`;
 
   const handleCopy = async () => {
