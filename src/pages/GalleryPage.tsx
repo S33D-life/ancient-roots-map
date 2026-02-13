@@ -193,7 +193,7 @@ const GalleryPage = () => {
   const { showEntrance: showSplash, dismissEntrance: dismissSplash } = useEntranceOnce("gallery", !roomParam);
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(searchParams.get("fullscreen") === "true");
   const [showExplorer, setShowExplorer] = useState(false);
   const [vaultRevealed, setVaultRevealed] = useState(!!roomParam && roomParam === "vault");
 

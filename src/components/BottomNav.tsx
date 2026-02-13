@@ -11,7 +11,7 @@ import { TreeDeciduous, BookOpen, Flame, Radio } from "lucide-react";
 const NAV_ITEMS = [
   { to: "/map", icon: TreeDeciduous, label: "Atlas" },
   { to: "/library", icon: BookOpen, label: "Library" },
-  { to: "/radio", icon: Radio, label: "Radio" },
+  { to: "/library/music-room?fullscreen=true", icon: Radio, label: "Radio" },
   { to: "/dashboard", icon: Flame, label: "Hearth" },
 ] as const;
 
@@ -34,7 +34,7 @@ const BottomNav = () => {
     >
       <div className="flex items-center justify-around py-1.5">
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
-          const active = pathname === to || pathname.startsWith(to + "/");
+          const active = pathname === to || pathname.startsWith(to.split("?")[0] + "/") || pathname === to.split("?")[0];
           return (
             <Link
               key={to}
