@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Archive, Loader2 } from "lucide-react";
+import { Archive, Loader2, Wand2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useWallet } from "@/hooks/use-wallet";
@@ -83,16 +83,26 @@ const DashboardVault = ({ userId }: Props) => {
       transition={{ duration: 0.4 }}
     >
       <VaultParticles />
-      {/* Section header with wallet status */}
+      {/* Section header with Staff identity + wallet status */}
       <div className="flex items-center gap-2.5">
         <Archive className="w-5 h-5 text-primary" />
         <div className="flex-1">
           <h2 className="text-lg font-serif text-foreground tracking-wide">Heartwood Vault</h2>
           <p className="text-[11px] text-muted-foreground font-serif">
-            Your living treasury of Hearts, Seeds, and Tree Bonds
+            {wallet.activeStaff
+              ? `Anchored to ${wallet.activeStaff.id} · ${wallet.activeStaff.species}`
+              : "Your living treasury of Hearts, Seeds, and Tree Bonds"
+            }
           </p>
         </div>
-        {wallet.status === "connected" && (
+        {/* Staff + wallet pill */}
+        {wallet.activeStaff && (
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+            <Wand2 className="w-3 h-3 text-primary" />
+            <span className="text-[10px] font-mono text-foreground">{wallet.activeStaff.id}</span>
+          </div>
+        )}
+        {!wallet.activeStaff && wallet.status === "connected" && (
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/30 border border-border/40">
             <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_4px_hsl(var(--primary))]" />
             <span className="text-[10px] font-mono text-muted-foreground">{wallet.shortAddress}</span>
@@ -100,7 +110,7 @@ const DashboardVault = ({ userId }: Props) => {
         )}
       </div>
 
-      {/* Wallet Connection Card */}
+      {/* Wallet & Staff Identity Card */}
       <VaultWalletCard wallet={wallet} />
 
       {/* Primary: Heart Balance Ring */}

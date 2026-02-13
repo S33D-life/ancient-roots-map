@@ -571,6 +571,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_staff_id: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -581,6 +582,7 @@ export type Database = {
           wallet_address: string | null
         }
         Insert: {
+          active_staff_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -591,6 +593,7 @@ export type Database = {
           wallet_address?: string | null
         }
         Update: {
+          active_staff_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -600,7 +603,15 @@ export type Database = {
           updated_at?: string
           wallet_address?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_active_staff_id_fkey"
+            columns: ["active_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staffs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referrals: {
         Row: {
@@ -766,6 +777,60 @@ export type Database = {
           preview_url?: string | null
           source?: string
           title?: string
+        }
+        Relationships: []
+      }
+      staffs: {
+        Row: {
+          circle_id: number
+          created_at: string
+          id: string
+          image_url: string | null
+          is_origin_spiral: boolean
+          owner_address: string | null
+          owner_user_id: string | null
+          species: string
+          species_code: string
+          species_id: number
+          staff_number: number
+          token_id: number
+          updated_at: string
+          variant_id: number
+          verified_at: string | null
+        }
+        Insert: {
+          circle_id: number
+          created_at?: string
+          id: string
+          image_url?: string | null
+          is_origin_spiral?: boolean
+          owner_address?: string | null
+          owner_user_id?: string | null
+          species: string
+          species_code: string
+          species_id: number
+          staff_number: number
+          token_id: number
+          updated_at?: string
+          variant_id: number
+          verified_at?: string | null
+        }
+        Update: {
+          circle_id?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_origin_spiral?: boolean
+          owner_address?: string | null
+          owner_user_id?: string | null
+          species?: string
+          species_code?: string
+          species_id?: number
+          staff_number?: number
+          token_id?: number
+          updated_at?: string
+          variant_id?: number
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -979,6 +1044,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          staff_id: string | null
           title: string
           type: string
           updated_at: string
@@ -989,6 +1055,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          staff_id?: string | null
           title: string
           type?: string
           updated_at?: string
@@ -999,13 +1066,22 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
+          staff_id?: string | null
           title?: string
           type?: string
           updated_at?: string
           url?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vault_items_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staffs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
