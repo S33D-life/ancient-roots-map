@@ -286,6 +286,7 @@ const LITE_CSS = `
 .tree-cluster-sm{width:34px;height:34px;font-size:11px;background:hsla(120,40%,20%,0.85);box-shadow:0 0 8px hsla(42,60%,45%,0.2)}
 .tree-cluster-md{width:42px;height:42px;font-size:13px;background:hsla(120,45%,18%,0.88);box-shadow:0 0 10px hsla(42,60%,45%,0.25)}
 .tree-cluster-lg{width:50px;height:50px;font-size:14px;background:hsla(120,50%,16%,0.9);box-shadow:0 0 14px hsla(42,60%,45%,0.3)}
+.tree-cluster-xl{width:56px;height:56px;font-size:15px;background:hsla(120,55%,14%,0.92);box-shadow:0 0 18px hsla(42,60%,45%,0.35)}
 @keyframes ancientGlow{0%,100%{filter:drop-shadow(0 0 3px hsla(42,90%,55%,0.25))}50%{filter:drop-shadow(0 0 8px hsla(42,90%,55%,0.6))}}
 @keyframes popIn{0%{opacity:0;transform:scale(0.92) translateY(4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes userPulse{0%,100%{box-shadow:0 0 10px hsla(42,90%,55%,0.5),0 0 20px hsla(42,90%,55%,0.15)}50%{box-shadow:0 0 14px hsla(42,90%,55%,0.7),0 0 28px hsla(42,90%,55%,0.25)}}
@@ -514,22 +515,69 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
 
     const clusterGroup = (L as any).markerClusterGroup({
-      maxClusterRadius: 50,
+      maxClusterRadius: (zoom: number) => {
+        // Dynamic radius: tighter clusters at higher zoom for grove-scale feel
+        if (zoom <= 4) return 80;   // continental — large clusters
+        if (zoom <= 8) return 65;   // national/bioregional
+        if (zoom <= 11) return 50;  // regional
+        if (zoom <= 14) return 35;  // local
+        return 25;                  // hyper-local — only very close trees cluster
+      },
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       animate: true,
       animateAddingMarkers: false,
-      disableClusteringAtZoom: 16,
+      disableClusteringAtZoom: 18,
       chunkedLoading: true,
       chunkInterval: 80,
       chunkDelay: 8,
+      spiderfyDistanceMultiplier: 1.8,
+      spiderLegPolylineOptions: {
+        weight: 1.5,
+        color: "hsla(42, 60%, 50%, 0.4)",
+        opacity: 0.6,
+      },
       iconCreateFunction: (cluster: any) => {
         const count = cluster.getChildCount();
-        const sizeClass = count >= 20 ? "tree-cluster-lg" : count >= 5 ? "tree-cluster-md" : "tree-cluster-sm";
-        const dim = count >= 20 ? 50 : count >= 5 ? 42 : 34;
+        const childMarkers = cluster.getAllChildMarkers();
+
+        // Determine dominant tier in cluster
+        let ancientCount = 0;
+        let storiedCount = 0;
+        childMarkers.forEach((m: any) => {
+          const html = m.options?.icon?.options?.html || "";
+          if (html.includes("marker-ancient")) ancientCount++;
+          else if (html.includes("storied")) storiedCount++;
+        });
+
+        const hasAncient = ancientCount > 0;
+        const hasMajorStory = storiedCount >= count * 0.3;
+
+        // Size classes
+        const sizeClass = count >= 50
+          ? "tree-cluster-xl"
+          : count >= 20
+          ? "tree-cluster-lg"
+          : count >= 5
+          ? "tree-cluster-md"
+          : "tree-cluster-sm";
+        const dim = count >= 50 ? 56 : count >= 20 ? 50 : count >= 5 ? 42 : 34;
+
+        // Golden ring for clusters containing ancient trees
+        const ringStyle = hasAncient
+          ? "border-color:hsl(42,90%,55%);box-shadow:0 0 12px hsla(42,90%,55%,0.4)"
+          : hasMajorStory
+          ? "border-color:hsl(42,70%,48%);box-shadow:0 0 8px hsla(42,70%,48%,0.25)"
+          : "";
+
+        // Label: count + ancient badge
+        const badge = hasAncient
+          ? `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:hsl(42,95%,60%);border:1.5px solid hsl(30,15%,10%);"></span>`
+          : "";
+
         return L.divIcon({
-          html: `<div class="tree-cluster ${sizeClass}">${count}</div>`,
+          html: `<div class="tree-cluster ${sizeClass}" style="${ringStyle};position:relative;">${count}${badge}</div>`,
           className: "leaflet-tree-marker",
           iconSize: L.point(dim, dim),
         });
