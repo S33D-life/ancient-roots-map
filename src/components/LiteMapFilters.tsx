@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
-import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree, RotateCcw } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 
@@ -44,13 +45,10 @@ interface LiteMapFiltersProps {
   availableProjects?: string[];
 }
 
-const chipStyle = (active: boolean): React.CSSProperties => ({
-  background: active ? "hsla(42, 80%, 50%, 0.2)" : "hsla(30, 30%, 12%, 0.88)",
-  color: active ? "hsl(42, 80%, 60%)" : "hsl(42, 55%, 58%)",
-  border: `1px solid ${active ? "hsla(42, 70%, 50%, 0.5)" : "hsla(42, 40%, 30%, 0.4)"}`,
-  backdropFilter: "blur(6px)",
-  boxShadow: active ? "0 0 8px hsla(42, 70%, 50%, 0.15)" : "0 1px 4px rgba(0,0,0,0.2)",
-});
+/* ── Shared chip styles using HSL design tokens ── */
+const chipBase = "shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95 border backdrop-blur-sm";
+const chipActive = "bg-primary/20 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]";
+const chipInactive = "bg-card/80 text-muted-foreground border-border/60 shadow-sm hover:bg-accent/30 hover:text-foreground";
 
 const LiteMapFilters = ({
   species,
@@ -68,6 +66,8 @@ const LiteMapFilters = ({
 }: LiteMapFiltersProps) => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+
+  const hasActiveFilters = species !== "all" || lineageFilter !== "all" || projectFilter !== "all";
 
   const speciesWithFamilies = useMemo(
     () =>
@@ -106,264 +106,339 @@ const LiteMapFilters = ({
     setPanelOpen(false);
   }, [onSpeciesChange]);
 
+  const handleResetAll = useCallback(() => {
+    onSpeciesChange("all");
+    onLineageChange?.("all");
+    onProjectChange?.("all");
+    setFamilyFilter(null);
+  }, [onSpeciesChange, onLineageChange, onProjectChange]);
+
   return (
     <>
-      {/* Top bar — offset left to accommodate search button */}
+      {/* ── Top bar ── */}
       <div className="absolute top-[4.5rem] left-14 right-24 z-[1000] flex items-center gap-1.5 animate-fade-in">
         {/* Perspective chips */}
         {PERSPECTIVES.map((p) => (
-          <button
+          <motion.button
             key={p.key}
             onClick={() => onPerspectiveChange(p.key)}
-            className="shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
-            style={chipStyle(perspective === p.key)}
+            whileTap={{ scale: 0.93 }}
+            className={`${chipBase} ${perspective === p.key ? chipActive : chipInactive}`}
           >
             {p.icon} {p.label}
-          </button>
+          </motion.button>
         ))}
 
         <div className="flex-1" />
 
-        {/* Active lineage chip */}
-        {lineageFilter !== "all" && (
-          <button
-            onClick={() => onLineageChange?.("all")}
-            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
-            style={chipStyle(true)}
-          >
-            <GitBranch className="w-3 h-3" /> {lineageFilter} <X className="w-3 h-3" />
-          </button>
-        )}
+        {/* Active filter chips — dismissable */}
+        <AnimatePresence mode="popLayout">
+          {lineageFilter !== "all" && (
+            <motion.button
+              key="lineage-chip"
+              initial={{ opacity: 0, scale: 0.8, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 10 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => onLineageChange?.("all")}
+              className={`${chipBase} ${chipActive} flex items-center gap-1`}
+            >
+              <GitBranch className="w-3 h-3" /> {lineageFilter} <X className="w-3 h-3" />
+            </motion.button>
+          )}
 
-        {/* Active project chip */}
-        {projectFilter !== "all" && (
-          <button
-            onClick={() => onProjectChange?.("all")}
-            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
-            style={chipStyle(true)}
-          >
-            <FolderTree className="w-3 h-3" /> {projectFilter} <X className="w-3 h-3" />
-          </button>
-        )}
+          {projectFilter !== "all" && (
+            <motion.button
+              key="project-chip"
+              initial={{ opacity: 0, scale: 0.8, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 10 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => onProjectChange?.("all")}
+              className={`${chipBase} ${chipActive} flex items-center gap-1`}
+            >
+              <FolderTree className="w-3 h-3" /> {projectFilter} <X className="w-3 h-3" />
+            </motion.button>
+          )}
 
-        {/* Active species chip or filter toggle */}
-        {species !== "all" ? (
-          <button
-            onClick={() => onSpeciesChange("all")}
-            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
-            style={chipStyle(true)}
-          >
-            {species} <X className="w-3 h-3" />
-          </button>
-        ) : (
-          <button
-            onClick={() => setPanelOpen(!panelOpen)}
-            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
-            style={chipStyle(panelOpen)}
-          >
-            <Filter className="w-3 h-3" /> Staff
-          </button>
-        )}
+          {species !== "all" ? (
+            <motion.button
+              key="species-chip"
+              initial={{ opacity: 0, scale: 0.8, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: 10 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => onSpeciesChange("all")}
+              className={`${chipBase} ${chipActive} flex items-center gap-1`}
+            >
+              {species} <X className="w-3 h-3" />
+            </motion.button>
+          ) : (
+            <motion.button
+              key="filter-toggle"
+              whileTap={{ scale: 0.93 }}
+              onClick={() => setPanelOpen(!panelOpen)}
+              className={`${chipBase} flex items-center gap-1 ${panelOpen ? chipActive : chipInactive}`}
+            >
+              <Filter className="w-3 h-3" /> Staff
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         {/* Count badge */}
-        <span
-          className="shrink-0 tabular-nums px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-300"
-          style={{
-            background: "hsla(30, 30%, 12%, 0.8)",
-            color: "hsl(42, 50%, 55%)",
-            border: "1px solid hsla(42, 40%, 30%, 0.3)",
-          }}
+        <motion.span
+          key={totalVisible}
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          className="shrink-0 tabular-nums px-2 py-1 rounded-full text-[10px] font-serif bg-card/80 text-muted-foreground border border-border/50"
         >
           {totalVisible}
-        </span>
+        </motion.span>
       </div>
 
       {/* Perspective label — subtle context indicator */}
-      {perspective !== "collective" && (
-        <div
-          className="absolute top-[6.5rem] left-2 z-[1000] px-2 py-0.5 rounded-full text-[9px] font-serif animate-fade-in"
-          style={{
-            background: "hsla(42, 80%, 50%, 0.12)",
-            color: "hsl(42, 70%, 58%)",
-            border: "1px solid hsla(42, 60%, 45%, 0.2)",
-          }}
-        >
-          {perspective === "personal" ? "Viewing your mapped trees" : "Viewing tribe trees"}
-        </div>
-      )}
-
-      {/* Slide-up species panel */}
-      <div
-        className="absolute bottom-0 left-0 right-0 z-[1001] rounded-t-2xl"
-        style={{
-          background: "hsla(30, 20%, 8%, 0.96)",
-          border: "1px solid hsla(42, 40%, 30%, 0.3)",
-          borderBottom: "none",
-          backdropFilter: "blur(12px)",
-          maxHeight: panelOpen ? "45vh" : "0",
-          overflow: "hidden",
-          transition: "max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      >
-        {/* Handle */}
-        <button
-          onClick={() => setPanelOpen(false)}
-          className="w-full flex flex-col items-center pt-2 pb-1 active:bg-white/5 transition-colors"
-        >
-          <div className="w-10 h-1 rounded-full" style={{ background: "hsla(42, 40%, 40%, 0.4)" }} />
-          <span className="text-[10px] font-serif mt-1 flex items-center gap-0.5" style={{ color: "hsl(42, 50%, 55%)" }}>
-            <ChevronDown className="w-3 h-3" />Filter by Staff
-          </span>
-        </button>
-
-        {/* Lineage + Project filter chips */}
-        {(availableLineages.length > 0 || availableProjects.length > 0) && (
-          <div className="px-3 pb-2 flex gap-1.5 flex-wrap">
-            {availableLineages.length > 0 && (
-              <>
-                <span className="text-[9px] font-serif w-full" style={{ color: "hsl(42, 40%, 50%)" }}>
-                  <GitBranch className="w-2.5 h-2.5 inline mr-0.5" />Lineage
-                </span>
-                <button
-                  onClick={() => onLineageChange?.("all")}
-                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
-                  style={chipStyle(lineageFilter === "all")}
-                >
-                  All
-                </button>
-                {availableLineages.map((l) => (
-                  <button
-                    key={l}
-                    onClick={() => onLineageChange?.(lineageFilter === l ? "all" : l)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
-                    style={chipStyle(lineageFilter === l)}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </>
-            )}
-            {availableProjects.length > 0 && (
-              <>
-                <span className="text-[9px] font-serif w-full mt-1" style={{ color: "hsl(42, 40%, 50%)" }}>
-                  <FolderTree className="w-2.5 h-2.5 inline mr-0.5" />Project
-                </span>
-                <button
-                  onClick={() => onProjectChange?.("all")}
-                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
-                  style={chipStyle(projectFilter === "all")}
-                >
-                  All
-                </button>
-                {availableProjects.map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => onProjectChange?.(projectFilter === p ? "all" : p)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
-                    style={chipStyle(projectFilter === p)}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Family filter chips */}
-        <div className="px-3 pb-2 flex gap-1.5 flex-wrap">
-          <button
-            onClick={() => setFamilyFilter(null)}
-            className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
-            style={chipStyle(!familyFilter)}
+      <AnimatePresence>
+        {perspective !== "collective" && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="absolute top-[6.5rem] left-2 z-[1000] px-2 py-0.5 rounded-full text-[9px] font-serif bg-primary/12 text-primary/80 border border-primary/20"
           >
-            <Leaf className="w-2.5 h-2.5" /> All Families
-          </button>
-          {availableFamilies.map((f) => (
-            <button
-              key={f.name}
-              onClick={() => setFamilyFilter(familyFilter === f.name ? null : f.name)}
-              className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
-              style={chipStyle(familyFilter === f.name)}
-            >
-              {f.name}
-              <span
-                className="text-[8px] rounded-full px-1"
-                style={{ background: "hsla(42, 60%, 45%, 0.2)" }}
-              >
-                {f.count}
-              </span>
-            </button>
-          ))}
-        </div>
+            {perspective === "personal" ? "Viewing your mapped trees" : "Viewing tribe trees"}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <ScrollArea className="px-3 pb-4" style={{ maxHeight: "calc(45vh - 80px)" }}>
-          <div className="grid grid-cols-5 gap-2">
-            {/* TETOL */}
-            <button
-              onClick={() => handleSpeciesSelect("all")}
-              className="flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all duration-200 active:scale-95"
-              style={species === "all" ? { background: "hsla(42, 80%, 50%, 0.15)" } : {}}
+      {/* ── Slide-up species panel ── */}
+      <AnimatePresence>
+        {panelOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 z-[1000] bg-background/20"
+              onClick={() => setPanelOpen(false)}
+            />
+
+            {/* Panel */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="absolute bottom-0 left-0 right-0 z-[1001] rounded-t-2xl border-t border-border/50 bg-card/95 backdrop-blur-xl shadow-2xl"
+              style={{ maxHeight: "50vh" }}
             >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                style={{ background: "hsla(120, 30%, 20%, 0.5)", border: "1px solid hsla(42, 40%, 30%, 0.3)" }}
-              >
-                🌳
+              {/* Handle + Header */}
+              <div className="flex flex-col items-center pt-2 pb-1">
+                <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
               </div>
-              <span className="text-[9px] font-serif" style={{ color: "hsl(42, 55%, 58%)" }}>TETOL</span>
-            </button>
 
-            {availableSpecies.map((s) => {
-              const count = speciesCounts[s.species.toLowerCase()] || 0;
-              const active = species.toLowerCase() === s.species.toLowerCase();
-              return (
-                <button
-                  key={s.key}
-                  onClick={() => handleSpeciesSelect(s.species)}
-                  className="flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all duration-200 active:scale-95"
-                  style={active ? { background: "hsla(42, 80%, 50%, 0.15)" } : {}}
-                >
-                  <div className="relative">
-                    <img
-                      src={s.image}
-                      alt={s.species}
-                      className="w-10 h-10 rounded-full object-cover transition-all duration-200"
-                      style={{
-                        border: active ? "2px solid hsl(42, 80%, 55%)" : "1px solid hsla(42, 40%, 30%, 0.4)",
-                        boxShadow: active ? "0 0 8px hsla(42, 80%, 55%, 0.3)" : "none",
-                      }}
-                      loading="lazy"
-                    />
-                    {count > 0 && (
-                      <span
-                        className="absolute -top-0.5 -right-0.5 text-[8px] font-bold rounded-full w-3.5 h-3.5 flex items-center justify-center"
-                        style={{ background: "hsl(42, 80%, 50%)", color: "hsl(30, 20%, 8%)" }}
-                      >
-                        {count}
+              <div className="px-4 pb-2 flex items-center justify-between">
+                <h3 className="text-sm font-serif text-foreground tracking-wider flex items-center gap-2">
+                  <Filter className="w-3.5 h-3.5 text-primary/60" />
+                  Focus by Staff
+                </h3>
+                {hasActiveFilters && (
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleResetAll}
+                    className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif text-primary/70 hover:text-primary bg-primary/8 hover:bg-primary/15 border border-primary/20 transition-colors"
+                  >
+                    <RotateCcw className="w-2.5 h-2.5" /> Reset All
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Lineage + Project filter rows */}
+              {(availableLineages.length > 0 || availableProjects.length > 0) && (
+                <div className="px-4 pb-2 space-y-2">
+                  {availableLineages.length > 0 && (
+                    <div>
+                      <span className="text-[9px] font-serif text-muted-foreground/70 uppercase tracking-[0.15em] flex items-center gap-1 mb-1">
+                        <GitBranch className="w-2.5 h-2.5" />Lineage
                       </span>
-                    )}
-                  </div>
-                  <span className="text-[9px] font-serif leading-tight text-center" style={{ color: "hsl(42, 55%, 58%)" }}>
-                    {s.species}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </ScrollArea>
-      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <FilterChip active={lineageFilter === "all"} onClick={() => onLineageChange?.("all")} label="All" />
+                        {availableLineages.map((l) => (
+                          <FilterChip
+                            key={l}
+                            active={lineageFilter === l}
+                            onClick={() => onLineageChange?.(lineageFilter === l ? "all" : l)}
+                            label={l}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {availableProjects.length > 0 && (
+                    <div>
+                      <span className="text-[9px] font-serif text-muted-foreground/70 uppercase tracking-[0.15em] flex items-center gap-1 mb-1">
+                        <FolderTree className="w-2.5 h-2.5" />Project
+                      </span>
+                      <div className="flex gap-1.5 flex-wrap">
+                        <FilterChip active={projectFilter === "all"} onClick={() => onProjectChange?.("all")} label="All" />
+                        {availableProjects.map((p) => (
+                          <FilterChip
+                            key={p}
+                            active={projectFilter === p}
+                            onClick={() => onProjectChange?.(projectFilter === p ? "all" : p)}
+                            label={p}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
-      {/* Backdrop when panel open */}
-      {panelOpen && (
-        <div
-          className="absolute inset-0 z-[1000]"
-          style={{ background: "rgba(0,0,0,0.2)" }}
-          onClick={() => setPanelOpen(false)}
-        />
-      )}
+              {/* Family filter chips */}
+              <div className="px-4 pb-2 flex gap-1.5 flex-wrap">
+                <FilterChip
+                  active={!familyFilter}
+                  onClick={() => setFamilyFilter(null)}
+                  label="All Families"
+                  icon={<Leaf className="w-2.5 h-2.5" />}
+                />
+                {availableFamilies.map((f) => (
+                  <FilterChip
+                    key={f.name}
+                    active={familyFilter === f.name}
+                    onClick={() => setFamilyFilter(familyFilter === f.name ? null : f.name)}
+                    label={f.name}
+                    count={f.count}
+                  />
+                ))}
+              </div>
+
+              {/* Species grid */}
+              <ScrollArea className="px-4 pb-4" style={{ maxHeight: "calc(50vh - 140px)" }}>
+                <div className="grid grid-cols-5 gap-2">
+                  {/* TETOL — show all */}
+                  <StaffGridItem
+                    active={species === "all"}
+                    onClick={() => handleSpeciesSelect("all")}
+                    label="TETOL"
+                    isAll
+                  />
+
+                  {availableSpecies.map((s) => {
+                    const count = speciesCounts[s.species.toLowerCase()] || 0;
+                    const active = species.toLowerCase() === s.species.toLowerCase();
+                    return (
+                      <StaffGridItem
+                        key={s.key}
+                        active={active}
+                        onClick={() => handleSpeciesSelect(s.species)}
+                        label={s.species}
+                        image={s.image}
+                        count={count}
+                      />
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
+
+/* ── Filter Chip sub-component ── */
+function FilterChip({ active, onClick, label, icon, count }: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  icon?: React.ReactNode;
+  count?: number;
+}) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.93 }}
+      onClick={onClick}
+      className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 border ${
+        active
+          ? "bg-primary/15 text-primary border-primary/30 shadow-[0_0_6px_hsl(var(--primary)/0.1)]"
+          : "bg-muted/30 text-muted-foreground border-border/40 hover:bg-accent/20 hover:text-foreground"
+      }`}
+    >
+      {icon}
+      {label}
+      {count !== undefined && (
+        <span className={`text-[8px] rounded-full px-1 ${active ? "bg-primary/20" : "bg-muted/50"}`}>
+          {count}
+        </span>
+      )}
+    </motion.button>
+  );
+}
+
+/* ── Staff Grid Item sub-component ── */
+function StaffGridItem({ active, onClick, label, image, count, isAll }: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  image?: string;
+  count?: number;
+  isAll?: boolean;
+}) {
+  return (
+    <motion.button
+      whileTap={{ scale: 0.92 }}
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all duration-200 border ${
+        active
+          ? "bg-primary/10 border-primary/25 shadow-[0_0_10px_hsl(var(--primary)/0.1)]"
+          : "border-transparent hover:bg-accent/15"
+      }`}
+    >
+      <div className="relative">
+        {isAll ? (
+          <div className="w-11 h-11 rounded-full bg-muted/40 flex items-center justify-center text-lg border border-border/40">
+            🌳
+          </div>
+        ) : (
+          <img
+            src={image}
+            alt={label}
+            className={`w-11 h-11 rounded-full object-cover transition-all duration-200 border-2 ${
+              active ? "border-primary shadow-[0_0_8px_hsl(var(--primary)/0.3)]" : "border-border/40"
+            }`}
+            loading="lazy"
+          />
+        )}
+        {/* Count badge */}
+        {count !== undefined && count > 0 && (
+          <motion.span
+            initial={false}
+            animate={{ scale: active ? 1.1 : 1 }}
+            className="absolute -top-0.5 -right-0.5 text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center bg-primary text-primary-foreground"
+          >
+            {count}
+          </motion.span>
+        )}
+        {/* Active ring pulse */}
+        {active && (
+          <motion.div
+            className="absolute inset-0 rounded-full border-2 border-primary/40 pointer-events-none"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+      </div>
+      <span className={`text-[9px] font-serif leading-tight text-center transition-colors ${
+        active ? "text-primary" : "text-muted-foreground"
+      }`}>
+        {label}
+      </span>
+    </motion.button>
+  );
+}
 
 export default LiteMapFilters;
