@@ -46,7 +46,7 @@ import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import HeartEconomySummary from "@/components/HeartEconomySummary";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
-import greenhouseWindow from "@/assets/greenhouse-window.png";
+import greenhouseWindow from "@/assets/greenhouse-window.jpeg";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
@@ -235,6 +235,7 @@ const GalleryPage = () => {
   const [showCouncilEmbed, setShowCouncilEmbed] = useState(false);
   const [showSeedCellarEmbed, setShowSeedCellarEmbed] = useState(false);
   const [showAllStaffs, setShowAllStaffs] = useState(false);
+  const [showGreenhouseContent, setShowGreenhouseContent] = useState(false);
   const [showMintingProgress, setShowMintingProgress] = useState(false);
    const [showSpiral, setShowSpiral] = useState(false);
   const [selectedGridStaff, setSelectedGridStaff] = useState<{ tokenId: number; code: string; speciesName: string; img: string } | null>(null);
@@ -1433,11 +1434,29 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="greenhouse" className="space-y-6">
-            <Greenhouse />
-            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
-              <img src={greenhouseWindow} alt="Greenhouse" className="w-full h-auto object-contain" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            {/* Interactive entrance image */}
+            <div
+              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
+              onClick={() => setShowGreenhouseContent(!showGreenhouseContent)}
+            >
+              <img
+                src={greenhouseWindow}
+                alt="The Greenhouse"
+                className="w-full h-64 md:h-96 object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
+                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">🌿 The Greenhouse</h3>
+                <p className="text-sm text-foreground/70 mt-1 font-serif">
+                  {showGreenhouseContent ? "Click to close" : "Enter the botanical sanctuary"}
+                </p>
+              </div>
             </div>
+
+            {showGreenhouseContent && (
+              <div className="animate-fade-in">
+                <Greenhouse />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">
