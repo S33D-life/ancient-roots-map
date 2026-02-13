@@ -1,6 +1,63 @@
-import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import TetolBreadcrumb from "@/components/TetolBreadcrumb";
+import DashboardVault from "@/components/dashboard/DashboardVault";
+import hearthBg from "@/assets/hearth-bg.jpeg";
+import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
-// Vault is accessible through the Hearth dashboard
-const VaultPage = () => <Navigate to="/dashboard" replace />;
+const VaultPage = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const from = searchParams.get("from"); // "hearth" | "heartwood" | null
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUserId(session.user.id);
+      }
+      setLoading(false);
+    });
+  }, [navigate]);
+
+  if (loading || !userId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Contextual background based on entry point
+  const bgImage = from === "heartwood" ? heartwoodLanding : hearthBg;
+
+  return (
+    <div className="min-h-screen relative">
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <img src={bgImage} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-background/75 backdrop-blur-sm" />
+      </div>
+
+      <Header />
+
+      <main className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <TetolBreadcrumb />
+          <DashboardVault userId={userId} />
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
 
 export default VaultPage;
