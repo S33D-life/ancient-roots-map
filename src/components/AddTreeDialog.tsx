@@ -62,6 +62,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const { toast } = useToast();
   const navigate = useNavigate();
   const dragCounter = useRef(0);
+  const w3wInputRef = useRef<HTMLInputElement>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -94,7 +95,22 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
   }, [open, initLat, initLng]);
 
-  // Auto-lookup what3words when user types a valid-looking address
+  // Keyboard shortcut: "/" focuses what3words input
+  useEffect(() => {
+    if (!open || step !== "encounter" || adjustMode) return;
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "/") {
+        e.preventDefault();
+        w3wInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, step, adjustMode]);
+
+
   useEffect(() => {
     const trimmed = what3words.trim().replace(/^\/+/, "");
     const isValid = /^[a-z]+\.[a-z]+\.[a-z]+$/i.test(trimmed);
@@ -622,9 +638,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 <div className="space-y-2">
                   <Label htmlFor="what3words" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">
                     what3words {fetchingW3w && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
+                    <kbd className="ml-2 inline-flex items-center rounded border border-border/50 px-1 py-0.5 text-[9px] font-mono text-muted-foreground/60">/</kbd>
                   </Label>
                   <div className="flex gap-2">
-                    <Input id="what3words" value={what3words} onChange={(e) => setWhat3words(e.target.value)} placeholder="filled.count.soap" className="flex-1 font-serif" />
+                    <Input ref={w3wInputRef} id="what3words" value={what3words} onChange={(e) => setWhat3words(e.target.value)} placeholder="filled.count.soap" className="flex-1 font-serif" />
                     <Button type="button" variant="outline" size="icon" onClick={handleLookupW3w} disabled={lookingUpW3w || !what3words.trim()}>
                       {lookingUpW3w ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                     </Button>
