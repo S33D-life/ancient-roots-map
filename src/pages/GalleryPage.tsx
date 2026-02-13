@@ -1109,7 +1109,7 @@ const GalleryPage = () => {
 
             {loading ? (
               <p className="text-center py-12">Loading trees...</p>
-            ) : filteredTrees.length === 0 ? (
+            ) : clusteredTrees.length === 0 ? (
               <p className="text-center py-12 text-muted-foreground">
                 No trees found. Import some trees to get started!
               </p>
