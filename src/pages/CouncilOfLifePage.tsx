@@ -6,8 +6,11 @@ import TetolBridge from "@/components/TetolBridge";
 import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import CanopyEntrance from "@/components/CanopyEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
+import { HostAPodModal } from "@/components/HostAPodModal";
+import DigitalFireVote from "@/components/DigitalFireVote";
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 
 const councilRooms = [
@@ -30,7 +33,7 @@ const councilRooms = [
     title: "Host a Pod",
     description: "Start a local pod gathering",
     icon: Podcast,
-    externalUrl: "https://t.me/s33dlife",
+    comingSoon: true,
   },
   {
     id: "next",
@@ -45,6 +48,7 @@ const CouncilOfLifePage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
+  const [podModalOpen, setPodModalOpen] = useState(false);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
@@ -118,13 +122,11 @@ const CouncilOfLifePage = () => {
     );
   }
 
-  // Home screen — like HeARTwood Library
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main className="relative pt-20 pb-8">
         <TetolBreadcrumb />
-        {/* Background image */}
         <div className="absolute inset-0 z-0">
           <img
             src={councilHomeBg}
@@ -145,20 +147,37 @@ const CouncilOfLifePage = () => {
           <div className="grid grid-cols-2 gap-4 md:gap-6">
             {councilRooms.map((room) => {
               const Icon = room.icon;
+              const isComingSoon = 'comingSoon' in room && room.comingSoon;
               return (
                 <Card
                   key={room.id}
-                  className="cursor-pointer bg-card/60 backdrop-blur-sm border-border/50 hover:bg-card/80 hover:border-primary/40 hover:glow-subtle transition-all duration-300 group"
+                  className={`relative bg-card/60 backdrop-blur-sm border-border/50 transition-all duration-300 group ${
+                    isComingSoon
+                      ? "opacity-75 cursor-pointer"
+                      : "cursor-pointer hover:bg-card/80 hover:border-primary/40"
+                  }`}
                   onClick={() => {
-                    if ('externalUrl' in room && room.externalUrl) {
+                    if (isComingSoon) {
+                      setPodModalOpen(true);
+                    } else if ('externalUrl' in room && room.externalUrl) {
                       window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
                     } else {
                       setActiveRoom(room.id);
                     }
                   }}
                 >
+                  {isComingSoon && (
+                    <Badge
+                      variant="secondary"
+                      className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5"
+                    >
+                      Coming Soon
+                    </Badge>
+                  )}
                   <CardHeader className="text-center p-4 md:p-6">
-                    <Icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
+                    <Icon className={`h-8 w-8 mx-auto mb-2 transition-colors ${
+                      isComingSoon ? "text-muted-foreground" : "text-primary group-hover:text-accent"
+                    }`} />
                     <CardTitle className="text-base md:text-lg font-serif tracking-wide">
                       {room.title}
                     </CardTitle>
@@ -170,10 +189,17 @@ const CouncilOfLifePage = () => {
               );
             })}
           </div>
+
+          {/* Digital Fire Vote */}
+          <div className="mt-10">
+            <DigitalFireVote />
+          </div>
         </div>
         <TetolBridge />
       </main>
       <Footer />
+
+      <HostAPodModal open={podModalOpen} onOpenChange={setPodModalOpen} />
     </div>
   );
 };
