@@ -313,6 +313,33 @@ export type Database = {
           },
         ]
       }
+      digital_fire_votes: {
+        Row: {
+          created_at: string
+          event_date: string
+          id: string
+          moon_event: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date: string
+          id?: string
+          moon_event: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          id?: string
+          moon_event?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       draft_seeds: {
         Row: {
           artist: string | null
