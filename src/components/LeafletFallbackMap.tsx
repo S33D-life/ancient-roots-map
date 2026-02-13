@@ -5,6 +5,7 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
+import { fetchOverpassTrees, type ExternalTree } from "@/utils/overpassTrees";
 import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
 import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
 import LiteMapSearch from "./LiteMapSearch";
@@ -163,6 +164,41 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
   </div>`;
 }
 
+/* ── External tree popup ── */
+function buildExternalPopupHtml(tree: ExternalTree): string {
+  const displayName = tree.name || tree.species || tree.genus || "Unknown Tree";
+  const speciesLine = tree.species
+    ? `<p style="margin:0;font-size:11px;color:hsl(180,40%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>`
+    : tree.genus
+    ? `<p style="margin:0;font-size:11px;color:hsl(180,40%,55%);font-style:italic;">Genus: ${escapeHtml(tree.genus)}</p>`
+    : "";
+  const heightLine = tree.height
+    ? `<span style="display:flex;align-items:center;gap:3px;">📏 ~${tree.height}m tall</span>`
+    : "";
+
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:220px;background:hsl(200,15%,12%);border-radius:12px;border:1px solid hsla(180,40%,30%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+    <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;">
+      <div style="display:flex;align-items:center;gap-6px;">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:hsl(180,60%,50%);margin-right:6px;flex-shrink:0;"></span>
+        <h3 style="margin:0;font-size:14px;color:hsl(180,50%,70%);line-height:1.3;font-weight:700;">${escapeHtml(displayName)}</h3>
+      </div>
+      ${speciesLine}
+      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
+        ${heightLine}
+        <span style="display:flex;align-items:center;gap:3px;">🗺️ OpenStreetMap</span>
+      </div>
+    </div>
+    <div style="padding:6px 14px 12px;">
+      <p style="margin:0;font-size:10px;color:hsl(180,30%,45%);font-family:sans-serif;line-height:1.4;">
+        This tree is from the OpenStreetMap community database. Adopt it to make it an Ancient Friend.
+      </p>
+    </div>
+    <div style="padding:0 14px 12px;">
+      <a href="/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=18" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(200,15%,12%);background:linear-gradient(135deg,hsl(180,60%,45%),hsl(180,70%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌱 Adopt as Ancient Friend</a>
+    </div>
+  </div>`;
+}
+
 /* ── Haversine (km) ── */
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -224,6 +260,10 @@ const LITE_CSS = `
 @media(max-width:768px){.leaflet-control-zoom{display:none!important}}
 .leaflet-control-attribution{font-size:9px!important;background:hsla(30,20%,10%,0.7)!important;color:hsl(42,40%,50%)!important;border-radius:4px 0 0 0!important;padding:2px 6px!important}
 .leaflet-control-attribution a{color:hsl(42,50%,55%)!important}
+.external-tree-marker{background:transparent!important;border:none!important}
+@keyframes extPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.ext-dot{border-radius:50%;transition:transform .15s ease-out;cursor:pointer}
+.ext-dot:hover{transform:scale(1.3)!important}
 `;
 
 const btnBase: React.CSSProperties = {
@@ -243,6 +283,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
   const seedLayerRef = useRef<L.LayerGroup | null>(null);
   const rootThreadLayerRef = useRef<L.LayerGroup | null>(null);
   const offeringGlowLayerRef = useRef<L.LayerGroup | null>(null);
+  const externalLayerRef = useRef<L.LayerGroup | null>(null);
+  const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
   const [locating, setLocating] = useState(false);
@@ -261,6 +303,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
   const [showGroves, setShowGroves] = useState(false);
   const [showRootThreads, setShowRootThreads] = useState(false);
   const [showOfferingGlow, setShowOfferingGlow] = useState(false);
+  const [showExternalTrees, setShowExternalTrees] = useState(false);
+  const [externalTreeCount, setExternalTreeCount] = useState(0);
+  const [externalLoading, setExternalLoading] = useState(false);
   const [layerPanelOpen, setLayerPanelOpen] = useState(false);
 
   const speciesCounts = useMemo(() => {
@@ -710,6 +755,92 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
     };
   }, [filteredTrees, showOfferingGlow]);
 
+  // External trees layer — OSM Overpass data on viewport change
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (externalLayerRef.current) {
+      map.removeLayer(externalLayerRef.current);
+      externalLayerRef.current = null;
+    }
+
+    if (!showExternalTrees) {
+      setExternalTreeCount(0);
+      return;
+    }
+
+    const extLayer = L.layerGroup();
+    extLayer.addTo(map);
+    externalLayerRef.current = extLayer;
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+
+    const loadTrees = async () => {
+      if (externalAbortRef.current) externalAbortRef.current.abort();
+      const ac = new AbortController();
+      externalAbortRef.current = ac;
+
+      const zoom = map.getZoom();
+      if (zoom < 13) {
+        setExternalTreeCount(-1);
+        extLayer.clearLayers();
+        setExternalLoading(false);
+        return;
+      }
+
+      setExternalLoading(true);
+      const bounds = map.getBounds();
+      const trees = await fetchOverpassTrees(
+        bounds.getSouth(), bounds.getWest(), bounds.getNorth(), bounds.getEast(), ac.signal
+      );
+
+      if (ac.signal.aborted) return;
+      setExternalLoading(false);
+      setExternalTreeCount(trees.length);
+      extLayer.clearLayers();
+
+      const afSet = new Set(
+        filteredTrees.map((t) => `${t.latitude.toFixed(5)},${t.longitude.toFixed(5)}`)
+      );
+
+      trees.forEach((et) => {
+        if (afSet.has(`${et.latitude.toFixed(5)},${et.longitude.toFixed(5)}`)) return;
+
+        const icon = L.divIcon({
+          className: "external-tree-marker",
+          html: `<div class="ext-dot" style="width:12px;height:12px;background:hsl(180,60%,45%);border:2px solid hsl(180,40%,30%);box-shadow:0 0 6px hsla(180,60%,50%,0.4);"></div>`,
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+        });
+
+        const marker = L.marker([et.latitude, et.longitude], { icon });
+        marker.bindPopup(() => buildExternalPopupHtml(et), {
+          className: "atlas-leaflet-popup",
+          closeButton: true,
+          maxWidth: 240,
+          offset: L.point(0, -4),
+        });
+        marker.addTo(extLayer);
+      });
+    };
+
+    const onMoveEnd = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadTrees, 600);
+    };
+
+    map.on("moveend", onMoveEnd);
+    loadTrees();
+
+    return () => {
+      clearTimeout(debounceTimer);
+      map.off("moveend", onMoveEnd);
+      if (externalAbortRef.current) externalAbortRef.current.abort();
+      if (map.hasLayer(extLayer)) map.removeLayer(extLayer);
+    };
+  }, [showExternalTrees, filteredTrees]);
+
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
@@ -847,6 +978,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
               { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
               { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
               { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
+              { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "") : "" },
             ].map((layer) => (
               <button
                 key={layer.label}
@@ -866,6 +998,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
                   {layer.active && <span className="text-[10px]">✓</span>}
                 </div>
                 <span className="text-[12px] font-serif">{layer.label}</span>
+                {(layer as any).extra && (
+                  <span className="text-[9px] font-sans ml-auto" style={{ color: "hsl(180, 50%, 55%)" }}>
+                    {(layer as any).extra}
+                  </span>
+                )}
               </button>
             ))}
           </div>
