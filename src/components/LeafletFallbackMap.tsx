@@ -35,9 +35,14 @@ interface BloomedSeed {
   planter_id: string;
 }
 
+interface TreePhotos {
+  [treeId: string]: string;
+}
+
 interface LeafletFallbackMapProps {
   trees: Tree[];
   offeringCounts?: TreeOfferings;
+  treePhotos?: TreePhotos;
   className?: string;
   userId?: string | null;
   bloomedSeeds?: BloomedSeed[];
@@ -119,7 +124,7 @@ function getOrCreateIcon(tier: Tier, species: string): L.DivIcon {
 }
 
 /* ── Popup HTML ── */
-function buildPopupHtml(tree: Tree, offerings: number, age: number): string {
+function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string): string {
   const ageText = age > 0 ? `~${age} years` : "Age unknown";
   const offeringText = offerings > 0
     ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span> offering${offerings !== 1 ? "s" : ""}`
@@ -128,7 +133,14 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number): string {
     ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
     : "";
 
+  const thumbnail = photoUrl
+    ? `<div style="width:100%;height:100px;overflow:hidden;border-radius:12px 12px 0 0;">
+        <img src="${escapeHtml(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" />
+      </div>`
+    : "";
+
   return `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+    ${thumbnail}
     <div style="padding:14px 14px 10px;display:flex;flex-direction:column;gap:6px;">
       <h3 style="margin:0;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;">${escapeHtml(tree.name)}</h3>
       <p style="margin:0;font-size:11px;color:hsl(${getSpeciesHue(tree.species)},45%,62%);font-style:italic;">${escapeHtml(tree.species)}</p>
@@ -220,7 +232,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, bloomedSeeds = [] }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, className, userId, bloomedSeeds = [] }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -269,9 +281,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
     return result;
   }, [trees, species, perspective, userId]);
 
-  // Stable reference for offering counts
+  // Stable references for offering counts and photos
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
+  const treePhotosRef = useRef(treePhotos);
+  treePhotosRef.current = treePhotos;
 
   // Initialize map once
   useEffect(() => {
@@ -418,7 +432,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       const icon = getOrCreateIcon(tier, tree.species);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age), {
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id]), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
