@@ -4,6 +4,7 @@ import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, 
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
+import headerMossWood from "@/assets/header-moss-wood.jpg";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -156,19 +157,35 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md"
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical overflow-hidden"
         style={{
-          background: 'linear-gradient(180deg, hsl(140 30% 14% / 0.97), hsl(145 28% 10% / 0.95))',
+          background: 'hsl(140 30% 10%)',
         }}
       >
+      {/* Moss-wood texture background */}
+      <div className="absolute inset-0 z-0" aria-hidden="true"
+        style={{
+          backgroundImage: `url(${headerMossWood})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: 0.35,
+        }}
+      />
+      <div className="absolute inset-0 z-[1]" aria-hidden="true"
+        style={{
+          background: 'linear-gradient(180deg, hsl(140 30% 10% / 0.7), hsl(145 28% 8% / 0.8))',
+        }}
+      />
       <style>{`
-        .light header { background: linear-gradient(180deg, hsl(140 20% 92% / 0.97), hsl(145 18% 88% / 0.95)) !important; border-bottom-color: hsl(140 20% 78%) !important; box-shadow: 0 1px 4px hsl(140 15% 40% / 0.08) !important; }
+        .light header { background: hsl(140 20% 92%) !important; border-bottom-color: hsl(140 20% 78%) !important; box-shadow: 0 1px 4px hsl(140 15% 40% / 0.08) !important; }
+        .light header > div:first-child { opacity: 0.15 !important; }
+        .light header > div:nth-child(2) { background: linear-gradient(180deg, hsl(140 20% 92% / 0.75), hsl(145 18% 88% / 0.85)) !important; }
         @keyframes emberPulse {
           0%, 100% { opacity: 0.6; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.3); }
         }
       `}</style>
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mx-auto px-4 py-2 relative z-[2]">
         <div className="flex items-center justify-between relative">
           {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
