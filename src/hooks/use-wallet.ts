@@ -1,9 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getOwnedStaffs, type OwnedStaff } from "@/utils/staffNftReader";
-import { STAFF_CONTRACT_ADDRESS, ACTIVE_CHAIN_ID, BASE_CHAIN_ID } from "@/config/staffContract";
+import { STAFF_CONTRACT_ADDRESS, ACTIVE_CHAIN_ID } from "@/config/staffContract";
 
 export type WalletStatus = "disconnected" | "connecting" | "connected" | "error";
+
+export interface CachedStaff {
+  id: string;
+  token_id: number;
+  species: string;
+  species_code: string;
+  circle_id: number;
+  staff_number: number;
+  is_origin_spiral: boolean;
+  image_url: string | null;
+  owner_address: string | null;
+}
 
 interface WalletState {
   status: WalletStatus;
@@ -13,6 +25,7 @@ interface WalletState {
   chainName: string | null;
   isCorrectNetwork: boolean;
   staffs: OwnedStaff[];
+  activeStaff: CachedStaff | null;
   linkedStaff: OwnedStaff | null;
   error: string | null;
   isLive: boolean;
@@ -38,6 +51,7 @@ export function useWallet(userId?: string) {
     chainName: null,
     isCorrectNetwork: false,
     staffs: [],
+    activeStaff: null,
     linkedStaff: null,
     error: null,
     isLive: !!STAFF_CONTRACT_ADDRESS,
@@ -49,11 +63,23 @@ export function useWallet(userId?: string) {
     const restore = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("wallet_address")
+        .select("wallet_address, active_staff_id")
         .eq("id", userId)
         .single();
+
+      // Load active staff from DB regardless of wallet connection
+      if ((data as any)?.active_staff_id) {
+        const { data: staffData } = await supabase
+          .from("staffs")
+          .select("*")
+          .eq("id", (data as any).active_staff_id)
+          .single();
+        if (staffData) {
+          setState(prev => ({ ...prev, activeStaff: staffData as unknown as CachedStaff }));
+        }
+      }
+
       if (data?.wallet_address && (window as any).ethereum) {
-        // Check if still connected
         try {
           const accounts: string[] = await (window as any).ethereum.request({ method: "eth_accounts" });
           const match = accounts.find(a => a.toLowerCase() === data.wallet_address!.toLowerCase());
@@ -69,11 +95,10 @@ export function useWallet(userId?: string) {
               chainName: CHAIN_NAMES[chainId] || `Chain ${chainId}`,
               isCorrectNetwork: chainId === ACTIVE_CHAIN_ID,
             }));
-            // Fetch staffs in background
             fetchStaffs(match);
           }
         } catch {
-          // Silently fail — user can reconnect
+          // Silently fail
         }
       }
     };
@@ -119,11 +144,48 @@ export function useWallet(userId?: string) {
     };
   }, [state.address]);
 
+  /** Sync owned staffs to the staffs table */
+  const syncStaffsToDB = async (staffs: OwnedStaff[], ownerAddress: string) => {
+    if (!userId || staffs.length === 0) return;
+
+    for (const staff of staffs) {
+      await supabase
+        .from("staffs")
+        .upsert({
+          id: staff.code,
+          token_id: staff.tokenId,
+          species_id: staff.speciesId,
+          circle_id: staff.circleId,
+          variant_id: staff.variantId,
+          staff_number: staff.staffNumber,
+          is_origin_spiral: staff.isOriginSpiral,
+          species: staff.species,
+          species_code: staff.code.split("-")[0],
+          image_url: staff.image,
+          owner_address: ownerAddress.toLowerCase(),
+          owner_user_id: userId,
+          verified_at: new Date().toISOString(),
+        } as any, { onConflict: "id" });
+    }
+
+    // Auto-select first staff if none active
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active_staff_id")
+      .eq("id", userId)
+      .single();
+
+    if (!(profile as any)?.active_staff_id && staffs.length > 0) {
+      await setActiveStaff(staffs[0].code);
+    }
+  };
+
   const fetchStaffs = async (address: string) => {
     try {
       if (STAFF_CONTRACT_ADDRESS) {
         const staffs = await getOwnedStaffs(address);
         setState(prev => ({ ...prev, staffs, isLive: true }));
+        await syncStaffsToDB(staffs, address);
       }
     } catch {
       // Non-critical
@@ -138,11 +200,35 @@ export function useWallet(userId?: string) {
       .eq("id", userId);
   };
 
+  const setActiveStaff = async (staffId: string | null) => {
+    if (!userId) return;
+    await supabase
+      .from("profiles")
+      .update({ active_staff_id: staffId } as any)
+      .eq("id", userId);
+
+    if (staffId) {
+      const { data } = await supabase
+        .from("staffs")
+        .select("*")
+        .eq("id", staffId)
+        .single();
+      setState(prev => ({ ...prev, activeStaff: data as unknown as CachedStaff }));
+      localStorage.setItem("linked_staff_code", staffId);
+      localStorage.setItem("linked_staff_name", (data as any)?.species || staffId);
+      localStorage.setItem("linked_staff_token_id", String((data as any)?.token_id || ""));
+    } else {
+      setState(prev => ({ ...prev, activeStaff: null }));
+      localStorage.removeItem("linked_staff_code");
+      localStorage.removeItem("linked_staff_name");
+      localStorage.removeItem("linked_staff_token_id");
+    }
+  };
+
   const connect = useCallback(async () => {
     const eth = (window as any).ethereum;
 
     if (!eth) {
-      // Mobile deep link or error
       if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         const dappUrl = window.location.href.replace(/^https?:\/\//, "");
         window.location.href = `https://metamask.app.link/dapp/${dappUrl}`;
@@ -194,22 +280,22 @@ export function useWallet(userId?: string) {
       chainName: null,
       isCorrectNetwork: false,
       staffs: [],
+      activeStaff: state.activeStaff, // Keep active staff — it persists in profile
       linkedStaff: null,
       error: null,
       isLive: !!STAFF_CONTRACT_ADDRESS,
     });
     await persistWallet(null);
-    localStorage.removeItem("linked_staff_code");
-    localStorage.removeItem("linked_staff_name");
-    localStorage.removeItem("linked_staff_token_id");
-  }, [userId]);
+  }, [userId, state.activeStaff]);
 
   const selectStaff = useCallback((staff: OwnedStaff) => {
     setState(prev => ({ ...prev, linkedStaff: staff }));
-    localStorage.setItem("linked_staff_code", staff.code);
-    localStorage.setItem("linked_staff_name", staff.name);
-    localStorage.setItem("linked_staff_token_id", String(staff.tokenId));
-  }, []);
+    setActiveStaff(staff.code);
+  }, [userId]);
+
+  const clearActiveStaff = useCallback(() => {
+    setActiveStaff(null);
+  }, [userId]);
 
   const hasMetaMask = typeof window !== "undefined" && !!(window as any).ethereum;
 
@@ -218,6 +304,7 @@ export function useWallet(userId?: string) {
     connect,
     disconnect,
     selectStaff,
+    clearActiveStaff,
     hasMetaMask,
   };
 }
