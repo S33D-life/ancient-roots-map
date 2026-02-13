@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
+import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -168,37 +169,16 @@ const Header = () => {
         }
       `}</style>
       <div className="container mx-auto px-4 py-2">
-        <div className="flex items-center justify-between">
-          {/* Left side: Hearth button (mobile) + Desktop TEOTAG logo */}
+        <div className="flex items-center justify-between relative">
+          {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
-            {/* Mobile Hearth button — top left, toggles dashboard */}
-            <button
-              type="button"
-              className="md:hidden flex items-center bg-transparent border-none p-0 relative"
-              onClick={() => {
-                if (!user) { navigate("/auth"); return; }
-                navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
-              }}
-            >
-              {user ? (
-                <div className="relative">
-                  <img src={hearthImg} alt="Hearth" className="w-9 h-9 rounded-full object-cover border border-primary/30" />
-                  {hasPendingActivity && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
-                      style={{
-                        background: "hsl(25, 90%, 55%)",
-                        boxShadow: "0 0 8px hsla(25, 90%, 55%, 0.6)",
-                        animation: "emberPulse 2s ease-in-out infinite",
-                      }}
-                    />
-                  )}
-                </div>
-              ) : (
-                <Button variant="ghost" size="icon" title="Login" asChild>
-                  <span><Flame className="w-5 h-5 text-primary" /></span>
-                </Button>
-              )}
+            {/* Mobile TEOTAG logo — top left, opens TETOL menu */}
+            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}>
+              <img 
+                src={teotagLogo} 
+                alt="TEOTAG — Open navigation" 
+                className="w-10 h-10 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300"
+              />
             </button>
             {/* Desktop TEOTAG logo */}
             <div className="relative group hidden md:block">
@@ -218,6 +198,32 @@ const Header = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Center: S33D Hearth button — absolute centered on mobile */}
+          <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
+            <button
+              type="button"
+              className="flex items-center bg-transparent border-none p-0 relative"
+              onClick={() => {
+                if (!user) { navigate("/auth"); return; }
+                navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
+              }}
+            >
+              <div className="relative">
+                <img src={s33dHearthLogo} alt="Hearth" className="w-11 h-11 rounded-full object-cover border-2 border-primary/40 shadow-[0_0_12px_hsla(42,90%,55%,0.25)] hover:shadow-[0_0_20px_hsla(42,90%,55%,0.4)] transition-all duration-300 hover:scale-105" />
+                {hasPendingActivity && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
+                    style={{
+                      background: "hsl(25, 90%, 55%)",
+                      boxShadow: "0 0 8px hsla(25, 90%, 55%, 0.6)",
+                      animation: "emberPulse 2s ease-in-out infinite",
+                    }}
+                  />
+                )}
+              </div>
+            </button>
           </div>
           
           <nav className="hidden md:flex items-center gap-3 lg:gap-5">
@@ -263,7 +269,7 @@ const Header = () => {
                 className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer group"
               >
                 <div className="relative">
-                  <img src={hearthImg} alt="Hearth" className="w-8 h-8 rounded-full object-cover" />
+                  <img src={s33dHearthLogo} alt="Hearth" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
                   {hasPendingActivity && (
                     <span
                       className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
@@ -293,14 +299,6 @@ const Header = () => {
                 <Link to="/auth">Login</Link>
               </Button>
             )}
-            {/* Mobile TEOTAG logo — top right, opens TETOL menu directly */}
-            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}>
-              <img 
-                src={teotagLogo} 
-                alt="TEOTAG — Open navigation" 
-                className="w-10 h-10 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300"
-              />
-            </button>
           </div>
         </div>
 
