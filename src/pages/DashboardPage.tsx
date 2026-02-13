@@ -16,7 +16,7 @@ import HearthEntrance from "@/components/HearthEntrance";
 import Footer from "@/components/Footer";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
-import DashboardWishlist from "@/components/dashboard/DashboardWishlist";
+import WishingTreeUnified from "@/components/WishingTreeUnified";
 import DashboardProfile from "@/components/dashboard/DashboardProfile";
 import Greenhouse from "@/components/Greenhouse";
 import DashboardVault from "@/components/dashboard/DashboardVault";
@@ -438,7 +438,7 @@ const DashboardPage = () => {
                 {/* Section: Wishlist */}
                 <PodSection icon={Star} label="Wishlist" count={wishlistCount} accent>
                   {user && (
-                    <DashboardWishlist userId={user.id} onCountChange={setWishlistCount} />
+                    <WishingTreeUnified compact onCountChange={setWishlistCount} />
                   )}
                 </PodSection>
 

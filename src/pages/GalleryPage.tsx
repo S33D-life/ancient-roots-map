@@ -40,6 +40,7 @@ import StaffRoomGallery from "@/components/StaffRoomGallery";
 import EarthRadioRoom from "@/components/EarthRadioRoom";
 import Greenhouse from "@/components/Greenhouse";
 import TreeResources from "@/components/TreeResources";
+import WishingTreeUnified from "@/components/WishingTreeUnified";
 import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import HeartEconomySummary from "@/components/HeartEconomySummary";
 import councilImage from "@/assets/council-of-life.jpeg";
@@ -1318,104 +1319,7 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="wishlist" className="space-y-6">
-            <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
-              {/* Wishing Tree painting header */}
-              <div className="flex items-center gap-4 p-4 border-b border-border/30">
-                <div className="relative w-48 h-60 shrink-0 rounded-md overflow-hidden border border-border shadow" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-                  <img
-                    src={wishingTreeImage}
-                    alt="Wishing Tree"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h2 className="text-lg md:text-xl font-serif text-primary">
-                    Wishing Tree
-                  </h2>
-                  <p className="text-xs font-serif text-muted-foreground">
-                    Trees you dream of visiting someday
-                  </p>
-                </div>
-              </div>
-              <CardHeader className="sr-only">
-                <CardTitle>Wishing Tree</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {wishlistLoading ? (
-                  <p className="text-center py-12">Loading your wishlist...</p>
-                ) : wishlist.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground mb-2">
-                      Your Wishing Tree is empty
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Add trees from the Gallery that you would like to visit
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {wishlist.map((item) => (
-                      <Card key={item.id} className="border-mystical/50">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="font-serif text-mystical line-clamp-1">
-                                {item.trees.name}
-                              </CardTitle>
-                              <CardDescription className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="font-serif">
-                                  {item.trees.species}
-                                </Badge>
-                              </CardDescription>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeFromWishlist(item.id)}
-                              className="text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            <span className="truncate">/{item.trees.what3words}</span>
-                          </div>
-                          
-                          {item.trees.state && (
-                            <p className="text-sm text-muted-foreground">
-                              {item.trees.state}{item.trees.nation ? `, ${item.trees.nation}` : ''}
-                            </p>
-                          )}
-
-                          <div className="pt-2 border-t border-border">
-                            <Label className="text-xs text-muted-foreground">Personal Notes</Label>
-                            <Textarea
-                              value={item.notes || ""}
-                              onChange={(e) => updateWishlistNotes(item.id, e.target.value)}
-                              placeholder="Why do you want to visit this tree?"
-                              className="mt-1 min-h-[60px] text-sm"
-                            />
-                          </div>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedTree(item.trees)}
-                            className="w-full"
-                          >
-                            View Details
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <WishingTreeUnified />
           </TabsContent>
           </div>
         </Tabs>
