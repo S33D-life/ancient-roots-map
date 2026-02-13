@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import LibraryRoomTabs from "@/components/LibraryRoomTabs";
 import { toast } from "sonner";
 import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map, Archive } from "lucide-react";
 import {
@@ -902,20 +903,13 @@ const GalleryPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <div className="relative -mx-4 px-4 mb-8 flex items-center gap-2">
-            <div className="overflow-x-auto scrollbar-hide flex-1">
-              <TabsList className="inline-flex w-auto min-w-full md:grid md:w-full md:max-w-6xl md:grid-cols-10 gap-1" style={{ background: 'linear-gradient(90deg, hsl(28 30% 20%), hsl(22 28% 16%), hsl(30 32% 22%))', border: '1px solid hsl(35 25% 28%)' }}>
-                <TabsTrigger value="staff-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Staff Room</TabsTrigger>
-                <TabsTrigger value="gallery" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ancient Friends</TabsTrigger>
-                <TabsTrigger value="music-room" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Music Room</TabsTrigger>
-                <TabsTrigger value="greenhouse" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Greenhouse</TabsTrigger>
-                <TabsTrigger value="wishlist" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Wishing Tree</TabsTrigger>
-                <TabsTrigger value="seed-cellar" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Seed Cellar</TabsTrigger>
-                <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
-                <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
-                <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
-                <TabsTrigger value="vault" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Vaults</TabsTrigger>
-              </TabsList>
+          <div className="mb-8 flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <LibraryRoomTabs
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                vaultRevealed={vaultRevealed}
+              />
             </div>
             {/* Fullscreen toggle */}
             <button
@@ -925,8 +919,6 @@ const GalleryPage = () => {
             >
               {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </button>
-            {/* Scroll hint gradient - mobile only */}
-            <div className="absolute top-0 right-10 bottom-0 w-12 bg-gradient-to-l from-background/80 to-transparent pointer-events-none md:hidden" />
           </div>
 
           <div
