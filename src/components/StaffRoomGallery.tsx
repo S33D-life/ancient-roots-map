@@ -251,6 +251,23 @@ export default function StaffRoomGallery() {
   const filteredStaffs = useMemo(() => filterStaffs(allStaffs, filter), [allStaffs, filter]);
   const activeStaff = filteredStaffs[activeIndex] || filteredStaffs[0];
 
+  // Deep-link: open a specific staff from ?staff=CODE
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const staffParam = params.get("staff");
+    if (!staffParam) return;
+    const idx = allStaffs.findIndex(s => s.code.toLowerCase() === staffParam.toLowerCase());
+    if (idx >= 0) {
+      setFilter("all");
+      setActiveIndex(idx);
+      setDetailOpen(true);
+      // Clean up URL without reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete("staff");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [allStaffs]);
+
   // Prefetch adjacent images
   useEffect(() => {
     if (viewMode !== "fullscreen") return;
