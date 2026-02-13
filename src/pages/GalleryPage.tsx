@@ -6,6 +6,7 @@ import AmanitaFlush from "@/components/AmanitaFlush";
 import AncientFriendsExplorer from "@/components/AncientFriendsExplorer";
 import HeartwoodEntrance from "@/components/HeartwoodEntrance";
 import Header from "@/components/Header";
+import HeartwoodBackground from "@/components/HeartwoodBackground";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -826,35 +827,15 @@ const GalleryPage = () => {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <Header />
-        {/* Background */}
-        <div className="absolute inset-0">
-          <img src={heartwoodLanding} alt="" className="w-full h-full object-cover" style={{ objectPosition: 'center 80%' }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/30 md:from-black/80 md:via-black/30 md:to-black/50" />
-        </div>
-
-        {/* Mushrooms & Moss — dissolve after 3.3s */}
-        <div
-          className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none hidden md:block"
-          style={{
-            animation: 'mushroomDissolve 1.2s ease-out 3.3s forwards',
-          }}
-        >
-          <AmanitaFlush position="bottom" />
-        </div>
-        <style>{`
-          @keyframes mushroomDissolve {
-            0% { opacity: 1; filter: blur(0px); }
-            60% { opacity: 0.4; filter: blur(2px); }
-            100% { opacity: 0; filter: blur(6px); }
-          }
-        `}</style>
+        {/* Dynamic atmospheric background */}
+        <HeartwoodBackground />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
-          <h1 className="text-5xl md:text-7xl font-serif text-amber-400/90 tracking-wider mb-4 text-center" style={{ textShadow: '0 0 40px hsl(35 80% 30% / 0.6)' }}>
+          <h1 className="text-5xl md:text-7xl font-serif tracking-wider mb-4 text-center" style={{ color: 'hsl(38 75% 65%)', textShadow: '0 0 50px hsl(38 80% 35% / 0.5), 0 2px 20px hsl(25 60% 20% / 0.6)' }}>
             HEARTWOOD
           </h1>
-          <p className="text-amber-200/60 font-serif text-lg md:text-xl mb-12 text-center max-w-md">
+          <p className="font-serif text-lg md:text-xl mb-12 text-center max-w-md" style={{ color: 'hsl(38 50% 70% / 0.6)' }}>
             A Library of Love
           </p>
 
