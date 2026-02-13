@@ -614,6 +614,11 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   )}
                 </div>
 
+                <Button type="button" variant="outline" className="w-full gap-2 font-serif" onClick={handleFindMe} disabled={findingMe}>
+                  {findingMe ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+                  Find Me — Use My Location
+                </Button>
+
                 <div className="space-y-2">
                   <Label htmlFor="what3words" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">
                     what3words {fetchingW3w && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
@@ -665,11 +670,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     </div>
                   )}
                 </div>
-
-                <Button type="button" variant="outline" className="w-full gap-2 font-serif" onClick={handleFindMe} disabled={findingMe}>
-                  {findingMe ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
-                  Find Me — Use My Location
-                </Button>
 
                 {lat && lng && (
                   <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg p-2" style={{ background: 'hsla(120, 30%, 20%, 0.3)', border: '1px solid hsla(120, 30%, 30%, 0.3)' }}>
