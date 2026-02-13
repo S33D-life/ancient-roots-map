@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
+import treeRadioBg from "@/assets/tree-radio-bg.png";
 import TREE_SPECIES from "@/data/treeSpecies";
 
 /* ── Species name helpers ────────────────────────────────── */
@@ -94,6 +95,43 @@ function shuffle<T>(arr: T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+/* ── Floating particles ────────────────────────────────────── */
+
+function RadioParticles() {
+  const prefersReduced = typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) return null;
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+      {Array.from({ length: 18 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            width: 2 + Math.random() * 3,
+            height: 2 + Math.random() * 3,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            background: `hsl(${35 + Math.random() * 15} ${50 + Math.random() * 30}% ${55 + Math.random() * 20}% / ${0.15 + Math.random() * 0.2})`,
+          }}
+          animate={{
+            y: [0, -(30 + Math.random() * 60), 0],
+            x: [0, (Math.random() - 0.5) * 40, 0],
+            opacity: [0.1, 0.35, 0.1],
+          }}
+          transition={{
+            duration: 8 + Math.random() * 12,
+            repeat: Infinity,
+            delay: Math.random() * 8,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 /* ── Waveform visualizer ─────────────────────────────────── */
@@ -325,344 +363,373 @@ const EarthRadioRoom = () => {
 
   const resolved = currentSong ? resolveSpecies(currentSong.species) : null;
 
+  const prefersReduced = typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
-    <div className="space-y-6">
-      {/* ── Hero Console ── */}
-      <div className="relative rounded-2xl overflow-hidden border border-primary/20 shadow-2xl">
-        {/* Background art with ambient motion */}
-        <motion.div
-          className="relative"
-          animate={isPlaying ? { scale: [1, 1.01, 1] } : {}}
-          transition={isPlaying ? { duration: 8, repeat: Infinity, ease: "easeInOut" } : {}}
-        >
-          <img src={treeRadioArt} alt="Earth Radio" className="w-full h-auto object-cover" />
-        </motion.div>
+    <div className="relative -mx-4 -mt-4 md:-mx-0 md:-mt-0 min-h-[80vh] overflow-hidden rounded-none md:rounded-2xl">
+      {/* ── Background layer with parallax ── */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url(${treeRadioBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 40%',
+          backgroundAttachment: prefersReduced ? 'scroll' : 'fixed',
+        }}
+      />
 
-        {/* Gradient overlay — stronger for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/10" />
+      {/* ── Gradient overlays for readability ── */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: 'linear-gradient(to bottom, hsl(160 30% 8% / 0.55) 0%, hsl(160 25% 10% / 0.45) 40%, hsl(35 40% 12% / 0.7) 75%, hsl(28 35% 8% / 0.85) 100%)',
+        }}
+      />
 
-        {/* Playing glow ring around the console */}
-        {isPlaying && (
-          <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            animate={{ boxShadow: [
-              "inset 0 0 30px hsl(var(--primary) / 0.05)",
-              "inset 0 0 60px hsl(var(--primary) / 0.12)",
-              "inset 0 0 30px hsl(var(--primary) / 0.05)",
-            ]}}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          />
-        )}
+      {/* ── Ambient glow behind controls ── */}
+      <div
+        className="absolute z-[2] pointer-events-none"
+        style={{
+          left: '50%',
+          top: '55%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          height: '60%',
+          background: 'radial-gradient(ellipse at center, hsl(35 60% 35% / 0.12) 0%, transparent 70%)',
+        }}
+      />
 
-        {/* ── Station Badge — top-left corner ── */}
-        <div className="absolute top-3 left-3 md:top-4 md:left-4">
+      {/* ── Floating particles ── */}
+      <RadioParticles />
+
+      {/* ── Content — floats above the scene ── */}
+      <div className="relative z-10 flex flex-col items-center px-4 py-8 md:py-12 min-h-[80vh]">
+
+        {/* ── Station Badge ── */}
+        <div className="w-full flex justify-center mb-6">
           <motion.button
             onClick={() => setTunerOpen(!tunerOpen)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border border-primary/30 bg-background/60"
+            className="flex items-center gap-2 px-4 py-2 rounded-full border"
+            style={{
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              background: 'hsl(28 30% 12% / 0.6)',
+              borderColor: 'hsl(42 50% 40% / 0.3)',
+            }}
             whileTap={{ scale: 0.95 }}
           >
-            <Radio className="h-3.5 w-3.5 text-primary" />
-            <span className="font-serif text-xs text-foreground tracking-wider">
+            <Radio className="h-3.5 w-3.5" style={{ color: 'hsl(42 80% 60%)' }} />
+            <span className="font-serif text-xs tracking-wider" style={{ color: 'hsl(40 60% 85%)' }}>
               {activeStation?.label || "Earth Radio"}
             </span>
             <WaveformBars active={isPlaying} barCount={3} />
           </motion.button>
         </div>
 
-        {/* ── Now Playing + Controls — bottom overlay ── */}
-        <div className="absolute inset-x-0 bottom-0 p-4 md:p-6 lg:p-8">
-          <div className="flex items-end gap-4 md:gap-6">
-            {/* Album Artwork — prominent */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={preview?.artworkUrl || "placeholder"}
-                initial={{ opacity: 0, scale: 0.9, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -8 }}
-                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="relative w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0 shadow-xl"
-              >
-                {previewLoading ? (
-                  <div className="w-full h-full flex items-center justify-center bg-card/80 backdrop-blur">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                      className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full"
-                    />
-                  </div>
-                ) : preview?.artworkUrl ? (
-                  <img src={preview.artworkUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-card/80">
-                    <Music className="h-10 w-10 text-primary/25" />
-                  </div>
-                )}
-                {/* Playing pulse ring */}
-                {isPlaying && (
-                  <motion.div
-                    className="absolute inset-0 rounded-xl border-2 border-primary/40 pointer-events-none"
-                    animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.03, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Track Info */}
-            <div className="flex-1 min-w-0 pb-1">
-              {/* Track title — large, high contrast */}
+        {/* ── Hero Console — glass card ── */}
+        <div
+          className="w-full max-w-lg rounded-2xl overflow-hidden border"
+          style={{
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            background: 'linear-gradient(160deg, hsl(28 25% 10% / 0.65), hsl(25 20% 8% / 0.75))',
+            borderColor: 'hsl(42 50% 35% / 0.25)',
+            boxShadow: '0 8px 40px hsl(28 40% 10% / 0.5), 0 0 60px hsl(35 60% 30% / 0.08)',
+          }}
+        >
+          {/* Album art + Now Playing */}
+          <div className="p-5 md:p-6">
+            <div className="flex items-end gap-4 md:gap-5">
+              {/* Artwork */}
               <AnimatePresence mode="wait">
-                <motion.h3
-                  key={preview?.trackName || currentSong?.title || "none"}
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
-                  transition={{ duration: 0.35 }}
-                  className="text-lg md:text-2xl font-serif text-foreground truncate leading-tight"
-                  style={{ textShadow: "0 2px 12px hsl(var(--background) / 0.8)" }}
-                >
-                  {preview?.trackName || currentSong?.title || "—"}
-                </motion.h3>
-              </AnimatePresence>
-
-              {/* Artist */}
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={preview?.artistName || "none"}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className="text-sm md:text-base text-foreground/70 font-serif truncate mt-1"
-                  style={{ textShadow: "0 1px 8px hsl(var(--background) / 0.6)" }}
-                >
-                  {preview?.artistName || currentSong?.content || ""}
-                </motion.p>
-              </AnimatePresence>
-
-              {/* Offering context — subtle, collapsible detail */}
-              {currentSong && resolved && (
-                <p className="text-xs text-primary/50 font-serif mt-2 flex items-center gap-1.5 flex-wrap"
-                   style={{ textShadow: "0 1px 6px hsl(var(--background) / 0.5)" }}>
-                  <TreeDeciduous className="h-3 w-3 text-primary/40 flex-shrink-0" />
-                  <span>offered to <span className="text-primary/70">{currentSong.tree_name}</span></span>
-                  {resolved.latin && (
-                    <span className="text-primary/30 italic">· {resolved.latin}</span>
-                  )}
-                </p>
-              )}
-
-              {/* ── Transport Controls ── */}
-              <div className="flex items-center gap-3 mt-4">
-                {/* Mute */}
-                <motion.button
-                  onClick={() => setIsMuted(!isMuted)}
-                  whileTap={{ scale: 0.85 }}
-                  className="text-foreground/40 hover:text-foreground/80 transition-colors p-1"
-                  aria-label={isMuted ? "Unmute" : "Mute"}
-                >
-                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </motion.button>
-
-                {/* Previous */}
-                <motion.button
-                  onClick={skipPrev}
-                  whileTap={{ scale: 0.85 }}
-                  className="text-foreground/40 hover:text-foreground/80 transition-colors p-1"
-                  aria-label="Previous track"
-                >
-                  <SkipBack className="h-5 w-5" />
-                </motion.button>
-
-                {/* Play/Pause — hero button */}
-                <motion.button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  whileTap={{ scale: 0.9 }}
-                  whileHover={{ scale: 1.08 }}
-                  className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border-2 transition-colors backdrop-blur-sm"
+                <motion.div
+                  key={preview?.artworkUrl || "placeholder"}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="relative w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden flex-shrink-0"
                   style={{
-                    background: isPlaying
-                      ? "linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.15))"
-                      : "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.08))",
-                    borderColor: isPlaying ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary) / 0.3)",
+                    border: '1px solid hsl(42 40% 35% / 0.3)',
                     boxShadow: isPlaying
-                      ? "0 0 28px hsl(var(--primary) / 0.25), 0 0 8px hsl(var(--primary) / 0.15)"
-                      : "none",
+                      ? '0 0 24px hsl(35 60% 40% / 0.3), 0 4px 16px hsl(0 0% 0% / 0.4)'
+                      : '0 4px 16px hsl(0 0% 0% / 0.4)',
                   }}
-                  aria-label={isPlaying ? "Pause" : "Play"}
                 >
-                  <AnimatePresence mode="wait">
+                  {previewLoading ? (
+                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'hsl(28 20% 12%)' }}>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                        className="w-6 h-6 border-2 rounded-full"
+                        style={{ borderColor: 'hsl(42 50% 40% / 0.3)', borderTopColor: 'hsl(42 70% 55%)' }}
+                      />
+                    </div>
+                  ) : preview?.artworkUrl ? (
+                    <img src={preview.artworkUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'hsl(28 20% 12%)' }}>
+                      <Music className="h-10 w-10" style={{ color: 'hsl(42 40% 40% / 0.3)' }} />
+                    </div>
+                  )}
+                  {isPlaying && (
                     <motion.div
-                      key={isPlaying ? "pause" : "play"}
-                      initial={{ scale: 0.5, opacity: 0, rotate: -30 }}
-                      animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                      exit={{ scale: 0.5, opacity: 0, rotate: 30 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      {isPlaying
-                        ? <Pause className="h-5 w-5 md:h-6 md:w-6 text-primary" />
-                        : <Play className="h-5 w-5 md:h-6 md:w-6 text-primary ml-0.5" />}
-                    </motion.div>
-                  </AnimatePresence>
-                </motion.button>
+                      className="absolute inset-0 rounded-xl pointer-events-none"
+                      style={{ border: '2px solid hsl(42 60% 50% / 0.4)' }}
+                      animate={{ opacity: [0.3, 0.7, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
-                {/* Next */}
-                <motion.button
-                  onClick={skipNext}
-                  whileTap={{ scale: 0.85 }}
-                  className="text-foreground/40 hover:text-foreground/80 transition-colors p-1"
-                  aria-label="Next track"
-                >
-                  <SkipForward className="h-5 w-5" />
-                </motion.button>
+              {/* Track info */}
+              <div className="flex-1 min-w-0 pb-1">
+                <AnimatePresence mode="wait">
+                  <motion.h3
+                    key={preview?.trackName || currentSong?.title || "none"}
+                    initial={{ opacity: 0, x: 12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -12 }}
+                    transition={{ duration: 0.35 }}
+                    className="text-lg md:text-xl font-serif truncate leading-tight"
+                    style={{ color: 'hsl(40 60% 88%)', textShadow: '0 2px 8px hsl(0 0% 0% / 0.5)' }}
+                  >
+                    {preview?.trackName || currentSong?.title || "—"}
+                  </motion.h3>
+                </AnimatePresence>
 
-                {/* Volume slider — desktop */}
-                <input
-                  type="range" min="0" max="1" step="0.05"
-                  value={isMuted ? 0 : volume}
-                  onChange={e => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
-                  className="w-20 h-1 accent-primary opacity-50 hover:opacity-100 transition-opacity hidden sm:block ml-1"
-                  aria-label="Volume"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={preview?.artistName || "none"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="text-sm font-serif truncate mt-1"
+                    style={{ color: 'hsl(42 50% 70%)' }}
+                  >
+                    {preview?.artistName || currentSong?.content || ""}
+                  </motion.p>
+                </AnimatePresence>
+
+                {currentSong && resolved && (
+                  <p className="text-xs font-serif mt-2 flex items-center gap-1.5 flex-wrap"
+                     style={{ color: 'hsl(120 20% 55% / 0.6)' }}>
+                    <TreeDeciduous className="h-3 w-3 flex-shrink-0" style={{ color: 'hsl(120 25% 50% / 0.5)' }} />
+                    <span>offered to <span style={{ color: 'hsl(120 25% 60% / 0.8)' }}>{currentSong.tree_name}</span></span>
+                    {resolved.latin && (
+                      <span className="italic" style={{ color: 'hsl(120 15% 50% / 0.4)' }}>· {resolved.latin}</span>
+                    )}
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Waveform visualizer — desktop */}
-            <div className="hidden md:flex items-center pb-2">
-              <WaveformBars active={isPlaying} barCount={7} />
+            {/* ── Transport Controls ── */}
+            <div className="flex items-center justify-center gap-4 mt-5">
+              <motion.button
+                onClick={() => setIsMuted(!isMuted)}
+                whileTap={{ scale: 0.85 }}
+                className="p-1.5 transition-colors"
+                style={{ color: 'hsl(40 40% 65% / 0.5)' }}
+                aria-label={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </motion.button>
+
+              <motion.button
+                onClick={skipPrev}
+                whileTap={{ scale: 0.85 }}
+                className="p-1.5 transition-colors"
+                style={{ color: 'hsl(40 40% 65% / 0.5)' }}
+                aria-label="Previous track"
+              >
+                <SkipBack className="h-5 w-5" />
+              </motion.button>
+
+              {/* Play/Pause — hero button */}
+              <motion.button
+                onClick={() => setIsPlaying(!isPlaying)}
+                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.08 }}
+                className="w-14 h-14 rounded-full flex items-center justify-center border-2"
+                style={{
+                  backdropFilter: 'blur(8px)',
+                  background: isPlaying
+                    ? 'linear-gradient(135deg, hsl(35 50% 28% / 0.7), hsl(28 40% 20% / 0.6))'
+                    : 'linear-gradient(135deg, hsl(35 40% 22% / 0.6), hsl(28 30% 15% / 0.5))',
+                  borderColor: isPlaying ? 'hsl(42 60% 50% / 0.5)' : 'hsl(42 40% 35% / 0.3)',
+                  boxShadow: isPlaying
+                    ? '0 0 30px hsl(42 70% 40% / 0.25), 0 0 8px hsl(42 60% 45% / 0.15)'
+                    : 'none',
+                }}
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={isPlaying ? "pause" : "play"}
+                    initial={{ scale: 0.5, opacity: 0, rotate: -30 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    exit={{ scale: 0.5, opacity: 0, rotate: 30 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isPlaying
+                      ? <Pause className="h-6 w-6" style={{ color: 'hsl(42 80% 65%)' }} />
+                      : <Play className="h-6 w-6 ml-0.5" style={{ color: 'hsl(42 70% 60%)' }} />}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.button>
+
+              <motion.button
+                onClick={skipNext}
+                whileTap={{ scale: 0.85 }}
+                className="p-1.5 transition-colors"
+                style={{ color: 'hsl(40 40% 65% / 0.5)' }}
+                aria-label="Next track"
+              >
+                <SkipForward className="h-5 w-5" />
+              </motion.button>
+
+              <input
+                type="range" min="0" max="1" step="0.05"
+                value={isMuted ? 0 : volume}
+                onChange={e => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
+                className="w-16 h-1 accent-primary opacity-40 hover:opacity-80 transition-opacity hidden sm:block"
+                aria-label="Volume"
+              />
+            </div>
+
+            {/* Rotation info */}
+            <div className="mt-4 pt-3 flex items-center justify-between text-[10px] font-serif" style={{ borderTop: '1px solid hsl(42 30% 25% / 0.2)', color: 'hsl(40 30% 55% / 0.4)' }}>
+              <span className="tracking-wider">{currentIndex + 1} / {playlist.length} in rotation</span>
+              <span className="hidden sm:inline">{allSongs.length} offerings · {speciesStations.length} species</span>
+              <motion.button
+                onClick={() => { setPlaylist(shuffle(playlist)); setCurrentIndex(0); }}
+                whileTap={{ scale: 0.9, rotate: 180 }}
+                className="flex items-center gap-1 transition-colors"
+                style={{ color: 'hsl(40 30% 55% / 0.4)' }}
+              >
+                <Shuffle className="h-3 w-3" />
+                <span className="tracking-wider">Shuffle</span>
+              </motion.button>
             </div>
           </div>
-
-          {/* Rotation info bar */}
-          <div className="mt-3 pt-2 border-t border-foreground/10 flex items-center justify-between text-[10px] text-foreground/35 font-serif">
-            <span className="tracking-wider">{currentIndex + 1} / {playlist.length} in rotation</span>
-            <span className="hidden sm:inline">{allSongs.length} offerings · {speciesStations.length} species</span>
-            <motion.button
-              onClick={() => { setPlaylist(shuffle(playlist)); setCurrentIndex(0); }}
-              whileTap={{ scale: 0.9, rotate: 180 }}
-              className="hover:text-foreground/60 transition-colors flex items-center gap-1"
-            >
-              <Shuffle className="h-3 w-3" />
-              <span className="tracking-wider">Shuffle</span>
-            </motion.button>
-          </div>
         </div>
-      </div>
 
-      {/* ── Station Tuner ── */}
-      <motion.div
-        className="rounded-xl border border-primary/15 bg-card/40 backdrop-blur-sm overflow-hidden"
-        layout
-      >
-        <button
-          className="w-full px-4 py-3.5 flex items-center justify-between text-left group"
-          onClick={() => setTunerOpen(!tunerOpen)}
+        {/* ── Station Tuner — glass panel ── */}
+        <motion.div
+          className="w-full max-w-lg mt-4 rounded-xl overflow-hidden border"
+          style={{
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            background: 'hsl(28 20% 10% / 0.5)',
+            borderColor: 'hsl(42 40% 30% / 0.2)',
+          }}
+          layout
         >
-          <span className="font-serif text-sm text-primary/90 tracking-wider flex items-center gap-2.5">
-            <Radio className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
-            Station Tuner
-          </span>
-          <motion.span
-            animate={{ rotate: tunerOpen ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-primary/40 text-xs"
+          <button
+            className="w-full px-4 py-3.5 flex items-center justify-between text-left group"
+            onClick={() => setTunerOpen(!tunerOpen)}
           >
-            ▼
-          </motion.span>
-        </button>
-
-        <AnimatePresence>
-          {tunerOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="overflow-hidden"
+            <span className="font-serif text-sm tracking-wider flex items-center gap-2.5" style={{ color: 'hsl(42 60% 70% / 0.9)' }}>
+              <Radio className="h-4 w-4 transition-colors" style={{ color: 'hsl(42 50% 55% / 0.6)' }} />
+              Station Tuner
+            </span>
+            <motion.span
+              animate={{ rotate: tunerOpen ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="text-xs"
+              style={{ color: 'hsl(42 40% 50% / 0.4)' }}
             >
-              <div className="px-4 pb-4 space-y-4">
-                {/* All station */}
-                <StationButton
-                  station={allStation}
-                  isActive={activeStation?.id === "all"}
-                  onClick={() => { setActiveStation(allStation); setTunerOpen(false); }}
-                  icon={<Radio className="h-3.5 w-3.5" />}
-                  isPlaying={isPlaying && activeStation?.id === "all"}
-                />
+              ▼
+            </motion.span>
+          </button>
 
-                {/* Species */}
-                {speciesStations.length > 0 && (
-                  <div>
-                    <p className="text-[10px] text-muted-foreground/70 font-serif uppercase tracking-[0.2em] mb-2 px-1">
-                      Species Broadcasts
-                    </p>
-                    <div className="space-y-1 max-h-40 overflow-y-auto pr-1 scrollbar-thin">
-                      {speciesStations.map(s => (
-                        <StationButton
-                          key={s.id}
-                          station={s}
-                          isActive={activeStation?.id === s.id && activeStation?.type === "species"}
-                          onClick={() => { setActiveStation(s); setTunerOpen(false); }}
-                          icon={<Leaf className="h-3 w-3" />}
-                          isPlaying={isPlaying && activeStation?.id === s.id}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <AnimatePresence>
+            {tunerOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className="overflow-hidden"
+              >
+                <div className="px-4 pb-4 space-y-4">
+                  <StationButton
+                    station={allStation}
+                    isActive={activeStation?.id === "all"}
+                    onClick={() => { setActiveStation(allStation); setTunerOpen(false); }}
+                    icon={<Radio className="h-3.5 w-3.5" />}
+                    isPlaying={isPlaying && activeStation?.id === "all"}
+                  />
 
-                {/* Trees */}
-                {treeStations.length > 0 && (
-                  <div>
-                    <p className="text-[10px] text-muted-foreground/70 font-serif uppercase tracking-[0.2em] mb-2 px-1">
-                      Individual Trees
-                    </p>
-                    <div className="space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
-                      {treeStations.map(s => {
-                        const r = resolveSpecies(s.species);
-                        return (
+                  {speciesStations.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-serif uppercase tracking-[0.2em] mb-2 px-1" style={{ color: 'hsl(40 25% 50% / 0.5)' }}>
+                        Species Broadcasts
+                      </p>
+                      <div className="space-y-1 max-h-40 overflow-y-auto pr-1 scrollbar-thin">
+                        {speciesStations.map(s => (
                           <StationButton
                             key={s.id}
                             station={s}
-                            isActive={activeStation?.id === s.id && activeStation?.type === "tree"}
+                            isActive={activeStation?.id === s.id && activeStation?.type === "species"}
                             onClick={() => { setActiveStation(s); setTunerOpen(false); }}
-                            icon={<TreeDeciduous className="h-3 w-3" />}
-                            subtitle={r.common}
+                            icon={<Leaf className="h-3 w-3" />}
                             isPlaying={isPlaying && activeStation?.id === s.id}
                           />
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+                  )}
 
-      {/* Visit tree link */}
-      {currentSong && (
-        <div className="text-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xs font-serif gap-1.5 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate(`/tree/${currentSong.tree_id}`)}
-          >
-            <Eye className="h-3.5 w-3.5" />
-            Visit this Ancient Friend
-          </Button>
-        </div>
-      )}
+                  {treeStations.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-serif uppercase tracking-[0.2em] mb-2 px-1" style={{ color: 'hsl(40 25% 50% / 0.5)' }}>
+                        Individual Trees
+                      </p>
+                      <div className="space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
+                        {treeStations.map(s => {
+                          const r = resolveSpecies(s.species);
+                          return (
+                            <StationButton
+                              key={s.id}
+                              station={s}
+                              isActive={activeStation?.id === s.id && activeStation?.type === "tree"}
+                              onClick={() => { setActiveStation(s); setTunerOpen(false); }}
+                              icon={<TreeDeciduous className="h-3 w-3" />}
+                              subtitle={r.common}
+                              isPlaying={isPlaying && activeStation?.id === s.id}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
-      {/* CSS for radio bars fallback */}
-      <style>{`
-        @keyframes radioBar {
-          0% { height: 3px; }
-          100% { height: 10px; }
-        }
-      `}</style>
+        {/* Visit tree link */}
+        {currentSong && (
+          <div className="mt-4 text-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs font-serif gap-1.5"
+              style={{ color: 'hsl(40 30% 65% / 0.6)' }}
+              onClick={() => navigate(`/tree/${currentSong.tree_id}`)}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Visit this Ancient Friend
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -683,28 +750,29 @@ function StationButton({
     <motion.button
       onClick={onClick}
       whileTap={{ scale: 0.97 }}
-      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all text-xs font-serif ${
-        isActive
-          ? "bg-primary/10 border border-primary/25 text-foreground"
-          : "hover:bg-muted/30 text-muted-foreground hover:text-foreground border border-transparent"
-      }`}
+      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all text-xs font-serif border"
+      style={{
+        background: isActive ? 'hsl(35 40% 18% / 0.5)' : 'transparent',
+        borderColor: isActive ? 'hsl(42 50% 40% / 0.25)' : 'transparent',
+        color: isActive ? 'hsl(40 60% 85%)' : 'hsl(40 20% 60% / 0.6)',
+      }}
       aria-pressed={isActive}
     >
-      <span className={`flex-shrink-0 ${isActive ? "text-primary" : "text-muted-foreground/50"}`}>
+      <span className="flex-shrink-0" style={{ color: isActive ? 'hsl(42 70% 60%)' : 'hsl(40 20% 50% / 0.4)' }}>
         {icon}
       </span>
       <div className="flex-1 min-w-0">
         <span className="block truncate">{station.label}</span>
         {subtitle && (
-          <span className="block text-[10px] text-muted-foreground/50 truncate">{subtitle}</span>
+          <span className="block text-[10px] truncate" style={{ color: 'hsl(40 15% 50% / 0.4)' }}>{subtitle}</span>
         )}
       </div>
-      <span className="text-[10px] text-muted-foreground/40 tabular-nums flex-shrink-0">
+      <span className="text-[10px] tabular-nums flex-shrink-0" style={{ color: 'hsl(40 20% 50% / 0.35)' }}>
         {station.songCount}
       </span>
       {isActive && isPlaying && <WaveformBars active barCount={3} />}
       {isActive && !isPlaying && (
-        <div className="w-2 h-2 rounded-full bg-primary/40 flex-shrink-0" />
+        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'hsl(42 60% 50% / 0.4)' }} />
       )}
     </motion.button>
   );
