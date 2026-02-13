@@ -81,6 +81,10 @@ interface TreeOfferings {
   [treeId: string]: number;
 }
 
+interface TreePhotos {
+  [treeId: string]: string;
+}
+
 interface BloomedSeed {
   id: string;
   tree_id: string;
@@ -259,6 +263,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
+  const [treePhotos, setTreePhotos] = useState<TreePhotos>({});
   const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
@@ -316,7 +321,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           .not('longitude', 'is', null),
         supabase
           .from('offerings')
-          .select('tree_id'),
+          .select('tree_id, type, media_url'),
       ]);
 
       if (treesResult.error) {
@@ -336,10 +341,15 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
       if (!offeringsResult.error && offeringsResult.data) {
         const counts: TreeOfferings = {};
-        offeringsResult.data.forEach((o) => {
+        const photos: TreePhotos = {};
+        offeringsResult.data.forEach((o: any) => {
           counts[o.tree_id] = (counts[o.tree_id] || 0) + 1;
+          if (o.type === 'photo' && o.media_url && !photos[o.tree_id]) {
+            photos[o.tree_id] = o.media_url;
+          }
         });
         setOfferingCounts(counts);
+        setTreePhotos(photos);
       }
     };
 
@@ -1213,7 +1223,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} userId={userId} bloomedSeeds={bloomedSeeds} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} userId={userId} bloomedSeeds={bloomedSeeds} />
         </Suspense>
         <button
           onClick={() => {
