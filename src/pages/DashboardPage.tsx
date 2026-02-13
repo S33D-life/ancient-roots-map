@@ -335,7 +335,6 @@ const DashboardPage = () => {
     const TAB_ITEMS = [
       { value: "legend", label: "Legend", icon: ScrollText },
       { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
-      { value: "vault", label: "Heartwood Vault", icon: Archive },
       { value: "hearts", label: "Hearts", icon: Heart },
       { value: "leaderboard", label: "Fellowship", icon: Trophy },
       { value: "profile", label: "Settings", icon: Settings },
@@ -443,11 +442,12 @@ const DashboardPage = () => {
                 <PodSection icon={Sprout} label="Seed Pods" count={plantCount}>
                   <Greenhouse />
                 </PodSection>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="vault">
-              {user && <DashboardVault userId={user.id} />}
+                {/* Section: Heartwood Vault */}
+                <PodSection icon={Archive} label="Heartwood Vault" accent>
+                  {user && <DashboardVault userId={user.id} />}
+                </PodSection>
+              </div>
             </TabsContent>
 
             <TabsContent value="leaderboard">
