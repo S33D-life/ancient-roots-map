@@ -112,23 +112,27 @@ const Header = () => {
   };
 
   const fetchHearts = async (userId: string) => {
-    const [treesRes, offeringsRes, plantsRes, wishlistRes, heartTxRes] = await Promise.all([
+    const [treesRes, offeringsRes, plantsRes, wishlistRes, heartTxRes, photoOfferingsRes] = await Promise.all([
       supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
       supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
       supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
       supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
-      // Sum heart transactions for this user (wanderer, sower, windfall)
       supabase.from("heart_transactions").select("amount").eq("user_id", userId),
+      // Count distinct trees with photo offerings by this user
+      supabase.from("offerings").select("tree_id").eq("created_by", userId).eq("type", "photo"),
     ]);
     const tc = treesRes.count || 0;
     const oc = offeringsRes.count || 0;
     const pc = plantsRes.count || 0;
     const wc = wishlistRes.count || 0;
 
-    // Sum all heart transaction amounts for this user
     const heartTxTotal = (heartTxRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
 
-    let total = tc * 10;
+    // Count unique trees with photos
+    const photoTreeIds = new Set((photoOfferingsRes.data || []).map((o: any) => o.tree_id));
+    const photoTreeCount = photoTreeIds.size;
+
+    let total = tc * 10 + photoTreeCount; // +1 heart per tree mapped with photo
     const milestones: [number, number, string][] = [
       [tc, 1, "10"], [tc, 5, "25"], [tc, 10, "50"], [tc, 25, "100"], [tc, 50, "200"], [tc, 100, "500"], [tc, 250, "1000"],
       [oc, 1, "5"], [oc, 10, "30"], [oc, 25, "75"], [oc, 50, "200"], [oc, 100, "500"],
