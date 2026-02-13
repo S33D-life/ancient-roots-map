@@ -25,6 +25,8 @@ import PersonalLegend from "@/components/dashboard/PersonalLegend";
 import DashboardWanderers from "@/components/dashboard/DashboardWanderers";
 import GrovePulse from "@/components/GrovePulse";
 import HearthHearts from "@/components/HearthHearts";
+import ContextualWhisper from "@/components/ContextualWhisper";
+import PageShell from "@/components/PageShell";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 
@@ -371,7 +373,8 @@ const DashboardPage = () => {
       `}</style>
       <Header />
 
-      <main className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+      <main className="container mx-auto px-4 pt-24 pb-20 relative z-10">
+        <PageShell>
         <div className="max-w-5xl mx-auto">
           {/* Page header */}
           <div className="mb-8">
@@ -474,7 +477,15 @@ const DashboardPage = () => {
             </TabsContent>
           </Tabs>
         </div>
+        </PageShell>
       </main>
+      <ContextualWhisper
+        id="hearth-vault"
+        message="Your Vault holds your Staff, tokens, and all the treasures of your journey."
+        cta={{ label: "Open Vault", to: "/vault?from=hearth" }}
+        delay={5000}
+        position="bottom-center"
+      />
       <Footer />
     </div>
   );
