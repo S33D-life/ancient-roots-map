@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useNavigate as useRouterNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -140,7 +141,7 @@ function SpiralMiniMap({ currentIndex, totalOrigin, onSelect }: {
 }
 
 // ── Detail Drawer Content ────────────────────────────────────────
-function StaffDetailContent({ staff, onViewOnChain }: { staff: StaffItem; onViewOnChain: () => void }) {
+function StaffDetailContent({ staff, onViewOnChain, onViewLegend }: { staff: StaffItem; onViewOnChain: () => void; onViewLegend: () => void }) {
   const counts = getSpeciesStaffCounts();
   const upperCode = staff.isOrigin ? staff.code : staff.code.split("-")[0];
   const total = counts[upperCode] || 1;
@@ -171,6 +172,11 @@ function StaffDetailContent({ staff, onViewOnChain }: { staff: StaffItem; onView
         <StaffQRCode staffCode={staff.code} size={80} />
       </div>
 
+      {/* Primary action — full legend page */}
+      <Button className="w-full gap-2 font-serif text-sm" onClick={onViewLegend}>
+        <ExternalLink className="w-4 h-4" /> View Full Legend
+      </Button>
+
       <div className="grid grid-cols-2 gap-2">
         <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() =>
           handleShare(`${staff.speciesName} Staff`, `${staff.speciesName} staff (${staff.code}) — one of 144 sacred staffs.`)
@@ -180,10 +186,10 @@ function StaffDetailContent({ staff, onViewOnChain }: { staff: StaffItem; onView
         <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={onViewOnChain}>
           <Eye className="w-3.5 h-3.5" /> On-Chain
         </Button>
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() => toast.info("Lore scrolls coming soon…")}>
+        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={onViewLegend}>
           <ScrollText className="w-3.5 h-3.5" /> Lore Scroll
         </Button>
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() => toast.info("Linked trees coming soon…")}>
+        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={onViewLegend}>
           <TreeDeciduous className="w-3.5 h-3.5" /> Linked Trees
         </Button>
       </div>
@@ -234,6 +240,7 @@ function StaffRoomEntrance({ onComplete }: { onComplete: () => void }) {
 // ── Main Component ───────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
 export default function StaffRoomGallery() {
+  const routerNavigate = useRouterNavigate();
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [filter, setFilter] = useState<StaffFilter>("all");
@@ -651,6 +658,10 @@ export default function StaffRoomGallery() {
                 onViewOnChain={() => {
                   setDetailOpen(false);
                   setOnChainStaff(activeStaff);
+                }}
+                onViewLegend={() => {
+                  setDetailOpen(false);
+                  routerNavigate(`/staff/${activeStaff.code}`);
                 }}
               />
             </div>
