@@ -50,7 +50,16 @@ const HivesIndexPage = lazy(() => import("./pages/HivesIndexPage"));
 const ValueTreePage = lazy(() => import("./pages/ValueTreePage"));
 const HiveTreasuryPage = lazy(() => import("./pages/HiveTreasuryPage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,   // 5 min — avoid refetching on every navigation
+      gcTime: 10 * 60 * 1000,     // 10 min garbage collection
+      refetchOnWindowFocus: false, // prevent aggressive refetch on tab switch
+      retry: 1,
+    },
+  },
+});
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
