@@ -203,7 +203,7 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
 
       // Issue mapping rewards
       const rr = await issueRewards({ userId: user.id, treeId: treeData.id, treeSpecies: item.species.trim() || 'Unknown', actionType: "mapping" });
-      if (rr && (rr.speciesHearts > 0 || rr.influence > 0)) {
+      if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) {
         setMappingReward(rr);
         setShowMappingReceipt(true);
       }

@@ -171,7 +171,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       // Issue species/influence rewards
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.speciesHearts > 0 || rr.influence > 0)) {
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) {
           setRewardResult(rr);
         }
       }
@@ -233,7 +233,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       // Issue rewards
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
       }
 
       setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
@@ -283,7 +283,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       // Issue rewards
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
       }
 
       setCelebrationMsg({ emoji: "🎙️", message: "Voice offering sealed!", subtitle: "Your voice has been offered" });
@@ -416,7 +416,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       // Issue rewards
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
       }
 
       setCelebrationMsg({ emoji: "📖", message: "Book offering sealed!", subtitle: `"${data.title}" by ${data.author}` });
