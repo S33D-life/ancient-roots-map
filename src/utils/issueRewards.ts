@@ -1,7 +1,7 @@
 /**
- * Lightweight reward issuance helper.
- * Inserts species_heart_transactions + influence_transactions + daily_reward_caps.
- * Returns the earned amounts for UI display (RewardReceipt).
+ * Unified 3-layer reward issuance engine.
+ * Mints S33D Hearts + Species Hearts + Influence Tokens in one call.
+ * Enforces daily caps per tree for check-ins.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { matchSpecies } from "@/data/treeSpecies";
@@ -23,17 +23,25 @@ interface IssueParams {
   treeId: string;
   treeSpecies: string;
   actionType: "checkin" | "mapping" | "offering" | "curation";
-  /** Override species-heart amount (defaults based on actionType) */
+  /** Override S33D-heart amount */
+  s33dAmount?: number;
+  /** Override species-heart amount */
   speciesAmount?: number;
-  /** Override influence amount (defaults based on actionType) */
+  /** Override influence amount */
   influenceAmount?: number;
 }
 
-const ACTION_DEFAULTS: Record<string, { species: number; influence: number }> = {
-  checkin: { species: 1, influence: 0 },
-  mapping: { species: 3, influence: 2 },
-  offering: { species: 1, influence: 0 },
-  curation: { species: 0, influence: 2 },
+/**
+ * Default issuance amounts per action across all 3 layers.
+ *   s33d     – global S33D Hearts  (heart_transactions)
+ *   species  – fractal Species Hearts  (species_heart_transactions)
+ *   influence – soulbound governance  (influence_transactions)
+ */
+const ACTION_DEFAULTS: Record<string, { s33d: number; species: number; influence: number }> = {
+  checkin:  { s33d: 1, species: 1, influence: 0 },
+  mapping:  { s33d: 10, species: 3, influence: 2 },
+  offering: { s33d: 2, species: 1, influence: 0 },
+  curation: { s33d: 0, species: 0, influence: 2 },
 };
 
 export async function issueRewards(params: IssueParams): Promise<RewardResult | null> {
@@ -43,11 +51,12 @@ export async function issueRewards(params: IssueParams): Promise<RewardResult | 
   const hive = getHiveForSpecies(treeSpecies);
   const hiveName = hive?.displayName || `${family} Hive`;
 
-  const defaults = ACTION_DEFAULTS[actionType] || { species: 1, influence: 0 };
+  const defaults = ACTION_DEFAULTS[actionType] || { s33d: 1, species: 1, influence: 0 };
+  const s33dAmt = params.s33dAmount ?? defaults.s33d;
   const speciesAmt = params.speciesAmount ?? defaults.species;
   const influenceAmt = params.influenceAmount ?? defaults.influence;
 
-  // Daily cap enforcement for check-ins
+  // ── Daily cap enforcement for check-ins ──
   if (actionType === "checkin") {
     const today = new Date().toISOString().slice(0, 10);
     const { data: cap } = await supabase
@@ -71,7 +80,17 @@ export async function issueRewards(params: IssueParams): Promise<RewardResult | 
     }, { onConflict: "user_id,tree_id,reward_date" });
   }
 
-  // Issue species hearts
+  // ── Layer 1: S33D Hearts (global currency) ──
+  if (s33dAmt > 0) {
+    await supabase.from("heart_transactions").insert({
+      user_id: userId,
+      tree_id: treeId,
+      heart_type: actionType,
+      amount: s33dAmt,
+    });
+  }
+
+  // ── Layer 2: Species Hearts (fractal per-hive) ──
   if (speciesAmt > 0) {
     await supabase.from("species_heart_transactions").insert({
       user_id: userId,
@@ -82,7 +101,7 @@ export async function issueRewards(params: IssueParams): Promise<RewardResult | 
     });
   }
 
-  // Issue influence tokens
+  // ── Layer 3: Influence Tokens (soulbound governance) ──
   if (influenceAmt > 0) {
     await supabase.from("influence_transactions").insert({
       user_id: userId,
@@ -95,7 +114,7 @@ export async function issueRewards(params: IssueParams): Promise<RewardResult | 
   }
 
   return {
-    s33dHearts: 0, // S33D hearts are issued by existing heart_transactions system
+    s33dHearts: s33dAmt,
     speciesHearts: speciesAmt,
     influence: influenceAmt,
     speciesFamily: family,
