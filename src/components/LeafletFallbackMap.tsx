@@ -93,6 +93,14 @@ function getSpeciesHue(species: string): number {
   return SPECIES_HUE[species.toLowerCase()] ?? 120;
 }
 
+/** Viewport-cull helper — returns only trees within current map bounds + padding */
+function getVisibleTrees(map: L.Map, trees: Tree[], pad = 0.1): Tree[] {
+  const b = map.getBounds();
+  const s = b.getSouth() - pad, n = b.getNorth() + pad;
+  const w = b.getWest() - pad, e = b.getEast() + pad;
+  return trees.filter(t => t.latitude >= s && t.latitude <= n && t.longitude >= w && t.longitude <= e);
+}
+
 /* ── SVG with species-aware coloring ── */
 const SVG_CACHE: Record<string, string> = {};
 
@@ -753,9 +761,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const groveLayer = L.layerGroup();
 
-    // Group by species
+    // Viewport-cull: only group trees visible on screen
+    const visible = getVisibleTrees(map, filteredTrees, 0.3);
     const bySpecies: Record<string, Tree[]> = {};
-    filteredTrees.forEach((t) => {
+    visible.forEach((t) => {
       const key = t.species.toLowerCase();
       if (!bySpecies[key]) bySpecies[key] = [];
       bySpecies[key].push(t);
@@ -793,6 +802,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   }, [filteredTrees, showGroves]);
 
   // Draw root threads — golden dashed lines between same-species trees within 80km
+  // Viewport-culled + O(n²) capped to prevent jank with large datasets
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -806,8 +816,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const threadLayer = L.layerGroup();
 
+    // Only draw threads for trees visible in the viewport (+ padding)
+    const visible = getVisibleTrees(map, filteredTrees, 0.2);
+    if (visible.length < 2 || visible.length > 400) {
+      // Too many — skip to keep panning smooth
+      threadLayer.addTo(map);
+      rootThreadLayerRef.current = threadLayer;
+      return;
+    }
+
     const bySpecies: Record<string, Tree[]> = {};
-    filteredTrees.forEach((t) => {
+    visible.forEach((t) => {
       const key = t.species.toLowerCase();
       if (!bySpecies[key]) bySpecies[key] = [];
       bySpecies[key].push(t);
@@ -815,12 +834,14 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const MAX_DIST_KM = 80;
     const drawn = new Set<string>();
+    const MAX_THREADS = 300; // hard cap for performance
+    let threadCount = 0;
 
     Object.entries(bySpecies).forEach(([, group]) => {
-      if (group.length < 2) return;
+      if (group.length < 2 || threadCount >= MAX_THREADS) return;
 
-      for (let i = 0; i < group.length; i++) {
-        for (let j = i + 1; j < group.length; j++) {
+      for (let i = 0; i < group.length && threadCount < MAX_THREADS; i++) {
+        for (let j = i + 1; j < group.length && threadCount < MAX_THREADS; j++) {
           const a = group[i];
           const b = group[j];
           const dist = haversineKm(a.latitude, a.longitude, b.latitude, b.longitude);
@@ -843,6 +864,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               interactive: false,
             }
           ).addTo(threadLayer);
+          threadCount++;
         }
       }
     });
@@ -855,7 +877,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [filteredTrees, showRootThreads]);
 
-  // Offering glow layer — golden pulsing circles on trees with recent offerings
+  // Offering glow layer — viewport-culled for performance
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -870,7 +892,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     const glowLayer = L.layerGroup();
     const currentOfferings = offeringCountsRef.current;
 
-    filteredTrees.forEach((tree) => {
+    // Only render glow for trees visible in viewport
+    const visible = getVisibleTrees(map, filteredTrees, 0.05);
+
+    visible.forEach((tree) => {
       const count = currentOfferings[tree.id] || 0;
       if (count === 0) return;
 
@@ -1035,9 +1060,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       return;
     }
 
-    const extLayer = L.layerGroup();
-    extLayer.addTo(map);
-    externalLayerRef.current = extLayer;
+    // Use a cluster group for external trees to prevent DOM overload
+    const extCluster = (L as any).markerClusterGroup({
+      maxClusterRadius: 40,
+      disableClusteringAtZoom: 17,
+      chunkedLoading: true,
+      chunkInterval: 100,
+      chunkDelay: 10,
+      animateAddingMarkers: false,
+      spiderfyOnMaxZoom: false,
+      showCoverageOnHover: false,
+      iconCreateFunction: (cluster: any) => {
+        const count = cluster.getChildCount();
+        const dim = count >= 20 ? 36 : count >= 5 ? 30 : 24;
+        return L.divIcon({
+          html: `<div style="width:${dim}px;height:${dim}px;border-radius:50%;background:hsla(180,50%,35%,0.85);border:2px solid hsl(180,40%,25%);color:hsl(180,80%,85%);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:monospace;box-shadow:0 0 8px hsla(180,60%,50%,0.3);">${count}</div>`,
+          className: "leaflet-tree-marker",
+          iconSize: L.point(dim, dim),
+        });
+      },
+    });
+    extCluster.addTo(map);
+    externalLayerRef.current = extCluster;
 
     let debounceTimer: ReturnType<typeof setTimeout>;
 
@@ -1051,7 +1095,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const zoom = map.getZoom();
       if (zoom < minZoom) {
         setExternalTreeCount(-1);
-        extLayer.clearLayers();
+        extCluster.clearLayers();
         setExternalLoading(false);
         return;
       }
@@ -1071,7 +1115,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (ac.signal.aborted) return;
       setExternalLoading(false);
       setExternalTreeCount(trees.length);
-      extLayer.clearLayers();
+      extCluster.clearLayers();
 
       const afSet = new Set(
         filteredTrees.map((t) => `${t.latitude.toFixed(5)},${t.longitude.toFixed(5)}`)
@@ -1099,7 +1143,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           maxWidth: 240,
           offset: L.point(0, -4),
         });
-        marker.addTo(extLayer);
+        extCluster.addLayer(marker);
       });
     };
 
@@ -1115,7 +1159,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       clearTimeout(debounceTimer);
       map.off("moveend", onMoveEnd);
       if (externalAbortRef.current) externalAbortRef.current.abort();
-      if (map.hasLayer(extLayer)) map.removeLayer(extLayer);
+      if (map.hasLayer(extCluster)) map.removeLayer(extCluster);
     };
   }, [showExternalTrees, filteredTrees]);
 
