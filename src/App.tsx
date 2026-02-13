@@ -61,7 +61,7 @@ const App = () => {
 
   // /map and /atlas bypass the password gate for public discovery
   const isPublicRoute = typeof window !== 'undefined' && (
-    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?')
+    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?') || window.location.pathname === '/auth'
   );
 
   if (!authed && !isPublicRoute) {
