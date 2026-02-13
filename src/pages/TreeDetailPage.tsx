@@ -4,6 +4,8 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
+import JourneyNudge from "@/components/JourneyNudge";
+import ContextualWhisper from "@/components/ContextualWhisper";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
 import { Card, CardContent } from "@/components/ui/card";
@@ -360,8 +362,31 @@ const TreeDetailPage = () => {
         </div>
 
         {/* Tree Heart Pool */}
-        <div className="mb-10">
+        <div className="mb-6">
           <TreeHeartPool treeId={id!} userId={userId} />
+        </div>
+
+        {/* Journey Nudges — connect this tree to the wider ecosystem */}
+        <div className="space-y-2 mb-8">
+          {(() => {
+            const hive = tree.species ? getHiveForSpecies(tree.species) : null;
+            return hive ? (
+              <JourneyNudge
+                icon={hive.icon}
+                message={`Explore the ${hive.displayName} — see all ${tree.species} trees and their collective radio.`}
+                to={`/hive/${hive.slug}`}
+                label="Visit Hive"
+                delay={800}
+              />
+            ) : null;
+          })()}
+          <JourneyNudge
+            icon="📚"
+            message="This tree's offerings live in the Heartwood Library alongside all Ancient Friends."
+            to="/library/ancient-friends"
+            label="Library"
+            delay={1200}
+          />
         </div>
 
         {/* Birdsong Offering Button */}

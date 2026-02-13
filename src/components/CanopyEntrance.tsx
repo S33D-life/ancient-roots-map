@@ -35,7 +35,7 @@ interface LightMote {
   phase: number;
 }
 
-const DURATION = 5000;
+const DURATION = 2500;
 const LEAF_COUNT = 45;
 const MOTE_COUNT = 25;
 

@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
+import ContextualWhisper from "@/components/ContextualWhisper";
 import RootsEntrance from "@/components/RootsEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 
@@ -27,6 +28,12 @@ const MapPage = () => {
     <div className="fixed inset-0 z-[10] bg-background">
       <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} />
       <Header />
+      <ContextualWhisper
+        id="map-first-tree"
+        message="Tap any marker to meet an Ancient Friend, or long-press the map to claim a new encounter."
+        delay={4000}
+        position="bottom-center"
+      />
     </div>
   );
 };
