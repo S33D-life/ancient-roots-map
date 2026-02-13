@@ -3,12 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Archive, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
+import { useWallet } from "@/hooks/use-wallet";
 import VaultHeartBalance from "./vault/VaultHeartBalance";
 import VaultSproutingSeeds from "./vault/VaultSproutingSeeds";
 import VaultHeartLedger from "./vault/VaultHeartLedger";
 import VaultTreeReservoirs from "./vault/VaultTreeReservoirs";
 import VaultLotteryTracker from "./vault/VaultLotteryTracker";
 import VaultParticles from "./vault/VaultParticles";
+import VaultWalletCard from "./vault/VaultWalletCard";
 
 interface Props {
   userId: string;
@@ -21,6 +23,7 @@ const DashboardVault = ({ userId }: Props) => {
   const [plantCount, setPlantCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [heartFilter, setHeartFilter] = useState<string | null>(null);
+  const wallet = useWallet(userId);
 
   const handleSegmentClick = useCallback((label: string) => {
     setHeartFilter(prev => prev === label ? null : label);
@@ -80,16 +83,25 @@ const DashboardVault = ({ userId }: Props) => {
       transition={{ duration: 0.4 }}
     >
       <VaultParticles />
-      {/* Section header */}
+      {/* Section header with wallet status */}
       <div className="flex items-center gap-2.5">
         <Archive className="w-5 h-5 text-primary" />
-        <div>
+        <div className="flex-1">
           <h2 className="text-lg font-serif text-foreground tracking-wide">Heartwood Vault</h2>
           <p className="text-[11px] text-muted-foreground font-serif">
             Your living treasury of Hearts, Seeds, and Tree Bonds
           </p>
         </div>
+        {wallet.status === "connected" && (
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/30 border border-border/40">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_4px_hsl(var(--primary))]" />
+            <span className="text-[10px] font-mono text-muted-foreground">{wallet.shortAddress}</span>
+          </div>
+        )}
       </div>
+
+      {/* Wallet Connection Card */}
+      <VaultWalletCard wallet={wallet} />
 
       {/* Primary: Heart Balance Ring */}
       <VaultHeartBalance

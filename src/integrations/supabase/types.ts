@@ -578,6 +578,7 @@ export type Database = {
           id: string
           is_discoverable: boolean
           updated_at: string
+          wallet_address: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -587,6 +588,7 @@ export type Database = {
           id: string
           is_discoverable?: boolean
           updated_at?: string
+          wallet_address?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -596,6 +598,7 @@ export type Database = {
           id?: string
           is_discoverable?: boolean
           updated_at?: string
+          wallet_address?: string | null
         }
         Relationships: []
       }
