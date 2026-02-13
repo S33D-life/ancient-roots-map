@@ -355,297 +355,227 @@ const EarthRadioRoom = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hero / Banner */}
-      <div className="relative rounded-xl overflow-hidden border border-primary/20">
+    <div className="space-y-0">
+      {/* ── The Radio Console — single hero image with overlaid controls ── */}
+      <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-xl">
+        {/* Background art — the tree radio console */}
         <img
           src={treeRadioArt}
           alt="Earth Radio"
-          className="w-full h-40 md:h-56 object-cover"
-          style={{ filter: "brightness(0.5) saturate(0.8)" }}
+          className="w-full h-auto object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="flex items-center gap-2 mb-1">
-            <Signal className="h-5 w-5 text-primary" style={{ opacity: 0.5 + signalLevel * 0.5 }} />
-            <h2 className="text-2xl md:text-3xl font-serif text-primary tracking-wider">
-              Earth Radio
-            </h2>
-            <Signal className="h-5 w-5 text-primary" style={{ opacity: 0.5 + signalLevel * 0.5, transform: "scaleX(-1)" }} />
-          </div>
-          <p className="text-xs text-foreground/60 font-serif tracking-widest">
-            {allSongs.length} offering{allSongs.length !== 1 ? "s" : ""} · {speciesStations.length} species · {treeStations.length} tree{treeStations.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Left: Tuner ── */}
-        <div className="lg:col-span-1 space-y-4">
-          {/* Species Stations */}
-          <div className="rounded-xl border border-primary/20 bg-card/50 backdrop-blur overflow-hidden">
-            <button
-              className="w-full px-4 py-3 flex items-center justify-between text-left"
-              onClick={() => setTunerOpen(!tunerOpen)}
-            >
-              <span className="font-serif text-sm text-primary tracking-wider flex items-center gap-2">
-                <TreeDeciduous className="h-4 w-4" />
-                Station Tuner
-              </span>
-              <span className={`text-primary/50 text-xs transition-transform ${tunerOpen ? "rotate-180" : ""}`}>▼</span>
-            </button>
+        {/* Subtle overlay for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
 
-            <AnimatePresence>
-              {tunerOpen && (
+        {/* ── Overlaid Now Playing + Controls ── */}
+        <div className="absolute inset-x-0 bottom-0 p-4 md:p-6 lg:p-8">
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+            {/* Album art */}
+            <div className="relative w-20 h-20 md:w-28 md:h-28 rounded-xl overflow-hidden border border-primary/30 flex-shrink-0 shadow-lg backdrop-blur-sm bg-card/30">
+              <AnimatePresence mode="wait">
                 <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: "auto" }}
-                  exit={{ height: 0 }}
-                  className="overflow-hidden"
+                  key={preview?.artworkUrl || "placeholder"}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-full h-full"
                 >
-                  <div className="px-4 pb-4 space-y-3">
-                    {/* All station */}
-                    <StationButton
-                      station={allStation}
-                      isActive={activeStation?.id === "all"}
-                      onClick={() => setActiveStation(allStation)}
-                      icon={<Radio className="h-3.5 w-3.5" />}
-                    />
-
-                    {/* Species */}
-                    <div>
-                      <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-widest mb-2">
-                        Species Broadcasts
-                      </p>
-                      <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
-                        {speciesStations.map(s => (
-                          <StationButton
-                            key={s.id}
-                            station={s}
-                            isActive={activeStation?.id === s.id && activeStation?.type === "species"}
-                            onClick={() => setActiveStation(s)}
-                            icon={<Leaf className="h-3 w-3" />}
-                          />
-                        ))}
-                      </div>
+                  {previewLoading ? (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/50">
+                      <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                     </div>
-
-                    {/* Individual trees */}
-                    <div>
-                      <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-widest mb-2">
-                        Individual Trees
-                      </p>
-                      <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                        {treeStations.map(s => (
-                          <StationButton
-                            key={s.id}
-                            station={s}
-                            isActive={activeStation?.id === s.id && activeStation?.type === "tree"}
-                            onClick={() => setActiveStation(s)}
-                            icon={<TreeDeciduous className="h-3 w-3" />}
-                            showSpecies
-                          />
-                        ))}
-                      </div>
+                  ) : preview?.artworkUrl ? (
+                    <img src={preview.artworkUrl} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-muted/30">
+                      <Music className="h-8 w-8 text-primary/20" />
                     </div>
-                  </div>
+                  )}
                 </motion.div>
+              </AnimatePresence>
+              {isPlaying && (
+                <div className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-pulse pointer-events-none" />
               )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* ── Center/Right: Now Playing ── */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border border-primary/20 bg-card/50 backdrop-blur overflow-hidden">
-            {/* Station header */}
-            <div className="px-5 py-3 border-b border-border/30 flex items-center justify-between">
-              <div className="flex items-center gap-2 min-w-0">
-                {activeStation?.type === "species" ? (
-                  <Leaf className="h-4 w-4 text-primary flex-shrink-0" />
-                ) : activeStation?.type === "tree" ? (
-                  <TreeDeciduous className="h-4 w-4 text-primary flex-shrink-0" />
-                ) : (
-                  <Radio className="h-4 w-4 text-primary flex-shrink-0" />
-                )}
-                <span className="font-serif text-sm text-foreground tracking-wider truncate">
-                  {activeStation?.label || "TETOL Radio"}
-                </span>
-                {activeStation && activeStation.type !== "all" && (() => {
-                  const resolved = resolveSpecies(activeStation.type === "species" ? activeStation.id : activeStation.species);
-                  return resolved.latin ? (
-                    <span className="text-[10px] text-muted-foreground/60 font-serif italic truncate hidden sm:inline">
-                      {resolved.latin}
-                    </span>
-                  ) : null;
-                })()}
-                <Badge variant="outline" className="text-[10px] font-serif ml-auto flex-shrink-0">
-                  {activeStation?.type === "all" ? "All" : activeStation?.type === "species" ? "Species" : "Local"}
-                </Badge>
-              </div>
-              {/* Signal bars */}
-              <div className="flex items-end gap-0.5 h-4">
-                {[0.3, 0.5, 0.7, 0.9, 1.0].map((threshold, i) => (
-                  <div
-                    key={i}
-                    className="w-1 rounded-full transition-all duration-300"
-                    style={{
-                      height: `${6 + i * 3}px`,
-                      backgroundColor: signalLevel >= threshold
-                        ? "hsl(var(--primary))"
-                        : "hsl(var(--muted-foreground) / 0.2)",
-                    }}
-                  />
-                ))}
-              </div>
             </div>
 
-            {/* Artwork + track info */}
-            <div className="p-5 md:p-8">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                {/* Album art */}
-                <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-xl overflow-hidden border border-primary/20 flex-shrink-0 shadow-lg">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={preview?.artworkUrl || "placeholder"}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.5 }}
-                      className="w-full h-full"
-                    >
-                      {previewLoading ? (
-                        <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                        </div>
-                      ) : preview?.artworkUrl ? (
-                        <img src={preview.artworkUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted/30">
-                          <Music className="h-12 w-12 text-primary/20" />
-                        </div>
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
-
-                  {/* Pulse ring when playing */}
-                  {isPlaying && (
-                    <div className="absolute inset-0 rounded-xl border-2 border-primary/30 animate-pulse pointer-events-none" />
-                  )}
-                </div>
-
-                {/* Track info */}
-                <div className="flex-1 text-center md:text-left min-w-0">
-                  <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-[0.2em] mb-1">
-                    Now Playing
+            {/* Track info + controls */}
+            <div className="flex-1 text-center md:text-left min-w-0">
+              <p className="text-[10px] text-foreground/50 font-serif uppercase tracking-[0.2em] mb-0.5">
+                {activeStation?.label || "Earth Radio"}
+              </p>
+              <h3 className="text-base md:text-xl font-serif text-foreground truncate drop-shadow-md">
+                {preview?.trackName || currentSong?.title || "—"}
+              </h3>
+              <p className="text-xs text-foreground/60 font-serif truncate mt-0.5 drop-shadow-sm">
+                {preview?.artistName || currentSong?.content || ""}
+              </p>
+              {currentSong && (() => {
+                const resolved = resolveSpecies(currentSong.species);
+                return (
+                  <p className="text-[10px] text-primary/60 font-serif mt-1 italic flex items-center gap-1 justify-center md:justify-start flex-wrap drop-shadow-sm">
+                    <TreeDeciduous className="h-3 w-3 inline" />
+                    offered to {currentSong.tree_name}
+                    <span className="text-primary/40">· {resolved.common}</span>
                   </p>
-                  <h3 className="text-xl md:text-2xl font-serif text-foreground truncate">
-                    {preview?.trackName || currentSong?.title || "—"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-serif truncate mt-1">
-                    {preview?.artistName || currentSong?.content || ""}
-                  </p>
-                  {currentSong && (() => {
-                    const resolved = resolveSpecies(currentSong.species);
-                    return (
-                      <p className="text-xs text-primary/50 font-serif mt-2 italic flex items-center gap-1 justify-center md:justify-start flex-wrap">
-                        <TreeDeciduous className="h-3 w-3 inline" />
-                        offered to {currentSong.tree_name}
-                        <span className="text-primary/30">· {resolved.common}</span>
-                        {resolved.latin && (
-                          <span className="text-primary/20 text-[10px]">({resolved.latin})</span>
-                        )}
-                      </p>
-                    );
-                  })()}
+                );
+              })()}
 
-                  {/* View tree link */}
-                  {currentSong && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-3 text-xs font-serif gap-1 text-muted-foreground"
-                      onClick={() => navigate(`/tree/${currentSong.tree_id}`)}
-                    >
-                      <Eye className="h-3 w-3" />
-                      Visit this Ancient Friend
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="flex items-center justify-center gap-6 mt-8">
+              {/* Transport controls */}
+              <div className="flex items-center justify-center md:justify-start gap-4 mt-3">
                 <button
                   onClick={() => setIsMuted(!isMuted)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-foreground/50 hover:text-foreground transition-colors"
                   aria-label={isMuted ? "Unmute" : "Mute"}
                 >
-                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </button>
-
-                <button
-                  onClick={skipPrev}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Previous track"
-                >
-                  <SkipBack className="h-5 w-5" />
+                <button onClick={skipPrev} className="text-foreground/50 hover:text-foreground transition-colors" aria-label="Previous track">
+                  <SkipBack className="h-4 w-4" />
                 </button>
-
                 <button
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all hover:scale-105"
+                  className="w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all hover:scale-105 backdrop-blur-sm"
                   style={{
-                    background: "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.1))",
+                    background: "linear-gradient(135deg, hsl(var(--primary) / 0.25), hsl(var(--primary) / 0.1))",
                     borderColor: isPlaying ? "hsl(var(--primary) / 0.6)" : "hsl(var(--primary) / 0.3)",
-                    boxShadow: isPlaying ? "0 0 24px hsl(var(--primary) / 0.2)" : "none",
+                    boxShadow: isPlaying ? "0 0 24px hsl(var(--primary) / 0.25)" : "none",
                   }}
                   aria-label={isPlaying ? "Pause" : "Play"}
                 >
-                  {isPlaying ? (
-                    <Pause className="h-6 w-6 text-primary" />
-                  ) : (
-                    <Play className="h-6 w-6 text-primary ml-0.5" />
-                  )}
+                  {isPlaying ? <Pause className="h-5 w-5 text-primary" /> : <Play className="h-5 w-5 text-primary ml-0.5" />}
                 </button>
-
-                <button
-                  onClick={skipNext}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Next track"
-                >
-                  <SkipForward className="h-5 w-5" />
+                <button onClick={skipNext} className="text-foreground/50 hover:text-foreground transition-colors" aria-label="Next track">
+                  <SkipForward className="h-4 w-4" />
                 </button>
-
-                {/* Volume slider */}
                 <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
+                  type="range" min="0" max="1" step="0.05"
                   value={isMuted ? 0 : volume}
                   onChange={e => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
-                  className="w-20 h-1 accent-primary opacity-60 hover:opacity-100 transition-opacity"
+                  className="w-16 h-1 accent-primary opacity-60 hover:opacity-100 transition-opacity hidden sm:block"
                   aria-label="Volume"
                 />
               </div>
-
-              {/* Playlist info */}
-              <div className="mt-6 pt-4 border-t border-border/20 flex items-center justify-between text-xs text-muted-foreground font-serif">
-                <span>
-                  {currentIndex + 1} / {playlist.length} in rotation
-                </span>
-                <button
-                  onClick={() => { setPlaylist(shuffle(playlist)); setCurrentIndex(0); }}
-                  className="hover:text-foreground transition-colors tracking-wider"
-                >
-                  ⟳ Shuffle
-                </button>
-              </div>
             </div>
+
+            {/* Signal bars */}
+            <div className="hidden md:flex items-end gap-0.5 h-5 flex-shrink-0">
+              {[0.3, 0.5, 0.7, 0.9, 1.0].map((threshold, i) => (
+                <div
+                  key={i}
+                  className="w-1 rounded-full transition-all duration-300"
+                  style={{
+                    height: `${6 + i * 3}px`,
+                    backgroundColor: signalLevel >= threshold
+                      ? "hsl(var(--primary))"
+                      : "hsl(var(--muted-foreground) / 0.2)",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Playlist info */}
+          <div className="mt-3 pt-2 border-t border-foreground/10 flex items-center justify-between text-[10px] text-foreground/40 font-serif">
+            <span>{currentIndex + 1} / {playlist.length} in rotation</span>
+            <span>{allSongs.length} offerings · {speciesStations.length} species · {treeStations.length} trees</span>
+            <button
+              onClick={() => { setPlaylist(shuffle(playlist)); setCurrentIndex(0); }}
+              className="hover:text-foreground/70 transition-colors tracking-wider"
+            >
+              ⟳ Shuffle
+            </button>
           </div>
         </div>
       </div>
+
+      {/* ── Station Tuner — below the console ── */}
+      <div className="rounded-xl border border-primary/20 bg-card/50 backdrop-blur overflow-hidden mt-6">
+        <button
+          className="w-full px-4 py-3 flex items-center justify-between text-left"
+          onClick={() => setTunerOpen(!tunerOpen)}
+        >
+          <span className="font-serif text-sm text-primary tracking-wider flex items-center gap-2">
+            <TreeDeciduous className="h-4 w-4" />
+            Station Tuner
+          </span>
+          <span className={`text-primary/50 text-xs transition-transform ${tunerOpen ? "rotate-180" : ""}`}>▼</span>
+        </button>
+
+        <AnimatePresence>
+          {tunerOpen && (
+            <motion.div
+              initial={{ height: 0 }}
+              animate={{ height: "auto" }}
+              exit={{ height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 space-y-3">
+                {/* All station */}
+                <StationButton
+                  station={allStation}
+                  isActive={activeStation?.id === "all"}
+                  onClick={() => setActiveStation(allStation)}
+                  icon={<Radio className="h-3.5 w-3.5" />}
+                />
+
+                {/* Species */}
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-widest mb-2">
+                    Species Broadcasts
+                  </p>
+                  <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                    {speciesStations.map(s => (
+                      <StationButton
+                        key={s.id}
+                        station={s}
+                        isActive={activeStation?.id === s.id && activeStation?.type === "species"}
+                        onClick={() => setActiveStation(s)}
+                        icon={<Leaf className="h-3 w-3" />}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Individual trees */}
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-widest mb-2">
+                    Individual Trees
+                  </p>
+                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+                    {treeStations.map(s => (
+                      <StationButton
+                        key={s.id}
+                        station={s}
+                        isActive={activeStation?.id === s.id && activeStation?.type === "tree"}
+                        onClick={() => setActiveStation(s)}
+                        icon={<TreeDeciduous className="h-3 w-3" />}
+                        showSpecies
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Visit tree link */}
+      {currentSong && (
+        <div className="text-center mt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs font-serif gap-1 text-muted-foreground"
+            onClick={() => navigate(`/tree/${currentSong.tree_id}`)}
+          >
+            <Eye className="h-3 w-3" />
+            Visit this Ancient Friend
+          </Button>
+        </div>
+      )}
 
       {/* CSS for radio bars */}
       <style>{`
