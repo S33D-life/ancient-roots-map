@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Archive, Loader2, Wand2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Archive, Loader2, Wand2, RotateCcw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useWallet } from "@/hooks/use-wallet";
+import { Button } from "@/components/ui/button";
+import { AwakeningAnimation } from "@/components/StaffCeremony";
+import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
 import VaultHeartBalance from "./vault/VaultHeartBalance";
 import VaultSproutingSeeds from "./vault/VaultSproutingSeeds";
 import VaultHeartLedger from "./vault/VaultHeartLedger";
@@ -23,6 +26,7 @@ const DashboardVault = ({ userId }: Props) => {
   const [plantCount, setPlantCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [heartFilter, setHeartFilter] = useState<string | null>(null);
+  const [showReawaken, setShowReawaken] = useState(false);
   const wallet = useWallet(userId);
 
   const handleSegmentClick = useCallback((label: string) => {
@@ -112,6 +116,40 @@ const DashboardVault = ({ userId }: Props) => {
 
       {/* Wallet & Staff Identity Card */}
       <VaultWalletCard wallet={wallet} />
+
+      {/* Re-awaken Staff */}
+      {wallet.activeStaff && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full gap-2 font-serif text-xs border-primary/20 hover:border-primary/40"
+          onClick={() => setShowReawaken(true)}
+        >
+          <RotateCcw className="w-3.5 h-3.5" /> Re-awaken Staff
+        </Button>
+      )}
+
+      {/* Re-awaken overlay */}
+      <AnimatePresence>
+        {showReawaken && wallet.activeStaff && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center"
+            style={{ background: "hsla(0, 0%, 0%, 0.85)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <AwakeningAnimation
+              staffImage={
+                wallet.activeStaff.species_code && SPECIES_MAP[wallet.activeStaff.species_code as SpeciesCode]
+                  ? SPECIES_MAP[wallet.activeStaff.species_code as SpeciesCode].image
+                  : `/images/staffs/${wallet.activeStaff.species_code?.toLowerCase() || "oak"}.jpeg`
+              }
+              onComplete={() => setShowReawaken(false)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Primary: Heart Balance Ring */}
       <VaultHeartBalance

@@ -168,7 +168,7 @@ function StepProgress({ current }: { current: CeremonyStep }) {
 }
 
 // ── Awakening Animation ─────────────────────────────────────────
-function AwakeningAnimation({ staffImage, onComplete }: { staffImage: string; onComplete: () => void }) {
+export function AwakeningAnimation({ staffImage, onComplete }: { staffImage: string; onComplete: () => void }) {
   useEffect(() => {
     const timer = setTimeout(onComplete, 4500);
     return () => clearTimeout(timer);
