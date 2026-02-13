@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { escapeHtml } from "@/utils/escapeHtml";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { getMapStyle } from "@/config/mapbox";
@@ -256,6 +256,7 @@ interface MapProps {
 
 const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom }: MapProps) => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const autoAddTree = searchParams.get("addTree") === "true";
   const deepLinkHandled = useRef(false);
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -1219,6 +1220,21 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
       <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
 
+      {/* Staff Room button — bottom-right, glowing staff icon */}
+      <button
+        onClick={() => navigate("/library/staff-room")}
+        className="absolute bottom-4 right-2 z-10 w-11 h-11 rounded-full flex items-center justify-center staff-glow-btn transition-transform hover:scale-110 active:scale-95"
+        style={{
+          background: "radial-gradient(circle, hsla(42,80%,40%,0.25), hsla(30,30%,12%,0.9))",
+          border: "1.5px solid hsla(42,50%,45%,0.5)",
+          backdropFilter: "blur(6px)",
+        }}
+        title="Staff Room"
+        aria-label="Staff Room"
+      >
+        <span className="text-xl leading-none" style={{ filter: "drop-shadow(0 0 6px hsla(42,80%,50%,0.7))" }}>🪄</span>
+      </button>
+
       <style>{`
         @keyframes ancientPulse {
           0%, 100% { filter: drop-shadow(0 0 2px hsla(42, 80%, 50%, 0.3)); }
@@ -1277,6 +1293,13 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         @keyframes seedHeartPulse {
           0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px hsla(120, 60%, 50%, 0.4)); }
           50% { transform: scale(1.15); filter: drop-shadow(0 0 10px hsla(120, 60%, 50%, 0.7)); }
+        }
+        .staff-glow-btn {
+          animation: staffGlow 3s ease-in-out infinite;
+        }
+        @keyframes staffGlow {
+          0%, 100% { box-shadow: 0 0 8px hsla(42,80%,50%,0.3), inset 0 0 6px hsla(42,80%,50%,0.1); }
+          50% { box-shadow: 0 0 18px hsla(42,80%,50%,0.6), inset 0 0 10px hsla(42,80%,50%,0.2); }
         }
       `}</style>
     </div>
