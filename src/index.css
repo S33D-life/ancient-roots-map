@@ -81,34 +81,62 @@ All colors MUST be HSL.
   .light .tetol-hearth { --level-accent: 15 65% 45%; }
 
   .light {
-    --background: 45 30% 95%;
-    --foreground: 80 20% 15%;
-    --card: 45 25% 92%;
-    --card-foreground: 80 20% 15%;
-    --popover: 45 25% 93%;
-    --popover-foreground: 80 20% 15%;
-    --primary: 42 75% 40%;
-    --primary-foreground: 45 100% 97%;
-    --secondary: 75 15% 88%;
-    --secondary-foreground: 80 20% 20%;
-    --muted: 45 15% 85%;
-    --muted-foreground: 80 15% 40%;
-    --accent: 42 70% 45%;
-    --accent-foreground: 45 100% 97%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 45 100% 97%;
-    --border: 42 30% 70%;
-    --input: 45 20% 88%;
-    --ring: 42 75% 40%;
-    --mystical-glow: 42 70% 40%;
-    --sacred-gold: 42 70% 35%;
-    --ancient-green: 75 20% 85%;
-    --earth-brown: 30 20% 75%;
-    --gradient-mystical: linear-gradient(135deg, hsl(42 75% 35%), hsl(45 80% 50%));
-    --gradient-forest: linear-gradient(180deg, hsl(45 25% 92%), hsl(45 30% 95%));
-    --gradient-radial: radial-gradient(circle at center, hsl(42 70% 45% / 0.1), transparent);
-    --glow-sacred: 0 0 20px hsl(42 70% 45% / 0.2);
-    --glow-subtle: 0 0 15px hsl(42 75% 40% / 0.15);
+    /* Luminous warm ivory — never flat white */
+    --background: 40 40% 96%;
+    --foreground: 30 25% 18%;
+
+    /* Soft parchment cards with warmth */
+    --card: 38 45% 97%;
+    --card-foreground: 30 25% 18%;
+
+    --popover: 36 40% 98%;
+    --popover-foreground: 30 25% 18%;
+
+    /* Rich amber primary — warm and readable */
+    --primary: 32 75% 38%;
+    --primary-foreground: 40 60% 98%;
+
+    /* Soft sage secondary */
+    --secondary: 45 25% 91%;
+    --secondary-foreground: 30 20% 25%;
+
+    /* Warm muted tones */
+    --muted: 38 20% 90%;
+    --muted-foreground: 30 15% 45%;
+
+    /* Amber accent */
+    --accent: 36 65% 42%;
+    --accent-foreground: 40 60% 98%;
+
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 40 60% 98%;
+
+    /* Warm golden borders with depth */
+    --border: 35 30% 82%;
+    --input: 38 25% 92%;
+    --ring: 32 75% 38%;
+
+    /* Mystical tokens — light mode versions */
+    --mystical-glow: 32 65% 42%;
+    --sacred-gold: 36 70% 38%;
+    --ancient-green: 80 18% 88%;
+    --earth-brown: 30 22% 80%;
+
+    /* Luminous gradients */
+    --gradient-mystical: linear-gradient(135deg, hsl(32 70% 42%), hsl(40 75% 55%));
+    --gradient-forest: linear-gradient(180deg, hsl(38 45% 97%), hsl(40 40% 94%));
+    --gradient-radial: radial-gradient(circle at center, hsl(36 70% 50% / 0.08), transparent);
+
+    /* Soft sacred glow — not harsh */
+    --glow-sacred: 0 0 24px hsl(36 70% 50% / 0.18), 0 0 60px hsl(36 70% 50% / 0.06);
+    --glow-subtle: 0 0 16px hsl(32 65% 45% / 0.12);
+
+    /* Light-mode-only elevation & atmosphere tokens */
+    --elevation-low: 0 1px 3px hsl(30 20% 50% / 0.06), 0 1px 2px hsl(30 20% 50% / 0.04);
+    --elevation-mid: 0 4px 12px hsl(30 20% 50% / 0.08), 0 2px 4px hsl(30 20% 50% / 0.04);
+    --elevation-high: 0 8px 30px hsl(30 20% 50% / 0.1), 0 4px 8px hsl(30 20% 50% / 0.06);
+    --surface-glow: inset 0 1px 0 hsl(40 80% 98% / 0.8);
+    --atmosphere-bg: linear-gradient(180deg, hsl(38 50% 97%) 0%, hsl(40 35% 94%) 50%, hsl(42 40% 96%) 100%);
   }
 
   .dark {
@@ -143,6 +171,11 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Luminous atmospheric body for light mode */
+  .light body {
+    background: var(--atmosphere-bg);
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -200,6 +233,61 @@ All colors MUST be HSL.
       opacity: 0.85;
       filter: drop-shadow(0 0 20px hsl(var(--mystical-glow) / 0.8));
     }
+  }
+
+  /* ── Light-mode elevation & atmosphere utilities ── */
+  .elevation-low {
+    box-shadow: var(--elevation-low, 0 1px 3px rgba(0,0,0,0.04));
+  }
+  .elevation-mid {
+    box-shadow: var(--elevation-mid, 0 4px 12px rgba(0,0,0,0.06));
+  }
+  .elevation-high {
+    box-shadow: var(--elevation-high, 0 8px 30px rgba(0,0,0,0.08));
+  }
+  .surface-glow {
+    box-shadow: var(--surface-glow, none);
+  }
+
+  /* Light-mode card polish — inner highlight + soft edge */
+  .light .card-luminous {
+    background: hsl(38 45% 97%);
+    border: 1px solid hsl(35 35% 88%);
+    box-shadow:
+      var(--elevation-mid),
+      var(--surface-glow),
+      inset 0 0 0 1px hsl(40 60% 96% / 0.5);
+  }
+
+  /* Soft glow hover for interactive elements in light mode */
+  .light .glow-hover {
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+  }
+  .light .glow-hover:hover {
+    box-shadow:
+      0 4px 16px hsl(36 70% 50% / 0.12),
+      0 0 0 1px hsl(36 60% 80% / 0.4);
+    transform: translateY(-1px);
+  }
+  .light .glow-hover:active {
+    transform: translateY(0);
+    box-shadow: var(--elevation-low);
+  }
+
+  /* Atmospheric panel background for light mode */
+  .light .panel-atmosphere {
+    background: linear-gradient(180deg, hsl(38 50% 98%) 0%, hsl(40 35% 96%) 100%);
+    border: 1px solid hsl(35 30% 86%);
+    box-shadow: var(--elevation-mid);
+  }
+
+  /* Luminous button glow */
+  @keyframes btn-glow-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(36 70% 50% / 0); }
+    50% { box-shadow: 0 0 16px 2px hsl(36 70% 50% / 0.15); }
+  }
+  .light .btn-glow {
+    animation: btn-glow-pulse 3s ease-in-out infinite;
   }
 
   @keyframes tetol-fall {
