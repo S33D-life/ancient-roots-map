@@ -158,11 +158,11 @@ const Header = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical backdrop-blur-md"
         style={{
-          background: 'linear-gradient(180deg, hsl(28 35% 18% / 0.97), hsl(25 30% 14% / 0.95))',
+          background: 'linear-gradient(180deg, hsl(140 30% 14% / 0.97), hsl(145 28% 10% / 0.95))',
         }}
       >
       <style>{`
-        .light header { background: linear-gradient(180deg, hsl(38 50% 97% / 0.97), hsl(36 40% 93% / 0.95)) !important; border-bottom-color: hsl(35 30% 86%) !important; box-shadow: 0 1px 4px hsl(30 20% 50% / 0.06) !important; }
+        .light header { background: linear-gradient(180deg, hsl(140 20% 92% / 0.97), hsl(145 18% 88% / 0.95)) !important; border-bottom-color: hsl(140 20% 78%) !important; box-shadow: 0 1px 4px hsl(140 15% 40% / 0.08) !important; }
         @keyframes emberPulse {
           0%, 100% { opacity: 0.6; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.3); }
