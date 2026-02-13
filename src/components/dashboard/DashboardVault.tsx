@@ -18,6 +18,7 @@ import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultSpeciesHearts from "./vault/VaultSpeciesHearts";
 import VaultInfluence from "./vault/VaultInfluence";
 import VaultTokenHistory from "./vault/VaultTokenHistory";
+import VaultTokenLayers from "./vault/VaultTokenLayers";
 
 interface Props {
   userId: string;
@@ -172,14 +173,11 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Active Seeds / Bloom Timers */}
       <VaultSproutingSeeds seeds={allSeeds} userId={userId} />
 
-      {/* Species Hearts Grid */}
-      <VaultSpeciesHearts
-        balances={speciesTokens.speciesBalances}
+      {/* 3-Layer Token Vault */}
+      <VaultTokenLayers
+        totalHearts={totalHearts}
+        speciesBalances={speciesTokens.speciesBalances}
         totalSpeciesHearts={speciesTokens.totalSpeciesHearts}
-      />
-
-      {/* Influence Tokens */}
-      <VaultInfluence
         globalInfluence={speciesTokens.influenceGlobal}
         influenceByHive={speciesTokens.influenceByHive}
       />
