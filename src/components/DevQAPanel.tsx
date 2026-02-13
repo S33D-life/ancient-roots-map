@@ -291,7 +291,7 @@ const DevQAPanel = () => {
       {/* Floating trigger */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-4 left-4 z-[9999] h-11 w-11 rounded-full bg-red-600 text-white shadow-lg flex items-center justify-center hover:bg-red-700 transition-colors"
+        className="fixed bottom-20 left-4 z-[9999] h-11 w-11 rounded-full bg-red-600 text-white shadow-lg flex items-center justify-center hover:bg-red-700 transition-colors"
         title="Test & Repair Mode"
         style={{ minWidth: 44, minHeight: 44 }}
       >
@@ -305,7 +305,7 @@ const DevQAPanel = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-16 left-4 z-[9999] w-[380px] max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-hidden rounded-xl border border-red-500/30 bg-card shadow-2xl"
+            className="fixed bottom-32 left-4 z-[9999] w-[380px] max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-hidden rounded-xl border border-red-500/30 bg-card shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-red-600/10">
