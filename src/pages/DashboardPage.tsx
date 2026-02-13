@@ -443,8 +443,8 @@ const DashboardPage = () => {
                   <Greenhouse />
                 </PodSection>
 
-                {/* Section: Heartwood Vault */}
-                <PodSection icon={Archive} label="Heartwood Vault" accent>
+                {/* Section: IAM Heartwood Vault */}
+                <PodSection icon={Archive} label="IAM Heartwood Vault" accent>
                   {user && <DashboardVault userId={user.id} />}
                 </PodSection>
               </div>

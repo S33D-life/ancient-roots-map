@@ -96,7 +96,7 @@ const DashboardVault = ({ userId }: Props) => {
       <div className="flex items-center gap-2.5">
         <Archive className="w-5 h-5 text-primary" />
         <div className="flex-1">
-          <h2 className="text-lg font-serif text-foreground tracking-wide">Heartwood Vault</h2>
+          <h2 className="text-lg font-serif text-foreground tracking-wide">IAM Heartwood Vault</h2>
           <p className="text-[11px] text-muted-foreground font-serif">
             {wallet.activeStaff
               ? `Anchored to ${wallet.activeStaff.id} · ${wallet.activeStaff.species}`
