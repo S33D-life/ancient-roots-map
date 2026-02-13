@@ -20,6 +20,7 @@ import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
 import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
 import StaffQRCode from "@/components/StaffQRCode";
 import CuratorAssignPanel from "@/components/CuratorAssignPanel";
+import StaffCeremony from "@/components/StaffCeremony";
 import MintingStatusDashboard from "@/components/MintingStatusDashboard";
 import OptimizedImage from "@/components/OptimizedImage";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -257,6 +258,8 @@ export default function StaffRoomGallery() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [showMinting, setShowMinting] = useState(false);
+  const [showCeremony, setShowCeremony] = useState(false);
+  const [hasLinkedStaff, setHasLinkedStaff] = useState(() => !!localStorage.getItem("linked_staff_code"));
 
   const allStaffs = useMemo(() => buildStaffItems(), []);
   const filteredStaffs = useMemo(() => filterStaffs(allStaffs, filter), [allStaffs, filter]);
@@ -600,10 +603,44 @@ export default function StaffRoomGallery() {
       </AnimatePresence>
 
       <div className="space-y-6">
+        {/* Staff Ceremony — shown when no staff connected or user triggers it */}
+        <AnimatePresence>
+          {(showCeremony || !hasLinkedStaff) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <StaffCeremony
+                onComplete={() => {
+                  setShowCeremony(false);
+                  setHasLinkedStaff(true);
+                }}
+                onCancel={() => {
+                  setShowCeremony(false);
+                  setHasLinkedStaff(true); // dismiss portal
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Controls bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <ViewToggle />
           <div className="flex items-center gap-2">
+            {hasLinkedStaff && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs font-serif gap-1.5"
+                onClick={() => setShowCeremony(!showCeremony)}
+                style={{ borderColor: "hsla(42, 60%, 50%, 0.3)", color: "hsl(42, 80%, 60%)" }}
+              >
+                <Wand2 className="w-3.5 h-3.5" />
+                {showCeremony ? "Close" : "Staff Ceremony"}
+              </Button>
+            )}
             <Select value={filter} onValueChange={(v) => { setFilter(v as StaffFilter); setActiveIndex(0); }}>
               <SelectTrigger className="w-[160px] text-xs">
                 <SelectValue />
