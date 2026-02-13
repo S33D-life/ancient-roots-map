@@ -5,7 +5,13 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
-import { fetchOverpassTrees, type ExternalTree } from "@/utils/overpassTrees";
+import {
+  fetchAllSourceTrees,
+  getEnabledSources,
+  getSourceById,
+  type ExternalTreeCandidate,
+  type BBox,
+} from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
 import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
 import LiteMapSearch from "./LiteMapSearch";
@@ -175,9 +181,12 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
   </div>`;
 }
 
-/* ── External tree popup ── */
-function buildExternalPopupHtml(tree: ExternalTree): string {
-  const displayName = tree.name || tree.species || tree.genus || "Unknown Tree";
+/* ── External tree popup (registry-aware) ── */
+function buildExternalPopupHtml(tree: ExternalTreeCandidate): string {
+  const displayName = tree.title || tree.species || tree.genus || "Unknown Tree";
+  const source = getSourceById(tree.source);
+  const sourceName = source?.attribution || tree.source;
+  const dotColor = source?.style.color || "hsl(180,60%,50%)";
   const speciesLine = tree.species
     ? `<p style="margin:0;font-size:11px;color:hsl(180,40%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>`
     : tree.genus
@@ -186,26 +195,30 @@ function buildExternalPopupHtml(tree: ExternalTree): string {
   const heightLine = tree.height
     ? `<span style="display:flex;align-items:center;gap:3px;">📏 ~${tree.height}m tall</span>`
     : "";
+  const classLine = tree.classification
+    ? `<span style="display:flex;align-items:center;gap:3px;">🏛️ ${escapeHtml(tree.classification)}</span>`
+    : "";
 
   return `<div style="padding:0;font-family:'Cinzel',serif;width:220px;background:hsl(200,15%,12%);border-radius:12px;border:1px solid hsla(180,40%,30%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
     <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;">
       <div style="display:flex;align-items:center;gap-6px;">
-        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:hsl(180,60%,50%);margin-right:6px;flex-shrink:0;"></span>
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};margin-right:6px;flex-shrink:0;"></span>
         <h3 style="margin:0;font-size:14px;color:hsl(180,50%,70%);line-height:1.3;font-weight:700;">${escapeHtml(displayName)}</h3>
       </div>
       ${speciesLine}
-      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
         ${heightLine}
-        <span style="display:flex;align-items:center;gap:3px;">🗺️ OpenStreetMap</span>
+        ${classLine}
+        <span style="display:flex;align-items:center;gap:3px;">🗺️ ${escapeHtml(sourceName)}</span>
       </div>
     </div>
     <div style="padding:6px 14px 12px;">
       <p style="margin:0;font-size:10px;color:hsl(180,30%,45%);font-family:sans-serif;line-height:1.4;">
-        This tree is from the OpenStreetMap community database. Adopt it to make it an Ancient Friend.
+        Discover recorded elders nearby. Bloom hearts with this Ancient Friend.
       </p>
     </div>
     <div style="padding:0 14px 12px;">
-      <a href="/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=18" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(200,15%,12%);background:linear-gradient(135deg,hsl(180,60%,45%),hsl(180,70%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌱 Adopt as Ancient Friend</a>
+      <a href="/map?lat=${tree.lat}&lng=${tree.lng}&zoom=18" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(200,15%,12%);background:linear-gradient(135deg,hsl(180,60%,45%),hsl(180,70%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌱 Bloom Hearts Here</a>
     </div>
   </div>`;
 }
@@ -782,7 +795,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
     };
   }, [filteredTrees, showOfferingGlow]);
 
-  // External trees layer — OSM Overpass data on viewport change
+  // External trees layer — registry-driven multi-source system
+  const enabledSources = useMemo(() => getEnabledSources(), []);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -808,8 +823,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
       const ac = new AbortController();
       externalAbortRef.current = ac;
 
+      // Use the lowest minZoom across all enabled sources
+      const minZoom = Math.min(...enabledSources.map((s) => s.minZoom));
       const zoom = map.getZoom();
-      if (zoom < 13) {
+      if (zoom < minZoom) {
         setExternalTreeCount(-1);
         extLayer.clearLayers();
         setExternalLoading(false);
@@ -818,9 +835,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
 
       setExternalLoading(true);
       const bounds = map.getBounds();
-      const trees = await fetchOverpassTrees(
-        bounds.getSouth(), bounds.getWest(), bounds.getNorth(), bounds.getEast(), ac.signal
-      );
+      const bbox: BBox = {
+        south: bounds.getSouth(),
+        west: bounds.getWest(),
+        north: bounds.getNorth(),
+        east: bounds.getEast(),
+      };
+
+      const activeSourceIds = enabledSources.map((s) => s.id);
+      const trees = await fetchAllSourceTrees(bbox, activeSourceIds, ac.signal);
 
       if (ac.signal.aborted) return;
       setExternalLoading(false);
@@ -832,16 +855,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
       );
 
       trees.forEach((et) => {
-        if (afSet.has(`${et.latitude.toFixed(5)},${et.longitude.toFixed(5)}`)) return;
+        if (afSet.has(`${et.lat.toFixed(5)},${et.lng.toFixed(5)}`)) return;
+
+        const source = getSourceById(et.source);
+        const style = source?.style;
+        const sz = style?.size || 12;
+        const half = sz / 2;
 
         const icon = L.divIcon({
-          className: "external-tree-marker",
-          html: `<div class="ext-dot" style="width:12px;height:12px;background:hsl(180,60%,45%);border:2px solid hsl(180,40%,30%);box-shadow:0 0 6px hsla(180,60%,50%,0.4);"></div>`,
-          iconSize: [12, 12],
-          iconAnchor: [6, 6],
+          className: `external-tree-marker ext-${style?.cssClass || "default"}`,
+          html: `<div class="ext-dot" style="width:${sz}px;height:${sz}px;background:${style?.color || "hsl(180,60%,45%)"};border:2px solid ${style?.borderColor || "hsl(180,40%,30%)"};box-shadow:0 0 6px ${style?.glowColor || "hsla(180,60%,50%,0.4)"};"></div>`,
+          iconSize: [sz, sz],
+          iconAnchor: [half, half],
         });
 
-        const marker = L.marker([et.latitude, et.longitude], { icon });
+        const marker = L.marker([et.lat, et.lng], { icon });
         marker.bindPopup(() => buildExternalPopupHtml(et), {
           className: "atlas-leaflet-popup",
           closeButton: true,
@@ -1005,7 +1033,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
               { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
               { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
               { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
-              { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "") : "" },
+              { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "no catalogued trees here") : `${enabledSources.length} source${enabledSources.length !== 1 ? "s" : ""}` },
             ].map((layer) => (
               <button
                 key={layer.label}
