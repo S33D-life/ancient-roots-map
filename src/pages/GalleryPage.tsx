@@ -57,6 +57,7 @@ import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import Footer from "@/components/Footer";
 import DashboardVault from "@/components/dashboard/DashboardVault";
+import { useWallet } from "@/hooks/use-wallet";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
 
@@ -131,6 +132,7 @@ const GalleryPage = () => {
   const [galleryView, setGalleryView] = useState<"collective" | "individual" | "tribe">("collective");
   const [staffFilter, setStaffFilter] = useState<string>("all");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const wallet = useWallet(currentUserId || undefined);
   const [tribeUserIds, setTribeUserIds] = useState<string[]>([]);
   const [staffCodes, setStaffCodes] = useState<string[]>([]);
   const [treesWithStaff, setTreesWithStaff] = useState<Record<string, string[]>>({});
@@ -1059,7 +1061,7 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="creators-path">
-            <CreatorsPath />
+            <CreatorsPath userId={currentUserId || undefined} activeStaff={wallet.activeStaff} />
           </TabsContent>
 
           <TabsContent value="tree-resources" className="space-y-6">

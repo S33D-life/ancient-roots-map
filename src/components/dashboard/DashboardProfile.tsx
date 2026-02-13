@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
 import { Loader2, LogOut, Save, Camera, Eye, EyeOff } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
+import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
+import { Link } from "react-router-dom";
 
 interface Profile {
   full_name: string | null;
@@ -33,6 +35,7 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { toast } = useToast();
+  const wallet = useWallet(user.id);
 
   const initials = profile?.full_name
     ?.split(" ")
@@ -181,6 +184,31 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
           </div>
         </CardContent>
       </Card>
+
+      {/* Active Staff */}
+      {wallet.activeStaff && (
+        <Card className="border-border/50 bg-card/60 backdrop-blur">
+          <CardContent className="p-5">
+            <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-serif">Linked Staff</h3>
+            <Link to={`/staff/${wallet.activeStaff.id}`} className="flex items-center gap-4 group">
+              <div className="w-14 h-14 rounded-lg overflow-hidden border-2 border-primary/40 shrink-0">
+                <img
+                  src={wallet.activeStaff.image_url || `/images/staffs/${wallet.activeStaff.species_code.toLowerCase()}.jpeg`}
+                  alt={wallet.activeStaff.species}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-serif text-sm text-foreground group-hover:text-primary transition-colors">{wallet.activeStaff.species}</p>
+                <p className="text-xs text-muted-foreground font-mono">{wallet.activeStaff.id}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  {wallet.activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${wallet.activeStaff.circle_id}`} · Staff #{wallet.activeStaff.staff_number}
+                </p>
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Wallet */}
       <div>
