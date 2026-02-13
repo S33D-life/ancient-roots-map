@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import LibraryRoomTabs from "@/components/LibraryRoomTabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map, Archive } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map, Archive, Sparkles } from "lucide-react";
 import {
   getSpiralStaffs,
   getGridStaffs,
@@ -61,6 +61,7 @@ import Footer from "@/components/Footer";
 import { deduplicateForGallery, type EncounterCluster } from "@/utils/treeEncounterClustering";
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import { useWallet } from "@/hooks/use-wallet";
+import NFTreeStudio from "@/components/NFTreeStudio";
 // TetolBreadcrumb removed — Library uses its own contextual breadcrumb
 import TetolBridge from "@/components/TetolBridge";
 
@@ -238,7 +239,8 @@ const GalleryPage = () => {
   const [showAllStaffs, setShowAllStaffs] = useState(false);
   const [showGreenhouseContent, setShowGreenhouseContent] = useState(false);
   const [showMintingProgress, setShowMintingProgress] = useState(false);
-   const [showSpiral, setShowSpiral] = useState(false);
+  const [showSpiral, setShowSpiral] = useState(false);
+  const [nftreeTarget, setNftreeTarget] = useState<{ id: string; name: string; species: string; photoUrl?: string | null } | null>(null);
   const [selectedGridStaff, setSelectedGridStaff] = useState<{ tokenId: number; code: string; speciesName: string; img: string } | null>(null);
   const [showTreeLedger, setShowTreeLedger] = useState(false);
   const [showBirdTribe, setShowBirdTribe] = useState(false);
@@ -1233,6 +1235,24 @@ const GalleryPage = () => {
                           >
                             <Share2 className="w-4 h-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Find first photo offering for this tree
+                              const photoOffering = offerings.find((o) => o.tree_id === tree.id && o.type === "photo" && o.media_url);
+                              setNftreeTarget({
+                                id: tree.id,
+                                name: tree.name,
+                                species: tree.species,
+                                photoUrl: photoOffering?.media_url || null,
+                              });
+                            }}
+                            title="NFTree Studio"
+                          >
+                            <Sparkles className="w-4 h-4" />
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1805,6 +1825,16 @@ const GalleryPage = () => {
       </Dialog>
 
       {/* Staff dialogs now handled by StaffRoomGallery component */}
+      {nftreeTarget && (
+        <NFTreeStudio
+          open={!!nftreeTarget}
+          onOpenChange={(open) => { if (!open) setNftreeTarget(null); }}
+          treeId={nftreeTarget.id}
+          treeName={nftreeTarget.name}
+          treeSpecies={nftreeTarget.species}
+          photoUrl={nftreeTarget.photoUrl}
+        />
+      )}
       <TetolBridge />
       <Footer />
     </div>

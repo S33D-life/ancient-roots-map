@@ -1,0 +1,511 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  Sparkles, Image as ImageIcon, Paintbrush, History, ExternalLink,
+  Loader2, Download, RotateCcw, Type, Palette, Layers, ZoomIn, ZoomOut,
+} from "lucide-react";
+import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
+
+interface NFTreeStudioProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  treeId: string;
+  treeName: string;
+  treeSpecies: string;
+  /** URL of a tree photo to use as the starting canvas */
+  photoUrl?: string | null;
+}
+
+// ── Art Studio Canvas ─────────────────────────────────────────────
+interface CanvasState {
+  text: string;
+  textColor: string;
+  fontSize: number;
+  filter: string;
+  overlay: string;
+}
+
+const FILTERS = [
+  { id: "none", label: "None", css: "none" },
+  { id: "sepia", label: "Sepia", css: "sepia(0.7)" },
+  { id: "mystic", label: "Mystic", css: "saturate(1.4) hue-rotate(15deg)" },
+  { id: "ancient", label: "Ancient", css: "contrast(1.1) brightness(0.9) sepia(0.3)" },
+  { id: "ember", label: "Ember", css: "saturate(1.6) hue-rotate(-10deg) brightness(1.05)" },
+  { id: "frost", label: "Frost", css: "saturate(0.7) brightness(1.15) hue-rotate(180deg)" },
+];
+
+const OVERLAYS = [
+  { id: "none", label: "None" },
+  { id: "vignette", label: "Vignette" },
+  { id: "grain", label: "Grain" },
+  { id: "golden", label: "Golden Glow" },
+];
+
+const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photoUrl }: NFTreeStudioProps) => {
+  const [activeTab, setActiveTab] = useState<string>("mint");
+  const [mintTitle, setMintTitle] = useState(treeName);
+  const [mintDescription, setMintDescription] = useState("");
+  const [minting, setMinting] = useState(false);
+
+  // Art studio state
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasState, setCanvasState] = useState<CanvasState>({
+    text: treeName,
+    textColor: "#d4a574",
+    fontSize: 32,
+    filter: "none",
+    overlay: "none",
+  });
+  const [studioImage, setStudioImage] = useState<HTMLImageElement | null>(null);
+  const [zoom, setZoom] = useState(1);
+
+  // Mint history
+  const [mintHistory, setMintHistory] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  // Load tree photo into studio
+  useEffect(() => {
+    if (!photoUrl) return;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => setStudioImage(img);
+    img.src = photoUrl;
+  }, [photoUrl]);
+
+  // Draw canvas
+  const drawCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !studioImage) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const size = 512;
+    canvas.width = size;
+    canvas.height = size;
+
+    ctx.clearRect(0, 0, size, size);
+    ctx.save();
+
+    // Apply filter
+    const filterDef = FILTERS.find((f) => f.id === canvasState.filter);
+    if (filterDef) ctx.filter = filterDef.css;
+
+    // Draw image centered & zoomed
+    const scale = Math.max(size / studioImage.width, size / studioImage.height) * zoom;
+    const dx = (size - studioImage.width * scale) / 2;
+    const dy = (size - studioImage.height * scale) / 2;
+    ctx.drawImage(studioImage, dx, dy, studioImage.width * scale, studioImage.height * scale);
+
+    ctx.restore();
+
+    // Apply overlay
+    if (canvasState.overlay === "vignette") {
+      const grad = ctx.createRadialGradient(size / 2, size / 2, size * 0.25, size / 2, size / 2, size * 0.7);
+      grad.addColorStop(0, "transparent");
+      grad.addColorStop(1, "rgba(0,0,0,0.6)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+    } else if (canvasState.overlay === "grain") {
+      const imageData = ctx.getImageData(0, 0, size, size);
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const noise = (Math.random() - 0.5) * 30;
+        imageData.data[i] += noise;
+        imageData.data[i + 1] += noise;
+        imageData.data[i + 2] += noise;
+      }
+      ctx.putImageData(imageData, 0, 0);
+    } else if (canvasState.overlay === "golden") {
+      ctx.fillStyle = "rgba(212, 165, 116, 0.15)";
+      ctx.fillRect(0, 0, size, size);
+      const grad = ctx.createRadialGradient(size * 0.3, size * 0.3, 0, size * 0.3, size * 0.3, size * 0.5);
+      grad.addColorStop(0, "rgba(255, 215, 100, 0.12)");
+      grad.addColorStop(1, "transparent");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    // Draw text
+    if (canvasState.text) {
+      ctx.font = `bold ${canvasState.fontSize}px "Playfair Display", serif`;
+      ctx.fillStyle = canvasState.textColor;
+      ctx.textAlign = "center";
+      ctx.shadowColor = "rgba(0,0,0,0.7)";
+      ctx.shadowBlur = 8;
+      ctx.fillText(canvasState.text, size / 2, size - 40, size - 40);
+      ctx.shadowBlur = 0;
+    }
+  }, [studioImage, canvasState, zoom]);
+
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
+
+  // Fetch mint history (offerings of type 'nft' for this tree)
+  useEffect(() => {
+    if (!open) return;
+    setHistoryLoading(true);
+    supabase
+      .from("offerings")
+      .select("id, title, content, media_url, nft_link, created_at, created_by")
+      .eq("tree_id", treeId)
+      .eq("type", "nft")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setMintHistory(data || []);
+        setHistoryLoading(false);
+      });
+  }, [open, treeId]);
+
+  // Mint: save as NFT offering
+  const handleMint = async () => {
+    setMinting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to mint");
+        return;
+      }
+
+      let finalUrl = photoUrl || null;
+
+      // If studio canvas has edits, export it
+      if (activeTab === "studio" && canvasRef.current) {
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvasRef.current!.toBlob(resolve, "image/jpeg", 0.92)
+        );
+        if (blob) {
+          const fileName = `${user.id}/${treeId}/nftree-${Date.now()}.jpg`;
+          const { error: upErr } = await supabase.storage
+            .from("offerings")
+            .upload(fileName, blob, { cacheControl: "3600" });
+          if (upErr) throw upErr;
+          const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(fileName);
+          finalUrl = urlData.publicUrl;
+        }
+      }
+
+      const { error } = await supabase.from("offerings").insert({
+        tree_id: treeId,
+        type: "nft" as const,
+        title: mintTitle || treeName,
+        content: mintDescription || `NFTree of ${treeName} (${treeSpecies})`,
+        media_url: finalUrl,
+        nft_link: null,
+        created_by: user.id,
+      });
+
+      if (error) throw error;
+
+      toast.success("NFTree minted!", { description: `"${mintTitle}" has been sealed on-chain` });
+      // Refresh history
+      const { data: refreshed } = await supabase
+        .from("offerings")
+        .select("id, title, content, media_url, nft_link, created_at, created_by")
+        .eq("tree_id", treeId)
+        .eq("type", "nft")
+        .order("created_at", { ascending: false });
+      setMintHistory(refreshed || []);
+      setActiveTab("history");
+    } catch (err: any) {
+      toast.error("Minting failed", { description: err.message });
+    } finally {
+      setMinting(false);
+    }
+  };
+
+  const downloadCanvas = () => {
+    if (!canvasRef.current) return;
+    const link = document.createElement("a");
+    link.download = `nftree-${treeName.replace(/\s+/g, "-").toLowerCase()}.jpg`;
+    link.href = canvasRef.current.toDataURL("image/jpeg", 0.92);
+    link.click();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto p-0">
+        <div
+          className="h-1"
+          style={{
+            background: "linear-gradient(90deg, hsl(var(--primary) / 0.3), hsl(42 70% 55%), hsl(var(--primary) / 0.3))",
+          }}
+        />
+        <div className="px-6 pt-5 pb-2">
+          <DialogHeader>
+            <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              NFTree Studio
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
+              {treeName} — {treeSpecies}
+            </p>
+          </DialogHeader>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6 pb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="mint" className="gap-1.5 text-xs font-serif">
+              <ImageIcon className="w-3.5 h-3.5" /> Mint
+            </TabsTrigger>
+            <TabsTrigger value="studio" className="gap-1.5 text-xs font-serif">
+              <Paintbrush className="w-3.5 h-3.5" /> Studio
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-1.5 text-xs font-serif">
+              <History className="w-3.5 h-3.5" /> History
+            </TabsTrigger>
+          </TabsList>
+
+          {/* ── Mint from Photo ─────────────────────────────── */}
+          <TabsContent value="mint" className="space-y-4">
+            {photoUrl ? (
+              <div className="rounded-xl overflow-hidden border border-border/40">
+                <img src={photoUrl} alt={treeName} className="w-full aspect-square object-cover" />
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-border/60 flex items-center justify-center aspect-square bg-muted/20">
+                <p className="text-sm text-muted-foreground font-serif">No photo available — use Studio to create artwork</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs font-serif text-muted-foreground">Title</Label>
+                <Input
+                  value={mintTitle}
+                  onChange={(e) => setMintTitle(e.target.value)}
+                  placeholder="NFTree title"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="text-xs font-serif text-muted-foreground">Description</Label>
+                <Textarea
+                  value={mintDescription}
+                  onChange={(e) => setMintDescription(e.target.value)}
+                  placeholder="Tell the story of this NFTree..."
+                  rows={3}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={handleMint}
+              disabled={minting || !mintTitle.trim()}
+              className="w-full gap-2 font-serif"
+            >
+              {minting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {minting ? "Minting…" : "Mint NFTree"}
+            </Button>
+          </TabsContent>
+
+          {/* ── Art Studio ──────────────────────────────────── */}
+          <TabsContent value="studio" className="space-y-4">
+            <div className="rounded-xl overflow-hidden border border-border/40 bg-black/20 relative">
+              <canvas
+                ref={canvasRef}
+                className="w-full aspect-square"
+                style={{ imageRendering: "auto" }}
+              />
+              {!studioImage && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground font-serif">
+                    {photoUrl ? "Loading image…" : "Add a photo offering first to use the studio"}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {studioImage && (
+              <>
+                {/* Filters */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-serif text-muted-foreground flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5" /> Filter
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {FILTERS.map((f) => (
+                      <Button
+                        key={f.id}
+                        variant={canvasState.filter === f.id ? "default" : "outline"}
+                        size="sm"
+                        className="text-[10px] h-7 font-serif"
+                        onClick={() => setCanvasState((s) => ({ ...s, filter: f.id }))}
+                      >
+                        {f.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Overlays */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-serif text-muted-foreground flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5" /> Overlay
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {OVERLAYS.map((o) => (
+                      <Button
+                        key={o.id}
+                        variant={canvasState.overlay === o.id ? "default" : "outline"}
+                        size="sm"
+                        className="text-[10px] h-7 font-serif"
+                        onClick={() => setCanvasState((s) => ({ ...s, overlay: o.id }))}
+                      >
+                        {o.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Text overlay */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-serif text-muted-foreground flex items-center gap-1.5">
+                    <Type className="w-3.5 h-3.5" /> Text Overlay
+                  </Label>
+                  <Input
+                    value={canvasState.text}
+                    onChange={(e) => setCanvasState((s) => ({ ...s, text: e.target.value }))}
+                    placeholder="Inscribe text on your NFTree"
+                    className="text-sm"
+                  />
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={canvasState.textColor}
+                      onChange={(e) => setCanvasState((s) => ({ ...s, textColor: e.target.value }))}
+                      className="w-8 h-8 rounded border-0 cursor-pointer"
+                    />
+                    <div className="flex items-center gap-1.5 flex-1">
+                      <span className="text-[10px] text-muted-foreground">Size</span>
+                      <input
+                        type="range"
+                        min={16}
+                        max={64}
+                        value={canvasState.fontSize}
+                        onChange={(e) => setCanvasState((s) => ({ ...s, fontSize: +e.target.value }))}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Zoom */}
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}>
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </Button>
+                  <span className="text-xs text-muted-foreground font-mono">{(zoom * 100).toFixed(0)}%</span>
+                  <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.min(3, z + 0.1))}>
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => { setZoom(1); setCanvasState({ text: treeName, textColor: "#d4a574", fontSize: 32, filter: "none", overlay: "none" }); }}>
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </Button>
+                  <div className="flex-1" />
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs font-serif" onClick={downloadCanvas}>
+                    <Download className="w-3.5 h-3.5" /> Save
+                  </Button>
+                </div>
+
+                {/* Mint from Studio */}
+                <div className="space-y-3 pt-2 border-t border-border/30">
+                  <div>
+                    <Label className="text-xs font-serif text-muted-foreground">Title</Label>
+                    <Input
+                      value={mintTitle}
+                      onChange={(e) => setMintTitle(e.target.value)}
+                      placeholder="NFTree title"
+                      className="mt-1"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleMint}
+                    disabled={minting || !mintTitle.trim()}
+                    className="w-full gap-2 font-serif"
+                  >
+                    {minting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {minting ? "Minting from Studio…" : "Mint Studio NFTree"}
+                  </Button>
+                </div>
+              </>
+            )}
+          </TabsContent>
+
+          {/* ── Mint History ────────────────────────────────── */}
+          <TabsContent value="history" className="space-y-4">
+            {historyLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-primary/50" />
+              </div>
+            ) : mintHistory.length === 0 ? (
+              <div className="text-center py-12 space-y-2">
+                <Sparkles className="w-8 h-8 text-muted-foreground/30 mx-auto" />
+                <p className="text-sm text-muted-foreground font-serif">No NFTrees minted for this tree yet</p>
+                <Button variant="outline" size="sm" className="mt-2 font-serif" onClick={() => setActiveTab("mint")}>
+                  Mint the first one
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground font-serif">
+                  {mintHistory.length} NFTree{mintHistory.length !== 1 ? "s" : ""} minted
+                </p>
+                {mintHistory.map((item) => (
+                  <Card key={item.id} className="border-border/40 bg-card/50 overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="flex gap-3">
+                        {item.media_url && (
+                          <img
+                            src={item.media_url}
+                            alt={item.title}
+                            className="w-20 h-20 object-cover shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 py-3 pr-3 space-y-1">
+                          <p className="text-sm font-serif font-medium text-foreground line-clamp-1">
+                            {item.title}
+                          </p>
+                          {item.content && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">{item.content}</p>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-muted-foreground/60 font-mono">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </span>
+                            {item.nft_link && (
+                              <a
+                                href={item.nft_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                              >
+                                View on-chain <ExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default NFTreeStudio;
