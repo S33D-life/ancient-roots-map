@@ -78,6 +78,7 @@ interface Tree {
   grove_scale: string | null;
   created_at: string;
   created_by: string | null;
+  project_name: string | null;
 }
 
 interface Offering {
@@ -213,6 +214,8 @@ const GalleryPage = () => {
   const [isOfferingDialogOpen, setIsOfferingDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
+  const [lineageFilter, setLineageFilter] = useState<string>("all");
+  const [projectFilter, setProjectFilter] = useState<string>("all");
   const [galleryView, setGalleryView] = useState<"collective" | "individual" | "tribe">("collective");
   const [staffFilter, setStaffFilter] = useState<string>("all");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -764,6 +767,8 @@ const GalleryPage = () => {
   };
 
   const uniqueSpecies = Array.from(new Set(trees.map(t => t.species)));
+  const uniqueLineages = Array.from(new Set(trees.filter(t => t.lineage).map(t => t.lineage!))).sort();
+  const uniqueProjects = Array.from(new Set(trees.filter(t => t.project_name).map(t => t.project_name!))).sort();
 
   const filteredTrees = trees.filter(tree => {
     const matchesSearch = 
@@ -772,6 +777,10 @@ const GalleryPage = () => {
       tree.what3words.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesSpecies = speciesFilter === "all" || tree.species === speciesFilter;
+
+    const matchesLineage = lineageFilter === "all" || tree.lineage === lineageFilter;
+
+    const matchesProject = projectFilter === "all" || tree.project_name === projectFilter;
 
     // View filter
     let matchesView = true;
@@ -784,7 +793,7 @@ const GalleryPage = () => {
     // Staff filter
     const matchesStaff = staffFilter === "all" || (treesWithStaff[tree.id]?.includes(staffFilter) ?? false);
     
-    return matchesSearch && matchesSpecies && matchesView && matchesStaff;
+    return matchesSearch && matchesSpecies && matchesLineage && matchesProject && matchesView && matchesStaff;
   });
 
   const getOfferingIcon = (type: string) => {
@@ -1019,6 +1028,32 @@ const GalleryPage = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {uniqueLineages.length > 0 && (
+                <Select value={lineageFilter} onValueChange={setLineageFilter}>
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectValue placeholder="Filter by lineage" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Lineages</SelectItem>
+                    {uniqueLineages.map((l) => (
+                      <SelectItem key={l} value={l}>{l}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              {uniqueProjects.length > 0 && (
+                <Select value={projectFilter} onValueChange={setProjectFilter}>
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectValue placeholder="Filter by project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Projects</SelectItem>
+                    {uniqueProjects.map((p) => (
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               {staffCodes.length > 0 && (
                 <Select value={staffFilter} onValueChange={setStaffFilter}>
                   <SelectTrigger className="w-full md:w-[200px]">

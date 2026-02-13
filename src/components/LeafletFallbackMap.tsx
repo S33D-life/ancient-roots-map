@@ -345,6 +345,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   // Filter state
   const [species, setSpecies] = useState("all");
   const [perspective, setPerspective] = useState<LitePerspective>("collective");
+  const [lineageFilter, setLineageFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState("all");
 
   // Layer visibility toggles
   const [showSeeds, setShowSeeds] = useState(true);
@@ -366,6 +368,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return counts;
   }, [trees]);
 
+  const availableLineages = useMemo(() => {
+    const set = new Set<string>();
+    trees.forEach((t: any) => { if (t.lineage) set.add(t.lineage); });
+    return Array.from(set).sort();
+  }, [trees]);
+
+  const availableProjects = useMemo(() => {
+    const set = new Set<string>();
+    trees.forEach((t: any) => { if (t.project_name) set.add(t.project_name); });
+    return Array.from(set).sort();
+  }, [trees]);
+
   const filteredTrees = useMemo(() => {
     let result = trees;
     if (perspective === "personal" && userId) {
@@ -374,8 +388,14 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     if (species !== "all") {
       result = result.filter((t) => t.species.toLowerCase() === species.toLowerCase());
     }
+    if (lineageFilter !== "all") {
+      result = result.filter((t: any) => t.lineage === lineageFilter);
+    }
+    if (projectFilter !== "all") {
+      result = result.filter((t: any) => t.project_name === projectFilter);
+    }
     return result;
-  }, [trees, species, perspective, userId]);
+  }, [trees, species, perspective, lineageFilter, projectFilter, userId]);
 
   // Stable references for offering counts and photos
   const offeringCountsRef = useRef(offeringCounts);
@@ -1125,6 +1145,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onPerspectiveChange={setPerspective}
         speciesCounts={speciesCounts}
         totalVisible={filteredTrees.length}
+        lineageFilter={lineageFilter}
+        onLineageChange={setLineageFilter}
+        availableLineages={availableLineages}
+        projectFilter={projectFilter}
+        onProjectChange={setProjectFilter}
+        availableProjects={availableProjects}
       />
 
       {/* Discovery cue */}
