@@ -21,8 +21,8 @@ interface CacheEntry {
 }
 
 const CACHE = new Map<string, CacheEntry>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-const MAX_RESULTS = 500;
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes — reduce redundant API calls
+const MAX_RESULTS = 300; // cap results for faster parsing & rendering
 
 function bboxKey(s: number, w: number, n: number, e: number): string {
   return `${s.toFixed(3)},${w.toFixed(3)},${n.toFixed(3)},${e.toFixed(3)}`;
@@ -43,10 +43,10 @@ export async function fetchOverpassTrees(
     return cached.trees;
   }
 
-  // Limit bbox area to prevent excessive queries (roughly 0.5° × 0.5° max)
+  // Limit bbox area to prevent excessive queries (roughly 0.3° × 0.3° max)
   const latSpan = north - south;
   const lngSpan = east - west;
-  if (latSpan > 0.6 || lngSpan > 0.6) {
+  if (latSpan > 0.35 || lngSpan > 0.35) {
     return []; // Too zoomed out — don't query
   }
 

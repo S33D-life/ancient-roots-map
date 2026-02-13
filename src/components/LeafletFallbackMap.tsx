@@ -561,7 +561,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       animate: true,
-      animateAddingMarkers: false,
+      animateAddingMarkers: false, // critical: prevents costly re-layout animations
       disableClusteringAtZoom: isLineageFocused ? 16 : 18,
       chunkedLoading: true,
       chunkInterval: 80,
@@ -1105,7 +1105,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const onMoveEnd = () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(loadTrees, 600);
+      debounceTimer = setTimeout(loadTrees, 1000); // longer debounce to reduce Overpass load
     };
 
     map.on("moveend", onMoveEnd);
