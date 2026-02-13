@@ -50,7 +50,6 @@ import greenhouseWindow from "@/assets/greenhouse-window.png";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
-import musicRoomWindow from "@/assets/music-room-window.png";
 import ancientFriendsWindow from "@/assets/ancient-friends-window.jpeg";
 import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
@@ -952,10 +951,6 @@ const GalleryPage = () => {
             )}
           {/* Music Room — Earth Radio powered by offerings */}
           <TabsContent value="music-room" className="space-y-6">
-            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
-              <img src={musicRoomWindow} alt="Music Room" className="w-full h-auto object-contain" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
             <EarthRadioRoom />
           </TabsContent>
 
