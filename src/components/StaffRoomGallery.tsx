@@ -19,6 +19,7 @@ import {
 import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
 import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
 import StaffQRCode from "@/components/StaffQRCode";
+import CuratorAssignPanel from "@/components/CuratorAssignPanel";
 import MintingStatusDashboard from "@/components/MintingStatusDashboard";
 import OptimizedImage from "@/components/OptimizedImage";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -193,6 +194,9 @@ function StaffDetailContent({ staff, onViewOnChain, onViewLegend }: { staff: Sta
           <TreeDeciduous className="w-3.5 h-3.5" /> Linked Trees
         </Button>
       </div>
+
+      {/* Curator-only assign panel */}
+      <CuratorAssignPanel staffCode={staff.code} />
     </div>
   );
 }
