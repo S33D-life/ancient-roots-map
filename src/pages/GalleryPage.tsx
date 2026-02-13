@@ -1173,6 +1173,19 @@ const GalleryPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
 
+            {/* Tree Ledger - Click to open */}
+            <div
+              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
+              onClick={() => setShowTreeLedger(!showTreeLedger)}
+            >
+              <div className="p-6 bg-card/50 backdrop-blur border-mystical">
+                <div className="flex flex-col items-center justify-center py-4">
+                  <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{showTreeLedger ? "Click to close" : "Click to open the Ledger"}</p>
+                </div>
+              </div>
+            </div>
+
             {/* Heart Reservoir Rankings */}
             <TreeReservoirLeaderboard />
 
@@ -1205,18 +1218,6 @@ const GalleryPage = () => {
               </div>
             )}
 
-            {/* Tree Ledger - Click to open */}
-            <div
-              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
-              onClick={() => setShowTreeLedger(!showTreeLedger)}
-            >
-              <div className="p-6 bg-card/50 backdrop-blur border-mystical">
-                <div className="flex flex-col items-center justify-center py-4">
-                  <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{showTreeLedger ? "Click to close" : "Click to open the Ledger"}</p>
-                </div>
-              </div>
-            </div>
             {showTreeLedger && (
               <div className="animate-fade-in">
                 <Card className="border-mystical bg-card/50 backdrop-blur">
