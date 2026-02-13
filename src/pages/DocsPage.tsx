@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BookOpen, Smartphone, Globe, ArrowRight, AlertTriangle, Lightbulb, Code, Heart, Leaf, Shield, TreePine } from "lucide-react";
+import { BookOpen, Smartphone, Globe, ArrowRight, AlertTriangle, Lightbulb, Code, Heart, Leaf, Shield, TreePine, Flame, Eye, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -16,13 +16,114 @@ const DocsPage = () => (
         </p>
       </div>
 
-      <Tabs defaultValue="share-sheet">
+      <Tabs defaultValue="quick-start">
         <TabsList className="w-full justify-start bg-card/40 flex-wrap">
+          <TabsTrigger value="quick-start" className="font-serif text-xs">Quick Start</TabsTrigger>
           <TabsTrigger value="rewards" className="font-serif text-xs">Rewards Guide</TabsTrigger>
           <TabsTrigger value="share-sheet" className="font-serif text-xs">Share Sheet</TabsTrigger>
           <TabsTrigger value="future" className="font-serif text-xs">Future Path</TabsTrigger>
           <TabsTrigger value="architecture" className="font-serif text-xs">Architecture</TabsTrigger>
         </TabsList>
+
+        {/* Quick Start */}
+        <TabsContent value="quick-start" className="space-y-4 mt-4">
+          <Card className="border-border/30 bg-card/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="font-serif text-base flex items-center gap-2">
+                <Flame className="h-4 w-4 text-primary" />
+                Your First Rewards in 5 Minutes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm font-serif text-foreground/70 space-y-4">
+              <p>Follow these steps to earn your first S33D Hearts, Species Hearts, and Influence tokens.</p>
+
+              <div className="space-y-3">
+                <Step number={1} title="Encounter — Find a Tree">
+                  <p>Open the Map and locate an ancient tree near you. Tap the "+" button to begin the mapping ritual. Identify the species — this is the <strong>Encounter</strong> step.</p>
+                </Step>
+                <Step number={2} title="Reflection — Map & Save">
+                  <p>Add the tree's location, name, and details. Hit save to plant the record. You'll immediately earn <strong>10 S33D Hearts + 3 Species Hearts + 2 Influence</strong>.</p>
+                </Step>
+                <Step number={3} title="Offering — Add a Photo or Poem">
+                  <p>Add a photo to your new tree for a <strong>+1 S33D bonus</strong>, or leave a poem/song for <strong>+2 S33D + 1 Species Heart</strong>. Each offering type earns independently.</p>
+                </Step>
+                <Step number={4} title="Check Your Reward Receipt">
+                  <p>After each action a <strong>Reward Receipt</strong> appears, showing exactly which tokens were issued. Look for the 🔥 Ember Pulse on the Hearth icon — it signals uncollected rewards.</p>
+                </Step>
+              </div>
+
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1">
+                <p className="text-xs font-medium text-primary">First-Tree Milestone</p>
+                <p className="text-xs text-foreground/60">
+                  Mapping your very first tree triggers a commemorative <strong>"Your grove has begun"</strong> overlay with the global collective tree count. This is your initiation into the S33D ecosystem.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/30 bg-card/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="font-serif text-base flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                Understanding Daily Caps
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm font-serif text-foreground/70 space-y-3">
+              <p>Caps keep the economy fair. Here's what to know day-to-day:</p>
+
+              <div className="rounded-lg bg-secondary/10 p-3 space-y-2 text-xs">
+                <div className="flex justify-between items-center border-b border-border/10 pb-1">
+                  <span className="font-medium text-foreground/80">Action</span>
+                  <span className="font-medium text-foreground/80">Daily Limit</span>
+                </div>
+                <div className="flex justify-between"><span className="text-foreground/60">Map a tree</span><span className="text-primary">Unlimited</span></div>
+                <div className="flex justify-between"><span className="text-foreground/60">Check-in (per tree)</span><span className="text-foreground/80">3 / day</span></div>
+                <div className="flex justify-between"><span className="text-foreground/60">Offerings</span><span className="text-primary">Unlimited</span></div>
+                <div className="flex justify-between"><span className="text-foreground/60">Curation</span><span className="text-primary">Unlimited</span></div>
+                <div className="flex justify-between"><span className="text-foreground/60">Seed collection</span><span className="text-foreground/80">1 per seed (once)</span></div>
+              </div>
+
+              <ul className="list-disc list-inside space-y-1 text-foreground/60 pl-2 text-xs">
+                <li>Check-in caps reset at <strong>00:00 UTC</strong> each day.</li>
+                <li>When capped, the Reward Receipt shows <Badge variant="outline" className="text-[8px] mx-1">capped</Badge> — no tokens are minted until reset.</li>
+                <li>Visiting <strong>different trees</strong> on the same day earns 3 check-ins each — the cap is per tree, not global.</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/30 bg-card/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="font-serif text-base flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" />
+                Viewing Per-Tree Rewards
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm font-serif text-foreground/70 space-y-3">
+              <p>Every tree tracks its own reward history. Here's where to find it:</p>
+
+              <div className="space-y-3">
+                <Step number={1} title="Tree Detail Page">
+                  <p>Tap any tree on the Map or from your Dashboard → Trees. The <strong>Heart Pool</strong> section shows total hearts accumulated for that tree and any available windfall.</p>
+                </Step>
+                <Step number={2} title="Hearth → Rewards Tab">
+                  <p>Your personal Hearth dashboard aggregates all rewards across every tree you've contributed to. The <strong>Rewards</strong> tab lists each transaction with timestamp and token type.</p>
+                </Step>
+                <Step number={3} title="IAM Heartwood Vault">
+                  <p>The Vault shows your complete token balance broken down by <strong>S33D Hearts</strong>, <strong>Species Hearts</strong> (per hive), and <strong>Influence</strong>. The Species tab shows your standing within each hive.</p>
+                </Step>
+              </div>
+
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1">
+                <p className="text-xs font-medium text-primary flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> Return Pill
+                </p>
+                <p className="text-xs text-foreground/60">
+                  Use the <strong>Return Pill</strong> in the dashboard to navigate back to the last tree you visited — handy for checking if your recent offering was rewarded.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Rewards Guide */}
         <TabsContent value="rewards" className="space-y-4 mt-4">
