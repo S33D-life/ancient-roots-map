@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      birdsong_offerings: {
+        Row: {
+          audio_cid: string | null
+          audio_url: string
+          chain_tx_hash: string | null
+          confidence: number | null
+          created_at: string
+          duration_seconds: number | null
+          ebird_code: string | null
+          id: string
+          metadata_cid: string | null
+          model_version: string | null
+          predictions: Json | null
+          season: string | null
+          species_common: string | null
+          species_scientific: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          audio_cid?: string | null
+          audio_url: string
+          chain_tx_hash?: string | null
+          confidence?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          ebird_code?: string | null
+          id?: string
+          metadata_cid?: string | null
+          model_version?: string | null
+          predictions?: Json | null
+          season?: string | null
+          species_common?: string | null
+          species_scientific?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          audio_cid?: string | null
+          audio_url?: string
+          chain_tx_hash?: string | null
+          confidence?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          ebird_code?: string | null
+          id?: string
+          metadata_cid?: string | null
+          model_version?: string | null
+          predictions?: Json | null
+          season?: string | null
+          species_common?: string | null
+          species_scientific?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "birdsong_offerings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       book_catalog: {
         Row: {
           author: string
