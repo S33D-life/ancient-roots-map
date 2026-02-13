@@ -60,7 +60,7 @@ import seedCellarWindow from "@/assets/seed-cellar-window.png";
 import Footer from "@/components/Footer";
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import { useWallet } from "@/hooks/use-wallet";
-import TetolBreadcrumb from "@/components/TetolBreadcrumb";
+// TetolBreadcrumb removed — Library uses its own contextual breadcrumb
 import TetolBridge from "@/components/TetolBridge";
 
 interface Tree {
@@ -880,37 +880,71 @@ const GalleryPage = () => {
     );
   }
 
+  // Room label lookup for breadcrumb
+  const ROOM_LABELS: Record<string, string> = {
+    "staff-room": "Staff Room",
+    "gallery": "Ancient Friends",
+    "music-room": "Music Room",
+    "greenhouse": "Greenhouse",
+    "wishlist": "Wishing Tree",
+    "seed-cellar": "Seed Cellar",
+    "creators-path": "Creator's Path",
+    "tree-resources": "Resources",
+    "ledger": "Ledger",
+    "vault": "Vaults",
+  };
+
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, hsl(220 40% 12%) 0%, hsl(160 50% 18%) 25%, hsl(120 40% 22%) 45%, hsl(80 45% 20%) 60%, hsl(50 60% 25%) 80%, hsl(220 35% 15%) 100%)' }}>
       <Header />
-      <TetolBreadcrumb />
+
       <main className="container mx-auto px-4 pt-28 pb-12">
+        {/* Breadcrumb — calm, contextual */}
+        <nav
+          aria-label="Library breadcrumb"
+          className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground/70 mb-6 select-none"
+        >
+          <button
+            onClick={() => setShowLanding(true)}
+            className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded px-1"
+          >
+            Heartwood Library
+          </button>
+          {ROOM_LABELS[activeTab] && (
+            <>
+              <span className="text-border/50" aria-hidden>›</span>
+              <span className="text-foreground/60 truncate max-w-[200px]" aria-current="page">
+                {ROOM_LABELS[activeTab]}
+              </span>
+            </>
+          )}
+        </nav>
+
+        {/* Heartwood Library Sign — crafted plaque anchor */}
         <div className="mb-8 flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowLanding(true)} className="text-amber-400/70 hover:text-amber-300 transition-colors font-serif text-sm border border-amber-700/30 rounded-lg px-3 py-1.5 hover:border-amber-600/50" style={{ background: 'hsl(28 30% 12% / 0.8)' }}>
-              ← Heartwood
-            </button>
             <div>
-              <div>
-                <h1 className="text-4xl font-serif font-bold text-mystical mb-0">
-                  Heartwood
-                </h1>
-                <div className="flex items-center gap-2">
-                  <span className="text-4xl font-serif font-bold text-mystical">Library</span>
-                  <VaultSeal
-                    isRevealed={vaultRevealed}
-                    onReveal={() => { setVaultRevealed(true); handleTabChange("vault"); }}
-                    onHide={() => setVaultRevealed(false)}
-                  />
-                </div>
+              <h1
+                className="text-3xl md:text-4xl font-serif font-bold tracking-wide leading-tight"
+                style={{
+                  color: 'hsl(35 70% 65%)',
+                  textShadow: '0 2px 12px hsl(35 60% 20% / 0.6), 0 0 30px hsl(35 80% 30% / 0.3)',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                Heartwood Library
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <VaultSeal
+                  isRevealed={vaultRevealed}
+                  onReveal={() => { setVaultRevealed(true); handleTabChange("vault"); }}
+                  onHide={() => setVaultRevealed(false)}
+                />
               </div>
-              <p className="text-muted-foreground hidden md:block">
-                Explore all mapped trees and manage the tree ledger
-              </p>
             </div>
           </div>
           <div className="hidden md:block shrink-0">
-            <img src={heartwoodLibrary} alt="Heartwood Library" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" />
+            <img src={heartwoodLibrary} alt="" className="h-24 w-36 object-cover rounded-lg border border-mystical shadow-lg" aria-hidden="true" />
           </div>
         </div>
 
