@@ -6,6 +6,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import DashboardVault from "@/components/dashboard/DashboardVault";
+import PageShell from "@/components/PageShell";
+import ContextualWhisper from "@/components/ContextualWhisper";
 import hearthBg from "@/assets/hearth-bg.jpeg";
 import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
@@ -48,13 +50,21 @@ const VaultPage = () => {
 
       <Header />
 
-      <main className="container mx-auto px-4 pt-24 pb-12 relative z-10">
+      <main className="container mx-auto px-4 pt-24 pb-20 relative z-10">
+        <PageShell>
         <div className="max-w-5xl mx-auto">
           <TetolBreadcrumb />
           <DashboardVault userId={userId} />
         </div>
+        </PageShell>
       </main>
 
+      <ContextualWhisper
+        id="vault-staff"
+        message="Connect your wallet to link your Staff and unlock deeper grove stewardship."
+        delay={6000}
+        position="bottom-center"
+      />
       <Footer />
     </div>
   );
