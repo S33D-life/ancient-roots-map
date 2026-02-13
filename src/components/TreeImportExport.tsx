@@ -2,83 +2,59 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
-import { convertToCoordinates } from "@/utils/what3words";
+import { generateCSV, downloadCSV, TreeCSVRow } from "@/utils/csvHandler";
 import PhotoImport from "./PhotoImport";
 import PreloadCollectiveButton from "./PreloadCollectiveButton";
+import CSVImportPreview from "./CSVImportPreview";
 import { Upload, Download, Loader2, MapPin } from "lucide-react";
+import { convertToCoordinates } from "@/utils/what3words";
 
 const TreeImportExport = () => {
-  const [isImporting, setIsImporting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
   const [batchSize, setBatchSize] = useState(50);
   const { toast } = useToast();
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  /* ── Confirmed import from preview ── */
+  const handleConfirmedImport = async (rows: TreeCSVRow[]) => {
+    const { data: { user } } = await supabase.auth.getUser();
 
-    setIsImporting(true);
-
-    try {
-      const text = await file.text();
-      const csvRows = parseCSV(text);
-
-      if (csvRows.length === 0) {
-        toast({
-          title: "Invalid CSV",
-          description: "No valid tree data found in the CSV file",
-          variant: "destructive",
-        });
-        setIsImporting(false);
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "You must be logged in to import trees",
-          variant: "destructive",
-        });
-        setIsImporting(false);
-        return;
-      }
-
-      // Enrich species and insert trees without coordinates - they'll be converted later
-      const enrichedCount = csvRows.filter(t => t.lineage).length;
-      const treesToInsert = csvRows.map(tree => ({
-        ...tree,
-        created_by: user.id,
-        latitude: null,
-        longitude: null,
-      }));
-
-      const { error } = await supabase
-        .from('trees')
-        .insert(treesToInsert);
-
-      if (error) throw error;
-
+    if (!user) {
       toast({
-        title: "Import successful",
-        description: `Imported ${csvRows.length} trees${enrichedCount > 0 ? ` (${enrichedCount} enriched with scientific names)` : ''}. Use "Convert Coordinates" to add locations.`,
-      });
-
-      // Reset the input
-      event.target.value = '';
-    } catch (error) {
-      console.error('Import error:', error);
-      toast({
-        title: "Import failed",
-        description: "An error occurred while importing the CSV",
+        title: "Authentication required",
+        description: "You must be logged in to import trees",
         variant: "destructive",
       });
-    } finally {
-      setIsImporting(false);
+      return;
     }
+
+    const enrichedCount = rows.filter((t) => t.lineage).length;
+    const treesToInsert = rows.map((tree) => ({
+      ...tree,
+      created_by: user.id,
+      latitude: null,
+      longitude: null,
+    }));
+
+    const { error } = await supabase.from("trees").insert(treesToInsert);
+
+    if (error) {
+      toast({
+        title: "Import failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+
+    toast({
+      title: "Import successful",
+      description: `Imported ${rows.length} trees${
+        enrichedCount > 0 ? ` (${enrichedCount} enriched with scientific names)` : ""
+      }. Use "Convert Coordinates" to add locations.`,
+    });
+    setShowPreview(false);
   };
 
   const handleConvertCoordinates = async () => {
@@ -86,7 +62,7 @@ const TreeImportExport = () => {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         toast({
           title: "Authentication required",
@@ -97,13 +73,12 @@ const TreeImportExport = () => {
         return;
       }
 
-      // Fetch trees without coordinates (limited by batch size)
       const { data: trees, error: fetchError } = await supabase
-        .from('trees')
-        .select('*')
-        .is('latitude', null)
-        .is('longitude', null)
-        .eq('created_by', user.id)
+        .from("trees")
+        .select("*")
+        .is("latitude", null)
+        .is("longitude", null)
+        .eq("created_by", user.id)
         .limit(batchSize);
 
       if (fetchError) throw fetchError;
@@ -128,26 +103,23 @@ const TreeImportExport = () => {
       for (const tree of trees) {
         try {
           const coords = await convertToCoordinates(tree.what3words);
-          
+
           if (coords) {
             const { error: updateError } = await supabase
-              .from('trees')
+              .from("trees")
               .update({
                 latitude: coords.coordinates.lat,
                 longitude: coords.coordinates.lng,
               })
-              .eq('id', tree.id);
+              .eq("id", tree.id);
 
-            if (!updateError) {
-              converted++;
-            } else {
-              failed++;
-            }
+            if (!updateError) converted++;
+            else failed++;
           } else {
             failed++;
           }
         } catch (error) {
-          if (error instanceof Error && error.message === 'quota_exceeded') {
+          if (error instanceof Error && error.message === "quota_exceeded") {
             toast({
               title: "API quota exceeded",
               description: `Converted ${converted} of ${trees.length} trees before hitting quota. Try again later.`,
@@ -162,10 +134,10 @@ const TreeImportExport = () => {
 
       toast({
         title: "Conversion complete",
-        description: `Converted ${converted} trees${failed > 0 ? `, ${failed} failed` : ''}`,
+        description: `Converted ${converted} trees${failed > 0 ? `, ${failed} failed` : ""}`,
       });
     } catch (error) {
-      console.error('Conversion error:', error);
+      console.error("Conversion error:", error);
       toast({
         title: "Conversion failed",
         description: "An error occurred while converting coordinates",
@@ -181,9 +153,9 @@ const TreeImportExport = () => {
 
     try {
       const { data: trees, error } = await supabase
-        .from('trees')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("trees")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
@@ -198,7 +170,7 @@ const TreeImportExport = () => {
       }
 
       const csv = generateCSV(trees);
-      const filename = `ancient-friends-trees-${new Date().toISOString().split('T')[0]}.csv`;
+      const filename = `ancient-friends-trees-${new Date().toISOString().split("T")[0]}.csv`;
       downloadCSV(csv, filename);
 
       toast({
@@ -206,7 +178,7 @@ const TreeImportExport = () => {
         description: `Exported ${trees.length} trees to ${filename}`,
       });
     } catch (error) {
-      console.error('Export error:', error);
+      console.error("Export error:", error);
       toast({
         title: "Export failed",
         description: "An error occurred while exporting the CSV",
@@ -217,40 +189,34 @@ const TreeImportExport = () => {
     }
   };
 
+  /* ── Preview mode: full-width staged import ── */
+  if (showPreview) {
+    return (
+      <div className="w-full">
+        <CSVImportPreview
+          onConfirm={handleConfirmedImport}
+          onCancel={() => setShowPreview(false)}
+        />
+      </div>
+    );
+  }
+
+  /* ── Compact toolbar ── */
   return (
     <div className="absolute top-20 left-4 z-10 flex gap-2">
       <PhotoImport />
-      
+
       <PreloadCollectiveButton />
-      
-      <div className="relative">
-        <input
-          type="file"
-          accept=".csv"
-          onChange={handleImport}
-          className="hidden"
-          id="csv-upload"
-          disabled={isImporting}
-        />
-        <label htmlFor="csv-upload">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={isImporting}
-            className="cursor-pointer"
-            asChild
-          >
-            <span>
-              {isImporting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Upload className="h-4 w-4 mr-2" />
-              )}
-              Import CSV
-            </span>
-          </Button>
-        </label>
-      </div>
+
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => setShowPreview(true)}
+        className="cursor-pointer gap-1.5"
+      >
+        <Upload className="h-4 w-4" />
+        Import CSV
+      </Button>
 
       <div className="flex gap-1">
         <select
