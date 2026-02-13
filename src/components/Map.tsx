@@ -1220,19 +1220,21 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
       <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
 
-      {/* Staff Room button — bottom-right, glowing staff icon */}
+      {/* Staff Room button — bottom-right corner, golden glowing line */}
       <button
         onClick={() => navigate("/library/staff-room")}
-        className="absolute bottom-4 right-2 z-10 w-11 h-11 rounded-full flex items-center justify-center staff-glow-btn transition-transform hover:scale-110 active:scale-95"
-        style={{
-          background: "radial-gradient(circle, hsla(42,80%,40%,0.25), hsla(30,30%,12%,0.9))",
-          border: "1.5px solid hsla(42,50%,45%,0.5)",
-          backdropFilter: "blur(6px)",
-        }}
+        className="absolute bottom-2 right-2 z-10 w-8 h-14 flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
         title="Staff Room"
         aria-label="Staff Room"
+        style={{ background: "transparent", border: "none" }}
       >
-        <span className="text-xl leading-none" style={{ filter: "drop-shadow(0 0 6px hsla(42,80%,50%,0.7))" }}>🪄</span>
+        <div
+          className="w-[2px] h-10 rounded-full"
+          style={{
+            background: "linear-gradient(to bottom, hsla(42,80%,60%,0.9), hsla(42,60%,35%,0.4))",
+            boxShadow: "0 0 6px 1px hsla(42,80%,50%,0.5), 0 0 14px 2px hsla(42,80%,50%,0.2)",
+          }}
+        />
       </button>
 
       <style>{`
