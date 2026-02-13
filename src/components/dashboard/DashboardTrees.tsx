@@ -12,6 +12,8 @@ import { convertToCoordinates } from "@/utils/what3words";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { extractExifDate } from "@/utils/exifDate";
+import { issueRewards, type RewardResult } from "@/utils/issueRewards";
+import RewardReceipt from "@/components/RewardReceipt";
 
 interface Tree {
   id: string;
@@ -51,6 +53,8 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
   const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
+  const [mappingReward, setMappingReward] = useState<RewardResult | null>(null);
+  const [showMappingReceipt, setShowMappingReceipt] = useState(false);
 
   // Multi-photo queue state
   const [queue, setQueue] = useState<QueueItem[]>([]);
@@ -196,6 +200,13 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
 
       updateQueueItem(index, { status: 'done', treeId: treeData.id });
       toast({ title: "🌳 Planted!", description: `${item.what3words || treeName}` });
+
+      // Issue mapping rewards
+      const rr = await issueRewards({ userId: user.id, treeId: treeData.id, treeSpecies: item.species.trim() || 'Unknown', actionType: "mapping" });
+      if (rr && (rr.speciesHearts > 0 || rr.influence > 0)) {
+        setMappingReward(rr);
+        setShowMappingReceipt(true);
+      }
 
       // Auto-advance to next unfinished item
       const nextIndex = queue.findIndex((q, i) => i > index && (q.status === 'ready' || q.status === 'pending' || q.status === 'extracting'));
@@ -731,6 +742,14 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
           )
         )
       )}
+      <RewardReceipt
+        visible={showMappingReceipt}
+        onClose={() => { setShowMappingReceipt(false); setMappingReward(null); }}
+        speciesHearts={mappingReward?.speciesHearts}
+        speciesFamily={mappingReward?.speciesFamily}
+        influence={mappingReward?.influence}
+        actionLabel="Tree Mapping"
+      />
     </div>
   );
 };

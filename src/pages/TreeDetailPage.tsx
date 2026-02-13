@@ -342,6 +342,7 @@ const TreeDetailPage = () => {
           <MeetingTimer
             treeId={id!}
             treeName={tree.name}
+            treeSpecies={tree.species}
             userId={userId}
             onMeetingChange={setActiveMeeting}
             onStatusChange={setMeetingStatus}
@@ -554,6 +555,7 @@ const TreeDetailPage = () => {
         open={addOfferingOpen}
         onOpenChange={setAddOfferingOpen}
         treeId={id!}
+        treeSpecies={tree?.species}
         type={selectedType}
         meetingId={activeMeeting?.id}
       />
