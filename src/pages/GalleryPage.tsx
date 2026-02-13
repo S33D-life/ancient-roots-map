@@ -46,7 +46,7 @@ import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import HeartEconomySummary from "@/components/HeartEconomySummary";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
-import greenhouseWindow from "@/assets/greenhouse-window.jpeg";
+import greenhouseWindow from "@/assets/greenhouse-window.png";
 import { Progress } from "@/components/ui/progress";
 import heartwoodLibrary from "@/assets/heartwood-library.jpeg";
 import treeRadioArt from "@/assets/tree-radio-art.jpeg";
