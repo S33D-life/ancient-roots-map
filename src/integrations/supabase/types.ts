@@ -77,6 +77,66 @@ export type Database = {
         }
         Relationships: []
       }
+      chain_anchors: {
+        Row: {
+          anchor_data: Json | null
+          anchor_type: string
+          asset_id: string
+          block_number: number | null
+          chain: string
+          created_at: string
+          cycle_id: string | null
+          id: string
+          status: string
+          tx_hash: string | null
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          anchor_data?: Json | null
+          anchor_type?: string
+          asset_id: string
+          block_number?: number | null
+          chain?: string
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          status?: string
+          tx_hash?: string | null
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          anchor_data?: Json | null
+          anchor_type?: string
+          asset_id?: string
+          block_number?: number | null
+          chain?: string
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          status?: string
+          tx_hash?: string | null
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_anchors_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "sync_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_anchors_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "sync_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -169,6 +229,50 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cid_history: {
+        Row: {
+          asset_id: string
+          cid: string
+          created_at: string
+          id: string
+          pin_status: string
+          pinned_at: string | null
+          unpinned_at: string | null
+          user_id: string
+          version: number
+        }
+        Insert: {
+          asset_id: string
+          cid: string
+          created_at?: string
+          id?: string
+          pin_status?: string
+          pinned_at?: string | null
+          unpinned_at?: string | null
+          user_id: string
+          version: number
+        }
+        Update: {
+          asset_id?: string
+          cid?: string
+          created_at?: string
+          id?: string
+          pin_status?: string
+          pinned_at?: string | null
+          unpinned_at?: string | null
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cid_history_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "sync_assets"
             referencedColumns: ["id"]
           },
         ]
@@ -831,6 +935,206 @@ export type Database = {
           updated_at?: string
           variant_id?: number
           verified_at?: string | null
+        }
+        Relationships: []
+      }
+      sync_assets: {
+        Row: {
+          content_hash: string | null
+          created_at: string
+          current_cid: string | null
+          file_path: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          pin_status: string
+          project_id: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          content_hash?: string | null
+          created_at?: string
+          current_cid?: string | null
+          file_path?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          pin_status?: string
+          project_id: string
+          updated_at?: string
+          user_id: string
+          version?: number
+        }
+        Update: {
+          content_hash?: string | null
+          created_at?: string
+          current_cid?: string | null
+          file_path?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          pin_status?: string
+          project_id?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_assets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sync_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_cycles: {
+        Row: {
+          assets_conflicted: number | null
+          assets_processed: number | null
+          assets_verified: number | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          project_id: string
+          started_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          assets_conflicted?: number | null
+          assets_processed?: number | null
+          assets_verified?: number | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          project_id: string
+          started_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          assets_conflicted?: number | null
+          assets_processed?: number | null
+          assets_verified?: number | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          project_id?: string
+          started_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_cycles_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sync_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_logs: {
+        Row: {
+          asset_id: string | null
+          created_at: string
+          cycle_id: string | null
+          details: Json | null
+          id: string
+          level: string
+          message: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          asset_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          details?: Json | null
+          id?: string
+          level?: string
+          message: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          asset_id?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          details?: Json | null
+          id?: string
+          level?: string
+          message?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_logs_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "sync_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sync_logs_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "sync_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sync_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "sync_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_projects: {
+        Row: {
+          created_at: string
+          cycle_interval_minutes: number
+          description: string | null
+          id: string
+          ipfs_prefix: string | null
+          is_active: boolean
+          last_cycle_at: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_interval_minutes?: number
+          description?: string | null
+          id?: string
+          ipfs_prefix?: string | null
+          is_active?: boolean
+          last_cycle_at?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_interval_minutes?: number
+          description?: string | null
+          id?: string
+          ipfs_prefix?: string | null
+          is_active?: boolean
+          last_cycle_at?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
