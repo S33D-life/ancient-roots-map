@@ -440,247 +440,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     return filtered;
   }, [trees, viewMode, speciesFilter, groveScale, userId, userLocation]);
 
-  // Initialize map — MapLibre GL (no token needed)
+  // Initialize map — default to Leaflet for reliability until WebGL rendering issue is resolved.
+  // WebGL tiles load (200 OK) and MapLibre reports "ready", but canvas appears blank.
+  // TODO: Investigate WebGL canvas visibility — likely a CSS stacking/compositing issue.
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
-
-    // Detect iOS for immediate Leaflet default
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    const webgl = isWebGLSupported();
-
-    if (!webgl) {
-      console.warn('[Atlas] WebGL unsupported — using Leaflet');
-      setDebugInfo(prev => ({ ...prev, webgl: false, error: 'WebGL unsupported' }));
-      setMapStatus("leaflet");
-      return;
-    }
-
-    // On iOS, default to Leaflet instantly for reliability.
-    // Only attempt WebGL if user explicitly clicked "Try WebGL".
-    if (isIOS && !sessionStorage.getItem('atlas-try-webgl')) {
-      console.log('[Atlas] iOS — instant Leaflet for reliability');
-      setMapStatus("leaflet");
-      return;
-    }
-    // Clear the flag after use
-    sessionStorage.removeItem('atlas-try-webgl');
-
-    setDebugInfo(prev => ({ ...prev, webgl: true }));
-
-    // Use rAF to ensure layout is settled before init
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let aborted = false;
-    const rafId = requestAnimationFrame(() => {
-      if (aborted) return;
-      const container = mapContainer.current;
-      if (!container) return;
-
-      const { width, height } = container.getBoundingClientRect();
-      setDebugInfo(prev => ({ ...prev, width, height }));
-
-      if (width === 0 || height === 0) {
-        console.warn(`[Atlas] Container has zero dimensions: ${width}×${height}`);
-        setMapStatus("leaflet");
-        return;
-      }
-
-      function fallbackToLeaflet(reason: string) {
-        if (aborted) return;
-        aborted = true;
-        console.warn(`[Atlas] Auto-fallback to Leaflet: ${reason}`);
-        clearTimeout(timeoutId);
-        setMapStatus("leaflet");
-        try { m?.remove(); } catch {}
-        map.current = null;
-      }
-
-      let m: maplibregl.Map;
-      try {
-        const style = getMapStyle();
-        m = new maplibregl.Map({
-          container,
-          style: style as any,
-          center: [0, 20],
-          zoom: 2,
-          attributionControl: false,
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error('[Atlas] Map initialization failed:', msg);
-        setMapStatus("leaflet");
-        return;
-      }
-
-      // Handle WebGL context loss (common on iOS under memory pressure)
-      const canvas = m.getCanvas();
-      if (canvas) {
-        canvas.addEventListener('webglcontextlost', (e) => {
-          e.preventDefault();
-          fallbackToLeaflet("WebGL context lost");
-        });
-      }
-
-      // Faster timeout on iOS (5s) vs desktop (8s)
-      const timeoutMs = isIOS ? 5000 : 8000;
-      timeoutId = setTimeout(() => {
-        if (mapStatusRef.current === "loading") {
-          fallbackToLeaflet("MapLibre timed out");
-        }
-      }, timeoutMs);
-
-      // Track tile data arrival
-      let tileDataReceived = false;
-      m.on('sourcedata', (e) => {
-        if (e.isSourceLoaded && !tileDataReceived) {
-          tileDataReceived = true;
-          console.log('[Atlas] Tile source data received');
-        }
-      });
-
-      m.on('load', () => {
-        if (aborted) return;
-        clearTimeout(timeoutId);
-        setDebugInfo(prev => ({ ...prev, style: true }));
-        const c = m.getCenter();
-        setMapCenter({ lat: c.lat, lng: c.lng });
-        m.resize();
-        console.log('[Atlas] MapLibre style loaded');
-
-        // Validate tiles rendered — use idle event + tile data check
-        const checkDelay = isIOS ? 2000 : 3000;
-
-        // Wait for map to go idle (all tiles rendered) or timeout
-        let idleFired = false;
-        m.once('idle', () => { idleFired = true; });
-
-        // Canvas pixel validation — catches iOS blank-but-initialized state
-        function canvasHasContent(): boolean {
-          try {
-            const cvs = m.getCanvas();
-            if (!cvs) return false;
-            const gl = cvs.getContext("webgl2") || cvs.getContext("webgl");
-            if (!gl) return false;
-            const w = gl.drawingBufferWidth;
-            const h = gl.drawingBufferHeight;
-            // Sample 5 points across the canvas
-            const points = [
-              [Math.floor(w / 2), Math.floor(h / 2)],
-              [Math.floor(w / 4), Math.floor(h / 4)],
-              [Math.floor(3 * w / 4), Math.floor(h / 4)],
-              [Math.floor(w / 4), Math.floor(3 * h / 4)],
-              [Math.floor(3 * w / 4), Math.floor(3 * h / 4)],
-            ];
-            for (const [sx, sy] of points) {
-              const px = new Uint8Array(4);
-              gl.readPixels(sx, sy, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-              // Non-black, non-transparent pixel = content rendered
-              if (px[0] > 10 || px[1] > 10 || px[2] > 10) return true;
-            }
-            return false;
-          } catch { return false; }
-        }
-
-        setTimeout(() => {
-          if (aborted) return;
-
-          // Primary check: did tile source data arrive?
-          if (!tileDataReceived) {
-            fallbackToLeaflet("No tile data received after style load");
-            return;
-          }
-
-          // Secondary check: did the map reach idle (tiles painted)?
-          if (idleFired) {
-            // Verify canvas has actual pixel content (all browsers, not just iOS)
-            if (!canvasHasContent()) {
-              console.warn('[Atlas] idle fired but canvas is blank — retrying');
-              setTimeout(() => {
-                if (aborted) return;
-                if (canvasHasContent()) {
-                  setMapStatus("ready");
-                  console.log('[Atlas] MapLibre ready after pixel recheck');
-                } else {
-                  fallbackToLeaflet("canvas blank despite idle");
-                }
-              }, 1500);
-              return;
-            }
-            setMapStatus("ready");
-            console.log('[Atlas] MapLibre ready — idle confirmed');
-            return;
-          }
-
-          // Idle hasn't fired yet — give more time, then fallback
-          console.warn('[Atlas] Map not idle yet — waiting 3s more');
-          const retryTimeout = setTimeout(() => {
-            if (aborted) return;
-            if (idleFired) {
-              if (!canvasHasContent()) {
-                fallbackToLeaflet("canvas blank after extended wait");
-                return;
-              }
-              setMapStatus("ready");
-              console.log('[Atlas] MapLibre ready after extended wait');
-            } else {
-              fallbackToLeaflet("Map never reached idle state");
-            }
-          }, 3000);
-
-          // If idle fires during the retry window, clear the timeout
-          m.once('idle', () => {
-            if (aborted) return;
-            clearTimeout(retryTimeout);
-            if (!canvasHasContent()) {
-              setTimeout(() => {
-                if (aborted) return;
-                if (canvasHasContent()) {
-                  setMapStatus("ready");
-                } else {
-                  fallbackToLeaflet("late idle but canvas still blank");
-                }
-              }, 1000);
-              return;
-            }
-            setMapStatus("ready");
-            console.log('[Atlas] MapLibre ready — late idle');
-          });
-        }, checkDelay);
-      });
-
-      m.on('moveend', () => {
-        const c = m.getCenter();
-        setMapCenter({ lat: c.lat, lng: c.lng });
-      });
-
-      m.on('error', (e) => {
-        if (aborted) return;
-        console.error('[Atlas] MapLibre error:', e);
-        const msg = (e as any)?.error?.message || (e as any)?.message || "Unknown map error";
-        setMapError(msg);
-        setDebugInfo(prev => ({ ...prev, error: msg }));
-        if (msg.includes('Source') || msg.includes('AJAXError')) {
-          console.warn('[Atlas] Non-critical tile error, map may still function');
-        } else {
-          fallbackToLeaflet(msg);
-        }
-      });
-
-      m.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
-      m.addControl(new maplibregl.AttributionControl({ compact: true }));
-
-      map.current = m;
-    });
-
-    return () => {
-      aborted = true;
-      clearTimeout(timeoutId);
-      cancelAnimationFrame(rafId);
-      map.current?.remove();
-      map.current = null;
-    };
+    console.log('[Atlas] Defaulting to Leaflet — WebGL rendering under investigation');
+    setMapStatus("leaflet");
   }, []);
+
+  // NOTE: WebGL init code removed temporarily — tiles load but canvas is visually blank.
+  // Leaflet Lite Mode is the primary renderer until this is resolved.
 
   // Resize map on visibility/tab changes
   useEffect(() => {
@@ -1230,8 +1000,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   }
 
   return (
-    <div className="absolute inset-0 z-[1]">
-      {/* Map canvas — no opaque background so WebGL canvas is always visible */}
+    <div className="absolute inset-0" style={{ zIndex: 1 }}>
+      {/* Map canvas — opaque cream background ensures tiles are visible over dark page */}
       <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: '#faf7f0' }} />
 
       {/* Loading / Error overlay (kept non-occluding) */}
