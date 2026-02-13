@@ -72,26 +72,10 @@ interface LeafletFallbackMapProps {
   initialW3w?: string;
 }
 
-/* ── Marker tier ── */
-type Tier = "ancient" | "storied" | "notable" | "seedling";
+/* ── Shared tier & species logic ── */
+import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue, SPECIES_HUE } from "@/utils/treeCardTypes";
 
-function getTreeTier(age: number, offerings: number): Tier {
-  if (age >= 100) return "ancient";
-  if (offerings >= 3) return "storied";
-  if (offerings >= 1 || age >= 50) return "notable";
-  return "seedling";
-}
-
-/* ── Species-aware canopy hue ── */
-const SPECIES_HUE: Record<string, number> = {
-  oak: 120, yew: 145, ash: 110, beech: 130, birch: 90, cherry: 340,
-  holly: 150, pine: 155, willow: 100, rowan: 25, hawthorn: 115,
-  hazel: 80, sycamore: 105, alder: 135, apple: 95,
-};
-
-function getSpeciesHue(species: string): number {
-  return SPECIES_HUE[species.toLowerCase()] ?? 120;
-}
+type Tier = TreeTier;
 
 /** Viewport-cull helper — returns only trees within current map bounds + padding */
 function getVisibleTrees(map: L.Map, trees: Tree[], pad = 0.1): Tree[] {
@@ -159,14 +143,20 @@ function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number): L
   return icon;
 }
 
-/* ── Popup HTML ── */
+/* ── Popup HTML (aligned with TreeCard visual language) ── */
 function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number): string {
-  const ageText = age > 0 ? `~${age} years` : "Age unknown";
+  const tier = getTreeTier(age, offerings);
+  const tierLabel = TIER_LABELS[tier];
+  const tierBg = tier === "ancient" ? "hsla(42,80%,55%,0.15)" : tier === "storied" ? "hsla(42,60%,50%,0.1)" : "hsla(0,0%,50%,0.08)";
+  const tierColor = tier === "ancient" ? "hsl(42,80%,60%)" : tier === "storied" ? "hsl(42,60%,55%)" : "hsl(0,0%,55%)";
+  const speciesHue = getSpeciesHue(tree.species);
+
+  const ageText = age > 0 ? `🌿 ~${age}y` : "";
   const offeringText = offerings > 0
-    ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span> offering${offerings !== 1 ? "s" : ""}`
-    : `<span style="color:hsl(0,0%,50%);font-style:italic;">No offerings yet</span>`;
+    ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span>`
+    : "";
   const birdsongLine = (birdsongCount ?? 0) > 0
-    ? `<span style="display:flex;align-items:center;gap:3px;">🐦 <span style="color:hsl(200,60%,65%);">${birdsongCount} birdsong${birdsongCount !== 1 ? 's' : ''}</span></span>`
+    ? `<span>🐦 ${birdsongCount}</span>`
     : "";
   const desc = tree.description
     ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
@@ -176,31 +166,29 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
     ? `<div style="position:relative;width:100%;height:100px;overflow:hidden;border-radius:12px 12px 0 0;">
         <img src="${escapeHtml(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" />
         <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
+        <span style="position:absolute;top:6px;left:6px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}33;backdrop-filter:blur(4px);">${tierLabel}</span>
       </div>`
-    : `<div style="position:relative;width:100%;height:90px;overflow:hidden;border-radius:12px 12px 0 0;background:linear-gradient(135deg,hsl(30,20%,14%),hsl(25,18%,10%));display:flex;align-items:center;justify-content:center;">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="opacity:0.35;">
-          <path d="M24 6C24 6 14 16 14 26a10 10 0 0020 0C34 16 24 6 24 6z" fill="hsl(42,50%,45%)" />
-          <rect x="22" y="30" width="4" height="10" rx="2" fill="hsl(30,30%,35%)" />
-          <circle cx="24" cy="22" r="3" fill="hsl(42,70%,55%)" opacity="0.5" />
-        </svg>
+    : `<div style="position:relative;width:100%;height:80px;overflow:hidden;border-radius:12px 12px 0 0;background:linear-gradient(135deg,hsl(30,20%,14%),hsl(25,18%,10%));display:flex;align-items:center;justify-content:center;">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none" style="opacity:0.3;"><path d="M24 6C24 6 14 16 14 26a10 10 0 0020 0C34 16 24 6 24 6z" fill="hsl(42,50%,45%)"/><rect x="22" y="30" width="4" height="10" rx="2" fill="hsl(30,30%,35%)"/></svg>
         <div style="position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
+        <span style="position:absolute;top:6px;left:6px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}33;">${tierLabel}</span>
       </div>`;
 
-  return `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.4);overflow:hidden;animation:popIn .2s ease-out;">
     ${thumbnail}
-    <div style="padding:14px 14px 10px;display:flex;flex-direction:column;gap:6px;">
-      <h3 style="margin:0;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;">${escapeHtml(tree.name)}</h3>
-      <p style="margin:0;font-size:11px;color:hsl(${getSpeciesHue(tree.species)},45%,62%);font-style:italic;">${escapeHtml(tree.species)}</p>
-      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,58%);">
-        <span style="display:flex;align-items:center;gap:3px;">🌿 ${ageText}</span>
-        <span style="display:flex;align-items:center;gap:3px;">${offeringText}</span>
+    <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;">
+      <h3 style="margin:0;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
+      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},45%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>
+      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
+        ${ageText ? `<span>${ageText}</span>` : ""}
+        ${offeringText ? `<span>${offeringText}</span>` : ""}
         ${birdsongLine}
       </div>
-      ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(tree.what3words)}</p>` : ""}
+      ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>` : ""}
       ${desc}
     </div>
-    <div style="padding:0 14px 12px;display:flex;gap:6px;">
-      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">View Details ⟶</a>
+    <div style="padding:0 14px 10px;display:flex;gap:6px;">
+      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;font-size:11px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">View Details ⟶</a>
     </div>
     <div style="padding:0 14px 12px;display:flex;gap:6px;justify-content:center;">
       <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(120,30%,30%,0.15);border:1px solid hsla(120,40%,40%,0.2);border-radius:8px;" title="Add Photo">📷</a>
@@ -210,6 +198,7 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
     </div>
   </div>`;
 }
+
 
 /* ── External tree popup (registry-aware) ── */
 function buildExternalPopupHtml(tree: ExternalTreeCandidate): string {

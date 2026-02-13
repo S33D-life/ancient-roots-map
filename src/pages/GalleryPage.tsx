@@ -62,6 +62,7 @@ import { deduplicateForGallery, type EncounterCluster } from "@/utils/treeEncoun
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import { useWallet } from "@/hooks/use-wallet";
 import NFTreeStudio from "@/components/NFTreeStudio";
+import TreeCard from "@/components/TreeCard";
 // TetolBreadcrumb removed — Library uses its own contextual breadcrumb
 import TetolBridge from "@/components/TetolBridge";
 
@@ -1119,143 +1120,22 @@ const GalleryPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {clusteredTrees.map((cluster) => {
                   const tree = cluster.anchor;
+                  const treeOfferingCount = offerings.filter((o) => o.tree_id === tree.id).length;
+                  const photoOffering = offerings.find((o) => o.tree_id === tree.id && o.type === "photo" && o.media_url);
                   return (
-                    <Card
+                    <TreeCard
                       key={tree.id}
-                      className="border-mystical hover:shadow-elegant transition-mystical relative"
-                    >
-                      {/* Encounter count indicator */}
-                      {cluster.isClustered && (
-                        <div className="absolute top-2 right-2 z-10">
-                          <Badge
-                            variant="secondary"
-                            className="font-serif text-[10px] gap-1 bg-accent/20 text-accent border-accent/30"
-                          >
-                            <Users className="h-3 w-3" />
-                            {cluster.encounters.length} encounters
-                          </Badge>
-                        </div>
-                      )}
-                      <CardHeader className="cursor-pointer" onClick={() => setSelectedTree(tree)}>
-                        <CardTitle className="font-serif text-mystical line-clamp-1">
-                          {tree.name}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-serif">
-                            {tree.species}
-                          </Badge>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 text-sm cursor-pointer" onClick={() => setSelectedTree(tree)}>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            <span className="truncate">/{tree.what3words}</span>
-                          </div>
-                          {tree.estimated_age && (
-                            <p className="text-muted-foreground">
-                              Est. Age: {tree.estimated_age} years
-                            </p>
-                          )}
-                          {tree.description && (
-                            <p className="text-muted-foreground line-clamp-2">
-                              {tree.description}
-                            </p>
-                          )}
-                          {/* Clustered wanderer avatars */}
-                          {cluster.isClustered && cluster.wandererCount > 1 && (
-                            <div className="flex items-center gap-1.5 pt-1">
-                              <span className="text-[10px] text-muted-foreground/70 font-serif">
-                                {cluster.wandererCount} wanderer{cluster.wandererCount > 1 ? "s" : ""}
-                              </span>
-                              <div className="flex -space-x-1.5">
-                                {cluster.encounters.slice(0, 3).map((enc) => (
-                                  <div
-                                    key={enc.id}
-                                    className="w-5 h-5 rounded-full bg-secondary border border-card flex items-center justify-center text-[8px]"
-                                  >
-                                    🌳
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="mt-4 pt-4 border-t border-border flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addToWishlist(tree.id);
-                            }}
-                            className="flex-1"
-                          >
-                            <Heart
-                              className="w-4 h-4 mr-2 transition-all duration-300"
-                              style={wishlistPulseId === tree.id ? {
-                                transform: 'scale(1.3)',
-                                color: 'hsl(39, 80%, 55%)',
-                                filter: 'drop-shadow(0 0 8px hsl(39, 80%, 55% / 0.6))',
-                              } : {
-                                color: 'hsl(39, 50%, 72%)',
-                              }}
-                            />
-                            Wishing Tree
-                          </Button>
-                          {(tree.latitude || tree.what3words) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (tree.latitude && tree.longitude) {
-                                  navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16`);
-                                } else if (tree.what3words) {
-                                  navigate(`/map?w3w=${tree.what3words}`);
-                                }
-                              }}
-                              title="View on Map"
-                            >
-                              <Map className="w-4 h-4" />
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleShare(
-                                tree.name,
-                                `${tree.name} — a ${tree.species} on the Ancient Friends Map`,
-                                `${window.location.origin}/tree/${tree.id}`
-                              );
-                            }}
-                            title="Share this tree"
-                          >
-                            <Share2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Find first photo offering for this tree
-                              const photoOffering = offerings.find((o) => o.tree_id === tree.id && o.type === "photo" && o.media_url);
-                              setNftreeTarget({
-                                id: tree.id,
-                                name: tree.name,
-                                species: tree.species,
-                                photoUrl: photoOffering?.media_url || null,
-                              });
-                            }}
-                            title="NFTree Studio"
-                          >
-                            <Sparkles className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      tree={tree}
+                      variant="gallery"
+                      cluster={cluster}
+                      offeringCount={treeOfferingCount}
+                      heroPhotoUrl={photoOffering?.media_url}
+                      wishlistPulseActive={wishlistPulseId === tree.id}
+                      onSelect={(t) => setSelectedTree(t as any)}
+                      onWishlist={addToWishlist}
+                      onShare={handleShare}
+                      onNFTree={(data) => setNftreeTarget(data)}
+                    />
                   );
                 })}
               </div>
