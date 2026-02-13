@@ -1000,19 +1000,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
       )}
 
       {/* Layer toggles panel */}
-      <div className="absolute bottom-8 right-3 z-[1000] flex flex-col items-end gap-2">
-        <button
-          onClick={() => setLayerPanelOpen(!layerPanelOpen)}
-          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
-          style={{
-            ...btnBase,
-            color: layerPanelOpen ? "hsl(42, 90%, 55%)" : "hsl(42, 60%, 60%)",
-            background: layerPanelOpen ? "hsla(42, 50%, 20%, 0.95)" : btnBase.background,
-          }}
-          title="Toggle Layers"
-        >
-          <Layers className="w-[18px] h-[18px]" />
-        </button>
+      <div className="absolute bottom-20 right-3 z-[1001] flex flex-col items-end gap-2">
 
         {layerPanelOpen && (
           <div
@@ -1102,6 +1090,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, class
           title="Reset view"
         >
           <Compass className="w-[18px] h-[18px]" />
+        </button>
+        <button
+          onClick={() => setLayerPanelOpen(!layerPanelOpen)}
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
+          style={{
+            ...btnBase,
+            color: layerPanelOpen ? "hsl(42, 90%, 55%)" : "hsl(42, 60%, 60%)",
+            background: layerPanelOpen ? "hsla(42, 50%, 20%, 0.95)" : btnBase.background,
+          }}
+          title="Toggle Layers"
+        >
+          <Layers className="w-[18px] h-[18px]" />
         </button>
       </div>
 
