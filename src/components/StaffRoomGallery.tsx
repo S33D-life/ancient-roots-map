@@ -17,6 +17,7 @@ import {
 } from "@/utils/staffRoomData";
 import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
 import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
+import StaffQRCode from "@/components/StaffQRCode";
 import MintingStatusDashboard from "@/components/MintingStatusDashboard";
 import OptimizedImage from "@/components/OptimizedImage";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -165,6 +166,10 @@ function StaffDetailContent({ staff, onViewOnChain }: { staff: StaffItem; onView
           ? `The ${staff.speciesName} staff — position #${staff.index + 1} on the sacred spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.`
           : `Circle staff ${staff.code} — one of ${total} ${staff.speciesName} staffs in the Ancient Friends collection.`}
       </p>
+
+      <div className="flex justify-center">
+        <StaffQRCode staffCode={staff.code} size={80} />
+      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() =>

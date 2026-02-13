@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, Link2, Unlink, AlertCircle, Shield, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import StaffQRCode from "@/components/StaffQRCode";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import type { useWallet } from "@/hooks/use-wallet";
@@ -189,6 +190,7 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                               <p className="text-xs font-serif text-foreground truncate">{staff.name}</p>
                               <p className="text-[10px] text-muted-foreground font-mono">{staff.code}</p>
                             </div>
+                            <StaffQRCode staffCode={staff.code} size={40} className="p-1" />
                             {wallet.linkedStaff?.tokenId === staff.tokenId && (
                               <Link2 className="w-3.5 h-3.5 text-primary shrink-0" />
                             )}
