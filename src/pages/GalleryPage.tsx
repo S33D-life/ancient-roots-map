@@ -1178,6 +1178,38 @@ const GalleryPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             </div>
 
+            {/* Heart Reservoir Rankings */}
+            <TreeReservoirLeaderboard />
+
+            {/* Council of Life Window */}
+            <div
+              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
+              onClick={() => setShowCouncilEmbed(!showCouncilEmbed)}
+            >
+              <img
+                src={councilImage}
+                alt="Council of Life"
+                className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
+                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Council of Life</h3>
+                <p className="text-sm text-foreground/70 mt-1">{showCouncilEmbed ? "Click to close" : "Click to open the Council"}</p>
+              </div>
+            </div>
+            {showCouncilEmbed && (
+              <div className="animate-fade-in">
+                <iframe
+                  src="https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228"
+                  width="100%"
+                  height="600"
+                  frameBorder="0"
+                  allowFullScreen
+                  className="rounded-xl border border-border/40"
+                  title="Council of Life"
+                />
+              </div>
+            )}
+
             {/* Tree Ledger - Click to open */}
             <div
               className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
@@ -1354,38 +1386,6 @@ const GalleryPage = () => {
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            )}
-
-            {/* Heart Reservoir Rankings */}
-            <TreeReservoirLeaderboard />
-
-            {/* Council of Life Window */}
-            <div
-              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
-              onClick={() => setShowCouncilEmbed(!showCouncilEmbed)}
-            >
-              <img
-                src={councilImage}
-                alt="Council of Life"
-                className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
-                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Council of Life</h3>
-                <p className="text-sm text-foreground/70 mt-1">{showCouncilEmbed ? "Click to close" : "Click to open the Council"}</p>
-              </div>
-            </div>
-            {showCouncilEmbed && (
-              <div className="animate-fade-in">
-                <iframe
-                  src="https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  allowFullScreen
-                  className="rounded-xl border border-border/40"
-                  title="Council of Life"
-                />
               </div>
             )}
           </TabsContent>
