@@ -87,8 +87,23 @@ const DashboardWanderers = ({ userId }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [profiles, setProfiles] = useState<Record<string, WandererProfile>>({});
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [generatingInvite, setGeneratingInvite] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>();
   const { toast } = useToast();
+
+  // Load existing invite code on mount
+  useEffect(() => {
+    supabase
+      .from("invite_links")
+      .select("code")
+      .eq("created_by", userId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setInviteCode(data.code);
+      });
+  }, [userId]);
 
   // Fetch profiles for followed/following users
   useEffect(() => {
@@ -139,6 +154,15 @@ const DashboardWanderers = ({ userId }: Props) => {
   };
 
   const generateInvite = async () => {
+    setGeneratingInvite(true);
+    // Reuse existing invite link if available
+    if (inviteCode) {
+      const link = `${window.location.origin}/auth?invite=${inviteCode}`;
+      await copyToClipboard(link);
+      toast({ title: "Invite link copied!", description: link });
+      setGeneratingInvite(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("invite_links")
       .insert({ created_by: userId })
@@ -146,6 +170,7 @@ const DashboardWanderers = ({ userId }: Props) => {
       .single();
     if (error) {
       toast({ title: "Error", description: "Could not create invite link", variant: "destructive" });
+      setGeneratingInvite(false);
       return;
     }
     if (data) {
@@ -154,6 +179,7 @@ const DashboardWanderers = ({ userId }: Props) => {
       await copyToClipboard(link);
       toast({ title: "Invite link copied!", description: link });
     }
+    setGeneratingInvite(false);
   };
 
   const pendingIncoming = companions.filter((c) => c.status === "pending" && c.recipient_id === userId);
@@ -183,8 +209,9 @@ const DashboardWanderers = ({ userId }: Props) => {
                 className="pl-9 font-serif"
               />
             </div>
-            <Button variant="outline" size="sm" className="font-serif text-xs gap-1 shrink-0" onClick={generateInvite}>
-              <Copy className="w-3.5 h-3.5" /> Invite Link
+            <Button variant="outline" size="sm" className="font-serif text-xs gap-1 shrink-0" onClick={generateInvite} disabled={generatingInvite}>
+              {generatingInvite ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Copy className="w-3.5 h-3.5" />}
+              {inviteCode ? "Copy Link" : "Invite Link"}
             </Button>
           </div>
 
