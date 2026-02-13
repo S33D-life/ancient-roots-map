@@ -22,6 +22,7 @@ import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/Meeti
 import OfferingHistory from "@/components/OfferingHistory";
 import BirdsongOfferingFlow from "@/components/BirdsongOfferingFlow";
 import BirdsongTab from "@/components/BirdsongTab";
+import EncounterClusterPanel from "@/components/EncounterClusterPanel";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -338,6 +339,9 @@ const TreeDetailPage = () => {
             )}
           </div>
         </div>
+
+        {/* Encounter Cluster — shared wanderer encounters */}
+        <EncounterClusterPanel tree={tree} />
 
         {/* Meeting Timer */}
         <div className="mb-6">
