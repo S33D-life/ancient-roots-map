@@ -867,13 +867,15 @@ const GalleryPage = () => {
               ← Heartwood
             </button>
             <div>
-              <h1 className="text-4xl font-serif font-bold text-mystical mb-2 flex items-center gap-3">
+              <h1 className="text-4xl font-serif font-bold text-mystical mb-2 flex items-start gap-3">
                 Heartwood Library
-                <VaultSeal
-                  isRevealed={vaultRevealed}
-                  onReveal={() => { setVaultRevealed(true); handleTabChange("vault"); }}
-                  onHide={() => setVaultRevealed(false)}
-                />
+                <span className="relative top-1 -ml-1">
+                  <VaultSeal
+                    isRevealed={vaultRevealed}
+                    onReveal={() => { setVaultRevealed(true); handleTabChange("vault"); }}
+                    onHide={() => setVaultRevealed(false)}
+                  />
+                </span>
               </h1>
               <p className="text-muted-foreground hidden md:block">
                 Explore all mapped trees and manage the tree ledger
