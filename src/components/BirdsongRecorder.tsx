@@ -193,7 +193,7 @@ const BirdsongRecorder = ({
 
         {(state === "recorded" || state === "playing") && (
           <>
-            <Button variant="outline" size="sm" onClick={reRecord} className="gap-1.5 font-serif">
+            <Button variant="outline" size="sm" onClick={reRecord} className="gap-1.5 font-serif h-10 px-4">
               <RotateCcw className="h-4 w-4" /> Re-record
             </Button>
             <Button
@@ -212,7 +212,7 @@ const BirdsongRecorder = ({
               size="sm"
               onClick={confirmRecording}
               disabled={tooShort}
-              className="gap-1.5 font-serif"
+              className="gap-1.5 font-serif h-10 px-4"
             >
               {tooShort ? `Need ${minDuration}s+` : "Use Recording"}
             </Button>
