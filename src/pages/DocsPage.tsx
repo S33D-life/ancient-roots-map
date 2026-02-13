@@ -30,19 +30,19 @@ const DocsPage = () => (
             <CardHeader className="pb-3">
               <CardTitle className="font-serif text-base flex items-center gap-2">
                 <Heart className="h-4 w-4 text-primary" />
-                How Rewards Are Earned
+                Reward Distribution Per Action
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm font-serif text-foreground/70 space-y-4">
-              <p>
-                Every contribution to the S33D ecosystem earns tokens across up to three layers. Here's how each action is rewarded:
-              </p>
+              <p>Every contribution earns tokens across up to three layers. Rewards are issued instantly via a Reward Receipt.</p>
 
               <div className="space-y-3">
-                <RewardRow action="Map a tree" s33d={10} species={3} influence={2} />
-                <RewardRow action="Check in at a tree" s33d={1} species={1} influence={0} note="Max 3 per tree/day" />
-                <RewardRow action="Leave an offering" s33d={2} species={1} influence={0} />
-                <RewardRow action="Curate / verify data" s33d={0} species={0} influence={2} />
+                <RewardRow action="Map a new tree" s33d={10} species={3} influence={2} note="Issued once when the tree record is created" />
+                <RewardRow action="Map a tree + add photo" s33d={11} species={3} influence={2} note="+1 bonus S33D Heart for photo offering" />
+                <RewardRow action="Check in at a tree" s33d={1} species={1} influence={0} note="Max 3 per tree/day — resets at midnight UTC" />
+                <RewardRow action="Leave an offering (poem, song, story, voice, book)" s33d={2} species={1} influence={0} note="Each offering type earns independently" />
+                <RewardRow action="Curate / verify data" s33d={0} species={0} influence={2} note="Issued when a curator approves an edit proposal" />
+                <RewardRow action="Collect a bloomed seed" s33d={1} species={0} influence={0} note="Seed must have bloomed (24 h after planting)" />
               </div>
             </CardContent>
           </Card>
@@ -59,7 +59,7 @@ const DocsPage = () => (
                 icon={<Heart className="h-4 w-4" />}
                 name="S33D Hearts"
                 tag="Global Currency"
-                description="Earned for every contribution. Used across the entire ecosystem — think of them as the universal heartbeat of S33D."
+                description="Earned for every contribution. Used across the entire ecosystem — the universal heartbeat of S33D."
               />
               <TokenLayer
                 icon={<Leaf className="h-4 w-4" />}
@@ -73,6 +73,18 @@ const DocsPage = () => (
                 tag="Soulbound Governance"
                 description="Non-transferable tokens earned through curation — correcting metadata, verifying records, reviewing edits. They represent your reputation and voting weight in governance."
               />
+
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1">
+                <p className="text-xs font-medium text-primary">Real-World Example</p>
+                <p className="text-xs text-foreground/60">
+                  You visit a 300-year-old Oak, map it with a photo, and leave a poem. You earn:
+                  <strong> 11 S33D Hearts</strong> (10 mapping + 1 photo bonus),
+                  <strong> 3 Oak Hearts</strong> (mapping species reward),
+                  <strong> 2 Influence</strong> (mapping curation credit),
+                  plus <strong>2 S33D + 1 Oak Heart</strong> for the poem offering.
+                  Total: <strong>13 S33D, 4 Oak, 2 Influence</strong> — all in one visit.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -80,20 +92,39 @@ const DocsPage = () => (
             <CardHeader className="pb-3">
               <CardTitle className="font-serif text-base flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                Daily Caps &amp; Fair Use
+                Edge Cases, Caps &amp; Timing
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm font-serif text-foreground/70 space-y-3">
-              <p>To prevent abuse, the reward engine enforces daily limits:</p>
-              <ul className="list-disc list-inside space-y-1 text-foreground/60 pl-2">
-                <li><strong>Check-ins:</strong> Maximum 3 rewarded check-ins per tree per day</li>
-                <li><strong>Mapping:</strong> No daily cap — every new tree earns full rewards</li>
-                <li><strong>Offerings:</strong> No daily cap — each offering earns rewards once</li>
-                <li><strong>Curation:</strong> Influence is issued per approved action</li>
+              <p>The reward engine enforces fair-use rules to keep the economy healthy:</p>
+
+              <h4 className="text-xs font-semibold text-foreground/80 mt-2">Daily Caps</h4>
+              <ul className="list-disc list-inside space-y-1 text-foreground/60 pl-2 text-xs">
+                <li><strong>Check-ins:</strong> 3 rewarded check-ins per tree per day. The counter resets at <strong>00:00 UTC</strong>.</li>
+                <li><strong>Mapping:</strong> No daily cap — every new tree earns full rewards.</li>
+                <li><strong>Offerings:</strong> No daily cap — each offering earns rewards once.</li>
+                <li><strong>Curation:</strong> Influence is issued per approved action, no cap.</li>
               </ul>
+
+              <h4 className="text-xs font-semibold text-foreground/80 mt-2">Timing &amp; Delayed Rewards</h4>
+              <ul className="list-disc list-inside space-y-1 text-foreground/60 pl-2 text-xs">
+                <li><strong>Planted Seeds:</strong> A seed blooms 24 hours after planting. Only another user can collect it — the planter cannot self-collect.</li>
+                <li><strong>Windfall Hearts:</strong> Tree Heart Pools accumulate hearts over time. A windfall can be claimed once the pool exceeds a threshold — timing depends on community activity.</li>
+                <li><strong>Curation Influence:</strong> Only issued after a curator or keeper reviews and approves the edit proposal. Pending proposals earn nothing until resolved.</li>
+              </ul>
+
+              <h4 className="text-xs font-semibold text-foreground/80 mt-2">Edge Cases</h4>
+              <ul className="list-disc list-inside space-y-1 text-foreground/60 pl-2 text-xs">
+                <li><strong>Duplicate trees:</strong> If you map a tree that already exists, no mapping reward is issued. Use the search to check first.</li>
+                <li><strong>Self-collection blocked:</strong> You cannot collect your own planted seeds — this prevents reward farming.</li>
+                <li><strong>Capped state:</strong> When you hit a daily cap, the Reward Receipt shows <Badge variant="outline" className="text-[8px] mx-1">capped</Badge> and no additional tokens are minted until the next UTC day.</li>
+                <li><strong>Offline actions:</strong> Actions taken offline are queued and rewarded when the device syncs — rewards use the original action timestamp.</li>
+                <li><strong>Multiple offerings, same tree:</strong> Each distinct offering (poem, song, photo, etc.) earns its own reward. Submitting the same type twice still earns rewards for each.</li>
+              </ul>
+
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
                 <p className="text-xs text-foreground/60">
-                  When you hit a cap, the Reward Receipt will show <strong>"capped"</strong> and no additional tokens are minted for that action until the next day.
+                  <strong>Tip:</strong> Check your Reward Receipt after every action — it breaks down exactly which tokens were issued and whether any caps were hit.
                 </p>
               </div>
             </CardContent>
