@@ -10,19 +10,20 @@ interface StaffQRCodeProps {
 }
 
 /**
- * Renders a unique QR code for a staff, encoding its code.
- * Click to copy the staff code to clipboard.
+ * Renders a unique QR code for a staff, encoding a direct URL to its page.
+ * Click to copy the URL to clipboard.
  */
 export default function StaffQRCode({ staffCode, size = 96, className }: StaffQRCodeProps) {
   const [copied, setCopied] = useState(false);
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(staffCode)}&bgcolor=0a0a08&color=c8a96e&margin=1&format=svg`;
+  const staffUrl = `${window.location.origin}/library/staff-room?staff=${encodeURIComponent(staffCode)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size * 2}x${size * 2}&data=${encodeURIComponent(staffUrl)}&bgcolor=0a0a08&color=c8a96e&margin=1&format=svg`;
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(staffCode);
+      await navigator.clipboard.writeText(staffUrl);
       setCopied(true);
-      toast.success(`Copied: ${staffCode}`);
+      toast.success(`Link copied for ${staffCode}`);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error("Could not copy to clipboard");
@@ -36,8 +37,8 @@ export default function StaffQRCode({ staffCode, size = 96, className }: StaffQR
         "relative group rounded-lg border border-border/40 bg-secondary/20 p-2 transition-all hover:border-primary/40 hover:bg-secondary/40 cursor-pointer",
         className
       )}
-      title={`Click to copy: ${staffCode}`}
-      aria-label={`Copy staff code ${staffCode}`}
+      title={`Click to copy link for ${staffCode}`}
+      aria-label={`Copy link for staff ${staffCode}`}
     >
       <img
         src={qrUrl}
@@ -55,7 +56,7 @@ export default function StaffQRCode({ staffCode, size = 96, className }: StaffQR
         )}
       </span>
       <p className="text-[9px] text-muted-foreground font-mono text-center mt-1 group-hover:text-primary transition-colors">
-        {copied ? "Copied!" : "Click to copy"}
+        {copied ? "Copied!" : "Click to copy link"}
       </p>
     </button>
   );
