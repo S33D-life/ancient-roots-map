@@ -1225,18 +1225,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         }>
           <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} />
         </Suspense>
-        <button
-          onClick={() => {
-            sessionStorage.setItem('atlas-try-webgl', '1');
-            map.current = null;
-            setMapStatus("loading");
-          }}
-          className="absolute top-14 left-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
-          style={{ background: "hsla(30,30%,12%,0.88)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(6px)" }}
-          title="Switch to WebGL mode"
-        >
-          🗺️ Try WebGL
-        </button>
       </div>
     );
   }
