@@ -46,6 +46,7 @@ const SyncDashboardPage = lazy(() => import("./pages/SyncDashboardPage"));
 const EditReviewPage = lazy(() => import("./pages/EditReviewPage"));
 const HivePage = lazy(() => import("./pages/HivePage"));
 const HivesIndexPage = lazy(() => import("./pages/HivesIndexPage"));
+const ValueTreePage = lazy(() => import("./pages/ValueTreePage"));
 
 const queryClient = new QueryClient();
 
@@ -112,6 +113,7 @@ const App = () => {
                 <Route path="/edit-review" element={<EditReviewPage />} />
                 <Route path="/hives" element={<HivesIndexPage />} />
                 <Route path="/hive/:family" element={<HivePage />} />
+                <Route path="/value-tree" element={<ValueTreePage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
