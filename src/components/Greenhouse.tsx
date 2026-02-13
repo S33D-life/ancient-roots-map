@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import greenhouseCover from "@/assets/greenhouse-cover.png";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,17 +172,11 @@ const Greenhouse = () => {
 
   return (
     <div className="relative min-h-[60vh]">
-      {/* Ambient daylight gradient background */}
-      <div
-        className="absolute inset-0 -z-10 rounded-2xl overflow-hidden"
-        style={{
-          background: `
-            radial-gradient(ellipse at 30% 20%, hsla(90, 40%, 85%, 0.4) 0%, transparent 50%),
-            radial-gradient(ellipse at 70% 80%, hsla(140, 30%, 80%, 0.3) 0%, transparent 50%),
-            linear-gradient(180deg, hsla(80, 25%, 95%, 0.9) 0%, hsla(90, 20%, 92%, 0.8) 50%, hsla(100, 15%, 88%, 0.7) 100%)
-          `,
-        }}
-      />
+      {/* Cover image background */}
+      <div className="absolute inset-0 -z-10 rounded-2xl overflow-hidden">
+        <img src={greenhouseCover} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
+      </div>
       {/* Floating pollen / light motes */}
       <div className="absolute inset-0 -z-[5] rounded-2xl overflow-hidden">
         <GreenhouseMotes />
