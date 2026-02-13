@@ -157,7 +157,7 @@ const Header = () => {
         }}
       >
       <style>{`
-        .light header { background: linear-gradient(180deg, hsl(38 45% 92% / 0.97), hsl(35 35% 85% / 0.95)) !important; }
+        .light header { background: linear-gradient(180deg, hsl(38 50% 97% / 0.97), hsl(36 40% 93% / 0.95)) !important; border-bottom-color: hsl(35 30% 86%) !important; box-shadow: 0 1px 4px hsl(30 20% 50% / 0.06) !important; }
         @keyframes emberPulse {
           0%, 100% { opacity: 0.6; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.3); }
