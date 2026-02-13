@@ -28,15 +28,19 @@ const Header = () => {
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setTetolOpen(true);
-  }, []);
+    if (!user) { navigate("/auth"); return; }
+    navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
+  }, [user, navigate, location.pathname]);
 
-  // Listen for custom event from Hero Teotag logo
+  // Listen for custom event from Hero Teotag logo — now navigates to Hearth
   useEffect(() => {
-    const handler = () => setTetolOpen(true);
+    const handler = () => {
+      if (!user) { navigate("/auth"); return; }
+      navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
+    };
     window.addEventListener("open-tetol", handler);
     return () => window.removeEventListener("open-tetol", handler);
-  }, []);
+  }, [user, navigate, location.pathname]);
 
   // Hover no longer opens search automatically — it was too aggressive and obscured the header
 
@@ -189,46 +193,43 @@ const Header = () => {
         <div className="flex items-center justify-between relative">
           {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
-            {/* Mobile TEOTAG logo — top left, opens TETOL menu */}
-            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}>
+            {/* Mobile TEOTAG logo — top left, navigates to Hearth */}
+            <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={handleTeotagClick}>
               <img 
                 src={teotagLogo} 
-                alt="TEOTAG — Open navigation" 
+                alt="TEOTAG — Go to Hearth" 
                 className="w-10 h-10 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300"
               />
             </button>
-            {/* Desktop TEOTAG logo */}
+            {/* Desktop TEOTAG logo — navigates to Hearth */}
             <div className="relative group hidden md:block">
               <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
                 <img 
                   src={teotagLogo} 
-                  alt="TEOTAG — Click to go home" 
+                  alt="TEOTAG — Go to Hearth" 
                   className="w-12 h-12 md:w-14 md:h-14 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300 hover:scale-105"
-                  title="Click for Home · Double-click for TETOL"
+                  title="Click to go to Hearth"
                 />
               </button>
               <div className="absolute top-1/2 -translate-y-1/2 left-full ml-3 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-x-2 group-hover:translate-x-0 z-50">
                 <div className="bg-card/95 backdrop-blur border border-mystical rounded-xl p-3 shadow-lg max-w-xs animate-fade-in whitespace-nowrap">
                   <p className="text-sm font-serif text-foreground">
-                    <span className="text-primary font-bold">TEOTAG</span> — Your grove guide
+                    <span className="text-primary font-bold">TEOTAG</span> — Go to Hearth
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Center: S33D Hearth button — absolute centered on mobile */}
+          {/* Center: S33D logo — absolute centered on mobile, opens TETOL nav */}
           <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
             <button
               type="button"
               className="flex items-center bg-transparent border-none p-0 relative"
-              onClick={() => {
-                if (!user) { navigate("/auth"); return; }
-                navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
-              }}
+              onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}
             >
               <div className="relative">
-                <img src={s33dHearthLogo} alt="Hearth" className="w-11 h-11 rounded-full object-cover border-2 border-primary/40 shadow-[0_0_12px_hsla(42,90%,55%,0.25)] hover:shadow-[0_0_20px_hsla(42,90%,55%,0.4)] transition-all duration-300 hover:scale-105" />
+                <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-11 h-11 rounded-full object-cover border-2 border-primary/40 shadow-[0_0_12px_hsla(42,90%,55%,0.25)] hover:shadow-[0_0_20px_hsla(42,90%,55%,0.4)] transition-all duration-300 hover:scale-105" />
                 {hasPendingActivity && (
                   <span
                     className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
@@ -282,11 +283,11 @@ const Header = () => {
             {user ? (
               <button
                 type="button"
-                onClick={() => navigate(location.pathname === "/dashboard" ? "/" : "/dashboard")}
+                onClick={() => setTetolOpen(true)}
                 className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer group"
               >
                 <div className="relative">
-                  <img src={s33dHearthLogo} alt="Hearth" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
+                  <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
                   {hasPendingActivity && (
                     <span
                       className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full"
@@ -298,7 +299,7 @@ const Header = () => {
                     />
                   )}
                 </div>
-                <span className="font-serif">Hearth</span>
+                <span className="font-serif">S33D</span>
                 {heartsCount !== null && heartsCount > 0 && (
                   <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
                     <Heart className="w-3 h-3 fill-primary/40" />
