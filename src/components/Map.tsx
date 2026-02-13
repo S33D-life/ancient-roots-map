@@ -394,14 +394,24 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
     fetchTrees();
 
+    // Debounce realtime updates to avoid redundant refetch storms
+    let realtimeDebounce: ReturnType<typeof setTimeout>;
+    const debouncedFetch = () => {
+      clearTimeout(realtimeDebounce);
+      realtimeDebounce = setTimeout(fetchTrees, 2000);
+    };
+
     const channel = supabase
       .channel('schema-db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, () => fetchTrees())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offerings' }, () => fetchTrees())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'planted_seeds' }, () => fetchTrees())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, debouncedFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'offerings' }, debouncedFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'planted_seeds' }, debouncedFetch)
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      clearTimeout(realtimeDebounce);
+      supabase.removeChannel(channel);
+    };
   }, [toast]);
 
   // Species counts for filter panel

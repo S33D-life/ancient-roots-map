@@ -12,6 +12,7 @@ const StarryNight = () => {
     if (!ctx) return;
 
     let animationId: number;
+    let paused = false;
     let width = window.innerWidth;
     let height = window.innerHeight;
     canvas.width = width;
@@ -37,6 +38,10 @@ const StarryNight = () => {
 
     let t = 0;
     const draw = () => {
+      if (paused) {
+        animationId = requestAnimationFrame(draw);
+        return;
+      }
       ctx.clearRect(0, 0, width, height);
       t += 1;
 
@@ -52,6 +57,12 @@ const StarryNight = () => {
     };
 
     draw();
+
+    // Pause when tab is hidden to save CPU/battery
+    const handleVisibility = () => {
+      paused = document.hidden;
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const handleResize = () => {
       width = window.innerWidth;
@@ -69,6 +80,7 @@ const StarryNight = () => {
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 
