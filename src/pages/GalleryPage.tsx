@@ -1186,38 +1186,6 @@ const GalleryPage = () => {
               </div>
             </div>
 
-            {/* Heart Reservoir Rankings */}
-            <TreeReservoirLeaderboard />
-
-            {/* Council of Life Window */}
-            <div
-              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
-              onClick={() => setShowCouncilEmbed(!showCouncilEmbed)}
-            >
-              <img
-                src={councilImage}
-                alt="Council of Life"
-                className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
-                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Council of Life</h3>
-                <p className="text-sm text-foreground/70 mt-1">{showCouncilEmbed ? "Click to close" : "Click to open the Council"}</p>
-              </div>
-            </div>
-            {showCouncilEmbed && (
-              <div className="animate-fade-in">
-                <iframe
-                  src="https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228"
-                  width="100%"
-                  height="600"
-                  frameBorder="0"
-                  allowFullScreen
-                  className="rounded-xl border border-border/40"
-                  title="Council of Life"
-                />
-              </div>
-            )}
-
             {showTreeLedger && (
               <div className="animate-fade-in">
                 <Card className="border-mystical bg-card/50 backdrop-blur">
@@ -1256,12 +1224,9 @@ const GalleryPage = () => {
                           </div>
                         </div>
                       </div>
-
-                      {/* Heart Economy Summary */}
                       <div className="border-t border-mystical pt-4">
                         <HeartEconomySummary />
                       </div>
-
                       <div className="border-t border-mystical pt-4">
                         <div className="flex items-center gap-3 mb-3">
                           <h3 className="text-lg font-serif font-semibold">Strings</h3>
@@ -1301,7 +1266,6 @@ const GalleryPage = () => {
                           className="rounded-lg border border-border"
                         />
                       </div>
-
                       <div className="border-t border-mystical pt-4">
                         <h3 className="text-lg font-serif font-semibold mb-3">Import Data</h3>
                         <p className="text-sm text-muted-foreground mb-4">
@@ -1309,7 +1273,6 @@ const GalleryPage = () => {
                         </p>
                         <div className="flex flex-wrap gap-3">
                           <PhotoImport />
-                          
                           <div className="relative">
                             <input
                               type="file"
@@ -1339,7 +1302,6 @@ const GalleryPage = () => {
                             </label>
                           </div>
                         </div>
-                        
                         {isImporting && importProgress.total > 0 && (
                           <div className="mt-4 p-4 border border-mystical rounded-lg bg-background/50 space-y-2">
                             <div className="flex justify-between text-sm">
@@ -1366,7 +1328,6 @@ const GalleryPage = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="border-t border-mystical pt-4">
                         <h3 className="text-lg font-serif font-semibold mb-3">Export Data</h3>
                         <p className="text-sm text-muted-foreground mb-4">
@@ -1388,6 +1349,38 @@ const GalleryPage = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </div>
+            )}
+
+            {/* Heart Reservoir Rankings */}
+            <TreeReservoirLeaderboard />
+
+            {/* Council of Life Window */}
+            <div
+              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
+              onClick={() => setShowCouncilEmbed(!showCouncilEmbed)}
+            >
+              <img
+                src={councilImage}
+                alt="Council of Life"
+                className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
+                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Council of Life</h3>
+                <p className="text-sm text-foreground/70 mt-1">{showCouncilEmbed ? "Click to close" : "Click to open the Council"}</p>
+              </div>
+            </div>
+            {showCouncilEmbed && (
+              <div className="animate-fade-in">
+                <iframe
+                  src="https://clammy-viscount-ddb.notion.site/ebd/1e415b58480d8042a722ef57e01e3228"
+                  width="100%"
+                  height="600"
+                  frameBorder="0"
+                  allowFullScreen
+                  className="rounded-xl border border-border/40"
+                  title="Council of Life"
+                />
               </div>
             )}
           </TabsContent>
