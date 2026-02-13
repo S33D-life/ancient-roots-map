@@ -56,6 +56,7 @@ import heartwoodLanding from "@/assets/hearth-cave.png";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import Footer from "@/components/Footer";
+import DashboardVault from "@/components/dashboard/DashboardVault";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
 
@@ -819,7 +820,7 @@ const GalleryPage = () => {
                 <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
                 <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
                 <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
-                <TabsTrigger value="vault" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4" onClick={() => navigate("/heartwood/vault?from=heartwood")}>Vault</TabsTrigger>
+                <TabsTrigger value="vault" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Vault</TabsTrigger>
               </TabsList>
             </div>
             {/* Fullscreen toggle */}
@@ -1321,6 +1322,16 @@ const GalleryPage = () => {
 
           <TabsContent value="wishlist" className="space-y-6">
             <WishingTreeUnified />
+          </TabsContent>
+
+          <TabsContent value="vault" className="space-y-6">
+            {currentUserId ? (
+              <DashboardVault userId={currentUserId} />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground font-serif">
+                <p>Please log in to access your Heartwood Vault</p>
+              </div>
+            )}
           </TabsContent>
           </div>
         </Tabs>
