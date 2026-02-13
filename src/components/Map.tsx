@@ -1,21 +1,29 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
-import MapSearch from "./MapSearch";
-import MapFilters, { GroveScale } from "./MapFilters";
-import ConversionStatus from "./ConversionStatus";
-import FindMeButton from "./FindMeButton";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import MistOverlay from "./MistOverlay";
-import { lazy, Suspense } from "react";
+import {
+  haversineKm, convexHull, expandHull, createGroveBoundary, getContinent,
+  getTimeOfDay, TIME_ATMOSPHERES,
+  type TreeCoord, type TimeOfDay,
+} from "@/utils/mapGeometry";
+import type { GroveScale } from "./MapFilters";
 
-// Lazy-load heavy / non-critical sub-components
+// ── Lazy-loaded modules ──
+// Core map renderer
 const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
+
+// Overlay widgets — deferred to keep critical bundle small
+const MapSearch = lazy(() => import("./MapSearch"));
+const MapFilters = lazy(() => import("./MapFilters").then(m => ({ default: m.default })));
+const ConversionStatus = lazy(() => import("./ConversionStatus"));
+const FindMeButton = lazy(() => import("./FindMeButton"));
+const MistOverlay = lazy(() => import("./MistOverlay"));
 const TreeImportExport = lazy(() => import("./TreeImportExport"));
 const TreeRadio = lazy(() => import("./TreeRadio"));
 const MapIdleNudge = lazy(() => import("./MapIdleNudge"));
@@ -32,53 +40,6 @@ function isWebGLSupported(): boolean {
     return !!(canvas.getContext("webgl") || canvas.getContext("webgl2") || canvas.getContext("experimental-webgl"));
   } catch { return false; }
 }
-
-type TimeOfDay = "dawn" | "day" | "dusk" | "night";
-
-function getTimeOfDay(): TimeOfDay {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 8) return "dawn";
-  if (h >= 8 && h < 17) return "day";
-  if (h >= 17 && h < 20) return "dusk";
-  return "night";
-}
-
-const TIME_ATMOSPHERES: Record<TimeOfDay, {
-  mapFilter: string;
-  vignette: string;
-  vignetteBoxShadow: string;
-  ambientGlow: string;
-  label: string;
-}> = {
-  dawn: {
-    mapFilter: 'sepia(0.08) brightness(1.0)',
-    vignette: 'radial-gradient(ellipse at center, transparent 70%, hsla(25, 50%, 25%, 0.08) 90%, hsla(20, 45%, 15%, 0.15) 100%)',
-    vignetteBoxShadow: 'inset 0 0 40px 15px hsla(25, 45%, 18%, 0.1)',
-    ambientGlow: 'none',
-    label: 'Dawn',
-  },
-  day: {
-    mapFilter: 'none',
-    vignette: 'radial-gradient(ellipse at center, transparent 75%, hsla(35, 45%, 20%, 0.05) 95%, hsla(30, 40%, 12%, 0.1) 100%)',
-    vignetteBoxShadow: 'inset 0 0 30px 10px hsla(30, 40%, 15%, 0.08)',
-    ambientGlow: 'none',
-    label: 'Day',
-  },
-  dusk: {
-    mapFilter: 'sepia(0.1) brightness(0.95)',
-    vignette: 'radial-gradient(ellipse at center, transparent 60%, hsla(20, 55%, 18%, 0.1) 85%, hsla(15, 50%, 10%, 0.2) 100%)',
-    vignetteBoxShadow: 'inset 0 0 60px 20px hsla(20, 50%, 12%, 0.15)',
-    ambientGlow: 'none',
-    label: 'Dusk',
-  },
-  night: {
-    mapFilter: 'sepia(0.1) brightness(0.85) hue-rotate(-5deg)',
-    vignette: 'radial-gradient(ellipse at center, transparent 55%, hsla(240, 30%, 10%, 0.15) 80%, hsla(240, 35%, 5%, 0.3) 100%)',
-    vignetteBoxShadow: 'inset 0 0 80px 30px hsla(240, 30%, 6%, 0.25)',
-    ambientGlow: 'none',
-    label: 'Starlight',
-  },
-};
 
 interface TreeOfferings {
   [treeId: string]: number;
@@ -108,18 +69,7 @@ interface BloomedSeed {
   planter_id: string;
 }
 
-interface Tree {
-  id: string;
-  name: string;
-  species: string;
-  latitude: number;
-  longitude: number;
-  what3words: string;
-  description?: string;
-  created_by?: string;
-  nation?: string;
-  estimated_age?: number | null;
-}
+type Tree = TreeCoord;
 
 const GROVE_SOURCE_ID = 'grove-boundary-source';
 const ROOT_THREADS_SOURCE = 'root-threads-source';
@@ -132,132 +82,6 @@ const CREATOR_PATHS_GLOW_LAYER = 'creator-paths-glow-layer';
 const ROOT_THREAD_MAX_KM = 80;
 const GROVE_FILL_ID = 'grove-boundary-fill';
 const GROVE_LINE_ID = 'grove-boundary-line';
-
-// Haversine distance in km
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-// Compute convex hull of [lng, lat] points using Graham scan
-function convexHull(points: [number, number][]): [number, number][] {
-  if (points.length < 3) return points;
-
-  const sorted = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-
-  function cross(O: [number, number], A: [number, number], B: [number, number]) {
-    return (A[0] - O[0]) * (B[1] - O[1]) - (A[1] - O[1]) * (B[0] - O[0]);
-  }
-
-  const lower: [number, number][] = [];
-  for (const p of sorted) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0)
-      lower.pop();
-    lower.push(p);
-  }
-
-  const upper: [number, number][] = [];
-  for (const p of sorted.reverse()) {
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0)
-      upper.pop();
-    upper.push(p);
-  }
-
-  upper.pop();
-  lower.pop();
-  return lower.concat(upper);
-}
-
-// Create a buffered boundary around points (expand hull outward)
-function createGroveBoundary(trees: Tree[], bufferKm: number): GeoJSON.Feature | null {
-  const points: [number, number][] = trees.map((t) => [t.longitude, t.latitude]);
-
-  if (points.length === 0) return null;
-
-  if (points.length === 1) {
-    const [lng, lat] = points[0];
-    const coords: [number, number][] = [];
-    for (let i = 0; i <= 64; i++) {
-      const angle = (i / 64) * 2 * Math.PI;
-      const dLat = (bufferKm / 111.32) * Math.cos(angle);
-      const dLng = (bufferKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.sin(angle);
-      coords.push([lng + dLng, lat + dLat]);
-    }
-    return {
-      type: 'Feature',
-      properties: {},
-      geometry: { type: 'Polygon', coordinates: [coords] },
-    };
-  }
-
-  if (points.length === 2) {
-    const hull = points;
-    const expanded = expandHull(hull, bufferKm);
-    return {
-      type: 'Feature',
-      properties: {},
-      geometry: { type: 'Polygon', coordinates: [expanded] },
-    };
-  }
-
-  const hull = convexHull(points);
-  const expanded = expandHull(hull, bufferKm);
-  return {
-    type: 'Feature',
-    properties: {},
-    geometry: { type: 'Polygon', coordinates: [expanded] },
-  };
-}
-
-// Expand a hull outward by bufferKm, smoothing corners
-function expandHull(hull: [number, number][], bufferKm: number): [number, number][] {
-  if (hull.length < 2) return hull;
-
-  const result: [number, number][] = [];
-  const n = hull.length;
-
-  for (let i = 0; i < n; i++) {
-    const [lng, lat] = hull[i];
-    const cx = hull.reduce((s, p) => s + p[0], 0) / n;
-    const cy = hull.reduce((s, p) => s + p[1], 0) / n;
-    const dx = lng - cx;
-    const dy = lat - cy;
-    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    const normDx = dx / dist;
-    const normDy = dy / dist;
-
-    const baseAngle = Math.atan2(normDy, normDx);
-    for (let j = -2; j <= 2; j++) {
-      const angle = baseAngle + (j * Math.PI) / 10;
-      const aLat = (bufferKm / 111.32) * Math.sin(angle);
-      const aLng = (bufferKm / (111.32 * Math.cos((lat * Math.PI) / 180))) * Math.cos(angle);
-      result.push([lng + aLng, lat + aLat]);
-    }
-  }
-
-  const finalHull = convexHull(result);
-  finalHull.push(finalHull[0]);
-  return finalHull;
-}
-
-// Determine continent from coordinates (rough bounding boxes)
-function getContinent(lat: number, lng: number): string {
-  if (lat > 15 && lat < 72 && lng > -25 && lng < 45) return "Europe";
-  if (lat > -35 && lat < 37 && lng > -20 && lng < 55) return "Africa";
-  if (lat > 5 && lat < 78 && lng > 45 && lng < 180) return "Asia";
-  if (lat > -50 && lat < 5 && lng > 90 && lng < 180) return "Oceania";
-  if (lat > -60 && lat < -10 && lng > 110 && lng < 180) return "Oceania";
-  if (lat > 15 && lat < 85 && lng > -170 && lng < -50) return "North America";
-  if (lat > -60 && lat < 15 && lng > -90 && lng < -30) return "South America";
-  return "Other";
-}
 
 interface MapProps {
   initialView?: string;
@@ -285,9 +109,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const mapStatusRef = useRef(mapStatus);
-  // Keep ref in sync so timeouts/callbacks read current value
   useEffect(() => { mapStatusRef.current = mapStatus; }, [mapStatus]);
-  // Auto-redirect error to leaflet — never leave user on a broken screen
   useEffect(() => {
     if (mapStatus === "error") {
       console.warn('[Atlas] Error state detected — auto-switching to Leaflet');
@@ -324,7 +146,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {} // silently fail
+        () => {}
       );
     }
   }, []);
@@ -333,17 +155,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   useEffect(() => {
     const fetchTrees = async () => {
       const [treesResult, offeringsResult, birdsongResult] = await Promise.all([
-        supabase
-          .from('trees')
-          .select('*')
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null),
-        supabase
-          .from('offerings')
-          .select('tree_id, type, media_url'),
-        supabase
-          .from('birdsong_offerings')
-          .select('tree_id, season'),
+        supabase.from('trees').select('*').not('latitude', 'is', null).not('longitude', 'is', null),
+        supabase.from('offerings').select('tree_id, type, media_url'),
+        supabase.from('birdsong_offerings').select('tree_id, season'),
       ]);
 
       if (treesResult.error) {
@@ -353,7 +167,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         setTrees(treesResult.data || []);
       }
 
-      // Fetch bloomed, uncollected seeds
       const { data: seedData } = await supabase
         .from('planted_seeds')
         .select('id, tree_id, latitude, longitude, blooms_at, planter_id')
@@ -381,7 +194,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         });
         setBirdsongCounts(bCounts);
 
-        // Build heat points by joining with tree coords
         const treeMap: Record<string, any> = {};
         (treesResult.data || []).forEach((t: any) => { treeMap[t.id] = t; });
         const heatPts: BirdsongHeatPoint[] = [];
@@ -397,7 +209,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
     fetchTrees();
 
-    // Debounce realtime updates to avoid redundant refetch storms
     let realtimeDebounce: ReturnType<typeof setTimeout>;
     const debouncedFetch = () => {
       clearTimeout(realtimeDebounce);
@@ -427,7 +238,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     return counts;
   }, [trees]);
 
-  // Available lineages and projects for filter dropdowns
   const availableLineages = useMemo(() => {
     const set = new Set<string>();
     trees.forEach((t: any) => { if (t.lineage) set.add(t.lineage); });
@@ -513,17 +323,12 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     return filtered;
   }, [trees, viewMode, speciesFilter, groveScale, lineageFilter, projectFilter, userId, userLocation]);
 
-  // Initialize map — default to Leaflet for reliability until WebGL rendering issue is resolved.
-  // WebGL tiles load (200 OK) and MapLibre reports "ready", but canvas appears blank.
-  // TODO: Investigate WebGL canvas visibility — likely a CSS stacking/compositing issue.
+  // Initialize map — default to Leaflet
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
     console.log('[Atlas] Defaulting to Leaflet — WebGL rendering under investigation');
     setMapStatus("leaflet");
   }, []);
-
-  // NOTE: WebGL init code removed temporarily — tiles load but canvas is visually blank.
-  // Leaflet Lite Mode is the primary renderer until this is resolved.
 
   // Resize map on visibility/tab changes
   useEffect(() => {
@@ -565,11 +370,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       });
     }
   }, [mapStatus, initialLat, initialLng, initialZoom, initialW3w, toast]);
-
-
-  // WebGL marker rendering skipped — Leaflet is the active renderer.
-  // The filteredTrees are passed to LeafletFallbackMap via props instead.
-  // This avoids creating 100s of DOM elements that never display.
 
   // Render glowing seed heart markers for bloomed, uncollected seeds
   useEffect(() => {
@@ -638,10 +438,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
       m.addSource(GROVE_SOURCE_ID, {
         type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [feature],
-        },
+        data: { type: 'FeatureCollection', features: [feature] },
       });
 
       m.addLayer({
@@ -686,9 +483,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           if (m.getLayer(GROVE_LINE_ID)) m.removeLayer(GROVE_LINE_ID);
           if (m.getSource(GROVE_SOURCE_ID)) m.removeSource(GROVE_SOURCE_ID);
         }
-      } catch {
-        // Map already removed
-      }
+      } catch {}
     };
   }, [filteredTrees, groveScale]);
 
@@ -725,10 +520,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
               properties: { distance: dist, species: a.species },
               geometry: {
                 type: 'LineString',
-                coordinates: [
-                  [a.longitude, a.latitude],
-                  [b.longitude, b.latitude],
-                ],
+                coordinates: [[a.longitude, a.latitude], [b.longitude, b.latitude]],
               },
             });
           });
@@ -749,19 +541,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         minzoom: 5,
         paint: {
           'line-color': 'hsla(220, 15%, 65%, 0.4)',
-          'line-width': [
-            'interpolate', ['linear'], ['zoom'],
-            5, 0.2,
-            10, 0.8,
-            14, 1.5,
-          ],
-          'line-opacity': [
-            'interpolate', ['linear'], ['zoom'],
-            5, 0,
-            7, 0.1,
-            10, 0.25,
-            14, 0.4,
-          ],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.2, 10, 0.8, 14, 1.5],
+          'line-opacity': ['interpolate', ['linear'], ['zoom'], 5, 0, 7, 0.1, 10, 0.25, 14, 0.4],
           'line-dasharray': [6, 4],
         },
       });
@@ -779,9 +560,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           if (m.getLayer(ROOT_THREADS_LAYER)) m.removeLayer(ROOT_THREADS_LAYER);
           if (m.getSource(ROOT_THREADS_SOURCE)) m.removeSource(ROOT_THREADS_SOURCE);
         }
-      } catch {
-        // Map already removed
-      }
+      } catch {}
     };
   }, [filteredTrees]);
 
@@ -846,14 +625,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
         features.push({
           type: 'Feature',
-          properties: {
-            isWalked: isCurrentUser(creatorId) ? 1 : 0,
-            creatorId,
-          },
-          geometry: {
-            type: 'LineString',
-            coordinates: smoothCoords,
-          },
+          properties: { isWalked: isCurrentUser(creatorId) ? 1 : 0, creatorId },
+          geometry: { type: 'LineString', coordinates: smoothCoords },
         });
       });
 
@@ -870,30 +643,10 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         source: CREATOR_PATHS_SOURCE,
         minzoom: 3,
         paint: {
-          'line-color': [
-            'case',
-            ['==', ['get', 'isWalked'], 1],
-            'hsla(42, 90%, 55%, 0.25)',
-            'hsla(220, 20%, 70%, 0.15)',
-          ],
-          'line-width': [
-            'interpolate', ['linear'], ['zoom'],
-            3, 2,
-            8, 6,
-            14, 10,
-          ],
-          'line-blur': [
-            'interpolate', ['linear'], ['zoom'],
-            3, 2,
-            8, 4,
-            14, 6,
-          ],
-          'line-opacity': [
-            'interpolate', ['linear'], ['zoom'],
-            3, 0.15,
-            6, 0.3,
-            10, 0.5,
-          ],
+          'line-color': ['case', ['==', ['get', 'isWalked'], 1], 'hsla(42, 90%, 55%, 0.25)', 'hsla(220, 20%, 70%, 0.15)'],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 3, 2, 8, 6, 14, 10],
+          'line-blur': ['interpolate', ['linear'], ['zoom'], 3, 2, 8, 4, 14, 6],
+          'line-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0.15, 6, 0.3, 10, 0.5],
         },
       });
 
@@ -902,30 +655,11 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         type: 'line',
         source: CREATOR_PATHS_SOURCE,
         minzoom: 3,
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': [
-            'case',
-            ['==', ['get', 'isWalked'], 1],
-            'hsl(42, 90%, 58%)',
-            'hsl(220, 15%, 72%)',
-          ],
-          'line-width': [
-            'interpolate', ['linear'], ['zoom'],
-            3, 0.5,
-            8, 1.5,
-            14, 3,
-          ],
-          'line-opacity': [
-            'interpolate', ['linear'], ['zoom'],
-            3, 0.3,
-            6, 0.5,
-            10, 0.75,
-            14, 0.9,
-          ],
+          'line-color': ['case', ['==', ['get', 'isWalked'], 1], 'hsl(42, 90%, 58%)', 'hsl(220, 15%, 72%)'],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.5, 8, 1.5, 14, 3],
+          'line-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0.3, 6, 0.5, 10, 0.75, 14, 0.9],
         },
       });
     };
@@ -943,9 +677,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           if (m.getLayer(CREATOR_PATHS_LAYER)) m.removeLayer(CREATOR_PATHS_LAYER);
           if (m.getSource(CREATOR_PATHS_SOURCE)) m.removeSource(CREATOR_PATHS_SOURCE);
         }
-      } catch {
-        // Map already removed
-      }
+      } catch {}
     };
   }, [trees, userId, mapStatus]);
 
@@ -972,10 +704,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   return (
     <div className="absolute inset-0" style={{ zIndex: 1 }}>
-      {/* Map canvas — opaque cream background ensures tiles are visible over dark page */}
       <div ref={mapContainer} className="absolute inset-0" style={{ zIndex: 0, background: '#faf7f0' }} />
 
-      {/* Loading / Error overlay (kept non-occluding) */}
       {mapStatus !== "ready" && (
         <div className="absolute inset-0 z-[2] flex flex-col items-center justify-center gap-4 pointer-events-none" style={{
           background: mapStatus === "loading"
@@ -1002,12 +732,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
                 }} />
               </div>
               <div className="flex flex-col items-center gap-1.5">
-                <p className="font-serif text-sm tracking-wide" style={{ color: 'hsl(42, 70%, 60%)' }}>
-                  Awakening the Atlas…
-                </p>
-                <p className="font-serif text-xs" style={{ color: 'hsla(42, 40%, 55%, 0.6)' }}>
-                  Preparing ancient cartography
-                </p>
+                <p className="font-serif text-sm tracking-wide" style={{ color: 'hsl(42, 70%, 60%)' }}>Awakening the Atlas…</p>
+                <p className="font-serif text-xs" style={{ color: 'hsla(42, 40%, 55%, 0.6)' }}>Preparing ancient cartography</p>
               </div>
               <div className="flex gap-1.5 mt-1">
                 {[0, 1, 2].map(i => (
@@ -1018,13 +744,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
                   }} />
                 ))}
               </div>
-              {/* Quick escape back to Lite Mode while WebGL is loading */}
               <button
-                onClick={() => {
-                  map.current?.remove();
-                  map.current = null;
-                  setMapStatus("leaflet");
-                }}
+                onClick={() => { map.current?.remove(); map.current = null; setMapStatus("leaflet"); }}
                 className="mt-3 pointer-events-auto px-4 py-2 rounded-full font-serif text-xs transition-all hover:brightness-125"
                 style={{ background: "hsla(120,30%,18%,0.6)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.4)" }}
               >
@@ -1042,24 +763,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
                 {mapError || "Map tiles failed to load. This may be a network issue or WebGL compatibility problem."}
               </p>
               <div className="flex gap-2 mt-2">
-                <button
-                  onClick={() => window.location.reload()}
-                  className="px-5 py-2 rounded-lg font-serif text-sm transition-colors bg-primary text-primary-foreground border border-border"
-                >
-                  Retry
-                </button>
-                <button
-                  onClick={() => setMapStatus("leaflet")}
-                  className="px-4 py-2 rounded-lg font-serif text-sm transition-colors bg-secondary text-secondary-foreground border border-border"
-                >
-                  Lite Mode
-                </button>
-                <button
-                  onClick={() => setShowDebug(!showDebug)}
-                  className="px-3 py-2 rounded-lg font-serif text-xs transition-colors bg-card text-foreground border border-border"
-                >
-                  Debug
-                </button>
+                <button onClick={() => window.location.reload()} className="px-5 py-2 rounded-lg font-serif text-sm transition-colors bg-primary text-primary-foreground border border-border">Retry</button>
+                <button onClick={() => setMapStatus("leaflet")} className="px-4 py-2 rounded-lg font-serif text-sm transition-colors bg-secondary text-secondary-foreground border border-border">Lite Mode</button>
+                <button onClick={() => setShowDebug(!showDebug)} className="px-3 py-2 rounded-lg font-serif text-xs transition-colors bg-card text-foreground border border-border">Debug</button>
               </div>
               {showDebug && (
                 <div className="mt-3 text-left text-[10px] font-mono p-3 rounded-lg w-full bg-card text-foreground border border-border">
@@ -1075,9 +781,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </div>
       )}
 
-      {/* Atmospheric overlays disabled to ensure unobstructed map visibility */}
-
-      <ConversionStatus />
+      <Suspense fallback={null}>
+        <ConversionStatus />
+      </Suspense>
 
       {/* Top bar — desktop: full toolbar, mobile: minimal floating pills */}
       <div className="hidden md:block absolute top-[72px] left-1/2 -translate-x-1/2 z-10">
@@ -1089,20 +795,22 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
                 <TabsTrigger value="personal" className="text-sm">Personal Groves</TabsTrigger>
               </TabsList>
             </Tabs>
-            <MapFilters
-              speciesFilter={speciesFilter}
-              onSpeciesChange={setSpeciesFilter}
-              groveScale={groveScale}
-              onGroveScaleChange={setGroveScale}
-              treeCounts={treeCounts}
-              totalTrees={trees.length}
-              lineageFilter={lineageFilter}
-              onLineageChange={setLineageFilter}
-              availableLineages={availableLineages}
-              projectFilter={projectFilter}
-              onProjectChange={setProjectFilter}
-              availableProjects={availableProjects}
-            />
+            <Suspense fallback={<span className="text-xs text-muted-foreground">…</span>}>
+              <MapFilters
+                speciesFilter={speciesFilter}
+                onSpeciesChange={setSpeciesFilter}
+                groveScale={groveScale}
+                onGroveScaleChange={setGroveScale}
+                treeCounts={treeCounts}
+                totalTrees={trees.length}
+                lineageFilter={lineageFilter}
+                onLineageChange={setLineageFilter}
+                availableLineages={availableLineages}
+                projectFilter={projectFilter}
+                onProjectChange={setProjectFilter}
+                availableProjects={availableProjects}
+              />
+            </Suspense>
             <span className="text-sm text-muted-foreground whitespace-nowrap">
               {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
             </span>
@@ -1118,20 +826,22 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           {viewMode === 'collective' ? '🌍 All' : '🌿 Mine'}
         </button>
         <div className="shrink-0">
-          <MapFilters
-            speciesFilter={speciesFilter}
-            onSpeciesChange={setSpeciesFilter}
-            groveScale={groveScale}
-            onGroveScaleChange={setGroveScale}
-            treeCounts={treeCounts}
-            totalTrees={trees.length}
-            lineageFilter={lineageFilter}
-            onLineageChange={setLineageFilter}
-            availableLineages={availableLineages}
-            projectFilter={projectFilter}
-            onProjectChange={setProjectFilter}
-            availableProjects={availableProjects}
-          />
+          <Suspense fallback={null}>
+            <MapFilters
+              speciesFilter={speciesFilter}
+              onSpeciesChange={setSpeciesFilter}
+              groveScale={groveScale}
+              onGroveScaleChange={setGroveScale}
+              treeCounts={treeCounts}
+              totalTrees={trees.length}
+              lineageFilter={lineageFilter}
+              onLineageChange={setLineageFilter}
+              availableLineages={availableLineages}
+              projectFilter={projectFilter}
+              onProjectChange={setProjectFilter}
+              availableProjects={availableProjects}
+            />
+          </Suspense>
         </div>
         <span className="ml-auto text-[11px] font-serif px-2 py-1 rounded-full backdrop-blur-md border border-border bg-card/70 text-muted-foreground">
           {filteredTrees.length} trees
@@ -1149,17 +859,21 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </span>
       </div>
 
-      <MapSearch onLocationSelect={handleLocationSelect} />
+      <Suspense fallback={null}>
+        <MapSearch onLocationSelect={handleLocationSelect} />
+      </Suspense>
 
       {/* Bottom controls — hidden on mobile, shown on desktop */}
       <div className="absolute bottom-2 left-2 z-10 hidden md:block">
-        <FindMeButton
-          autoOpen={autoAddTree}
-          onLocationFound={(lat, lng) => {
-            setUserLocation({ lat, lng });
-            map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
-          }}
-        />
+        <Suspense fallback={null}>
+          <FindMeButton
+            autoOpen={autoAddTree}
+            onLocationFound={(lat, lng) => {
+              setUserLocation({ lat, lng });
+              map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
+            }}
+          />
+        </Suspense>
       </div>
 
       <Suspense fallback={null}>
@@ -1179,16 +893,18 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </div>
       </Suspense>
 
-      {/* Mobile: compact bottom bar — safe-area above Teotag */}
+      {/* Mobile: compact bottom bar */}
       <div className="absolute bottom-14 left-2 right-2 z-10 flex md:hidden items-center gap-2">
         <div className="shrink-0">
-          <FindMeButton
-            autoOpen={autoAddTree}
-            onLocationFound={(lat, lng) => {
-              setUserLocation({ lat, lng });
-              map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
-            }}
-          />
+          <Suspense fallback={null}>
+            <FindMeButton
+              autoOpen={autoAddTree}
+              onLocationFound={(lat, lng) => {
+                setUserLocation({ lat, lng });
+                map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
+              }}
+            />
+          </Suspense>
         </div>
         <div className="ml-auto shrink-0 flex items-center gap-2">
           <button
@@ -1208,7 +924,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
       </Suspense>
 
-      {/* Staff Room button — bottom-right corner, golden glowing line */}
+      {/* Staff Room button */}
       <button
         onClick={() => navigate("/library/staff-room")}
         className="absolute bottom-2 right-2 z-10 w-8 h-14 flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
@@ -1245,48 +961,28 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px hsla(45, 60%, 40%, 0.1);
           padding: 0;
         }
-        .tree-popup .maplibregl-popup-tip {
-          border-top-color: hsl(120, 40%, 15%);
-        }
-        .tree-popup .maplibregl-popup-close-button {
-          color: hsl(45, 60%, 50%);
-          font-size: 18px;
-          padding: 4px 8px;
-        }
+        .tree-popup .maplibregl-popup-tip { border-top-color: hsl(120, 40%, 15%); }
+        .tree-popup .maplibregl-popup-close-button { color: hsl(45, 60%, 50%); font-size: 18px; padding: 4px 8px; }
         .seed-heart-marker {
-          position: relative;
-          cursor: pointer;
+          position: relative; cursor: pointer;
           animation: seedHeartPulse 2s ease-in-out infinite;
           z-index: 5;
           filter: drop-shadow(0 0 6px hsla(120, 60%, 50%, 0.5));
         }
-        .seed-heart-icon {
-          font-size: 22px;
-          display: block;
-        }
+        .seed-heart-icon { font-size: 22px; display: block; }
         .seed-heart-count {
-          position: absolute;
-          top: -4px;
-          right: -8px;
-          background: hsl(120, 50%, 40%);
-          color: hsl(0, 0%, 100%);
-          font-size: 9px;
-          font-weight: 700;
-          font-family: sans-serif;
-          min-width: 16px;
-          height: 16px;
-          line-height: 16px;
-          text-align: center;
-          border-radius: 99px;
+          position: absolute; top: -4px; right: -8px;
+          background: hsl(120, 50%, 40%); color: hsl(0, 0%, 100%);
+          font-size: 9px; font-weight: 700; font-family: sans-serif;
+          min-width: 16px; height: 16px; line-height: 16px;
+          text-align: center; border-radius: 99px;
           border: 1.5px solid hsl(120, 40%, 15%);
         }
         @keyframes seedHeartPulse {
           0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px hsla(120, 60%, 50%, 0.4)); }
           50% { transform: scale(1.15); filter: drop-shadow(0 0 10px hsla(120, 60%, 50%, 0.7)); }
         }
-        .staff-glow-btn {
-          animation: staffGlow 3s ease-in-out infinite;
-        }
+        .staff-glow-btn { animation: staffGlow 3s ease-in-out infinite; }
         @keyframes staffGlow {
           0%, 100% { box-shadow: 0 0 8px hsla(42,80%,50%,0.3), inset 0 0 6px hsla(42,80%,50%,0.1); }
           50% { box-shadow: 0 0 18px hsla(42,80%,50%,0.6), inset 0 0 10px hsla(42,80%,50%,0.2); }
