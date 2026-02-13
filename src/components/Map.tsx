@@ -2,25 +2,28 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import { getMapStyle } from "@/config/mapbox";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
 import MapSearch from "./MapSearch";
 import MapFilters, { GroveScale } from "./MapFilters";
-import TreeImportExport from "./TreeImportExport";
-import TreeRadio from "./TreeRadio";
 import ConversionStatus from "./ConversionStatus";
 import FindMeButton from "./FindMeButton";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import MistOverlay from "./MistOverlay";
-import MapIdleNudge from "./MapIdleNudge";
 import { lazy, Suspense } from "react";
 
+// Lazy-load heavy / non-critical sub-components
 const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
+const TreeImportExport = lazy(() => import("./TreeImportExport"));
+const TreeRadio = lazy(() => import("./TreeRadio"));
+const MapIdleNudge = lazy(() => import("./MapIdleNudge"));
+
+// Defer the massive maplibre-gl bundle — only imported if WebGL path is ever activated
+const maplibreglPromise = () => import("maplibre-gl");
+let maplibregl: any = null;
+const getMapStylePromise = () => import("@/config/mapbox").then(m => m.getMapStyle);
 
 /* ── WebGL detection ── */
 function isWebGLSupported(): boolean {
@@ -1159,20 +1162,22 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         />
       </div>
 
-      <div className="absolute bottom-4 right-16 z-10 hidden md:flex flex-col items-end gap-2">
-        <div className="relative">
-          <TreeRadio speciesFilter={speciesFilter} />
+      <Suspense fallback={null}>
+        <div className="absolute bottom-4 right-16 z-10 hidden md:flex flex-col items-end gap-2">
+          <div className="relative">
+            <TreeRadio speciesFilter={speciesFilter} />
+          </div>
+          <TreeImportExport />
+          <button
+            onClick={() => { map.current?.remove(); map.current = null; setMapStatus("leaflet"); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-serif text-xs transition-all hover:brightness-125"
+            style={{ background: "hsla(30,30%,12%,0.85)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(4px)" }}
+            title="Switch to Lite Mode (Leaflet)"
+          >
+            🍃 Lite Mode
+          </button>
         </div>
-        <TreeImportExport />
-        <button
-          onClick={() => { map.current?.remove(); map.current = null; setMapStatus("leaflet"); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full font-serif text-xs transition-all hover:brightness-125"
-          style={{ background: "hsla(30,30%,12%,0.85)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(4px)" }}
-          title="Switch to Lite Mode (Leaflet)"
-        >
-          🍃 Lite Mode
-        </button>
-      </div>
+      </Suspense>
 
       {/* Mobile: compact bottom bar — safe-area above Teotag */}
       <div className="absolute bottom-14 left-2 right-2 z-10 flex md:hidden items-center gap-2">
@@ -1193,11 +1198,15 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           >
             🍃 Lite
           </button>
-          <TreeRadio speciesFilter={speciesFilter} />
+          <Suspense fallback={null}>
+            <TreeRadio speciesFilter={speciesFilter} />
+          </Suspense>
         </div>
       </div>
 
-      <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
+      <Suspense fallback={null}>
+        <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
+      </Suspense>
 
       {/* Staff Room button — bottom-right corner, golden glowing line */}
       <button
