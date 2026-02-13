@@ -534,28 +534,38 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       map.removeLayer(clusterRef.current);
     }
 
+    // When filtering by lineage, tighten clustering for focused exploration
+    const isLineageFocused = lineageFilter !== "all";
+
     const clusterGroup = (L as any).markerClusterGroup({
       maxClusterRadius: (zoom: number) => {
-        // Dynamic radius: tighter clusters at higher zoom for grove-scale feel
-        if (zoom <= 4) return 80;   // continental — large clusters
-        if (zoom <= 8) return 65;   // national/bioregional
-        if (zoom <= 11) return 50;  // regional
-        if (zoom <= 14) return 35;  // local
-        return 25;                  // hyper-local — only very close trees cluster
+        if (isLineageFocused) {
+          // Tighter clusters when exploring a single lineage
+          if (zoom <= 6) return 60;
+          if (zoom <= 10) return 40;
+          if (zoom <= 14) return 25;
+          return 18;
+        }
+        // Default multi-lineage view
+        if (zoom <= 4) return 80;
+        if (zoom <= 8) return 65;
+        if (zoom <= 11) return 50;
+        if (zoom <= 14) return 35;
+        return 25;
       },
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       animate: true,
       animateAddingMarkers: false,
-      disableClusteringAtZoom: 18,
+      disableClusteringAtZoom: isLineageFocused ? 16 : 18,
       chunkedLoading: true,
       chunkInterval: 80,
       chunkDelay: 8,
       spiderfyDistanceMultiplier: 1.8,
       spiderLegPolylineOptions: {
         weight: 1.5,
-        color: "hsla(42, 60%, 50%, 0.4)",
+        color: isLineageFocused ? "hsla(120, 50%, 45%, 0.45)" : "hsla(42, 60%, 50%, 0.4)",
         opacity: 0.6,
       },
       iconCreateFunction: (cluster: any) => {
@@ -574,6 +584,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const hasAncient = ancientCount > 0;
         const hasMajorStory = storiedCount >= count * 0.3;
 
+        // Lineage analysis for cluster labelling
+        const lineageCounts: Record<string, number> = {};
+        childMarkers.forEach((m: any) => {
+          const lin = m._treeLineage;
+          if (lin) lineageCounts[lin] = (lineageCounts[lin] || 0) + 1;
+        });
+        const lineageEntries = Object.entries(lineageCounts).sort((a, b) => b[1] - a[1]);
+        const dominantLineage = lineageEntries.length > 0 ? lineageEntries[0] : null;
+        const isMonoLineage = dominantLineage && dominantLineage[1] === count;
+
         // Size classes
         const sizeClass = count >= 50
           ? "tree-cluster-xl"
@@ -584,22 +604,33 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           : "tree-cluster-sm";
         const dim = count >= 50 ? 56 : count >= 20 ? 50 : count >= 5 ? 42 : 34;
 
-        // Golden ring for clusters containing ancient trees
-        const ringStyle = hasAncient
-          ? "border-color:hsl(42,90%,55%);box-shadow:0 0 12px hsla(42,90%,55%,0.4)"
-          : hasMajorStory
-          ? "border-color:hsl(42,70%,48%);box-shadow:0 0 8px hsla(42,70%,48%,0.25)"
-          : "";
+        // Ring styling — lineage-focused or tier-based
+        let ringStyle = "";
+        if (isLineageFocused && isMonoLineage) {
+          ringStyle = "border-color:hsl(120,55%,45%);box-shadow:0 0 10px hsla(120,55%,45%,0.35)";
+        } else if (hasAncient) {
+          ringStyle = "border-color:hsl(42,90%,55%);box-shadow:0 0 12px hsla(42,90%,55%,0.4)";
+        } else if (hasMajorStory) {
+          ringStyle = "border-color:hsl(42,70%,48%);box-shadow:0 0 8px hsla(42,70%,48%,0.25)";
+        }
 
-        // Label: count + ancient badge
-        const badge = hasAncient
-          ? `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:hsl(42,95%,60%);border:1.5px solid hsl(30,15%,10%);"></span>`
+        // Badge: ancient golden dot, or lineage leaf indicator
+        let badge = "";
+        if (hasAncient) {
+          badge = `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:hsl(42,95%,60%);border:1.5px solid hsl(30,15%,10%);"></span>`;
+        } else if (dominantLineage && dominantLineage[1] >= 3 && !isLineageFocused) {
+          badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:9px;line-height:1;" title="${dominantLineage[0]}">🌿</span>`;
+        }
+
+        // Lineage label on larger clusters when mono-lineage
+        const lineageLabel = isMonoLineage && dominantLineage && count >= 5
+          ? `<span style="position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;font-family:'Cinzel',serif;color:hsl(42,50%,60%);text-shadow:0 1px 3px rgba(0,0,0,0.7);letter-spacing:0.04em;">${dominantLineage[0].length > 14 ? dominantLineage[0].slice(0, 12) + "…" : dominantLineage[0]}</span>`
           : "";
 
         return L.divIcon({
-          html: `<div class="tree-cluster ${sizeClass}" style="${ringStyle};position:relative;">${count}${badge}</div>`,
+          html: `<div class="tree-cluster ${sizeClass}" style="${ringStyle};position:relative;">${count}${badge}${lineageLabel}</div>`,
           className: "leaflet-tree-marker",
-          iconSize: L.point(dim, dim),
+          iconSize: L.point(dim, dim + (lineageLabel ? 12 : 0)),
         });
       },
     });
@@ -615,6 +646,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const icon = getOrCreateIcon(tier, tree.species, bCount);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
+      // Attach lineage for cluster analysis
+      (marker as any)._treeLineage = (tree as any).lineage || null;
       marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
@@ -644,7 +677,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
-  }, [filteredTrees, userLatLng]);
+  }, [filteredTrees, userLatLng, lineageFilter]);
 
   // Render bloomed seed heart markers
   useEffect(() => {
