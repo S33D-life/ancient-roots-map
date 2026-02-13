@@ -44,6 +44,8 @@ const StaffDetailPage = lazy(() => import("./pages/StaffDetailPage"));
 const CuratorPage = lazy(() => import("./pages/CuratorPage"));
 const SyncDashboardPage = lazy(() => import("./pages/SyncDashboardPage"));
 const EditReviewPage = lazy(() => import("./pages/EditReviewPage"));
+const HivePage = lazy(() => import("./pages/HivePage"));
+const HivesIndexPage = lazy(() => import("./pages/HivesIndexPage"));
 
 const queryClient = new QueryClient();
 
@@ -61,7 +63,7 @@ const App = () => {
 
   // /map and /atlas bypass the password gate for public discovery
   const isPublicRoute = typeof window !== 'undefined' && (
-    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?') || window.location.pathname === '/auth'
+    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?') || window.location.pathname === '/auth' || window.location.pathname === '/hives' || window.location.pathname.startsWith('/hive/')
   );
 
   if (!authed && !isPublicRoute) {
@@ -108,6 +110,8 @@ const App = () => {
                 <Route path="/curator" element={<CuratorPage />} />
                 <Route path="/sync" element={<SyncDashboardPage />} />
                 <Route path="/edit-review" element={<EditReviewPage />} />
+                <Route path="/hives" element={<HivesIndexPage />} />
+                <Route path="/hive/:family" element={<HivePage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
