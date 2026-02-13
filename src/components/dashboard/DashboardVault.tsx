@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Archive, Loader2, Wand2, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
+import { useSpeciesTokens } from "@/hooks/use-species-tokens";
 import { useWallet } from "@/hooks/use-wallet";
 import { Button } from "@/components/ui/button";
 import { AwakeningAnimation } from "@/components/StaffCeremony";
@@ -14,6 +15,9 @@ import VaultTreeReservoirs from "./vault/VaultTreeReservoirs";
 import VaultLotteryTracker from "./vault/VaultLotteryTracker";
 import VaultParticles from "./vault/VaultParticles";
 import VaultWalletCard from "./vault/VaultWalletCard";
+import VaultSpeciesHearts from "./vault/VaultSpeciesHearts";
+import VaultInfluence from "./vault/VaultInfluence";
+import VaultTokenHistory from "./vault/VaultTokenHistory";
 
 interface Props {
   userId: string;
@@ -28,6 +32,7 @@ const DashboardVault = ({ userId }: Props) => {
   const [heartFilter, setHeartFilter] = useState<string | null>(null);
   const [showReawaken, setShowReawaken] = useState(false);
   const wallet = useWallet(userId);
+  const speciesTokens = useSpeciesTokens(userId);
 
   const handleSegmentClick = useCallback((label: string) => {
     setHeartFilter(prev => prev === label ? null : label);
@@ -167,6 +172,18 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Active Seeds / Bloom Timers */}
       <VaultSproutingSeeds seeds={allSeeds} userId={userId} />
 
+      {/* Species Hearts Grid */}
+      <VaultSpeciesHearts
+        balances={speciesTokens.speciesBalances}
+        totalSpeciesHearts={speciesTokens.totalSpeciesHearts}
+      />
+
+      {/* Influence Tokens */}
+      <VaultInfluence
+        globalInfluence={speciesTokens.influenceGlobal}
+        influenceByHive={speciesTokens.influenceByHive}
+      />
+
       {/* Two-column layout for mid sections on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Heart Ledger */}
@@ -179,6 +196,9 @@ const DashboardVault = ({ userId }: Props) => {
         {/* Lottery Tracker */}
         <VaultLotteryTracker userId={userId} />
       </div>
+
+      {/* Token History (Species + Influence) */}
+      <VaultTokenHistory history={speciesTokens.history} />
 
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />

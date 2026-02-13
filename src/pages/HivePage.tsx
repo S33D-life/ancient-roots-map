@@ -3,14 +3,14 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getHiveBySlug, getAllHives, type HiveInfo } from "@/utils/hiveUtils";
+import { getHiveBySlug, type HiveInfo } from "@/utils/hiveUtils";
 import { matchSpecies } from "@/data/treeSpecies";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, TreePine, MapPin, Heart, Music, Users, ArrowLeft, ExternalLink, Map } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface TreeRow {
   id: string;
@@ -34,6 +34,23 @@ interface OfferingRow {
   created_by: string | null;
 }
 
+interface SpeciesHeartTx {
+  id: string;
+  user_id: string;
+  amount: number;
+  action_type: string;
+  created_at: string;
+  tree_id: string;
+}
+
+interface InfluenceTx {
+  id: string;
+  user_id: string;
+  amount: number;
+  action_type: string;
+  created_at: string;
+}
+
 const HivePage = () => {
   const { family } = useParams<{ family: string }>();
   const navigate = useNavigate();
@@ -41,19 +58,15 @@ const HivePage = () => {
 
   const [trees, setTrees] = useState<TreeRow[]>([]);
   const [offerings, setOfferings] = useState<OfferingRow[]>([]);
+  const [speciesHearts, setSpeciesHearts] = useState<SpeciesHeartTx[]>([]);
+  const [influenceTxs, setInfluenceTxs] = useState<InfluenceTx[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("trees");
-
-  // Determine which species names belong to this hive
-  const hiveSpeciesNames = useMemo(() => {
-    if (!hive) return [];
-    return hive.representativeSpecies.map(s => s.toLowerCase());
-  }, [hive]);
 
   useEffect(() => {
     if (!hive) { setLoading(false); return; }
     const fetchData = async () => {
-      // Fetch all trees, then filter client-side by species family
+      // Fetch all trees, filter client-side by species family
       const { data: allTrees } = await supabase
         .from("trees")
         .select("id, name, species, what3words, latitude, longitude, estimated_age, created_at, nation")
@@ -65,17 +78,22 @@ const HivePage = () => {
       });
       setTrees(hiveTrees);
 
-      if (hiveTrees.length > 0) {
-        const treeIds = hiveTrees.map(t => t.id);
-        // Fetch offerings for these trees (batched)
-        const { data: offs } = await supabase
-          .from("offerings")
-          .select("id, tree_id, title, type, media_url, created_at, created_by")
-          .in("tree_id", treeIds.slice(0, 100))
-          .order("created_at", { ascending: false })
-          .limit(200);
-        setOfferings(offs || []);
-      }
+      // Fetch species heart transactions for this family
+      const [offsRes, speciesHeartsRes, influenceRes] = await Promise.all([
+        hiveTrees.length > 0
+          ? supabase.from("offerings").select("id, tree_id, title, type, media_url, created_at, created_by")
+              .in("tree_id", hiveTrees.map(t => t.id).slice(0, 100))
+              .order("created_at", { ascending: false }).limit(200)
+          : Promise.resolve({ data: [] }),
+        supabase.from("species_heart_transactions").select("id, user_id, amount, action_type, created_at, tree_id")
+          .eq("species_family", hive.family).order("created_at", { ascending: false }).limit(200),
+        supabase.from("influence_transactions").select("id, user_id, amount, action_type, created_at")
+          .eq("species_family", hive.family).order("created_at", { ascending: false }).limit(100),
+      ]);
+
+      setOfferings(offsRes.data || []);
+      setSpeciesHearts(speciesHeartsRes.data || []);
+      setInfluenceTxs(influenceRes.data || []);
       setLoading(false);
     };
     fetchData();
@@ -95,7 +113,34 @@ const HivePage = () => {
 
   const totalHearts = trees.length * 10;
   const uniqueContributors = new Set(offerings.map(o => o.created_by).filter(Boolean)).size;
-  const photoOfferings = offerings.filter(o => o.type === "photo" && o.media_url);
+  const totalSpeciesHearts = speciesHearts.reduce((s, tx) => s + tx.amount, 0);
+  const totalInfluence = influenceTxs.reduce((s, tx) => s + tx.amount, 0);
+
+  // Top contributing trees (by species hearts)
+  const treeHeartMap: Record<string, number> = {};
+  speciesHearts.forEach(tx => {
+    treeHeartMap[tx.tree_id] = (treeHeartMap[tx.tree_id] || 0) + tx.amount;
+  });
+  const topTrees = Object.entries(treeHeartMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id, hearts]) => ({ id, name: trees.find(t => t.id === id)?.name || "Unknown", hearts }));
+
+  // Top wanderers
+  const userHeartMap: Record<string, number> = {};
+  speciesHearts.forEach(tx => {
+    userHeartMap[tx.user_id] = (userHeartMap[tx.user_id] || 0) + tx.amount;
+  });
+  const topWanderers = Object.entries(userHeartMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  // Top curators (influence)
+  const curatorMap: Record<string, number> = {};
+  influenceTxs.forEach(tx => {
+    curatorMap[tx.user_id] = (curatorMap[tx.user_id] || 0) + tx.amount;
+  });
+  const topCurators = Object.entries(curatorMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   return (
     <div className="min-h-screen bg-background">
@@ -113,9 +158,7 @@ const HivePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative mb-8 rounded-xl border border-border overflow-hidden"
-          style={{
-            background: `linear-gradient(135deg, hsl(${hive.accentHsl} / 0.15), hsl(var(--background)))`,
-          }}
+          style={{ background: `linear-gradient(135deg, hsl(${hive.accentHsl} / 0.15), hsl(var(--background)))` }}
         >
           <div className="h-1" style={{ background: `linear-gradient(90deg, transparent, hsl(${hive.accentHsl}), transparent)` }} />
           <div className="p-6 md:p-8">
@@ -125,19 +168,13 @@ const HivePage = () => {
                 <h1 className="text-3xl md:text-4xl font-serif tracking-wide" style={{ color: `hsl(${hive.accentHsl})` }}>
                   {hive.displayName}
                 </h1>
-                <p className="text-muted-foreground font-serif mt-2 max-w-2xl">
-                  {hive.description}
-                </p>
+                <p className="text-muted-foreground font-serif mt-2 max-w-2xl">{hive.description}</p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {hive.representativeSpecies.slice(0, 8).map(sp => (
-                    <Badge key={sp} variant="outline" className="font-serif text-xs" style={{ borderColor: `hsl(${hive.accentHsl} / 0.4)` }}>
-                      {sp}
-                    </Badge>
+                    <Badge key={sp} variant="outline" className="font-serif text-xs" style={{ borderColor: `hsl(${hive.accentHsl} / 0.4)` }}>{sp}</Badge>
                   ))}
                   {hive.representativeSpecies.length > 8 && (
-                    <Badge variant="secondary" className="font-serif text-xs">
-                      +{hive.representativeSpecies.length - 8} more
-                    </Badge>
+                    <Badge variant="secondary" className="font-serif text-xs">+{hive.representativeSpecies.length - 8} more</Badge>
                   )}
                 </div>
               </div>
@@ -145,19 +182,21 @@ const HivePage = () => {
           </div>
         </motion.div>
 
-        {/* Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {/* Metrics — now includes Species Hearts + Influence */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           {[
             { label: "Ancient Friends", value: trees.length, icon: <TreePine className="w-4 h-4" /> },
             { label: "Offerings", value: offerings.length, icon: <Music className="w-4 h-4" /> },
-            { label: "Hearts Circulating", value: totalHearts, icon: <Heart className="w-4 h-4" /> },
+            { label: "S33D Hearts", value: totalHearts, icon: <Heart className="w-4 h-4" /> },
+            { label: `${hive.family} Hearts`, value: totalSpeciesHearts, icon: <span className="text-sm">{hive.icon}</span> },
+            { label: "Influence", value: totalInfluence, icon: <Shield className="w-4 h-4" /> },
             { label: "Wanderers", value: uniqueContributors, icon: <Users className="w-4 h-4" /> },
           ].map(m => (
             <Card key={m.label} className="bg-card/60 backdrop-blur border-border/50">
-              <CardContent className="p-4 text-center">
-                <div className="flex items-center justify-center gap-1.5 mb-1 text-muted-foreground">{m.icon}</div>
-                <p className="text-2xl font-serif" style={{ color: `hsl(${hive.accentHsl})` }}>{m.value}</p>
-                <p className="text-[11px] text-muted-foreground font-serif">{m.label}</p>
+              <CardContent className="p-3 text-center">
+                <div className="flex items-center justify-center gap-1 mb-1 text-muted-foreground">{m.icon}</div>
+                <p className="text-xl font-serif" style={{ color: `hsl(${hive.accentHsl})` }}>{m.value}</p>
+                <p className="text-[10px] text-muted-foreground font-serif leading-tight">{m.label}</p>
               </CardContent>
             </Card>
           ))}
@@ -171,17 +210,16 @@ const HivePage = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5">
               <TabsTrigger value="trees" className="font-serif text-xs tracking-wider">
-                <TreePine className="w-3.5 h-3.5 mr-1.5" /> Ancient Friends ({trees.length})
+                <TreePine className="w-3.5 h-3.5 mr-1.5" /> Trees ({trees.length})
+              </TabsTrigger>
+              <TabsTrigger value="treasury" className="font-serif text-xs tracking-wider">
+                <TrendingUp className="w-3.5 h-3.5 mr-1.5" /> Treasury
               </TabsTrigger>
               <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider">
-                <Music className="w-3.5 h-3.5 mr-1.5" /> Offerings ({offerings.length})
+                <Music className="w-3.5 h-3.5 mr-1.5" /> Offerings
               </TabsTrigger>
-              <TabsTrigger value="lore" className="font-serif text-xs tracking-wider">
-                📜 Species Lore
-              </TabsTrigger>
-              <TabsTrigger value="governance" className="font-serif text-xs tracking-wider">
-                🏛️ Hive Council
-              </TabsTrigger>
+              <TabsTrigger value="lore" className="font-serif text-xs tracking-wider">📜 Lore</TabsTrigger>
+              <TabsTrigger value="governance" className="font-serif text-xs tracking-wider">🏛️ Council</TabsTrigger>
             </TabsList>
 
             {/* Trees Tab */}
@@ -196,12 +234,7 @@ const HivePage = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {trees.slice(0, 60).map((tree, i) => (
-                    <motion.div
-                      key={tree.id}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                    >
+                    <motion.div key={tree.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
                       <Link to={`/tree/${tree.id}`}>
                         <Card className="bg-card/60 backdrop-blur border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
                           <CardContent className="p-4">
@@ -220,6 +253,106 @@ const HivePage = () => {
               )}
             </TabsContent>
 
+            {/* Treasury Tab */}
+            <TabsContent value="treasury">
+              <div className="space-y-6">
+                {/* Heart Flows */}
+                <Card className="bg-card/60 backdrop-blur border-border/40">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-serif mb-4 flex items-center gap-2" style={{ color: `hsl(${hive.accentHsl})` }}>
+                      {hive.icon} {hive.family} Heart Flows
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                      <div>
+                        <p className="text-2xl font-serif font-bold" style={{ color: `hsl(${hive.accentHsl})` }}>{totalSpeciesHearts}</p>
+                        <p className="text-[11px] text-muted-foreground font-serif">Total Circulating</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-serif font-bold text-foreground">{speciesHearts.length}</p>
+                        <p className="text-[11px] text-muted-foreground font-serif">Issuance Events</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-serif font-bold text-foreground">{Object.keys(userHeartMap).length}</p>
+                        <p className="text-[11px] text-muted-foreground font-serif">Unique Holders</p>
+                      </div>
+                    </div>
+
+                    {/* Recent issuance */}
+                    {speciesHearts.length > 0 && (
+                      <div className="border-t border-border/30 pt-4">
+                        <p className="text-xs font-serif text-muted-foreground mb-2 uppercase tracking-wider">Recent Issuance</p>
+                        <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                          {speciesHearts.slice(0, 10).map(tx => (
+                            <div key={tx.id} className="flex items-center gap-2 text-xs font-serif">
+                              <span>{hive.icon}</span>
+                              <span className="flex-1 text-muted-foreground">{tx.action_type}</span>
+                              <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>+{tx.amount}</span>
+                              <span className="text-[10px] text-muted-foreground/60">
+                                {new Date(tx.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Top Trees + Wanderers */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-card/60 backdrop-blur border-border/40">
+                    <CardContent className="p-5">
+                      <h4 className="text-sm font-serif mb-3 text-foreground">🌳 Top Contributing Trees</h4>
+                      {topTrees.length === 0 ? (
+                        <p className="text-xs text-muted-foreground font-serif">No data yet</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {topTrees.map((t, i) => (
+                            <Link key={t.id} to={`/tree/${t.id}`} className="flex items-center gap-2 text-xs font-serif hover:text-primary transition-colors">
+                              <span className="text-muted-foreground w-4">{i + 1}.</span>
+                              <span className="flex-1 truncate">{t.name}</span>
+                              <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>{t.hearts}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-card/60 backdrop-blur border-border/40">
+                    <CardContent className="p-5">
+                      <h4 className="text-sm font-serif mb-3 text-foreground">🚶 Top Wanderers</h4>
+                      {topWanderers.length === 0 ? (
+                        <p className="text-xs text-muted-foreground font-serif">No data yet</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {topWanderers.map(([uid, hearts], i) => (
+                            <div key={uid} className="flex items-center gap-2 text-xs font-serif">
+                              <span className="text-muted-foreground w-4">{i + 1}.</span>
+                              <span className="flex-1 text-muted-foreground truncate">{uid.slice(0, 8)}…</span>
+                              <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>{hearts}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Staking — Coming Soon */}
+                <Card className="bg-card/60 backdrop-blur border-border/40">
+                  <CardContent className="p-6 text-center">
+                    <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                    <h4 className="text-sm font-serif text-foreground mb-1">Species Heart Staking</h4>
+                    <p className="text-xs text-muted-foreground font-serif mb-3 max-w-md mx-auto">
+                      Stake {hive.family} Hearts at individual trees or the collective hive to earn S33D Hearts drip, species boosts, and lottery eligibility.
+                    </p>
+                    <Badge variant="outline" className="font-serif text-[10px]">Coming Soon</Badge>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
             {/* Offerings Tab */}
             <TabsContent value="offerings">
               {offerings.length === 0 ? (
@@ -229,12 +362,7 @@ const HivePage = () => {
                   {offerings.slice(0, 50).map((off, i) => {
                     const tree = trees.find(t => t.id === off.tree_id);
                     return (
-                      <motion.div
-                        key={off.id}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.02 }}
-                      >
+                      <motion.div key={off.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}>
                         <Card className="bg-card/60 backdrop-blur border-border/40">
                           <CardContent className="p-3 flex items-center gap-3">
                             {off.media_url && off.type === "photo" && (
@@ -242,11 +370,7 @@ const HivePage = () => {
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                              {tree && (
-                                <Link to={`/tree/${tree.id}`} className="text-[11px] text-primary/70 hover:text-primary font-serif">
-                                  at {tree.name}
-                                </Link>
-                              )}
+                              {tree && <Link to={`/tree/${tree.id}`} className="text-[11px] text-primary/70 hover:text-primary font-serif">at {tree.name}</Link>}
                             </div>
                             <Badge variant="outline" className="text-[10px] font-serif shrink-0">{off.type}</Badge>
                           </CardContent>
@@ -265,23 +389,14 @@ const HivePage = () => {
                   <h3 className="text-xl font-serif mb-4" style={{ color: `hsl(${hive.accentHsl})` }}>
                     {hive.icon} About the {hive.family} Family
                   </h3>
-                  <p className="text-muted-foreground font-serif leading-relaxed mb-4">
-                    {hive.description}
-                  </p>
+                  <p className="text-muted-foreground font-serif leading-relaxed mb-4">{hive.description}</p>
                   <div className="border-t border-border/40 pt-4 mt-4">
                     <h4 className="text-sm font-serif text-foreground mb-3 tracking-wider uppercase">Known Species</h4>
                     <div className="flex flex-wrap gap-2">
                       {hive.representativeSpecies.map(sp => (
-                        <Badge key={sp} variant="secondary" className="font-serif text-xs">
-                          {sp}
-                        </Badge>
+                        <Badge key={sp} variant="secondary" className="font-serif text-xs">{sp}</Badge>
                       ))}
                     </div>
-                  </div>
-                  <div className="border-t border-border/40 pt-4 mt-4">
-                    <p className="text-xs text-muted-foreground/60 font-serif italic">
-                      Species lore, ecological data, and conservation stories will grow here as the community contributes.
-                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -289,25 +404,75 @@ const HivePage = () => {
 
             {/* Governance Tab */}
             <TabsContent value="governance">
-              <Card className="bg-card/60 backdrop-blur border-border/40">
-                <CardContent className="p-6 text-center">
-                  <span className="text-4xl mb-4 block">🏛️</span>
-                  <h3 className="text-xl font-serif mb-2" style={{ color: `hsl(${hive.accentHsl})` }}>
-                    Hive Council
-                  </h3>
-                  <p className="text-muted-foreground font-serif text-sm max-w-md mx-auto mb-6">
-                    The governance layer for this species hive is being prepared. Soon, curators will be able to propose, vote, and shape the future of this living lineage.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto">
-                    {["Proposals", "Curators", "Staking"].map(item => (
-                      <div key={item} className="p-3 rounded-lg bg-secondary/20 border border-border/30">
-                        <p className="font-serif text-sm text-foreground">{item}</p>
-                        <Badge variant="outline" className="text-[10px] mt-1 font-serif">Coming Soon</Badge>
+              <div className="space-y-4">
+                {/* Influence Overview */}
+                <Card className="bg-card/60 backdrop-blur border-border/40">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-serif mb-4 flex items-center gap-2" style={{ color: `hsl(${hive.accentHsl})` }}>
+                      <Shield className="w-5 h-5" /> Hive Council
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                      <div>
+                        <p className="text-2xl font-serif font-bold" style={{ color: "hsl(42, 80%, 50%)" }}>{totalInfluence}</p>
+                        <p className="text-[11px] text-muted-foreground font-serif">Total Influence</p>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <div>
+                        <p className="text-2xl font-serif font-bold text-foreground">{Object.keys(curatorMap).length}</p>
+                        <p className="text-[11px] text-muted-foreground font-serif">Active Curators</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-serif font-bold text-foreground">{influenceTxs.length}</p>
+                        <p className="text-[11px] text-muted-foreground font-serif">Curation Actions</p>
+                      </div>
+                    </div>
+
+                    {/* How influence is earned */}
+                    <div className="border-t border-border/30 pt-4">
+                      <p className="text-xs font-serif text-muted-foreground mb-2 uppercase tracking-wider">How Influence is Earned</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {["Verify tree records", "Add missing metadata", "High-quality media", "Resolve duplicates",
+                          "Curate playlists", "Tag offerings"].map(a => (
+                          <Badge key={a} variant="secondary" className="text-[9px] font-serif">{a}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Curators Leaderboard */}
+                <Card className="bg-card/60 backdrop-blur border-border/40">
+                  <CardContent className="p-5">
+                    <h4 className="text-sm font-serif mb-3 text-foreground flex items-center gap-2">
+                      🛡️ Top Curators
+                    </h4>
+                    {topCurators.length === 0 ? (
+                      <p className="text-xs text-muted-foreground font-serif">No curators yet — be the first!</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {topCurators.map(([uid, inf], i) => (
+                          <div key={uid} className="flex items-center gap-2 text-xs font-serif">
+                            <span className="text-muted-foreground w-4">{i + 1}.</span>
+                            <span className="flex-1 text-muted-foreground truncate">{uid.slice(0, 8)}…</span>
+                            <span className="tabular-nums" style={{ color: "hsl(42, 80%, 50%)" }}>{inf} influence</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Proposals — Coming Soon */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {["Proposals", "Staking Governance"].map(item => (
+                    <Card key={item} className="bg-card/60 backdrop-blur border-border/40">
+                      <CardContent className="p-5 text-center">
+                        <p className="font-serif text-sm text-foreground mb-1">{item}</p>
+                        <Badge variant="outline" className="text-[10px] font-serif">Coming Soon</Badge>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         )}
