@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
@@ -20,6 +20,7 @@ import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/Meeti
 import OfferingHistory from "@/components/OfferingHistory";
 import BirdsongOfferingFlow from "@/components/BirdsongOfferingFlow";
 import BirdsongTab from "@/components/BirdsongTab";
+import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -207,6 +208,19 @@ const TreeDetailPage = () => {
                 </h1>
                 <p className="text-muted-foreground italic font-serif text-lg mt-1">
                   {tree.species}
+                  {(() => {
+                    const hive = getHiveForSpecies(tree.species);
+                    if (!hive) return null;
+                    return (
+                      <button
+                        onClick={() => navigate(`/hive/${hive.slug}`)}
+                        className="ml-2 inline-flex items-center gap-1 text-xs font-serif px-2 py-0.5 rounded-full border transition-colors hover:text-primary"
+                        style={{ borderColor: `hsl(${hive.accentHsl} / 0.4)`, color: `hsl(${hive.accentHsl})` }}
+                      >
+                        {hive.icon} {hive.displayName}
+                      </button>
+                    );
+                  })()}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
