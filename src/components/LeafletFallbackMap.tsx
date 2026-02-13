@@ -134,8 +134,9 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
     : "";
 
   const thumbnail = photoUrl
-    ? `<div style="width:100%;height:100px;overflow:hidden;border-radius:12px 12px 0 0;">
+    ? `<div style="position:relative;width:100%;height:100px;overflow:hidden;border-radius:12px 12px 0 0;">
         <img src="${escapeHtml(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" />
+        <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
       </div>`
     : "";
 
