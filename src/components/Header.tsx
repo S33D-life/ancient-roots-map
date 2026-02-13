@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
 import TeotagGuide from "./TeotagGuide";
-import TeotagWhisper from "./TeotagWhisper";
+
 
 const Header = () => {
   const navigate = useNavigate();
@@ -309,7 +309,7 @@ const Header = () => {
       </header>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
       <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />
-      <TeotagWhisper onOpenGuide={() => setGuideOpen(true)} />
+      
     </>
   );
 };
