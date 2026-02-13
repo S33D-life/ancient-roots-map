@@ -96,7 +96,7 @@ interface WishlistItem {
   trees: Tree;
 }
 
-const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger"];
+const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger", "vault"];
 
 const GalleryPage = () => {
   const [searchParams] = useSearchParams();
@@ -819,6 +819,7 @@ const GalleryPage = () => {
                 <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
                 <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
                 <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
+                <TabsTrigger value="vault" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4" onClick={() => navigate("/heartwood/vault?from=heartwood")}>Vault</TabsTrigger>
               </TabsList>
             </div>
             {/* Fullscreen toggle */}
