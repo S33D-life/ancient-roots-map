@@ -41,6 +41,7 @@ const TestLabPage = lazy(() => import("./pages/TestLabPage"));
 const DocsPage = lazy(() => import("./pages/DocsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const StaffDetailPage = lazy(() => import("./pages/StaffDetailPage"));
+const CuratorPage = lazy(() => import("./pages/CuratorPage"));
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,7 @@ const App = () => {
                 <Route path="/incoming-share" element={<IncomingSharePage />} />
                 <Route path="/test-lab" element={<TestLabPage />} />
                 <Route path="/docs" element={<DocsPage />} />
+                <Route path="/curator" element={<CuratorPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
