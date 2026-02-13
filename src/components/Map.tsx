@@ -89,6 +89,13 @@ interface BirdsongCounts {
   [treeId: string]: number;
 }
 
+interface BirdsongHeatPoint {
+  tree_id: string;
+  season: string | null;
+  latitude: number;
+  longitude: number;
+}
+
 interface BloomedSeed {
   id: string;
   tree_id: string;
@@ -270,6 +277,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [treePhotos, setTreePhotos] = useState<TreePhotos>({});
   const [birdsongCounts, setBirdsongCounts] = useState<BirdsongCounts>({});
+  const [birdsongHeatPoints, setBirdsongHeatPoints] = useState<BirdsongHeatPoint[]>([]);
   const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
@@ -330,7 +338,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           .select('tree_id, type, media_url'),
         supabase
           .from('birdsong_offerings')
-          .select('tree_id'),
+          .select('tree_id, season'),
       ]);
 
       if (treesResult.error) {
@@ -367,6 +375,18 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
           bCounts[b.tree_id] = (bCounts[b.tree_id] || 0) + 1;
         });
         setBirdsongCounts(bCounts);
+
+        // Build heat points by joining with tree coords
+        const treeMap: Record<string, any> = {};
+        (treesResult.data || []).forEach((t: any) => { treeMap[t.id] = t; });
+        const heatPts: BirdsongHeatPoint[] = [];
+        birdsongResult.data.forEach((b: any) => {
+          const tree = treeMap[b.tree_id];
+          if (tree?.latitude && tree?.longitude) {
+            heatPts.push({ tree_id: b.tree_id, season: b.season, latitude: tree.latitude, longitude: tree.longitude });
+          }
+        });
+        setBirdsongHeatPoints(heatPts);
       }
     };
 
@@ -1010,7 +1030,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} />
         </Suspense>
       </div>
     );
