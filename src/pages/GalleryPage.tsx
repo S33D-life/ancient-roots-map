@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
@@ -116,37 +116,50 @@ const CollectiveVaultCard = ({ name, description, members, hearts, slug }: { nam
 );
 
 /** Whistle button component — reveals the hidden vault room */
-const WhistleButton = ({ onClick, isRevealed }: { onClick: () => void; isRevealed: boolean }) => (
-  <button
-    onClick={onClick}
-    className="fixed bottom-6 right-6 z-40 group"
-    title={isRevealed ? "Hide the IAM Vault" : "Whistle to reveal the IAM Vault…"}
-  >
-    <div
-      className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg"
-      style={{
-        background: isRevealed
-          ? 'linear-gradient(135deg, hsl(35 80% 40%), hsl(28 70% 30%))'
-          : 'linear-gradient(135deg, hsl(28 30% 18%), hsl(22 25% 14%))',
-        border: isRevealed
-          ? '2px solid hsl(42 70% 55%)'
-          : '2px solid hsl(35 25% 28%)',
-        boxShadow: isRevealed
-          ? '0 0 20px hsl(42 70% 40% / 0.4), inset 0 0 12px hsl(42 80% 50% / 0.2)'
-          : '0 4px 12px hsl(0 0% 0% / 0.3)',
-      }}
+const WhistleButton = ({ onClick, isRevealed }: { onClick: () => void; isRevealed: boolean }) => {
+  const tapTimestamps = useRef<number[]>([]);
+
+  const handleTap = () => {
+    const now = Date.now();
+    tapTimestamps.current = [...tapTimestamps.current.filter(t => now - t < 800), now];
+    if (tapTimestamps.current.length >= 3) {
+      tapTimestamps.current = [];
+      if (!isRevealed) onClick();
+    }
+  };
+
+  return (
+    <button
+      onClick={isRevealed ? onClick : handleTap}
+      className="fixed bottom-6 right-6 z-40 group"
+      title={isRevealed ? "Hide the IAM Vault" : "Tap 3× to reveal the IAM Vault…"}
     >
-      <span className="text-lg" style={{ filter: isRevealed ? 'drop-shadow(0 0 6px hsl(42 80% 60%))' : 'none' }}>
-        {isRevealed ? '🔓' : '🎵'}
-      </span>
-    </div>
-    {!isRevealed && (
-      <span className="absolute -top-8 right-0 text-[10px] font-serif text-amber-400/50 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-        Whistle…
-      </span>
-    )}
-  </button>
-);
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg"
+        style={{
+          background: isRevealed
+            ? 'linear-gradient(135deg, hsl(35 80% 40%), hsl(28 70% 30%))'
+            : 'linear-gradient(135deg, hsl(28 30% 18%), hsl(22 25% 14%))',
+          border: isRevealed
+            ? '2px solid hsl(42 70% 55%)'
+            : '2px solid hsl(35 25% 28%)',
+          boxShadow: isRevealed
+            ? '0 0 20px hsl(42 70% 40% / 0.4), inset 0 0 12px hsl(42 80% 50% / 0.2)'
+            : '0 4px 12px hsl(0 0% 0% / 0.3)',
+        }}
+      >
+        <span className="text-lg" style={{ filter: isRevealed ? 'drop-shadow(0 0 6px hsl(42 80% 60%))' : 'none' }}>
+          {isRevealed ? '🔓' : '🎵'}
+        </span>
+      </div>
+      {!isRevealed && (
+        <span className="absolute -top-8 right-0 text-[10px] font-serif text-amber-400/50 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+          Whistle 3×…
+        </span>
+      )}
+    </button>
+  );
+};
 
 const GalleryPage = () => {
   const [searchParams] = useSearchParams();
