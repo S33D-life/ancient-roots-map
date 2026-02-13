@@ -77,6 +77,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ceremony_logs: {
+        Row: {
+          anchor_tx_hash: string | null
+          ceremony_type: string
+          cid: string | null
+          created_at: string
+          id: string
+          staff_code: string
+          staff_name: string | null
+          staff_species: string | null
+          user_id: string
+        }
+        Insert: {
+          anchor_tx_hash?: string | null
+          ceremony_type?: string
+          cid?: string | null
+          created_at?: string
+          id?: string
+          staff_code: string
+          staff_name?: string | null
+          staff_species?: string | null
+          user_id: string
+        }
+        Update: {
+          anchor_tx_hash?: string | null
+          ceremony_type?: string
+          cid?: string | null
+          created_at?: string
+          id?: string
+          staff_code?: string
+          staff_name?: string | null
+          staff_species?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chain_anchors: {
         Row: {
           anchor_data: Json | null

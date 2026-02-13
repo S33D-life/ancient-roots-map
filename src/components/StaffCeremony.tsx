@@ -361,6 +361,18 @@ export default function StaffCeremony({ onComplete, onCancel }: StaffCeremonyPro
         .eq("id", user.id);
 
       localStorage.setItem("linked_staff_code", staffId);
+
+      // Log ceremony completion
+      await supabase.from("ceremony_logs" as any).insert({
+        user_id: user.id,
+        staff_code: staffId,
+        staff_species: state.species ? SPECIES_MAP[state.species as SpeciesCode]?.name : state.name,
+        staff_name: state.name,
+        cid: state.cid || null,
+        anchor_tx_hash: state.txInfo || null,
+        ceremony_type: state.existingStaff ? "binding" : "creation",
+      });
+
       update({ awakeningDone: true });
     } catch (err) {
       console.error("Awakening DB error:", err);

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate as useRouterNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -143,6 +144,55 @@ function SpiralMiniMap({ currentIndex, totalOrigin, onSelect }: {
 }
 
 // ── Detail Drawer Content ────────────────────────────────────────
+function CeremonyHistory({ staffCode }: { staffCode: string }) {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("ceremony_logs" as any)
+        .select("*")
+        .eq("staff_code", staffCode)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      setLogs((data as any[]) || []);
+      setLoading(false);
+    };
+    load();
+  }, [staffCode]);
+
+  if (loading) return <div className="text-xs text-muted-foreground animate-pulse py-2">Loading ceremony history…</div>;
+  if (!logs.length) return null;
+
+  return (
+    <div className="space-y-2">
+      <h4 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Ceremony History</h4>
+      {logs.map((log: any) => (
+        <div key={log.id} className="rounded-lg p-2.5 text-xs space-y-1" style={{ background: "hsl(var(--secondary) / 0.3)", border: "1px solid hsl(var(--border) / 0.3)" }}>
+          <div className="flex justify-between items-center">
+            <Badge variant="outline" className="text-[10px] capitalize">{log.ceremony_type}</Badge>
+            <span className="text-muted-foreground text-[10px]">
+              {new Date(log.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+            </span>
+          </div>
+          {log.staff_name && <p className="text-foreground font-serif">{log.staff_name}</p>}
+          {log.cid && (
+            <p className="text-muted-foreground font-mono truncate" title={log.cid}>
+              CID: {log.cid}
+            </p>
+          )}
+          {log.anchor_tx_hash && (
+            <p className="text-muted-foreground font-mono truncate" title={log.anchor_tx_hash}>
+              Anchor: {log.anchor_tx_hash}
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function StaffDetailContent({ staff, onViewOnChain, onViewLegend }: { staff: StaffItem; onViewOnChain: () => void; onViewLegend: () => void }) {
   const counts = getSpeciesStaffCounts();
   const upperCode = staff.isOrigin ? staff.code : staff.code.split("-")[0];
@@ -173,6 +223,9 @@ function StaffDetailContent({ staff, onViewOnChain, onViewLegend }: { staff: Sta
       <div className="flex justify-center">
         <StaffQRCode staffCode={staff.code} size={80} />
       </div>
+
+      {/* Ceremony History */}
+      <CeremonyHistory staffCode={staff.code} />
 
       {/* Primary action — full legend page */}
       <Button className="w-full gap-2 font-serif text-sm" onClick={onViewLegend}>
