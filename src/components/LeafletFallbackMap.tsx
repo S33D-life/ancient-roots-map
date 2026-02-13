@@ -120,26 +120,32 @@ function getOrCreateIcon(tier: Tier, species: string): L.DivIcon {
 
 /* ── Popup HTML ── */
 function buildPopupHtml(tree: Tree, offerings: number, age: number): string {
-  const ageBadge = age > 0
-    ? `<span style="margin-left:6px;padding:1px 6px;font-size:10px;border-radius:99px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,60%);border:1px solid hsla(42,80%,50%,0.25);font-family:sans-serif;vertical-align:middle;">~${age}y</span>`
-    : "";
-  const offeringLine = offerings > 0
-    ? `<p style="margin:6px 0 0;font-size:11px;color:hsl(42,60%,55%);font-family:sans-serif;">✦ ${offerings} offering${offerings !== 1 ? "s" : ""}</p>`
-    : `<p style="margin:6px 0 0;font-size:11px;color:hsl(0,0%,48%);font-style:italic;font-family:sans-serif;">No offerings yet</p>`;
+  const ageText = age > 0 ? `~${age} years` : "Age unknown";
+  const offeringText = offerings > 0
+    ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span> offering${offerings !== 1 ? "s" : ""}`
+    : `<span style="color:hsl(0,0%,50%);font-style:italic;">No offerings yet</span>`;
   const desc = tree.description
-    ? `<p style="margin:6px 0 0;font-size:11px;color:hsl(0,0%,68%);line-height:1.45;font-family:sans-serif;">${escapeHtml(tree.description.substring(0, 100))}${tree.description.length > 100 ? "…" : ""}</p>`
+    ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
     : "";
 
-  return `<div style="padding:12px 14px;font-family:'Cinzel',serif;min-width:200px;max-width:260px;background:hsl(30,15%,10%);border-radius:10px;border:1px solid hsla(42,40%,30%,0.4);animation:popIn .2s ease-out;">
-    <h3 style="margin:0;font-size:14px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;">${escapeHtml(tree.name)}${ageBadge}</h3>
-    <p style="margin:2px 0 0;font-size:11px;color:hsl(${getSpeciesHue(tree.species)},40%,62%);font-style:italic;">${escapeHtml(tree.species)}</p>
-    ${tree.what3words ? `<p style="margin:4px 0 0;font-size:10px;color:hsl(45,45%,48%);font-family:sans-serif;">📍 ${escapeHtml(tree.what3words)}</p>` : ""}
-    ${desc}${offeringLine}
-    <a href="/tree/${encodeURIComponent(tree.id)}" style="display:block;margin-top:10px;padding:8px 0;text-align:center;font-size:12px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:7px;text-decoration:none;letter-spacing:0.06em;font-weight:700;font-family:sans-serif;transition:transform .1s ease-out;">Visit Ancient Friend ⟶</a>
-    <div style="margin-top:6px;display:flex;gap:5px;justify-content:center;">
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;font-size:16px;text-decoration:none;border:1px solid hsla(120,50%,50%,0.2);border-radius:8px;transition:background .15s;" title="Photo">📷</a>
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;font-size:16px;text-decoration:none;border:1px solid hsla(200,50%,50%,0.2);border-radius:8px;transition:background .15s;" title="Song">🎵</a>
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=story" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;font-size:16px;text-decoration:none;border:1px solid hsla(280,50%,50%,0.2);border-radius:8px;transition:background .15s;" title="Musing">💭</a>
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+    <div style="padding:14px 14px 10px;display:flex;flex-direction:column;gap:6px;">
+      <h3 style="margin:0;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;">${escapeHtml(tree.name)}</h3>
+      <p style="margin:0;font-size:11px;color:hsl(${getSpeciesHue(tree.species)},45%,62%);font-style:italic;">${escapeHtml(tree.species)}</p>
+      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,58%);">
+        <span style="display:flex;align-items:center;gap:3px;">🌿 ${ageText}</span>
+        <span style="display:flex;align-items:center;gap:3px;">${offeringText}</span>
+      </div>
+      ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(tree.what3words)}</p>` : ""}
+      ${desc}
+    </div>
+    <div style="padding:0 14px 12px;display:flex;gap:6px;">
+      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">View Details ⟶</a>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;gap:6px;justify-content:center;">
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(120,30%,30%,0.15);border:1px solid hsla(120,40%,40%,0.2);border-radius:8px;" title="Add Photo">📷</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(200,30%,30%,0.15);border:1px solid hsla(200,40%,40%,0.2);border-radius:8px;" title="Add Song">🎵</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=story" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(280,30%,30%,0.15);border:1px solid hsla(280,40%,40%,0.2);border-radius:8px;" title="Add Musing">💭</a>
     </div>
   </div>`;
 }
