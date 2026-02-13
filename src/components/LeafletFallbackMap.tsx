@@ -793,7 +793,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
       )}
 
       {/* Layer toggles panel */}
-      <div className="absolute bottom-20 right-3 z-[1000] flex flex-col items-end gap-2">
+      <div className="absolute bottom-8 right-3 z-[1000] flex flex-col items-end gap-2">
         <button
           onClick={() => setLayerPanelOpen(!layerPanelOpen)}
           className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
@@ -851,8 +851,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         )}
       </div>
 
-      {/* Bottom controls: add-tree left, locate centred */}
-      <div className="absolute bottom-20 left-3 z-[1000]">
+      {/* Bottom controls: add-tree left, locate centred, layers right — above attribution */}
+      <div className="absolute bottom-8 left-3 z-[1000]">
         <button
           onClick={() => {
             const map = mapRef.current;
@@ -872,7 +872,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         </button>
       </div>
 
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
         <button
           onClick={handleFindMe}
           disabled={locating}
@@ -890,20 +890,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, className, userId, blo
         >
           <Compass className="w-[18px] h-[18px]" />
         </button>
-      </div>
-
-      {/* Lite Mode badge */}
-      <div
-        className="absolute top-[8.5rem] right-2 z-[1000] px-2 py-1 rounded-full font-serif flex items-center gap-1"
-        style={{
-          background: "hsla(30, 30%, 12%, 0.85)",
-          color: "hsl(42, 55%, 58%)",
-          border: "1px solid hsla(42, 40%, 30%, 0.4)",
-          backdropFilter: "blur(6px)",
-          fontSize: "10px",
-        }}
-      >
-        🍃 Lite
       </div>
 
       {/* Add Tree Dialog */}
