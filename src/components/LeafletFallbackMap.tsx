@@ -37,6 +37,13 @@ interface BirdsongCounts {
   [treeId: string]: number;
 }
 
+interface BirdsongHeatPoint {
+  tree_id: string;
+  season: string | null;
+  latitude: number;
+  longitude: number;
+}
+
 interface BloomedSeed {
   id: string;
   tree_id: string;
@@ -55,6 +62,7 @@ interface LeafletFallbackMapProps {
   offeringCounts?: TreeOfferings;
   treePhotos?: TreePhotos;
   birdsongCounts?: BirdsongCounts;
+  birdsongHeatPoints?: BirdsongHeatPoint[];
   className?: string;
   userId?: string | null;
   bloomedSeeds?: BloomedSeed[];
@@ -310,7 +318,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -320,6 +328,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const seedLayerRef = useRef<L.LayerGroup | null>(null);
   const rootThreadLayerRef = useRef<L.LayerGroup | null>(null);
   const offeringGlowLayerRef = useRef<L.LayerGroup | null>(null);
+  const birdsongHeatLayerRef = useRef<L.LayerGroup | null>(null);
   const externalLayerRef = useRef<L.LayerGroup | null>(null);
   const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
@@ -341,6 +350,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showRootThreads, setShowRootThreads] = useState(false);
   const [showOfferingGlow, setShowOfferingGlow] = useState(false);
   const [showExternalTrees, setShowExternalTrees] = useState(false);
+  const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
+  const [birdsongSeason, setBirdsongSeason] = useState<string>("all");
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
   const [layerPanelOpen, setLayerPanelOpen] = useState(false);
@@ -812,6 +823,95 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [filteredTrees, showOfferingGlow]);
 
+  // Birdsong seasonal heatmap layer
+  const SEASON_COLORS: Record<string, { fill: string; stroke: string; label: string }> = {
+    spring: { fill: "hsla(120, 55%, 50%, 0.35)", stroke: "hsl(120, 55%, 50%)", label: "Spring" },
+    summer: { fill: "hsla(45, 80%, 50%, 0.35)", stroke: "hsl(45, 80%, 50%)", label: "Summer" },
+    autumn: { fill: "hsla(25, 75%, 50%, 0.35)", stroke: "hsl(25, 75%, 50%)", label: "Autumn" },
+    winter: { fill: "hsla(200, 60%, 55%, 0.35)", stroke: "hsl(200, 60%, 55%)", label: "Winter" },
+    unknown: { fill: "hsla(270, 40%, 55%, 0.3)", stroke: "hsl(270, 40%, 55%)", label: "Unknown" },
+  };
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (birdsongHeatLayerRef.current) {
+      map.removeLayer(birdsongHeatLayerRef.current);
+      birdsongHeatLayerRef.current = null;
+    }
+
+    if (!showBirdsongHeat || birdsongHeatPoints.length === 0) return;
+
+    const heatLayer = L.layerGroup();
+
+    // Aggregate by tree+season
+    const grouped: Record<string, { lat: number; lng: number; seasons: Record<string, number> }> = {};
+    birdsongHeatPoints.forEach((pt) => {
+      const key = pt.tree_id;
+      if (!grouped[key]) grouped[key] = { lat: pt.latitude, lng: pt.longitude, seasons: {} };
+      const s = pt.season || "unknown";
+      grouped[key].seasons[s] = (grouped[key].seasons[s] || 0) + 1;
+    });
+
+    Object.values(grouped).forEach((g) => {
+      const totalAtTree = Object.values(g.seasons).reduce((a, b) => a + b, 0);
+      const baseRadius = Math.min(8 + totalAtTree * 2, 28);
+
+      // Draw a circle per season at slight offset for visibility, or stacked
+      let ringIndex = 0;
+      Object.entries(g.seasons).forEach(([season, count]) => {
+        if (birdsongSeason !== "all" && birdsongSeason !== season) return;
+        const colors = SEASON_COLORS[season] || SEASON_COLORS.unknown;
+        const r = baseRadius - ringIndex * 3;
+        const intensity = Math.min(0.2 + count * 0.1, 0.7);
+
+        L.circleMarker([g.lat, g.lng], {
+          radius: r,
+          color: colors.stroke,
+          fillColor: colors.fill,
+          fillOpacity: intensity,
+          weight: 1.5,
+          opacity: 0.7,
+          interactive: false,
+        }).addTo(heatLayer);
+
+        ringIndex++;
+      });
+
+      // Count label
+      const filteredTotal = birdsongSeason === "all"
+        ? totalAtTree
+        : (g.seasons[birdsongSeason] || 0);
+      if (filteredTotal > 0) {
+        const badgeIcon = L.divIcon({
+          html: `<span style="
+            background: hsla(200, 50%, 15%, 0.9);
+            color: hsl(200, 60%, 75%);
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: 50%;
+            width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid hsla(200, 50%, 45%, 0.5);
+            font-family: monospace;
+          ">🐦${filteredTotal > 1 ? filteredTotal : ''}</span>`,
+          className: "birdsong-heat-badge",
+          iconSize: L.point(18, 18),
+          iconAnchor: L.point(9, -6),
+        });
+        L.marker([g.lat, g.lng], { icon: badgeIcon, interactive: false }).addTo(heatLayer);
+      }
+    });
+
+    heatLayer.addTo(map);
+    birdsongHeatLayerRef.current = heatLayer;
+
+    return () => {
+      if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+    };
+  }, [birdsongHeatPoints, showBirdsongHeat, birdsongSeason]);
+
   // External trees layer — registry-driven multi-source system
   const enabledSources = useMemo(() => getEnabledSources(), []);
 
@@ -1039,6 +1139,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
               { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
               { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "no catalogued trees here") : `${enabledSources.length} source${enabledSources.length !== 1 ? "s" : ""}` },
+              { label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(!showBirdsongHeat), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
             ].map((layer) => (
               <button
                 key={layer.label}
@@ -1065,6 +1166,33 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 )}
               </button>
             ))}
+
+            {/* Season filter sub-panel */}
+            {showBirdsongHeat && (
+              <div className="border-t px-3 py-2 flex flex-wrap gap-1" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
+                <p className="w-full text-[9px] font-serif mb-1" style={{ color: "hsl(200, 50%, 55%)" }}>Season</p>
+                {[
+                  { key: "all", label: "All", color: "hsl(200, 60%, 60%)" },
+                  { key: "spring", label: "🌱", color: "hsl(120, 55%, 50%)" },
+                  { key: "summer", label: "☀️", color: "hsl(45, 80%, 50%)" },
+                  { key: "autumn", label: "🍂", color: "hsl(25, 75%, 50%)" },
+                  { key: "winter", label: "❄️", color: "hsl(200, 60%, 55%)" },
+                ].map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => setBirdsongSeason(s.key)}
+                    className="px-2 py-1 rounded-md text-[11px] transition-all"
+                    style={{
+                      background: birdsongSeason === s.key ? "hsla(200, 50%, 40%, 0.3)" : "transparent",
+                      color: birdsongSeason === s.key ? s.color : "hsl(42, 30%, 45%)",
+                      border: birdsongSeason === s.key ? `1px solid ${s.color}` : "1px solid transparent",
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
