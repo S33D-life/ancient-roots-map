@@ -25,7 +25,7 @@ const STAFF_SPECIES: { key: string; species: string; image: string }[] = [
 
 const PERSPECTIVES: { key: LitePerspective; label: string; icon: string }[] = [
   { key: "collective", label: "TETOL", icon: "🌍" },
-  { key: "personal", label: "Mine", icon: "🌿" },
+  { key: "personal", label: "I AM", icon: "🌿" },
   { key: "tribe", label: "Tribe", icon: "👥" },
 ];
 
