@@ -65,6 +65,7 @@ const TreeDetailPage = () => {
   const [proposeEditOpen, setProposeEditOpen] = useState(false);
   const [birdsongOpen, setBirdsongOpen] = useState(false);
   const [birdsongCount, setBirdsongCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>("photo");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -72,9 +73,13 @@ const TreeDetailPage = () => {
 
   // Handle ?add=type query param
   useEffect(() => {
-    const addType = searchParams.get("add") as OfferingType | null;
-    if (addType && ["photo", "song", "poem", "story", "nft"].includes(addType)) {
-      setSelectedType(addType);
+    const addType = searchParams.get("add");
+    if (addType === "birdsong") {
+      setActiveTab("birdsong");
+      setBirdsongOpen(true);
+      setSearchParams({}, { replace: true });
+    } else if (addType && ["photo", "song", "poem", "story", "nft"].includes(addType)) {
+      setSelectedType(addType as OfferingType);
       setAddOfferingOpen(true);
       setSearchParams({}, { replace: true });
     }
@@ -391,7 +396,7 @@ const TreeDetailPage = () => {
           </div>
         )}
 
-        <Tabs defaultValue="photo" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg">
             {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
               <TabsTrigger

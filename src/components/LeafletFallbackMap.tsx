@@ -197,6 +197,7 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
     <div style="padding:0 14px 12px;display:flex;gap:6px;justify-content:center;">
       <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(120,30%,30%,0.15);border:1px solid hsla(120,40%,40%,0.2);border-radius:8px;" title="Add Photo">📷</a>
       <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(200,30%,30%,0.15);border:1px solid hsla(200,40%,40%,0.2);border-radius:8px;" title="Add Song">🎵</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=birdsong" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(180,30%,30%,0.15);border:1px solid hsla(180,40%,40%,0.2);border-radius:8px;" title="Record Birdsong">🐦</a>
       <a href="/tree/${encodeURIComponent(tree.id)}?add=story" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(280,30%,30%,0.15);border:1px solid hsla(280,40%,40%,0.2);border-radius:8px;" title="Add Musing">💭</a>
     </div>
   </div>`;
