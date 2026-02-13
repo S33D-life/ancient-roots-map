@@ -46,7 +46,7 @@ interface SoilParticle {
   phase: number;
 }
 
-const DURATION = 7000;
+const DURATION = 2800;
 const MAX_ROOTS = 200;
 const THREAD_COUNT = 85;
 const PARTICLE_COUNT = 45;

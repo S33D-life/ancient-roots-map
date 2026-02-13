@@ -50,7 +50,7 @@ const HeartwoodEntrance = ({ onComplete }: HeartwoodEntranceProps) => {
     let animId: number;
     let embers: Ember[] = [];
     let startTime = performance.now();
-    const DURATION = 5200; // slower, meditative pacing
+    const DURATION = 2500;
     const RING_COUNT = 28;
 
     const resize = () => {

@@ -1,6 +1,7 @@
 import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
+import { resetWhispers } from "@/components/ContextualWhisper";
 
 const Footer = () => {
   const Dot = () => <span className="text-border/60 select-none" aria-hidden>·</span>;
@@ -36,12 +37,13 @@ const Footer = () => {
           <button
             onClick={() => {
               localStorage.removeItem("ancient-friends-tour-seen");
+              resetWhispers();
               window.location.href = "/";
             }}
             className="inline-flex items-center gap-1 hover:text-primary transition-colors py-1"
           >
             <RotateCcw className="w-3 h-3" />
-            Restart Tour
+            Restart Whispers
           </button>
           <Dot />
           <button

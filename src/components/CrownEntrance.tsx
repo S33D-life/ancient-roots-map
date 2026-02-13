@@ -36,7 +36,7 @@ interface SunParticle {
   hue: number;
 }
 
-const DURATION = 5200;
+const DURATION = 2500;
 const LEAF_COUNT = 35;
 const PARTICLE_COUNT = 50;
 

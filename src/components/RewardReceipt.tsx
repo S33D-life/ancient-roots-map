@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Shield, X } from "lucide-react";
+import { Heart, Shield, X, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { getHiveInfo } from "@/utils/hiveUtils";
 
 interface RewardReceiptProps {
@@ -93,6 +94,32 @@ const RewardReceipt = ({
                   </motion.div>
                 ))}
               </div>
+
+              {/* Journey connection — nudge to hive or vault */}
+              {hive && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-4"
+                >
+                  <Link
+                    to={`/hive/${hive.slug}`}
+                    onClick={onClose}
+                    className="group flex items-center gap-2 p-2.5 rounded-lg border transition-colors text-left"
+                    style={{
+                      borderColor: `hsl(${hive.accentHsl} / 0.25)`,
+                      background: `hsl(${hive.accentHsl} / 0.05)`,
+                    }}
+                  >
+                    <span className="text-base">{hive.icon}</span>
+                    <span className="flex-1 text-xs font-serif text-muted-foreground">
+                      See your {hive.displayName} treasury
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+                  </Link>
+                </motion.div>
+              )}
             </div>
           </motion.div>
         </motion.div>
