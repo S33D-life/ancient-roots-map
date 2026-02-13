@@ -40,6 +40,7 @@ const IncomingSharePage = lazy(() => import("./pages/IncomingSharePage"));
 const TestLabPage = lazy(() => import("./pages/TestLabPage"));
 const DocsPage = lazy(() => import("./pages/DocsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const StaffDetailPage = lazy(() => import("./pages/StaffDetailPage"));
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/atlas" element={<AtlasRedirect />} />
                 <Route path="/tree/:id" element={<TreeDetailPage />} />
+                <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
                 <Route path="/library" element={<GalleryPage />} />
                 <Route path="/library/:room" element={<GalleryPage />} />
