@@ -57,6 +57,7 @@ import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
+import seedCellarWindow from "@/assets/seed-cellar-window.png";
 import Footer from "@/components/Footer";
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import { useWallet } from "@/hooks/use-wallet";
@@ -1186,6 +1187,10 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="seed-cellar" className="space-y-6">
+            <div className="relative max-w-[50%] mx-auto rounded-xl overflow-hidden border border-amber-700/40">
+              <img src={seedCellarWindow} alt="Seed Cellar" className="w-full h-auto object-contain" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
             <Card className="border-mystical bg-card/50 backdrop-blur overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-2xl font-serif text-primary tracking-wide">
