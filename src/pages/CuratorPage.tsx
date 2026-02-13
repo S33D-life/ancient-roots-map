@@ -223,6 +223,14 @@ export default function CuratorPage() {
           </Badge>
         </div>
 
+        {/* Link to Edit Review */}
+        <div className="mb-6">
+          <a href="/edit-review" className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2">
+            <Shield className="w-4 h-4" />
+            Tree Edit Proposals →
+          </a>
+        </div>
+
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="relative flex-1 min-w-[200px]">
