@@ -297,6 +297,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
+  const [lineageFilter, setLineageFilter] = useState<string>("all");
+  const [projectFilter, setProjectFilter] = useState<string>("all");
   const [userId, setUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [timeOfDay] = useState<TimeOfDay>(getTimeOfDay);
@@ -412,6 +414,19 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     return counts;
   }, [trees]);
 
+  // Available lineages and projects for filter dropdowns
+  const availableLineages = useMemo(() => {
+    const set = new Set<string>();
+    trees.forEach((t: any) => { if (t.lineage) set.add(t.lineage); });
+    return Array.from(set).sort();
+  }, [trees]);
+
+  const availableProjects = useMemo(() => {
+    const set = new Set<string>();
+    trees.forEach((t: any) => { if (t.project_name) set.add(t.project_name); });
+    return Array.from(set).sort();
+  }, [trees]);
+
   // Apply filters
   const filteredTrees = useMemo(() => {
     let filtered = trees;
@@ -424,6 +439,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       filtered = filtered.filter(
         (t) => t.species.toLowerCase() === speciesFilter.toLowerCase()
       );
+    }
+
+    if (lineageFilter !== "all") {
+      filtered = filtered.filter((t: any) => t.lineage === lineageFilter);
+    }
+
+    if (projectFilter !== "all") {
+      filtered = filtered.filter((t: any) => t.project_name === projectFilter);
     }
 
     if (groveScale !== "all" && speciesFilter !== "all") {
@@ -475,7 +498,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     }
 
     return filtered;
-  }, [trees, viewMode, speciesFilter, groveScale, userId, userLocation]);
+  }, [trees, viewMode, speciesFilter, groveScale, lineageFilter, projectFilter, userId, userLocation]);
 
   // Initialize map — default to Leaflet for reliability until WebGL rendering issue is resolved.
   // WebGL tiles load (200 OK) and MapLibre reports "ready", but canvas appears blank.
@@ -1163,6 +1186,12 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
               onGroveScaleChange={setGroveScale}
               treeCounts={treeCounts}
               totalTrees={trees.length}
+              lineageFilter={lineageFilter}
+              onLineageChange={setLineageFilter}
+              availableLineages={availableLineages}
+              projectFilter={projectFilter}
+              onProjectChange={setProjectFilter}
+              availableProjects={availableProjects}
             />
             <span className="text-sm text-muted-foreground whitespace-nowrap">
               {filteredTrees.length} {filteredTrees.length === 1 ? 'tree' : 'trees'}
@@ -1186,6 +1215,12 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             onGroveScaleChange={setGroveScale}
             treeCounts={treeCounts}
             totalTrees={trees.length}
+            lineageFilter={lineageFilter}
+            onLineageChange={setLineageFilter}
+            availableLineages={availableLineages}
+            projectFilter={projectFilter}
+            onProjectChange={setProjectFilter}
+            availableProjects={availableProjects}
           />
         </div>
         <span className="ml-auto text-[11px] font-serif px-2 py-1 rounded-full backdrop-blur-md border border-border bg-card/70 text-muted-foreground">

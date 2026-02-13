@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Filter, TreeDeciduous, Users, Globe } from "lucide-react";
+import { Filter, TreeDeciduous, Users, Globe, GitBranch, FolderTree } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -62,6 +63,12 @@ interface MapFiltersProps {
   onGroveScaleChange: (scale: GroveScale) => void;
   treeCounts: Record<string, number>;
   totalTrees: number;
+  lineageFilter?: string;
+  onLineageChange?: (lineage: string) => void;
+  availableLineages?: string[];
+  projectFilter?: string;
+  onProjectChange?: (project: string) => void;
+  availableProjects?: string[];
 }
 
 const MapFilters = ({
@@ -71,6 +78,12 @@ const MapFilters = ({
   onGroveScaleChange,
   treeCounts,
   totalTrees,
+  lineageFilter = "all",
+  onLineageChange,
+  availableLineages = [],
+  projectFilter = "all",
+  onProjectChange,
+  availableProjects = [],
 }: MapFiltersProps) => {
   const [open, setOpen] = useState(false);
 
@@ -176,6 +189,62 @@ const MapFilters = ({
             </div>
           )}
         </div>
+
+        {/* Lineage Filter */}
+        {availableLineages.length > 0 && (
+          <>
+            <Separator />
+            <div className="p-4 space-y-3">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <GitBranch className="h-4 w-4 text-primary" />
+                Filter by Lineage
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Named lineages connect trees through heritage
+              </p>
+              <Select value={lineageFilter} onValueChange={(v) => onLineageChange?.(v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="All Lineages" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Lineages</SelectItem>
+                  {availableLineages.map((l) => (
+                    <SelectItem key={l} value={l}>{l}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+
+        {/* Project Scope Filter */}
+        {availableProjects.length > 0 && (
+          <>
+            <Separator />
+            <div className="p-4 space-y-3">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <FolderTree className="h-4 w-4 text-primary" />
+                Filter by Project
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Trees linked to conservation or mapping projects
+              </p>
+              <Select value={projectFilter} onValueChange={(v) => onProjectChange?.(v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="All Projects" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Projects</SelectItem>
+                  {availableProjects.map((p) => (
+                    <SelectItem key={p} value={p}>{p}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
+
+        <Separator />
 
         <ScrollArea className="flex-1 h-[calc(100vh-420px)]">
           <div className="grid grid-cols-4 gap-2 px-4 pb-4">

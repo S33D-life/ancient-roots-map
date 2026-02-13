@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Filter, X, ChevronDown, Leaf } from "lucide-react";
+import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 
@@ -36,6 +36,12 @@ interface LiteMapFiltersProps {
   onPerspectiveChange: (p: LitePerspective) => void;
   speciesCounts: Record<string, number>;
   totalVisible: number;
+  lineageFilter?: string;
+  onLineageChange?: (l: string) => void;
+  availableLineages?: string[];
+  projectFilter?: string;
+  onProjectChange?: (p: string) => void;
+  availableProjects?: string[];
 }
 
 const chipStyle = (active: boolean): React.CSSProperties => ({
@@ -53,6 +59,12 @@ const LiteMapFilters = ({
   onPerspectiveChange,
   speciesCounts,
   totalVisible,
+  lineageFilter = "all",
+  onLineageChange,
+  availableLineages = [],
+  projectFilter = "all",
+  onProjectChange,
+  availableProjects = [],
 }: LiteMapFiltersProps) => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
@@ -111,6 +123,28 @@ const LiteMapFilters = ({
         ))}
 
         <div className="flex-1" />
+
+        {/* Active lineage chip */}
+        {lineageFilter !== "all" && (
+          <button
+            onClick={() => onLineageChange?.("all")}
+            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
+            style={chipStyle(true)}
+          >
+            <GitBranch className="w-3 h-3" /> {lineageFilter} <X className="w-3 h-3" />
+          </button>
+        )}
+
+        {/* Active project chip */}
+        {projectFilter !== "all" && (
+          <button
+            onClick={() => onProjectChange?.("all")}
+            className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95"
+            style={chipStyle(true)}
+          >
+            <FolderTree className="w-3 h-3" /> {projectFilter} <X className="w-3 h-3" />
+          </button>
+        )}
 
         {/* Active species chip or filter toggle */}
         {species !== "all" ? (
@@ -181,6 +215,60 @@ const LiteMapFilters = ({
             <ChevronDown className="w-3 h-3" />Filter by Staff
           </span>
         </button>
+
+        {/* Lineage + Project filter chips */}
+        {(availableLineages.length > 0 || availableProjects.length > 0) && (
+          <div className="px-3 pb-2 flex gap-1.5 flex-wrap">
+            {availableLineages.length > 0 && (
+              <>
+                <span className="text-[9px] font-serif w-full" style={{ color: "hsl(42, 40%, 50%)" }}>
+                  <GitBranch className="w-2.5 h-2.5 inline mr-0.5" />Lineage
+                </span>
+                <button
+                  onClick={() => onLineageChange?.("all")}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
+                  style={chipStyle(lineageFilter === "all")}
+                >
+                  All
+                </button>
+                {availableLineages.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => onLineageChange?.(lineageFilter === l ? "all" : l)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
+                    style={chipStyle(lineageFilter === l)}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </>
+            )}
+            {availableProjects.length > 0 && (
+              <>
+                <span className="text-[9px] font-serif w-full mt-1" style={{ color: "hsl(42, 40%, 50%)" }}>
+                  <FolderTree className="w-2.5 h-2.5 inline mr-0.5" />Project
+                </span>
+                <button
+                  onClick={() => onProjectChange?.("all")}
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
+                  style={chipStyle(projectFilter === "all")}
+                >
+                  All
+                </button>
+                {availableProjects.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => onProjectChange?.(projectFilter === p ? "all" : p)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif transition-all duration-200 active:scale-95"
+                    style={chipStyle(projectFilter === p)}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        )}
 
         {/* Family filter chips */}
         <div className="px-3 pb-2 flex gap-1.5 flex-wrap">
