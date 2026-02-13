@@ -115,48 +115,57 @@ const CollectiveVaultCard = ({ name, description, members, hearts, slug }: { nam
   </div>
 );
 
-/** Whistle button component — reveals the hidden vault room */
-const WhistleButton = ({ onClick, isRevealed }: { onClick: () => void; isRevealed: boolean }) => {
-  const tapTimestamps = useRef<number[]>([]);
+/** Vault Seal — cycling logo that reveals the vault */
+const VAULT_SEAL_IMAGES = [
+  "/images/vault-logos/1-tree-fire.png",
+  "/images/vault-logos/2-tree-face.png",
+  "/images/vault-logos/3-green-orb.png",
+  "/images/vault-logos/4-hobbit-door.png",
+  "/images/vault-logos/5-heart-door.png",
+  "/images/vault-logos/6-golden-door.png",
+  "/images/vault-logos/7-vault-room.png",
+];
 
-  const handleTap = () => {
-    const now = Date.now();
-    tapTimestamps.current = [...tapTimestamps.current.filter(t => now - t < 800), now];
-    if (tapTimestamps.current.length >= 3) {
-      tapTimestamps.current = [];
-      if (!isRevealed) onClick();
+const VaultSeal = ({ onReveal, isRevealed, onHide }: { onReveal: () => void; isRevealed: boolean; onHide: () => void }) => {
+  const [imageIndex, setImageIndex] = useState(isRevealed ? VAULT_SEAL_IMAGES.length - 1 : 0);
+
+  const handleClick = () => {
+    if (isRevealed) {
+      setImageIndex(0);
+      onHide();
+      return;
+    }
+    const next = imageIndex + 1;
+    if (next >= VAULT_SEAL_IMAGES.length) {
+      // Final image reached — reveal vault
+      setImageIndex(VAULT_SEAL_IMAGES.length - 1);
+      onReveal();
+    } else {
+      setImageIndex(next);
     }
   };
 
+  const glowing = imageIndex >= VAULT_SEAL_IMAGES.length - 2 || isRevealed;
+
   return (
     <button
-      onClick={isRevealed ? onClick : handleTap}
-      className="fixed bottom-6 right-6 z-40 group"
-      title={isRevealed ? "Hide the IAM Vault" : "Tap 3× to reveal the IAM Vault…"}
+      onClick={handleClick}
+      className="shrink-0 rounded-full overflow-hidden transition-all duration-500"
+      title={isRevealed ? "Close the Vault" : `Tap to explore… (${imageIndex + 1}/${VAULT_SEAL_IMAGES.length})`}
+      style={{
+        width: 48,
+        height: 48,
+        border: glowing ? '2px solid hsl(42 70% 55%)' : '2px solid hsl(35 25% 28%)',
+        boxShadow: glowing
+          ? '0 0 16px hsl(42 70% 40% / 0.5), inset 0 0 8px hsl(42 80% 50% / 0.2)'
+          : '0 2px 8px hsl(0 0% 0% / 0.3)',
+      }}
     >
-      <div
-        className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg"
-        style={{
-          background: isRevealed
-            ? 'linear-gradient(135deg, hsl(35 80% 40%), hsl(28 70% 30%))'
-            : 'linear-gradient(135deg, hsl(28 30% 18%), hsl(22 25% 14%))',
-          border: isRevealed
-            ? '2px solid hsl(42 70% 55%)'
-            : '2px solid hsl(35 25% 28%)',
-          boxShadow: isRevealed
-            ? '0 0 20px hsl(42 70% 40% / 0.4), inset 0 0 12px hsl(42 80% 50% / 0.2)'
-            : '0 4px 12px hsl(0 0% 0% / 0.3)',
-        }}
-      >
-        <span className="text-lg" style={{ filter: isRevealed ? 'drop-shadow(0 0 6px hsl(42 80% 60%))' : 'none' }}>
-          {isRevealed ? '🔓' : '🎵'}
-        </span>
-      </div>
-      {!isRevealed && (
-        <span className="absolute -top-8 right-0 text-[10px] font-serif text-amber-400/50 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-          Whistle 3×…
-        </span>
-      )}
+      <img
+        src={VAULT_SEAL_IMAGES[imageIndex]}
+        alt="Vault seal"
+        className="w-full h-full object-cover transition-opacity duration-300"
+      />
     </button>
   );
 };
@@ -858,8 +867,13 @@ const GalleryPage = () => {
               ← Heartwood
             </button>
             <div>
-              <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
+              <h1 className="text-4xl font-serif font-bold text-mystical mb-2 flex items-center gap-3">
                 Heartwood Library
+                <VaultSeal
+                  isRevealed={vaultRevealed}
+                  onReveal={() => { setVaultRevealed(true); handleTabChange("vault"); }}
+                  onHide={() => setVaultRevealed(false)}
+                />
               </h1>
               <p className="text-muted-foreground hidden md:block">
                 Explore all mapped trees and manage the tree ledger
@@ -1467,11 +1481,6 @@ const GalleryPage = () => {
           </div>
         </Tabs>
 
-        {/* Whistle button — always visible in library */}
-        <WhistleButton
-          isRevealed={vaultRevealed}
-          onClick={() => setVaultRevealed(prev => !prev)}
-        />
       </main>
 
       <Dialog open={!!selectedTree} onOpenChange={(open) => !open && setSelectedTree(null)}>
