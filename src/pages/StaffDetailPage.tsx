@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowLeft, TreeDeciduous, ScrollText, Share2, ExternalLink,
-  Loader2, Eye, Wand2, MapPin,
+  Loader2, Eye, Wand2, MapPin, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import {
   getGridStaffs, getSpiralStaffs, getSpeciesStaffCounts,
@@ -45,6 +45,9 @@ export default function StaffDetailPage() {
   const staff = staffIndex >= 0 ? allGrid[staffIndex] : null;
   const isOrigin = staffIndex >= 0 && staffIndex < 36;
   const spiralData = isOrigin ? allSpiral[staffIndex] : null;
+
+  const prevStaff = staffIndex > 0 ? allGrid[staffIndex - 1] : null;
+  const nextStaff = staffIndex >= 0 && staffIndex < allGrid.length - 1 ? allGrid[staffIndex + 1] : null;
 
   const speciesCode = staff
     ? (staff.code.includes("-") ? staff.code.split("-")[0] : staff.code).toUpperCase()
@@ -147,14 +150,37 @@ export default function StaffDetailPage() {
       <Header />
 
       <div className="container mx-auto px-4 py-8 max-w-3xl">
-        {/* Back nav */}
-        <Link
-          to="/library/staff-room"
-          className="inline-flex items-center text-muted-foreground hover:text-primary mb-6 font-serif text-sm tracking-wide transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Staff Room
-        </Link>
+        {/* Back nav + prev/next */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            to="/library/staff-room"
+            className="inline-flex items-center text-muted-foreground hover:text-primary font-serif text-sm tracking-wide transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Staff Room
+          </Link>
+          <div className="flex items-center gap-1">
+            {prevStaff ? (
+              <Button variant="ghost" size="sm" className="gap-1 font-serif text-xs" onClick={() => navigate(`/staff/${prevStaff.code}`)}>
+                <ChevronLeft className="w-4 h-4" /> {prevStaff.code}
+              </Button>
+            ) : (
+              <Button variant="ghost" size="sm" className="gap-1 font-serif text-xs" disabled>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+            )}
+            <span className="text-xs text-muted-foreground font-mono">{staffIndex + 1}/{allGrid.length}</span>
+            {nextStaff ? (
+              <Button variant="ghost" size="sm" className="gap-1 font-serif text-xs" onClick={() => navigate(`/staff/${nextStaff.code}`)}>
+                {nextStaff.code} <ChevronRight className="w-4 h-4" />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="sm" className="gap-1 font-serif text-xs" disabled>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* Hero card */}
         <motion.div
@@ -352,6 +378,20 @@ export default function StaffDetailPage() {
             </div>
           )}
         </motion.div>
+
+        {/* Bottom prev/next navigation */}
+        <div className="flex items-center justify-between py-6 border-t border-border/30">
+          {prevStaff ? (
+            <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() => navigate(`/staff/${prevStaff.code}`)}>
+              <ChevronLeft className="w-4 h-4" /> {prevStaff.speciesName} ({prevStaff.code})
+            </Button>
+          ) : <div />}
+          {nextStaff ? (
+            <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() => navigate(`/staff/${nextStaff.code}`)}>
+              {nextStaff.speciesName} ({nextStaff.code}) <ChevronRight className="w-4 h-4" />
+            </Button>
+          ) : <div />}
+        </div>
       </div>
     </div>
   );
