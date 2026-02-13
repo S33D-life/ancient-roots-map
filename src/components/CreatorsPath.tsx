@@ -1,112 +1,99 @@
-import { useState } from "react";
-import { TreeDeciduous, Leaf, Users, Footprints, Sprout, Sparkles, MapPin, Wallet } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { TreeDeciduous, Leaf, Users, Footprints, Sprout, Sparkles, MapPin, Wand2, Gift, Music } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import creatorsPathBg from "@/assets/creators-path-bg.jpeg";
-import WalletConnect from "@/components/WalletConnect";
+import type { CachedStaff } from "@/hooks/use-wallet";
 
-interface StaffNFT {
-  tokenId: number;
-  name: string;
-  code: string;
-  species: string;
-  image: string;
+interface CreatorsPathProps {
+  userId?: string;
+  activeStaff?: CachedStaff | null;
 }
 
-// Mock journey data per staff — keyed by tokenId
-const STAFF_JOURNEYS: Record<number, { steps: typeof DEFAULT_JOURNEY; stats: typeof DEFAULT_STATS }> = {
-  1: {
-    stats: { trees: 14, seeds: 7, councils: 3, paths: 2 },
-    steps: [
-      { id: 1, title: "Staff Awakened", tree: "Oak Staff bonded at the Mother Oak", species: "Oak", date: "Imbolc 2024", type: "tree" },
-      { id: 2, title: "First Seed Planted", tree: "Elder Oak of Avebury", species: "Oak", date: "Spring Equinox 2024", type: "seed" },
-      { id: 3, title: "Council Attended", tree: "Glastonbury Grove Council", species: "", date: "Beltane 2024", type: "council" },
-      { id: 4, title: "Ancient Friend Found", tree: "The Whispering Yew", species: "Yew", date: "Summer Solstice 2024", type: "tree" },
-      { id: 5, title: "Dream Shared", tree: "Vision of the Food Forest Path", species: "", date: "Lammas 2024", type: "dream" },
-      { id: 6, title: "Path Walked", tree: "Pilgrimage to the Fortingall Yew", species: "Yew", date: "Samhain 2024", type: "path" },
-      { id: 7, title: "Council of Life", tree: "Winter Gathering of Keepers", species: "", date: "Winter Solstice 2024", type: "council" },
-      { id: 8, title: "Food Forest Begun", tree: "Paradise Orchard Project", species: "Mixed", date: "Imbolc 2025", type: "forest" },
-    ],
-  },
-  2: {
-    stats: { trees: 9, seeds: 4, councils: 5, paths: 1 },
-    steps: [
-      { id: 1, title: "Staff Awakened", tree: "Yew Staff claimed at Kingley Vale", species: "Yew", date: "Samhain 2023", type: "tree" },
-      { id: 2, title: "Council Attended", tree: "Elders' Circle, Dartmoor", species: "", date: "Winter Solstice 2023", type: "council" },
-      { id: 3, title: "Ancient Friend Found", tree: "The Ankerwycke Yew", species: "Yew", date: "Spring Equinox 2024", type: "tree" },
-      { id: 4, title: "Dream Shared", tree: "The Yew Network Vision", species: "", date: "Beltane 2024", type: "dream" },
-      { id: 5, title: "Seed Saved", tree: "Seeds from the Bleeding Yew", species: "Yew", date: "Summer Solstice 2024", type: "seed" },
-      { id: 6, title: "Council of Life", tree: "Midsummer Keepers Assembly", species: "", date: "Lammas 2024", type: "council" },
-    ],
-  },
-  3: {
-    stats: { trees: 6, seeds: 2, councils: 1, paths: 3 },
-    steps: [
-      { id: 1, title: "Staff Awakened", tree: "Ash Staff found on the Ridgeway", species: "Ash", date: "Spring Equinox 2024", type: "tree" },
-      { id: 2, title: "Path Walked", tree: "The Ash Trail of the Cotswolds", species: "Ash", date: "Beltane 2024", type: "path" },
-      { id: 3, title: "Ancient Friend Found", tree: "The Dancing Ash of Borrowdale", species: "Ash", date: "Summer Solstice 2024", type: "tree" },
-      { id: 4, title: "Seed Saved", tree: "Ash keys from the last giant", species: "Ash", date: "Autumn Equinox 2024", type: "seed" },
-    ],
-  },
-  4: {
-    stats: { trees: 11, seeds: 5, councils: 2, paths: 4 },
-    steps: [
-      { id: 1, title: "Staff Awakened", tree: "Willow Staff woven by the river", species: "Willow", date: "Imbolc 2024", type: "tree" },
-      { id: 2, title: "Dream Shared", tree: "Vision of the Wetland Sanctuary", species: "", date: "Spring Equinox 2024", type: "dream" },
-      { id: 3, title: "Council Attended", tree: "Riversong Council", species: "", date: "Beltane 2024", type: "council" },
-      { id: 4, title: "Food Forest Begun", tree: "Willow Creek Food Forest", species: "Mixed", date: "Summer Solstice 2024", type: "forest" },
-      { id: 5, title: "Path Walked", tree: "The Willow Way along the Thames", species: "Willow", date: "Lammas 2024", type: "path" },
-    ],
-  },
-};
-
-const DEFAULT_JOURNEY = [
-  { id: 1, title: "First Seed Planted", tree: "Elder Oak of Avebury", species: "Oak", date: "Spring Equinox 2024", type: "tree" },
-  { id: 2, title: "Council Attended", tree: "Glastonbury Grove Council", species: "", date: "Beltane 2024", type: "council" },
-  { id: 3, title: "Ancient Friend Found", tree: "The Whispering Yew", species: "Yew", date: "Summer Solstice 2024", type: "tree" },
-  { id: 4, title: "Dream Shared", tree: "Vision of the Food Forest Path", species: "", date: "Lammas 2024", type: "dream" },
-  { id: 5, title: "Seed Saved", tree: "Hawthorn of the Hedgerow", species: "Hawthorn", date: "Autumn Equinox 2024", type: "seed" },
-  { id: 6, title: "Path Walked", tree: "Pilgrimage to the Fortingall Yew", species: "Yew", date: "Samhain 2024", type: "path" },
-  { id: 7, title: "Council of Life", tree: "Winter Gathering of Keepers", species: "", date: "Winter Solstice 2024", type: "council" },
-  { id: 8, title: "Food Forest Begun", tree: "Paradise Orchard Project", species: "Mixed", date: "Imbolc 2025", type: "forest" },
-];
-
-const DEFAULT_STATS = { trees: 14, seeds: 7, councils: 3, paths: 2 };
+interface PathEvent {
+  id: string;
+  type: "tree" | "offering" | "ceremony" | "song";
+  title: string;
+  subtitle?: string;
+  date: string;
+  link?: string;
+}
 
 const getStepIcon = (type: string) => {
   switch (type) {
     case "tree": return <TreeDeciduous className="w-5 h-5" />;
-    case "council": return <Users className="w-5 h-5" />;
-    case "dream": return <Sparkles className="w-5 h-5" />;
-    case "seed": return <Leaf className="w-5 h-5" />;
-    case "path": return <Footprints className="w-5 h-5" />;
-    case "forest": return <Sprout className="w-5 h-5" />;
+    case "offering": return <Gift className="w-5 h-5" />;
+    case "ceremony": return <Wand2 className="w-5 h-5" />;
+    case "song": return <Music className="w-5 h-5" />;
     default: return <MapPin className="w-5 h-5" />;
   }
 };
 
-const statsMeta = [
-  { key: "trees" as const, icon: TreeDeciduous, label: "Trees Mapped", color: "text-primary" },
-  { key: "seeds" as const, icon: Leaf, label: "Seeds Saved", color: "text-accent" },
-  { key: "councils" as const, icon: Users, label: "Councils Attended", color: "text-primary" },
-  { key: "paths" as const, icon: Footprints, label: "Paths & Food Forests", color: "text-accent" },
-];
+const TYPE_COLORS: Record<string, string> = {
+  tree: "120 45% 45%",
+  offering: "28 70% 50%",
+  ceremony: "280 60% 55%",
+  song: "28 70% 50%",
+};
 
-const CreatorsPath = () => {
-  const [linkedStaff, setLinkedStaff] = useState<StaffNFT | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
+  const [events, setEvents] = useState<PathEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ trees: 0, offerings: 0, ceremonies: 0, songs: 0 });
 
-  const journey = linkedStaff
-    ? STAFF_JOURNEYS[linkedStaff.tokenId]
-    : null;
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    fetchPath();
+  }, [userId]);
 
-  const currentSteps = journey?.steps || DEFAULT_JOURNEY;
-  const currentStats = journey?.stats || DEFAULT_STATS;
+  const fetchPath = async () => {
+    setLoading(true);
 
-  const handleWalletLinked = (address: string, staff: StaffNFT) => {
-    setWalletAddress(address);
-    setLinkedStaff(staff);
+    const [treesRes, offeringsRes, ceremoniesRes, songsRes] = await Promise.all([
+      supabase.from("trees").select("id, name, species, created_at").eq("created_by", userId!).order("created_at", { ascending: false }).limit(50),
+      supabase.from("offerings").select("id, title, type, created_at, tree_id").eq("created_by", userId!).order("created_at", { ascending: false }).limit(50),
+      supabase.from("ceremony_logs").select("id, staff_code, staff_name, staff_species, ceremony_type, created_at").eq("user_id", userId!).order("created_at", { ascending: false }).limit(30),
+      supabase.from("saved_songs").select("id, title, artist, created_at").eq("user_id", userId!).order("created_at", { ascending: false }).limit(30),
+    ]);
+
+    const all: PathEvent[] = [];
+
+    const trees = treesRes.data || [];
+    const offerings = offeringsRes.data || [];
+    const ceremonies = ceremoniesRes.data || [];
+    const songs = songsRes.data || [];
+
+    trees.forEach((t) =>
+      all.push({ id: t.id, type: "tree", title: t.name, subtitle: t.species, date: t.created_at, link: `/tree/${t.id}` })
+    );
+    offerings.forEach((o) =>
+      all.push({ id: o.id, type: "offering", title: o.title, subtitle: o.type, date: o.created_at, link: `/tree/${o.tree_id}` })
+    );
+    ceremonies.forEach((c: any) => {
+      const label = c.ceremony_type === "binding" ? "Staff Bound" : "Staff Awakened";
+      all.push({ id: c.id, type: "ceremony", title: `${label}: ${c.staff_name || c.staff_code}`, subtitle: c.staff_species, date: c.created_at, link: `/staff/${c.staff_code}` });
+    });
+    songs.forEach((s) =>
+      all.push({ id: s.id, type: "song", title: s.title, subtitle: s.artist, date: s.created_at })
+    );
+
+    all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setEvents(all);
+    setStats({ trees: trees.length, offerings: offerings.length, ceremonies: ceremonies.length, songs: songs.length });
+    setLoading(false);
   };
+
+  const statsMeta = [
+    { key: "trees" as const, icon: TreeDeciduous, label: "Trees Mapped", color: "text-primary" },
+    { key: "offerings" as const, icon: Gift, label: "Offerings Given", color: "text-accent" },
+    { key: "ceremonies" as const, icon: Wand2, label: "Ceremonies", color: "text-primary" },
+    { key: "songs" as const, icon: Music, label: "Songs Saved", color: "text-accent" },
+  ];
 
   return (
     <div className="space-y-10">
@@ -126,45 +113,28 @@ const CreatorsPath = () => {
       </div>
 
       {/* Staff Identity Card */}
-      {linkedStaff ? (
+      {activeStaff && (
         <Card className="border-mystical bg-card/80 backdrop-blur-sm overflow-hidden">
           <CardContent className="p-0">
-            <div className="flex items-center gap-5 p-5">
+            <Link to={`/staff/${activeStaff.id}`} className="flex items-center gap-5 p-5 group">
               <div className="w-20 h-20 rounded-xl overflow-hidden border-2 border-primary/40 flex-shrink-0 shadow-lg">
-                <img src={linkedStaff.image} alt={linkedStaff.name} className="w-full h-full object-cover" />
+                <img
+                  src={activeStaff.image_url || `/images/staffs/${activeStaff.species_code.toLowerCase()}.jpeg`}
+                  alt={activeStaff.species}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Active Staff</p>
-                <h3 className="font-serif text-xl text-mystical">{linkedStaff.name}</h3>
-                <p className="text-sm text-muted-foreground font-mono">{linkedStaff.code}</p>
-                <p className="text-xs text-muted-foreground mt-1">{linkedStaff.species}</p>
+                <h3 className="font-serif text-xl text-mystical group-hover:text-primary transition-colors">{activeStaff.species}</h3>
+                <p className="text-sm text-muted-foreground font-mono">{activeStaff.id}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${activeStaff.circle_id}`} · Staff #{activeStaff.staff_number}
+                </p>
               </div>
-              <div className="text-right flex-shrink-0">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Wallet className="w-3 h-3" />
-                  <span>{walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mt-2 text-xs"
-                  onClick={() => { setLinkedStaff(null); setWalletAddress(null); }}
-                >
-                  Switch Staff
-                </Button>
-              </div>
-            </div>
+            </Link>
           </CardContent>
         </Card>
-      ) : (
-        <div className="max-w-md mx-auto">
-          <div className="text-center mb-4">
-            <p className="text-sm text-muted-foreground">
-              Connect your wallet to view your staff's personal legend
-            </p>
-          </div>
-          <WalletConnect onWalletLinked={handleWalletLinked} />
-        </div>
       )}
 
       {/* Stats Cards */}
@@ -176,7 +146,7 @@ const CreatorsPath = () => {
                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
               <span className="text-2xl md:text-3xl font-serif font-bold text-mystical">
-                {currentStats[stat.key]}
+                {stats[stat.key]}
               </span>
               <span className="text-xs text-muted-foreground text-center">{stat.label}</span>
             </CardContent>
@@ -185,41 +155,70 @@ const CreatorsPath = () => {
       </div>
 
       {/* Journey Timeline */}
-      <div>
-        <h3 className="text-xl font-serif font-bold text-primary mb-6">
-          {linkedStaff ? `${linkedStaff.name} — Personal Legend` : "Your Personal Legend"}
-        </h3>
-        <div className="relative">
-          <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-accent/40 to-transparent" />
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      ) : events.length === 0 ? (
+        <div className="text-center py-16">
+          <Sparkles className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-muted-foreground font-serif mb-1">Your path has not yet begun</p>
+          <p className="text-xs text-muted-foreground/60">Map a tree or leave an offering to start your journey.</p>
+        </div>
+      ) : (
+        <div>
+          <h3 className="text-xl font-serif font-bold text-primary mb-6">
+            {activeStaff ? `${activeStaff.species} — Paradise Path` : "Your Paradise Path"}
+          </h3>
+          <div className="relative">
+            <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-accent/40 to-transparent" />
 
-          <div className="space-y-6">
-            {currentSteps.map((step) => (
-              <div key={step.id} className="relative flex gap-5 items-start group">
-                <div className="relative z-10 w-12 h-12 rounded-full border-2 border-primary/50 bg-card flex items-center justify-center shrink-0 group-hover:border-accent group-hover:shadow-[0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300">
-                  <span className="text-primary group-hover:text-accent transition-colors">
-                    {getStepIcon(step.type)}
-                  </span>
-                </div>
-
-                <Card className="flex-1 border-mystical bg-card/60 backdrop-blur-sm group-hover:border-accent/40 transition-all duration-300">
-                  <CardContent className="py-4 px-5">
-                    <div className="flex items-start justify-between gap-2 flex-wrap">
-                      <div>
-                        <h4 className="font-serif font-semibold text-primary text-sm">{step.title}</h4>
-                        <p className="text-foreground/80 text-sm mt-1">{step.tree}</p>
-                        {step.species && (
-                          <span className="text-xs text-muted-foreground italic">{step.species}</span>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">{step.date}</span>
+            <div className="space-y-4">
+              {events.map((event) => {
+                const color = TYPE_COLORS[event.type] || "28 70% 50%";
+                const Icon = getStepIcon(event.type);
+                const content = (
+                  <div className="relative flex gap-5 items-start group">
+                    <div
+                      className="relative z-10 w-12 h-12 rounded-full border-2 flex items-center justify-center shrink-0 group-hover:shadow-[0_0_12px_hsl(var(--accent)/0.4)] transition-all duration-300"
+                      style={{
+                        borderColor: `hsl(${color})`,
+                        backgroundColor: `hsl(${color} / 0.15)`,
+                      }}
+                    >
+                      <span style={{ color: `hsl(${color})` }}>{Icon}</span>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
+
+                    <Card className="flex-1 border-mystical bg-card/60 backdrop-blur-sm group-hover:border-accent/40 transition-all duration-300">
+                      <CardContent className="py-4 px-5">
+                        <div className="flex items-start justify-between gap-2 flex-wrap">
+                          <div>
+                            <h4 className="font-serif font-semibold text-primary text-sm">{event.title}</h4>
+                            {event.subtitle && (
+                              <span className="text-xs text-muted-foreground italic">{event.subtitle}</span>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {new Date(event.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                );
+
+                return event.link ? (
+                  <Link key={event.id} to={event.link} className="block">
+                    {content}
+                  </Link>
+                ) : (
+                  <div key={event.id}>{content}</div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

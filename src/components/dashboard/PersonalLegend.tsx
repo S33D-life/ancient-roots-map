@@ -3,13 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
   TreeDeciduous, Gift, Heart, Music, Sprout, Archive,
-  Star, Loader2
+  Star, Loader2, Wand2
 } from "lucide-react";
 import type { TetolLevel } from "@/contexts/TetolLevelContext";
 
 interface TimelineEvent {
   id: string;
-  type: "tree" | "offering" | "song" | "plant" | "vault" | "wishlist";
+  type: "tree" | "offering" | "song" | "plant" | "vault" | "wishlist" | "ceremony";
   title: string;
   subtitle?: string;
   date: string;
@@ -24,6 +24,7 @@ const TYPE_META: Record<TimelineEvent["type"], { icon: React.ElementType; label:
   plant:    { icon: Sprout, label: "Added a plant", color: "120 45% 45%" },
   vault:    { icon: Archive, label: "Stored in vault", color: "15 80% 55%" },
   wishlist: { icon: Star, label: "Wished for a tree", color: "45 100% 60%" },
+  ceremony: { icon: Wand2, label: "Staff ceremony", color: "280 60% 55%" },
 };
 
 interface PersonalLegendProps {
@@ -41,13 +42,14 @@ const PersonalLegend = ({ userId }: PersonalLegendProps) => {
   const fetchTimeline = async () => {
     setLoading(true);
 
-    const [treesRes, offeringsRes, songsRes, plantsRes, vaultRes, wishlistRes] = await Promise.all([
+    const [treesRes, offeringsRes, songsRes, plantsRes, vaultRes, wishlistRes, ceremoniesRes] = await Promise.all([
       supabase.from("trees").select("id, name, species, created_at").eq("created_by", userId).order("created_at", { ascending: false }).limit(50),
       supabase.from("offerings").select("id, title, type, created_at, tree_id").eq("created_by", userId).order("created_at", { ascending: false }).limit(50),
       supabase.from("saved_songs").select("id, title, artist, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(30),
       supabase.from("greenhouse_plants").select("id, name, species, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(30),
       supabase.from("vault_items").select("id, title, type, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(30),
       supabase.from("tree_wishlist").select("id, notes, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(30),
+      supabase.from("ceremony_logs").select("id, staff_code, staff_name, staff_species, ceremony_type, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(30),
     ]);
 
     const all: TimelineEvent[] = [];
@@ -70,6 +72,18 @@ const PersonalLegend = ({ userId }: PersonalLegendProps) => {
     (wishlistRes.data || []).forEach((w) =>
       all.push({ id: w.id, type: "wishlist", title: w.notes || "A wish", date: w.created_at, level: "heartwood" })
     );
+    (ceremoniesRes.data || []).forEach((c: any) => {
+      const label = c.ceremony_type === "binding" ? "Staff Bound" : "Staff Awakened";
+      all.push({
+        id: c.id,
+        type: "ceremony",
+        title: `${label}: ${c.staff_name || c.staff_code}`,
+        subtitle: c.staff_species || c.staff_code,
+        date: c.created_at,
+        level: "hearth",
+        link: `/staff/${c.staff_code}`,
+      });
+    });
 
     all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setEvents(all);
