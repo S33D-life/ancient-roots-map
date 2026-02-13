@@ -1210,11 +1210,14 @@ const GalleryPage = () => {
               className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
               onClick={() => setShowTreeLedger(!showTreeLedger)}
             >
-              <div className="p-6 bg-card/50 backdrop-blur border-mystical">
-                <div className="flex flex-col items-center justify-center py-4">
-                  <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{showTreeLedger ? "Click to close" : "Click to open the Ledger"}</p>
-                </div>
+              <img
+                src={councilLedgerWindow}
+                alt="Tree Ledger"
+                className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
+                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
+                <p className="text-sm text-foreground/70 mt-1">{showTreeLedger ? "Click to close" : "Click to open the Ledger"}</p>
               </div>
             </div>
 
