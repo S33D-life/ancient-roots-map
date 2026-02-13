@@ -321,16 +321,16 @@ const Hero = () => {
         </div>
 
         {/* Bottom stack: CTA buttons → Teotag → Ancient Friend */}
-        <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-3 px-4">
+        <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-3 px-4">
           {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none">
-            <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base py-4 sm:py-3" asChild>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none">
+            <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/map">
                 <MapPin className="w-5 h-5 mr-2" />
                 Arrive on the Atlas
               </Link>
             </Button>
-            <Button variant="sacred" size="lg" className="min-w-[220px] w-full sm:w-auto text-base py-4 sm:py-3" asChild>
+            <Button variant="sacred" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/map?addTree=true">
                 <TreeDeciduous className="w-5 h-5 mr-2" />
                 Claim a Tree Encounter

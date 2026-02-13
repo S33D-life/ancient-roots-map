@@ -13,7 +13,7 @@ const Footer = () => {
           <JourneyPulse />
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <TreeDeciduous className="w-3.5 h-3.5 text-primary" />
             <span className="font-serif">s33d.life</span>
@@ -38,7 +38,7 @@ const Footer = () => {
               localStorage.removeItem("ancient-friends-tour-seen");
               window.location.href = "/";
             }}
-            className="inline-flex items-center gap-1 hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1 hover:text-primary transition-colors py-1"
           >
             <RotateCcw className="w-3 h-3" />
             Restart Tour
@@ -48,7 +48,7 @@ const Footer = () => {
             onClick={() => {
               window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
             }}
-            className="inline-flex items-center gap-1.5 hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 hover:text-primary transition-colors py-1"
             title="Search (⌘K)"
           >
             <Search className="w-3 h-3" />

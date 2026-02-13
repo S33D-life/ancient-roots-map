@@ -209,7 +209,7 @@ const DashboardWanderers = ({ userId }: Props) => {
                 className="pl-9 font-serif"
               />
             </div>
-            <Button variant="outline" size="sm" className="font-serif text-xs gap-1 shrink-0" onClick={generateInvite} disabled={generatingInvite}>
+            <Button variant="outline" size="sm" className="font-serif text-xs gap-1 shrink-0 h-10" onClick={generateInvite} disabled={generatingInvite}>
               {generatingInvite ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Copy className="w-3.5 h-3.5" />}
               {inviteCode ? "Copy Link" : "Invite Link"}
             </Button>
