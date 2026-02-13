@@ -1198,6 +1198,57 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         )}
       </div>
 
+      {/* Birdsong seasonal legend */}
+      {showBirdsongHeat && (
+        <div
+          className="absolute bottom-24 left-3 z-[1000] flex flex-col gap-1.5 px-3 py-2.5 rounded-lg"
+          style={{
+            background: "hsla(30, 15%, 10%, 0.92)",
+            border: "1px solid hsla(42, 40%, 30%, 0.5)",
+            backdropFilter: "blur(8px)",
+            animation: "popIn .2s ease-out",
+          }}
+        >
+          <p className="text-[10px] font-serif tracking-wider" style={{ color: "hsl(42, 50%, 55%)" }}>
+            Birdsong Seasons
+          </p>
+          {[
+            { key: "spring", color: "hsl(120, 55%, 50%)", label: "Spring" },
+            { key: "summer", color: "hsl(45, 80%, 50%)", label: "Summer" },
+            { key: "autumn", color: "hsl(25, 75%, 50%)", label: "Autumn" },
+            { key: "winter", color: "hsl(200, 60%, 55%)", label: "Winter" },
+          ].map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setBirdsongSeason(birdsongSeason === s.key ? "all" : s.key)}
+              className="flex items-center gap-2 transition-opacity"
+              style={{ opacity: birdsongSeason === "all" || birdsongSeason === s.key ? 1 : 0.4 }}
+            >
+              <span
+                className="inline-block w-3 h-3 rounded-sm"
+                style={{
+                  background: s.color,
+                  boxShadow: birdsongSeason === s.key ? `0 0 6px ${s.color}` : "none",
+                  border: birdsongSeason === s.key ? `1.5px solid ${s.color}` : "1px solid hsla(0,0%,100%,0.15)",
+                }}
+              />
+              <span className="text-[11px] font-serif" style={{ color: birdsongSeason === s.key ? s.color : "hsl(0, 0%, 62%)" }}>
+                {s.label}
+              </span>
+            </button>
+          ))}
+          {birdsongSeason !== "all" && (
+            <button
+              onClick={() => setBirdsongSeason("all")}
+              className="text-[9px] font-sans mt-0.5 transition-colors"
+              style={{ color: "hsl(42, 50%, 55%)" }}
+            >
+              Show all seasons
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Bottom controls: add-tree left, locate centred, layers right — above attribution */}
       <div className="absolute bottom-8 left-3 z-[1000]">
         <button
