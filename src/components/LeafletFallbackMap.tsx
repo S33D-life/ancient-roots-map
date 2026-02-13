@@ -143,7 +143,7 @@ function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number): L
     : '';
   const icon = L.divIcon({
     className: "leaflet-tree-marker",
-    html: `<div style="position:relative;display:inline-block;"><div class="marker-wrap ${tier === 'ancient' ? 'marker-ancient' : ''}" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;transition:transform .15s ease-out;"></div>${birdBadge}</div>`,
+    html: `<div style="position:relative;display:inline-block;"><div class="marker-wrap marker-${tier} ${tier === 'ancient' ? 'marker-ancient' : ''}" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;"></div>${birdBadge}</div>`,
     iconSize: [size + 8, size + 8],
     iconAnchor: [(size + 8) / 2, (size + 8) / 2],
   });
@@ -279,8 +279,12 @@ function convexHull(points: [number, number][]): [number, number][] {
 /* ── CSS ── */
 const LITE_CSS = `
 .leaflet-tree-marker{background:transparent!important;border:none!important}
-.marker-wrap{transition:transform .15s ease-out,filter .2s ease-out}
-.marker-wrap:hover{transform:scale(1.15)!important}
+.marker-wrap{transition:transform .2s cubic-bezier(0.34,1.56,0.64,1),filter .2s ease-out}
+.marker-wrap:hover{transform:scale(1.2)!important;filter:brightness(1.15) drop-shadow(0 0 6px hsla(42,80%,55%,0.4))!important}
+.marker-wrap:active{transform:scale(0.92)!important;transition:transform .1s ease-out}
+@keyframes markerBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.marker-seedling .marker-wrap{animation:markerBreathe 4s ease-in-out infinite}
+.marker-notable .marker-wrap{animation:markerBreathe 3.5s ease-in-out infinite}
 .tree-cluster{display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:'Cinzel',serif;font-weight:700;color:hsl(45,80%,60%);text-shadow:0 1px 2px rgba(0,0,0,0.5);border:2px solid hsla(42,70%,50%,0.55);transition:transform .15s ease-out,box-shadow .15s ease-out}
 .tree-cluster:active{transform:scale(0.95)}
 .tree-cluster-sm{width:34px;height:34px;font-size:11px;background:hsla(120,40%,20%,0.85);box-shadow:0 0 8px hsla(42,60%,45%,0.2)}
@@ -288,7 +292,7 @@ const LITE_CSS = `
 .tree-cluster-lg{width:50px;height:50px;font-size:14px;background:hsla(120,50%,16%,0.9);box-shadow:0 0 14px hsla(42,60%,45%,0.3)}
 .tree-cluster-xl{width:56px;height:56px;font-size:15px;background:hsla(120,55%,14%,0.92);box-shadow:0 0 18px hsla(42,60%,45%,0.35)}
 @keyframes ancientGlow{0%,100%{filter:drop-shadow(0 0 3px hsla(42,90%,55%,0.25))}50%{filter:drop-shadow(0 0 8px hsla(42,90%,55%,0.6))}}
-@keyframes popIn{0%{opacity:0;transform:scale(0.92) translateY(4px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(0.88) translateY(8px)}60%{transform:scale(1.02) translateY(-2px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes userPulse{0%,100%{box-shadow:0 0 10px hsla(42,90%,55%,0.5),0 0 20px hsla(42,90%,55%,0.15)}50%{box-shadow:0 0 14px hsla(42,90%,55%,0.7),0 0 28px hsla(42,90%,55%,0.25)}}
 .marker-ancient{animation:ancientGlow 3.5s ease-in-out infinite;will-change:filter}
 .user-dot{animation:userPulse 2.5s ease-in-out infinite}

@@ -306,4 +306,39 @@ All colors MUST be HSL.
       opacity: 0;
     }
   }
+
+  /* ── Reward micro-animations ── */
+  @keyframes heart-burst {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .animate-heart-burst {
+    animation: heart-burst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes seed-sprout {
+    0% { transform: translateY(8px) scale(0.8); opacity: 0; }
+    60% { transform: translateY(-2px) scale(1.05); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .animate-seed-sprout {
+    animation: seed-sprout 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ── Ambient page-level shimmer for depth ── */
+  @keyframes ambient-shimmer {
+    0%, 100% { opacity: 0.03; }
+    50% { opacity: 0.07; }
+  }
+  .ambient-shimmer::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse at 30% 20%, hsl(var(--primary) / 0.08), transparent 60%),
+                radial-gradient(ellipse at 70% 80%, hsl(var(--accent) / 0.05), transparent 50%);
+    animation: ambient-shimmer 8s ease-in-out infinite;
+  }
 }
