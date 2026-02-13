@@ -1231,7 +1231,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             map.current = null;
             setMapStatus("loading");
           }}
-          className="absolute top-14 right-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
+          className="absolute top-14 left-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
           style={{ background: "hsla(30,30%,12%,0.88)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(6px)" }}
           title="Switch to WebGL mode"
         >
