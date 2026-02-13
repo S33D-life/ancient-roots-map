@@ -948,7 +948,7 @@ const GalleryPage = () => {
             <EarthRadioRoom />
           </TabsContent>
 
-          <TabsContent value="gallery" className="space-y-8">
+          <TabsContent value="gallery" className="space-y-6">
 
             {/* Ancient Friends Window — tap to explore */}
             <button
@@ -1138,11 +1138,11 @@ const GalleryPage = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="staff-room" className="space-y-8">
+          <TabsContent value="staff-room" className="space-y-6">
             <StaffRoomGallery />
           </TabsContent>
 
-          <TabsContent value="creators-path">
+          <TabsContent value="creators-path" className="space-y-6">
             <CreatorsPath userId={currentUserId || undefined} activeStaff={wallet.activeStaff} />
           </TabsContent>
 
