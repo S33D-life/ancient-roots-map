@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { extractExifDate } from "@/utils/exifDate";
-import { getMapStyle } from "@/config/mapbox";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +94,31 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
   }, [open, initLat, initLng]);
 
+  // Auto-lookup what3words when user types a valid-looking address
+  useEffect(() => {
+    const trimmed = what3words.trim().replace(/^\/+/, "");
+    const isValid = /^[a-z]+\.[a-z]+\.[a-z]+$/i.test(trimmed);
+    if (!isValid || lookingUpW3w || fetchingW3w) return;
+    if (lat !== null && lng !== null) return;
+
+    const timer = setTimeout(async () => {
+      setLookingUpW3w(true);
+      try {
+        const result = await convertToCoordinates(trimmed);
+        if (result?.coordinates) {
+          setLat(result.coordinates.lat);
+          setLng(result.coordinates.lng);
+          setWhat3words(result.words);
+        }
+      } catch {
+        // silently fail for auto-lookup
+      } finally {
+        setLookingUpW3w(false);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [what3words]);
+
   const fetchWhat3words = async (latitude: number, longitude: number) => {
     setFetchingW3w(true);
     try {
@@ -135,13 +159,32 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   );
 
   // Satellite map for adjustment
+  const SATELLITE_STYLE: any = {
+    version: 8,
+    name: "Satellite",
+    sources: {
+      satellite: {
+        type: "raster",
+        tiles: [
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        ],
+        tileSize: 256,
+        attribution: "Esri, Maxar, Earthstar Geographics",
+        maxzoom: 19,
+      },
+    },
+    layers: [
+      { id: "satellite-tiles", type: "raster", source: "satellite", minzoom: 0, maxzoom: 22 },
+    ],
+  };
+
   useEffect(() => {
     if (!adjustMode || !mapContainerRef.current || lat === null || lng === null) return;
     circleAddedRef.current = false;
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: getMapStyle() as any,
+      style: SATELLITE_STYLE,
       center: [lng, lat],
       zoom: 19,
       maxZoom: 22,
@@ -188,7 +231,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
     setFindingMe(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => { setFindingMe(false); startAdjustMode(pos.coords.latitude, pos.coords.longitude); },
+      (pos) => {
+        setFindingMe(false);
+        const foundLat = pos.coords.latitude;
+        const foundLng = pos.coords.longitude;
+        startAdjustMode(foundLat, foundLng);
+        fetchWhat3words(foundLat, foundLng);
+      },
       (err) => { setFindingMe(false); toast({ title: "Location error", description: err.message, variant: "destructive" }); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
