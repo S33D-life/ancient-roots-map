@@ -1221,7 +1221,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             map.current = null;
             setMapStatus("loading");
           }}
-          className="absolute top-[6.5rem] right-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
+          className="absolute top-14 right-2 z-[1002] flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-serif text-[11px] transition-all hover:brightness-125 active:scale-95"
           style={{ background: "hsla(30,30%,12%,0.88)", color: "hsl(42,60%,60%)", border: "1px solid hsla(42,40%,30%,0.5)", backdropFilter: "blur(6px)" }}
           title="Switch to WebGL mode"
         >
@@ -1341,7 +1341,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       <ConversionStatus />
 
       {/* Top bar — desktop: full toolbar, mobile: minimal floating pills */}
-      <div className="hidden md:block absolute top-4 left-1/2 -translate-x-1/2 z-10">
+      <div className="hidden md:block absolute top-[72px] left-1/2 -translate-x-1/2 z-10">
         <Card className="bg-card/95 backdrop-blur border-border shadow-lg text-card-foreground">
           <div className="flex items-center gap-3 p-3">
             <Tabs value={viewMode} onValueChange={setViewMode}>
@@ -1388,7 +1388,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       </div>
 
       {/* Time-of-day whisper — desktop only */}
-      <div className="absolute top-[72px] right-4 z-10 animate-fade-in hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
+      <div className="absolute top-[130px] right-4 z-10 animate-fade-in hidden md:block" style={{ animationDelay: '1s', animationFillMode: 'backwards' }}>
         <span className="font-serif text-xs px-2.5 py-1 rounded-full border border-border bg-card/70 text-muted-foreground backdrop-blur-sm">
           {timeOfDay === 'dawn' && '🌅'}
           {timeOfDay === 'day' && '☀️'}
@@ -1411,7 +1411,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         />
       </div>
 
-      <div className="absolute bottom-4 right-4 z-10 hidden md:flex flex-col items-end gap-2">
+      <div className="absolute bottom-4 right-16 z-10 hidden md:flex flex-col items-end gap-2">
         <div className="relative">
           <TreeRadio speciesFilter={speciesFilter} />
         </div>
@@ -1426,8 +1426,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </button>
       </div>
 
-      {/* Mobile: compact bottom bar */}
-      <div className="absolute bottom-3 left-2 right-2 z-10 flex md:hidden items-center gap-2">
+      {/* Mobile: compact bottom bar — safe-area above Teotag */}
+      <div className="absolute bottom-14 left-2 right-2 z-10 flex md:hidden items-center gap-2">
         <div className="shrink-0">
           <FindMeButton
             autoOpen={autoAddTree}
