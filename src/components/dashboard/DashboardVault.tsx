@@ -17,8 +17,7 @@ import VaultParticles from "./vault/VaultParticles";
 import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultSpeciesHearts from "./vault/VaultSpeciesHearts";
 import VaultInfluence from "./vault/VaultInfluence";
-import VaultTokenHistory from "./vault/VaultTokenHistory";
-import VaultTokenLayers from "./vault/VaultTokenLayers";
+import VaultTokenWallet from "./vault/VaultTokenWallet";
 
 interface Props {
   userId: string;
@@ -173,13 +172,14 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Active Seeds / Bloom Timers */}
       <VaultSproutingSeeds seeds={allSeeds} userId={userId} />
 
-      {/* 3-Layer Token Vault */}
-      <VaultTokenLayers
+      {/* Unified Token Wallet (3 layers + history) */}
+      <VaultTokenWallet
         totalHearts={totalHearts}
         speciesBalances={speciesTokens.speciesBalances}
         totalSpeciesHearts={speciesTokens.totalSpeciesHearts}
         globalInfluence={speciesTokens.influenceGlobal}
         influenceByHive={speciesTokens.influenceByHive}
+        history={speciesTokens.history}
       />
 
       {/* Two-column layout for mid sections on desktop */}
@@ -194,9 +194,6 @@ const DashboardVault = ({ userId }: Props) => {
         {/* Lottery Tracker */}
         <VaultLotteryTracker userId={userId} />
       </div>
-
-      {/* Token History (Species + Influence) */}
-      <VaultTokenHistory history={speciesTokens.history} />
 
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />
