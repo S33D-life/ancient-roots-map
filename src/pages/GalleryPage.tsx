@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map } from "lucide-react";
+import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map, Archive } from "lucide-react";
 import {
   getSpiralStaffs,
   getGridStaffs,
@@ -100,6 +100,39 @@ interface WishlistItem {
 
 const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger", "vault"];
 
+/** Whistle button component — reveals the hidden vault room */
+const WhistleButton = ({ onClick, isRevealed }: { onClick: () => void; isRevealed: boolean }) => (
+  <button
+    onClick={onClick}
+    className="fixed bottom-6 right-6 z-40 group"
+    title={isRevealed ? "Hide the Vault" : "Whistle to reveal the Vault…"}
+  >
+    <div
+      className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-lg"
+      style={{
+        background: isRevealed
+          ? 'linear-gradient(135deg, hsl(35 80% 40%), hsl(28 70% 30%))'
+          : 'linear-gradient(135deg, hsl(28 30% 18%), hsl(22 25% 14%))',
+        border: isRevealed
+          ? '2px solid hsl(42 70% 55%)'
+          : '2px solid hsl(35 25% 28%)',
+        boxShadow: isRevealed
+          ? '0 0 20px hsl(42 70% 40% / 0.4), inset 0 0 12px hsl(42 80% 50% / 0.2)'
+          : '0 4px 12px hsl(0 0% 0% / 0.3)',
+      }}
+    >
+      <span className="text-lg" style={{ filter: isRevealed ? 'drop-shadow(0 0 6px hsl(42 80% 60%))' : 'none' }}>
+        {isRevealed ? '🔓' : '🎵'}
+      </span>
+    </div>
+    {!isRevealed && (
+      <span className="absolute -top-8 right-0 text-[10px] font-serif text-amber-400/50 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+        Whistle…
+      </span>
+    )}
+  </button>
+);
+
 const GalleryPage = () => {
   const [searchParams] = useSearchParams();
   const { room: roomPathParam } = useParams<{ room?: string }>();
@@ -110,6 +143,7 @@ const GalleryPage = () => {
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showExplorer, setShowExplorer] = useState(false);
+  const [vaultRevealed, setVaultRevealed] = useState(!!roomParam && roomParam === "vault");
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -822,7 +856,6 @@ const GalleryPage = () => {
                 <TabsTrigger value="creators-path" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Creator's Path</TabsTrigger>
                 <TabsTrigger value="tree-resources" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Tree Resources</TabsTrigger>
                 <TabsTrigger value="ledger" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Ledger</TabsTrigger>
-                <TabsTrigger value="vault" className="whitespace-nowrap text-xs md:text-sm px-3 md:px-4">Vault</TabsTrigger>
               </TabsList>
             </div>
             {/* Fullscreen toggle */}
@@ -1326,17 +1359,31 @@ const GalleryPage = () => {
             <WishingTreeUnified />
           </TabsContent>
 
-          <TabsContent value="vault" className="space-y-6">
-            {currentUserId ? (
-              <DashboardVault userId={currentUserId} />
-            ) : (
-              <div className="text-center py-12 text-muted-foreground font-serif">
-                <p>Please log in to access your Heartwood Vault</p>
+          {/* Hidden Vault Room — revealed by whistle */}
+          {vaultRevealed && (
+            <div className="mt-8 rounded-2xl border border-amber-600/30 p-6 space-y-4" style={{ background: 'linear-gradient(135deg, hsl(28 30% 12% / 0.9), hsl(22 25% 10% / 0.95))', boxShadow: '0 0 30px hsl(42 70% 40% / 0.15), inset 0 0 20px hsl(42 60% 30% / 0.08)' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Archive className="w-5 h-5 text-amber-400/80" />
+                <h2 className="text-lg font-serif text-amber-300/90 tracking-wide">Heartwood Vault</h2>
+                <span className="text-[10px] font-serif text-amber-400/40 ml-auto">Hidden Room</span>
               </div>
-            )}
-          </TabsContent>
+              {currentUserId ? (
+                <DashboardVault userId={currentUserId} />
+              ) : (
+                <p className="text-center py-8 text-muted-foreground font-serif text-sm">
+                  Please log in to access your Heartwood Vault
+                </p>
+              )}
+            </div>
+          )}
           </div>
         </Tabs>
+
+        {/* Whistle button — always visible in library */}
+        <WhistleButton
+          isRevealed={vaultRevealed}
+          onClick={() => setVaultRevealed(prev => !prev)}
+        />
       </main>
 
       <Dialog open={!!selectedTree} onOpenChange={(open) => !open && setSelectedTree(null)}>
