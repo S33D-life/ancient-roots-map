@@ -150,7 +150,7 @@ const VaultSeal = ({ onReveal, isRevealed, onHide }: { onReveal: () => void; isR
   return (
     <button
       onClick={handleClick}
-      className="shrink-0 rounded-full overflow-hidden transition-all duration-500"
+      className="shrink-0 rounded-full overflow-hidden transition-all duration-500 hover:scale-110 focus:scale-110 focus:outline-none"
       title={isRevealed ? "Close the Vault" : `Tap to explore… (${imageIndex + 1}/${VAULT_SEAL_IMAGES.length})`}
       style={{
         width: 48,
@@ -159,12 +159,23 @@ const VaultSeal = ({ onReveal, isRevealed, onHide }: { onReveal: () => void; isR
         boxShadow: glowing
           ? '0 0 16px hsl(42 70% 40% / 0.5), inset 0 0 8px hsl(42 80% 50% / 0.2)'
           : '0 2px 8px hsl(0 0% 0% / 0.3)',
+        animation: glowing ? 'vaultGlow 2s ease-in-out infinite' : undefined,
       }}
     >
+      <style>{`
+        @keyframes vaultGlow {
+          0%, 100% { box-shadow: 0 0 16px hsl(42 70% 40% / 0.5), inset 0 0 8px hsl(42 80% 50% / 0.2); }
+          50% { box-shadow: 0 0 28px hsl(42 70% 55% / 0.7), inset 0 0 14px hsl(42 80% 60% / 0.35); }
+        }
+        button:hover > img.vault-seal-img,
+        button:focus > img.vault-seal-img {
+          filter: brightness(1.2) drop-shadow(0 0 6px hsl(42 70% 50% / 0.6));
+        }
+      `}</style>
       <img
         src={VAULT_SEAL_IMAGES[imageIndex]}
         alt="Vault seal"
-        className="w-full h-full object-cover transition-opacity duration-300"
+        className="vault-seal-img w-full h-full object-cover transition-all duration-300"
       />
     </button>
   );
