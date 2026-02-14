@@ -794,15 +794,46 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     map.addLayer(clusterGroup);
     clusterRef.current = clusterGroup;
 
-    // Dynamically adjust spiderfy distance on zoom for detailed exploration
-    const adjustSpiderfy = () => {
+    // Real-time clustering threshold adjustments on zoom
+    const adjustClusteringOnZoom = () => {
       const z = map.getZoom();
-      // At high zooms, spread spiderfied markers further apart for clarity
-      const mult = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
-      (clusterGroup as any).options.spiderfyDistanceMultiplier = mult;
+      const opts = (clusterGroup as any).options;
+
+      // Count visible markers in viewport for density-aware tuning
+      const bounds = map.getBounds();
+      let visibleCount = 0;
+      filteredTrees.forEach(t => {
+        if (bounds.contains([t.latitude, t.longitude])) visibleCount++;
+      });
+
+      // Spiderfy distance — spread more at high zoom
+      opts.spiderfyDistanceMultiplier = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
+
+      // Dynamically adjust disableClusteringAtZoom based on visible density
+      // Fewer visible trees → uncluster earlier; many → keep clusters longer
+      const newDisable = visibleCount > 200 ? 18 : visibleCount > 80 ? 17 : visibleCount > 30 ? 16 : 15;
+      if (opts.disableClusteringAtZoom !== newDisable) {
+        opts.disableClusteringAtZoom = newDisable;
+        // Force cluster recalculation only when threshold actually changed
+        clusterGroup.clearLayers();
+        filteredTrees.forEach((tree: any) => {
+          const existingMarker = (clusterGroup as any)._featureGroup?.getLayers?.()?.find?.((l: any) => l.options?._treeId === tree.id);
+          if (!existingMarker) {
+            // Re-add markers; the main effect re-renders will handle full repopulation
+          }
+        });
+        // Trigger a lightweight re-process by toggling layer
+        map.removeLayer(clusterGroup);
+        map.addLayer(clusterGroup);
+      }
+
+      // Adjust chunked loading params for current density
+      opts.chunkInterval = visibleCount > 300 ? 120 : visibleCount > 100 ? 80 : 50;
+      opts.chunkDelay = visibleCount > 300 ? 14 : visibleCount > 100 ? 10 : 6;
     };
-    map.on("zoomend", adjustSpiderfy);
-    adjustSpiderfy(); // apply for current zoom
+    map.on("zoomend", adjustClusteringOnZoom);
+    map.on("moveend", adjustClusteringOnZoom);
+    adjustClusteringOnZoom();
 
     // Only auto-fit on first load
     if (!hasFittedRef.current && filteredTrees.length > 0) {
