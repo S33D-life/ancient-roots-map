@@ -71,7 +71,7 @@ export async function gatherArchiveData(userId: string): Promise<FullArchive> {
     icon,
     count: data?.length ?? 0,
     lastUpdated: getLatest(data ?? []),
-    status: data === null ? "missing" : data.length > 0 ? "synced" : "partial",
+    status: data === null ? "missing" : "synced",
     data: data ?? [],
   });
 
