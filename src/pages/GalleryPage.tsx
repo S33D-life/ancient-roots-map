@@ -217,9 +217,13 @@ const GalleryPage = () => {
   const [isOfferingDialogOpen, setIsOfferingDialogOpen] = useState(false);
   const [galleryOfferingType, setGalleryOfferingType] = useState<Database["public"]["Enums"]["offering_type"]>("photo");
   const [searchQuery, setSearchQuery] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
+  const [w3wFilter, setW3wFilter] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
   const [lineageFilter, setLineageFilter] = useState<string>("all");
   const [projectFilter, setProjectFilter] = useState<string>("all");
+  const [groveScaleFilter, setGroveScaleFilter] = useState<string>("all");
+  const [nationFilter, setNationFilter] = useState<string>("all");
   const [galleryView, setGalleryView] = useState<"collective" | "individual" | "tribe">("collective");
   const [staffFilter, setStaffFilter] = useState<string>("all");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -711,20 +715,31 @@ const GalleryPage = () => {
   const uniqueSpecies = Array.from(new Set(trees.map(t => t.species)));
   const uniqueLineages = Array.from(new Set(trees.filter(t => t.lineage).map(t => t.lineage!))).sort();
   const uniqueProjects = Array.from(new Set(trees.filter(t => t.project_name).map(t => t.project_name!))).sort();
+  const uniqueNations = Array.from(new Set(trees.filter(t => t.nation).map(t => t.nation!))).sort();
+
+  const clearAllFilters = () => {
+    setSearchQuery(""); setNameFilter(""); setW3wFilter("");
+    setSpeciesFilter("all"); setLineageFilter("all"); setProjectFilter("all");
+    setStaffFilter("all"); setGroveScaleFilter("all"); setNationFilter("all");
+  };
 
   const filteredTrees = trees.filter(tree => {
-    const matchesSearch = 
-      tree.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tree.species.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tree.what3words.toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      tree.name.toLowerCase().includes(q) ||
+      tree.species.toLowerCase().includes(q) ||
+      tree.what3words.toLowerCase().includes(q) ||
+      (tree.lineage?.toLowerCase().includes(q) ?? false);
+
+    const matchesName = !nameFilter.trim() || tree.name.toLowerCase().includes(nameFilter.toLowerCase());
+    const matchesW3w = !w3wFilter.trim() || tree.what3words.toLowerCase().includes(w3wFilter.toLowerCase().replace(/^\/+/, ""));
+
     const matchesSpecies = speciesFilter === "all" || tree.species === speciesFilter;
-
     const matchesLineage = lineageFilter === "all" || tree.lineage === lineageFilter;
-
     const matchesProject = projectFilter === "all" || tree.project_name === projectFilter;
+    const matchesGroveScale = groveScaleFilter === "all" || tree.grove_scale === groveScaleFilter;
+    const matchesNation = nationFilter === "all" || tree.nation === nationFilter;
 
-    // View filter
     let matchesView = true;
     if (galleryView === "individual") {
       matchesView = tree.created_by === currentUserId;
@@ -732,10 +747,9 @@ const GalleryPage = () => {
       matchesView = tribeUserIds.includes(tree.created_by || "");
     }
 
-    // Staff filter
     const matchesStaff = staffFilter === "all" || (treesWithStaff[tree.id]?.includes(staffFilter) ?? false);
-    
-    return matchesSearch && matchesSpecies && matchesLineage && matchesProject && matchesView && matchesStaff;
+
+    return matchesSearch && matchesName && matchesW3w && matchesSpecies && matchesLineage && matchesProject && matchesGroveScale && matchesNation && matchesView && matchesStaff;
   });
 
   // Cluster filtered trees to deduplicate nearby encounters
@@ -1032,6 +1046,10 @@ const GalleryPage = () => {
               <GalleryFilterDrawer
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
+                nameFilter={nameFilter}
+                onNameChange={setNameFilter}
+                w3wFilter={w3wFilter}
+                onW3wChange={setW3wFilter}
                 speciesFilter={speciesFilter}
                 onSpeciesChange={setSpeciesFilter}
                 lineageFilter={lineageFilter}
@@ -1040,10 +1058,16 @@ const GalleryPage = () => {
                 onProjectChange={setProjectFilter}
                 staffFilter={staffFilter}
                 onStaffChange={setStaffFilter}
+                groveScaleFilter={groveScaleFilter}
+                onGroveScaleChange={setGroveScaleFilter}
+                nationFilter={nationFilter}
+                onNationChange={setNationFilter}
                 uniqueSpecies={uniqueSpecies}
                 uniqueLineages={uniqueLineages}
                 uniqueProjects={uniqueProjects}
+                uniqueNations={uniqueNations}
                 staffCodes={staffCodes}
+                onClearAll={clearAllFilters}
               />
             </div>
           </TabsContent>
