@@ -462,10 +462,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return result;
   }, [trees, species, perspective, lineageFilter, projectFilter, userId, groveScale, mapCenter, userLatLng, ageBand, girthBand]);
 
-  /** Compute per-hive data for legend + marker coloring */
+  /** Compute per-hive data from ALL trees so the legend stays stable when filtering */
   const hiveMap = useMemo(() => {
     const m = new Map<string, { hive: HiveInfo; count: number; speciesList: string[] }>();
-    filteredTrees.forEach((t) => {
+    trees.forEach((t) => {
       const hive = getHiveForSpecies(t.species);
       if (!hive) return;
       const existing = m.get(hive.family);
@@ -477,7 +477,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
     });
     return Array.from(m.values()).sort((a, b) => b.count - a.count);
-  }, [filteredTrees]);
+  }, [trees]);
 
   // Stable references for offering counts and photos
   const offeringCountsRef = useRef(offeringCounts);
@@ -1511,28 +1511,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           <p className="text-[10px] font-serif tracking-wider mb-0.5" style={{ color: "hsl(42, 50%, 55%)" }}>
             Species Hives
           </p>
-          {hiveMap.map(({ hive, count }) => {
+          {hiveMap.map(({ hive, count, speciesList }) => {
             const hue = hslStringToHue(hive.accentHsl);
-            const isFiltered = species.length > 0 && hive.representativeSpecies.some(rs =>
+            const isFiltered = species.length > 0 && speciesList.some(rs =>
               species.some(s => s.toLowerCase() === rs.toLowerCase())
             );
             return (
               <button
                 key={hive.family}
                 onClick={() => {
-                  // Toggle: filter to this hive's species or clear
+                  // Toggle: filter to this hive's actual species or clear
                   if (isFiltered) {
                     setSpecies([]);
                   } else {
-                    const hiveSpecies = hive.representativeSpecies.filter(rs =>
-                      filteredTrees.some(t => t.species.toLowerCase() === rs.toLowerCase()) ||
-                      trees.some(t => t.species.toLowerCase() === rs.toLowerCase())
-                    );
-                    setSpecies(hiveSpecies.length > 0 ? hiveSpecies : hive.representativeSpecies);
+                    setSpecies(speciesList);
                   }
                 }}
                 className="flex items-center gap-2 transition-opacity group"
-                style={{ opacity: isFiltered ? 1 : 0.8 }}
+                style={{ opacity: isFiltered ? 1 : 0.75 }}
               >
                 <span
                   className="inline-block w-3 h-3 rounded-sm shrink-0"
@@ -1545,7 +1541,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 <span className="text-[11px] font-serif group-hover:underline" style={{ color: isFiltered ? `hsl(${hue}, 55%, 60%)` : "hsl(0, 0%, 62%)" }}>
                   {hive.icon} {hive.displayName}
                 </span>
-                <span className="text-[9px] font-sans ml-auto tabular-nums" style={{ color: "hsl(42, 40%, 45%)" }}>
+                <span className="text-[9px] font-sans ml-auto pl-2 tabular-nums" style={{ color: "hsl(42, 40%, 45%)" }}>
                   {count}
                 </span>
               </button>
