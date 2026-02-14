@@ -188,7 +188,7 @@ const LiteMapFilters = ({
   return (
     <>
       {/* ── Top bar ── */}
-      <div className="absolute top-[4.5rem] left-14 right-24 z-[1000] flex items-center gap-1.5 animate-fade-in">
+      <div className="absolute top-[4.5rem] left-14 right-14 z-[1000] flex items-center gap-1.5 overflow-x-auto animate-fade-in" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
         {/* Perspective chips */}
         {PERSPECTIVES.map((p) => (
           <motion.button
