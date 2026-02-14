@@ -51,6 +51,7 @@ const LivingArchivePage = lazy(() => import("./pages/LivingArchivePage"));
 const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
 const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
+const PilgrimagePathwaysPage = lazy(() => import("./pages/PilgrimagePathwaysPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -143,6 +144,7 @@ const App = () => {
                 <Route path="/value-tree" element={<ValueTreePage />} />
                 <Route path="/living-archive" element={<LivingArchivePage />} />
                 <Route path="/discovery" element={<DiscoveryPage />} />
+                <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

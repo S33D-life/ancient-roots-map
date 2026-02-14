@@ -26,29 +26,34 @@ interface CountryStats {
   status: "active" | "growing" | "proposed";
 }
 
-/* ─── Pilgrimage pathways ─── */
+/* ─── Pilgrimage pathways (mirrors PATHWAY_DEFS slugs) ─── */
 const PATHWAYS = [
   {
+    slug: "champion-trees",
     title: "Champion Trees of the World",
     desc: "Officially designated trees of exceptional size, age, or significance from national registers.",
     icon: TreeDeciduous,
   },
   {
+    slug: "oldest-living",
     title: "Oldest Living Trees",
     desc: "Ancient witnesses — trees estimated at hundreds or thousands of years. Precision varies by source.",
     icon: Sparkles,
   },
   {
+    slug: "sacred-cultural",
     title: "Sacred & Cultural Trees",
     desc: "Trees woven into spiritual practice, folklore, and community memory across cultures.",
     icon: Heart,
   },
   {
+    slug: "by-species",
     title: "By Species Lineage",
     desc: "Follow a single species across continents — oaks, baobabs, yews, eucalyptus, and more.",
     icon: Leaf,
   },
   {
+    slug: "verified",
     title: "Verified by Footsteps",
     desc: "Trees already visited and confirmed by wanderers. Living proof that presence matters.",
     icon: Footprints,
@@ -355,17 +360,22 @@ const WorldAtlasPage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {PATHWAYS.map(p => (
-              <Card key={p.title} className="border-primary/10 hover:border-primary/25 transition-all group cursor-default">
-                <CardContent className="p-4 flex gap-3">
-                  <div className="p-2 rounded-lg bg-primary/8 shrink-0 self-start">
-                    <p.icon className="w-4 h-4 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-serif font-medium text-foreground mb-0.5">{p.title}</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <Link key={p.slug} to={`/atlas/pathways/${p.slug}`} className="block">
+                <Card className="border-primary/10 hover:border-primary/25 transition-all group h-full">
+                  <CardContent className="p-4 flex gap-3">
+                    <div className="p-2 rounded-lg bg-primary/8 shrink-0 self-start">
+                      <p.icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-serif font-medium text-foreground mb-0.5 group-hover:text-primary transition-colors">
+                        {p.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 self-center transition-colors" />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>
