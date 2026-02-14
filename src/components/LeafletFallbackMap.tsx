@@ -674,7 +674,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       chunkedLoading: true,
       chunkInterval: treeCount > 500 ? 100 : treeCount > 200 ? 80 : 50,
       chunkDelay: treeCount > 500 ? 12 : 8,
-      spiderfyDistanceMultiplier: 1.8,
+      spiderfyDistanceMultiplier: 2.0,
       spiderLegPolylineOptions: {
         weight: 1.5,
         color: tightCluster ? "hsla(120, 50%, 45%, 0.45)" : "hsla(42, 60%, 50%, 0.4)",
@@ -775,6 +775,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     map.addLayer(clusterGroup);
     clusterRef.current = clusterGroup;
+
+    // Dynamically adjust spiderfy distance on zoom for detailed exploration
+    const adjustSpiderfy = () => {
+      const z = map.getZoom();
+      // At high zooms, spread spiderfied markers further apart for clarity
+      const mult = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
+      (clusterGroup as any).options.spiderfyDistanceMultiplier = mult;
+    };
+    map.on("zoomend", adjustSpiderfy);
+    adjustSpiderfy(); // apply for current zoom
 
     // Only auto-fit on first load
     if (!hasFittedRef.current && filteredTrees.length > 0) {
