@@ -8,7 +8,7 @@ const Footer = () => {
 
   return (
     <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm mt-16">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-3">
+      <div className="max-w-7xl mx-auto px-4 py-6 pb-20 md:pb-6 space-y-3">
         {/* Journey Pulse — only shows when logged in */}
         <div className="flex justify-center">
           <JourneyPulse />
