@@ -1614,6 +1614,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          discovery_list: string | null
           estimated_age: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
@@ -1624,6 +1625,9 @@ export type Database = {
           nation: string | null
           project_name: string | null
           project_url: string | null
+          source_id: string | null
+          source_name: string | null
+          source_url: string | null
           species: string
           state: string | null
           updated_at: string
@@ -1634,6 +1638,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          discovery_list?: string | null
           estimated_age?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
@@ -1644,6 +1649,9 @@ export type Database = {
           nation?: string | null
           project_name?: string | null
           project_url?: string | null
+          source_id?: string | null
+          source_name?: string | null
+          source_url?: string | null
           species: string
           state?: string | null
           updated_at?: string
@@ -1654,6 +1662,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          discovery_list?: string | null
           estimated_age?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
@@ -1664,6 +1673,9 @@ export type Database = {
           nation?: string | null
           project_name?: string | null
           project_url?: string | null
+          source_id?: string | null
+          source_name?: string | null
+          source_url?: string | null
           species?: string
           state?: string | null
           updated_at?: string
