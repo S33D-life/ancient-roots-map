@@ -393,20 +393,40 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       const coords = treeCoordMap[treeId];
       if (!coords) return;
 
+      const safeCount = Number(count) || 0;
       const el = document.createElement('div');
       el.className = 'seed-heart-marker';
-      el.innerHTML = `<span class="seed-heart-icon">💚</span>${count > 1 ? `<span class="seed-heart-count">${count}</span>` : ''}`;
-      el.title = `${count} bloomed heart${count !== 1 ? 's' : ''} ready to collect!`;
+      const icon = document.createElement('span');
+      icon.className = 'seed-heart-icon';
+      icon.textContent = '💚';
+      el.appendChild(icon);
+      if (safeCount > 1) {
+        const badge = document.createElement('span');
+        badge.className = 'seed-heart-count';
+        badge.textContent = String(safeCount);
+        el.appendChild(badge);
+      }
+      el.title = `${safeCount} bloomed heart${safeCount !== 1 ? 's' : ''} ready to collect!`;
+
+      const popupDiv = document.createElement('div');
+      popupDiv.style.cssText = 'padding: 12px; font-family: "Cinzel", serif; min-width: 180px; text-align: center;';
+      const pEmoji = document.createElement('p');
+      pEmoji.style.cssText = 'margin: 0; font-size: 20px;';
+      pEmoji.textContent = '💚';
+      const pCount = document.createElement('p');
+      pCount.style.cssText = 'margin: 6px 0 2px; font-size: 14px; color: hsl(120, 50%, 60%); font-weight: 700;';
+      pCount.textContent = `${safeCount} Bloomed Heart${safeCount !== 1 ? 's' : ''}`;
+      const pHint = document.createElement('p');
+      pHint.style.cssText = 'margin: 0 0 8px; font-size: 11px; color: hsl(42, 50%, 55%);';
+      pHint.textContent = 'Ready to collect — visit this tree!';
+      const link = document.createElement('a');
+      link.href = `/tree/${encodeURIComponent(treeId)}`;
+      link.style.cssText = 'display: block; padding: 8px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(120, 50%, 45%), hsl(80, 60%, 50%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.06em; font-weight: 600;';
+      link.textContent = 'Collect Hearts ⟶';
+      popupDiv.append(pEmoji, pCount, pHint, link);
 
       const popup = new maplibregl.Popup({ offset: 20, closeButton: true, className: 'tree-popup' })
-        .setHTML(`
-          <div style="padding: 12px; font-family: 'Cinzel', serif; min-width: 180px; text-align: center;">
-            <p style="margin: 0; font-size: 20px;">💚</p>
-            <p style="margin: 6px 0 2px; font-size: 14px; color: hsl(120, 50%, 60%); font-weight: 700;">${count} Bloomed Heart${count !== 1 ? 's' : ''}</p>
-            <p style="margin: 0 0 8px; font-size: 11px; color: hsl(42, 50%, 55%);">Ready to collect — visit this tree!</p>
-            <a href="/tree/${encodeURIComponent(treeId)}" style="display: block; padding: 8px 0; text-align: center; font-size: 12px; color: hsl(80, 20%, 8%); background: linear-gradient(135deg, hsl(120, 50%, 45%), hsl(80, 60%, 50%)); border-radius: 6px; text-decoration: none; letter-spacing: 0.06em; font-weight: 600;">Collect Hearts ⟶</a>
-          </div>
-        `);
+        .setDOMContent(popupDiv);
 
       const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([coords.lng, coords.lat])
