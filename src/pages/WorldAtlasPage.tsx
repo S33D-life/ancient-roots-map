@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
+import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 
 /* ─── Types ─── */
 interface CountryStats {
@@ -24,17 +25,6 @@ interface CountryStats {
   sourceCount: number;
   status: "active" | "growing" | "proposed";
 }
-
-/* ─── Country registry — add entries here as portals bloom ─── */
-const COUNTRY_REGISTRY: Record<string, { flag: string; descriptor: string; slug: string }> = {
-  "South Africa": { flag: "🇿🇦", descriptor: "Champion Trees Programme", slug: "south-africa" },
-  "United Kingdom": { flag: "🇬🇧", descriptor: "Ancient & Heritage Trees", slug: "united-kingdom" },
-  "Ireland": { flag: "🇮🇪", descriptor: "Heritage Tree Register", slug: "ireland" },
-  "Australia": { flag: "🇦🇺", descriptor: "Significant Trees", slug: "australia" },
-  "New Zealand": { flag: "🇳🇿", descriptor: "Notable Trees", slug: "new-zealand" },
-  "Japan": { flag: "🇯🇵", descriptor: "Natural Monuments", slug: "japan" },
-  "India": { flag: "🇮🇳", descriptor: "Heritage Trees", slug: "india" },
-};
 
 /* ─── Pilgrimage pathways ─── */
 const PATHWAYS = [
@@ -196,7 +186,7 @@ const WorldAtlasPage = () => {
 
       // Active countries (have data)
       countryMap.forEach((val, country) => {
-        const reg = COUNTRY_REGISTRY[country];
+        const reg = getEntryByCountry(country);
         stats.push({
           country,
           slug: reg?.slug || country.toLowerCase().replace(/\s+/g, "-"),
@@ -210,10 +200,10 @@ const WorldAtlasPage = () => {
       });
 
       // Proposed countries (in registry but no data yet)
-      Object.entries(COUNTRY_REGISTRY).forEach(([country, reg]) => {
-        if (!countryMap.has(country)) {
+      COUNTRY_REGISTRY.forEach((reg) => {
+        if (!countryMap.has(reg.country)) {
           stats.push({
-            country,
+            country: reg.country,
             slug: reg.slug,
             flag: reg.flag,
             descriptor: reg.descriptor,
