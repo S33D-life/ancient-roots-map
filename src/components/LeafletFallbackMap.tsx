@@ -6,6 +6,13 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { escapeHtml } from "@/utils/escapeHtml";
 import {
+  fetchLandscapePOIs,
+  GUARDIAN_TAGS,
+  getNearbyLandscapeContext,
+  type LandscapePOI,
+  type LandscapeCategory,
+} from "@/utils/watersAndCommons";
+import {
   fetchAllSourceTrees,
   getEnabledSources,
   getSourceById,
@@ -400,6 +407,11 @@ const LITE_CSS = `
 @keyframes focusHalo{0%{transform:scale(0.5);opacity:0}30%{opacity:0.7}100%{transform:scale(2.8);opacity:0}}
 .tree-focus-halo{position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:hsla(42,90%,55%,0.35);pointer-events:none;animation:focusHalo 2.5s ease-out forwards}
 .tree-focus-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:'Cinzel',serif;font-size:12px;color:hsl(45,80%,60%);text-shadow:0 1px 4px rgba(0,0,0,0.8);padding:3px 10px;background:hsla(30,20%,10%,0.85);border:1px solid hsla(42,50%,40%,0.4);border-radius:6px;pointer-events:none;animation:popIn .3s ease-out;margin-bottom:6px}
+.wc-poi-marker{background:transparent!important;border:none!important}
+.wc-dot{transition:transform .15s ease-out,opacity .15s}
+.wc-dot:hover{transform:scale(1.4)!important;opacity:1!important}
+@keyframes wcGlow{0%,100%{opacity:0.5}50%{opacity:0.8}}
+.wc-waterway{animation:wcGlow 4s ease-in-out infinite}
 `;
 
 const btnBase: React.CSSProperties = {
@@ -466,6 +478,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showSeedTraces, setShowSeedTraces] = useState(false);
   const [showSharedTrees, setShowSharedTrees] = useState(false);
   const [showTribeActivity, setShowTribeActivity] = useState(false);
+
+  // Waters & Commons pilgrimage lens
+  const [showWatersCommons, setShowWatersCommons] = useState(false);
+  const [watersCommonsCollapsed, setWatersCommonsCollapsed] = useState(true);
+  const watersCommonsLayerRef = useRef<L.LayerGroup | null>(null);
+  const watersCommonsAbortRef = useRef<AbortController | null>(null);
+  const [watersCommonsCount, setWatersCommonsCount] = useState(0);
+  const [watersCommonsLoading, setWatersCommonsLoading] = useState(false);
+  const [watersCommonsPois, setWatersCommonsPois] = useState<LandscapePOI[]>([]);
+  const [watersCommonsWhisper, setWatersCommonsWhisper] = useState<string | null>(null);
 
   // hiveMap moved after filteredTrees declaration
 
@@ -1680,6 +1702,139 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [showResearchLayer]);
 
+  // ── Waters & Commons pilgrimage lens layer ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (watersCommonsLayerRef.current) {
+      map.removeLayer(watersCommonsLayerRef.current);
+      watersCommonsLayerRef.current = null;
+    }
+
+    if (!showWatersCommons) {
+      setWatersCommonsCount(0);
+      setWatersCommonsPois([]);
+      return;
+    }
+
+    const wcLayer = L.layerGroup();
+    wcLayer.addTo(map);
+    watersCommonsLayerRef.current = wcLayer;
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+
+    const loadPOIs = async () => {
+      if (watersCommonsAbortRef.current) watersCommonsAbortRef.current.abort();
+      const ac = new AbortController();
+      watersCommonsAbortRef.current = ac;
+
+      const zoom = map.getZoom();
+      if (zoom < 10) {
+        setWatersCommonsCount(-1);
+        wcLayer.clearLayers();
+        setWatersCommonsLoading(false);
+        return;
+      }
+
+      setWatersCommonsLoading(true);
+      const bounds = map.getBounds();
+      const pois = await fetchLandscapePOIs(
+        bounds.getSouth(), bounds.getWest(),
+        bounds.getNorth(), bounds.getEast(),
+        ac.signal
+      );
+
+      if (ac.signal.aborted) return;
+      setWatersCommonsLoading(false);
+      setWatersCommonsCount(pois.length);
+      setWatersCommonsPois(pois);
+      wcLayer.clearLayers();
+
+      pois.forEach((poi) => {
+        const meta = GUARDIAN_TAGS[poi.category];
+        const sz = poi.category === "waterway" ? 10 : 14;
+        const half = sz / 2;
+
+        const icon = L.divIcon({
+          className: "wc-poi-marker",
+          html: `<div class="wc-dot wc-${poi.category}" style="width:${sz}px;height:${sz}px;border-radius:50%;background:${meta.color};border:2px solid ${meta.color};opacity:0.7;box-shadow:0 0 8px ${meta.glowColor};cursor:pointer;transition:transform .15s;" title="${escapeHtml(poi.name || meta.tag)}"></div>`,
+          iconSize: [sz, sz],
+          iconAnchor: [half, half],
+        });
+
+        const nameStr = poi.name ? escapeHtml(poi.name) : meta.tag;
+        const subtypeStr = poi.subtype ? escapeHtml(poi.subtype) : "";
+        const popupHtml = `<div style="padding:12px 14px;font-family:'Cinzel',serif;width:220px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid ${meta.color}44;overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:18px;">${meta.icon}</span>
+            <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:${meta.color}22;color:${meta.color};border:1px solid ${meta.color}44;font-family:sans-serif;">${meta.tag}</span>
+          </div>
+          <h3 style="margin:0;font-size:14px;color:${meta.color};line-height:1.3;font-weight:700;">${nameStr}</h3>
+          ${subtypeStr ? `<p style="margin:2px 0 0;font-size:10px;color:hsl(0,0%,55%);font-style:italic;">${subtypeStr}</p>` : ""}
+          <p style="margin:8px 0 0;font-size:11px;color:hsl(42,40%,55%);font-family:sans-serif;line-height:1.5;font-style:italic;">${escapeHtml(meta.whisper)}</p>
+        </div>`;
+
+        L.marker([poi.lat, poi.lng], { icon })
+          .bindPopup(popupHtml, {
+            className: "atlas-leaflet-popup",
+            closeButton: true,
+            maxWidth: 240,
+            offset: L.point(0, -4),
+          })
+          .addTo(wcLayer);
+      });
+
+      // Draw soft proximity circles around nearby trees
+      filteredTrees.forEach((tree) => {
+        const context = getNearbyLandscapeContext(tree.latitude, tree.longitude, pois);
+        if (context) {
+          const meta = GUARDIAN_TAGS[context.category];
+          L.circleMarker([tree.latitude, tree.longitude], {
+            radius: 18,
+            color: meta.color,
+            fillColor: meta.glowColor,
+            fillOpacity: 0.25,
+            weight: 1.5,
+            opacity: 0.5,
+            interactive: false,
+          }).addTo(wcLayer);
+        }
+      });
+    };
+
+    const onMoveEnd = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadPOIs, 1200);
+    };
+
+    map.on("moveend", onMoveEnd);
+    loadPOIs();
+
+    return () => {
+      clearTimeout(debounceTimer);
+      map.off("moveend", onMoveEnd);
+      if (watersCommonsAbortRef.current) watersCommonsAbortRef.current.abort();
+      if (map.hasLayer(wcLayer)) map.removeLayer(wcLayer);
+    };
+  }, [showWatersCommons, filteredTrees]);
+
+  // Show contextual whisper when adding a tree near a W&C landmark
+  useEffect(() => {
+    if (!showWatersCommons || !addTreeCoords || watersCommonsPois.length === 0) {
+      setWatersCommonsWhisper(null);
+      return;
+    }
+    const context = getNearbyLandscapeContext(
+      addTreeCoords.lat, addTreeCoords.lng, watersCommonsPois
+    );
+    if (context) {
+      setWatersCommonsWhisper(GUARDIAN_TAGS[context.category].whisper);
+    } else {
+      setWatersCommonsWhisper(null);
+    }
+  }, [addTreeCoords, watersCommonsPois, showWatersCommons]);
+
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
@@ -2046,6 +2201,73 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               )}
             </div>
 
+            {/* ── 3b. Pilgrimage Lenses (collapsed by default) ── */}
+            <div className="border-b" style={{ borderColor: "hsla(200, 40%, 30%, 0.2)" }}>
+              <button
+                onClick={() => setWatersCommonsCollapsed(!watersCommonsCollapsed)}
+                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
+                style={{ color: "hsl(200, 50%, 58%)" }}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-base">🌊</span>
+                  <span className="text-[13px] font-serif font-medium">Pilgrimage Lenses</span>
+                </span>
+                <span className="text-[10px] transition-transform" style={{ transform: watersCommonsCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
+              </button>
+
+              {!watersCommonsCollapsed && (
+                <div className="px-3 pb-3 space-y-1">
+                  <p className="text-[10px] font-sans px-2 pb-1.5 leading-relaxed" style={{ color: "hsla(200, 30%, 55%, 0.7)" }}>
+                    Where trees, water, and people have long met.
+                  </p>
+                  <button
+                    onClick={() => setShowWatersCommons(!showWatersCommons)}
+                    className="w-full flex items-center gap-2.5 px-2 py-2.5 rounded-md text-left transition-colors"
+                    style={{ color: showWatersCommons ? "hsl(200, 60%, 65%)" : "hsl(42, 40%, 45%)" }}
+                  >
+                    <div
+                      className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0"
+                      style={{
+                        borderColor: showWatersCommons ? "hsl(200, 55%, 55%)" : "hsla(42, 40%, 30%, 0.5)",
+                        background: showWatersCommons ? "hsla(200, 55%, 50%, 0.2)" : "transparent",
+                      }}
+                    >
+                      {showWatersCommons && <span className="text-[9px]">✓</span>}
+                    </div>
+                    <span className="text-[12px] font-serif">🌊 Waters & Commons</span>
+                    <span className="text-[9px] font-sans ml-auto" style={{ color: "hsl(200, 50%, 55%)" }}>
+                      {showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK"}
+                    </span>
+                  </button>
+
+                  {showWatersCommons && (
+                    <div className="pl-7 pt-1 space-y-1">
+                      {(["waterway", "churchyard", "parkland", "commons"] as const).map((cat) => {
+                        const meta = GUARDIAN_TAGS[cat];
+                        const count = watersCommonsPois.filter(p => p.category === cat).length;
+                        return (
+                          <div
+                            key={cat}
+                            className="flex items-center gap-2 px-1 py-1 text-[10px] font-sans"
+                            style={{ color: count > 0 ? meta.color : "hsl(42, 30%, 40%)" }}
+                          >
+                            <span
+                              className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ background: meta.color, opacity: count > 0 ? 0.8 : 0.3 }}
+                            />
+                            <span>{meta.icon} {meta.tag}</span>
+                            {count > 0 && (
+                              <span className="ml-auto tabular-nums">{count}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* ── 4. Wanderer Activity (collapsed & off by default) ── */}
             <div className="border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
               <button
@@ -2170,6 +2392,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           <Compass className="w-[18px] h-[18px]" />
         </button>
       </div>
+
+      {/* Waters & Commons contextual whisper */}
+      {watersCommonsWhisper && addDialogOpen && (
+        <div
+          className="absolute top-20 left-1/2 -translate-x-1/2 z-[1010] px-4 py-2.5 rounded-xl font-serif text-[12px] max-w-[300px] text-center animate-fade-in"
+          style={{
+            background: "hsla(200, 25%, 12%, 0.92)",
+            color: "hsl(200, 55%, 70%)",
+            border: "1px solid hsla(200, 45%, 40%, 0.3)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+          }}
+        >
+          <span className="text-base mr-1">🌊</span>
+          <span className="italic">{watersCommonsWhisper}</span>
+        </div>
+      )}
 
       {/* Add Tree Dialog */}
       <AddTreeDialog
