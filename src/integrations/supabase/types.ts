@@ -1616,6 +1616,7 @@ export type Database = {
           description: string | null
           discovery_list: string | null
           estimated_age: number | null
+          girth_cm: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
           latitude: number | null
@@ -1640,6 +1641,7 @@ export type Database = {
           description?: string | null
           discovery_list?: string | null
           estimated_age?: number | null
+          girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
           latitude?: number | null
@@ -1664,6 +1666,7 @@ export type Database = {
           description?: string | null
           discovery_list?: string | null
           estimated_age?: number | null
+          girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
           latitude?: number | null
