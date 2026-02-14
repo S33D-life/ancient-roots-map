@@ -1586,9 +1586,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             maxHeight: "45vh",
           }}
         >
-          <p className="text-[10px] font-serif tracking-wider mb-0.5" style={{ color: "hsl(42, 50%, 55%)" }}>
-            Species Hives
-          </p>
+          <div className="flex items-center justify-between mb-0.5">
+            <p className="text-[10px] font-serif tracking-wider" style={{ color: "hsl(42, 50%, 55%)" }}>
+              Species Hives
+            </p>
+            <button
+              onClick={() => setShowHiveLayer(false)}
+              className="w-5 h-5 flex items-center justify-center rounded-full transition-colors hover:bg-white/10"
+              style={{ color: "hsl(42, 50%, 55%)" }}
+              aria-label="Close hive legend"
+            >
+              ✕
+            </button>
+          </div>
           {hiveMap.map(({ hive, count, speciesList }) => {
             const hue = hslStringToHue(hive.accentHsl);
             const isFiltered = species.length > 0 && speciesList.some(rs =>
