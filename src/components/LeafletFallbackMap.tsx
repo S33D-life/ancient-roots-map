@@ -804,8 +804,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     const applyClusteringUpdate = (z: number, visibleCount: number, densityBand: number) => {
       const opts = (clusterGroup as any).options;
 
-      // Spiderfy distance — spread more at high zoom for stable spacing
-      opts.spiderfyDistanceMultiplier = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
+      // Spiderfy distance — ramp with zoom but cap at 2.8 to prevent extreme spread
+      const MAX_SPIDERFY = 2.8;
+      const rawSpiderfy = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
+      opts.spiderfyDistanceMultiplier = Math.min(rawSpiderfy, MAX_SPIDERFY);
 
       // Density-aware uncluster threshold
       const newDisable = densityBand >= 4 ? 18 : densityBand >= 3 ? 17 : densityBand >= 2 ? 16 : 15;
