@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
+import ContextualWhisper from "@/components/ContextualWhisper";
 import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 
 /* ─── Types ─── */
@@ -467,6 +468,14 @@ const WorldAtlasPage = () => {
           </Card>
         </section>
 
+        {/* Whisper: search hint */}
+        <ContextualWhisper
+          id="atlas-search-hint"
+          message="Use the search bar above to find any country, pathway, or tree by name."
+          delay={4000}
+          position="top-center"
+        />
+
         {/* ─── C + D) Country Gateways ─── */}
         <section id="country-gateways" className="px-4 max-w-3xl mx-auto mb-12">
           <div className="flex items-center justify-between mb-4">
@@ -502,6 +511,14 @@ const WorldAtlasPage = () => {
           )}
         </section>
 
+        {/* Whisper: country chapter hint */}
+        <ContextualWhisper
+          id="atlas-country-hint"
+          message="Each country is a chapter. Tap one to explore its trees, sources, and stories."
+          delay={10000}
+          position="bottom-center"
+        />
+
         {/* ─── E) Pilgrimage Pathways ─── */}
         <section className="px-4 max-w-3xl mx-auto mb-12">
           <h2 className="text-lg font-serif font-bold text-foreground mb-1">
@@ -532,6 +549,14 @@ const WorldAtlasPage = () => {
             ))}
           </div>
         </section>
+
+        {/* Whisper: pathways hint */}
+        <ContextualWhisper
+          id="atlas-pathways-hint"
+          message="Pathways cross borders — follow champion trees, sacred groves, or a single species across the world."
+          delay={18000}
+          position="bottom-left"
+        />
 
         {/* ─── F) How a Country Blooms ─── */}
         <section id="how-it-grows" className="px-4 max-w-2xl mx-auto mb-12">
