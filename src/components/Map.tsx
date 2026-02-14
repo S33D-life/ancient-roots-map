@@ -90,9 +90,10 @@ interface MapProps {
   initialLat?: number;
   initialLng?: number;
   initialZoom?: number;
+  initialTreeId?: string;
 }
 
-const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom }: MapProps) => {
+const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom, initialTreeId }: MapProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const autoAddTree = searchParams.get("addTree") === "true";
@@ -696,7 +697,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} />
         </Suspense>
       </div>
     );

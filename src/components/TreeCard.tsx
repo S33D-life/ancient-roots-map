@@ -57,9 +57,9 @@ const TreeCard = ({
   const handleMapNav = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (tree.latitude && tree.longitude) {
-      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16`);
+      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16&treeId=${tree.id}`);
     } else if (tree.what3words) {
-      navigate(`/map?w3w=${tree.what3words}`);
+      navigate(`/map?w3w=${tree.what3words}&treeId=${tree.id}`);
     }
   };
 
