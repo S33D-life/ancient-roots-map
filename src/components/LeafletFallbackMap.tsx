@@ -13,7 +13,7 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
-import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES } from "./LiteMapFilters";
+import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES, AGE_BANDS, GIRTH_BANDS, type AgeBand, type GirthBand } from "./LiteMapFilters";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 
@@ -344,11 +344,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   // Filter state
-  const [species, setSpecies] = useState("all");
+  const [species, setSpecies] = useState<string[]>([]);
   const [perspective, setPerspective] = useState<LitePerspective>("collective");
   const [lineageFilter, setLineageFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
+  const [ageBand, setAgeBand] = useState<AgeBand>("all");
+  const [girthBand, setGirthBand] = useState<GirthBand>("all");
 
   // Layer visibility toggles
   const [showSeeds, setShowSeeds] = useState(true);
@@ -403,14 +405,38 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     if (perspective === "personal" && userId) {
       result = result.filter((t) => t.created_by === userId);
     }
-    if (species !== "all") {
-      result = result.filter((t) => t.species.toLowerCase() === species.toLowerCase());
+    // Multi-select species filter
+    if (species.length > 0) {
+      const lowerSpecies = species.map(s => s.toLowerCase());
+      result = result.filter((t) => lowerSpecies.includes(t.species.toLowerCase()));
     }
     if (lineageFilter !== "all") {
       result = result.filter((t: any) => t.lineage === lineageFilter);
     }
     if (projectFilter !== "all") {
       result = result.filter((t: any) => t.project_name === projectFilter);
+    }
+    // Age band filter — trees with unknown age remain visible unless a band is selected
+    if (ageBand !== "all") {
+      const band = AGE_BANDS.find(b => b.key === ageBand);
+      if (band) {
+        result = result.filter((t) => {
+          const age = (t as any).estimated_age;
+          if (age == null) return true;
+          return age >= band.min && age <= band.max;
+        });
+      }
+    }
+    // Girth band filter — trees with unknown girth remain visible
+    if (girthBand !== "all") {
+      const band = GIRTH_BANDS.find(b => b.key === girthBand);
+      if (band) {
+        result = result.filter((t) => {
+          const girth = (t as any).girth_cm;
+          if (girth == null) return true;
+          return girth >= band.minCm && girth <= band.maxCm;
+        });
+      }
     }
     // Grove scale distance filter — uses map center (or user location as fallback)
     if (groveScale !== "all") {
@@ -424,7 +450,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
     }
     return result;
-  }, [trees, species, perspective, lineageFilter, projectFilter, userId, groveScale, mapCenter, userLatLng]);
+  }, [trees, species, perspective, lineageFilter, projectFilter, userId, groveScale, mapCenter, userLatLng, ageBand, girthBand]);
 
   // Stable references for offering counts and photos
   const offeringCountsRef = useRef(offeringCounts);
@@ -1262,6 +1288,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         availableProjects={availableProjects}
         groveScale={groveScale}
         onGroveScaleChange={setGroveScale}
+        ageBand={ageBand}
+        onAgeBandChange={setAgeBand}
+        girthBand={girthBand}
+        onGirthBandChange={setGirthBand}
       />
 
       {/* Discovery cue */}
@@ -1292,7 +1322,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             No trees match this view.
             <br />
             <button
-              onClick={() => { setSpecies("all"); setPerspective("collective"); }}
+              onClick={() => { setSpecies([]); setPerspective("collective"); }}
               className="underline mt-1 inline-block transition-colors"
               style={{ color: "hsl(42, 80%, 60%)" }}
             >
