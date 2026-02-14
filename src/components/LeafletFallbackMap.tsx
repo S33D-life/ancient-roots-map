@@ -572,9 +572,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    // Use higher zoom on tall/mobile viewports so tiles fill the screen
+    const isTall = window.innerHeight > window.innerWidth;
+    const defaultZoom = isTall ? 3 : 2;
+
     const map = L.map(containerRef.current, {
-      center: [30, 0],
-      zoom: 2,
+      center: [25, 10],
+      zoom: defaultZoom,
+      minZoom: isTall ? 3 : 2,
+      maxBounds: [[-85, -200], [85, 200]],
+      maxBoundsViscosity: 0.8,
       attributionControl: false,
       zoomControl: false,
       preferCanvas: true,
@@ -605,7 +612,14 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
     mapRef.current = map;
+    // Robust invalidateSize — ensure container is fully laid out before sizing
     requestAnimationFrame(() => map.invalidateSize());
+    setTimeout(() => map.invalidateSize(), 100);
+    setTimeout(() => map.invalidateSize(), 500);
+    // Also re-invalidate on window resize
+    const onResize = () => map.invalidateSize();
+    window.addEventListener('resize', onResize);
+    const originalCleanup = () => window.removeEventListener('resize', onResize);
 
     // Deep-link: fly to coordinates or w3w if provided
     let deepLinked = false;
@@ -638,6 +652,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
 
     return () => {
+      originalCleanup();
       map.remove();
       mapRef.current = null;
       clusterRef.current = null;
