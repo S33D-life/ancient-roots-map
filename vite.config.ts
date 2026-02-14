@@ -56,7 +56,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ["maplibre-gl"],
+    include: ["maplibre-gl", "leaflet", "react", "react-dom", "react-router-dom"],
     esbuildOptions: {
       target: "es2022",
     },
