@@ -1,0 +1,143 @@
+/**
+ * Canopy Check-In — automatic proximity-based recognition.
+ * 
+ * Watches the user's geolocation and triggers a silent check-in
+ * when they enter the canopy radius (~40m) of a tree they created
+ * that has an NFTree offering. Enforces a 12-hour cooldown per tree.
+ */
+import { useState, useEffect, useRef, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { haversineKm } from "@/utils/mapGeometry";
+import { issueRewards, type RewardResult } from "@/utils/issueRewards";
+
+const CANOPY_RADIUS_KM = 0.04; // ~40 metres
+const COOLDOWN_MS = 12 * 60 * 60 * 1000; // 12 hours
+const WATCH_INTERVAL_MS = 15_000; // poll every 15s
+const MIN_ACCURACY_M = 80; // ignore inaccurate readings
+
+interface CanopyTree {
+  id: string;
+  name: string;
+  species: string;
+  latitude: number;
+  longitude: number;
+}
+
+interface CanopyEvent {
+  tree: CanopyTree;
+  reward: RewardResult | null;
+  timestamp: number;
+}
+
+export function useCanopyCheckIn() {
+  const [lastEvent, setLastEvent] = useState<CanopyEvent | null>(null);
+  const [active, setActive] = useState(false);
+  const cooldownMapRef = useRef<Map<string, number>>(new Map());
+  const treesRef = useRef<CanopyTree[]>([]);
+  const watchIdRef = useRef<number | null>(null);
+  const userIdRef = useRef<string | null>(null);
+
+  // Load user's trees that qualify for canopy check-in
+  const loadTrees = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    userIdRef.current = session.user.id;
+
+    // Trees the user created that have coordinates
+    const { data } = await supabase
+      .from("trees")
+      .select("id, name, species, latitude, longitude")
+      .eq("created_by", session.user.id)
+      .not("latitude", "is", null)
+      .not("longitude", "is", null);
+
+    if (data) {
+      treesRef.current = data.filter(
+        (t) => t.latitude != null && t.longitude != null
+      ) as CanopyTree[];
+    }
+  }, []);
+
+  const handlePosition = useCallback(async (pos: GeolocationPosition) => {
+    if (pos.coords.accuracy > MIN_ACCURACY_M) return;
+    if (!userIdRef.current || treesRef.current.length === 0) return;
+
+    const { latitude, longitude } = pos.coords;
+    const now = Date.now();
+
+    for (const tree of treesRef.current) {
+      const dist = haversineKm(latitude, longitude, tree.latitude, tree.longitude);
+      if (dist > CANOPY_RADIUS_KM) continue;
+
+      // Check cooldown
+      const lastCheckin = cooldownMapRef.current.get(tree.id) || 0;
+      if (now - lastCheckin < COOLDOWN_MS) continue;
+
+      // Issue rewards silently
+      const reward = await issueRewards({
+        userId: userIdRef.current,
+        treeId: tree.id,
+        treeSpecies: tree.species,
+        actionType: "checkin",
+      });
+
+      if (reward && !reward.capped) {
+        cooldownMapRef.current.set(tree.id, now);
+        setLastEvent({ tree, reward, timestamp: now });
+      }
+    }
+  }, []);
+
+  const start = useCallback(() => {
+    if (!("geolocation" in navigator)) return;
+
+    loadTrees();
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      handlePosition,
+      () => {}, // silent fail
+      {
+        enableHighAccuracy: true,
+        maximumAge: WATCH_INTERVAL_MS,
+        timeout: 30_000,
+      }
+    );
+    setActive(true);
+  }, [loadTrees, handlePosition]);
+
+  const stop = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    setActive(false);
+  }, []);
+
+  // Auto-start when user is authenticated
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session) {
+          start();
+        } else {
+          stop();
+        }
+      }
+    );
+
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) start();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      stop();
+    };
+  }, [start, stop]);
+
+  // Clear the event after display
+  const dismissEvent = useCallback(() => setLastEvent(null), []);
+
+  return { lastEvent, dismissEvent, active };
+}

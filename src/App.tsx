@@ -20,6 +20,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 
 // Lazy-load all route pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -105,6 +106,7 @@ const App = () => {
         <DevQAPanel />
         {/* <ChatPanel /> */}
         
+        <CanopyHeartPulse />
         <BrowserRouter>
           <TetolLevelProvider>
             <BottomNav />
