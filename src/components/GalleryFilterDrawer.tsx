@@ -127,40 +127,51 @@ const GalleryFilterDrawer = ({
               />
             </motion.div>
 
-            {/* Mobile: slide up from bottom */}
+            {/* Mobile: slide up from bottom with swipe-to-close */}
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 260 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_e, info) => {
+                if (info.offset.y > 80 || info.velocity.y > 300) {
+                  setOpen(false);
+                }
+              }}
               className="fixed left-0 right-0 bottom-0 z-[95] max-h-[80vh] md:hidden flex flex-col rounded-t-2xl"
               style={{
                 background: "linear-gradient(180deg, hsl(28 20% 10%), hsl(22 18% 8%))",
                 borderTop: "1px solid hsla(42, 40%, 30%, 0.3)",
                 boxShadow: "0 -8px 32px hsla(0, 0%, 0%, 0.4)",
+                touchAction: "none",
               }}
             >
               {/* Drag handle */}
-              <div className="flex justify-center pt-3 pb-1">
+              <div className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
                 <div className="w-10 h-1 rounded-full" style={{ background: "hsla(42, 30%, 40%, 0.4)" }} />
               </div>
-              <DrawerContent
-                onClose={() => setOpen(false)}
-                searchQuery={searchQuery}
-                onSearchChange={onSearchChange}
-                speciesFilter={speciesFilter}
-                onSpeciesChange={onSpeciesChange}
-                lineageFilter={lineageFilter}
-                onLineageChange={onLineageChange}
-                projectFilter={projectFilter}
-                onProjectChange={onProjectChange}
-                staffFilter={staffFilter}
-                onStaffChange={onStaffChange}
-                uniqueSpecies={uniqueSpecies}
-                uniqueLineages={uniqueLineages}
-                uniqueProjects={uniqueProjects}
-                staffCodes={staffCodes}
-              />
+              <div className="overflow-y-auto flex-1" style={{ touchAction: "pan-y" }}>
+                <DrawerContent
+                  onClose={() => setOpen(false)}
+                  searchQuery={searchQuery}
+                  onSearchChange={onSearchChange}
+                  speciesFilter={speciesFilter}
+                  onSpeciesChange={onSpeciesChange}
+                  lineageFilter={lineageFilter}
+                  onLineageChange={onLineageChange}
+                  projectFilter={projectFilter}
+                  onProjectChange={onProjectChange}
+                  staffFilter={staffFilter}
+                  onStaffChange={onStaffChange}
+                  uniqueSpecies={uniqueSpecies}
+                  uniqueLineages={uniqueLineages}
+                  uniqueProjects={uniqueProjects}
+                  staffCodes={staffCodes}
+                />
+              </div>
             </motion.div>
           </>
         )}
