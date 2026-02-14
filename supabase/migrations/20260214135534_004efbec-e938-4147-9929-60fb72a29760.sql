@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "System can update heart transactions" ON public.heart_transactions;
