@@ -25,10 +25,10 @@ import BirdsongTab from "@/components/BirdsongTab";
 import EncounterClusterPanel from "@/components/EncounterClusterPanel";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
+import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
+import type { OfferingType, Offering } from "@/hooks/use-offerings";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
-type Offering = Database["public"]["Tables"]["offerings"]["Row"];
-type OfferingType = Database["public"]["Enums"]["offering_type"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
   photo: <Camera className="h-4 w-4" />,
@@ -40,22 +40,11 @@ const offeringIcons: Record<OfferingType, React.ReactNode> = {
   book: <BookOpen className="h-4 w-4" />,
 };
 
-const offeringLabels: Record<OfferingType, string> = {
-  photo: "Memories",
-  song: "Songs",
-  poem: "Poems",
-  story: "Musings",
-  nft: "NFTs",
-  voice: "Voices",
-  book: "Books",
-};
-
 const TreeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tree, setTree] = useState<Tree | null>(null);
-  const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<OfferingType>("photo");
@@ -70,6 +59,9 @@ const TreeDetailPage = () => {
   const [birdsongOpen, setBirdsongOpen] = useState(false);
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
+
+  // Centralized offerings via shared hook (with realtime)
+  const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType } = useOfferings({ treeId: id, realtime: true });
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -102,16 +94,6 @@ const TreeDetailPage = () => {
       else setTree(data);
     };
 
-    const fetchOfferings = async () => {
-      const { data, error } = await supabase
-        .from("offerings")
-        .select("*")
-        .eq("tree_id", id)
-        .order("created_at", { ascending: false });
-      if (error) console.error("Error fetching offerings:", error);
-      else setOfferings(data || []);
-    };
-
     const fetchMeetings = async () => {
       const { data, error } = await supabase
         .from("meetings")
@@ -129,20 +111,7 @@ const TreeDetailPage = () => {
       setBirdsongCount(count || 0);
     };
 
-    Promise.all([fetchTree(), fetchOfferings(), fetchMeetings(), fetchBirdsongCount()]).then(() => setLoading(false));
-
-    const channel = supabase
-      .channel(`offerings-${id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "offerings", filter: `tree_id=eq.${id}` },
-        () => fetchOfferings()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount()]).then(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -170,8 +139,7 @@ const TreeDetailPage = () => {
     );
   }
 
-  const getOfferingsByType = (type: OfferingType) =>
-    offerings.filter((o) => o.type === type);
+  // getOfferingsByType provided by useOfferings hook
 
   const handleAddOffering = (type: OfferingType) => {
     setSelectedType(type);

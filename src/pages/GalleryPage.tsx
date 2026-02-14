@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import type { Database } from "@/integrations/supabase/types";
+import { useOfferings, type Offering } from "@/hooks/use-offerings";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
@@ -87,16 +88,7 @@ interface Tree {
   project_name: string | null;
 }
 
-interface Offering {
-  id: string;
-  tree_id: string;
-  title: string;
-  type: string;
-  content: string | null;
-  media_url: string | null;
-  nft_link: string | null;
-  created_at: string;
-}
+// Offering type now imported from shared hook
 
 interface WishlistItem {
   id: string;
@@ -215,7 +207,7 @@ const GalleryPage = () => {
 
   const [trees, setTrees] = useState<Tree[]>([]);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
-  const [offerings, setOfferings] = useState<Offering[]>([]);
+  // offerings now provided by shared useOfferings hook below
   const [loading, setLoading] = useState(true);
   const [isOfferingDialogOpen, setIsOfferingDialogOpen] = useState(false);
   const [galleryOfferingType, setGalleryOfferingType] = useState<Database["public"]["Enums"]["offering_type"]>("photo");
@@ -347,11 +339,8 @@ const GalleryPage = () => {
     fetchStaffCodes();
   }, []);
 
-  useEffect(() => {
-    if (selectedTree) {
-      fetchOfferings(selectedTree.id);
-    }
-  }, [selectedTree]);
+  // Centralized offerings via shared hook
+  const { offerings, refetch: refetchOfferings } = useOfferings({ treeId: selectedTree?.id });
 
   const fetchTrees = async () => {
     try {
@@ -417,21 +406,7 @@ const GalleryPage = () => {
     }
   };
 
-  const fetchOfferings = async (treeId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("offerings")
-        .select("*")
-        .eq("tree_id", treeId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setOfferings(data || []);
-    } catch (error) {
-      console.error("Error fetching offerings:", error);
-      toast.error("Failed to load offerings");
-    }
-  };
+  // fetchOfferings replaced by useOfferings hook
 
   const fetchWishlist = async () => {
     setWishlistLoading(true);
@@ -1549,7 +1524,7 @@ const GalleryPage = () => {
                       open={isOfferingDialogOpen}
                       onOpenChange={(open) => {
                         setIsOfferingDialogOpen(open);
-                        if (!open && selectedTree) fetchOfferings(selectedTree.id);
+                        if (!open) refetchOfferings();
                       }}
                       treeId={selectedTree?.id || ""}
                       treeSpecies={selectedTree?.species}
