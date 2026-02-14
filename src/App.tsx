@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 
@@ -13,6 +13,7 @@ import StarryNight from "@/components/StarryNight";
 import ChatPanel from "@/components/ChatPanel";
 import DevQAPanel from "@/components/DevQAPanel";
 import PasswordGate, { isAuthenticated } from "@/components/PasswordGate";
+import { supabase } from "@/integrations/supabase/client";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -73,13 +74,24 @@ const PageLoader = () => (
 
 const App = () => {
   const [authed, setAuthed] = useState(isAuthenticated());
+  const [supabaseAuthed, setSupabaseAuthed] = useState(false);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSupabaseAuthed(!!session);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSupabaseAuthed(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // /map and /atlas bypass the password gate for public discovery
   const isPublicRoute = typeof window !== 'undefined' && (
     window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?') || window.location.pathname === '/auth' || window.location.pathname === '/hives' || window.location.pathname.startsWith('/hive/')
   );
 
-  if (!authed && !isPublicRoute) {
+  if (!authed && !supabaseAuthed && !isPublicRoute) {
     return <PasswordGate onSuccess={() => setAuthed(true)} />;
   }
 
