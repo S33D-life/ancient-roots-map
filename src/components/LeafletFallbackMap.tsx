@@ -17,6 +17,7 @@ import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES, AGE_BANDS, G
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Tree {
   id: string;
@@ -249,6 +250,78 @@ function buildExternalPopupHtml(tree: ExternalTreeCandidate): string {
   </div>`;
 }
 
+/* ── Research tree types ── */
+interface ResearchTree {
+  id: string;
+  species_scientific: string;
+  species_common: string | null;
+  tree_name: string | null;
+  locality_text: string;
+  province: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  geo_precision: string;
+  description: string | null;
+  height_m: number | null;
+  girth_or_stem: string | null;
+  crown_spread: string | null;
+  designation_type: string;
+  source_doc_title: string;
+  source_doc_url: string;
+  source_doc_year: number;
+  source_program: string;
+  status: string;
+}
+
+/* ── Research Tree Card popup ── */
+function buildResearchPopupHtml(rt: ResearchTree): string {
+  const name = rt.tree_name || rt.species_common || rt.species_scientific;
+  const precisionBadge = rt.geo_precision === 'exact'
+    ? '<span style="color:hsl(120,55%,50%);font-size:9px;">● Exact</span>'
+    : rt.geo_precision === 'approx'
+    ? '<span style="color:hsl(45,70%,50%);font-size:9px;">◐ Approx</span>'
+    : '<span style="color:hsl(0,50%,55%);font-size:9px;">○ Unverified</span>';
+
+  const measurements = [
+    rt.height_m ? `📏 ${rt.height_m}m tall` : '',
+    rt.girth_or_stem ? `⊙ ${escapeHtml(rt.girth_or_stem)}` : '',
+    rt.crown_spread ? `🌳 ${escapeHtml(rt.crown_spread)}` : '',
+  ].filter(Boolean).join(' · ');
+
+  const desc = rt.description
+    ? `<p style="margin:4px 0 0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${escapeHtml(rt.description.substring(0, 200))}${rt.description.length > 200 ? '…' : ''}</p>`
+    : '';
+
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(25,18%,10%);border-radius:12px;border:1px solid hsla(35,60%,40%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+    <div style="padding:10px 14px 6px;background:linear-gradient(135deg,hsla(35,50%,30%,0.15),hsla(35,60%,20%,0.05));">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span style="font-size:16px;">📜</span>
+        <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(35,60%,40%,0.15);color:hsl(35,70%,60%);border:1px solid hsla(35,60%,40%,0.3);">Research Layer</span>
+        ${precisionBadge}
+      </div>
+      <h3 style="margin:0;font-size:15px;color:hsl(35,70%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(name)}</h3>
+      <p style="margin:2px 0 0;font-size:11px;color:hsl(35,45%,50%);font-style:italic;">${escapeHtml(rt.species_scientific)}</p>
+      ${rt.species_common && rt.species_common !== name ? `<p style="margin:0;font-size:10px;color:hsl(35,40%,45%);">(${escapeHtml(rt.species_common)})</p>` : ''}
+    </div>
+    <div style="padding:6px 14px 8px;display:flex;flex-direction:column;gap:4px;">
+      <p style="margin:0;font-size:10px;color:hsl(35,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(rt.locality_text)}${rt.province ? `, ${escapeHtml(rt.province)}` : ''}</p>
+      ${measurements ? `<p style="margin:0;font-size:10px;color:hsl(0,0%,55%);font-family:sans-serif;">${measurements}</p>` : ''}
+      ${desc}
+      <div style="margin-top:6px;padding:6px 8px;background:hsla(35,40%,20%,0.3);border-radius:6px;border:1px solid hsla(35,40%,30%,0.2);">
+        <p style="margin:0;font-size:9px;color:hsl(35,50%,55%);font-family:sans-serif;line-height:1.4;">
+          <strong>Lineage:</strong> This is a Research Layer record from ${escapeHtml(rt.source_program)}. It becomes an Ancient Friend only after a wanderer verifies it in person.
+        </p>
+        <p style="margin:4px 0 0;font-size:9px;color:hsl(35,40%,48%);font-family:sans-serif;">
+          📄 <a href="${escapeHtml(rt.source_doc_url)}" target="_blank" rel="noopener" style="color:hsl(35,60%,55%);text-decoration:underline;">${escapeHtml(rt.source_doc_title)}</a> (${rt.source_doc_year})
+        </p>
+      </div>
+    </div>
+    <div style="padding:0 14px 12px;">
+      <a href="/map?lat=${rt.latitude}&lng=${rt.longitude}&zoom=18" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(25,15%,8%);background:linear-gradient(135deg,hsl(35,70%,45%),hsl(40,80%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🔍 Verify This Tree In Person</a>
+    </div>
+  </div>`;
+}
+
 /* ── Haversine (km) ── */
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -319,6 +392,10 @@ const LITE_CSS = `
 @keyframes extPulse{0%,100%{opacity:0.6}50%{opacity:1}}
 .ext-dot{border-radius:50%;transition:transform .15s ease-out;cursor:pointer}
 .ext-dot:hover{transform:scale(1.3)!important}
+@keyframes researchLantern{0%,100%{box-shadow:0 0 6px hsla(35,80%,55%,0.3),0 0 12px hsla(35,80%,55%,0.1)}50%{box-shadow:0 0 10px hsla(35,80%,55%,0.5),0 0 20px hsla(35,80%,55%,0.2)}}
+.research-marker{background:transparent!important;border:none!important}
+.research-dot{border-radius:50%;transition:transform .15s ease-out;cursor:pointer;animation:researchLantern 3s ease-in-out infinite}
+.research-dot:hover{transform:scale(1.3)!important}
 `;
 
 const btnBase: React.CSSProperties = {
@@ -340,6 +417,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const offeringGlowLayerRef = useRef<L.LayerGroup | null>(null);
   const birdsongHeatLayerRef = useRef<L.LayerGroup | null>(null);
   const externalLayerRef = useRef<L.LayerGroup | null>(null);
+  const researchLayerRef = useRef<L.LayerGroup | null>(null);
   const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
@@ -367,6 +445,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showExternalTrees, setShowExternalTrees] = useState(false);
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
   const [showHiveLayer, setShowHiveLayer] = useState(false);
+  const [showResearchLayer, setShowResearchLayer] = useState(false);
+  const [researchTreeCount, setResearchTreeCount] = useState(0);
+  const [researchLoading, setResearchLoading] = useState(false);
   const [birdsongSeason, setBirdsongSeason] = useState<string>("all");
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
@@ -1363,6 +1444,89 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [showExternalTrees, filteredTrees]);
 
+  // Research Layer — DFFE Champion Trees from Supabase
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (researchLayerRef.current) {
+      map.removeLayer(researchLayerRef.current);
+      researchLayerRef.current = null;
+    }
+
+    if (!showResearchLayer) {
+      setResearchTreeCount(0);
+      return;
+    }
+
+    const researchCluster = (L as any).markerClusterGroup({
+      maxClusterRadius: 50,
+      disableClusteringAtZoom: 14,
+      chunkedLoading: true,
+      animateAddingMarkers: false,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      iconCreateFunction: (cluster: any) => {
+        const count = cluster.getChildCount();
+        const dim = count >= 10 ? 40 : count >= 5 ? 34 : 28;
+        return L.divIcon({
+          html: `<div style="width:${dim}px;height:${dim}px;border-radius:50%;background:hsla(35,40%,18%,0.9);border:2px solid hsl(35,60%,45%);color:hsl(35,70%,65%);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;box-shadow:0 0 10px hsla(35,70%,50%,0.3);"><span style="font-size:8px;margin-right:2px;">📜</span>${count}</div>`,
+          className: "leaflet-tree-marker",
+          iconSize: L.point(dim, dim),
+        });
+      },
+    });
+    researchCluster.addTo(map);
+    researchLayerRef.current = researchCluster;
+
+    setResearchLoading(true);
+
+    (async () => {
+      const { data, error } = await supabase
+        .from('research_trees')
+        .select('id,species_scientific,species_common,tree_name,locality_text,province,latitude,longitude,geo_precision,description,height_m,girth_or_stem,crown_spread,designation_type,source_doc_title,source_doc_url,source_doc_year,source_program,status')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+
+      setResearchLoading(false);
+
+      if (error || !data) {
+        console.warn('[ResearchLayer] fetch error:', error?.message);
+        return;
+      }
+
+      setResearchTreeCount(data.length);
+
+      data.forEach((rt: any) => {
+        const sz = 16;
+        const half = sz / 2;
+        const precColor = rt.geo_precision === 'exact' ? 'hsl(120,50%,45%)' : rt.geo_precision === 'approx' ? 'hsl(35,70%,50%)' : 'hsl(0,50%,50%)';
+
+        const icon = L.divIcon({
+          className: 'research-marker',
+          html: `<div class="research-dot" style="width:${sz}px;height:${sz}px;background:hsla(35,50%,25%,0.85);border:2.5px solid hsl(35,65%,50%);box-shadow:0 0 8px hsla(35,70%,50%,0.4);position:relative;">
+            <span style="position:absolute;top:-3px;right:-3px;width:5px;height:5px;border-radius:50%;background:${precColor};border:1px solid hsl(25,18%,10%);"></span>
+          </div>`,
+          iconSize: [sz, sz],
+          iconAnchor: [half, half],
+        });
+
+        const marker = L.marker([rt.latitude, rt.longitude], { icon });
+        marker.bindPopup(() => buildResearchPopupHtml(rt as ResearchTree), {
+          className: 'atlas-leaflet-popup',
+          closeButton: true,
+          maxWidth: 280,
+          offset: L.point(0, -4),
+        });
+        researchCluster.addLayer(marker);
+      });
+    })();
+
+    return () => {
+      if (map.hasLayer(researchCluster)) map.removeLayer(researchCluster);
+    };
+  }, [showResearchLayer]);
+
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
@@ -1503,6 +1667,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "no catalogued trees here") : `${enabledSources.length} source${enabledSources.length !== 1 ? "s" : ""}` },
               { label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(!showBirdsongHeat), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
               { label: "🐝 Species Hives", active: showHiveLayer, toggle: () => setShowHiveLayer(!showHiveLayer), extra: showHiveLayer ? `${hiveMap.length} families` : "" },
+              { label: "📜 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount} records` : "none") : "DFFE" },
             ].map((layer) => (
               <button
                 key={layer.label}
