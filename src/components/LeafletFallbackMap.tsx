@@ -639,31 +639,49 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const clusterGroup = (L as any).markerClusterGroup({
       maxClusterRadius: (zoom: number) => {
-        // Scale radius based on tree density and zoom
-        const densityFactor = treeCount > 500 ? 1.2 : treeCount > 200 ? 1.0 : 0.85;
+        // Density-aware continuous curve with safe breakpoints
+        // densityFactor smoothly scales with tree count via clamped log curve
+        const df = Math.min(1.35, Math.max(0.7, 0.55 + Math.log10(Math.max(treeCount, 1)) * 0.25));
 
         if (groveScale === "hyper_local") {
-          return zoom <= 14 ? 30 : 12;
+          // Tight view — collapse quickly
+          return zoom <= 12 ? 35 : zoom <= 14 ? 20 : 10;
         }
         if (groveScale === "local") {
-          if (zoom <= 10) return Math.round(45 * densityFactor);
-          if (zoom <= 14) return Math.round(28 * densityFactor);
-          return 18;
+          const base = zoom <= 8 ? 50 : zoom <= 10 ? 42 : zoom <= 12 ? 32 : zoom <= 14 ? 24 : zoom <= 16 ? 16 : 12;
+          return Math.round(base * df);
         }
         if (tightCluster) {
-          if (zoom <= 6) return Math.round(55 * densityFactor);
-          if (zoom <= 10) return Math.round(38 * densityFactor);
-          if (zoom <= 14) return Math.round(24 * densityFactor);
-          return 15;
+          const base = zoom <= 4 ? 60 : zoom <= 6 ? 52 : zoom <= 8 ? 44 : zoom <= 10 ? 36 : zoom <= 12 ? 26 : zoom <= 14 ? 20 : zoom <= 16 ? 14 : 10;
+          return Math.round(base * df);
         }
-        // Default — smoothly decrease radius through zoom levels
-        if (zoom <= 4) return Math.round(75 * densityFactor);
-        if (zoom <= 6) return Math.round(65 * densityFactor);
-        if (zoom <= 8) return Math.round(55 * densityFactor);
-        if (zoom <= 10) return Math.round(45 * densityFactor);
-        if (zoom <= 12) return Math.round(35 * densityFactor);
-        if (zoom <= 14) return Math.round(28 * densityFactor);
-        return 20;
+
+        // Default — smooth piecewise-linear curve with 2-zoom-level steps for stable transitions
+        // Breakpoints: z2→80, z4→72, z6→62, z8→52, z10→42, z12→34, z14→26, z16→18, z18+→14
+        const breakpoints: [number, number][] = [
+          [2, 80], [4, 72], [6, 62], [8, 52], [10, 42], [12, 34], [14, 26], [16, 18], [18, 14],
+        ];
+
+        // Interpolate between breakpoints for smooth transitions (no popping)
+        let base: number;
+        if (zoom <= breakpoints[0][0]) {
+          base = breakpoints[0][1];
+        } else if (zoom >= breakpoints[breakpoints.length - 1][0]) {
+          base = breakpoints[breakpoints.length - 1][1];
+        } else {
+          let lo = breakpoints[0], hi = breakpoints[breakpoints.length - 1];
+          for (let i = 0; i < breakpoints.length - 1; i++) {
+            if (zoom >= breakpoints[i][0] && zoom <= breakpoints[i + 1][0]) {
+              lo = breakpoints[i];
+              hi = breakpoints[i + 1];
+              break;
+            }
+          }
+          const t = (zoom - lo[0]) / (hi[0] - lo[0]);
+          base = lo[1] + (hi[1] - lo[1]) * t;
+        }
+
+        return Math.round(base * df);
       },
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
