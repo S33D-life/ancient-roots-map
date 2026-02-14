@@ -72,6 +72,7 @@ interface LeafletFallbackMapProps {
   initialLng?: number;
   initialZoom?: number;
   initialW3w?: string;
+  initialTreeId?: string;
 }
 
 /* ── Shared tier & species logic ── */
@@ -396,6 +397,9 @@ const LITE_CSS = `
 .research-marker{background:transparent!important;border:none!important}
 .research-dot{border-radius:50%;transition:transform .15s ease-out;cursor:pointer;animation:researchLantern 3s ease-in-out infinite}
 .research-dot:hover{transform:scale(1.3)!important}
+@keyframes focusHalo{0%{transform:scale(0.5);opacity:0}30%{opacity:0.7}100%{transform:scale(2.8);opacity:0}}
+.tree-focus-halo{position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:hsla(42,90%,55%,0.35);pointer-events:none;animation:focusHalo 2.5s ease-out forwards}
+.tree-focus-label{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:'Cinzel',serif;font-size:12px;color:hsl(45,80%,60%);text-shadow:0 1px 4px rgba(0,0,0,0.8);padding:3px 10px;background:hsla(30,20%,10%,0.85);border:1px solid hsla(42,50%,40%,0.4);border-radius:6px;pointer-events:none;animation:popIn .3s ease-out;margin-bottom:6px}
 `;
 
 const btnBase: React.CSSProperties = {
@@ -405,7 +409,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -421,6 +425,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
+  const focusHandledRef = useRef(false);
+  const focusHaloRef = useRef<L.Marker | null>(null);
   const [locating, setLocating] = useState(false);
   const [located, setLocated] = useState(false);
   const [userLatLng, setUserLatLng] = useState<[number, number] | null>(null);
@@ -884,8 +890,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
-      // Attach lineage for cluster analysis
+      // Attach metadata for cluster analysis and tree focus
       (marker as any)._treeLineage = (tree as any).lineage || null;
+      (marker as any)._treeId = tree.id;
+      (marker as any)._treeName = tree.name;
       marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
@@ -994,6 +1002,116 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
   }, [filteredTrees, userLatLng, lineageFilter, groveScale, showHiveLayer]);
+
+  // ── Focus on a specific tree when navigated via "View on Map" ──
+  useEffect(() => {
+    const map = mapRef.current;
+    const cluster = clusterRef.current;
+    if (!map || !cluster || !initialTreeId || focusHandledRef.current) return;
+    // Wait until trees are loaded and markers exist
+    if (filteredTrees.length === 0) return;
+
+    // Find the target tree
+    const targetTree = filteredTrees.find(t => t.id === initialTreeId);
+    if (!targetTree) {
+      // Tree might be hidden by filters — check ALL trees
+      const allTree = trees.find(t => t.id === initialTreeId);
+      if (!allTree) return;
+      // Tree exists but is filtered out — it will still show on map since
+      // the deep-link already set the view position. Mark as handled.
+      focusHandledRef.current = true;
+      return;
+    }
+
+    focusHandledRef.current = true;
+    const targetLatLng = L.latLng(targetTree.latitude, targetTree.longitude);
+
+    // Find the marker in the cluster group
+    let targetMarker: L.Marker | null = null;
+    cluster.eachLayer((layer: any) => {
+      if (layer._treeId === initialTreeId) {
+        targetMarker = layer;
+      }
+    });
+
+    if (!targetMarker) return;
+
+    // Smooth fly to the tree
+    map.flyTo(targetLatLng, Math.max(initialZoom ?? 17, 17), {
+      duration: 1.2,
+      easeLinearity: 0.4,
+    });
+
+    // After fly animation completes, expand cluster and highlight
+    const onFlyEnd = () => {
+      map.off('moveend', onFlyEnd);
+
+      // Zoom to cluster bounds to expand it if the marker is clustered
+      const visibleParent = cluster.getVisibleParent(targetMarker!);
+      if (visibleParent && visibleParent !== targetMarker) {
+        // The marker is inside a cluster — zoom to uncluster
+        cluster.zoomToShowLayer(targetMarker!, () => {
+          highlightMarker(map, targetMarker!, targetTree.name);
+        });
+      } else {
+        highlightMarker(map, targetMarker!, targetTree.name);
+      }
+    };
+
+    // Small delay to ensure fly animation starts
+    setTimeout(() => {
+      map.once('moveend', onFlyEnd);
+    }, 100);
+
+    function highlightMarker(map: L.Map, marker: L.Marker, treeName: string) {
+      // Center precisely on the marker
+      map.panTo(marker.getLatLng(), { animate: true, duration: 0.4 });
+
+      // Add a pulsing halo
+      const haloEl = document.createElement('div');
+      haloEl.style.position = 'relative';
+      haloEl.style.width = '40px';
+      haloEl.style.height = '40px';
+      haloEl.innerHTML = `
+        <div class="tree-focus-halo"></div>
+        <div class="tree-focus-halo" style="animation-delay:0.4s"></div>
+        <div class="tree-focus-halo" style="animation-delay:0.8s"></div>
+        <div class="tree-focus-label">${treeName}</div>
+      `;
+
+      const haloIcon = L.divIcon({
+        className: 'leaflet-tree-marker',
+        html: haloEl.innerHTML,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+      });
+
+      // Remove previous halo if any
+      if (focusHaloRef.current) {
+        map.removeLayer(focusHaloRef.current);
+      }
+
+      const haloMarker = L.marker(marker.getLatLng(), {
+        icon: haloIcon,
+        interactive: false,
+        zIndexOffset: -10,
+      }).addTo(map);
+      focusHaloRef.current = haloMarker;
+
+      // Open the popup after a brief pause
+      setTimeout(() => {
+        marker.openPopup();
+      }, 600);
+
+      // Remove halo after 3 seconds
+      setTimeout(() => {
+        if (focusHaloRef.current) {
+          map.removeLayer(focusHaloRef.current);
+          focusHaloRef.current = null;
+        }
+      }, 3000);
+    }
+  }, [filteredTrees, trees, initialTreeId, initialZoom]);
 
   // Render bloomed seed heart markers
   useEffect(() => {
