@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
+import { SLUG_MAP } from "@/config/countryRegistry";
 
 /* ─── Types ─── */
 interface ResearchTree {
@@ -35,24 +36,6 @@ interface ResearchTree {
   designation_type: string;
   status: string;
 }
-
-interface PortalConfig {
-  country: string;
-  countryFlag: string;
-  title: string;
-  subtitle: string;
-  sourceLabel: string;
-}
-
-const PORTAL_CONFIGS: Record<string, PortalConfig> = {
-  "south-africa": {
-    country: "South Africa",
-    countryFlag: "🇿🇦",
-    title: "South Africa — Champion Trees",
-    subtitle: "An official research layer. Verified Ancient Friends are born only through living footsteps.",
-    sourceLabel: "DFFE sources",
-  },
-};
 
 /* ─── Stat Tile ─── */
 const StatTile = ({ label, value, icon: Icon }: { label: string; value: number | string; icon: React.ElementType }) => (
@@ -191,7 +174,14 @@ const ResearchTreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate
 const CountryPortalPage = () => {
   const { countrySlug } = useParams<{ countrySlug: string }>();
   const navigate = useNavigate();
-  const config = PORTAL_CONFIGS[countrySlug || ""] || PORTAL_CONFIGS["south-africa"];
+  const entry = SLUG_MAP[countrySlug || ""] || SLUG_MAP["south-africa"];
+  const config = {
+    country: entry.country,
+    countryFlag: entry.flag,
+    title: entry.portalTitle,
+    subtitle: entry.portalSubtitle,
+    sourceLabel: entry.sourceLabel,
+  };
 
   const [trees, setTrees] = useState<ResearchTree[]>([]);
   const [loading, setLoading] = useState(true);
