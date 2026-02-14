@@ -914,10 +914,12 @@ const GalleryPage = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, hsl(220 40% 12%) 0%, hsl(160 50% 18%) 25%, hsl(120 40% 22%) 45%, hsl(80 45% 20%) 60%, hsl(50 60% 25%) 80%, hsl(220 35% 15%) 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'hsl(20 25% 6%)' }}>
+      {/* Shared dynamic atmospheric background */}
+      <HeartwoodBackground />
       <Header />
 
-      <main className="container mx-auto px-4 pt-28 pb-12">
+      <main className="relative z-10 container mx-auto px-4 pt-28 pb-12">
         {/* Breadcrumb — calm, contextual */}
         <nav
           aria-label="Library breadcrumb"
