@@ -106,7 +106,7 @@ const App = () => {
         {/* <ChatPanel /> */}
         
         <CanopyHeartPulse />
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
             <BottomNav />
             <Suspense fallback={<PageLoader />}>
