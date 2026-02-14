@@ -13,7 +13,7 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
-import LiteMapFilters, { LitePerspective } from "./LiteMapFilters";
+import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES } from "./LiteMapFilters";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 
@@ -348,6 +348,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [perspective, setPerspective] = useState<LitePerspective>("collective");
   const [lineageFilter, setLineageFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
+  const [groveScale, setGroveScale] = useState<GroveScale>("all");
 
   // Layer visibility toggles
   const [showSeeds, setShowSeeds] = useState(true);
@@ -381,6 +382,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return Array.from(set).sort();
   }, [trees]);
 
+  // Compute map center for grove scale filtering
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+
+  // Track map center changes for grove scale
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || groveScale === "all") return;
+    const update = () => {
+      const c = map.getCenter();
+      setMapCenter([c.lat, c.lng]);
+    };
+    update();
+    map.on("moveend", update);
+    return () => { map.off("moveend", update); };
+  }, [groveScale]);
+
   const filteredTrees = useMemo(() => {
     let result = trees;
     if (perspective === "personal" && userId) {
@@ -395,8 +412,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     if (projectFilter !== "all") {
       result = result.filter((t: any) => t.project_name === projectFilter);
     }
+    // Grove scale distance filter — uses map center (or user location as fallback)
+    if (groveScale !== "all") {
+      const scaleInfo = GROVE_SCALES.find((g) => g.key === groveScale);
+      const center = mapCenter || userLatLng;
+      if (scaleInfo && center) {
+        const maxKm = scaleInfo.radiusKm;
+        result = result.filter((t) =>
+          haversineKm(center[0], center[1], t.latitude, t.longitude) <= maxKm
+        );
+      }
+    }
     return result;
-  }, [trees, species, perspective, lineageFilter, projectFilter, userId]);
+  }, [trees, species, perspective, lineageFilter, projectFilter, userId, groveScale, mapCenter, userLatLng]);
 
   // Stable references for offering counts and photos
   const offeringCountsRef = useRef(offeringCounts);
@@ -535,13 +563,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       map.removeLayer(clusterRef.current);
     }
 
-    // When filtering by lineage, tighten clustering for focused exploration
+    // When filtering by lineage or tight grove scale, tighten clustering
     const isLineageFocused = lineageFilter !== "all";
+    const isGroveFocused = groveScale !== "all";
+    const tightCluster = isLineageFocused || isGroveFocused;
 
     const clusterGroup = (L as any).markerClusterGroup({
       maxClusterRadius: (zoom: number) => {
-        if (isLineageFocused) {
-          // Tighter clusters when exploring a single lineage
+        if (groveScale === "hyper_local") {
+          // Ultra-tight — show individual trees almost immediately
+          if (zoom <= 14) return 30;
+          return 15;
+        }
+        if (groveScale === "local") {
+          if (zoom <= 10) return 45;
+          if (zoom <= 14) return 30;
+          return 20;
+        }
+        if (tightCluster) {
           if (zoom <= 6) return 60;
           if (zoom <= 10) return 40;
           if (zoom <= 14) return 25;
@@ -558,15 +597,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       animate: true,
-      animateAddingMarkers: false, // critical: prevents costly re-layout animations
-      disableClusteringAtZoom: isLineageFocused ? 16 : 18,
+      animateAddingMarkers: false,
+      disableClusteringAtZoom: groveScale === "hyper_local" ? 14 : tightCluster ? 16 : 18,
       chunkedLoading: true,
       chunkInterval: 80,
       chunkDelay: 8,
       spiderfyDistanceMultiplier: 1.8,
       spiderLegPolylineOptions: {
         weight: 1.5,
-        color: isLineageFocused ? "hsla(120, 50%, 45%, 0.45)" : "hsla(42, 60%, 50%, 0.4)",
+        color: tightCluster ? "hsla(120, 50%, 45%, 0.45)" : "hsla(42, 60%, 50%, 0.4)",
         opacity: 0.6,
       },
       iconCreateFunction: (cluster: any) => {
@@ -678,7 +717,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
-  }, [filteredTrees, userLatLng, lineageFilter]);
+  }, [filteredTrees, userLatLng, lineageFilter, groveScale]);
 
   // Render bloomed seed heart markers
   useEffect(() => {
@@ -1221,6 +1260,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         projectFilter={projectFilter}
         onProjectChange={setProjectFilter}
         availableProjects={availableProjects}
+        groveScale={groveScale}
+        onGroveScaleChange={setGroveScale}
       />
 
       {/* Discovery cue */}

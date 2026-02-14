@@ -1,10 +1,19 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree, RotateCcw } from "lucide-react";
+import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree, RotateCcw, Circle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 
 export type LitePerspective = "collective" | "personal" | "tribe";
+
+export type GroveScale = "all" | "hyper_local" | "local" | "regional";
+
+export const GROVE_SCALES: { key: GroveScale; label: string; radiusKm: number; icon: string }[] = [
+  { key: "all", label: "TETOL", radiusKm: Infinity, icon: "🌍" },
+  { key: "hyper_local", label: "33m", radiusKm: 0.033, icon: "📍" },
+  { key: "local", label: "1km", radiusKm: 1, icon: "🌿" },
+  { key: "regional", label: "100km", radiusKm: 100, icon: "🗺️" },
+];
 
 const STAFF_SPECIES: { key: string; species: string; image: string }[] = [
   { key: "ald", species: "Alder", image: "/images/staffs/ald.jpeg" },
@@ -43,6 +52,8 @@ interface LiteMapFiltersProps {
   projectFilter?: string;
   onProjectChange?: (p: string) => void;
   availableProjects?: string[];
+  groveScale?: GroveScale;
+  onGroveScaleChange?: (g: GroveScale) => void;
 }
 
 /* ── Shared chip styles using HSL design tokens ── */
@@ -63,11 +74,13 @@ const LiteMapFilters = ({
   projectFilter = "all",
   onProjectChange,
   availableProjects = [],
+  groveScale = "all",
+  onGroveScaleChange,
 }: LiteMapFiltersProps) => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
 
-  const hasActiveFilters = species !== "all" || lineageFilter !== "all" || projectFilter !== "all";
+  const hasActiveFilters = species !== "all" || lineageFilter !== "all" || projectFilter !== "all" || groveScale !== "all";
 
   const speciesWithFamilies = useMemo(
     () =>
@@ -110,8 +123,9 @@ const LiteMapFilters = ({
     onSpeciesChange("all");
     onLineageChange?.("all");
     onProjectChange?.("all");
+    onGroveScaleChange?.("all");
     setFamilyFilter(null);
-  }, [onSpeciesChange, onLineageChange, onProjectChange]);
+  }, [onSpeciesChange, onLineageChange, onProjectChange, onGroveScaleChange]);
 
   return (
     <>
@@ -128,6 +142,23 @@ const LiteMapFilters = ({
             {p.icon} {p.label}
           </motion.button>
         ))}
+
+        {/* Grove scale chips */}
+        {onGroveScaleChange && (
+          <>
+            <span className="text-border/30 text-[10px] select-none" aria-hidden>|</span>
+            {GROVE_SCALES.map((g) => (
+              <motion.button
+                key={g.key}
+                onClick={() => onGroveScaleChange(g.key)}
+                whileTap={{ scale: 0.93 }}
+                className={`${chipBase} ${groveScale === g.key ? chipActive : chipInactive}`}
+              >
+                {g.icon} {g.label}
+              </motion.button>
+            ))}
+          </>
+        )}
 
         <div className="flex-1" />
 
