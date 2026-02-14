@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { SlidersHorizontal, X, Leaf } from "lucide-react";
+import { SlidersHorizontal, X, Leaf, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface GalleryFilterDrawerProps {
   searchQuery: string;
   onSearchChange: (val: string) => void;
+  nameFilter: string;
+  onNameChange: (val: string) => void;
+  w3wFilter: string;
+  onW3wChange: (val: string) => void;
   speciesFilter: string;
   onSpeciesChange: (val: string) => void;
   lineageFilter: string;
@@ -15,37 +19,44 @@ interface GalleryFilterDrawerProps {
   onProjectChange: (val: string) => void;
   staffFilter: string;
   onStaffChange: (val: string) => void;
+  groveScaleFilter: string;
+  onGroveScaleChange: (val: string) => void;
+  nationFilter: string;
+  onNationChange: (val: string) => void;
   uniqueSpecies: string[];
   uniqueLineages: string[];
   uniqueProjects: string[];
+  uniqueNations: string[];
   staffCodes: string[];
+  onClearAll: () => void;
 }
 
-const GalleryFilterDrawer = ({
-  searchQuery,
-  onSearchChange,
-  speciesFilter,
-  onSpeciesChange,
-  lineageFilter,
-  onLineageChange,
-  projectFilter,
-  onProjectChange,
-  staffFilter,
-  onStaffChange,
-  uniqueSpecies,
-  uniqueLineages,
-  uniqueProjects,
-  staffCodes,
-}: GalleryFilterDrawerProps) => {
+const GROVE_SCALES = [
+  { value: "hyper_local", label: "Hyper-Local" },
+  { value: "local", label: "Local" },
+  { value: "regional", label: "Regional" },
+  { value: "national", label: "National" },
+  { value: "bioregional", label: "Bioregional" },
+  { value: "species", label: "Species" },
+  { value: "lineage", label: "Lineage" },
+];
+
+const GalleryFilterDrawer = (props: GalleryFilterDrawerProps) => {
   const [open, setOpen] = useState(false);
 
   const activeCount = [
-    searchQuery.trim() ? 1 : 0,
-    speciesFilter !== "all" ? 1 : 0,
-    lineageFilter !== "all" ? 1 : 0,
-    projectFilter !== "all" ? 1 : 0,
-    staffFilter !== "all" ? 1 : 0,
+    props.searchQuery.trim() ? 1 : 0,
+    props.nameFilter.trim() ? 1 : 0,
+    props.w3wFilter.trim() ? 1 : 0,
+    props.speciesFilter !== "all" ? 1 : 0,
+    props.lineageFilter !== "all" ? 1 : 0,
+    props.projectFilter !== "all" ? 1 : 0,
+    props.staffFilter !== "all" ? 1 : 0,
+    props.groveScaleFilter !== "all" ? 1 : 0,
+    props.nationFilter !== "all" ? 1 : 0,
   ].reduce((a, b) => a + b, 0);
+
+  const drawerProps = { ...props, onClose: () => setOpen(false), activeCount };
 
   return (
     <>
@@ -95,7 +106,7 @@ const GalleryFilterDrawer = ({
               onClick={() => setOpen(false)}
             />
 
-            {/* Drawer — right on desktop, bottom on mobile */}
+            {/* Desktop: right panel */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
@@ -108,26 +119,10 @@ const GalleryFilterDrawer = ({
                 boxShadow: "-8px 0 32px hsla(0, 0%, 0%, 0.4)",
               }}
             >
-              <DrawerContent
-                onClose={() => setOpen(false)}
-                searchQuery={searchQuery}
-                onSearchChange={onSearchChange}
-                speciesFilter={speciesFilter}
-                onSpeciesChange={onSpeciesChange}
-                lineageFilter={lineageFilter}
-                onLineageChange={onLineageChange}
-                projectFilter={projectFilter}
-                onProjectChange={onProjectChange}
-                staffFilter={staffFilter}
-                onStaffChange={onStaffChange}
-                uniqueSpecies={uniqueSpecies}
-                uniqueLineages={uniqueLineages}
-                uniqueProjects={uniqueProjects}
-                staffCodes={staffCodes}
-              />
+              <DrawerContent {...drawerProps} />
             </motion.div>
 
-            {/* Mobile: slide up from bottom with swipe-to-close */}
+            {/* Mobile: slide up with swipe-to-close */}
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
@@ -149,28 +144,11 @@ const GalleryFilterDrawer = ({
                 touchAction: "none",
               }}
             >
-              {/* Drag handle */}
               <div className="flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
                 <div className="w-10 h-1 rounded-full" style={{ background: "hsla(42, 30%, 40%, 0.4)" }} />
               </div>
               <div className="overflow-y-auto flex-1" style={{ touchAction: "pan-y" }}>
-                <DrawerContent
-                  onClose={() => setOpen(false)}
-                  searchQuery={searchQuery}
-                  onSearchChange={onSearchChange}
-                  speciesFilter={speciesFilter}
-                  onSpeciesChange={onSpeciesChange}
-                  lineageFilter={lineageFilter}
-                  onLineageChange={onLineageChange}
-                  projectFilter={projectFilter}
-                  onProjectChange={onProjectChange}
-                  staffFilter={staffFilter}
-                  onStaffChange={onStaffChange}
-                  uniqueSpecies={uniqueSpecies}
-                  uniqueLineages={uniqueLineages}
-                  uniqueProjects={uniqueProjects}
-                  staffCodes={staffCodes}
-                />
+                <DrawerContent {...drawerProps} />
               </div>
             </motion.div>
           </>
@@ -180,11 +158,38 @@ const GalleryFilterDrawer = ({
   );
 };
 
-/* Inner content shared by desktop & mobile drawers */
+/* ─── Shared filter label ─── */
+const FilterLabel = ({ children }: { children: React.ReactNode }) => (
+  <label
+    className="text-[10px] font-serif uppercase tracking-widest mb-1.5 block"
+    style={{ color: "hsl(42, 40%, 50%)" }}
+  >
+    {children}
+  </label>
+);
+
+const inputStyle = {
+  background: "hsla(28, 20%, 14%, 0.8)",
+  borderColor: "hsla(42, 40%, 30%, 0.4)",
+  color: "hsl(42, 55%, 65%)",
+};
+
+const selectTriggerStyle = {
+  background: "hsla(28, 20%, 14%, 0.8)",
+  borderColor: "hsla(42, 40%, 30%, 0.4)",
+  color: "hsl(42, 55%, 62%)",
+};
+
+/* ─── Inner content shared by desktop & mobile drawers ─── */
 function DrawerContent({
   onClose,
+  activeCount,
   searchQuery,
   onSearchChange,
+  nameFilter,
+  onNameChange,
+  w3wFilter,
+  onW3wChange,
   speciesFilter,
   onSpeciesChange,
   lineageFilter,
@@ -193,27 +198,17 @@ function DrawerContent({
   onProjectChange,
   staffFilter,
   onStaffChange,
+  groveScaleFilter,
+  onGroveScaleChange,
+  nationFilter,
+  onNationChange,
   uniqueSpecies,
   uniqueLineages,
   uniqueProjects,
+  uniqueNations,
   staffCodes,
-}: {
-  onClose: () => void;
-  searchQuery: string;
-  onSearchChange: (v: string) => void;
-  speciesFilter: string;
-  onSpeciesChange: (v: string) => void;
-  lineageFilter: string;
-  onLineageChange: (v: string) => void;
-  projectFilter: string;
-  onProjectChange: (v: string) => void;
-  staffFilter: string;
-  onStaffChange: (v: string) => void;
-  uniqueSpecies: string[];
-  uniqueLineages: string[];
-  uniqueProjects: string[];
-  staffCodes: string[];
-}) {
+  onClearAll,
+}: GalleryFilterDrawerProps & { onClose: () => void; activeCount: number }) {
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Header */}
@@ -224,54 +219,57 @@ function DrawerContent({
             Refine Search
           </h3>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-full transition-colors hover:bg-white/5"
-          style={{ color: "hsl(var(--muted-foreground))" }}
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          {activeCount > 0 && (
+            <button
+              onClick={onClearAll}
+              className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-serif uppercase tracking-wider transition-colors hover:bg-white/5"
+              style={{ color: "hsl(0, 60%, 60%)" }}
+            >
+              <RotateCcw className="w-3 h-3" />
+              Clear All
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full transition-colors hover:bg-white/5"
+            style={{ color: "hsl(var(--muted-foreground))" }}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="px-5 pb-8 space-y-5 flex-1">
-        {/* Search */}
+        {/* Quick search (all fields) */}
         <div>
-          <label
-            className="text-[10px] font-serif uppercase tracking-widest mb-1.5 block"
-            style={{ color: "hsl(42, 40%, 50%)" }}
-          >
-            Search
-          </label>
+          <FilterLabel>Quick Search</FilterLabel>
           <Input
-            placeholder="Search by name, species, or what3words…"
+            placeholder="Search across all fields…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="font-serif text-sm"
-            style={{
-              background: "hsla(28, 20%, 14%, 0.8)",
-              borderColor: "hsla(42, 40%, 30%, 0.4)",
-              color: "hsl(42, 55%, 65%)",
-            }}
+            style={inputStyle}
+          />
+        </div>
+
+        {/* Name */}
+        <div>
+          <FilterLabel>Name</FilterLabel>
+          <Input
+            placeholder="Filter by tree name…"
+            value={nameFilter}
+            onChange={(e) => onNameChange(e.target.value)}
+            className="font-serif text-sm"
+            style={inputStyle}
           />
         </div>
 
         {/* Species */}
         <div>
-          <label
-            className="text-[10px] font-serif uppercase tracking-widest mb-1.5 block"
-            style={{ color: "hsl(42, 40%, 50%)" }}
-          >
-            Species
-          </label>
+          <FilterLabel>Species</FilterLabel>
           <Select value={speciesFilter} onValueChange={onSpeciesChange}>
-            <SelectTrigger
-              className="font-serif text-sm"
-              style={{
-                background: "hsla(28, 20%, 14%, 0.8)",
-                borderColor: "hsla(42, 40%, 30%, 0.4)",
-                color: "hsl(42, 55%, 62%)",
-              }}
-            >
+            <SelectTrigger className="font-serif text-sm" style={selectTriggerStyle}>
               <SelectValue placeholder="All Species" />
             </SelectTrigger>
             <SelectContent>
@@ -286,21 +284,9 @@ function DrawerContent({
         {/* Lineage */}
         {uniqueLineages.length > 0 && (
           <div>
-            <label
-              className="text-[10px] font-serif uppercase tracking-widest mb-1.5 block"
-              style={{ color: "hsl(42, 40%, 50%)" }}
-            >
-              Lineage
-            </label>
+            <FilterLabel>Lineage</FilterLabel>
             <Select value={lineageFilter} onValueChange={onLineageChange}>
-              <SelectTrigger
-                className="font-serif text-sm"
-                style={{
-                  background: "hsla(28, 20%, 14%, 0.8)",
-                  borderColor: "hsla(42, 40%, 30%, 0.4)",
-                  color: "hsl(42, 55%, 62%)",
-                }}
-              >
+              <SelectTrigger className="font-serif text-sm" style={selectTriggerStyle}>
                 <SelectValue placeholder="All Lineages" />
               </SelectTrigger>
               <SelectContent>
@@ -313,24 +299,24 @@ function DrawerContent({
           </div>
         )}
 
+        {/* what3words */}
+        <div>
+          <FilterLabel>what3words</FilterLabel>
+          <Input
+            placeholder="e.g. ///filled.count.soap"
+            value={w3wFilter}
+            onChange={(e) => onW3wChange(e.target.value)}
+            className="font-serif text-sm font-mono"
+            style={inputStyle}
+          />
+        </div>
+
         {/* Project */}
         {uniqueProjects.length > 0 && (
           <div>
-            <label
-              className="text-[10px] font-serif uppercase tracking-widest mb-1.5 block"
-              style={{ color: "hsl(42, 40%, 50%)" }}
-            >
-              Project
-            </label>
+            <FilterLabel>Project</FilterLabel>
             <Select value={projectFilter} onValueChange={onProjectChange}>
-              <SelectTrigger
-                className="font-serif text-sm"
-                style={{
-                  background: "hsla(28, 20%, 14%, 0.8)",
-                  borderColor: "hsla(42, 40%, 30%, 0.4)",
-                  color: "hsl(42, 55%, 62%)",
-                }}
-              >
+              <SelectTrigger className="font-serif text-sm" style={selectTriggerStyle}>
                 <SelectValue placeholder="All Projects" />
               </SelectTrigger>
               <SelectContent>
@@ -346,21 +332,9 @@ function DrawerContent({
         {/* Staff */}
         {staffCodes.length > 0 && (
           <div>
-            <label
-              className="text-[10px] font-serif uppercase tracking-widest mb-1.5 block"
-              style={{ color: "hsl(42, 40%, 50%)" }}
-            >
-              Staff
-            </label>
+            <FilterLabel>Staff</FilterLabel>
             <Select value={staffFilter} onValueChange={onStaffChange}>
-              <SelectTrigger
-                className="font-serif text-sm"
-                style={{
-                  background: "hsla(28, 20%, 14%, 0.8)",
-                  borderColor: "hsla(42, 40%, 30%, 0.4)",
-                  color: "hsl(42, 55%, 62%)",
-                }}
-              >
+              <SelectTrigger className="font-serif text-sm" style={selectTriggerStyle}>
                 <SelectValue placeholder="All Staffs" />
               </SelectTrigger>
               <SelectContent>
@@ -372,6 +346,69 @@ function DrawerContent({
             </Select>
           </div>
         )}
+
+        {/* ─── Scaffolded Future Filters ─── */}
+        <div className="pt-2 border-t" style={{ borderColor: "hsla(42, 30%, 25%, 0.3)" }}>
+          <p className="text-[9px] font-serif uppercase tracking-widest mb-3" style={{ color: "hsl(42, 30%, 40%)" }}>
+            Advanced
+          </p>
+
+          {/* Grove Scale */}
+          <div className="mb-4">
+            <FilterLabel>Grove Scale</FilterLabel>
+            <Select value={groveScaleFilter} onValueChange={onGroveScaleChange}>
+              <SelectTrigger className="font-serif text-sm" style={selectTriggerStyle}>
+                <SelectValue placeholder="All Scales" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Scales</SelectItem>
+                {GROVE_SCALES.map((gs) => (
+                  <SelectItem key={gs.value} value={gs.value}>{gs.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Nation */}
+          {uniqueNations.length > 0 && (
+            <div className="mb-4">
+              <FilterLabel>Nation</FilterLabel>
+              <Select value={nationFilter} onValueChange={onNationChange}>
+                <SelectTrigger className="font-serif text-sm" style={selectTriggerStyle}>
+                  <SelectValue placeholder="All Nations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Nations</SelectItem>
+                  {uniqueNations.map((n) => (
+                    <SelectItem key={n} value={n}>{n}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Placeholder: Age range (coming soon) */}
+          <div className="mb-4 opacity-40 pointer-events-none">
+            <FilterLabel>Estimated Age</FilterLabel>
+            <Input
+              placeholder="Coming soon…"
+              disabled
+              className="font-serif text-sm"
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Placeholder: Bioregion (coming soon) */}
+          <div className="opacity-40 pointer-events-none">
+            <FilterLabel>Bioregion</FilterLabel>
+            <Input
+              placeholder="Coming soon…"
+              disabled
+              className="font-serif text-sm"
+              style={inputStyle}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
