@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, MapPin, ExternalLink, TreeDeciduous, Globe, Code, ChevronRight } from "lucide-react";
+import { Plus, MapPin, ExternalLink, TreeDeciduous, Globe, Code, ChevronRight, Scroll } from "lucide-react";
+import { Link } from "react-router-dom";
 import treeResourcesBg from "@/assets/tree-resources-bg.jpeg";
 
 interface TreeProject {
@@ -256,6 +257,28 @@ const TreeResources = () => {
           </p>
         </div>
       </div>
+
+      {/* Research Portals */}
+      <Card className="border-primary/20 bg-card/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-serif flex items-center gap-2">
+            <Scroll className="w-4 h-4 text-primary" /> Research Portals
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Link
+            to="/atlas/south-africa"
+            className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 hover:bg-primary/10 border border-border/30 hover:border-primary/30 transition-all group"
+          >
+            <span className="text-2xl">🇿🇦</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-serif text-foreground group-hover:text-primary transition-colors">Champion Trees (DFFE) — South Africa Portal</p>
+              <p className="text-xs text-muted-foreground">Official research layer with provenance from DFFE documents</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary shrink-0" />
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Search bar + Add button */}
       <div className="flex items-center gap-3">
