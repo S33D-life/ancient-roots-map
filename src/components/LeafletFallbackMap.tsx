@@ -1072,12 +1072,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       haloEl.style.position = 'relative';
       haloEl.style.width = '40px';
       haloEl.style.height = '40px';
-      haloEl.innerHTML = `
-        <div class="tree-focus-halo"></div>
-        <div class="tree-focus-halo" style="animation-delay:0.4s"></div>
-        <div class="tree-focus-halo" style="animation-delay:0.8s"></div>
-        <div class="tree-focus-label">${treeName}</div>
-      `;
+      const halo1 = document.createElement('div');
+      halo1.className = 'tree-focus-halo';
+      haloEl.appendChild(halo1);
+
+      const halo2 = document.createElement('div');
+      halo2.className = 'tree-focus-halo';
+      halo2.style.animationDelay = '0.4s';
+      haloEl.appendChild(halo2);
+
+      const halo3 = document.createElement('div');
+      halo3.className = 'tree-focus-halo';
+      halo3.style.animationDelay = '0.8s';
+      haloEl.appendChild(halo3);
+
+      const label = document.createElement('div');
+      label.className = 'tree-focus-label';
+      label.textContent = treeName;
+      haloEl.appendChild(label);
 
       const haloIcon = L.divIcon({
         className: 'leaflet-tree-marker',
