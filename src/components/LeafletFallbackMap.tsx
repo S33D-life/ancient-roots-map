@@ -14,6 +14,7 @@ import {
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
 import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES, AGE_BANDS, GIRTH_BANDS, type AgeBand, type GirthBand } from "./LiteMapFilters";
+import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 
@@ -88,8 +89,8 @@ function getVisibleTrees(map: L.Map, trees: Tree[], pad = 0.1): Tree[] {
 /* ── SVG with species-aware coloring ── */
 const SVG_CACHE: Record<string, string> = {};
 
-function getSvgDataUri(tier: Tier, species?: string): string {
-  const hue = species ? getSpeciesHue(species) : 120;
+function getSvgDataUri(tier: Tier, species?: string, hueOverride?: number): string {
+  const hue = hueOverride !== undefined ? hueOverride : (species ? getSpeciesHue(species) : 120);
   const key = `${tier}-${hue}`;
   if (SVG_CACHE[key]) return SVG_CACHE[key];
 
@@ -117,19 +118,25 @@ function getSvgDataUri(tier: Tier, species?: string): string {
   return SVG_CACHE[key];
 }
 
+/** Parse "H S% L%" accentHsl → numeric hue */
+function hslStringToHue(hslStr: string): number {
+  const parts = hslStr.split(/[\s]+/);
+  return parseInt(parts[0], 10) || 120;
+}
+
 const MARKER_SIZES: Record<Tier, number> = { ancient: 40, storied: 34, notable: 30, seedling: 24 };
 
 /* ── Icon cache (module-level) ── */
 const ICON_CACHE: Record<string, L.DivIcon> = {};
 
-function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number): L.DivIcon {
-  const hue = getSpeciesHue(species);
+function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number, hiveHue?: number): L.DivIcon {
+  const hue = hiveHue !== undefined ? hiveHue : getSpeciesHue(species);
   const hasBirdsong = (birdsongCount ?? 0) > 0;
-  const cacheKey = `${tier}-${hue}-${hasBirdsong ? birdsongCount : 0}`;
+  const cacheKey = `${tier}-${hue}-${hasBirdsong ? birdsongCount : 0}-${hiveHue !== undefined ? 'h' : 's'}`;
   if (ICON_CACHE[cacheKey]) return ICON_CACHE[cacheKey];
 
   const size = MARKER_SIZES[tier];
-  const uri = getSvgDataUri(tier, species);
+  const uri = getSvgDataUri(tier, species, hiveHue);
   const birdBadge = hasBirdsong
     ? `<span class="birdsong-badge" style="position:absolute;top:-4px;right:-6px;display:flex;align-items:center;gap:1px;background:hsla(200,60%,18%,0.92);border:1.5px solid hsla(200,50%,45%,0.6);border-radius:99px;padding:1px 4px;font-size:9px;font-family:sans-serif;color:hsl(200,60%,70%);line-height:1;white-space:nowrap;pointer-events:none;"><span style="font-size:10px;">🐦</span>${birdsongCount! > 1 ? birdsongCount : ''}</span>`
     : '';
@@ -359,10 +366,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showOfferingGlow, setShowOfferingGlow] = useState(false);
   const [showExternalTrees, setShowExternalTrees] = useState(false);
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
+  const [showHiveLayer, setShowHiveLayer] = useState(false);
   const [birdsongSeason, setBirdsongSeason] = useState<string>("all");
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
   const [layerPanelOpen, setLayerPanelOpen] = useState(false);
+
+  // hiveMap moved after filteredTrees declaration
 
   const speciesCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -451,6 +461,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
     return result;
   }, [trees, species, perspective, lineageFilter, projectFilter, userId, groveScale, mapCenter, userLatLng, ageBand, girthBand]);
+
+  /** Compute per-hive data for legend + marker coloring */
+  const hiveMap = useMemo(() => {
+    const m = new Map<string, { hive: HiveInfo; count: number; speciesList: string[] }>();
+    filteredTrees.forEach((t) => {
+      const hive = getHiveForSpecies(t.species);
+      if (!hive) return;
+      const existing = m.get(hive.family);
+      if (existing) {
+        existing.count++;
+        if (!existing.speciesList.includes(t.species)) existing.speciesList.push(t.species);
+      } else {
+        m.set(hive.family, { hive, count: 1, speciesList: [t.species] });
+      }
+    });
+    return Array.from(m.values()).sort((a, b) => b.count - a.count);
+  }, [filteredTrees]);
 
   // Stable references for offering counts and photos
   const offeringCountsRef = useRef(offeringCounts);
@@ -709,7 +736,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const age = tree.estimated_age || 0;
       const bCount = currentBirdsong[tree.id] || 0;
       const tier = getTreeTier(age, offerings);
-      const icon = getOrCreateIcon(tier, tree.species, bCount);
+      const hiveHue = showHiveLayer ? (() => {
+        const h = getHiveForSpecies(tree.species);
+        return h ? hslStringToHue(h.accentHsl) : undefined;
+      })() : undefined;
+      const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue);
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
       // Attach lineage for cluster analysis
@@ -743,7 +774,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
-  }, [filteredTrees, userLatLng, lineageFilter, groveScale]);
+  }, [filteredTrees, userLatLng, lineageFilter, groveScale, showHiveLayer]);
 
   // Render bloomed seed heart markers
   useEffect(() => {
@@ -1356,6 +1387,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
               { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "no catalogued trees here") : `${enabledSources.length} source${enabledSources.length !== 1 ? "s" : ""}` },
               { label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(!showBirdsongHeat), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
+              { label: "🐝 Species Hives", active: showHiveLayer, toggle: () => setShowHiveLayer(!showHiveLayer), extra: showHiveLayer ? `${hiveMap.length} families` : "" },
             ].map((layer) => (
               <button
                 key={layer.label}
@@ -1459,6 +1491,73 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               style={{ color: "hsl(42, 50%, 55%)" }}
             >
               Show all seasons
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Species Hive legend — interactive */}
+      {showHiveLayer && hiveMap.length > 0 && (
+        <div
+          className="absolute bottom-24 left-3 z-[1000] flex flex-col gap-1 px-3 py-2.5 rounded-lg overflow-y-auto"
+          style={{
+            background: "hsla(30, 15%, 10%, 0.92)",
+            border: "1px solid hsla(42, 40%, 30%, 0.5)",
+            backdropFilter: "blur(8px)",
+            animation: "popIn .2s ease-out",
+            maxHeight: "45vh",
+          }}
+        >
+          <p className="text-[10px] font-serif tracking-wider mb-0.5" style={{ color: "hsl(42, 50%, 55%)" }}>
+            Species Hives
+          </p>
+          {hiveMap.map(({ hive, count }) => {
+            const hue = hslStringToHue(hive.accentHsl);
+            const isFiltered = species.length > 0 && hive.representativeSpecies.some(rs =>
+              species.some(s => s.toLowerCase() === rs.toLowerCase())
+            );
+            return (
+              <button
+                key={hive.family}
+                onClick={() => {
+                  // Toggle: filter to this hive's species or clear
+                  if (isFiltered) {
+                    setSpecies([]);
+                  } else {
+                    const hiveSpecies = hive.representativeSpecies.filter(rs =>
+                      filteredTrees.some(t => t.species.toLowerCase() === rs.toLowerCase()) ||
+                      trees.some(t => t.species.toLowerCase() === rs.toLowerCase())
+                    );
+                    setSpecies(hiveSpecies.length > 0 ? hiveSpecies : hive.representativeSpecies);
+                  }
+                }}
+                className="flex items-center gap-2 transition-opacity group"
+                style={{ opacity: isFiltered ? 1 : 0.8 }}
+              >
+                <span
+                  className="inline-block w-3 h-3 rounded-sm shrink-0"
+                  style={{
+                    background: `hsl(${hue}, 55%, 45%)`,
+                    boxShadow: isFiltered ? `0 0 6px hsl(${hue}, 55%, 45%)` : "none",
+                    border: isFiltered ? `1.5px solid hsl(${hue}, 55%, 45%)` : "1px solid hsla(0,0%,100%,0.15)",
+                  }}
+                />
+                <span className="text-[11px] font-serif group-hover:underline" style={{ color: isFiltered ? `hsl(${hue}, 55%, 60%)` : "hsl(0, 0%, 62%)" }}>
+                  {hive.icon} {hive.displayName}
+                </span>
+                <span className="text-[9px] font-sans ml-auto tabular-nums" style={{ color: "hsl(42, 40%, 45%)" }}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+          {species.length > 0 && (
+            <button
+              onClick={() => setSpecies([])}
+              className="text-[9px] font-sans mt-0.5 transition-colors"
+              style={{ color: "hsl(42, 50%, 55%)" }}
+            >
+              Show all hives
             </button>
           )}
         </div>
