@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Shield, Lock, Upload, FileJson, FileText, Globe, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { Loader2, Download, Shield, Lock, Upload, FileJson, FileText, Globe, ChevronDown, ChevronRight, RefreshCw, CheckCircle2, AlertTriangle, XCircle, Key } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,14 +54,18 @@ const LivingArchivePage = () => {
   const [loading, setLoading] = useState(true);
   const [archive, setArchive] = useState<FullArchive | null>(null);
   const [gathering, setGathering] = useState(false);
+  const [gatherProgress, setGatherProgress] = useState(0);
   const [expandedBranch, setExpandedBranch] = useState<string | null>(null);
   const [encryptPassword, setEncryptPassword] = useState("");
   const [showEncryptDialog, setShowEncryptDialog] = useState(false);
+  const [showDecryptDialog, setShowDecryptDialog] = useState(false);
+  const [decryptPassword, setDecryptPassword] = useState("");
+  const [decryptFile, setDecryptFile] = useState<File | null>(null);
   const [sealing, setSealing] = useState(false);
-  const [sealed, setSealed] = useState(false);
-
-  // Privacy controls
+  const [sealedCid, setSealedCid] = useState<string | null>(null);
+  const [sealHistory, setSealHistory] = useState<Array<{ cid: string; date: string }>>([]);
   const [privacyScope, setPrivacyScope] = useState<Record<string, boolean>>({});
+  const decryptInputRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
 
@@ -78,23 +83,32 @@ const LivingArchivePage = () => {
   const gatherData = useCallback(async () => {
     if (!userId) return;
     setGathering(true);
+    setGatherProgress(0);
+    // Simulate progress since queries are parallel
+    const interval = setInterval(() => {
+      setGatherProgress((p) => Math.min(p + 8, 90));
+    }, 150);
     try {
       const data = await gatherArchiveData(userId);
+      clearInterval(interval);
+      setGatherProgress(100);
       setArchive(data);
-      // Initialize privacy scope — all branches enabled by default
       const scope: Record<string, boolean> = {};
       data.branches.forEach((b) => (scope[b.key] = true));
       setPrivacyScope(scope);
       toast.success("Archive gathered — all branches loaded.");
     } catch (err: any) {
+      clearInterval(interval);
       console.error("Archive gather error:", err);
       toast.error("Failed to gather archive data.");
     } finally {
-      setGathering(false);
+      setTimeout(() => {
+        setGathering(false);
+        setGatherProgress(0);
+      }, 500);
     }
   }, [userId]);
 
-  // Auto-gather on load
   useEffect(() => {
     if (userId) gatherData();
   }, [userId, gatherData]);
@@ -127,6 +141,28 @@ const LivingArchivePage = () => {
     toast.success("Encrypted archive downloaded.");
   };
 
+  const handleDecryptImport = async () => {
+    if (!decryptFile || !decryptPassword) return;
+    try {
+      const imported = await decryptArchive(decryptFile, decryptPassword);
+      const valid = await verifyChecksum(imported);
+      if (!valid) {
+        toast.error("Checksum mismatch — archive may be corrupted.");
+        return;
+      }
+      setArchive(imported);
+      const scope: Record<string, boolean> = {};
+      imported.branches.forEach((b) => (scope[b.key] = true));
+      setPrivacyScope(scope);
+      setShowDecryptDialog(false);
+      setDecryptPassword("");
+      setDecryptFile(null);
+      toast.success(`Encrypted archive restored — ${imported.branches.reduce((s, b) => s + b.count, 0)} records verified.`);
+    } catch {
+      toast.error("Decryption failed — wrong passphrase or corrupted file.");
+    }
+  };
+
   const handleTextSummary = () => {
     const filtered = getFilteredArchive();
     if (!filtered) return;
@@ -142,12 +178,32 @@ const LivingArchivePage = () => {
   };
 
   const handleSealPath = async () => {
+    const filtered = getFilteredArchive();
+    if (!filtered) return;
     setSealing(true);
-    // Simulate IPFS pin — in production this would call ipfs-sync edge function
-    await new Promise((r) => setTimeout(r, 2500));
-    setSealing(false);
-    setSealed(true);
-    toast.success("Your path is now woven into the Living Archive.");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await supabase.functions.invoke("ipfs-sync", {
+        body: {
+          action: "pin_json",
+          content: filtered,
+          name: `s33d-archive-${new Date().toISOString().split("T")[0]}`,
+        },
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      const { cid } = response.data;
+      setSealedCid(cid);
+      setSealHistory((prev) => [{ cid, date: new Date().toISOString() }, ...prev]);
+      toast.success(`Path sealed to IPFS — CID: ${cid.slice(0, 12)}…`);
+    } catch (err: any) {
+      console.error("IPFS seal error:", err);
+      toast.error("Failed to seal to IPFS. Check Pinata configuration.");
+    } finally {
+      setSealing(false);
+    }
   };
 
   const handleImportJSON = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +218,9 @@ const LivingArchivePage = () => {
         return;
       }
       setArchive(imported);
+      const scope: Record<string, boolean> = {};
+      imported.branches.forEach((b) => (scope[b.key] = true));
+      setPrivacyScope(scope);
       toast.success(`Archive restored — ${imported.branches.reduce((s, b) => s + b.count, 0)} records verified.`);
     } catch {
       toast.error("Invalid archive file.");
@@ -171,6 +230,7 @@ const LivingArchivePage = () => {
   const totalRecords = archive?.branches.reduce((s, b) => s + b.count, 0) ?? 0;
   const syncedBranches = archive?.branches.filter((b) => b.status === "synced").length ?? 0;
   const totalBranches = archive?.branches.length ?? 0;
+  const enabledBranches = Object.values(privacyScope).filter(Boolean).length;
 
   if (loading || !userId) {
     return (
@@ -182,7 +242,6 @@ const LivingArchivePage = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Background */}
       <div className="fixed inset-0 z-0">
         <img src={heartwoodLanding} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
@@ -211,8 +270,18 @@ const LivingArchivePage = () => {
               </p>
             </motion.div>
 
+            {/* Progress during gathering */}
+            {gathering && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                <Progress value={gatherProgress} className="h-2" />
+                <p className="text-center text-xs text-muted-foreground font-serif">
+                  Gathering your roots… {Math.round(gatherProgress)}%
+                </p>
+              </motion.div>
+            )}
+
             {/* Integrity summary */}
-            {archive && (
+            {archive && !gathering && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -230,19 +299,24 @@ const LivingArchivePage = () => {
                         <p className="text-xs text-muted-foreground">Data Branches</p>
                       </div>
                       <div>
-                        <p className="text-2xl font-serif" style={{ color: syncedBranches === totalBranches ? "hsl(120 50% 50%)" : "hsl(40 80% 55%)" }}>
+                        <p className="text-2xl font-serif text-emerald-400">
                           {syncedBranches}/{totalBranches}
                         </p>
                         <p className="text-xs text-muted-foreground">Synced</p>
                       </div>
                     </div>
+                    {enabledBranches < totalBranches && (
+                      <p className="text-center text-xs text-amber-400/80 mt-3 font-serif">
+                        {enabledBranches}/{totalBranches} branches enabled for export
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
             )}
 
-            {/* Root System — Data Branches */}
-            {archive && (
+            {/* Root System */}
+            {archive && !gathering && (
               <Card className="border-primary/15 bg-card/50 backdrop-blur-md overflow-hidden">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -336,7 +410,7 @@ const LivingArchivePage = () => {
             )}
 
             {/* Export Actions */}
-            {archive && (
+            {archive && !gathering && (
               <Card className="border-primary/15 bg-card/50 backdrop-blur-md">
                 <CardHeader className="pb-3">
                   <CardTitle className="font-serif text-lg text-primary">Export Your Path</CardTitle>
@@ -346,7 +420,6 @@ const LivingArchivePage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* JSON Export */}
                     <Button
                       variant="outline"
                       className="h-auto py-4 flex flex-col items-center gap-2 border-primary/20 hover:border-primary/40"
@@ -357,7 +430,6 @@ const LivingArchivePage = () => {
                       <span className="text-xs text-muted-foreground">Complete relational archive</span>
                     </Button>
 
-                    {/* Text Scroll */}
                     <Button
                       variant="outline"
                       className="h-auto py-4 flex flex-col items-center gap-2 border-primary/20 hover:border-primary/40"
@@ -416,20 +488,20 @@ const LivingArchivePage = () => {
                       variant="outline"
                       className="h-auto py-4 flex flex-col items-center gap-2 border-primary/20 hover:border-primary/40 relative overflow-hidden"
                       onClick={handleSealPath}
-                      disabled={sealing || sealed}
+                      disabled={sealing}
                     >
                       {sealing ? (
                         <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                      ) : sealed ? (
+                      ) : sealedCid ? (
                         <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                       ) : (
                         <Globe className="w-6 h-6 text-primary" />
                       )}
                       <span className="font-serif text-sm">
-                        {sealed ? "Path Sealed" : sealing ? "Weaving…" : "Seal to IPFS"}
+                        {sealedCid ? "Re-seal to IPFS" : sealing ? "Weaving…" : "Seal to IPFS"}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {sealed ? "CID generated" : "Pin to permanent web"}
+                        {sealedCid ? `CID: ${sealedCid.slice(0, 12)}…` : "Pin to permanent web"}
                       </span>
                     </Button>
                   </div>
@@ -437,16 +509,51 @@ const LivingArchivePage = () => {
               </Card>
             )}
 
+            {/* Seal History */}
+            {sealHistory.length > 0 && (
+              <Card className="border-primary/15 bg-card/50 backdrop-blur-md">
+                <CardHeader className="pb-3">
+                  <CardTitle className="font-serif text-lg text-primary">Seal History</CardTitle>
+                  <CardDescription className="font-serif text-xs">
+                    IPFS snapshots of your path
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {sealHistory.map((entry, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm py-1.5 px-2 rounded-md bg-primary/5">
+                      <Globe className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <code className="text-xs text-primary font-mono truncate flex-1">{entry.cid}</code>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {new Date(entry.date).toLocaleDateString()}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => {
+                          navigator.clipboard.writeText(entry.cid);
+                          toast.success("CID copied");
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Recovery */}
-            {archive && (
+            {archive && !gathering && (
               <Card className="border-primary/15 bg-card/50 backdrop-blur-md">
                 <CardHeader className="pb-3">
                   <CardTitle className="font-serif text-lg text-primary">Restore from Archive</CardTitle>
                   <CardDescription className="font-serif text-xs">
-                    Import a previously exported JSON archive to verify and review
+                    Import a previously exported archive to verify and review
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-3">
+                  {/* JSON import */}
                   <div className="flex items-center gap-3">
                     <Label
                       htmlFor="archive-import"
@@ -463,21 +570,70 @@ const LivingArchivePage = () => {
                       onChange={handleImportJSON}
                     />
                   </div>
+
+                  {/* Encrypted import */}
+                  <Dialog open={showDecryptDialog} onOpenChange={setShowDecryptDialog}>
+                    <DialogTrigger asChild>
+                      <button className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-primary/30 rounded-lg cursor-pointer hover:bg-primary/5 transition-colors text-sm font-serif text-muted-foreground">
+                        <Key className="w-4 h-4" />
+                        Decrypt Encrypted Archive (.s33d)
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-card border-primary/20">
+                      <DialogHeader>
+                        <DialogTitle className="font-serif text-primary">Decrypt Archive</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                          <Label className="font-serif text-sm">Encrypted File</Label>
+                          <Input
+                            ref={decryptInputRef}
+                            type="file"
+                            accept=".s33d"
+                            onChange={(e) => setDecryptFile(e.target.files?.[0] || null)}
+                            className="bg-background/50"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-serif text-sm">Passphrase</Label>
+                          <Input
+                            type="password"
+                            value={decryptPassword}
+                            onChange={(e) => setDecryptPassword(e.target.value)}
+                            placeholder="Enter your passphrase…"
+                            className="bg-background/50"
+                          />
+                        </div>
+                        <Button
+                          onClick={handleDecryptImport}
+                          disabled={!decryptFile || decryptPassword.length < 6}
+                          className="w-full"
+                          variant="mystical"
+                        >
+                          <Lock className="w-4 h-4 mr-2" />
+                          Decrypt & Restore
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
             )}
 
-            {/* Loading state */}
-            {gathering && !archive && (
+            {/* Loading state (first load only) */}
+            {!archive && !gathering && (
               <div className="flex flex-col items-center gap-4 py-12">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="font-serif text-sm text-muted-foreground">Gathering your roots…</p>
+                <p className="font-serif text-sm text-muted-foreground">No archive data available.</p>
+                <Button onClick={gatherData} variant="sacred">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Gather Roots
+                </Button>
               </div>
             )}
 
             {/* Sealed confirmation */}
             <AnimatePresence>
-              {sealed && (
+              {sealedCid && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -485,7 +641,7 @@ const LivingArchivePage = () => {
                   className="text-center py-6"
                 >
                   <p className="font-serif text-primary text-lg drop-shadow-[0_0_12px_hsl(var(--primary)/0.5)]">
-                    ✦ Your path is now woven into the Living Archive ✦
+                    ✦ Your path is woven into the Living Archive ✦
                   </p>
                 </motion.div>
               )}
