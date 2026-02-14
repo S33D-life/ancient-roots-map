@@ -1681,7 +1681,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
               { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount} found` : "no catalogued trees here") : `${enabledSources.length} source${enabledSources.length !== 1 ? "s" : ""}` },
               { label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(!showBirdsongHeat), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
-              { label: "🐝 Species Hives", active: showHiveLayer, toggle: () => setShowHiveLayer(!showHiveLayer), extra: showHiveLayer ? `${hiveMap.length} families` : "" },
+              { label: "🐝 Species Hives", active: showHiveLayer, toggle: () => { const next = !showHiveLayer; setShowHiveLayer(next); if (next) setLayerPanelOpen(false); }, extra: showHiveLayer ? `${hiveMap.length} families` : "" },
               { label: "📜 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount} records` : "none") : "DFFE" },
             ].map((layer) => (
               <button
@@ -1791,81 +1791,129 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* Species Hive legend — interactive */}
-      {showHiveLayer && hiveMap.length > 0 && (
+      {/* Species Hive — slide-over panel */}
+      <div
+        className="absolute top-0 left-0 z-[1002] h-full pointer-events-none"
+        style={{ width: "min(70%, 420px)" }}
+      >
         <div
-          className="absolute bottom-24 left-3 z-[1000] flex flex-col gap-1 px-3 py-2.5 rounded-lg overflow-y-auto"
+          className="h-full pointer-events-auto flex flex-col transition-transform duration-200 ease-out"
+          onTouchStart={(e) => { (e.currentTarget as any)._swipeX = e.touches[0].clientX; }}
+          onTouchEnd={(e) => {
+            const startX = (e.currentTarget as any)._swipeX;
+            if (startX != null) {
+              const dx = e.changedTouches[0].clientX - startX;
+              if (dx < -50) setShowHiveLayer(false);
+            }
+          }}
           style={{
-            background: "hsla(30, 15%, 10%, 0.92)",
-            border: "1px solid hsla(42, 40%, 30%, 0.5)",
-            backdropFilter: "blur(8px)",
-            animation: "popIn .2s ease-out",
-            maxHeight: "45vh",
+            transform: showHiveLayer ? "translateX(0)" : "translateX(-100%)",
+            background: "hsla(150, 15%, 8%, 0.90)",
+            borderRight: "1px solid hsla(42, 40%, 30%, 0.35)",
+            borderRadius: "0 14px 14px 0",
+            boxShadow: showHiveLayer ? "4px 0 24px rgba(0,0,0,0.35)" : "none",
+            backdropFilter: "blur(14px)",
           }}
         >
-          <div className="flex items-center justify-between mb-0.5">
-            <p className="text-[10px] font-serif tracking-wider" style={{ color: "hsl(42, 50%, 55%)" }}>
-              Species Hives
-            </p>
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-16 pb-2 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🐝</span>
+              <p className="text-sm font-serif tracking-wider" style={{ color: "hsl(42, 50%, 60%)" }}>
+                Species Hives
+              </p>
+              <span className="text-[10px] font-sans ml-1 tabular-nums" style={{ color: "hsl(42, 40%, 45%)" }}>
+                {hiveMap.length} families
+              </span>
+            </div>
             <button
               onClick={() => setShowHiveLayer(false)}
-              className="w-5 h-5 flex items-center justify-center rounded-full transition-colors hover:bg-white/10"
+              className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-white/10"
               style={{ color: "hsl(42, 50%, 55%)" }}
-              aria-label="Close hive legend"
+              aria-label="Close hive panel"
             >
               ✕
             </button>
           </div>
-          {hiveMap.map(({ hive, count, speciesList }) => {
-            const hue = hslStringToHue(hive.accentHsl);
-            const isFiltered = species.length > 0 && speciesList.some(rs =>
-              species.some(s => s.toLowerCase() === rs.toLowerCase())
-            );
-            return (
-              <button
-                key={hive.family}
-                onClick={() => {
-                  // Toggle: filter to this hive's actual species or clear
-                  if (isFiltered) {
-                    setSpecies([]);
-                  } else {
-                    setSpecies(speciesList);
-                  }
-                }}
-                className="flex items-center gap-2 transition-opacity group"
-                style={{ opacity: isFiltered ? 1 : 0.75 }}
-              >
-                <span
-                  className="inline-block w-3 h-3 rounded-sm shrink-0"
-                  style={{
-                    background: `hsl(${hue}, 55%, 45%)`,
-                    boxShadow: isFiltered ? `0 0 6px hsl(${hue}, 55%, 45%)` : "none",
-                    border: isFiltered ? `1.5px solid hsl(${hue}, 55%, 45%)` : "1px solid hsla(0,0%,100%,0.15)",
+
+          {/* Scrollable hive list */}
+          <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-0.5 overscroll-contain">
+            {hiveMap.map(({ hive, count, speciesList }) => {
+              const hue = hslStringToHue(hive.accentHsl);
+              const isFiltered = species.length > 0 && speciesList.some(rs =>
+                species.some(s => s.toLowerCase() === rs.toLowerCase())
+              );
+              return (
+                <button
+                  key={hive.family}
+                  onClick={() => {
+                    if (isFiltered) {
+                      setSpecies([]);
+                    } else {
+                      setSpecies(speciesList);
+                    }
                   }}
-                />
-                <span className="text-[11px] font-serif group-hover:underline" style={{ color: isFiltered ? `hsl(${hue}, 55%, 60%)` : "hsl(0, 0%, 62%)" }}>
-                  {hive.icon} {hive.displayName}
-                </span>
-                <span className="text-[9px] font-sans ml-auto pl-2 tabular-nums" style={{ color: "hsl(42, 40%, 45%)" }}>
-                  {count}
-                </span>
+                  className="w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-all group"
+                  style={{
+                    background: isFiltered ? `hsla(${hue}, 40%, 25%, 0.25)` : "transparent",
+                  }}
+                >
+                  <span
+                    className="inline-block w-3.5 h-3.5 rounded-sm shrink-0 transition-shadow"
+                    style={{
+                      background: `hsl(${hue}, 55%, 45%)`,
+                      boxShadow: isFiltered ? `0 0 8px hsl(${hue}, 55%, 45%)` : "none",
+                      border: isFiltered ? `1.5px solid hsl(${hue}, 55%, 55%)` : "1px solid hsla(0,0%,100%,0.15)",
+                    }}
+                  />
+                  <span
+                    className="text-[13px] font-serif group-hover:underline truncate"
+                    style={{ color: isFiltered ? `hsl(${hue}, 55%, 65%)` : "hsl(0, 0%, 65%)" }}
+                  >
+                    {hive.icon} {hive.displayName}
+                  </span>
+                  <span className="text-[10px] font-sans ml-auto pl-2 tabular-nums shrink-0" style={{ color: "hsl(42, 40%, 45%)" }}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+            {species.length > 0 && (
+              <button
+                onClick={() => setSpecies([])}
+                className="text-[10px] font-sans mt-2 transition-colors block mx-auto"
+                style={{ color: "hsl(42, 50%, 55%)" }}
+              >
+                Show all hives
               </button>
-            );
-          })}
-          {species.length > 0 && (
-            <button
-              onClick={() => setSpecies([])}
-              className="text-[9px] font-sans mt-0.5 transition-colors"
-              style={{ color: "hsl(42, 50%, 55%)" }}
-            >
-              Show all hives
-            </button>
-          )}
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Invisible map tap catcher to close hive panel */}
+      {showHiveLayer && (
+        <div
+          className="absolute inset-0 z-[1001]"
+          style={{ left: "min(70%, 420px)" }}
+          onClick={() => setShowHiveLayer(false)}
+        />
       )}
 
-      {/* Bottom controls: add-tree left, locate centred, layers right — above attribution */}
-      <div className="absolute bottom-8 left-3 z-[1000]">
+      {/* Bottom controls: add-tree left, hive + locate centred, layers right — above attribution */}
+      <div className="absolute bottom-8 left-3 z-[1000] flex flex-col gap-2">
+        <button
+          onClick={() => { const next = !showHiveLayer; setShowHiveLayer(next); if (next) setLayerPanelOpen(false); }}
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
+          style={{
+            ...btnBase,
+            color: showHiveLayer ? "hsl(42, 90%, 55%)" : "hsl(42, 60%, 60%)",
+            background: showHiveLayer ? "hsla(42, 50%, 20%, 0.95)" : btnBase.background,
+          }}
+          title="Species Hives"
+        >
+          <span className="text-[18px] leading-none">🐝</span>
+        </button>
         <button
           onClick={() => {
             const map = mapRef.current;
@@ -1904,7 +1952,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           <Compass className="w-[18px] h-[18px]" />
         </button>
         <button
-          onClick={() => setLayerPanelOpen(!layerPanelOpen)}
+          onClick={() => { const next = !layerPanelOpen; setLayerPanelOpen(next); if (next) setShowHiveLayer(false); }}
           className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
           style={{
             ...btnBase,
