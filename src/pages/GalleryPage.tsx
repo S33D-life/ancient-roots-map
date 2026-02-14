@@ -340,7 +340,7 @@ const GalleryPage = () => {
   }, []);
 
   // Centralized offerings via shared hook
-  const { offerings, refetch: refetchOfferings } = useOfferings({ treeId: selectedTree?.id });
+  const { offerings, loading: offeringsLoading, refetch: refetchOfferings } = useOfferings({ treeId: selectedTree?.id });
 
   const fetchTrees = async () => {
     try {
@@ -1532,7 +1532,27 @@ const GalleryPage = () => {
                     />
                   </div>
 
-                  {offerings.length === 0 ? (
+                  {offeringsLoading ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="border-border animate-pulse">
+                          <CardHeader>
+                            <div className="flex items-center gap-2">
+                              <div className="h-4 w-4 rounded bg-muted" />
+                              <div className="h-5 w-40 rounded bg-muted" />
+                              <div className="ml-auto h-5 w-16 rounded-full bg-muted" />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <div className="h-4 w-full rounded bg-muted" />
+                              <div className="h-4 w-3/4 rounded bg-muted" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : offerings.length === 0 ? (
                     <p className="text-center py-8 text-muted-foreground">
                       No offerings yet. Be the first to add one!
                     </p>
