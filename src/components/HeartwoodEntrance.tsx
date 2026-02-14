@@ -118,7 +118,7 @@ const HeartwoodEntrance = ({ onComplete }: HeartwoodEntranceProps) => {
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
-      const t = Math.min(elapsed / DURATION, 1);
+      const t = Math.max(0, Math.min(elapsed / DURATION, 1));
       setProgress(t);
 
       // Text fades in at 30%
@@ -143,7 +143,7 @@ const HeartwoodEntrance = ({ onComplete }: HeartwoodEntranceProps) => {
 
       // Central warm glow
       const glowRadius = maxRadius * 0.6 * easeOutCubic(t);
-      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(0.1, glowRadius));
       glow.addColorStop(0, `hsla(30, 60%, 25%, ${0.3 * easeOutCubic(t)})`);
       glow.addColorStop(0.5, `hsla(25, 50%, 18%, ${0.15 * easeOutCubic(t)})`);
       glow.addColorStop(1, "transparent");

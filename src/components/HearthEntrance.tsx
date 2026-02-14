@@ -68,7 +68,7 @@ const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
-      const t = Math.min(elapsed / DURATION, 1);
+      const t = Math.max(0, Math.min(elapsed / DURATION, 1));
       setTextOpacity(t < 0.15 ? t / 0.15 : t > 0.85 ? (1 - t) / 0.15 : 1);
 
       const w = W();
@@ -90,7 +90,7 @@ const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
       const breathe = 0.85 + Math.sin(elapsed * 0.003) * 0.15;
 
       // Hearth glow — warm pulse
-      const glowR = 40 * ease * breathe;
+      const glowR = Math.max(0.1, 40 * ease * breathe);
       const g1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
       g1.addColorStop(0, `hsla(30, 70%, 45%, ${0.3 * ease})`);
       g1.addColorStop(0.4, `hsla(25, 55%, 30%, ${0.15 * ease})`);
@@ -100,7 +100,7 @@ const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
       ctx.fillRect(cx - glowR, cy - glowR, glowR * 2, glowR * 2);
 
       // Inner ember core
-      const coreR = 5 * ease * breathe;
+      const coreR = Math.max(0.1, 5 * ease * breathe);
       const g2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
       g2.addColorStop(0, `hsla(35, 85%, 60%, ${0.6 * ease})`);
       g2.addColorStop(0.5, `hsla(28, 70%, 45%, ${0.3 * ease})`);
@@ -111,7 +111,7 @@ const HearthEntrance = ({ onComplete }: HearthEntranceProps) => {
       ctx.fill();
 
       // Outer ambient warmth
-      const ambR = 180 * ease;
+      const ambR = Math.max(0.1, 180 * ease);
       const g3 = ctx.createRadialGradient(cx, cy, 0, cx, cy, ambR);
       g3.addColorStop(0, `hsla(28, 40%, 25%, ${0.06 * ease})`);
       g3.addColorStop(1, "transparent");
