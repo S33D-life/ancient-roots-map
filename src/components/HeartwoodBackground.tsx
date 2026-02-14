@@ -71,7 +71,12 @@ const DAWN = {
   floorGlow: "radial-gradient(ellipse 60% 100% at 50% 100%, hsl(38 40% 75% / 0.15), transparent 70%)",
 };
 
-const HeartwoodBackground = () => {
+interface HeartwoodBackgroundProps {
+  /** Set false to disable parallax scrolling (saves CPU on low-end devices) */
+  parallax?: boolean;
+}
+
+const HeartwoodBackground = ({ parallax = true }: HeartwoodBackgroundProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const motesRef = useRef<Mote[]>([]);
@@ -96,8 +101,9 @@ const HeartwoodBackground = () => {
 
   const palette = isDark ? NIGHT : DAWN;
 
-  // Throttled scroll listener for parallax
+  // Throttled scroll listener for parallax (skipped when disabled)
   useEffect(() => {
+    if (!parallax) return;
     let ticking = false;
     const onScroll = () => {
       if (!ticking) {
@@ -110,7 +116,7 @@ const HeartwoodBackground = () => {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [parallax]);
 
   const initMotes = useCallback((w: number, h: number) => {
     const motes: Mote[] = [];
@@ -196,12 +202,12 @@ const HeartwoodBackground = () => {
     };
   }, [initMotes]);
 
-  // Parallax offsets
-  const p = Math.min(scrollY * 0.15, 80);
-  const p2 = Math.min(scrollY * 0.08, 40);
-  const p3 = Math.min(scrollY * 0.12, 60);
-  const p4 = Math.min(scrollY * 0.05, 30);
-  const fadeOut = Math.max(0, 1 - scrollY / 800);
+  // Parallax offsets (zero when disabled for perf)
+  const p = parallax ? Math.min(scrollY * 0.15, 80) : 0;
+  const p2 = parallax ? Math.min(scrollY * 0.08, 40) : 0;
+  const p3 = parallax ? Math.min(scrollY * 0.12, 60) : 0;
+  const p4 = parallax ? Math.min(scrollY * 0.05, 30) : 0;
+  const fadeOut = parallax ? Math.max(0, 1 - scrollY / 800) : 1;
 
   return (
     <div ref={containerRef} className="absolute inset-0 overflow-hidden transition-colors duration-700" aria-hidden="true">
