@@ -1,14 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import {
   Globe, TreeDeciduous, MapPin, Eye, Shield, Scroll, Footprints,
   ChevronRight, Heart, BookOpen, ExternalLink, Sparkles, Compass,
-  Leaf, Users,
+  Leaf, Users, Search, X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
@@ -170,6 +171,10 @@ const CountryCard = ({ stat, isPioneer }: { stat: CountryStats; isPioneer?: bool
 const WorldAtlasPage = () => {
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [treeResults, setTreeResults] = useState<{ id: string; name: string; species: string; country: string }[]>([]);
+  const [treeSearching, setTreeSearching] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -235,6 +240,49 @@ const WorldAtlasPage = () => {
   const activeCount = countryStats.filter(c => c.status === "active").length;
   const totalRecords = countryStats.reduce((s, c) => s + c.treeCount, 0);
 
+  /* ─── Search logic ─── */
+  const q = searchQuery.trim().toLowerCase();
+
+  const filteredCountries = useMemo(() => {
+    if (!q) return [];
+    return countryStats.filter(
+      c => c.country.toLowerCase().includes(q) || c.descriptor.toLowerCase().includes(q)
+    );
+  }, [q, countryStats]);
+
+  const filteredPathways = useMemo(() => {
+    if (!q) return [];
+    return PATHWAYS.filter(
+      p => p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)
+    );
+  }, [q]);
+
+  // Debounced tree search from research_trees
+  useEffect(() => {
+    if (!q || q.length < 2) { setTreeResults([]); return; }
+    setTreeSearching(true);
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("research_trees")
+        .select("id, tree_name, species_common, species_scientific, country")
+        .or(`tree_name.ilike.%${q}%,species_common.ilike.%${q}%,species_scientific.ilike.%${q}%`)
+        .limit(8);
+      setTreeResults(
+        (data || []).map(r => ({
+          id: r.id,
+          name: r.tree_name || r.species_common || r.species_scientific,
+          species: r.species_scientific,
+          country: r.country,
+        }))
+      );
+      setTreeSearching(false);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [q]);
+
+  const hasResults = filteredCountries.length > 0 || filteredPathways.length > 0 || treeResults.length > 0;
+  const showDropdown = q.length > 0;
+
   return (
     <PageShell>
       <div className="min-h-screen pb-24">
@@ -278,6 +326,111 @@ const WorldAtlasPage = () => {
               How this Atlas Grows ↓
             </button>
           </motion.div>
+        </section>
+
+        {/* ─── Search Bar ─── */}
+        <section className="px-4 max-w-xl mx-auto mb-6 -mt-1 relative z-20">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              ref={searchRef}
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search countries, pathways, or trees…"
+              className="pl-9 pr-8 bg-card/70 backdrop-blur border-primary/15 focus:border-primary/40 font-serif text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => { setSearchQuery(""); searchRef.current?.focus(); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Results dropdown */}
+            {showDropdown && (
+              <Card className="absolute top-full mt-1.5 left-0 right-0 border-primary/20 bg-card/95 backdrop-blur shadow-lg overflow-hidden z-30">
+                <CardContent className="p-0 max-h-72 overflow-y-auto">
+                  {!hasResults && !treeSearching && (
+                    <p className="py-6 text-center text-xs text-muted-foreground italic">No results found</p>
+                  )}
+
+                  {/* Countries */}
+                  {filteredCountries.length > 0 && (
+                    <div>
+                      <p className="px-3 pt-2.5 pb-1 text-[10px] font-sans uppercase tracking-wider text-muted-foreground/60">Countries</p>
+                      {filteredCountries.map(c => (
+                        <Link
+                          key={c.country}
+                          to={c.status === "active" ? `/atlas/${c.slug}` : "#"}
+                          onClick={() => setSearchQuery("")}
+                          className="flex items-center gap-2.5 px-3 py-2 hover:bg-primary/5 transition-colors"
+                        >
+                          <span className="text-lg">{c.flag}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-serif text-foreground truncate">{c.country}</p>
+                            <p className="text-[10px] text-muted-foreground">{c.treeCount} records · {c.status}</p>
+                          </div>
+                          {c.status === "active" && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Pathways */}
+                  {filteredPathways.length > 0 && (
+                    <div>
+                      <p className="px-3 pt-2.5 pb-1 text-[10px] font-sans uppercase tracking-wider text-muted-foreground/60">Pathways</p>
+                      {filteredPathways.map(p => (
+                        <Link
+                          key={p.slug}
+                          to={`/atlas/pathways/${p.slug}`}
+                          onClick={() => setSearchQuery("")}
+                          className="flex items-center gap-2.5 px-3 py-2 hover:bg-primary/5 transition-colors"
+                        >
+                          <div className="p-1 rounded bg-primary/10">
+                            <p.icon className="w-3.5 h-3.5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-serif text-foreground truncate">{p.title}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">{p.desc}</p>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Trees */}
+                  {treeResults.length > 0 && (
+                    <div>
+                      <p className="px-3 pt-2.5 pb-1 text-[10px] font-sans uppercase tracking-wider text-muted-foreground/60">Trees</p>
+                      {treeResults.map(t => (
+                        <Link
+                          key={t.id}
+                          to={`/discovery?search=${encodeURIComponent(t.name)}`}
+                          onClick={() => setSearchQuery("")}
+                          className="flex items-center gap-2.5 px-3 py-2 hover:bg-primary/5 transition-colors"
+                        >
+                          <TreeDeciduous className="w-4 h-4 text-primary/60 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-serif text-foreground truncate">{t.name}</p>
+                            <p className="text-[10px] text-muted-foreground italic truncate">{t.species} · {t.country}</p>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {treeSearching && (
+                    <p className="py-3 text-center text-[10px] text-muted-foreground animate-pulse">Searching trees…</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </section>
 
         {/* ─── B) Context Panel ─── */}
