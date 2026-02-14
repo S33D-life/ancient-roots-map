@@ -3,10 +3,6 @@ import { Navigate } from "react-router-dom";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
-const AtlasRedirect = () => {
-  const search = window.location.search;
-  return <Navigate to={`/map${search}`} replace />;
-};
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
@@ -54,6 +50,7 @@ const HiveTreasuryPage = lazy(() => import("./pages/HiveTreasuryPage"));
 const LivingArchivePage = lazy(() => import("./pages/LivingArchivePage"));
 const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
 const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
+const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -115,7 +112,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/map" element={<MapPage />} />
-                <Route path="/atlas" element={<AtlasRedirect />} />
+                <Route path="/atlas" element={<WorldAtlasPage />} />
                 <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
