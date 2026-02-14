@@ -69,6 +69,7 @@ import NFTreeStudio from "@/components/NFTreeStudio";
 import TreeCard from "@/components/TreeCard";
 // TetolBreadcrumb removed — Library uses its own contextual breadcrumb
 import TetolBridge from "@/components/TetolBridge";
+import GalleryFilterDrawer from "@/components/GalleryFilterDrawer";
 
 interface Tree {
   id: string;
@@ -1027,67 +1028,23 @@ const GalleryPage = () => {
               ))}
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4">
-              <Input
-                placeholder="Search by name, species, or what3words..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
+            <div className="flex justify-end">
+              <GalleryFilterDrawer
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                speciesFilter={speciesFilter}
+                onSpeciesChange={setSpeciesFilter}
+                lineageFilter={lineageFilter}
+                onLineageChange={setLineageFilter}
+                projectFilter={projectFilter}
+                onProjectChange={setProjectFilter}
+                staffFilter={staffFilter}
+                onStaffChange={setStaffFilter}
+                uniqueSpecies={uniqueSpecies}
+                uniqueLineages={uniqueLineages}
+                uniqueProjects={uniqueProjects}
+                staffCodes={staffCodes}
               />
-              <Select value={speciesFilter} onValueChange={setSpeciesFilter}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder="Filter by species" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Species</SelectItem>
-                  {uniqueSpecies.map((species) => (
-                    <SelectItem key={species} value={species}>
-                      {species}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {uniqueLineages.length > 0 && (
-                <Select value={lineageFilter} onValueChange={setLineageFilter}>
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder="Filter by lineage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Lineages</SelectItem>
-                    {uniqueLineages.map((l) => (
-                      <SelectItem key={l} value={l}>{l}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              {uniqueProjects.length > 0 && (
-                <Select value={projectFilter} onValueChange={setProjectFilter}>
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder="Filter by project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Projects</SelectItem>
-                    {uniqueProjects.map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              {staffCodes.length > 0 && (
-                <Select value={staffFilter} onValueChange={setStaffFilter}>
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <SelectValue placeholder="Filter by staff" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Staffs</SelectItem>
-                    {staffCodes.map((code) => (
-                      <SelectItem key={code} value={code}>
-                        {code}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
             </div>
           </TabsContent>
 
