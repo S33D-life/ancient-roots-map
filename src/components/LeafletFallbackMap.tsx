@@ -620,41 +620,60 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     const isLineageFocused = lineageFilter !== "all";
     const isGroveFocused = groveScale !== "all";
     const tightCluster = isLineageFocused || isGroveFocused;
+    const treeCount = filteredTrees.length;
+
+    // Dynamically choose disableClusteringAtZoom based on visible tree count + context
+    const disableZoom = groveScale === "hyper_local"
+      ? 14
+      : groveScale === "local"
+      ? 15
+      : tightCluster
+      ? 16
+      : treeCount <= 50
+      ? 15   // Few trees — uncluster earlier for detail
+      : treeCount <= 200
+      ? 16
+      : treeCount <= 500
+      ? 17
+      : 18;  // Many trees — keep clustered longer for performance
 
     const clusterGroup = (L as any).markerClusterGroup({
       maxClusterRadius: (zoom: number) => {
+        // Scale radius based on tree density and zoom
+        const densityFactor = treeCount > 500 ? 1.2 : treeCount > 200 ? 1.0 : 0.85;
+
         if (groveScale === "hyper_local") {
-          // Ultra-tight — show individual trees almost immediately
-          if (zoom <= 14) return 30;
-          return 15;
+          return zoom <= 14 ? 30 : 12;
         }
         if (groveScale === "local") {
-          if (zoom <= 10) return 45;
-          if (zoom <= 14) return 30;
-          return 20;
-        }
-        if (tightCluster) {
-          if (zoom <= 6) return 60;
-          if (zoom <= 10) return 40;
-          if (zoom <= 14) return 25;
+          if (zoom <= 10) return Math.round(45 * densityFactor);
+          if (zoom <= 14) return Math.round(28 * densityFactor);
           return 18;
         }
-        // Default multi-lineage view
-        if (zoom <= 4) return 80;
-        if (zoom <= 8) return 65;
-        if (zoom <= 11) return 50;
-        if (zoom <= 14) return 35;
-        return 25;
+        if (tightCluster) {
+          if (zoom <= 6) return Math.round(55 * densityFactor);
+          if (zoom <= 10) return Math.round(38 * densityFactor);
+          if (zoom <= 14) return Math.round(24 * densityFactor);
+          return 15;
+        }
+        // Default — smoothly decrease radius through zoom levels
+        if (zoom <= 4) return Math.round(75 * densityFactor);
+        if (zoom <= 6) return Math.round(65 * densityFactor);
+        if (zoom <= 8) return Math.round(55 * densityFactor);
+        if (zoom <= 10) return Math.round(45 * densityFactor);
+        if (zoom <= 12) return Math.round(35 * densityFactor);
+        if (zoom <= 14) return Math.round(28 * densityFactor);
+        return 20;
       },
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       animate: true,
       animateAddingMarkers: false,
-      disableClusteringAtZoom: groveScale === "hyper_local" ? 14 : tightCluster ? 16 : 18,
+      disableClusteringAtZoom: disableZoom,
       chunkedLoading: true,
-      chunkInterval: 80,
-      chunkDelay: 8,
+      chunkInterval: treeCount > 500 ? 100 : treeCount > 200 ? 80 : 50,
+      chunkDelay: treeCount > 500 ? 12 : 8,
       spiderfyDistanceMultiplier: 1.8,
       spiderLegPolylineOptions: {
         weight: 1.5,
