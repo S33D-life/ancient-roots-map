@@ -794,35 +794,26 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     map.addLayer(clusterGroup);
     clusterRef.current = clusterGroup;
 
-    // Real-time clustering threshold adjustments on zoom
-    const adjustClusteringOnZoom = () => {
-      const z = map.getZoom();
+    // ── Per-geo-spiderfy preload with jitter prevention ──
+    // Cache last computed state to skip redundant recalculations during rapid zoom
+    let lastSpiderfyState = { zoom: -1, densityBand: -1, disableZoom: -1, timerHandle: 0 as any };
+
+    const computeDensityBand = (count: number): number =>
+      count > 200 ? 4 : count > 80 ? 3 : count > 30 ? 2 : 1;
+
+    const applyClusteringUpdate = (z: number, visibleCount: number, densityBand: number) => {
       const opts = (clusterGroup as any).options;
 
-      // Count visible markers in viewport for density-aware tuning
-      const bounds = map.getBounds();
-      let visibleCount = 0;
-      filteredTrees.forEach(t => {
-        if (bounds.contains([t.latitude, t.longitude])) visibleCount++;
-      });
-
-      // Spiderfy distance — spread more at high zoom
+      // Spiderfy distance — spread more at high zoom for stable spacing
       opts.spiderfyDistanceMultiplier = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
 
-      // Dynamically adjust disableClusteringAtZoom based on visible density
-      // Fewer visible trees → uncluster earlier; many → keep clusters longer
-      const newDisable = visibleCount > 200 ? 18 : visibleCount > 80 ? 17 : visibleCount > 30 ? 16 : 15;
+      // Density-aware uncluster threshold
+      const newDisable = densityBand >= 4 ? 18 : densityBand >= 3 ? 17 : densityBand >= 2 ? 16 : 15;
+
       if (opts.disableClusteringAtZoom !== newDisable) {
         opts.disableClusteringAtZoom = newDisable;
-        // Force cluster recalculation only when threshold actually changed
-        clusterGroup.clearLayers();
-        filteredTrees.forEach((tree: any) => {
-          const existingMarker = (clusterGroup as any)._featureGroup?.getLayers?.()?.find?.((l: any) => l.options?._treeId === tree.id);
-          if (!existingMarker) {
-            // Re-add markers; the main effect re-renders will handle full repopulation
-          }
-        });
-        // Trigger a lightweight re-process by toggling layer
+        lastSpiderfyState.disableZoom = newDisable;
+        // Lightweight re-process by toggling layer
         map.removeLayer(clusterGroup);
         map.addLayer(clusterGroup);
       }
@@ -830,10 +821,54 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       // Adjust chunked loading params for current density
       opts.chunkInterval = visibleCount > 300 ? 120 : visibleCount > 100 ? 80 : 50;
       opts.chunkDelay = visibleCount > 300 ? 14 : visibleCount > 100 ? 10 : 6;
+
+      lastSpiderfyState.zoom = z;
+      lastSpiderfyState.densityBand = densityBand;
     };
+
+    const adjustClusteringOnZoom = () => {
+      const z = map.getZoom();
+
+      // Quick bail-out: if zoom hasn't changed, skip expensive viewport scan
+      // (moveend without zoom change only matters if density might shift significantly)
+      const zoomChanged = Math.abs(z - lastSpiderfyState.zoom) >= 0.5;
+
+      // Debounce rapid zooms — cancel any pending update, schedule a new one
+      if (lastSpiderfyState.timerHandle) {
+        clearTimeout(lastSpiderfyState.timerHandle);
+        lastSpiderfyState.timerHandle = 0;
+      }
+
+      // For rapid zoom sequences, defer the heavy work by 120ms
+      // This prevents jitter from repeated cluster toggling mid-animation
+      const delay = zoomChanged ? 120 : 200;
+
+      lastSpiderfyState.timerHandle = setTimeout(() => {
+        lastSpiderfyState.timerHandle = 0;
+        const currentZ = map.getZoom();
+        const bounds = map.getBounds();
+        let visibleCount = 0;
+        filteredTrees.forEach(t => {
+          if (bounds.contains([t.latitude, t.longitude])) visibleCount++;
+        });
+        const band = computeDensityBand(visibleCount);
+
+        // Skip if nothing meaningful changed (same zoom band + same density band)
+        const zoomBand = Math.floor(currentZ);
+        const prevZoomBand = Math.floor(lastSpiderfyState.zoom);
+        if (zoomBand === prevZoomBand && band === lastSpiderfyState.densityBand) return;
+
+        applyClusteringUpdate(currentZ, visibleCount, band);
+      }, delay);
+    };
+
     map.on("zoomend", adjustClusteringOnZoom);
     map.on("moveend", adjustClusteringOnZoom);
-    adjustClusteringOnZoom();
+    // Initial calculation — run immediately without debounce
+    const bounds0 = map.getBounds();
+    let vc0 = 0;
+    filteredTrees.forEach(t => { if (bounds0.contains([t.latitude, t.longitude])) vc0++; });
+    applyClusteringUpdate(map.getZoom(), vc0, computeDensityBand(vc0));
 
     // Only auto-fit on first load
     if (!hasFittedRef.current && filteredTrees.length > 0) {
