@@ -171,10 +171,17 @@ const AnimatedCounter = ({ target, label }: { target: number; label: string }) =
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
+  const lastTarget = useRef(0);
 
   useEffect(() => {
+    // Reset animation flag when target changes from 0 to a real value
+    if (target > 0 && lastTarget.current === 0) {
+      hasAnimated.current = false;
+    }
+    lastTarget.current = target;
+
     const el = ref.current;
-    if (!el) return;
+    if (!el || target === 0) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
