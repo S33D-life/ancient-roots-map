@@ -832,12 +832,43 @@ const GalleryPage = () => {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
-          <h1 className="text-5xl md:text-7xl font-serif tracking-wider mb-4 text-center" style={{ color: 'hsl(38 75% 65%)', textShadow: '0 0 50px hsl(38 80% 35% / 0.5), 0 2px 20px hsl(25 60% 20% / 0.6)' }}>
-            HEARTWOOD
-          </h1>
-          <p className="font-serif text-lg md:text-xl mb-12 text-center max-w-md" style={{ color: 'hsl(38 50% 70% / 0.6)' }}>
-            A Library of Love
-          </p>
+          {/* Title area with breathing radial glow */}
+          <div className="relative flex flex-col items-center">
+            {/* Breathing glow backdrop — respects prefers-reduced-motion */}
+            <div
+              className="absolute inset-0 -inset-x-16 -inset-y-8 pointer-events-none motion-safe:animate-[titleBreathe_6s_ease-in-out_infinite]"
+              aria-hidden="true"
+              style={{
+                background: 'radial-gradient(ellipse 70% 60% at 50% 45%, hsl(38 70% 40% / 0.18), hsl(30 60% 25% / 0.06) 55%, transparent 80%)',
+                filter: 'blur(24px)',
+              }}
+            />
+            <h1
+              className="relative text-5xl md:text-7xl font-serif tracking-wider mb-4 text-center"
+              style={{
+                color: 'hsl(38 75% 65%)',
+                textShadow: '0 0 50px hsl(38 80% 35% / 0.5), 0 2px 20px hsl(25 60% 20% / 0.6), 0 0 2px hsl(20 20% 8% / 0.9)',
+              }}
+            >
+              HEARTWOOD
+            </h1>
+            <p
+              className="relative font-serif text-lg md:text-xl mb-12 text-center max-w-md"
+              style={{
+                color: 'hsl(38 50% 75% / 0.7)',
+                textShadow: '0 1px 8px hsl(20 20% 8% / 0.8)',
+              }}
+            >
+              A Library of Love
+            </p>
+          </div>
+
+          <style>{`
+            @keyframes titleBreathe {
+              0%, 100% { opacity: 0.5; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.06); }
+            }
+          `}</style>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl w-full">
             {[
