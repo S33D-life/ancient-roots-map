@@ -99,7 +99,7 @@ interface WishlistItem {
   trees: Tree;
 }
 
-const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger", "vault"];
+const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger", "vault", "archive"];
 
 /** Collective Vault card for DAOs */
 const CollectiveVaultCard = ({ name, description, members, hearts, slug }: { name: string; description: string; members: number; hearts: number; slug: string }) => (
@@ -195,6 +195,10 @@ const GalleryPage = () => {
   const [vaultRevealed, setVaultRevealed] = useState(!!roomParam && roomParam === "vault");
 
   const handleTabChange = (tab: string) => {
+    if (tab === "archive") {
+      navigate("/living-archive");
+      return;
+    }
     setActiveTab(tab);
     navigate(`/library/${tab}`, { replace: true });
   };
