@@ -455,6 +455,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [hivesCollapsed, setHivesCollapsed] = useState(false);
   const [signalsCollapsed, setSignalsCollapsed] = useState(true);
   const [structuresCollapsed, setStructuresCollapsed] = useState(true);
+  const [wandererCollapsed, setWandererCollapsed] = useState(true);
+  const [showRecentVisits, setShowRecentVisits] = useState(false);
+  const [showSeedTraces, setShowSeedTraces] = useState(false);
+  const [showSharedTrees, setShowSharedTrees] = useState(false);
+  const [showTribeActivity, setShowTribeActivity] = useState(false);
 
   // hiveMap moved after filteredTrees declaration
 
@@ -1905,6 +1910,58 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                           {(layer as any).extra}
                         </span>
                       )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ── 4. Wanderer Activity (collapsed & off by default) ── */}
+            <div className="border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
+              <button
+                onClick={() => setWandererCollapsed(!wandererCollapsed)}
+                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
+                style={{ color: "hsl(260, 35%, 60%)" }}
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-base">◌</span>
+                  <span className="text-[13px] font-serif font-medium">Wanderer Activity</span>
+                </span>
+                <span className="text-[10px] transition-transform" style={{ transform: wandererCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
+              </button>
+
+              {!wandererCollapsed && (
+                <div className="px-3 pb-3 space-y-0.5">
+                  <p className="text-[10px] font-sans px-2 pb-2 leading-relaxed" style={{ color: "hsla(260, 20%, 55%, 0.7)" }}>
+                    Sense the presence of others — gently, like traces in a forest.
+                  </p>
+                  {[
+                    { label: "◎ Recent Visits", desc: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => setShowRecentVisits(!showRecentVisits) },
+                    { label: "✿ Seed & Offering Traces", desc: "Subtle pulses that fade over time", active: showSeedTraces, toggle: () => setShowSeedTraces(!showSeedTraces) },
+                    { label: "◐ Shared Trees", desc: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => setShowSharedTrees(!showSharedTrees) },
+                    { label: "⊛ Tribe Activity", desc: "Opt-in visibility for invited wanderers", active: showTribeActivity, toggle: () => setShowTribeActivity(!showTribeActivity) },
+                  ].map((layer) => (
+                    <button
+                      key={layer.label}
+                      onClick={layer.toggle}
+                      className="w-full flex flex-col gap-0.5 px-2 py-2.5 rounded-md text-left transition-colors group"
+                    >
+                      <div className="flex items-center gap-2.5" style={{ color: layer.active ? "hsl(260, 55%, 70%)" : "hsl(260, 25%, 45%)" }}>
+                        <div
+                          className="w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-all"
+                          style={{
+                            borderColor: layer.active ? "hsl(260, 55%, 65%)" : "hsla(260, 30%, 35%, 0.5)",
+                            background: layer.active ? "hsla(260, 55%, 55%, 0.2)" : "transparent",
+                            boxShadow: layer.active ? "0 0 6px hsla(260, 60%, 60%, 0.3)" : "none",
+                          }}
+                        >
+                          {layer.active && <span className="block w-1.5 h-1.5 rounded-full" style={{ background: "hsl(260, 60%, 70%)" }} />}
+                        </div>
+                        <span className="text-[12px] font-serif">{layer.label}</span>
+                      </div>
+                      <span className="text-[9px] font-sans pl-6 leading-snug" style={{ color: "hsla(260, 20%, 50%, 0.6)" }}>
+                        {layer.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
