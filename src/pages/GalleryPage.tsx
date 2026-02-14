@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import AddOfferingDialog from "@/components/AddOfferingDialog";
+import type { Database } from "@/integrations/supabase/types";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
@@ -216,6 +218,7 @@ const GalleryPage = () => {
   const [offerings, setOfferings] = useState<Offering[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOfferingDialogOpen, setIsOfferingDialogOpen] = useState(false);
+  const [galleryOfferingType, setGalleryOfferingType] = useState<Database["public"]["Enums"]["offering_type"]>("photo");
   const [searchQuery, setSearchQuery] = useState("");
   const [speciesFilter, setSpeciesFilter] = useState<string>("all");
   const [lineageFilter, setLineageFilter] = useState<string>("all");
@@ -332,13 +335,7 @@ const GalleryPage = () => {
     { title: "Drumming the World Awake", artist: "Diane Patterson" },
     { title: "All Along the Watchtower", artist: "Jimi Hendrix" },
   ];
-  const [offeringForm, setOfferingForm] = useState({
-    title: "",
-    type: "photo",
-    content: "",
-    media_url: "",
-    nft_link: "",
-  });
+  // offeringForm removed — now using AddOfferingDialog component
 
   // Splash is now handled by HeartwoodEntrance component
 
@@ -601,49 +598,7 @@ const GalleryPage = () => {
     }
   };
 
-  const handleAddOffering = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast.error("Please log in to add offerings");
-      return;
-    }
-
-    if (!selectedTree) return;
-
-    try {
-      const offeringData: any = {
-        tree_id: selectedTree.id,
-        title: offeringForm.title,
-        type: offeringForm.type,
-        created_by: user.id,
-      };
-
-      if (offeringForm.content) offeringData.content = offeringForm.content;
-      if (offeringForm.media_url) offeringData.media_url = offeringForm.media_url;
-      if (offeringForm.nft_link) offeringData.nft_link = offeringForm.nft_link;
-
-      const { error } = await supabase.from("offerings").insert(offeringData);
-
-      if (error) throw error;
-
-      toast.success("Offering added successfully!");
-      setIsOfferingDialogOpen(false);
-      setOfferingForm({
-        title: "",
-        type: "photo",
-        content: "",
-        media_url: "",
-        nft_link: "",
-      });
-      fetchOfferings(selectedTree.id);
-    } catch (error) {
-      console.error("Error adding offering:", error);
-      toast.error("Failed to add offering");
-    }
-  };
+  // handleAddOffering removed — now using AddOfferingDialog component
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -1586,84 +1541,20 @@ const GalleryPage = () => {
                 <div className="border-t border-mystical pt-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-serif font-bold">Offerings</h3>
-                    <Dialog open={isOfferingDialogOpen} onOpenChange={setIsOfferingDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="sacred" size="sm">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Offering
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle className="font-serif">Add Offering</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleAddOffering} className="space-y-4">
-                          <div>
-                            <Label htmlFor="offeringTitle">Title *</Label>
-                            <Input
-                              id="offeringTitle"
-                              value={offeringForm.title}
-                              onChange={(e) => setOfferingForm({ ...offeringForm, title: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="offeringType">Type *</Label>
-                            <Select
-                              value={offeringForm.type}
-                              onValueChange={(value) => setOfferingForm({ ...offeringForm, type: value })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="photo">Photo</SelectItem>
-                                <SelectItem value="poem">Poem</SelectItem>
-                                <SelectItem value="song">Song</SelectItem>
-                                <SelectItem value="story">Story</SelectItem>
-                                <SelectItem value="nft">NFT Link</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          {offeringForm.type === "photo" && (
-                            <div>
-                              <Label htmlFor="mediaUrl">Photo URL</Label>
-                              <Input
-                                id="mediaUrl"
-                                type="url"
-                                value={offeringForm.media_url}
-                                onChange={(e) => setOfferingForm({ ...offeringForm, media_url: e.target.value })}
-                              />
-                            </div>
-                          )}
-                          {offeringForm.type === "nft" && (
-                            <div>
-                              <Label htmlFor="nftLink">NFT Link</Label>
-                              <Input
-                                id="nftLink"
-                                type="url"
-                                value={offeringForm.nft_link}
-                                onChange={(e) => setOfferingForm({ ...offeringForm, nft_link: e.target.value })}
-                              />
-                            </div>
-                          )}
-                          {["poem", "song", "story"].includes(offeringForm.type) && (
-                            <div>
-                              <Label htmlFor="content">Content</Label>
-                              <Textarea
-                                id="content"
-                                value={offeringForm.content}
-                                onChange={(e) => setOfferingForm({ ...offeringForm, content: e.target.value })}
-                                rows={6}
-                              />
-                            </div>
-                          )}
-                          <Button type="submit" variant="sacred" className="w-full">
-                            Add Offering
-                          </Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
+                    <Button variant="sacred" size="sm" onClick={() => { setGalleryOfferingType("photo"); setIsOfferingDialogOpen(true); }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Offering
+                    </Button>
+                    <AddOfferingDialog
+                      open={isOfferingDialogOpen}
+                      onOpenChange={(open) => {
+                        setIsOfferingDialogOpen(open);
+                        if (!open && selectedTree) fetchOfferings(selectedTree.id);
+                      }}
+                      treeId={selectedTree?.id || ""}
+                      treeSpecies={selectedTree?.species}
+                      type={galleryOfferingType}
+                    />
                   </div>
 
                   {offerings.length === 0 ? (
