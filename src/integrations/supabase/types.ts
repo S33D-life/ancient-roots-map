@@ -959,6 +959,101 @@ export type Database = {
           },
         ]
       }
+      research_trees: {
+        Row: {
+          country: string
+          created_at: string
+          crown_spread: string | null
+          description: string | null
+          designation_type: string
+          geo_precision: string
+          girth_or_stem: string | null
+          height_m: number | null
+          id: string
+          latitude: number | null
+          linked_tree_id: string | null
+          locality_text: string
+          longitude: number | null
+          province: string | null
+          size_index: number | null
+          source_doc_title: string
+          source_doc_url: string
+          source_doc_year: number
+          source_program: string
+          source_row_ref: string | null
+          species_common: string | null
+          species_scientific: string
+          status: string
+          tree_name: string | null
+          updated_at: string
+          user_annotations: Json | null
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          crown_spread?: string | null
+          description?: string | null
+          designation_type?: string
+          geo_precision?: string
+          girth_or_stem?: string | null
+          height_m?: number | null
+          id?: string
+          latitude?: number | null
+          linked_tree_id?: string | null
+          locality_text: string
+          longitude?: number | null
+          province?: string | null
+          size_index?: number | null
+          source_doc_title: string
+          source_doc_url: string
+          source_doc_year: number
+          source_program?: string
+          source_row_ref?: string | null
+          species_common?: string | null
+          species_scientific: string
+          status?: string
+          tree_name?: string | null
+          updated_at?: string
+          user_annotations?: Json | null
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          crown_spread?: string | null
+          description?: string | null
+          designation_type?: string
+          geo_precision?: string
+          girth_or_stem?: string | null
+          height_m?: number | null
+          id?: string
+          latitude?: number | null
+          linked_tree_id?: string | null
+          locality_text?: string
+          longitude?: number | null
+          province?: string | null
+          size_index?: number | null
+          source_doc_title?: string
+          source_doc_url?: string
+          source_doc_year?: number
+          source_program?: string
+          source_row_ref?: string | null
+          species_common?: string | null
+          species_scientific?: string
+          status?: string
+          tree_name?: string | null
+          updated_at?: string
+          user_annotations?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_trees_linked_tree_id_fkey"
+            columns: ["linked_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_songs: {
         Row: {
           artist: string
