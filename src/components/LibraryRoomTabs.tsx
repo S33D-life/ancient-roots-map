@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import {
-  Wand2, Globe, Music, Sprout, Star, Archive, Paintbrush, BookOpen, ScrollText, Lock,
+  Wand2, Globe, Music, Sprout, Star, Archive, Paintbrush, BookOpen, ScrollText, Lock, TreeDeciduous,
 } from "lucide-react";
 
 interface RoomTab {
@@ -20,6 +20,7 @@ const ROOMS: RoomTab[] = [
   { value: "tree-resources", label: "Resources", icon: <BookOpen className="w-4 h-4" /> },
   { value: "ledger", label: "Ledger", icon: <ScrollText className="w-4 h-4" /> },
   { value: "vault", label: "Vaults", icon: <Lock className="w-4 h-4" /> },
+  { value: "archive", label: "Living Archive", icon: <TreeDeciduous className="w-4 h-4" /> },
 ];
 
 interface LibraryRoomTabsProps {

@@ -49,6 +49,7 @@ const HivePage = lazy(() => import("./pages/HivePage"));
 const HivesIndexPage = lazy(() => import("./pages/HivesIndexPage"));
 const ValueTreePage = lazy(() => import("./pages/ValueTreePage"));
 const HiveTreasuryPage = lazy(() => import("./pages/HiveTreasuryPage"));
+const LivingArchivePage = lazy(() => import("./pages/LivingArchivePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -127,6 +128,7 @@ const App = () => {
                 <Route path="/hive/:family" element={<HivePage />} />
                 <Route path="/hive/:family/treasury" element={<HiveTreasuryPage />} />
                 <Route path="/value-tree" element={<ValueTreePage />} />
+                <Route path="/living-archive" element={<LivingArchivePage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
