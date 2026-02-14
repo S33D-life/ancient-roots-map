@@ -53,6 +53,7 @@ const ValueTreePage = lazy(() => import("./pages/ValueTreePage"));
 const HiveTreasuryPage = lazy(() => import("./pages/HiveTreasuryPage"));
 const LivingArchivePage = lazy(() => import("./pages/LivingArchivePage"));
 const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
+const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,7 +91,7 @@ const App = () => {
 
   // /map and /atlas bypass the password gate for public discovery
   const isPublicRoute = typeof window !== 'undefined' && (
-    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?') || window.location.pathname === '/auth' || window.location.pathname === '/hives' || window.location.pathname.startsWith('/hive/') || window.location.pathname === '/discovery'
+    window.location.pathname === '/map' || window.location.pathname === '/atlas' || window.location.pathname.startsWith('/atlas/') || window.location.pathname === '/install' || window.location.pathname === '/library' || window.location.pathname.startsWith('/library/') || window.location.pathname.startsWith('/map?') || window.location.pathname.startsWith('/atlas?') || window.location.pathname === '/auth' || window.location.pathname === '/hives' || window.location.pathname.startsWith('/hive/') || window.location.pathname === '/discovery'
   );
 
   if (!authed && !supabaseAuthed && !isPublicRoute) {
@@ -145,6 +146,7 @@ const App = () => {
                 <Route path="/value-tree" element={<ValueTreePage />} />
                 <Route path="/living-archive" element={<LivingArchivePage />} />
                 <Route path="/discovery" element={<DiscoveryPage />} />
+                <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
