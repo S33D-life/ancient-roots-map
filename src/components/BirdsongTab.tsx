@@ -59,9 +59,7 @@ const BirdsongTab = ({ treeId }: BirdsongTabProps) => {
         const userIds = [...new Set(data.map((o) => o.user_id))];
         if (userIds.length > 0) {
           const { data: profileData } = await supabase
-            .from("profiles")
-            .select("id, full_name")
-            .in("id", userIds);
+            .rpc("get_safe_profiles", { p_ids: userIds });
           if (profileData) {
             const map: Record<string, string> = {};
             profileData.forEach((p) => { map[p.id] = p.full_name || "Ancient Friend"; });

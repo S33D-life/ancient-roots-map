@@ -179,12 +179,9 @@ export default function StaffDetailPage() {
         .eq("id", code)
         .single();
       if (staffRow?.owner_user_id) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", staffRow.owner_user_id)
-          .single();
-        if (profile?.full_name) setOwnerName(profile.full_name);
+        const { data: profiles } = await supabase
+          .rpc("get_safe_profiles", { p_ids: [staffRow.owner_user_id] });
+        if (profiles?.[0]?.full_name) setOwnerName(profiles[0].full_name);
       }
 
       setLoadingData(false);

@@ -1918,6 +1918,16 @@ export type Database = {
           title: string
         }[]
       }
+      get_safe_profiles: {
+        Args: { p_ids: string[] }
+        Returns: {
+          avatar_url: string
+          bio: string
+          full_name: string
+          id: string
+          is_discoverable: boolean
+        }[]
+      }
       get_tree_leaderboard: {
         Args: { result_limit?: number }
         Returns: {
@@ -1951,6 +1961,15 @@ export type Database = {
           id: string
           similarity: number
           title: string
+        }[]
+      }
+      search_discoverable_profiles: {
+        Args: { result_limit?: number; search_query?: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          full_name: string
+          id: string
         }[]
       }
       search_songs: {
