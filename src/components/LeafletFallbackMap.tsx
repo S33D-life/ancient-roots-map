@@ -2358,57 +2358,78 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       )}
 
       {/* Bottom controls: Layers left, locate+compass centre */}
-      <div className="absolute bottom-8 left-3 z-[1000]">
-        <button
-          onClick={() => setLivingLayersOpen(!livingLayersOpen)}
-          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
-          style={{
-            ...btnBase,
-            color: livingLayersOpen ? "hsl(42, 90%, 55%)" : "hsl(42, 60%, 60%)",
-            background: livingLayersOpen ? "hsla(42, 50%, 20%, 0.95)" : btnBase.background,
-          }}
-          title="Living Layers"
-        >
-          <Layers className="w-[18px] h-[18px]" />
-        </button>
-      </div>
+      {(() => {
+        const modeAccent = perspective === "personal" ? "120, 50%, 45%" : perspective === "tribe" ? "200, 55%, 50%" : "42, 90%, 55%";
+        const addEmphasis = perspective === "personal";
+        const globeEmphasis = perspective === "collective";
+        return (
+          <>
+            <div className="absolute bottom-8 left-3 z-[1000]">
+              <button
+                onClick={() => setLivingLayersOpen(!livingLayersOpen)}
+                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                style={{
+                  ...btnBase,
+                  color: livingLayersOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  background: livingLayersOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  boxShadow: livingLayersOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
+                }}
+                title="Living Layers"
+              >
+                <Layers className="w-[18px] h-[18px]" />
+              </button>
+            </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
-        <button
-          onClick={handleFindMe}
-          disabled={locating}
-          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
-          style={{ ...btnBase, color: locating ? "hsl(42, 40%, 45%)" : located ? "hsl(42, 90%, 55%)" : "hsl(42, 60%, 60%)" }}
-          title="Find my location"
-        >
-          {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
-        </button>
-        <button
-          onClick={() => {
-            const map = mapRef.current;
-            if (map) {
-              const c = map.getCenter();
-              setAddTreeCoords({ lat: c.lat, lng: c.lng });
-            } else {
-              setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-            }
-            setAddDialogOpen(true);
-          }}
-          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
-          style={{ ...btnBase, color: "hsl(120, 50%, 55%)" }}
-          title="Add tree"
-        >
-          <Plus className="w-[18px] h-[18px]" />
-        </button>
-        <button
-          onClick={handleCompassReset}
-          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
-          style={{ ...btnBase, color: "hsl(42, 60%, 60%)" }}
-          title="Reset view"
-        >
-          <Globe className="w-[18px] h-[18px]" />
-        </button>
-      </div>
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
+              <button
+                onClick={handleFindMe}
+                disabled={locating}
+                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                style={{
+                  ...btnBase,
+                  color: locating ? "hsl(42, 40%, 45%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                }}
+                title="Find my location"
+              >
+                {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
+              </button>
+              <button
+                onClick={() => {
+                  const map = mapRef.current;
+                  if (map) {
+                    const c = map.getCenter();
+                    setAddTreeCoords({ lat: c.lat, lng: c.lng });
+                  } else {
+                    setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+                  }
+                  setAddDialogOpen(true);
+                }}
+                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                style={{
+                  ...btnBase,
+                  color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
+                  boxShadow: addEmphasis ? `0 0 10px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
+                }}
+                title="Add tree"
+              >
+                <Plus className="w-[18px] h-[18px]" />
+              </button>
+              <button
+                onClick={handleCompassReset}
+                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                style={{
+                  ...btnBase,
+                  color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  boxShadow: globeEmphasis ? `0 0 10px hsla(${modeAccent}, 0.15), ${btnBase.boxShadow}` : btnBase.boxShadow,
+                }}
+                title="Reset view"
+              >
+                <Globe className="w-[18px] h-[18px]" />
+              </button>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Waters & Commons contextual whisper */}
       {watersCommonsWhisper && addDialogOpen && (
