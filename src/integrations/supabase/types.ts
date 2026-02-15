@@ -1935,6 +1935,16 @@ export type Database = {
           x_handle: string
         }[]
       }
+      get_shared_plants: {
+        Args: { result_limit?: number }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          photo_url: string
+          species: string
+        }[]
+      }
       get_tree_leaderboard: {
         Args: { result_limit?: number }
         Returns: {

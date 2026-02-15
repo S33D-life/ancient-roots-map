@@ -137,10 +137,7 @@ const Greenhouse = () => {
         setPlants((data as Plant[]) || []);
       }
       const { data: shared } = await supabase
-        .from("greenhouse_plants")
-        .select("*")
-        .eq("is_shared", true)
-        .order("created_at", { ascending: false });
+        .rpc("get_shared_plants", { result_limit: 50 });
       setCommunityPlants((shared as Plant[]) || []);
     } finally {
       setLoading(false);
