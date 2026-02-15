@@ -4,6 +4,7 @@ import { escapeHtml } from "@/utils/escapeHtml";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
+import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -104,6 +105,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [trees, setTrees] = useState<Tree[]>([]);
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [treePhotos, setTreePhotos] = useState<TreePhotos>({});
+  // Unified offering counts from shared hook
+  const { counts: sharedOfferingCounts, photos: sharedOfferingPhotos } = useOfferingCounts();
   const [birdsongCounts, setBirdsongCounts] = useState<BirdsongCounts>({});
   const [birdsongHeatPoints, setBirdsongHeatPoints] = useState<BirdsongHeatPoint[]>([]);
   const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
@@ -152,12 +155,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     }
   }, []);
 
-  // Fetch trees and offering counts from database
+  // Sync offering counts from shared hook whenever they update
+  useEffect(() => {
+    setOfferingCounts(sharedOfferingCounts);
+    setTreePhotos(sharedOfferingPhotos);
+  }, [sharedOfferingCounts, sharedOfferingPhotos]);
+
+  // Fetch trees and birdsong from database (offerings handled by shared hook)
   useEffect(() => {
     const fetchTrees = async () => {
-      const [treesResult, offeringsResult, birdsongResult] = await Promise.all([
+      const [treesResult, birdsongResult] = await Promise.all([
         supabase.from('trees').select('*').not('latitude', 'is', null).not('longitude', 'is', null),
-        supabase.from('offerings').select('tree_id, type, media_url'),
         supabase.from('birdsong_offerings').select('tree_id, season'),
       ]);
 
@@ -174,19 +182,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         .is('collected_by', null)
         .lte('blooms_at', new Date().toISOString());
       setBloomedSeeds(seedData || []);
-
-      if (!offeringsResult.error && offeringsResult.data) {
-        const counts: TreeOfferings = {};
-        const photos: TreePhotos = {};
-        offeringsResult.data.forEach((o: any) => {
-          counts[o.tree_id] = (counts[o.tree_id] || 0) + 1;
-          if (o.type === 'photo' && o.media_url && !photos[o.tree_id]) {
-            photos[o.tree_id] = o.media_url;
-          }
-        });
-        setOfferingCounts(counts);
-        setTreePhotos(photos);
-      }
 
       if (!birdsongResult.error && birdsongResult.data) {
         const bCounts: BirdsongCounts = {};
@@ -219,7 +214,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, debouncedFetch)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'offerings' }, debouncedFetch)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'planted_seeds' }, debouncedFetch)
       .subscribe();
 
