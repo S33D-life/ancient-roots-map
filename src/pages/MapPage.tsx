@@ -8,7 +8,7 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
-const MapJourneyIndicator = lazy(() => import("@/components/MapJourneyIndicator"));
+
 
 const MapPage = () => {
   const [searchParams] = useSearchParams();
@@ -35,7 +35,7 @@ const MapPage = () => {
       <Header />
       {/* Non-critical overlays deferred until after map is interactive */}
       <Suspense fallback={null}>
-        <MapJourneyIndicator />
+        
         <MapOnboardingRitual />
         <ContextualWhisper
           id="map-first-tree"
