@@ -15,16 +15,18 @@ import { recordReferral } from "@/hooks/use-referrals";
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
-type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email";
+type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password";
 
 const AuthPage = () => {
   const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
   const [inviteCode, setInviteCode] = useState("");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -41,7 +43,13 @@ const AuthPage = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
+      // Handle password recovery redirect — show reset form instead of navigating away
+      if (event === "PASSWORD_RECOVERY") {
+        setView("reset-password");
+        return;
+      }
+
+      if (session && view !== "reset-password") {
         // Record referral on first sign-in if invite code was stored
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
@@ -203,6 +211,88 @@ const AuthPage = () => {
     setIsLoading(false);
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errors: typeof fieldErrors = {};
+    try { passwordSchema.parse(newPassword); } catch { errors.newPassword = "At least 6 characters required"; }
+    if (newPassword !== confirmNewPassword) errors.confirmNew = "Passwords don't match";
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast({ title: "Password updated", description: "You can now log in with your new password." });
+      navigate("/dashboard");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Could not update password";
+      toast({ title: "Update failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset password screen
+  if (view === "reset-password") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'radial-gradient(ellipse at top, hsl(75 20% 14%), hsl(80 15% 10%))' }}>
+        <div className="w-full max-w-sm">
+          <div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+                <KeyRound className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-serif">Set New Password</h2>
+              <p className="text-muted-foreground text-sm">Choose a new password for your grove account.</p>
+            </div>
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="new-password" className="text-xs uppercase tracking-wider text-muted-foreground">New Password</Label>
+                <div className="relative">
+                  <Input
+                    id="new-password"
+                    name="new-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => { setNewPassword(e.target.value); if (fieldErrors.newPassword) setFieldErrors(p => ({ ...p, newPassword: undefined })); }}
+                    disabled={isLoading}
+                    className={`pr-10 ${fieldErrors.newPassword ? "border-destructive" : ""}`}
+                    autoComplete="new-password"
+                    autoFocus
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {fieldErrors.newPassword && <p className="text-xs text-destructive">{fieldErrors.newPassword}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-new-password" className="text-xs uppercase tracking-wider text-muted-foreground">Confirm New Password</Label>
+                <Input
+                  id="confirm-new-password"
+                  name="confirm-new-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={confirmNewPassword}
+                  onChange={(e) => { setConfirmNewPassword(e.target.value); if (fieldErrors.confirmNew) setFieldErrors(p => ({ ...p, confirmNew: undefined })); }}
+                  disabled={isLoading}
+                  className={fieldErrors.confirmNew ? "border-destructive" : ""}
+                  autoComplete="new-password"
+                />
+                {fieldErrors.confirmNew && <p className="text-xs text-destructive">{fieldErrors.confirmNew}</p>}
+              </div>
+              <Button type="submit" className="w-full font-serif" disabled={isLoading}>
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating...</> : "Update Password"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Success / confirmation screens
   if (view === "verify-email" || view === "magic-sent" || view === "reset-sent") {
     const configs = {
@@ -327,7 +417,7 @@ const AuthPage = () => {
             </div>
 
             {/* Form */}
-            <form onSubmit={isForgot ? handleForgotPassword : isSignup ? handleSignup : handleLogin} className="space-y-4">
+            <form onSubmit={isForgot ? handleForgotPassword : isSignup ? handleSignup : handleLogin} method="post" action="/auth" className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
                 <Input
