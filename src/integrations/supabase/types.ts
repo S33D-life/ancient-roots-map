@@ -792,6 +792,7 @@ export type Database = {
           title: string
           tree_id: string
           type: Database["public"]["Enums"]["offering_type"]
+          visibility: string
         }
         Insert: {
           content?: string | null
@@ -805,6 +806,7 @@ export type Database = {
           title: string
           tree_id: string
           type: Database["public"]["Enums"]["offering_type"]
+          visibility?: string
         }
         Update: {
           content?: string | null
@@ -818,6 +820,7 @@ export type Database = {
           title?: string
           tree_id?: string
           type?: Database["public"]["Enums"]["offering_type"]
+          visibility?: string
         }
         Relationships: [
           {
@@ -1954,11 +1957,23 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_tree_offering_summary: {
+        Args: { p_tree_id: string }
+        Returns: {
+          cnt: number
+          has_photo: boolean
+          type: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_tree_meeting: {
+        Args: { _tree_id: string; _user_id: string }
         Returns: boolean
       }
       record_visit: {
