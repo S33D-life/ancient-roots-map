@@ -35,10 +35,10 @@ const STAFF_SPECIES: { key: string; species: string; image: string }[] = [
   { key: "yew", species: "Yew", image: "/images/staffs/yew.jpeg" },
 ];
 
-const PERSPECTIVES: { key: LitePerspective; label: string; icon: string }[] = [
-  { key: "personal", label: "I AM", icon: "🌿" },
-  { key: "collective", label: "TETOL", icon: "🌍" },
-  { key: "tribe", label: "Tribe", icon: "👥" },
+const PERSPECTIVES: { key: LitePerspective; label: string; icon: string; accent: string }[] = [
+  { key: "personal", label: "I AM", icon: "🌱", accent: "120, 50%, 45%" },
+  { key: "collective", label: "TETOL", icon: "🌍", accent: "42, 90%, 55%" },
+  { key: "tribe", label: "TRIBE", icon: "👥", accent: "200, 55%, 50%" },
 ];
 
 /** Age band definitions */
@@ -185,156 +185,186 @@ const LiteMapFilters = ({
     girthBand !== "all",
   ].filter(Boolean).length;
 
+  const activeAccent = PERSPECTIVES.find(p => p.key === perspective)?.accent || "42, 90%, 55%";
+
   return (
     <>
-      {/* ── Top bar ── */}
-      <div className="absolute top-[4.5rem] left-14 right-14 z-[1000] flex items-center gap-1.5 overflow-x-auto animate-fade-in" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
-        {/* Perspective chips */}
-        {PERSPECTIVES.map((p) => (
-          <motion.button
-            key={p.key}
-            onClick={() => onPerspectiveChange(p.key)}
-            whileTap={{ scale: 0.93 }}
-            className={`${chipBase} ${perspective === p.key ? chipActive : chipInactive}`}
+      {/* ── Top bar: Mode Capsule + Filters ── */}
+      <div className="absolute top-[4.5rem] left-3 right-3 z-[1000] flex flex-col gap-2 animate-fade-in">
+        {/* Mode Capsule — unified segmented control */}
+        <div className="flex items-center gap-2">
+          <div
+            className="flex items-center rounded-full p-[3px] backdrop-blur-md shrink-0"
+            style={{
+              background: "hsla(30, 25%, 10%, 0.88)",
+              border: `1px solid hsla(${activeAccent}, 0.25)`,
+              boxShadow: `0 2px 12px hsla(${activeAccent}, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.04)`,
+            }}
           >
-            {p.icon} {p.label}
+            {PERSPECTIVES.map((p) => {
+              const isActive = perspective === p.key;
+              return (
+                <motion.button
+                  key={p.key}
+                  onClick={() => onPerspectiveChange(p.key)}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-serif transition-colors duration-200"
+                  style={{
+                    color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 55%, 0.6)",
+                    background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
+                  }}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="mode-indicator"
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        border: `1.5px solid hsla(${p.accent}, 0.4)`,
+                        boxShadow: `0 0 10px hsla(${p.accent}, 0.15), inset 0 0 8px hsla(${p.accent}, 0.06)`,
+                      }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 text-[13px]">{p.icon}</span>
+                  <span className="relative z-10 tracking-wide">{p.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Count badge */}
+          <motion.span
+            key={totalVisible}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="shrink-0 tabular-nums px-2.5 py-1.5 rounded-full text-[10px] font-serif backdrop-blur-md"
+            style={{
+              background: "hsla(30, 25%, 10%, 0.85)",
+              color: `hsl(${activeAccent})`,
+              border: `1px solid hsla(${activeAccent}, 0.2)`,
+            }}
+          >
+            {totalVisible}
+          </motion.span>
+
+          <div className="flex-1" />
+
+          {/* Refine button */}
+          <motion.button
+            whileTap={{ scale: 0.93 }}
+            onClick={() => setPanelOpen(!panelOpen)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-serif backdrop-blur-md transition-all duration-200"
+            style={{
+              background: panelOpen ? `hsla(${activeAccent}, 0.15)` : "hsla(30, 25%, 10%, 0.85)",
+              color: panelOpen ? `hsl(${activeAccent})` : "hsla(42, 30%, 55%, 0.7)",
+              border: `1px solid ${panelOpen ? `hsla(${activeAccent}, 0.35)` : "hsla(42, 40%, 30%, 0.3)"}`,
+              boxShadow: panelOpen ? `0 0 8px hsla(${activeAccent}, 0.12)` : "none",
+            }}
+          >
+            <Filter className="w-3 h-3" /> Refine
+            {activeFilterCount > 0 && (
+              <span
+                className="ml-0.5 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold"
+                style={{
+                  background: `hsl(${activeAccent})`,
+                  color: "hsl(30, 25%, 10%)",
+                }}
+              >
+                {activeFilterCount}
+              </span>
+            )}
           </motion.button>
-        ))}
+        </div>
 
-        {/* Grove scale chips */}
-        {onGroveScaleChange && (
-          <>
-            <span className="text-border/30 text-[10px] select-none" aria-hidden>|</span>
-            {GROVE_SCALES.map((g) => (
-              <motion.button
-                key={g.key}
-                onClick={() => onGroveScaleChange(g.key)}
-                whileTap={{ scale: 0.93 }}
-                className={`${chipBase} ${groveScale === g.key ? chipActive : chipInactive}`}
-              >
-                {g.icon} {g.label}
-              </motion.button>
-            ))}
-          </>
-        )}
-
-        <div className="flex-1" />
-
-        {/* Active filter chips — dismissable */}
+        {/* Active filter chips — second row, only when filters are active */}
         <AnimatePresence mode="popLayout">
-          {lineageFilter !== "all" && (
-            <motion.button
-              key="lineage-chip"
-              initial={{ opacity: 0, scale: 0.8, x: 10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 10 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => onLineageChange?.("all")}
-              className={`${chipBase} ${chipActive} flex items-center gap-1`}
+          {(hasActiveFilters || groveScale !== "all") && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="flex items-center gap-1.5 overflow-x-auto pl-1"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              <GitBranch className="w-3 h-3" /> {lineageFilter} <X className="w-3 h-3" />
-            </motion.button>
-          )}
+              {/* Grove scale chips */}
+              {onGroveScaleChange && GROVE_SCALES.map((g) => (
+                <motion.button
+                  key={g.key}
+                  onClick={() => onGroveScaleChange(g.key)}
+                  whileTap={{ scale: 0.93 }}
+                  className={`${chipBase} ${groveScale === g.key ? chipActive : chipInactive}`}
+                >
+                  {g.icon} {g.label}
+                </motion.button>
+              ))}
 
-          {projectFilter !== "all" && (
-            <motion.button
-              key="project-chip"
-              initial={{ opacity: 0, scale: 0.8, x: 10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 10 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => onProjectChange?.("all")}
-              className={`${chipBase} ${chipActive} flex items-center gap-1`}
-            >
-              <FolderTree className="w-3 h-3" /> {projectFilter} <X className="w-3 h-3" />
-            </motion.button>
-          )}
-
-          {ageBand !== "all" && (
-            <motion.button
-              key="age-chip"
-              initial={{ opacity: 0, scale: 0.8, x: 10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 10 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => onAgeBandChange?.("all")}
-              className={`${chipBase} ${chipActive} flex items-center gap-1`}
-            >
-              🕰️ {AGE_BANDS.find(b => b.key === ageBand)?.label} <X className="w-3 h-3" />
-            </motion.button>
-          )}
-
-          {girthBand !== "all" && (
-            <motion.button
-              key="girth-chip"
-              initial={{ opacity: 0, scale: 0.8, x: 10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.8, x: 10 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => onGirthBandChange?.("all")}
-              className={`${chipBase} ${chipActive} flex items-center gap-1`}
-            >
-              📏 {GIRTH_BANDS.find(b => b.key === girthBand)?.label} <X className="w-3 h-3" />
-            </motion.button>
-          )}
-
-          {!isAllSpecies ? (
-            species.map(sp => (
-              <motion.button
-                key={`species-${sp}`}
-                initial={{ opacity: 0, scale: 0.8, x: 10 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.8, x: 10 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => handleSpeciesToggle(sp)}
-                className={`${chipBase} ${chipActive} flex items-center gap-1`}
-              >
-                {sp} <X className="w-3 h-3" />
-              </motion.button>
-            ))
-          ) : (
-            <motion.button
-              key="filter-toggle"
-              whileTap={{ scale: 0.93 }}
-              onClick={() => setPanelOpen(!panelOpen)}
-              className={`${chipBase} flex items-center gap-1 ${panelOpen ? chipActive : chipInactive}`}
-            >
-              <Filter className="w-3 h-3" /> Refine
-              {activeFilterCount > 0 && (
-                <span className="ml-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center font-bold">
-                  {activeFilterCount}
-                </span>
+              {lineageFilter !== "all" && (
+                <motion.button
+                  key="lineage-chip"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => onLineageChange?.("all")}
+                  className={`${chipBase} ${chipActive} flex items-center gap-1`}
+                >
+                  <GitBranch className="w-3 h-3" /> {lineageFilter} <X className="w-3 h-3" />
+                </motion.button>
               )}
-            </motion.button>
-          )}
 
-          {/* Open panel when species active */}
-          {!isAllSpecies && (
-            <motion.button
-              key="filter-toggle-active"
-              whileTap={{ scale: 0.93 }}
-              onClick={() => setPanelOpen(!panelOpen)}
-              className={`${chipBase} flex items-center gap-1 ${panelOpen ? chipActive : chipInactive}`}
-            >
-              <Filter className="w-3 h-3" />
-              {activeFilterCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center font-bold">
-                  {activeFilterCount}
-                </span>
+              {projectFilter !== "all" && (
+                <motion.button
+                  key="project-chip"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => onProjectChange?.("all")}
+                  className={`${chipBase} ${chipActive} flex items-center gap-1`}
+                >
+                  <FolderTree className="w-3 h-3" /> {projectFilter} <X className="w-3 h-3" />
+                </motion.button>
               )}
-            </motion.button>
+
+              {ageBand !== "all" && (
+                <motion.button
+                  key="age-chip"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => onAgeBandChange?.("all")}
+                  className={`${chipBase} ${chipActive} flex items-center gap-1`}
+                >
+                  🕰️ {AGE_BANDS.find(b => b.key === ageBand)?.label} <X className="w-3 h-3" />
+                </motion.button>
+              )}
+
+              {girthBand !== "all" && (
+                <motion.button
+                  key="girth-chip"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => onGirthBandChange?.("all")}
+                  className={`${chipBase} ${chipActive} flex items-center gap-1`}
+                >
+                  📏 {GIRTH_BANDS.find(b => b.key === girthBand)?.label} <X className="w-3 h-3" />
+                </motion.button>
+              )}
+
+              {!isAllSpecies && species.map(sp => (
+                <motion.button
+                  key={`species-${sp}`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  onClick={() => handleSpeciesToggle(sp)}
+                  className={`${chipBase} ${chipActive} flex items-center gap-1`}
+                >
+                  {sp} <X className="w-3 h-3" />
+                </motion.button>
+              ))}
+            </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Count badge */}
-        <motion.span
-          key={totalVisible}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          className="shrink-0 tabular-nums px-2 py-1 rounded-full text-[10px] font-serif bg-card/80 text-muted-foreground border border-border/50"
-        >
-          {totalVisible}
-        </motion.span>
       </div>
 
       {/* Perspective label — subtle context indicator */}
@@ -344,9 +374,16 @@ const LiteMapFilters = ({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute top-[6.5rem] left-2 z-[1000] px-2 py-0.5 rounded-full text-[9px] font-serif bg-primary/12 text-primary/80 border border-primary/20"
+            className="absolute z-[1000] px-2.5 py-0.5 rounded-full text-[9px] font-serif"
+            style={{
+              top: hasActiveFilters || groveScale !== "all" ? "8.5rem" : "7rem",
+              left: "0.75rem",
+              background: `hsla(${activeAccent}, 0.1)`,
+              color: `hsl(${activeAccent})`,
+              border: `1px solid hsla(${activeAccent}, 0.2)`,
+            }}
           >
-            {perspective === "personal" ? "Viewing your mapped trees" : "Viewing tribe trees"}
+            {perspective === "personal" ? "🌱 Viewing your mapped trees" : "👥 Viewing tribe trees"}
           </motion.div>
         )}
       </AnimatePresence>
@@ -376,13 +413,13 @@ const LiteMapFilters = ({
             >
               {/* Handle + Header */}
               <div className="flex flex-col items-center pt-2 pb-1">
-                <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+                <div className="w-10 h-1 rounded-full" style={{ background: `hsla(${activeAccent}, 0.3)` }} />
               </div>
 
               <div className="px-4 pb-2 flex items-center justify-between">
-                <h3 className="text-sm font-serif text-foreground tracking-wider flex items-center gap-2">
-                  <Filter className="w-3.5 h-3.5 text-primary/60" />
-                  Refine the Grove
+                <h3 className="text-sm font-serif tracking-wider flex items-center gap-2" style={{ color: `hsl(${activeAccent})` }}>
+                  <Filter className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
+                  {perspective === "personal" ? "🌱 I AM · Refine" : perspective === "tribe" ? "👥 Tribe · Refine" : "🌍 TETOL · Refine"}
                 </h3>
                 <div className="flex items-center gap-2">
                   {/* View Hive CTA — shown when exactly one species is selected */}
