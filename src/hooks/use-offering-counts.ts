@@ -20,20 +20,16 @@ export function useOfferingCounts({ realtime = true }: { realtime?: boolean } = 
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("offerings")
-      .select("tree_id, type, media_url");
+    const { data, error } = await supabase.rpc("get_offering_counts");
     if (error) {
       console.error("Error fetching offering counts:", error);
       return;
     }
     const c: OfferingCountMap = {};
     const p: TreePhotoMap = {};
-    (data || []).forEach((o) => {
-      c[o.tree_id] = (c[o.tree_id] || 0) + 1;
-      if (o.type === "photo" && o.media_url && !p[o.tree_id]) {
-        p[o.tree_id] = o.media_url;
-      }
+    (data || []).forEach((row: { tree_id: string; cnt: number; first_photo: string | null }) => {
+      c[row.tree_id] = row.cnt;
+      if (row.first_photo) p[row.tree_id] = row.first_photo;
     });
     setCounts(c);
     setPhotos(p);
