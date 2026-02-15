@@ -9,10 +9,26 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera, Eye, EyeOff } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import { Link } from "react-router-dom";
+
+interface VisibleFields {
+  bio: boolean;
+  home_place: boolean;
+  instagram_handle: boolean;
+  x_handle: boolean;
+  facebook_handle: boolean;
+}
+
+const DEFAULT_VISIBLE: VisibleFields = {
+  bio: true,
+  home_place: false,
+  instagram_handle: false,
+  x_handle: false,
+  facebook_handle: false,
+};
 
 interface Profile {
   full_name: string | null;
@@ -23,6 +39,7 @@ interface Profile {
   instagram_handle?: string | null;
   x_handle?: string | null;
   facebook_handle?: string | null;
+  visible_fields?: VisibleFields;
 }
 
 interface DashboardProfileProps {
@@ -32,6 +49,31 @@ interface DashboardProfileProps {
   onSignOut: () => void;
 }
 
+/** Tiny inline toggle for field-level visibility */
+const FieldVisibilityToggle = ({
+  visible,
+  onToggle,
+  label,
+}: {
+  visible: boolean;
+  onToggle: () => void;
+  label: string;
+}) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+    title={visible ? `${label} is visible to others` : `${label} is hidden from others`}
+  >
+    {visible ? (
+      <Eye className="w-3 h-3 text-primary/70" />
+    ) : (
+      <EyeOff className="w-3 h-3 text-muted-foreground" />
+    )}
+    {visible ? "Public" : "Private"}
+  </button>
+);
+
 const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: DashboardProfileProps) => {
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [bio, setBio] = useState(profile?.bio || "");
@@ -40,6 +82,9 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
   const [instagram, setInstagram] = useState(profile?.instagram_handle || "");
   const [xHandle, setXHandle] = useState(profile?.x_handle || "");
   const [facebook, setFacebook] = useState(profile?.facebook_handle || "");
+  const [visibleFields, setVisibleFields] = useState<VisibleFields>(
+    () => ({ ...DEFAULT_VISIBLE, ...(profile?.visible_fields || {}) })
+  );
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { toast } = useToast();
@@ -50,6 +95,10 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
     .map((n) => n[0])
     .join("")
     .toUpperCase() || user.email?.[0].toUpperCase() || "U";
+
+  const toggleField = (field: keyof VisibleFields) => {
+    setVisibleFields((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -63,13 +112,24 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         instagram_handle: instagram.trim().replace(/^@/, "") || null,
         x_handle: xHandle.trim().replace(/^@/, "") || null,
         facebook_handle: facebook.trim() || null,
+        visible_fields: visibleFields as any,
       })
       .eq("id", user.id);
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Profile updated!" });
-      onProfileUpdate({ ...profile!, full_name: fullName.trim() || null, bio: bio.trim() || null, is_discoverable: isDiscoverable, home_place: homePlace.trim() || null, instagram_handle: instagram.trim() || null, x_handle: xHandle.trim() || null, facebook_handle: facebook.trim() || null });
+      onProfileUpdate({
+        ...profile!,
+        full_name: fullName.trim() || null,
+        bio: bio.trim() || null,
+        is_discoverable: isDiscoverable,
+        home_place: homePlace.trim() || null,
+        instagram_handle: instagram.trim() || null,
+        x_handle: xHandle.trim() || null,
+        facebook_handle: facebook.trim() || null,
+        visible_fields: visibleFields,
+      });
     }
     setSaving(false);
   };
@@ -161,7 +221,14 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Bio</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Bio</Label>
+                <FieldVisibilityToggle
+                  visible={visibleFields.bio}
+                  onToggle={() => toggleField("bio")}
+                  label="Bio"
+                />
+              </div>
               <Textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value.slice(0, 280))}
@@ -174,7 +241,14 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Home Place</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Home Place</Label>
+                <FieldVisibilityToggle
+                  visible={visibleFields.home_place}
+                  onToggle={() => toggleField("home_place")}
+                  label="Home Place"
+                />
+              </div>
               <Input
                 value={homePlace}
                 onChange={(e) => setHomePlace(e.target.value.slice(0, 100))}
@@ -188,26 +262,64 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
             <div className="space-y-2 rounded-lg border border-border/50 bg-secondary/10 p-3">
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif mb-2">Social Roots</p>
               <div className="space-y-2">
-                <Input
-                  value={instagram}
-                  onChange={(e) => setInstagram(e.target.value.slice(0, 50))}
-                  placeholder="Instagram @handle"
-                  className="font-serif text-sm h-9"
-                />
-                <Input
-                  value={xHandle}
-                  onChange={(e) => setXHandle(e.target.value.slice(0, 50))}
-                  placeholder="X @handle"
-                  className="font-serif text-sm h-9"
-                />
-                <Input
-                  value={facebook}
-                  onChange={(e) => setFacebook(e.target.value.slice(0, 100))}
-                  placeholder="Facebook name or URL"
-                  className="font-serif text-sm h-9"
-                />
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] text-muted-foreground font-serif">Instagram</Label>
+                    <FieldVisibilityToggle
+                      visible={visibleFields.instagram_handle}
+                      onToggle={() => toggleField("instagram_handle")}
+                      label="Instagram"
+                    />
+                  </div>
+                  <Input
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value.slice(0, 50))}
+                    placeholder="Instagram @handle"
+                    className="font-serif text-sm h-9"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] text-muted-foreground font-serif">X / Twitter</Label>
+                    <FieldVisibilityToggle
+                      visible={visibleFields.x_handle}
+                      onToggle={() => toggleField("x_handle")}
+                      label="X handle"
+                    />
+                  </div>
+                  <Input
+                    value={xHandle}
+                    onChange={(e) => setXHandle(e.target.value.slice(0, 50))}
+                    placeholder="X @handle"
+                    className="font-serif text-sm h-9"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] text-muted-foreground font-serif">Facebook</Label>
+                    <FieldVisibilityToggle
+                      visible={visibleFields.facebook_handle}
+                      onToggle={() => toggleField("facebook_handle")}
+                      label="Facebook"
+                    />
+                  </div>
+                  <Input
+                    value={facebook}
+                    onChange={(e) => setFacebook(e.target.value.slice(0, 100))}
+                    placeholder="Facebook name or URL"
+                    className="font-serif text-sm h-9"
+                  />
+                </div>
               </div>
-              <p className="text-[10px] text-muted-foreground">Only shared when you choose to share.</p>
+            </div>
+
+            {/* Privacy info */}
+            <div className="flex items-start gap-2 rounded-lg border border-border/30 bg-secondary/5 p-3">
+              <Shield className="w-4 h-4 text-primary/60 mt-0.5 shrink-0" />
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Fields marked <span className="inline-flex items-center gap-0.5"><Eye className="w-2.5 h-2.5 inline" /> Public</span> are visible to other wanderers.
+                Private fields are only visible to you.
+              </p>
             </div>
 
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/20 p-3">
