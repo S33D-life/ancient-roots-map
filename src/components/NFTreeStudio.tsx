@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { useOfferings } from "@/hooks/use-offerings";
 import { toast } from "sonner";
 import {
   Sparkles, Image as ImageIcon, Paintbrush, History, ExternalLink,
@@ -69,9 +70,7 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
   const [studioImage, setStudioImage] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
 
-  // Mint history
-  const [mintHistory, setMintHistory] = useState<any[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
+  // Mint history provided by useOfferings hook below
 
   // Load tree photo into studio
   useEffect(() => {
@@ -150,21 +149,13 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
     drawCanvas();
   }, [drawCanvas]);
 
-  // Fetch mint history (offerings of type 'nft' for this tree)
-  useEffect(() => {
-    if (!open) return;
-    setHistoryLoading(true);
-    supabase
-      .from("offerings")
-      .select("id, title, content, media_url, nft_link, created_at, created_by")
-      .eq("tree_id", treeId)
-      .eq("type", "nft")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setMintHistory(data || []);
-        setHistoryLoading(false);
-      });
-  }, [open, treeId]);
+  // Use unified offerings hook for NFT history
+  const { offerings: allTreeOfferings, refetch: refetchOfferings } = useOfferings({ treeId: open ? treeId : null, realtime: true });
+  const mintHistory = useMemo(
+    () => allTreeOfferings.filter(o => o.type === "nft"),
+    [allTreeOfferings]
+  );
+  const historyLoading = false;
 
   // Mint: save as NFT offering
   const handleMint = async () => {
@@ -207,14 +198,8 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
       if (error) throw error;
 
       toast.success("NFTree minted!", { description: `"${mintTitle}" has been sealed on-chain` });
-      // Refresh history
-      const { data: refreshed } = await supabase
-        .from("offerings")
-        .select("id, title, content, media_url, nft_link, created_at, created_by")
-        .eq("tree_id", treeId)
-        .eq("type", "nft")
-        .order("created_at", { ascending: false });
-      setMintHistory(refreshed || []);
+      // Refresh via unified hook (realtime will also pick it up)
+      refetchOfferings();
       setActiveTab("history");
     } catch (err: any) {
       toast.error("Minting failed", { description: err.message });

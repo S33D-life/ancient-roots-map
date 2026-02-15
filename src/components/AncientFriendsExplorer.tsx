@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import { toast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "framer-motion";
@@ -370,37 +371,23 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
   const [seedCounts, setSeedCounts] = useState<Record<string, number>>({});
   const [heartBurst, setHeartBurst] = useState(false);
 
-  // Fetch photo offerings + offering type counts for all trees
+  // Use unified offering counts hook for photos + counts
+  const { counts: globalOfferingCounts, photos: globalPhotos } = useOfferingCounts();
+
   useEffect(() => {
     const treeIds = trees.map((t) => t.id);
     if (!treeIds.length) return;
 
-    // Fetch all offerings to build photo map + counts
-    supabase
-      .from("offerings")
-      .select("tree_id, media_url, type")
-      .in("tree_id", treeIds)
-      .then(({ data }) => {
-        if (!data) return;
-        const photoMap: Record<string, string> = {};
-        const countsMap: Record<string, OfferingCounts> = {};
-
-        for (const row of data) {
-          // First photo per tree
-          if (row.media_url && row.type === "photo" && !photoMap[row.tree_id]) {
-            photoMap[row.tree_id] = row.media_url;
-          }
-          // Offering counts
-          if (!countsMap[row.tree_id]) {
-            countsMap[row.tree_id] = { photo: 0, poem: 0, song: 0, story: 0, nft: 0, total: 0 };
-          }
-          const c = countsMap[row.tree_id];
-          if (row.type in c) (c as any)[row.type]++;
-          c.total++;
-        }
-        setTreePhotos(photoMap);
-        setOfferingCounts(countsMap);
-      });
+    // Derive per-tree photos from global hook
+    const photoMap: Record<string, string> = {};
+    const countsMap: Record<string, OfferingCounts> = {};
+    treeIds.forEach(id => {
+      if (globalPhotos[id]) photoMap[id] = globalPhotos[id];
+      const total = globalOfferingCounts[id] || 0;
+      countsMap[id] = { photo: 0, poem: 0, song: 0, story: 0, nft: 0, total };
+    });
+    setTreePhotos(photoMap);
+    setOfferingCounts(countsMap);
 
     // Fetch wishlist counts per tree
     supabase

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getAllHives, type HiveInfo, getHiveForSpecies } from "@/utils/hiveUtils";
@@ -47,24 +48,17 @@ const HivesIndexPage = () => {
   const [filterFamily, setFilterFamily] = useState<string | null>(null);
   const [speciesMode, setSpeciesMode] = useState(false);
 
+  const { counts: globalOfferingCounts } = useOfferingCounts();
+
   useEffect(() => {
     const fetchStats = async () => {
-      const [treesRes, offeringsRes, heartsRes] = await Promise.all([
+      const [treesRes, heartsRes] = await Promise.all([
         supabase.from("trees").select("id, name, species, nation, created_by, created_at").order("created_at", { ascending: false }),
-        supabase.from("offerings").select("tree_id, type, created_by"),
         supabase.from("species_heart_transactions").select("species_family, amount"),
       ]);
 
       const trees = treesRes.data || [];
-      const offerings = offeringsRes.data || [];
       const hearts = heartsRes.data || [];
-
-      const offeringsByTree: Record<string, { count: number; creators: Set<string> }> = {};
-      offerings.forEach(o => {
-        if (!offeringsByTree[o.tree_id]) offeringsByTree[o.tree_id] = { count: 0, creators: new Set() };
-        offeringsByTree[o.tree_id].count++;
-        if (o.created_by) offeringsByTree[o.tree_id].creators.add(o.created_by);
-      });
 
       const heartsByFamily: Record<string, number> = {};
       hearts.forEach(h => {
@@ -91,11 +85,7 @@ const HivesIndexPage = () => {
           if (t.created_by) wanderers.add(t.created_by);
           if (t.nation) nations.add(t.nation);
           speciesCounts[t.species] = (speciesCounts[t.species] || 0) + 1;
-          const treeOfferings = offeringsByTree[t.id];
-          if (treeOfferings) {
-            offeringCount += treeOfferings.count;
-            treeOfferings.creators.forEach(c => wanderers.add(c));
-          }
+          offeringCount += globalOfferingCounts[t.id] || 0;
         });
 
         const topSpecies = Object.entries(speciesCounts)
@@ -119,7 +109,7 @@ const HivesIndexPage = () => {
       setLoading(false);
     };
     fetchStats();
-  }, []);
+  }, [globalOfferingCounts]);
 
   // Active family chips (hives with trees, sorted by tree count)
   const activeChips = useMemo(() => {

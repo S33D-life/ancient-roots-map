@@ -1,21 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import { TreeDeciduous, Gift, Heart } from "lucide-react";
-
-interface JourneyStats {
-  trees: number;
-  offerings: number;
-  hearts: number;
-}
 
 /**
  * Compact personal stats widget showing the user's journey across TETOL levels.
  * Shows in footer area — only visible when logged in.
  */
 const JourneyPulse = () => {
-  const [stats, setStats] = useState<JourneyStats | null>(null);
+  const [trees, setTrees] = useState(0);
+  const [hearts, setHearts] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
+  const { count: offerings } = useUserOfferingCount(userId);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,21 +26,19 @@ const JourneyPulse = () => {
   }, []);
 
   const fetchStats = async (uid: string) => {
-    const [treesRes, offeringsRes, heartTxRes] = await Promise.all([
+    const [treesRes, heartTxRes] = await Promise.all([
       supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", uid),
-      supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", uid),
       supabase.from("heart_transactions").select("amount").eq("user_id", uid),
     ]);
 
-    const trees = treesRes.count || 0;
-    const offerings = offeringsRes.count || 0;
+    const treeCount = treesRes.count || 0;
     const heartTxTotal = (heartTxRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
-    const hearts = trees * 10 + heartTxTotal;
 
-    setStats({ trees, offerings, hearts });
+    setTrees(treeCount);
+    setHearts(treeCount * 10 + heartTxTotal);
   };
 
-  if (!userId || !stats || (stats.trees === 0 && stats.offerings === 0)) return null;
+  if (!userId || (trees === 0 && offerings === 0)) return null;
 
   return (
     <Link
@@ -52,17 +47,17 @@ const JourneyPulse = () => {
     >
       <span className="flex items-center gap-1">
         <TreeDeciduous className="w-3 h-3 text-primary/70" />
-        {stats.trees}
+        {trees}
       </span>
       <span className="text-border/40">·</span>
       <span className="flex items-center gap-1">
         <Gift className="w-3 h-3 text-accent/70" />
-        {stats.offerings}
+        {offerings}
       </span>
       <span className="text-border/40">·</span>
       <span className="flex items-center gap-1">
         <Heart className="w-3 h-3 text-primary/70 fill-primary/30" />
-        {stats.hearts}
+        {hearts}
       </span>
     </Link>
   );
