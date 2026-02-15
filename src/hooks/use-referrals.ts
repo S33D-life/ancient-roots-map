@@ -94,11 +94,9 @@ export function useReferrals(userId: string | undefined) {
  */
 export async function recordReferral(inviteeId: string, inviteCode: string) {
   // Look up the invite link
-  const { data: link } = await supabase
-    .from("invite_links")
-    .select("id, created_by")
-    .eq("code", inviteCode)
-    .maybeSingle();
+  const { data: links } = await supabase
+    .rpc("validate_invite_code", { p_code: inviteCode });
+  const link = links?.[0] || null;
 
   if (!link) return { error: "Invalid invite code" };
 
