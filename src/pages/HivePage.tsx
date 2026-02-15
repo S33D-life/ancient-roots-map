@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import OfferingList from "@/components/OfferingList";
 
 interface TreeRow {
   id: string;
@@ -363,31 +364,13 @@ const HivePage = () => {
 
             {/* Offerings Tab */}
             <TabsContent value="offerings">
-              {offerings.length === 0 ? (
-                <p className="text-center text-muted-foreground font-serif py-12">No offerings yet in this hive.</p>
-              ) : (
-                <div className="space-y-3">
-                  {offerings.slice(0, 50).map((off, i) => {
-                    const tree = trees.find(t => t.id === off.tree_id);
-                    return (
-                      <motion.div key={off.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}>
-                        <Card className="bg-card/60 backdrop-blur border-border/40">
-                          <CardContent className="p-3 flex items-center gap-3">
-                            {off.media_url && off.type === "photo" && (
-                              <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover" loading="lazy" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                              {tree && <Link to={`/tree/${tree.id}`} className="text-[11px] text-primary/70 hover:text-primary font-serif">at {tree.name}</Link>}
-                            </div>
-                            <Badge variant="outline" className="text-[10px] font-serif shrink-0">{off.type}</Badge>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
+              <OfferingList
+                offerings={offerings as any}
+                treeLookup={trees.map(t => ({ id: t.id, name: t.name }))}
+                limit={50}
+                emptyMessage="No offerings yet in this hive."
+                showTreeLink
+              />
             </TabsContent>
 
             {/* Lore Tab */}

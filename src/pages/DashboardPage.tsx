@@ -11,6 +11,7 @@ import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, Scroll
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
+import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import hearthBg from "@/assets/hearth-bg.jpeg";
 import HearthEntrance from "@/components/HearthEntrance";
 import Footer from "@/components/Footer";
@@ -181,7 +182,6 @@ const DashboardPage = () => {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [plantCount, setPlantCount] = useState(0);
-  const [offeringCount, setOfferingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { showEntrance, dismissEntrance } = useEntranceOnce("dashboard");
   const [isImporting, setIsImporting] = useState(false);
@@ -189,6 +189,9 @@ const DashboardPage = () => {
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Unified offering count — consistent across all surfaces
+  const { count: offeringCount } = useUserOfferingCount(user?.id ?? null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -201,7 +204,6 @@ const DashboardPage = () => {
           fetchProfile(session.user.id);
           fetchUserTrees(session.user.id);
           fetchPlantCount(session.user.id);
-          fetchOfferingCount(session.user.id);
         }, 0);
       }
     });
@@ -215,7 +217,6 @@ const DashboardPage = () => {
         fetchProfile(session.user.id);
         fetchUserTrees(session.user.id);
         fetchPlantCount(session.user.id);
-        fetchOfferingCount(session.user.id);
       }
       setLoading(false);
     });
@@ -236,11 +237,6 @@ const DashboardPage = () => {
   const fetchPlantCount = async (userId: string) => {
     const { count } = await supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId);
     setPlantCount(count || 0);
-  };
-
-  const fetchOfferingCount = async (userId: string) => {
-    const { count } = await supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId);
-    setOfferingCount(count || 0);
   };
 
   const handleSignOut = async () => {
