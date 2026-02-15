@@ -19,7 +19,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Compass, TreePine, Plus, Layers } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Plus, Layers } from "lucide-react";
 import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES, AGE_BANDS, GIRTH_BANDS, type AgeBand, type GirthBand } from "./LiteMapFilters";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
@@ -2384,12 +2384,29 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
         </button>
         <button
+          onClick={() => {
+            const map = mapRef.current;
+            if (map) {
+              const c = map.getCenter();
+              setAddTreeCoords({ lat: c.lat, lng: c.lng });
+            } else {
+              setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+            }
+            setAddDialogOpen(true);
+          }}
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
+          style={{ ...btnBase, color: "hsl(120, 50%, 55%)" }}
+          title="Add tree"
+        >
+          <Plus className="w-[18px] h-[18px]" />
+        </button>
+        <button
           onClick={handleCompassReset}
           className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
           style={{ ...btnBase, color: "hsl(42, 60%, 60%)" }}
           title="Reset view"
         >
-          <Compass className="w-[18px] h-[18px]" />
+          <Globe className="w-[18px] h-[18px]" />
         </button>
       </div>
 
