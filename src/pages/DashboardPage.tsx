@@ -245,7 +245,10 @@ const DashboardPage = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/");
+    // Use replace to prevent back-button returning to protected content
+    navigate("/", { replace: true });
+    // Clear browser history entry so back doesn't flash protected page
+    window.history.replaceState(null, "", "/");
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
