@@ -28,6 +28,7 @@ import GrovePulse from "@/components/GrovePulse";
 import HearthHearts from "@/components/HearthHearts";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
+import IdentityBloom from "@/components/IdentityBloom";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
 
@@ -187,6 +188,7 @@ const DashboardPage = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0, startTime: 0 });
+  const [showIdentityBloom, setShowIdentityBloom] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -226,7 +228,13 @@ const DashboardPage = () => {
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
-    if (data) setProfile(data);
+    if (data) {
+      setProfile(data);
+      // Trigger Identity Bloom if no name set yet
+      if (!data.full_name && !data.identity_bloomed_at) {
+        setShowIdentityBloom(true);
+      }
+    }
   };
 
   const fetchUserTrees = async (userId: string) => {
@@ -343,6 +351,16 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen relative">
+      {/* Identity Bloom — onboarding moment */}
+      {showIdentityBloom && user && (
+        <IdentityBloom
+          userId={user.id}
+          onComplete={(name) => {
+            setShowIdentityBloom(false);
+            setProfile((prev) => prev ? { ...prev, full_name: name } : prev);
+          }}
+        />
+      )}
       {/* Hearth background */}
       <div className="fixed inset-0 z-0">
         <img src={hearthBg} alt="" className="w-full h-full object-cover" />

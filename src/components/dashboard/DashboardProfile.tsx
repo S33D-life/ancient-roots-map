@@ -19,6 +19,10 @@ interface Profile {
   avatar_url: string | null;
   bio: string | null;
   is_discoverable: boolean;
+  home_place?: string | null;
+  instagram_handle?: string | null;
+  x_handle?: string | null;
+  facebook_handle?: string | null;
 }
 
 interface DashboardProfileProps {
@@ -32,6 +36,10 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [isDiscoverable, setIsDiscoverable] = useState(profile?.is_discoverable ?? true);
+  const [homePlace, setHomePlace] = useState(profile?.home_place || "");
+  const [instagram, setInstagram] = useState(profile?.instagram_handle || "");
+  const [xHandle, setXHandle] = useState(profile?.x_handle || "");
+  const [facebook, setFacebook] = useState(profile?.facebook_handle || "");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const { toast } = useToast();
@@ -51,13 +59,17 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         full_name: fullName.trim() || null,
         bio: bio.trim() || null,
         is_discoverable: isDiscoverable,
+        home_place: homePlace.trim() || null,
+        instagram_handle: instagram.trim().replace(/^@/, "") || null,
+        x_handle: xHandle.trim().replace(/^@/, "") || null,
+        facebook_handle: facebook.trim() || null,
       })
       .eq("id", user.id);
     if (error) {
       toast({ title: "Error saving", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Profile updated!" });
-      onProfileUpdate({ ...profile!, full_name: fullName.trim() || null, bio: bio.trim() || null, is_discoverable: isDiscoverable });
+      onProfileUpdate({ ...profile!, full_name: fullName.trim() || null, bio: bio.trim() || null, is_discoverable: isDiscoverable, home_place: homePlace.trim() || null, instagram_handle: instagram.trim() || null, x_handle: xHandle.trim() || null, facebook_handle: facebook.trim() || null });
     }
     setSaving(false);
   };
@@ -159,6 +171,43 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
                 className="font-serif resize-none"
               />
               <p className="text-[10px] text-muted-foreground text-right">{bio.length}/280</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Home Place</Label>
+              <Input
+                value={homePlace}
+                onChange={(e) => setHomePlace(e.target.value.slice(0, 100))}
+                placeholder="Your grove, city, or bioregion"
+                maxLength={100}
+                className="font-serif"
+              />
+            </div>
+
+            {/* Social Roots */}
+            <div className="space-y-2 rounded-lg border border-border/50 bg-secondary/10 p-3">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif mb-2">Social Roots</p>
+              <div className="space-y-2">
+                <Input
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value.slice(0, 50))}
+                  placeholder="Instagram @handle"
+                  className="font-serif text-sm h-9"
+                />
+                <Input
+                  value={xHandle}
+                  onChange={(e) => setXHandle(e.target.value.slice(0, 50))}
+                  placeholder="X @handle"
+                  className="font-serif text-sm h-9"
+                />
+                <Input
+                  value={facebook}
+                  onChange={(e) => setFacebook(e.target.value.slice(0, 100))}
+                  placeholder="Facebook name or URL"
+                  className="font-serif text-sm h-9"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">Only shared when you choose to share.</p>
             </div>
 
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/20 p-3">

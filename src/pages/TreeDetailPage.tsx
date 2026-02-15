@@ -8,6 +8,7 @@ import JourneyNudge from "@/components/JourneyNudge";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
+import TreeShareCard from "@/components/TreeShareCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +60,20 @@ const TreeDetailPage = () => {
   const [birdsongOpen, setBirdsongOpen] = useState(false);
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
+  const [shareCardOpen, setShareCardOpen] = useState(false);
+
+  // Capture referral params from shared tree links
+  useEffect(() => {
+    const invite = searchParams.get("invite");
+    const from = searchParams.get("from");
+    if (invite) {
+      localStorage.setItem("s33d_invite_code", invite);
+      if (from === "share") {
+        localStorage.setItem("s33d_inspiration_source", "share");
+        if (id) sessionStorage.setItem("s33d_shared_tree_id", id);
+      }
+    }
+  }, [searchParams, id]);
 
   // Centralized offerings via shared hook (with realtime)
   const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType } = useOfferings({ treeId: id, realtime: true });
@@ -223,32 +238,24 @@ const TreeDetailPage = () => {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  onClick={async () => {
-                    const shareData = {
-                      title: tree.name,
-                      text: `${tree.name} — a ${tree.species} on the Ancient Friends Map`,
-                      url: window.location.href,
-                    };
-                    try {
-                      if (navigator.share) {
-                        await navigator.share(shareData);
-                      } else {
-                        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-                        const { toast } = await import("sonner");
-                        toast.success("Link copied to clipboard!");
-                      }
-                    } catch (e) {
-                      if ((e as Error).name !== 'AbortError') {
-                        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-                        const { toast } = await import("sonner");
-                        toast.success("Link copied to clipboard!");
-                      }
-                    }
-                  }}
+                  onClick={() => setShareCardOpen(true)}
                   title="Share this tree"
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
+                {tree && (
+                  <TreeShareCard
+                    open={shareCardOpen}
+                    onOpenChange={setShareCardOpen}
+                    tree={{
+                      id: tree.id,
+                      name: tree.name,
+                      species: tree.species,
+                      imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
+                      location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
+                    }}
+                  />
+                )}
                 {tree.grove_scale && (
                   <Badge
                     variant="outline"
