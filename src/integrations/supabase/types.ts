@@ -1877,6 +1877,14 @@ export type Database = {
         Args: { p_tree_id: string; p_user_id: string }
         Returns: number
       }
+      get_offering_counts: {
+        Args: never
+        Returns: {
+          cnt: number
+          first_photo: string
+          tree_id: string
+        }[]
+      }
       get_recent_tree_songs: {
         Args: { p_tree_id: string; result_limit?: number }
         Returns: {
