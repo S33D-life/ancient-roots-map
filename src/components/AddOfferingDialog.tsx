@@ -15,6 +15,7 @@ import VoiceOfferingFlow, { type VoiceOfferingData } from "@/components/VoiceOff
 import BookOfferingFlow, { type BookOfferingData } from "@/components/BookOfferingFlow";
 import OfferingCelebration from "@/components/OfferingCelebration";
 import RewardReceipt from "@/components/RewardReceipt";
+import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
 import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -69,6 +70,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
   const [celebrationMsg, setCelebrationMsg] = useState({ emoji: "✨", message: "", subtitle: "" });
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showRewardReceipt, setShowRewardReceipt] = useState(false);
+  const [visibility, setVisibility] = useState<OfferingVisibility>(type === "photo" ? "public" : "tribe");
 
   const cfg = typeConfig[type];
 
@@ -157,6 +159,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
+        visibility: type === "photo" ? "public" : visibility,
       }).select("id").single();
       if (error) throw error;
 
@@ -223,6 +226,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
+        visibility,
       }).select("id").single();
       if (error) throw error;
 
@@ -276,6 +280,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
+        visibility,
       }).select("id").single();
       if (error) throw error;
 
@@ -334,6 +339,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
+        visibility,
       }).select("id").single();
       if (error) throw error;
 
@@ -504,6 +510,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
                 <Label htmlFor="nft" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">NFT Link</Label>
                 <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link..." className="bg-secondary/20 border-border/50 font-serif" />
               </div>
+            )}
+
+            {/* Visibility picker (not shown for photos — always public) */}
+            {type !== "photo" && (
+              <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading} />
             )}
 
             {/* Staff seal */}

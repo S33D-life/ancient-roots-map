@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Trash2, Loader2 } from "lucide-react";
+import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Trash2, Loader2, Eye, EyeOff, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,12 @@ const typeIcons: Record<OfferingType, React.ReactNode> = {
   nft: <Sparkles className="h-3.5 w-3.5" />,
   voice: <Mic className="h-3.5 w-3.5" />,
   book: <BookOpen className="h-3.5 w-3.5" />,
+};
+
+const visibilityIcons: Record<string, React.ReactNode> = {
+  private: <EyeOff className="h-2.5 w-2.5" />,
+  tribe: <Users className="h-2.5 w-2.5" />,
+  public: <Eye className="h-2.5 w-2.5" />,
 };
 
 interface TreeLookup {
@@ -166,7 +172,8 @@ const OfferingList = ({
                         })}
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-border/30">
+                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-border/30 gap-0.5">
+                      {(off as any).visibility && (off as any).visibility !== "public" && visibilityIcons[(off as any).visibility]}
                       {off.type}
                     </Badge>
                     {isAuthor && (
