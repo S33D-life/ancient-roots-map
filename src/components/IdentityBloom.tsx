@@ -62,11 +62,9 @@ const IdentityBloom = ({ userId, onComplete, showSocial = true }: IdentityBloomP
 
       if (inviteCode) {
         // Look up who created the invite
-        const { data: link } = await supabase
-          .from("invite_links")
-          .select("created_by")
-          .eq("code", inviteCode)
-          .maybeSingle();
+        const { data: links } = await supabase
+          .rpc("validate_invite_code", { p_code: inviteCode });
+        const link = links?.[0] || null;
 
         if (link && link.created_by !== userId) {
           updates.inspired_by_user_id = link.created_by;

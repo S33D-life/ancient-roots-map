@@ -1989,6 +1989,13 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      validate_invite_code: {
+        Args: { p_code: string }
+        Returns: {
+          created_by: string
+          id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "curator" | "keeper"
