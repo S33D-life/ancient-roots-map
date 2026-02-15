@@ -900,6 +900,7 @@ export type Database = {
           instagram_handle: string | null
           is_discoverable: boolean
           updated_at: string
+          visible_fields: Json
           wallet_address: string | null
           x_handle: string | null
         }
@@ -919,6 +920,7 @@ export type Database = {
           instagram_handle?: string | null
           is_discoverable?: boolean
           updated_at?: string
+          visible_fields?: Json
           wallet_address?: string | null
           x_handle?: string | null
         }
@@ -938,6 +940,7 @@ export type Database = {
           instagram_handle?: string | null
           is_discoverable?: boolean
           updated_at?: string
+          visible_fields?: Json
           wallet_address?: string | null
           x_handle?: string | null
         }
@@ -1923,9 +1926,13 @@ export type Database = {
         Returns: {
           avatar_url: string
           bio: string
+          facebook_handle: string
           full_name: string
+          home_place: string
           id: string
+          instagram_handle: string
           is_discoverable: boolean
+          x_handle: string
         }[]
       }
       get_tree_leaderboard: {
