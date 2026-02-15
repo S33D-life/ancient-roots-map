@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import { motion } from "framer-motion";
 import { Heart, TreeDeciduous, Gift, Sprout } from "lucide-react";
 
@@ -8,14 +9,14 @@ interface GrovePulseProps {
 }
 
 const GrovePulse = ({ userId }: GrovePulseProps) => {
-  const [stats, setStats] = useState({ trees: 0, offerings: 0, hearts: 0, seeds: 0 });
+  const [stats, setStats] = useState({ trees: 0, hearts: 0, seeds: 0 });
   const [loading, setLoading] = useState(true);
+  const { count: offeringCount, loading: offeringsLoading } = useUserOfferingCount(userId);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [treesRes, offeringsRes, heartsRes, seedsRes] = await Promise.all([
+      const [treesRes, heartsRes, seedsRes] = await Promise.all([
         supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
-        supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
         supabase.from("heart_transactions").select("amount").eq("user_id", userId),
         supabase.from("planted_seeds").select("*", { count: "exact", head: true }).eq("planter_id", userId),
       ]);
@@ -24,7 +25,6 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
 
       setStats({
         trees: treesRes.count || 0,
-        offerings: offeringsRes.count || 0,
         hearts: heartTotal,
         seeds: seedsRes.count || 0,
       });
@@ -33,10 +33,12 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
     fetchStats();
   }, [userId]);
 
+  const isLoading = loading || offeringsLoading;
+
   // Vitality score drives animation speed and color warmth (0 = dormant, 100 = thriving)
-  const vitality = Math.min(100, stats.trees * 5 + stats.offerings * 3 + stats.hearts * 0.5 + stats.seeds * 2);
-  const pulseSpeed = loading ? 4 : Math.max(1.5, 4 - vitality * 0.025);
-  const warmth = loading ? 0 : Math.min(1, vitality / 60);
+  const vitality = Math.min(100, stats.trees * 5 + offeringCount * 3 + stats.hearts * 0.5 + stats.seeds * 2);
+  const pulseSpeed = isLoading ? 4 : Math.max(1.5, 4 - vitality * 0.025);
+  const warmth = isLoading ? 0 : Math.min(1, vitality / 60);
 
   // HSL interpolation: dormant=cool blue-green, active=warm amber
   const hue = 160 - warmth * 130; // 160 (teal) → 30 (amber)
@@ -45,7 +47,7 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
 
   const statItems = [
     { icon: TreeDeciduous, value: stats.trees, label: "Trees" },
-    { icon: Gift, value: stats.offerings, label: "Offerings" },
+    { icon: Gift, value: offeringCount, label: "Offerings" },
     { icon: Heart, value: stats.hearts, label: "Hearts" },
     { icon: Sprout, value: stats.seeds, label: "Seeds" },
   ];
@@ -105,8 +107,8 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
         <p className="text-[10px] font-serif tracking-[0.2em] uppercase text-muted-foreground/50">
           Grove Vitality
         </p>
-        <p className="text-sm font-serif mt-0.5" style={{ color: `hsl(${hue}, ${sat}%, ${light + 20}%)` }}>
-          {loading ? "Sensing…" : vitality < 20 ? "Dormant" : vitality < 50 ? "Stirring" : vitality < 80 ? "Flourishing" : "Thriving"}
+         <p className="text-sm font-serif mt-0.5" style={{ color: `hsl(${hue}, ${sat}%, ${light + 20}%)` }}>
+          {isLoading ? "Sensing…" : vitality < 20 ? "Dormant" : vitality < 50 ? "Stirring" : vitality < 80 ? "Flourishing" : "Thriving"}
         </p>
       </div>
 
@@ -115,7 +117,7 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
         {statItems.map((s) => (
           <div key={s.label} className="flex flex-col items-center gap-1 py-2 rounded-lg bg-card/30 border border-border/20">
             <s.icon className="w-4 h-4 text-muted-foreground/60" />
-            <span className="text-sm font-serif text-foreground/80">{loading ? "–" : s.value}</span>
+            <span className="text-sm font-serif text-foreground/80">{isLoading ? "–" : s.value}</span>
             <span className="text-[9px] text-muted-foreground/40 font-serif">{s.label}</span>
           </div>
         ))}

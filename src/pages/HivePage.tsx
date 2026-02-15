@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getHiveBySlug, type HiveInfo } from "@/utils/hiveUtils";
@@ -63,6 +64,7 @@ const HivePage = () => {
   const [influenceTxs, setInfluenceTxs] = useState<InfluenceTx[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("trees");
+  const { counts: globalOfferingCounts } = useOfferingCounts();
 
   useEffect(() => {
     if (!hive) { setLoading(false); return; }
@@ -113,6 +115,7 @@ const HivePage = () => {
   }
 
   const totalHearts = trees.length * 10;
+  const hiveOfferingCount = trees.reduce((sum, t) => sum + (globalOfferingCounts[t.id] || 0), 0);
   const uniqueContributors = new Set(offerings.map(o => o.created_by).filter(Boolean)).size;
   const totalSpeciesHearts = speciesHearts.reduce((s, tx) => s + tx.amount, 0);
   const totalInfluence = influenceTxs.reduce((s, tx) => s + tx.amount, 0);
@@ -187,7 +190,7 @@ const HivePage = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           {[
             { label: "Ancient Friends", value: trees.length, icon: <TreePine className="w-4 h-4" /> },
-            { label: "Offerings", value: offerings.length, icon: <Music className="w-4 h-4" /> },
+            { label: "Offerings", value: hiveOfferingCount, icon: <Music className="w-4 h-4" /> },
             { label: "S33D Hearts", value: totalHearts, icon: <Heart className="w-4 h-4" /> },
             { label: `${hive.family} Hearts`, value: totalSpeciesHearts, icon: <span className="text-sm">{hive.icon}</span> },
             { label: "Influence", value: totalInfluence, icon: <Shield className="w-4 h-4" /> },
