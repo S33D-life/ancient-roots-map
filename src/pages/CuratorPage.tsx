@@ -67,7 +67,7 @@ export default function CuratorPage() {
       setLoading(true);
       const [staffRes, profileRes] = await Promise.all([
         supabase.from("staffs").select("id, token_id, species, species_code, owner_user_id, is_origin_spiral, image_url, circle_id, staff_number").order("token_id"),
-        supabase.from("profiles").select("id, full_name, avatar_url").eq("is_discoverable", true).order("full_name"),
+        supabase.rpc("search_discoverable_profiles", { search_query: "", result_limit: 200 }),
       ]);
       setStaffRows((staffRes.data as StaffRow[]) || []);
       setWanderers((profileRes.data as WandererOption[]) || []);

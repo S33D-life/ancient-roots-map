@@ -74,7 +74,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
 
       const [profilesRes, photosRes] = await Promise.all([
         creatorIds.length > 0
-          ? supabase.from("profiles").select("id, full_name, avatar_url").in("id", creatorIds)
+          ? supabase.rpc("get_safe_profiles", { p_ids: creatorIds })
           : Promise.resolve({ data: [] }),
         supabase.from("offerings").select("tree_id, media_url").in("tree_id", treeIds).eq("type", "photo"),
       ]);

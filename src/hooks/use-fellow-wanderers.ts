@@ -116,11 +116,7 @@ export function useWandererSearch() {
     if (!query.trim()) { setResults([]); return; }
     setSearching(true);
     const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url, bio, is_discoverable")
-      .eq("is_discoverable", true)
-      .ilike("full_name", `%${query}%`)
-      .limit(20);
+      .rpc("search_discoverable_profiles", { search_query: query, result_limit: 20 });
     setResults((data as WandererProfile[]) || []);
     setSearching(false);
   }, []);

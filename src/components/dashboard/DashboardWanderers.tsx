@@ -117,9 +117,7 @@ const DashboardWanderers = ({ userId }: Props) => {
     if (idsArr.length === 0) return;
 
     supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url, bio, is_discoverable")
-      .in("id", idsArr)
+      .rpc("get_safe_profiles", { p_ids: idsArr })
       .then(({ data }) => {
         if (data) {
           const map: Record<string, WandererProfile> = {};

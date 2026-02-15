@@ -407,9 +407,7 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
     const creatorIds = [...new Set(trees.filter(t => t.created_by).map(t => t.created_by!))];
     if (creatorIds.length > 0) {
       supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", creatorIds)
+        .rpc("get_safe_profiles", { p_ids: creatorIds })
         .then(({ data }) => {
           if (!data) return;
           const nameMap: Record<string, string> = {};

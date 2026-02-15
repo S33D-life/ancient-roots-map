@@ -43,7 +43,7 @@ export function useReferrals(userId: string | undefined) {
       const inviteeIds = myReferrals.map((r: any) => r.invitee_id);
       
       const [profilesRes, treesRes] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, avatar_url").in("id", inviteeIds),
+        supabase.rpc("get_safe_profiles", { p_ids: inviteeIds }),
         supabase.from("trees").select("created_by").in("created_by", inviteeIds),
       ]);
 
@@ -68,11 +68,9 @@ export function useReferrals(userId: string | undefined) {
     }
 
     if (myReferrer) {
-      const { data: referrerProfile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", (myReferrer as any).inviter_id)
-        .maybeSingle();
+      const { data: referrerProfiles } = await supabase
+        .rpc("get_safe_profiles", { p_ids: [(myReferrer as any).inviter_id] });
+      const referrerProfile = referrerProfiles?.[0] || null;
       setReferredBy({
         id: (myReferrer as any).inviter_id,
         name: referrerProfile?.full_name || null,
