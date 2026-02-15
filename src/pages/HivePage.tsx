@@ -370,7 +370,7 @@ const HivePage = () => {
               <OfferingList
                 offerings={offerings as any}
                 treeLookup={trees.map(t => ({ id: t.id, name: t.name }))}
-                limit={50}
+                pageSize={50}
                 emptyMessage="No offerings yet in this hive."
                 showTreeLink
               />

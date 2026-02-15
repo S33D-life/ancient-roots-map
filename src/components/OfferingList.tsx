@@ -1,7 +1,7 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Trash2 } from "lucide-react";
+import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Trash2, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,8 @@ interface TreeLookup {
 interface OfferingListProps {
   offerings: Offering[];
   treeLookup?: TreeLookup[];
-  limit?: number;
+  /** Items per page (default 20) */
+  pageSize?: number;
   emptyMessage?: string;
   showTreeLink?: boolean;
   /** Called after a successful delete so parent can refresh */
@@ -50,7 +51,7 @@ interface OfferingListProps {
 const OfferingList = ({
   offerings,
   treeLookup,
-  limit = 50,
+  pageSize = 20,
   emptyMessage = "No offerings yet.",
   showTreeLink = true,
   onDelete,
@@ -58,11 +59,17 @@ const OfferingList = ({
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Offering | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
   }, []);
+
+  // Reset cursor when offerings change (e.g. new data from parent)
+  useEffect(() => {
+    setCursor(null);
+  }, [offerings]);
 
   const treeMap = useMemo(() => {
     if (!treeLookup) return null;
@@ -73,11 +80,27 @@ const OfferingList = ({
 
   const sorted = useMemo(
     () =>
-      [...offerings]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, limit),
-    [offerings, limit]
+      [...offerings].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      ),
+    [offerings]
   );
+
+  // Cursor-based pagination: show items up to and including cursor position
+  const paginatedItems = useMemo(() => {
+    if (!cursor) return sorted.slice(0, pageSize);
+    const cursorIdx = sorted.findIndex((o) => o.created_at === cursor);
+    if (cursorIdx === -1) return sorted.slice(0, pageSize);
+    return sorted.slice(0, cursorIdx + pageSize);
+  }, [sorted, cursor, pageSize]);
+
+  const hasMore = paginatedItems.length < sorted.length;
+
+  const loadMore = useCallback(() => {
+    if (!hasMore || paginatedItems.length === 0) return;
+    const lastItem = paginatedItems[paginatedItems.length - 1];
+    setCursor(lastItem.created_at);
+  }, [hasMore, paginatedItems]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -103,7 +126,7 @@ const OfferingList = ({
     <>
       <div className="space-y-2">
         <AnimatePresence mode="popLayout">
-          {sorted.map((off, i) => {
+          {paginatedItems.map((off, i) => {
             const treeName = treeMap?.get(off.tree_id);
             const isAuthor = currentUserId && off.created_by === currentUserId;
             return (
@@ -113,7 +136,7 @@ const OfferingList = ({
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 8, height: 0 }}
-                transition={{ delay: i * 0.02, duration: 0.2 }}
+                transition={{ delay: Math.min(i, 10) * 0.02, duration: 0.2 }}
               >
                 <Card className="bg-card/60 backdrop-blur border-border/40">
                   <CardContent className="p-3 flex items-center gap-3">
@@ -163,6 +186,19 @@ const OfferingList = ({
             );
           })}
         </AnimatePresence>
+
+        {hasMore && (
+          <div className="flex justify-center pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={loadMore}
+              className="font-serif text-xs text-muted-foreground hover:text-foreground gap-1.5"
+            >
+              Load more ({sorted.length - paginatedItems.length} remaining)
+            </Button>
+          </div>
+        )}
       </div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>

@@ -59,6 +59,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const submittingRef = useRef(false);
   const { toast } = useToast();
   const { results: tagResults, searching: tagSearching, search: searchTags, clearResults: clearTagResults } = useWandererSearch();
   const [taggedUsers, setTaggedUsers] = useState<WandererProfile[]>([]);
@@ -118,10 +119,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     if (!title.trim()) {
       toast({ title: "Missing title", description: "Please provide a title", variant: "destructive" });
       return;
     }
+    submittingRef.current = true;
     setLoading(true);
 
     try {
@@ -194,11 +197,14 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
   // Song offering via MusicOfferingFlow
   const handleSongComplete = async (data: SelectedSongData) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -245,11 +251,14 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
   // Voice offering via VoiceOfferingFlow
   const handleVoiceComplete = async (data: VoiceOfferingData) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -295,89 +304,14 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
-  // For song type, render dedicated flow
-  if (type === "song") {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div
-            className="h-0.5"
-            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent)" }}
-          />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">🎵</span>
-                Song Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
-                Offer a song to this Ancient Friend
-              </p>
-            </DialogHeader>
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <MusicOfferingFlow
-                treeId={treeId}
-                onComplete={handleSongComplete}
-                onCancel={() => onOpenChange(false)}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  // For voice type, render dedicated flow
-  if (type === "voice") {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div
-            className="h-0.5"
-            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }}
-          />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">🎙️</span>
-                Voice Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
-                Speak your offering to this Ancient Friend
-              </p>
-            </DialogHeader>
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : (
-              <VoiceOfferingFlow
-                treeId={treeId}
-                onComplete={handleVoiceComplete}
-                onCancel={() => onOpenChange(false)}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   // Book offering via BookOfferingFlow
   const handleBookComplete = async (data: BookOfferingData) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -428,6 +362,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
