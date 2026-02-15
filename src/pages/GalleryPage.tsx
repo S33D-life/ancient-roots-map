@@ -986,39 +986,7 @@ const GalleryPage = () => {
               />
             )}
 
-            {/* Tree cards grid — shown first for immediate discovery */}
-            {loading ? (
-              <p className="text-center py-12">Loading trees...</p>
-            ) : clusteredTrees.length === 0 ? (
-              <p className="text-center py-12 text-muted-foreground">
-                No trees found. Import some trees to get started!
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {clusteredTrees.map((cluster) => {
-                  const tree = cluster.anchor;
-                  const treeOfferingCount = offerings.filter((o) => o.tree_id === tree.id).length;
-                  const photoOffering = offerings.find((o) => o.tree_id === tree.id && o.type === "photo" && o.media_url);
-                  return (
-                    <TreeCard
-                      key={tree.id}
-                      tree={tree}
-                      variant="gallery"
-                      cluster={cluster}
-                      offeringCount={treeOfferingCount}
-                      heroPhotoUrl={photoOffering?.media_url}
-                      wishlistPulseActive={wishlistPulseId === tree.id}
-                      onSelect={(t) => setSelectedTree(t as any)}
-                      onWishlist={addToWishlist}
-                      onShare={handleShare}
-                      onNFTree={(data) => setNftreeTarget(data)}
-                    />
-                  );
-                })}
-              </div>
-            )}
-
-            {/* View Toggle & Filters — below the cards for a discovery-first flow */}
+            {/* View Toggle & Filters — top for quick access */}
             <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'hsla(30, 20%, 15%, 0.6)', border: '1px solid hsla(42, 40%, 30%, 0.3)' }}>
               {([
                 { key: "collective" as const, label: "Collectively", icon: Globe, desc: "All mapped trees" },
@@ -1070,6 +1038,38 @@ const GalleryPage = () => {
                 onClearAll={clearAllFilters}
               />
             </div>
+
+            {/* Tree cards grid */}
+            {loading ? (
+              <p className="text-center py-12">Loading trees...</p>
+            ) : clusteredTrees.length === 0 ? (
+              <p className="text-center py-12 text-muted-foreground">
+                No trees found. Import some trees to get started!
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {clusteredTrees.map((cluster) => {
+                  const tree = cluster.anchor;
+                  const treeOfferingCount = offerings.filter((o) => o.tree_id === tree.id).length;
+                  const photoOffering = offerings.find((o) => o.tree_id === tree.id && o.type === "photo" && o.media_url);
+                  return (
+                    <TreeCard
+                      key={tree.id}
+                      tree={tree}
+                      variant="gallery"
+                      cluster={cluster}
+                      offeringCount={treeOfferingCount}
+                      heroPhotoUrl={photoOffering?.media_url}
+                      wishlistPulseActive={wishlistPulseId === tree.id}
+                      onSelect={(t) => setSelectedTree(t as any)}
+                      onWishlist={addToWishlist}
+                      onShare={handleShare}
+                      onNFTree={(data) => setNftreeTarget(data)}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="staff-room" className="space-y-6">
