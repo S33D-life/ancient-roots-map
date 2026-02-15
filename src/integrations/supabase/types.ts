@@ -889,33 +889,57 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          facebook_handle: string | null
           full_name: string | null
+          home_place: string | null
           id: string
+          identity_bloomed_at: string | null
+          inspiration_source: string | null
+          inspired_by_tree_id: string | null
+          inspired_by_user_id: string | null
+          instagram_handle: string | null
           is_discoverable: boolean
           updated_at: string
           wallet_address: string | null
+          x_handle: string | null
         }
         Insert: {
           active_staff_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          facebook_handle?: string | null
           full_name?: string | null
+          home_place?: string | null
           id: string
+          identity_bloomed_at?: string | null
+          inspiration_source?: string | null
+          inspired_by_tree_id?: string | null
+          inspired_by_user_id?: string | null
+          instagram_handle?: string | null
           is_discoverable?: boolean
           updated_at?: string
           wallet_address?: string | null
+          x_handle?: string | null
         }
         Update: {
           active_staff_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          facebook_handle?: string | null
           full_name?: string | null
+          home_place?: string | null
           id?: string
+          identity_bloomed_at?: string | null
+          inspiration_source?: string | null
+          inspired_by_tree_id?: string | null
+          inspired_by_user_id?: string | null
+          instagram_handle?: string | null
           is_discoverable?: boolean
           updated_at?: string
           wallet_address?: string | null
+          x_handle?: string | null
         }
         Relationships: [
           {
