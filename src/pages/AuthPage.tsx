@@ -332,13 +332,15 @@ const AuthPage = () => {
                 <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
+                  inputMode="email"
                   placeholder="grove.keeper@s33d.life"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (fieldErrors.email) setFieldErrors(p => ({ ...p, email: undefined })); }}
                   disabled={isLoading}
                   className={fieldErrors.email ? "border-destructive" : ""}
-                  autoComplete="email"
+                  autoComplete={isSignup ? "email" : "username"}
                 />
                 {fieldErrors.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
               </div>
@@ -349,6 +351,7 @@ const AuthPage = () => {
                   <div className="relative">
                     <Input
                       id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={password}
@@ -375,6 +378,7 @@ const AuthPage = () => {
                   <Label htmlFor="confirm-password" className="text-xs uppercase tracking-wider text-muted-foreground">Confirm Password</Label>
                   <Input
                     id="confirm-password"
+                    name="confirm-password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={confirmPassword}

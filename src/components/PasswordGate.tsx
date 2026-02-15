@@ -35,15 +35,18 @@ const PasswordGate = ({ onSuccess }: { onSuccess: () => void }) => {
           Ancient Friends
         </h1>
         <p className="text-amber-200/70 font-serif text-sm">Enter the grove</p>
-        <form onSubmit={handleSubmit} className="flex gap-2 w-full max-w-xs">
+        <form onSubmit={handleSubmit} className="flex gap-2 w-full max-w-xs" autoComplete="off">
           <Input
-            type="password"
+            type="text"
             value={value}
             onChange={(e) => { setValue(e.target.value); setError(false); }}
             placeholder="Password"
             aria-label="Grove password"
             className="bg-black/60 border-amber-700/50 text-amber-100 placeholder:text-amber-200/30 h-11"
             autoFocus
+            autoComplete="off"
+            data-lpignore="true"
+            data-1p-ignore="true"
           />
           <Button type="submit" variant="secondary" size="default" className="h-11 px-5">
             Enter
