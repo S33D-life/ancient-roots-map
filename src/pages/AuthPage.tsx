@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -11,6 +11,7 @@ import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { recordReferral } from "@/hooks/use-referrals";
+import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -46,6 +47,12 @@ const AuthPage = () => {
       // Handle password recovery redirect — show reset form instead of navigating away
       if (event === "PASSWORD_RECOVERY") {
         setView("reset-password");
+        return;
+      }
+
+      // Handle session expiry gracefully
+      if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        setView("login");
         return;
       }
 
@@ -121,11 +128,15 @@ const AuthPage = () => {
         if (error.message.includes("Email not confirmed")) {
           throw new Error("Please verify your email before signing in. Check your inbox.");
         }
+        if (error.message.includes("rate") || error.status === 429) {
+          throw new Error("Too many attempts. Please wait a moment before trying again.");
+        }
         throw error;
       }
       toast({ title: "Welcome back!", description: "You've entered the grove" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
+      setFieldErrors(prev => ({ ...prev, password: msg }));
       toast({ title: "Login failed", description: msg, variant: "destructive" });
     } finally {
       setIsLoading(false);
@@ -432,7 +443,7 @@ const AuthPage = () => {
                   className={fieldErrors.email ? "border-destructive" : ""}
                   autoComplete={isSignup ? "email" : "username"}
                 />
-                {fieldErrors.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
+                {fieldErrors.email && <p className="text-xs text-destructive" role="alert">{fieldErrors.email}</p>}
               </div>
 
               {!isForgot && (
@@ -449,17 +460,21 @@ const AuthPage = () => {
                       disabled={isLoading}
                       className={`pr-10 ${fieldErrors.password ? "border-destructive" : ""}`}
                       autoComplete={isSignup ? "new-password" : "current-password"}
+                      aria-invalid={!!fieldErrors.password}
+                      aria-describedby={fieldErrors.password ? "password-error" : undefined}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                       tabIndex={-1}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {fieldErrors.password && <p className="text-xs text-destructive">{fieldErrors.password}</p>}
+                  {isSignup && <PasswordStrengthMeter password={password} />}
+                  {fieldErrors.password && <p id="password-error" className="text-xs text-destructive" role="alert">{fieldErrors.password}</p>}
                 </div>
               )}
 
@@ -477,7 +492,7 @@ const AuthPage = () => {
                     className={fieldErrors.confirm ? "border-destructive" : ""}
                     autoComplete="new-password"
                   />
-                  {fieldErrors.confirm && <p className="text-xs text-destructive">{fieldErrors.confirm}</p>}
+                  {fieldErrors.confirm && <p className="text-xs text-destructive" role="alert">{fieldErrors.confirm}</p>}
                 </div>
                )}
 
