@@ -44,6 +44,41 @@ const typeConfig: Record<
 };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // target after compression
+
+/** Resize an image client-side so it stays under MAX_UPLOAD_SIZE */
+const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =>
+  new Promise((resolve, reject) => {
+    // If already small enough, skip
+    if (file.size <= MAX_UPLOAD_SIZE) { resolve(file); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("Canvas not supported")); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error("Compression failed")); return; }
+          resolve(new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality,
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load image")); };
+    img.src = url;
+  });
 
 const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meetingId }: AddOfferingDialogProps) => {
   const [title, setTitle] = useState("");
@@ -81,18 +116,26 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
     if (file) processFile(file);
   };
 
-  const processFile = (file: File) => {
-    if (file.size > MAX_FILE_SIZE) {
-      toast({ title: "File too large", description: "Please select an image under 10MB", variant: "destructive" });
-      return;
-    }
+  const processFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file type", description: "Please select an image file", variant: "destructive" });
       return;
     }
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
-    setMediaUrl("");
+    if (file.size > 50 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please select an image under 50MB", variant: "destructive" });
+      return;
+    }
+    try {
+      const processed = await resizeImage(file);
+      setSelectedFile(processed);
+      setPreviewUrl(URL.createObjectURL(processed));
+      setMediaUrl("");
+      if (processed !== file) {
+        toast({ title: "Image optimized", description: `Resized from ${(file.size / 1024 / 1024).toFixed(1)}MB to ${(processed.size / 1024 / 1024).toFixed(1)}MB` });
+      }
+    } catch {
+      toast({ title: "Processing failed", description: "Could not process the image", variant: "destructive" });
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
