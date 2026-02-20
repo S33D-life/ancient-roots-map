@@ -52,6 +52,8 @@ const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
 const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
 const PilgrimagePathwaysPage = lazy(() => import("./pages/PilgrimagePathwaysPage"));
+const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
+const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -144,6 +146,8 @@ const App = () => {
                 <Route path="/value-tree" element={<ValueTreePage />} />
                 <Route path="/living-archive" element={<LivingArchivePage />} />
                 <Route path="/discovery" element={<DiscoveryPage />} />
+                <Route path="/markets" element={<CycleMarketsPage />} />
+                <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -712,6 +712,244 @@ export type Database = {
         }
         Relationships: []
       }
+      market_funds_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          market_id: string
+          recipient: string
+          recipient_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          market_id: string
+          recipient: string
+          recipient_type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          market_id?: string
+          recipient?: string
+          recipient_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_funds_ledger_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_outcomes: {
+        Row: {
+          created_at: string
+          id: string
+          is_winning: boolean | null
+          label: string
+          market_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_winning?: boolean | null
+          label: string
+          market_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_winning?: boolean | null
+          label?: string
+          market_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_outcomes_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_resolutions: {
+        Row: {
+          evidence_refs: string[] | null
+          id: string
+          market_id: string
+          notes: string | null
+          resolved_at: string
+          resolved_outcome_id: string | null
+          resolver_id: string
+        }
+        Insert: {
+          evidence_refs?: string[] | null
+          id?: string
+          market_id: string
+          notes?: string | null
+          resolved_at?: string
+          resolved_outcome_id?: string | null
+          resolver_id: string
+        }
+        Update: {
+          evidence_refs?: string[] | null
+          id?: string
+          market_id?: string
+          notes?: string | null
+          resolved_at?: string
+          resolved_outcome_id?: string | null
+          resolver_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_resolutions_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_resolutions_resolved_outcome_id_fkey"
+            columns: ["resolved_outcome_id"]
+            isOneToOne: false
+            referencedRelation: "market_outcomes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_stakes: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          market_id: string
+          outcome_id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          market_id: string
+          outcome_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          market_id?: string
+          outcome_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_stakes_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_stakes_outcome_id_fkey"
+            columns: ["outcome_id"]
+            isOneToOne: false
+            referencedRelation: "market_outcomes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      markets: {
+        Row: {
+          close_time: string
+          created_at: string
+          creator_reward_cap: number
+          creator_user_id: string
+          daily_market_budget: number
+          description: string | null
+          evidence_policy: string | null
+          grove_fund_percent: number
+          id: string
+          is_demo: boolean
+          linked_hive_id: string | null
+          linked_tree_ids: string[] | null
+          market_type: Database["public"]["Enums"]["market_type"]
+          max_stake_per_user: number
+          open_time: string
+          research_pot_percent: number
+          resolution_source: string | null
+          resolve_time: string | null
+          rules_text: string | null
+          scope: Database["public"]["Enums"]["market_scope"]
+          status: Database["public"]["Enums"]["market_status"]
+          title: string
+          updated_at: string
+          winner_pool_percent: number
+        }
+        Insert: {
+          close_time: string
+          created_at?: string
+          creator_reward_cap?: number
+          creator_user_id: string
+          daily_market_budget?: number
+          description?: string | null
+          evidence_policy?: string | null
+          grove_fund_percent?: number
+          id?: string
+          is_demo?: boolean
+          linked_hive_id?: string | null
+          linked_tree_ids?: string[] | null
+          market_type?: Database["public"]["Enums"]["market_type"]
+          max_stake_per_user?: number
+          open_time?: string
+          research_pot_percent?: number
+          resolution_source?: string | null
+          resolve_time?: string | null
+          rules_text?: string | null
+          scope?: Database["public"]["Enums"]["market_scope"]
+          status?: Database["public"]["Enums"]["market_status"]
+          title: string
+          updated_at?: string
+          winner_pool_percent?: number
+        }
+        Update: {
+          close_time?: string
+          created_at?: string
+          creator_reward_cap?: number
+          creator_user_id?: string
+          daily_market_budget?: number
+          description?: string | null
+          evidence_policy?: string | null
+          grove_fund_percent?: number
+          id?: string
+          is_demo?: boolean
+          linked_hive_id?: string | null
+          linked_tree_ids?: string[] | null
+          market_type?: Database["public"]["Enums"]["market_type"]
+          max_stake_per_user?: number
+          open_time?: string
+          research_pot_percent?: number
+          resolution_source?: string | null
+          resolve_time?: string | null
+          rules_text?: string | null
+          scope?: Database["public"]["Enums"]["market_scope"]
+          status?: Database["public"]["Enums"]["market_status"]
+          title?: string
+          updated_at?: string
+          winner_pool_percent?: number
+        }
+        Relationships: []
+      }
       meetings: {
         Row: {
           created_at: string
@@ -1811,6 +2049,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_market_profile: {
+        Row: {
+          accuracy_pct: number | null
+          markets_entered: number
+          markets_won: number
+          total_staked: number
+          total_to_grove: number
+          total_won: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy_pct?: number | null
+          markets_entered?: number
+          markets_won?: number
+          total_staked?: number
+          total_to_grove?: number
+          total_won?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy_pct?: number | null
+          markets_entered?: number
+          markets_won?: number
+          total_staked?: number
+          total_to_grove?: number
+          total_won?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           display_name: string | null
@@ -2039,6 +2310,9 @@ export type Database = {
         | "bioregional"
         | "species"
         | "lineage"
+      market_scope: "tree" | "grove" | "species" | "region"
+      market_status: "draft" | "open" | "closed" | "resolved" | "cancelled"
+      market_type: "binary" | "date_range" | "numeric"
       offering_type:
         | "photo"
         | "poem"
@@ -2184,6 +2458,9 @@ export const Constants = {
         "species",
         "lineage",
       ],
+      market_scope: ["tree", "grove", "species", "region"],
+      market_status: ["draft", "open", "closed", "resolved", "cancelled"],
+      market_type: ["binary", "date_range", "numeric"],
       offering_type: ["photo", "poem", "song", "story", "nft", "voice", "book"],
     },
   },
