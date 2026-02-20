@@ -1,17 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Flame, Radio } from "lucide-react";
-
-/**
- * Persistent mobile bottom navigation bar — provides instant access to the
- * four core S33D spaces without opening the full TETOL menu.
- * Only visible on mobile (md:hidden). Hidden on the map page (which is fullscreen).
- */
+import { TreeDeciduous, BookOpen, Flame, Waves } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/map", icon: TreeDeciduous, label: "Atlas" },
   { to: "/library", icon: BookOpen, label: "Library" },
-  { to: "/library/music-room?fullscreen=true", icon: Radio, label: "Radio" },
+  { to: "/markets", icon: Waves, label: "Markets" },
   { to: "/dashboard", icon: Flame, label: "Hearth" },
 ] as const;
 
