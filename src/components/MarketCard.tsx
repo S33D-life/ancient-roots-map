@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TreePine, Flame, Globe, Leaf, Clock, Heart } from "lucide-react";
+import { TreePine, Flame, Globe, Leaf, Clock, Heart, Settings2 } from "lucide-react";
 import type { MarketWithMeta } from "@/hooks/use-markets";
 import { timeLeft, outcomePercent } from "@/hooks/use-markets";
 
@@ -55,8 +55,13 @@ const MarketCard = ({ market, index = 0 }: MarketCardProps) => {
                   variant="outline"
                   className="text-[10px] font-serif border-border/60 px-1.5 py-0.5"
                 >
-                  {market.market_type === "binary" ? "Yes/No" : market.market_type === "date_range" ? "Date" : "Over/Under"}
+                  {market.market_type === "binary" ? "Yes/No" : market.market_type === "date_range" ? "Date" : market.market_type === "protocol_parameter" ? "Protocol" : "Over/Under"}
                 </Badge>
+                {market.market_type === "protocol_parameter" && (
+                  <Badge variant="outline" className="text-[10px] font-serif gap-1 border-primary/40 text-primary px-1.5 py-0.5">
+                    <Settings2 className="w-2.5 h-2.5" /> Tunes Protocol
+                  </Badge>
+                )}
                 {market.is_demo && (
                   <Badge variant="secondary" className="text-[10px] font-serif px-1.5 py-0.5">
                     Demo

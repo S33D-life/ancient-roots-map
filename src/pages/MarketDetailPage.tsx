@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import {
   ArrowLeft, Loader2, Heart, Clock, TreePine, Leaf,
-  Globe, Info, ChevronDown, CheckCircle2, AlertCircle,
+  Globe, Info, ChevronDown, CheckCircle2, AlertCircle, Settings2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { MarketOutcome } from "@/hooks/use-markets";
@@ -127,8 +127,13 @@ const MarketDetailPage = () => {
                 {SCOPE_ICONS[market.scope]} {market.scope}
               </Badge>
               <Badge variant="outline" className="font-serif text-xs border-border/60">
-                {market.market_type === "binary" ? "Yes/No" : market.market_type === "date_range" ? "Date Range" : "Over/Under"}
+                {market.market_type === "binary" ? "Yes/No" : market.market_type === "date_range" ? "Date Range" : market.market_type === "protocol_parameter" ? "Protocol Parameter" : "Over/Under"}
               </Badge>
+              {market.market_type === "protocol_parameter" && (
+                <Badge variant="outline" className="font-serif text-xs gap-1 border-primary/40 text-primary">
+                  <Settings2 className="w-3 h-3" /> Tunes Protocol
+                </Badge>
+              )}
               {market.linked_hive_id && (
                 <Link to={`/hive/${market.linked_hive_id}`}>
                   <Badge variant="secondary" className="font-serif text-xs hover:bg-primary/20 transition-colors">
@@ -152,6 +157,58 @@ const MarketDetailPage = () => {
               <p className="text-sm text-muted-foreground font-serif leading-relaxed border-l-2 border-primary/20 pl-3">
                 {market.description}
               </p>
+            )}
+
+            {/* Protocol Parameter Info */}
+            {market.market_type === "protocol_parameter" && (
+              <div className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+                <p className="text-xs font-serif text-primary/80 italic leading-relaxed">
+                  "We don't guess the shape of the vessel. We let the grove teach the vessel its shape."
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-xs font-serif pt-2">
+                  {market.parameter_key && (
+                    <div>
+                      <span className="text-muted-foreground">Parameter:</span>{" "}
+                      <span className="text-foreground">{market.parameter_key.replace(/_/g, " ")}</span>
+                    </div>
+                  )}
+                  {market.success_metric && (
+                    <div>
+                      <span className="text-muted-foreground">Measured by:</span>{" "}
+                      <span className="text-foreground">{market.success_metric.replace(/_/g, " ")}</span>
+                    </div>
+                  )}
+                  {market.target_scope_id && (
+                    <div>
+                      <span className="text-muted-foreground">Target:</span>{" "}
+                      <span className="text-foreground">{market.target_scope_id}</span>
+                    </div>
+                  )}
+                  {market.metric_source && (
+                    <div>
+                      <span className="text-muted-foreground">Source:</span>{" "}
+                      <span className="text-foreground">{market.metric_source}</span>
+                    </div>
+                  )}
+                </div>
+                {(market.trial_window_start || market.trial_window_end) && (
+                  <div className="text-xs font-serif text-muted-foreground pt-1 border-t border-primary/10">
+                    <span className="text-primary/60">Trial window:</span>{" "}
+                    {market.trial_window_start && new Date(market.trial_window_start).toLocaleDateString()}
+                    {" → "}
+                    {market.trial_window_end && new Date(market.trial_window_end).toLocaleDateString()}
+                  </div>
+                )}
+                {market.candidate_values && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {(market.candidate_values as unknown[]).map((v, i) => (
+                      <Badge key={i} variant="outline" className="text-[10px] font-serif border-primary/30 text-primary">
+                        {String(v)}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Stats row */}

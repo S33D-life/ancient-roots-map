@@ -44,6 +44,13 @@ const TEMPLATES: { type: MarketType; label: string; desc: string; emoji: string;
     emoji: "📊",
     defaultOutcomes: ["Above threshold", "Below threshold"],
   },
+  {
+    type: "protocol_parameter",
+    label: "Protocol Parameter",
+    desc: "Tune the grove's memory — commit intervals, bundle sizes, anchor frequency. The grove teaches the vessel its shape.",
+    emoji: "⚙️",
+    defaultOutcomes: [],
+  },
 ];
 
 const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefillTreeId }: CreateMarketWizardProps) => {
@@ -68,12 +75,26 @@ const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefil
   const [grovePct, setGrovePct] = useState(10);
   const [researchPct, setResearchPct] = useState(5);
 
+  // Protocol parameter fields
+  const [parameterKey, setParameterKey] = useState("commit_interval_hours");
+  const [candidateValues, setCandidateValues] = useState("24, 72, 168");
+  const [targetScopeId, setTargetScopeId] = useState("global");
+  const [trialStart, setTrialStart] = useState("");
+  const [trialEnd, setTrialEnd] = useState("");
+  const [successMetric, setSuccessMetric] = useState("cost_per_bundle");
+  const [metricSource, setMetricSource] = useState("internal analytics");
+
   const selectedTemplate = TEMPLATES.find(t => t.type === marketType);
+  const isProtocol = marketType === "protocol_parameter";
 
   const selectTemplate = (type: MarketType) => {
     setMarketType(type);
     const tpl = TEMPLATES.find(t => t.type === type)!;
-    setOutcomes([...tpl.defaultOutcomes]);
+    if (type === "protocol_parameter") {
+      setOutcomes(candidateValues.split(",").map(v => v.trim()).filter(Boolean));
+    } else {
+      setOutcomes([...tpl.defaultOutcomes]);
+    }
   };
 
   const isStepValid = () => {
@@ -91,6 +112,15 @@ const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefil
       if (!user) throw new Error("Not logged in");
 
       const treeIds = treeIdStr.trim() ? [treeIdStr.trim()] : [];
+
+      const parsedCandidates = isProtocol
+        ? candidateValues.split(",").map(v => v.trim()).filter(Boolean)
+        : null;
+
+      // For protocol markets, auto-set outcomes from candidate values
+      const finalOutcomes = isProtocol && parsedCandidates
+        ? parsedCandidates.map(v => `${v} ${parameterKey.replace(/_/g, " ")}`)
+        : outcomes;
 
       const { data: market, error: mErr } = await supabase
         .from("markets")
@@ -111,6 +141,16 @@ const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefil
           winner_pool_percent: winnerPct,
           grove_fund_percent: grovePct,
           research_pot_percent: researchPct,
+          // Protocol parameter fields
+          ...(isProtocol ? {
+            parameter_key: parameterKey,
+            candidate_values: parsedCandidates,
+            target_scope_id: targetScopeId || "global",
+            trial_window_start: trialStart ? new Date(trialStart).toISOString() : null,
+            trial_window_end: trialEnd ? new Date(trialEnd).toISOString() : null,
+            success_metric: successMetric || null,
+            metric_source: metricSource || null,
+          } : {}),
         })
         .select("id")
         .single();
@@ -119,7 +159,7 @@ const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefil
 
       // Insert outcomes
       await supabase.from("market_outcomes").insert(
-        outcomes.filter(o => o.trim()).map((label, i) => ({
+        finalOutcomes.filter(o => o.trim()).map((label, i) => ({
           market_id: market.id,
           label: label.trim(),
           sort_order: i,
@@ -259,22 +299,101 @@ const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefil
               </div>
             )}
 
-            {/* Outcomes editor */}
-            <div>
-              <Label className="font-serif text-xs">Outcomes (edit if needed)</Label>
-              <div className="mt-1 space-y-1.5">
-                {outcomes.map((o, i) => (
+            {/* Protocol Parameter fields */}
+            {isProtocol && (
+              <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <p className="text-[11px] font-serif text-primary/70 italic">
+                  ⚙️ This market will tune the protocol. The grove teaches the vessel its shape.
+                </p>
+                <div>
+                  <Label className="font-serif text-xs">Parameter Key *</Label>
+                  <Select value={parameterKey} onValueChange={setParameterKey}>
+                    <SelectTrigger className="mt-1 font-serif text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="commit_interval_hours">Commit Interval (hours)</SelectItem>
+                      <SelectItem value="max_records_per_bundle">Max Records per Bundle</SelectItem>
+                      <SelectItem value="min_evidence_count">Min Evidence Count</SelectItem>
+                      <SelectItem value="anchor_chain">Anchor Chain</SelectItem>
+                      <SelectItem value="data_policy">Data Policy</SelectItem>
+                      <SelectItem value="anchor_frequency">Anchor Frequency</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="font-serif text-xs">Candidate Values (comma-separated) *</Label>
                   <Input
-                    key={i}
-                    value={o}
-                    onChange={e => {
-                      const next = [...outcomes]; next[i] = e.target.value; setOutcomes(next);
-                    }}
-                    className="font-serif text-sm"
+                    value={candidateValues}
+                    onChange={e => setCandidateValues(e.target.value)}
+                    placeholder="24, 72, 168"
+                    className="mt-1 font-serif text-sm"
                   />
-                ))}
+                </div>
+                <div>
+                  <Label className="font-serif text-xs">Target Scope</Label>
+                  <Input
+                    value={targetScopeId}
+                    onChange={e => setTargetScopeId(e.target.value)}
+                    placeholder="global / hive_id / grove_id / tree_id"
+                    className="mt-1 font-serif text-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="font-serif text-xs">Trial Start</Label>
+                    <Input type="datetime-local" value={trialStart} onChange={e => setTrialStart(e.target.value)} className="mt-1 font-serif text-sm" />
+                  </div>
+                  <div>
+                    <Label className="font-serif text-xs">Trial End</Label>
+                    <Input type="datetime-local" value={trialEnd} onChange={e => setTrialEnd(e.target.value)} className="mt-1 font-serif text-sm" />
+                  </div>
+                </div>
+                <div>
+                  <Label className="font-serif text-xs">Success Metric</Label>
+                  <Select value={successMetric} onValueChange={setSuccessMetric}>
+                    <SelectTrigger className="mt-1 font-serif text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cost_per_bundle">Cost per Bundle</SelectItem>
+                      <SelectItem value="time_to_verify">Time to Verify</SelectItem>
+                      <SelectItem value="dispute_rate">Dispute Rate</SelectItem>
+                      <SelectItem value="retrieval_latency">Retrieval Latency</SelectItem>
+                      <SelectItem value="user_completion_rate">User Completion Rate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="font-serif text-xs">Metric Source</Label>
+                  <Input
+                    value={metricSource}
+                    onChange={e => setMetricSource(e.target.value)}
+                    placeholder="internal analytics + optional external fee index"
+                    className="mt-1 font-serif text-sm"
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Outcomes editor */}
+            {!isProtocol && (
+              <div>
+                <Label className="font-serif text-xs">Outcomes (edit if needed)</Label>
+                <div className="mt-1 space-y-1.5">
+                  {outcomes.map((o, i) => (
+                    <Input
+                      key={i}
+                      value={o}
+                      onChange={e => {
+                        const next = [...outcomes]; next[i] = e.target.value; setOutcomes(next);
+                      }}
+                      className="font-serif text-sm"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -378,15 +497,26 @@ const CreateMarketWizard = ({ open, onOpenChange, onCreated, prefillHive, prefil
               <p><span className="text-muted-foreground">Type:</span> {TEMPLATES.find(t => t.type === marketType)?.label}</p>
               <p><span className="text-muted-foreground">Question:</span> {title}</p>
               <p><span className="text-muted-foreground">Scope:</span> {scope}</p>
-              <p><span className="text-muted-foreground">Outcomes:</span> {outcomes.filter(Boolean).join(" · ")}</p>
+              {!isProtocol && (
+                <p><span className="text-muted-foreground">Outcomes:</span> {outcomes.filter(Boolean).join(" · ")}</p>
+              )}
+              {isProtocol && (
+                <>
+                  <p><span className="text-muted-foreground">Parameter:</span> {parameterKey.replace(/_/g, " ")}</p>
+                  <p><span className="text-muted-foreground">Candidates:</span> {candidateValues}</p>
+                  <p><span className="text-muted-foreground">Target:</span> {targetScopeId}</p>
+                  <p><span className="text-muted-foreground">Metric:</span> {successMetric.replace(/_/g, " ")}</p>
+                  {trialStart && <p><span className="text-muted-foreground">Trial:</span> {new Date(trialStart).toLocaleDateString()} → {trialEnd ? new Date(trialEnd).toLocaleDateString() : "–"}</p>}
+                </>
+              )}
               <p><span className="text-muted-foreground">Closes:</span> {closeTime ? new Date(closeTime).toLocaleString() : "–"}</p>
               <p><span className="text-muted-foreground">Resolution:</span> {resolutionSource || evidencePolicy}</p>
               <div className="pt-2 border-t border-border/30">
                 <p className="text-muted-foreground text-[11px] mb-1">Fund allocation:</p>
                 <div className="flex gap-3 text-[11px]">
                   <span className="text-primary">{winnerPct}% winners</span>
-                  <span className="text-emerald-500">{grovePct}% grove</span>
-                  <span className="text-sky-500">{researchPct}% research</span>
+                  <span className="text-accent">{grovePct}% grove</span>
+                  <span className="text-muted-foreground">{researchPct}% research</span>
                 </div>
               </div>
             </div>
