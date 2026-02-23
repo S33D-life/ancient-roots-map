@@ -10,7 +10,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock } from "lucide-react";
+import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock, Flame } from "lucide-react";
+import { useMarkets } from "@/hooks/use-markets";
+import MarketCard from "@/components/MarketCard";
 import { motion } from "framer-motion";
 import OfferingList from "@/components/OfferingList";
 
@@ -65,6 +67,7 @@ const HivePage = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("trees");
   const { counts: globalOfferingCounts } = useOfferingCounts();
+  const { markets: hiveMarkets, loading: loadingMarkets } = useMarkets({ hiveId: family });
 
   useEffect(() => {
     if (!hive) { setLoading(false); return; }
@@ -223,6 +226,9 @@ const HivePage = () => {
               <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider">
                 <Music className="w-3.5 h-3.5 mr-1.5" /> Offerings
               </TabsTrigger>
+              <TabsTrigger value="markets" className="font-serif text-xs tracking-wider">
+                <Flame className="w-3.5 h-3.5 mr-1.5" /> Markets {hiveMarkets.length > 0 && `(${hiveMarkets.length})`}
+              </TabsTrigger>
               <TabsTrigger value="lore" className="font-serif text-xs tracking-wider">📜 Lore</TabsTrigger>
               <TabsTrigger value="governance" className="font-serif text-xs tracking-wider">🏛️ Council</TabsTrigger>
             </TabsList>
@@ -253,6 +259,31 @@ const HivePage = () => {
                         </Card>
                       </Link>
                     </motion.div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Markets Tab */}
+            <TabsContent value="markets">
+              {loadingMarkets ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : hiveMarkets.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-4xl mb-3">🌀</p>
+                  <p className="text-muted-foreground font-serif mb-3">No cycle markets for this hive yet.</p>
+                  <Link to="/markets">
+                    <Button variant="outline" className="font-serif text-xs gap-1.5">
+                      <Flame className="w-3.5 h-3.5" /> Browse All Markets
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {hiveMarkets.map((m, i) => (
+                    <MarketCard key={m.id} market={m} index={i} />
                   ))}
                 </div>
               )}
