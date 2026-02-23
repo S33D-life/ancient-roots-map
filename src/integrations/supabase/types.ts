@@ -871,6 +871,7 @@ export type Database = {
       }
       markets: {
         Row: {
+          candidate_values: Json | null
           close_time: string
           created_at: string
           creator_reward_cap: number
@@ -885,18 +886,25 @@ export type Database = {
           linked_tree_ids: string[] | null
           market_type: Database["public"]["Enums"]["market_type"]
           max_stake_per_user: number
+          metric_source: string | null
           open_time: string
+          parameter_key: string | null
           research_pot_percent: number
           resolution_source: string | null
           resolve_time: string | null
           rules_text: string | null
           scope: Database["public"]["Enums"]["market_scope"]
           status: Database["public"]["Enums"]["market_status"]
+          success_metric: string | null
+          target_scope_id: string | null
           title: string
+          trial_window_end: string | null
+          trial_window_start: string | null
           updated_at: string
           winner_pool_percent: number
         }
         Insert: {
+          candidate_values?: Json | null
           close_time: string
           created_at?: string
           creator_reward_cap?: number
@@ -911,18 +919,25 @@ export type Database = {
           linked_tree_ids?: string[] | null
           market_type?: Database["public"]["Enums"]["market_type"]
           max_stake_per_user?: number
+          metric_source?: string | null
           open_time?: string
+          parameter_key?: string | null
           research_pot_percent?: number
           resolution_source?: string | null
           resolve_time?: string | null
           rules_text?: string | null
           scope?: Database["public"]["Enums"]["market_scope"]
           status?: Database["public"]["Enums"]["market_status"]
+          success_metric?: string | null
+          target_scope_id?: string | null
           title: string
+          trial_window_end?: string | null
+          trial_window_start?: string | null
           updated_at?: string
           winner_pool_percent?: number
         }
         Update: {
+          candidate_values?: Json | null
           close_time?: string
           created_at?: string
           creator_reward_cap?: number
@@ -937,14 +952,20 @@ export type Database = {
           linked_tree_ids?: string[] | null
           market_type?: Database["public"]["Enums"]["market_type"]
           max_stake_per_user?: number
+          metric_source?: string | null
           open_time?: string
+          parameter_key?: string | null
           research_pot_percent?: number
           resolution_source?: string | null
           resolve_time?: string | null
           rules_text?: string | null
           scope?: Database["public"]["Enums"]["market_scope"]
           status?: Database["public"]["Enums"]["market_status"]
+          success_metric?: string | null
+          target_scope_id?: string | null
           title?: string
+          trial_window_end?: string | null
+          trial_window_start?: string | null
           updated_at?: string
           winner_pool_percent?: number
         }
@@ -1191,6 +1212,56 @@ export type Database = {
             columns: ["active_staff_id"]
             isOneToOne: false
             referencedRelation: "staffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      protocol_config_history: {
+        Row: {
+          applied_at: string
+          applied_by: string | null
+          created_at: string
+          id: string
+          market_id: string | null
+          metric_result: Json | null
+          new_value: string
+          notes: string | null
+          parameter_key: string
+          previous_value: string | null
+          target_scope_id: string
+        }
+        Insert: {
+          applied_at?: string
+          applied_by?: string | null
+          created_at?: string
+          id?: string
+          market_id?: string | null
+          metric_result?: Json | null
+          new_value: string
+          notes?: string | null
+          parameter_key: string
+          previous_value?: string | null
+          target_scope_id?: string
+        }
+        Update: {
+          applied_at?: string
+          applied_by?: string | null
+          created_at?: string
+          id?: string
+          market_id?: string | null
+          metric_result?: Json | null
+          new_value?: string
+          notes?: string | null
+          parameter_key?: string
+          previous_value?: string | null
+          target_scope_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocol_config_history_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
             referencedColumns: ["id"]
           },
         ]
@@ -2312,7 +2383,7 @@ export type Database = {
         | "lineage"
       market_scope: "tree" | "grove" | "species" | "region"
       market_status: "draft" | "open" | "closed" | "resolved" | "cancelled"
-      market_type: "binary" | "date_range" | "numeric"
+      market_type: "binary" | "date_range" | "numeric" | "protocol_parameter"
       offering_type:
         | "photo"
         | "poem"
@@ -2460,7 +2531,7 @@ export const Constants = {
       ],
       market_scope: ["tree", "grove", "species", "region"],
       market_status: ["draft", "open", "closed", "resolved", "cancelled"],
-      market_type: ["binary", "date_range", "numeric"],
+      market_type: ["binary", "date_range", "numeric", "protocol_parameter"],
       offering_type: ["photo", "poem", "song", "story", "nft", "voice", "book"],
     },
   },

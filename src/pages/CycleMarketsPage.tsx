@@ -9,7 +9,7 @@ import { useMarkets } from "@/hooks/use-markets";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Search, Flame, TreePine, Leaf, Globe, TrendingUp } from "lucide-react";
+import { Loader2, Plus, Search, Flame, TreePine, Leaf, Globe, TrendingUp, Settings2 } from "lucide-react";
 
 const SEASONAL_PULSE = [
   { month: "February", highlight: "Snowdrops blooming · Hazel catkins releasing · Blackbirds singing at dusk" },
@@ -39,12 +39,14 @@ const CycleMarketsPage = () => {
   const bySpecies = filtered.filter(m => m.scope === "species");
   const byGrove = filtered.filter(m => m.scope === "grove" || m.scope === "tree");
   const byRegion = filtered.filter(m => m.scope === "region");
+  const byProtocol = filtered.filter(m => m.market_type === "protocol_parameter");
 
   const displayMarkets =
     tab === "featured" ? featured :
     tab === "species" ? bySpecies :
     tab === "grove" ? byGrove :
     tab === "region" ? byRegion :
+    tab === "protocol" ? byProtocol :
     tab === "resolved" ? filtered :
     filtered;
 
@@ -112,12 +114,15 @@ const CycleMarketsPage = () => {
             <TabsTrigger value="region" className="font-serif text-xs gap-1.5">
               <Globe className="w-3 h-3" /> Regional
             </TabsTrigger>
+            <TabsTrigger value="protocol" className="font-serif text-xs gap-1.5">
+              <Settings2 className="w-3 h-3" /> Protocol
+            </TabsTrigger>
             <TabsTrigger value="resolved" className="font-serif text-xs gap-1.5">
               <TrendingUp className="w-3 h-3" /> Resolved
             </TabsTrigger>
           </TabsList>
 
-          {["featured", "species", "grove", "region", "resolved"].map(t => (
+          {["featured", "species", "grove", "region", "protocol", "resolved"].map(t => (
             <TabsContent key={t} value={t}>
               {loading ? (
                 <div className="flex justify-center py-16">

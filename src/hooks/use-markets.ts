@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type MarketType = "binary" | "date_range" | "numeric";
+export type MarketType = "binary" | "date_range" | "numeric" | "protocol_parameter";
 export type MarketScope = "tree" | "grove" | "species" | "region";
 export type MarketStatus = "draft" | "open" | "closed" | "resolved" | "cancelled";
 
@@ -28,6 +28,14 @@ export interface Market {
   is_demo: boolean;
   created_at: string;
   updated_at: string;
+  // Protocol parameter fields
+  parameter_key: string | null;
+  candidate_values: unknown[] | null;
+  target_scope_id: string | null;
+  trial_window_start: string | null;
+  trial_window_end: string | null;
+  success_metric: string | null;
+  metric_source: string | null;
 }
 
 export interface MarketOutcome {
