@@ -28,6 +28,7 @@ import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
+import TreeMarkets from "@/components/TreeMarkets";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -367,6 +368,9 @@ const TreeDetailPage = () => {
             delay={1200}
           />
         </div>
+
+        {/* Cycle Markets for this tree */}
+        <TreeMarkets treeId={id!} treeSpecies={tree.species} />
 
         {/* Birdsong Offering Button */}
         <div className="mb-6">
