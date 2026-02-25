@@ -164,6 +164,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
       "A research layer honouring Canada's ancient cedars, old-growth giants, and boreal elders.",
     sourceLabel: "Heritage records",
   },
+  {
+    country: "China",
+    slug: "china",
+    flag: "🇨🇳",
+    descriptor: "Ancient & Sacred Trees",
+    portalTitle: "China — Ancient & Sacred Trees",
+    portalSubtitle:
+      "A research layer honouring China's millennia-old cypresses, ginkgos, and sacred mountain pines.",
+    sourceLabel: "Heritage records",
+  },
 ];
 
 export default COUNTRY_REGISTRY;
