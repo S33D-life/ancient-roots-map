@@ -37,6 +37,7 @@ import CanopyCheckinModal from "@/components/CanopyCheckinModal";
 import CanopyVisitsTimeline from "@/components/CanopyVisitsTimeline";
 import TreeMarkets from "@/components/TreeMarkets";
 import StewardshipLeaderboard from "@/components/StewardshipLeaderboard";
+import LinkedVolumesPanel from "@/components/LinkedVolumesPanel";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -394,6 +395,9 @@ const TreeDetailPage = () => {
 
         {/* Stewardship Leaderboard */}
         <StewardshipLeaderboard treeId={id!} />
+
+        {/* Linked Collaborator Volumes */}
+        <LinkedVolumesPanel treeId={id!} />
 
         {/* Cycle Markets for this tree */}
         <TreeMarkets treeId={id!} treeSpecies={tree.species} />

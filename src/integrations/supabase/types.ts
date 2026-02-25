@@ -378,6 +378,137 @@ export type Database = {
           },
         ]
       }
+      collaborator_experiments: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          linked_pod_ids: string[] | null
+          linked_tree_ids: string[] | null
+          metrics: string | null
+          outcome_notes: string | null
+          status: string
+          timeline: string | null
+          updated_at: string
+          user_id: string
+          volume_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          linked_pod_ids?: string[] | null
+          linked_tree_ids?: string[] | null
+          metrics?: string | null
+          outcome_notes?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          user_id: string
+          volume_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          linked_pod_ids?: string[] | null
+          linked_tree_ids?: string[] | null
+          metrics?: string | null
+          outcome_notes?: string | null
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          user_id?: string
+          volume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaborator_experiments_volume_id_fkey"
+            columns: ["volume_id"]
+            isOneToOne: false
+            referencedRelation: "collaborator_volumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collaborator_volumes: {
+        Row: {
+          collaborator_name: string
+          collaborator_project: string | null
+          created_at: string
+          divergence_map: string | null
+          document_title: string
+          document_version: string | null
+          essence_summary: string | null
+          experiment_status: string
+          id: string
+          integration_intent: string
+          linked_council_sessions: string[] | null
+          linked_pod_ids: string[] | null
+          linked_tree_ids: string[] | null
+          micro_experiment: string | null
+          open_questions: string[] | null
+          resonance_map: string | null
+          ring_hearts_awarded: boolean | null
+          ripple_hearts_awarded: boolean | null
+          themes: string[] | null
+          updated_at: string
+          user_id: string
+          visibility_state: string
+          wanderer_summary: string | null
+        }
+        Insert: {
+          collaborator_name: string
+          collaborator_project?: string | null
+          created_at?: string
+          divergence_map?: string | null
+          document_title: string
+          document_version?: string | null
+          essence_summary?: string | null
+          experiment_status?: string
+          id?: string
+          integration_intent?: string
+          linked_council_sessions?: string[] | null
+          linked_pod_ids?: string[] | null
+          linked_tree_ids?: string[] | null
+          micro_experiment?: string | null
+          open_questions?: string[] | null
+          resonance_map?: string | null
+          ring_hearts_awarded?: boolean | null
+          ripple_hearts_awarded?: boolean | null
+          themes?: string[] | null
+          updated_at?: string
+          user_id: string
+          visibility_state?: string
+          wanderer_summary?: string | null
+        }
+        Update: {
+          collaborator_name?: string
+          collaborator_project?: string | null
+          created_at?: string
+          divergence_map?: string | null
+          document_title?: string
+          document_version?: string | null
+          essence_summary?: string | null
+          experiment_status?: string
+          id?: string
+          integration_intent?: string
+          linked_council_sessions?: string[] | null
+          linked_pod_ids?: string[] | null
+          linked_tree_ids?: string[] | null
+          micro_experiment?: string | null
+          open_questions?: string[] | null
+          resonance_map?: string | null
+          ring_hearts_awarded?: boolean | null
+          ripple_hearts_awarded?: boolean | null
+          themes?: string[] | null
+          updated_at?: string
+          user_id?: string
+          visibility_state?: string
+          wanderer_summary?: string | null
+        }
+        Relationships: []
+      }
       daily_reward_caps: {
         Row: {
           checkin_count: number

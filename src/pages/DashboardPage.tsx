@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search, Leaf } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search, Leaf, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -32,6 +32,7 @@ import PageShell from "@/components/PageShell";
 import GlobalSearch from "@/components/GlobalSearch";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
+import CollaboratorShelf from "@/components/CollaboratorShelf";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 
@@ -479,6 +480,11 @@ const DashboardPage = () => {
                 {/* Section: Seed Pods */}
                 <PodSection icon={Sprout} label="Seed Pods" count={plantCount}>
                   <Greenhouse />
+                </PodSection>
+
+                {/* Section: Collaborator Volumes */}
+                <PodSection icon={BookOpen} label="Collaborator Volumes">
+                  {user && <CollaboratorShelf userId={user.id} />}
                 </PodSection>
 
                 {/* Section: IAM Heartwood Vault */}
