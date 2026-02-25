@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search, Leaf } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -25,6 +25,7 @@ import DashboardLeaderboard from "@/components/dashboard/DashboardLeaderboard";
 import PersonalLegend from "@/components/dashboard/PersonalLegend";
 import DashboardWanderers from "@/components/dashboard/DashboardWanderers";
 import GrovePulse from "@/components/GrovePulse";
+import DashboardCanopyKeeper from "@/components/dashboard/DashboardCanopyKeeper";
 import HearthHearts from "@/components/HearthHearts";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
@@ -461,6 +462,11 @@ const DashboardPage = () => {
                     onImport={handleImport}
                     onExport={handleExport}
                   />
+                </PodSection>
+
+                {/* Section: Trees You Sit Beneath */}
+                <PodSection icon={Leaf} label="Trees You Sit Beneath" accent>
+                  {user && <DashboardCanopyKeeper userId={user.id} />}
                 </PodSection>
 
                 {/* Section: Wishlist */}
