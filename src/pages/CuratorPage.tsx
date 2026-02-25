@@ -215,7 +215,7 @@ export default function CuratorPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-5xl">
         {/* Title */}
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-6 h-6 text-primary" />

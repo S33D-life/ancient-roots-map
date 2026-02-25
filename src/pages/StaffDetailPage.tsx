@@ -302,7 +302,7 @@ export default function StaffDetailPage() {
       <HeartwoodBackground />
       <Header />
 
-      <main className="relative z-10 container mx-auto px-4 py-8 max-w-3xl">
+      <main className="relative z-10 container mx-auto px-4 pt-24 pb-20 max-w-3xl">
         {/* ── Navigation ──────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-8">
           <Link

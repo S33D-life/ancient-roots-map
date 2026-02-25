@@ -226,7 +226,7 @@ export default function EditReviewPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-serif text-primary tracking-wide">Tree Edit Review</h1>
