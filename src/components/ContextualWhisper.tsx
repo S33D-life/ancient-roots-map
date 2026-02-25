@@ -31,9 +31,9 @@ function markSeen(id: string) {
 }
 
 const positionClasses: Record<string, string> = {
-  "bottom-center": "bottom-6 left-1/2 -translate-x-1/2",
-  "bottom-left": "bottom-6 left-4",
-  "bottom-right": "bottom-6 right-4",
+  "bottom-center": "bottom-20 md:bottom-6 left-1/2 -translate-x-1/2",
+  "bottom-left": "bottom-20 md:bottom-6 left-4",
+  "bottom-right": "bottom-20 md:bottom-6 right-4",
   "top-center": "top-20 left-1/2 -translate-x-1/2",
 };
 
