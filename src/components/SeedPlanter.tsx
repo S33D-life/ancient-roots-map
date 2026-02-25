@@ -7,15 +7,18 @@ import { toast } from "sonner";
 import { useSeedEconomy, PROXIMITY_METERS } from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
+import RewardReceipt from "@/components/RewardReceipt";
+import { getFamilyForSpecies } from "@/data/treeSpecies";
 
 interface SeedPlanterProps {
   treeId: string;
   treeLat: number | null;
   treeLng: number | null;
   userId: string | null;
+  treeSpecies?: string;
 }
 
-const SeedPlanter = ({ treeId, treeLat, treeLng, userId }: SeedPlanterProps) => {
+const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlanterProps) => {
   const {
     seedsRemaining,
     plantSeed,
@@ -27,6 +30,8 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId }: SeedPlanterProps) => 
   const [planting, setPlanting] = useState(false);
   const [collecting, setCollecting] = useState<string | null>(null);
   const [showPlanted, setShowPlanted] = useState(false);
+  const [receiptVisible, setReceiptVisible] = useState(false);
+  const [receiptData, setReceiptData] = useState<{ s33dHearts: number; speciesHearts: number; speciesFamily?: string }>({ s33dHearts: 0, speciesHearts: 0 });
 
   const seedsHere = getSeedsAtTree(treeId);
   const bloomedSeeds = getBloomedSeedsAtTree(treeId);
@@ -65,7 +70,9 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId }: SeedPlanterProps) => 
     setCollecting(null);
 
     if (success) {
-      toast.success("💚 Heart collected! The planter also received a Heart.");
+      const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
+      setReceiptData({ s33dHearts: 1, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
+      setReceiptVisible(true);
     } else {
       toast.error(`You need to be within ${PROXIMITY_METERS}m to collect this Heart.`);
     }
@@ -202,6 +209,15 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId }: SeedPlanterProps) => 
           </CardContent>
         </Card>
       )}
+      {/* Reward Receipt */}
+      <RewardReceipt
+        visible={receiptVisible}
+        onClose={() => setReceiptVisible(false)}
+        s33dHearts={receiptData.s33dHearts}
+        speciesHearts={receiptData.speciesHearts}
+        speciesFamily={receiptData.speciesFamily}
+        actionLabel="Heart Collected from Bloomed Seed"
+      />
     </div>
   );
 };
