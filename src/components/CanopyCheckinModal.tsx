@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/utils/mapGeometry";
 import { issueRewards } from "@/utils/issueRewards";
+import type { RewardResult } from "@/utils/issueRewards";
+import RewardReceipt from "@/components/RewardReceipt";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -79,7 +81,8 @@ export default function CanopyCheckinModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [rewardResult, setRewardResult] = useState<any>(null);
+  const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -160,98 +163,140 @@ export default function CanopyCheckinModal({
       actionType: "checkin",
     });
     setRewardResult(reward);
+
+    // Try to claim any pending windfall hearts for this tree
+    if (reward && !reward.capped) {
+      const { data: windfallAmount } = await supabase.rpc("claim_windfall_hearts", {
+        p_tree_id: treeId,
+        p_user_id: userId,
+      });
+      if (windfallAmount && windfallAmount > 0) {
+        setRewardResult(prev => prev ? {
+          ...prev,
+          s33dHearts: prev.s33dHearts + windfallAmount,
+        } : prev);
+      }
+    }
+
     setSubmitted(true);
     setSubmitting(false);
+    setShowReceipt(true);
     onCheckinComplete?.();
   };
 
   // Success state
   if (submitted) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md overflow-hidden">
-          {/* Leaf animation overlay */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[...Array(6)].map((_, i) => (
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="sm:max-w-md overflow-hidden">
+            {/* Leaf animation overlay */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute text-2xl"
+                  initial={{ x: Math.random() * 300 + 50, y: -30, rotate: 0, opacity: 0.7 }}
+                  animate={{
+                    y: 500,
+                    x: Math.random() * 300 + 50 + (Math.random() - 0.5) * 100,
+                    rotate: Math.random() * 360,
+                    opacity: 0,
+                  }}
+                  transition={{ duration: 3 + Math.random() * 2, delay: i * 0.3, ease: "easeIn" }}
+                >
+                  🍃
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="flex flex-col items-center gap-4 py-8 text-center relative z-10">
               <motion.div
-                key={i}
-                className="absolute text-2xl"
-                initial={{ x: Math.random() * 300 + 50, y: -30, rotate: 0, opacity: 0.7 }}
-                animate={{
-                  y: 500,
-                  x: Math.random() * 300 + 50 + (Math.random() - 0.5) * 100,
-                  rotate: Math.random() * 360,
-                  opacity: 0,
-                }}
-                transition={{ duration: 3 + Math.random() * 2, delay: i * 0.3, ease: "easeIn" }}
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: [0.5, 1.2, 1], opacity: 1 }}
+                transition={{ duration: 0.8 }}
               >
-                🍃
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--accent) / 0.15))",
+                    boxShadow: "0 0 30px hsl(var(--primary) / 0.15)",
+                  }}
+                >
+                  <TreeDeciduous className="w-8 h-8 text-primary" />
+                </div>
               </motion.div>
-            ))}
-          </div>
 
-          <div className="flex flex-col items-center gap-4 py-8 text-center relative z-10">
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: [0.5, 1.2, 1], opacity: 1 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--accent) / 0.15))",
-                  boxShadow: "0 0 30px hsl(var(--primary) / 0.15)",
-                }}
-              >
-                <TreeDeciduous className="w-8 h-8 text-primary" />
-              </div>
-            </motion.div>
-
-            <motion.h3
-              className="text-xl font-serif text-primary"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              Presence Marked
-            </motion.h3>
-
-            <motion.p
-              className="text-sm text-muted-foreground font-serif max-w-xs"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              Your visit to <strong>{treeName}</strong> has been recorded in the canopy ledger.
-            </motion.p>
-
-            {rewardResult && !rewardResult.capped && (
-              <motion.div
-                className="flex items-center gap-2 text-xs font-serif text-primary/80"
-                initial={{ opacity: 0, y: 5 }}
+              <motion.h3
+                className="text-xl font-serif text-primary"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
+                transition={{ delay: 0.3 }}
               >
-                <Heart className="w-3.5 h-3.5 fill-current" />
-                +{rewardResult.s33dHearts} Heart{rewardResult.s33dHearts !== 1 ? "s" : ""} earned
-                {rewardResult.speciesHearts > 0 && (
-                  <span> · +{rewardResult.speciesHearts} {rewardResult.speciesFamily}</span>
-                )}
-              </motion.div>
-            )}
+                Presence Marked
+              </motion.h3>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.9 }}
-            >
-              <Button onClick={() => onOpenChange(false)} className="font-serif mt-2">
-                Return
-              </Button>
-            </motion.div>
-          </div>
-        </DialogContent>
-      </Dialog>
+              <motion.p
+                className="text-sm text-muted-foreground font-serif max-w-xs"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Your visit to <strong>{treeName}</strong> has been recorded in the canopy ledger.
+              </motion.p>
+
+              {rewardResult && !rewardResult.capped && (
+                <motion.button
+                  className="flex items-center gap-2 text-xs font-serif text-primary/80 hover:text-primary transition-colors cursor-pointer"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 }}
+                  onClick={() => setShowReceipt(true)}
+                >
+                  <Heart className="w-3.5 h-3.5 fill-current" />
+                  +{rewardResult.s33dHearts} Heart{rewardResult.s33dHearts !== 1 ? "s" : ""} earned
+                  {rewardResult.speciesHearts > 0 && (
+                    <span> · +{rewardResult.speciesHearts} {rewardResult.speciesFamily}</span>
+                  )}
+                  <span className="text-muted-foreground/50 ml-1">· View receipt</span>
+                </motion.button>
+              )}
+
+              {rewardResult?.capped && (
+                <motion.p
+                  className="text-xs text-muted-foreground font-serif"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                >
+                  Daily heart cap reached for this tree (3 per day).
+                </motion.p>
+              )}
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 }}
+              >
+                <Button onClick={() => onOpenChange(false)} className="font-serif mt-2">
+                  Return
+                </Button>
+              </motion.div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {rewardResult && !rewardResult.capped && (
+          <RewardReceipt
+            visible={showReceipt}
+            onClose={() => setShowReceipt(false)}
+            s33dHearts={rewardResult.s33dHearts}
+            speciesHearts={rewardResult.speciesHearts}
+            speciesFamily={rewardResult.speciesFamily}
+            actionLabel={`Check-in at ${treeName}`}
+          />
+        )}
+      </>
     );
   }
 
