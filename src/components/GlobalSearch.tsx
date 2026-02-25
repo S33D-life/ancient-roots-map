@@ -11,6 +11,7 @@ import {
 interface GlobalSearchProps {
   open: boolean;
   onClose: () => void;
+  embedded?: boolean;
 }
 
 type SearchCategory = "all" | "trees" | "species" | "greenhouse" | "pages";
@@ -45,7 +46,7 @@ const CATEGORY_LABELS: Record<SearchCategory, string> = {
 
 const CATEGORY_FILTERS: SearchCategory[] = ["all", "trees", "species", "greenhouse", "pages"];
 
-const GlobalSearch = ({ open, onClose }: GlobalSearchProps) => {
+const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<SearchCategory>("all");
@@ -179,6 +180,124 @@ const GlobalSearch = ({ open, onClose }: GlobalSearchProps) => {
 
   if (!open) return null;
 
+  const searchContent = (
+    <>
+      {/* Filter pills */}
+      <div className="flex gap-1.5 mb-3 px-1 flex-wrap">
+        {CATEGORY_FILTERS.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setFilter(cat)}
+            className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-widest font-serif border transition-all duration-200 ${
+              filter === cat
+                ? "bg-primary/20 border-primary/50 text-primary"
+                : "bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground hover:border-border"
+            }`}
+          >
+            {CATEGORY_LABELS[cat]}
+          </button>
+        ))}
+      </div>
+
+      {/* Command palette */}
+      <Command
+        className="rounded-xl border border-border bg-card/95 backdrop-blur shadow-2xl overflow-hidden"
+        shouldFilter={false}
+      >
+        <CommandInput
+          placeholder="Search trees, species, seed pods, pages…"
+          value={query}
+          onValueChange={setQuery}
+          className="font-serif"
+        />
+        <CommandList className="max-h-[50vh]">
+          {loading && (
+            <div className="py-6 text-center text-xs text-muted-foreground font-serif animate-pulse">
+              Searching the ancient records…
+            </div>
+          )}
+
+          {!loading && query.length >= 2 && filteredGroups.length === 0 && (
+            <CommandEmpty className="font-serif text-muted-foreground">
+              No echoes found for "{query}"
+            </CommandEmpty>
+          )}
+
+          {!loading && query.length < 2 && filter === "all" && (
+            <CommandGroup heading="Quick Navigation">
+              {STATIC_PAGES.slice(0, 5).map((page) => (
+                <CommandItem
+                  key={page.id}
+                  value={page.id}
+                  onSelect={() => handleSelect(page.route)}
+                  className="gap-3 cursor-pointer font-serif"
+                >
+                  <span className="text-primary">{page.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate">{page.title}</p>
+                    {page.subtitle && (
+                      <p className="text-[10px] text-muted-foreground truncate">{page.subtitle}</p>
+                    )}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+
+          {!loading &&
+            filteredGroups.map((group, gi) => (
+              <div key={group.key}>
+                {gi > 0 && <CommandSeparator />}
+                <CommandGroup heading={group.label}>
+                  {group.items.map((item) => (
+                    <CommandItem
+                      key={item.id}
+                      value={item.id}
+                      onSelect={() => handleSelect(item.route)}
+                      className="gap-3 cursor-pointer font-serif"
+                    >
+                      <span className="text-primary">{item.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{item.title}</p>
+                        {item.subtitle && (
+                          <p className="text-[10px] text-muted-foreground truncate">
+                            {item.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-[8px] uppercase tracking-widest shrink-0">
+                        {item.category}
+                      </Badge>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </div>
+            ))}
+        </CommandList>
+
+        {/* Footer hint */}
+        <div className="border-t border-border px-3 py-2 flex items-center justify-between text-[10px] text-muted-foreground">
+          <span className="font-serif">⌘K to search anytime</span>
+          <span className="font-serif">ESC to close</span>
+        </div>
+      </Command>
+    </>
+  );
+
+  // Embedded mode — render inline without overlay
+  if (embedded) {
+    return (
+      <div className="w-full max-w-lg mx-auto">
+        <div className="flex items-center gap-2 mb-4">
+          <Search className="w-5 h-5 text-primary" />
+          <h2 className="font-serif text-lg tracking-widest text-primary uppercase">Search the Grove</h2>
+        </div>
+        {searchContent}
+      </div>
+    );
+  }
+
+  // Modal overlay mode
   return (
     <div
       className="fixed inset-0 z-[110] flex items-start justify-center pt-[10vh] md:pt-[15vh]"
@@ -210,105 +329,7 @@ const GlobalSearch = ({ open, onClose }: GlobalSearchProps) => {
           </button>
         </div>
 
-        {/* Filter pills */}
-        <div className="flex gap-1.5 mb-3 px-1 flex-wrap">
-          {CATEGORY_FILTERS.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-widest font-serif border transition-all duration-200 ${
-                filter === cat
-                  ? "bg-primary/20 border-primary/50 text-primary"
-                  : "bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground hover:border-border"
-              }`}
-            >
-              {CATEGORY_LABELS[cat]}
-            </button>
-          ))}
-        </div>
-
-        {/* Command palette */}
-        <Command
-          className="rounded-xl border border-border bg-card/95 backdrop-blur shadow-2xl overflow-hidden"
-          shouldFilter={false}
-        >
-          <CommandInput
-            placeholder="Search trees, species, seed pods, pages…"
-            value={query}
-            onValueChange={setQuery}
-            className="font-serif"
-          />
-          <CommandList className="max-h-[50vh]">
-            {loading && (
-              <div className="py-6 text-center text-xs text-muted-foreground font-serif animate-pulse">
-                Searching the ancient records…
-              </div>
-            )}
-
-            {!loading && query.length >= 2 && filteredGroups.length === 0 && (
-              <CommandEmpty className="font-serif text-muted-foreground">
-                No echoes found for "{query}"
-              </CommandEmpty>
-            )}
-
-            {!loading && query.length < 2 && filter === "all" && (
-              <CommandGroup heading="Quick Navigation">
-                {STATIC_PAGES.slice(0, 5).map((page) => (
-                  <CommandItem
-                    key={page.id}
-                    value={page.id}
-                    onSelect={() => handleSelect(page.route)}
-                    className="gap-3 cursor-pointer font-serif"
-                  >
-                    <span className="text-primary">{page.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">{page.title}</p>
-                      {page.subtitle && (
-                        <p className="text-[10px] text-muted-foreground truncate">{page.subtitle}</p>
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-
-            {!loading &&
-              filteredGroups.map((group, gi) => (
-                <div key={group.key}>
-                  {gi > 0 && <CommandSeparator />}
-                  <CommandGroup heading={group.label}>
-                    {group.items.map((item) => (
-                      <CommandItem
-                        key={item.id}
-                        value={item.id}
-                        onSelect={() => handleSelect(item.route)}
-                        className="gap-3 cursor-pointer font-serif"
-                      >
-                        <span className="text-primary">{item.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{item.title}</p>
-                          {item.subtitle && (
-                            <p className="text-[10px] text-muted-foreground truncate">
-                              {item.subtitle}
-                            </p>
-                          )}
-                        </div>
-                        <Badge variant="outline" className="text-[8px] uppercase tracking-widest shrink-0">
-                          {item.category}
-                        </Badge>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </div>
-              ))}
-          </CommandList>
-
-          {/* Footer hint */}
-          <div className="border-t border-border px-3 py-2 flex items-center justify-between text-[10px] text-muted-foreground">
-            <span className="font-serif">⌘K to search anytime</span>
-            <span className="font-serif">ESC to close</span>
-          </div>
-        </Command>
+        {searchContent}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -28,6 +28,7 @@ import GrovePulse from "@/components/GrovePulse";
 import HearthHearts from "@/components/HearthHearts";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
+import GlobalSearch from "@/components/GlobalSearch";
 import IdentityBloom from "@/components/IdentityBloom";
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
@@ -344,6 +345,7 @@ const DashboardPage = () => {
     const TAB_ITEMS = [
       { value: "legend", label: "Legend", icon: ScrollText },
       { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
+      { value: "search", label: "Search", icon: Search },
       { value: "hearts", label: "Hearts", icon: Heart },
       { value: "leaderboard", label: "Fellowship", icon: Trophy },
       { value: "profile", label: "Settings", icon: Settings },
@@ -430,6 +432,10 @@ const DashboardPage = () => {
                   <PersonalLegend userId={user.id} />
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="search">
+              <GlobalSearch open={true} onClose={() => {}} embedded />
             </TabsContent>
 
             <TabsContent value="hearts">
