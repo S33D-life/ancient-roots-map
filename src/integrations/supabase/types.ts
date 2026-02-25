@@ -593,6 +593,51 @@ export type Database = {
         }
         Relationships: []
       }
+      heart_campaigns: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          eligibility_rules: string | null
+          ends_at: string
+          heart_pool: number
+          hearts_distributed: number
+          id: string
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          eligibility_rules?: string | null
+          ends_at: string
+          heart_pool?: number
+          hearts_distributed?: number
+          id?: string
+          starts_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          eligibility_rules?: string | null
+          ends_at?: string
+          heart_pool?: number
+          hearts_distributed?: number
+          id?: string
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       heart_transactions: {
         Row: {
           amount: number
@@ -2192,6 +2237,83 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      value_proposal_supports: {
+        Row: {
+          created_at: string
+          id: string
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_proposal_supports_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "value_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      value_proposals: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          moderator_note: string | null
+          proposed_by: string
+          status: string
+          suggested_duration: string | null
+          suggested_hearts: number
+          support_count: number
+          title: string
+          updated_at: string
+          verification_level: string
+          why_it_matters: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          moderator_note?: string | null
+          proposed_by: string
+          status?: string
+          suggested_duration?: string | null
+          suggested_hearts?: number
+          support_count?: number
+          title: string
+          updated_at?: string
+          verification_level?: string
+          why_it_matters?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          moderator_note?: string | null
+          proposed_by?: string
+          status?: string
+          suggested_duration?: string | null
+          suggested_hearts?: number
+          support_count?: number
+          title?: string
+          updated_at?: string
+          verification_level?: string
+          why_it_matters?: string | null
         }
         Relationships: []
       }
