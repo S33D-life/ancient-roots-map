@@ -116,71 +116,91 @@ export const ParticipationSection = () => (
   </section>
 );
 
-/* ─── 3. Mini Map Preview ─── */
-export const MapPreviewSection = () => (
-  <section id="atlas-preview" className="py-16 md:py-24 overflow-hidden">
-    <div className="container mx-auto px-4 max-w-5xl">
-      <motion.h2
-        initial={{ opacity: 0, y: 12 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-2xl md:text-3xl font-serif text-center mb-3"
-      >
-        The Arboreal Atlas
-      </motion.h2>
-      <p className="text-center text-muted-foreground text-sm mb-8 max-w-md mx-auto">
-        Ancient Friends mapped across nations. Tap a cluster to explore.
-      </p>
+/* ─── 3. Mini Map Preview — static image with CTA ─── */
+export const MapPreviewSection = () => {
+  const [treeCount, setTreeCount] = useState(0);
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="relative rounded-2xl overflow-hidden border border-border/30"
-        style={{ height: "clamp(280px, 50vw, 420px)" }}
-      >
-        {/* Embed the actual map as a lightweight iframe preview */}
-        <iframe
-          src="/map?embed=true"
-          title="Ancient Friends Atlas Preview"
-          className="w-full h-full border-0"
-          loading="lazy"
-          style={{ pointerEvents: "none" }}
-        />
-        {/* Clickable overlay to go to full map */}
-        <Link
-          to="/map"
-          className="absolute inset-0 z-10 flex items-end justify-center pb-6"
+  useEffect(() => {
+    supabase.from("trees").select("id", { count: "exact", head: true }).then(({ count }) => {
+      if (count) setTreeCount(count);
+    });
+  }, []);
+
+  return (
+    <section id="atlas-preview" className="py-16 md:py-24 overflow-hidden">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <motion.h2
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-2xl md:text-3xl font-serif text-center mb-3"
         >
-          <Button variant="mystical" size="lg" className="shadow-lg">
-            <Globe className="w-4 h-4 mr-2" />
-            Enter the Atlas
-          </Button>
-        </Link>
-        {/* Legend overlay */}
-        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 text-[10px] text-foreground/70 bg-card/70 backdrop-blur-sm rounded-lg px-3 py-2 border border-border/30">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(42 95% 55%)" }} />
-            Ancient (500+ yrs)
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(120 45% 50%)" }} />
-            Storied
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(195 50% 50%)" }} />
-            Notable
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Heart className="w-2.5 h-2.5 text-destructive" />
-            Heart Pool
-          </span>
-        </div>
-      </motion.div>
-    </div>
-  </section>
-);
+          The Arboreal Atlas
+        </motion.h2>
+        <p className="text-center text-muted-foreground text-sm mb-8 max-w-md mx-auto">
+          {treeCount > 0
+            ? `${treeCount.toLocaleString()} Ancient Friends mapped across nations. Explore the living grove.`
+            : "Ancient Friends mapped across nations. Tap to explore."}
+        </p>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative rounded-2xl overflow-hidden border border-border/30 bg-card/30"
+          style={{ height: "clamp(280px, 50vw, 420px)" }}
+        >
+          {/* Atmospheric map placeholder — avoids iframe recursion */}
+          <div className="absolute inset-0 flex items-center justify-center"
+            style={{
+              background: `
+                radial-gradient(ellipse at 30% 40%, hsl(120 30% 20% / 0.4), transparent 60%),
+                radial-gradient(ellipse at 70% 60%, hsl(195 40% 25% / 0.3), transparent 50%),
+                hsl(var(--card))
+              `,
+            }}
+          >
+            <div className="text-center space-y-4">
+              <Globe className="w-16 h-16 text-primary/30 mx-auto" />
+              <p className="text-sm text-muted-foreground/60 font-serif">The planetary grove awaits</p>
+            </div>
+          </div>
+
+          {/* Clickable overlay to go to full map */}
+          <Link
+            to="/map"
+            className="absolute inset-0 z-10 flex items-end justify-center pb-6"
+          >
+            <Button variant="mystical" size="lg" className="shadow-lg">
+              <Globe className="w-4 h-4 mr-2" />
+              Enter the Atlas
+            </Button>
+          </Link>
+          {/* Legend overlay */}
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5 text-[10px] text-foreground/70 bg-card/70 backdrop-blur-sm rounded-lg px-3 py-2 border border-border/30">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(42 95% 55%)" }} />
+              Ancient (500+ yrs)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(120 45% 50%)" }} />
+              Storied
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(195 50% 50%)" }} />
+              Notable
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Heart className="w-2.5 h-2.5 text-destructive" />
+              Heart Pool
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 /* ─── 4. Living Scroll — Wisdom Showcase ─── */
 const WISDOM_SNIPPETS = [

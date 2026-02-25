@@ -254,12 +254,16 @@ const Hero = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const { data } = await supabase.from('trees').select('species, nation');
-      if (data) {
-        const species = new Set(data.map(t => t.species).filter(Boolean));
-        const nations = new Set(data.map(t => t.nation).filter(Boolean));
-        setStats({ trees: data.length, species: species.size, nations: nations.size });
-      }
+      // Use count-only queries to avoid 1000-row limit
+      const [treesRes, speciesRes] = await Promise.all([
+        supabase.from('trees').select('id', { count: 'exact', head: true }),
+        supabase.from('trees').select('species, nation'),
+      ]);
+      const treeCount = treesRes.count || 0;
+      const data = speciesRes.data || [];
+      const species = new Set(data.map(t => t.species).filter(Boolean));
+      const nations = new Set(data.map(t => t.nation).filter(Boolean));
+      setStats({ trees: treeCount, species: species.size, nations: nations.size });
     };
     fetchStats();
   }, []);
