@@ -30,8 +30,9 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
 import GlobalSearch from "@/components/GlobalSearch";
 import IdentityBloom from "@/components/IdentityBloom";
+import DashboardActivity from "@/components/dashboard/DashboardActivity";
 import { Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
+import { MapPin, Activity } from "lucide-react";
 
 /** Contextual pill showing the last tree the user visited, for easy return */
 const ReturnPill = () => {
@@ -344,6 +345,7 @@ const DashboardPage = () => {
 
     const TAB_ITEMS = [
       { value: "legend", label: "Legend", icon: ScrollText },
+      { value: "activity", label: "Activity", icon: Activity },
       { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
       { value: "search", label: "Search", icon: Search },
       { value: "hearts", label: "Hearts", icon: Heart },
@@ -432,6 +434,10 @@ const DashboardPage = () => {
                   <PersonalLegend userId={user.id} />
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="activity">
+              {user && <DashboardActivity userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="search">
