@@ -468,8 +468,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showResearchLayer, setShowResearchLayer] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      return params.get('research') === 'on';
-    } catch { return false; }
+      if (params.get('research') === 'off') return false;
+      return true; // On by default so all country data is visible
+    } catch { return true; }
   });
   const [researchTreeCount, setResearchTreeCount] = useState(0);
   const [researchLoading, setResearchLoading] = useState(false);
