@@ -1,13 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Flame, Globe, Hexagon } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/map", icon: TreeDeciduous, label: "Atlas" },
-  { to: "/atlas", icon: Globe, label: "Countries" },
-  { to: "/hives", icon: Hexagon, label: "Hives" },
-  { to: "/library", icon: BookOpen, label: "Library" },
-  { to: "/dashboard", icon: Flame, label: "Hearth" },
+  { to: "/map", icon: TreeDeciduous, label: "Roots", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/"] },
+  { to: "/library", icon: BookOpen, label: "Trunk", matchPrefixes: ["/library", "/vault", "/dashboard"] },
+  { to: "/council-of-life", icon: Leaf, label: "Canopy", matchPrefixes: ["/council"] },
+  { to: "/golden-dream", icon: Sparkles, label: "Crown", matchPrefixes: ["/golden-dream", "/value-tree"] },
 ] as const;
 
 const BottomNav = () => {
@@ -28,8 +27,10 @@ const BottomNav = () => {
       }}
     >
       <div className="flex items-center justify-around py-1.5">
-        {NAV_ITEMS.map(({ to, icon: Icon, label }) => {
-          const active = pathname === to || pathname.startsWith(to.split("?")[0] + "/") || pathname === to.split("?")[0];
+        {NAV_ITEMS.map((item) => {
+          const { to, icon: Icon, label } = item;
+          const active = item.matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
           return (
             <Link
               key={to}
