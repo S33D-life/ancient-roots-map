@@ -51,7 +51,7 @@ const MapPage = () => {
       {!isFullscreen && (
         <button
           onClick={toggleFullscreen}
-          className="fixed top-16 right-3 z-[51] flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-serif transition-all hover:brightness-125 active:scale-95"
+          className="fixed bottom-24 right-3 z-[51] flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-serif transition-all hover:brightness-125 active:scale-95"
           style={{
             background: "hsl(var(--card) / 0.75)",
             color: "hsl(var(--foreground) / 0.8)",
