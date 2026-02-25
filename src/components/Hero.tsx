@@ -338,8 +338,8 @@ const Hero = () => {
       {isDark ? <FairyDust /> : <FallingLeaves />}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-center">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-end pb-8">
+        <div className="max-w-4xl mx-auto space-y-6 mb-auto mt-auto">
           {/* Branding title */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
             The Arboreal Atlas of<br />Ancient Friends
@@ -347,19 +347,19 @@ const Hero = () => {
           <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
             Mapping the world's most storied trees — one encounter at a time.
           </p>
+        </div>
 
+        {/* Bottom stack: Stats → CTA buttons → Teotag → Ancient Friend */}
+        <div className="flex flex-col items-center gap-3 px-4 mt-6">
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-2">
+          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto w-full">
             <AnimatedCounter target={stats.trees} label="Ancient Trees" />
             <AnimatedCounter target={stats.species} label="Species Mapped" />
             <AnimatedCounter target={stats.nations} label="Nations" />
           </div>
-        </div>
 
-        {/* Bottom stack: CTA buttons → Teotag → Ancient Friend */}
-        <div className="absolute bottom-8 left-0 right-0 flex flex-col items-center gap-3 px-4">
           {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none pt-2">
             <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/map">
                 <MapPin className="w-5 h-5 mr-2" />
