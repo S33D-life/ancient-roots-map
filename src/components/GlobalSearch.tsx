@@ -26,7 +26,7 @@ interface SearchResult {
 }
 
 const STATIC_PAGES: SearchResult[] = [
-  { id: "page-atlas", title: "Ancient Friend Arboreal Atlas", subtitle: "Map of ancient trees", category: "pages", icon: <MapPin className="w-4 h-4" />, route: "/map" },
+  { id: "page-atlas", title: "The Arboreal Atlas of Ancient Friends", subtitle: "Map of ancient trees", category: "pages", icon: <MapPin className="w-4 h-4" />, route: "/map" },
   { id: "page-library", title: "HeARTwood Library", subtitle: "The Heartwood — rooms & scrolls", category: "pages", icon: <BookOpen className="w-4 h-4" />, route: "/library" },
   { id: "page-council", title: "Council of Life", subtitle: "Community council", category: "pages", icon: <Leaf className="w-4 h-4" />, route: "/council-of-life" },
   { id: "page-dream", title: "yOur Golden Dream", subtitle: "Vision & offerings", category: "pages", icon: <Sparkles className="w-4 h-4" />, route: "/golden-dream" },

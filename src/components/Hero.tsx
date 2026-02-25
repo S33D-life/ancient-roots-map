@@ -342,7 +342,7 @@ const Hero = () => {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Branding title */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
-            The Living Atlas of<br />Ancient Friends
+            The Arboreal Atlas of<br />Ancient Friends
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
             Mapping the world's most storied trees — one encounter at a time.

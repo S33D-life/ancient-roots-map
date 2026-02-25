@@ -210,7 +210,7 @@ export const MapPreviewSection = () => {
           viewport={{ once: true }}
           className="text-2xl md:text-3xl font-serif text-center mb-3"
         >
-          The Arboreal Atlas
+          The Arboreal Atlas of Ancient Friends
         </motion.h2>
         <p className="text-center text-muted-foreground text-sm mb-8 max-w-md mx-auto">
           {treeCount > 0
