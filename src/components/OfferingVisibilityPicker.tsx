@@ -1,7 +1,7 @@
 import { Eye, EyeOff, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
-export type OfferingVisibility = "private" | "tribe" | "public";
+export type OfferingVisibility = "private" | "circle" | "tribe" | "public";
 
 interface OfferingVisibilityPickerProps {
   value: OfferingVisibility;
@@ -10,9 +10,10 @@ interface OfferingVisibilityPickerProps {
 }
 
 const options: { value: OfferingVisibility; label: string; desc: string; icon: React.ReactNode }[] = [
-  { value: "private", label: "Just me", desc: "Only you can see this", icon: <EyeOff className="h-3.5 w-3.5" /> },
+  { value: "private", label: "Private", desc: "Only you can see this", icon: <EyeOff className="h-3.5 w-3.5" /> },
+  { value: "circle", label: "Circle", desc: "Your grove companions", icon: <Users className="h-3.5 w-3.5" /> },
   { value: "tribe", label: "Tribe", desc: "Visitors of this tree", icon: <Users className="h-3.5 w-3.5" /> },
-  { value: "public", label: "All", desc: "Everyone can see this", icon: <Eye className="h-3.5 w-3.5" /> },
+  { value: "public", label: "Public", desc: "Everyone can see this", icon: <Eye className="h-3.5 w-3.5" /> },
 ];
 
 const OfferingVisibilityPicker = ({ value, onChange, disabled }: OfferingVisibilityPickerProps) => {

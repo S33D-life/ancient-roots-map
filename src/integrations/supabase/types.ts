@@ -1173,12 +1173,14 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          impact_weight: number
           media_url: string | null
           meeting_id: string | null
           nft_link: string | null
           sealed_by_staff: string | null
           title: string
           tree_id: string
+          tree_role: string
           type: Database["public"]["Enums"]["offering_type"]
           visibility: string
         }
@@ -1187,12 +1189,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          impact_weight?: number
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
           sealed_by_staff?: string | null
           title: string
           tree_id: string
+          tree_role?: string
           type: Database["public"]["Enums"]["offering_type"]
           visibility?: string
         }
@@ -1201,12 +1205,14 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          impact_weight?: number
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
           sealed_by_staff?: string | null
           title?: string
           tree_id?: string
+          tree_role?: string
           type?: Database["public"]["Enums"]["offering_type"]
           visibility?: string
         }
