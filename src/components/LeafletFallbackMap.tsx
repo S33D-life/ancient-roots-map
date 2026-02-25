@@ -471,6 +471,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   });
   const [researchTreeCount, setResearchTreeCount] = useState(0);
   const [researchLoading, setResearchLoading] = useState(false);
+  const [showImmutableLayer, setShowImmutableLayer] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('immutable') === 'on';
+    } catch { return false; }
+  });
+  const [immutableTreeCount, setImmutableTreeCount] = useState(0);
+  const [immutableLoading, setImmutableLoading] = useState(false);
+  const immutableLayerRef = useRef<L.MarkerClusterGroup | null>(null);
   const [birdsongSeason, setBirdsongSeason] = useState<string>("all");
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
@@ -1708,6 +1717,110 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [showResearchLayer]);
 
+  // ── Immutable Ancient Friends layer ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (immutableLayerRef.current) {
+      map.removeLayer(immutableLayerRef.current);
+      immutableLayerRef.current = null;
+    }
+
+    if (!showImmutableLayer) {
+      setImmutableTreeCount(0);
+      return;
+    }
+
+    const immutableCluster = (L as any).markerClusterGroup({
+      maxClusterRadius: 50,
+      disableClusteringAtZoom: 14,
+      spiderfyOnMaxZoom: true,
+      iconCreateFunction: (cluster: any) => {
+        const count = cluster.getChildCount();
+        const dim = count >= 10 ? 42 : count >= 5 ? 36 : 30;
+        return L.divIcon({
+          html: `<div style="width:${dim}px;height:${dim}px;border-radius:50%;background:hsla(42,30%,12%,0.95);border:2.5px solid hsl(42,80%,50%);color:hsl(42,80%,60%);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;box-shadow:0 0 14px hsla(42,80%,50%,0.4);"><span style="font-size:8px;margin-right:2px;">🔱</span>${count}</div>`,
+          className: "leaflet-tree-marker",
+          iconSize: L.point(dim, dim),
+        });
+      },
+    });
+    immutableCluster.addTo(map);
+    immutableLayerRef.current = immutableCluster;
+
+    setImmutableLoading(true);
+
+    (async () => {
+      const { data, error } = await supabase
+        .from('research_trees')
+        .select('id,species_scientific,species_common,tree_name,locality_text,province,latitude,longitude,geo_precision,description,height_m,girth_or_stem,crown_spread,designation_type,source_doc_title,source_doc_url,source_doc_year,source_program,status,record_status,immutable_record_id,anchored_at,metadata_hash')
+        .eq('record_status', 'immutable')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .limit(5000);
+
+      setImmutableLoading(false);
+
+      if (error || !data) {
+        console.warn('[ImmutableLayer] fetch error:', error?.message);
+        return;
+      }
+
+      setImmutableTreeCount(data.length);
+
+      data.forEach((rt: any) => {
+        const sz = 22;
+        const half = sz / 2;
+
+        const icon = L.divIcon({
+          className: 'research-marker',
+          html: `<div style="width:${sz}px;height:${sz}px;background:hsla(42,30%,15%,0.95);border:3px solid hsl(42,80%,50%);border-radius:50%;box-shadow:0 0 12px hsla(42,80%,50%,0.5),0 0 24px hsla(42,80%,50%,0.2);position:relative;animation:markerBreathe 4s ease-in-out infinite;">
+            <span style="position:absolute;top:-5px;right:-5px;font-size:9px;">🔱</span>
+          </div>`,
+          iconSize: [sz, sz],
+          iconAnchor: [half, half],
+        });
+
+        const name = rt.tree_name || rt.species_common || rt.species_scientific;
+        const anchorDate = rt.anchored_at ? new Date(rt.anchored_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+        const popupHtml = `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(25,18%,10%);border-radius:12px;border:1.5px solid hsla(42,80%,50%,0.5);overflow:hidden;">
+          <div style="padding:10px 14px 6px;background:linear-gradient(135deg,hsla(42,50%,30%,0.2),hsla(42,60%,20%,0.05));">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="font-size:16px;">🔱</span>
+              <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,55%);border:1px solid hsla(42,80%,50%,0.3);">Immutable Ancient Friend</span>
+            </div>
+            <h3 style="margin:0;font-size:15px;color:hsl(42,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(name)}</h3>
+            <p style="margin:2px 0 0;font-size:11px;color:hsl(42,50%,50%);font-style:italic;">${escapeHtml(rt.species_scientific)}</p>
+          </div>
+          <div style="padding:6px 14px 8px;display:flex;flex-direction:column;gap:4px;">
+            <p style="margin:0;font-size:10px;color:hsl(35,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(rt.locality_text)}${rt.province ? `, ${escapeHtml(rt.province)}` : ''}</p>
+            ${rt.description ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(rt.description.substring(0, 150))}</p>` : ''}
+            <div style="margin-top:6px;padding:6px 8px;background:hsla(42,30%,15%,0.4);border-radius:6px;border:1px solid hsla(42,80%,50%,0.2);">
+              <p style="margin:0;font-size:9px;color:hsl(42,80%,55%);font-family:sans-serif;">✦ Recorded in the Eternal Grove</p>
+              ${rt.immutable_record_id ? `<p style="margin:2px 0 0;font-size:9px;color:hsl(42,50%,50%);font-family:monospace;">Record: ${escapeHtml(rt.immutable_record_id)}</p>` : ''}
+              ${anchorDate ? `<p style="margin:2px 0 0;font-size:9px;color:hsl(42,50%,50%);font-family:sans-serif;">Anchored: ${anchorDate}</p>` : ''}
+            </div>
+          </div>
+        </div>`;
+
+        const marker = L.marker([rt.latitude, rt.longitude], { icon });
+        marker.bindPopup(popupHtml, {
+          className: 'atlas-leaflet-popup',
+          closeButton: true,
+          maxWidth: 280,
+          offset: L.point(0, -4),
+        });
+        immutableCluster.addLayer(marker);
+      });
+    })();
+
+    return () => {
+      if (map.hasLayer(immutableCluster)) map.removeLayer(immutableCluster);
+    };
+  }, [showImmutableLayer]);
+
   // ── Waters & Commons pilgrimage lens layer ──
   useEffect(() => {
     const map = mapRef.current;
@@ -2177,7 +2290,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   {[
                     { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
                     { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
-                    { label: "📜 Research Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
+                    { label: "📜 Research Grove", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
+                    { label: "🔱 Immutable Ancient Friends", active: showImmutableLayer, toggle: () => setShowImmutableLayer(!showImmutableLayer), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
                     { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : `${enabledSources.length} src` },
                   ].map((layer) => (
                     <button

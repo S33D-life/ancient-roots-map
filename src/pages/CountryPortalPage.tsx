@@ -8,13 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   MapPin, ExternalLink, Scroll, TreeDeciduous, Eye, Compass, Heart,
-  BookOpen, ChevronRight, Map as MapIcon, Footprints, Shield, BarChart3,
+  BookOpen, ChevronRight, Map as MapIcon, Footprints, Shield, BarChart3, Lock, Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import { SLUG_MAP } from "@/config/countryRegistry";
+import VerificationPipeline from "@/components/VerificationPipeline";
+import ImmutableTreeCard from "@/components/ImmutableTreeCard";
 
 /* ─── Types ─── */
 interface ResearchTree {
@@ -37,6 +39,13 @@ interface ResearchTree {
   source_doc_year: number;
   designation_type: string;
   status: string;
+  record_status: string;
+  verification_score: number;
+  immutable_record_id: string | null;
+  immutable_anchor_reference: string | null;
+  metadata_hash: string | null;
+  anchored_at: string | null;
+  verified_by: string | null;
 }
 
 /* ─── Stat Tile ─── */
@@ -190,6 +199,7 @@ const CountryPortalPage = () => {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [pilgrimagePreset, setPilgrimagePreset] = useState<string>("first-steps");
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTrees = async () => {
@@ -410,7 +420,10 @@ const CountryPortalPage = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="bg-card/50 border border-primary/20 mb-4">
               <TabsTrigger value="overview">All Trees</TabsTrigger>
-              <TabsTrigger value="species">Species Index</TabsTrigger>
+              <TabsTrigger value="immutable" className="gap-1">
+                <Lock className="w-3 h-3" /> Immutable
+              </TabsTrigger>
+              <TabsTrigger value="species">Species</TabsTrigger>
               <TabsTrigger value="pilgrimages">Pilgrimages</TabsTrigger>
             </TabsList>
 
@@ -423,10 +436,49 @@ const CountryPortalPage = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {filteredTrees.map(tree => (
-                    <ResearchTreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} />
+                    <div key={tree.id} onClick={() => setSelectedTreeId(selectedTreeId === tree.id ? null : tree.id)} className="cursor-pointer">
+                      <ResearchTreeCard tree={tree} onNavigate={handleMapNavigate} />
+                      {selectedTreeId === tree.id && (
+                        <div className="mt-2">
+                          <VerificationPipeline
+                            tree={{ ...tree, record_status: (tree as any).record_status || "research", verification_score: (tree as any).verification_score || 0 }}
+                            onStatusChange={(newStatus) => {
+                              setTrees(prev => prev.map(t => t.id === tree.id ? { ...t, record_status: newStatus } as any : t));
+                              setSelectedTreeId(null);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            {/* ─── Immutable Ancient Friends ─── */}
+            <TabsContent value="immutable">
+              {(() => {
+                const immutableTrees = trees.filter(t => (t as any).record_status === "immutable");
+                if (loading) return <p className="text-center py-12 text-muted-foreground">Loading…</p>;
+                if (immutableTrees.length === 0) return (
+                  <Card className="border-[hsl(42_80%_50%/0.2)] bg-[hsl(42_30%_12%/0.3)]">
+                    <CardContent className="py-12 text-center space-y-3">
+                      <Sparkles className="w-8 h-8 text-[hsl(42_80%_55%)] mx-auto opacity-60" />
+                      <p className="text-sm font-serif text-[hsl(42_80%_55%)]">No Immutable Ancient Friends yet</p>
+                      <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                        Research trees become Immutable after verification and anchoring. Browse the "All Trees" tab to begin the pipeline.
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {immutableTrees.map(tree => (
+                      <ImmutableTreeCard key={tree.id} tree={tree as any} onMapNavigate={() => handleMapNavigate(tree)} />
+                    ))}
+                  </div>
+                );
+              })()}
             </TabsContent>
 
             {/* ─── D) Species Index ─── */}
