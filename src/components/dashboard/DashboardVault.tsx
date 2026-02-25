@@ -18,7 +18,7 @@ import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultSpeciesHearts from "./vault/VaultSpeciesHearts";
 import VaultInfluence from "./vault/VaultInfluence";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
-
+import VaultValueTree from "./vault/VaultValueTree";
 interface Props {
   userId: string;
 }
@@ -181,6 +181,9 @@ const DashboardVault = ({ userId }: Props) => {
         influenceByHive={speciesTokens.influenceByHive}
         history={speciesTokens.history}
       />
+
+      {/* S33D Hearts — The Value Tree */}
+      <VaultValueTree userId={userId} totalHearts={totalHearts} />
 
       {/* Two-column layout for mid sections on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
