@@ -85,7 +85,10 @@ const TreeDetailPage = () => {
   }, [searchParams, id]);
 
   // Centralized offerings via shared hook (with realtime)
-  const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType } = useOfferings({ treeId: id, realtime: true });
+  const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType, getByRole } = useOfferings({ treeId: id, realtime: true });
+  const stewardshipOfferings = useMemo(() => getByRole("stewardship"), [getByRole]);
+  const anchoredOfferings = useMemo(() => getByRole("anchored"), [getByRole]);
+  const [showAnchored, setShowAnchored] = useState(false);
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
@@ -405,23 +408,96 @@ const TreeDetailPage = () => {
           </Button>
         </div>
 
-        {/* Offerings Section */}
+        {/* ── Tree Record (Stewardship offerings) ── */}
+        {stewardshipOfferings.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
+              <h2 className="text-xl font-serif text-primary tracking-widest uppercase flex items-center gap-2">
+                🌳 Tree Record
+              </h2>
+              <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
+            </div>
+            <p className="text-xs text-muted-foreground font-serif mb-3 text-center">
+              Observations, documentation, and seasonal records contributed to this tree's archive.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {stewardshipOfferings.map((off) => (
+                <Card key={off.id} className="bg-card/60 backdrop-blur border-primary/20">
+                  <CardContent className="p-3 flex items-center gap-3">
+                    {off.media_url && off.type === "photo" && (
+                      <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
+                      <span className="text-[10px] text-muted-foreground/60 font-mono">
+                        {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary">
+                      {off.type}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Beneath This Tree (Anchored offerings) ── */}
+        {anchoredOfferings.length > 0 && (
+          <div className="mb-8">
+            <button
+              onClick={() => setShowAnchored(!showAnchored)}
+              className="w-full flex items-center gap-3 mb-4"
+            >
+              <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
+              <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
+                🏡 Beneath This Tree
+                <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
+                <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
+              </span>
+              <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
+            </button>
+            <AnimatePresence>
+              {showAnchored && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="grid gap-3 md:grid-cols-2 overflow-hidden"
+                >
+                  {anchoredOfferings.map((off) => (
+                    <Card key={off.id} className="bg-card/40 backdrop-blur border-border/30">
+                      <CardContent className="p-3 flex items-center gap-3">
+                        {off.media_url && off.type === "photo" && (
+                          <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
+                          <span className="text-[10px] text-muted-foreground/60 font-mono">
+                            {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                          </span>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-border/30">
+                          {off.type}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* Offerings Section (all by type) */}
         <div className="flex items-center gap-3 mb-6">
-          <div
-            className="h-px flex-1"
-            style={{
-              background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)",
-            }}
-          />
+          <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
           <h2 className="text-2xl font-serif text-primary tracking-widest uppercase">
             Offerings
           </h2>
-          <div
-            className="h-px flex-1"
-            style={{
-              background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)",
-            }}
-          />
+          <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
         </div>
 
         {/* Gate: offerings require active/expiring meeting */}

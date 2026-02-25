@@ -4,6 +4,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 export type Offering = Database["public"]["Tables"]["offerings"]["Row"];
 export type OfferingType = Database["public"]["Enums"]["offering_type"];
+export type TreeRole = "stewardship" | "anchored" | "none";
 
 export interface OfferingSummary {
   id: string;
@@ -101,5 +102,10 @@ export function useOfferings({ treeId, realtime = false }: UseOfferingsOptions) 
     [offerings]
   );
 
-  return { offerings, loading, refetch: fetchOfferings, getByType };
+  const getByRole = useCallback(
+    (role: TreeRole) => offerings.filter((o) => (o as any).tree_role === role),
+    [offerings]
+  );
+
+  return { offerings, loading, refetch: fetchOfferings, getByType, getByRole };
 }

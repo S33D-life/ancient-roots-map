@@ -16,6 +16,7 @@ import BookOfferingFlow, { type BookOfferingData } from "@/components/BookOfferi
 import OfferingCelebration from "@/components/OfferingCelebration";
 import RewardReceipt from "@/components/RewardReceipt";
 import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
+import TreeRolePicker, { type TreeRole } from "@/components/TreeRolePicker";
 import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -106,6 +107,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showRewardReceipt, setShowRewardReceipt] = useState(false);
   const [visibility, setVisibility] = useState<OfferingVisibility>(type === "photo" ? "public" : "tribe");
+  const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
 
   const cfg = typeConfig[type];
 
@@ -192,6 +194,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         }
       }
 
+      const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
+
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
         tree_id: treeId,
         type,
@@ -203,6 +207,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
         visibility: type === "photo" ? "public" : visibility,
+        tree_role: treeRole,
+        impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
 
@@ -217,9 +223,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         );
       }
 
-      // Issue species/influence rewards
+      // Issue species/influence rewards (stewardship gets +2, anchored gets +1)
       if (treeSpecies) {
-        const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
+        const s33dOverride = treeRole === "stewardship" ? 2 : 1;
+        const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering", s33dAmount: s33dOverride });
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) {
           setRewardResult(rr);
         }
@@ -259,6 +266,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         return;
       }
 
+      const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
         tree_id: treeId,
         type: "song" as const,
@@ -270,6 +278,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
         visibility,
+        tree_role: treeRole,
+        impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
 
@@ -314,6 +324,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         return;
       }
 
+      const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
         tree_id: treeId,
         type: "voice" as const,
@@ -324,6 +335,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
         visibility,
+        tree_role: treeRole,
+        impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
 
@@ -373,6 +386,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       if (data.quote) contentParts.push(`\n"${data.quote}"`);
       if (data.reflection) contentParts.push(`\n${data.reflection}`);
 
+      const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
         tree_id: treeId,
         type: "book" as const,
@@ -383,6 +397,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
         visibility,
+        tree_role: treeRole,
+        impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
 
@@ -554,6 +570,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
                 <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link..." className="bg-secondary/20 border-border/50 font-serif" />
               </div>
             )}
+
+            {/* Tree role picker */}
+            <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
 
             {/* Visibility picker (not shown for photos — always public) */}
             {type !== "photo" && (
