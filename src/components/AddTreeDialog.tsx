@@ -59,6 +59,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [isDragging, setIsDragging] = useState(false);
   const [extractingPhoto, setExtractingPhoto] = useState(false);
   const [photoDate, setPhotoDate] = useState<string | null>(null);
+  const [droppedPhotoFile, setDroppedPhotoFile] = useState<File | null>(null);
+  const [uploadingOffering, setUploadingOffering] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const dragCounter = useRef(0);
@@ -83,6 +85,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setAdjustMode(false);
       setSavedTreeId(null);
       setPhotoDate(null);
+      setDroppedPhotoFile(null);
+      setUploadingOffering(false);
     }
   }, [open]);
 
@@ -287,6 +291,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       return;
     }
     setExtractingPhoto(true);
+    // Store the file for later upload as offering
+    setDroppedPhotoFile(file);
     try {
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -336,6 +342,57 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setExtractingPhoto(false);
     }
   }, [toast]);
+
+  // Upload dropped photo as first offering after tree is saved
+  const uploadPhotoOffering = useCallback(async (treeId: string, userId: string, file: File) => {
+    setUploadingOffering(true);
+    try {
+      // Downscale image client-side (2048px max, 0.82 quality)
+      const compressed = await new Promise<Blob>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 2048;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            const scale = maxDim / Math.max(w, h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+          canvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.82);
+        };
+        img.src = URL.createObjectURL(file);
+      });
+
+      const filePath = `${userId}/${treeId}/photo-${Date.now()}.jpeg`;
+      const { error: uploadErr } = await supabase.storage
+        .from("offerings")
+        .upload(filePath, compressed, { contentType: "image/jpeg" });
+      if (uploadErr) throw uploadErr;
+
+      const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(filePath);
+
+      const { error: insertErr } = await supabase.from("offerings").insert({
+        tree_id: treeId,
+        title: "First encounter",
+        type: "photo" as any,
+        media_url: urlData.publicUrl,
+        created_by: userId,
+        visibility: "public",
+        ...(photoDate ? { created_at: photoDate } : {}),
+      });
+      if (insertErr) throw insertErr;
+
+      toast({ title: "📷 Photo offering saved", description: "Your first encounter photo has been added" });
+    } catch (err: any) {
+      console.error("Photo offering upload error:", err);
+      toast({ title: "Photo upload failed", description: err.message || "Could not save the photo offering", variant: "destructive" });
+    } finally {
+      setUploadingOffering(false);
+    }
+  }, [photoDate, toast]);
 
   const onDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -424,6 +481,11 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         name: name.trim() || species.trim(),
         species: species.trim(),
       }));
+
+      // Auto-upload dropped photo as first offering
+      if (droppedPhotoFile) {
+        uploadPhotoOffering(data.id, user.id, droppedPhotoFile);
+      }
 
       // Auto-advance to offering step
       setTransitionDir("forward");
@@ -678,6 +740,16 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
                       <span className="text-xs font-serif text-muted-foreground">Extracting address from photo…</span>
                     </div>
+                  ) : droppedPhotoFile && !extractingPhoto ? (
+                    <div className="flex flex-col items-center gap-1.5 py-1">
+                      <Check className="h-5 w-5" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                      <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>
+                        📷 {droppedPhotoFile.name} — will be your first offering
+                      </span>
+                      <span className="text-[10px] font-serif text-muted-foreground/60">
+                        Tap to choose a different photo
+                      </span>
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center gap-1.5 py-1">
                       <ImagePlus className="h-5 w-5" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(0, 0%, 45%)' }} />
@@ -785,6 +857,18 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 <p className="text-xs text-muted-foreground mt-1 font-serif">
                   Give this ancient friend a name, then leave an offering
                 </p>
+                {uploadingOffering && (
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                    <span className="text-xs font-serif" style={{ color: 'hsl(42, 60%, 55%)' }}>Uploading your photo offering…</span>
+                  </div>
+                )}
+                {!uploadingOffering && droppedPhotoFile && (
+                  <div className="flex items-center justify-center gap-1.5 mt-2">
+                    <Check className="h-3.5 w-3.5" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                    <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>📷 Photo offering saved</span>
+                  </div>
+                )}
               </div>
 
               {/* Name field — now in the offering step */}
