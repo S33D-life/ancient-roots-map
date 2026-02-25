@@ -2163,6 +2163,74 @@ export type Database = {
         }
         Relationships: []
       }
+      tree_sources: {
+        Row: {
+          contributor_email: string | null
+          contributor_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          research_tree_id: string | null
+          source_title: string
+          source_type: string
+          submitted_at: string
+          submitted_by: string | null
+          tree_id: string
+          updated_at: string
+          url: string | null
+          verification_notes: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          contributor_email?: string | null
+          contributor_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          research_tree_id?: string | null
+          source_title: string
+          source_type?: string
+          submitted_at?: string
+          submitted_by?: string | null
+          tree_id: string
+          updated_at?: string
+          url?: string | null
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          contributor_email?: string | null
+          contributor_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          research_tree_id?: string | null
+          source_title?: string
+          source_type?: string
+          submitted_at?: string
+          submitted_by?: string | null
+          tree_id?: string
+          updated_at?: string
+          url?: string | null
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_sources_research_tree_id_fkey"
+            columns: ["research_tree_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_wishlist: {
         Row: {
           created_at: string

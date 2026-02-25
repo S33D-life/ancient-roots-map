@@ -21,9 +21,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Loader2, Shield, Wand2, Search, UserPlus, X } from "lucide-react";
+import { Loader2, Shield, Wand2, Search, UserPlus, X, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { getGridStaffs, type GridStaff } from "@/utils/staffRoomData";
+import SourceReviewPanel from "@/components/SourceReviewPanel";
 
 interface WandererOption {
   id: string;
@@ -57,6 +58,7 @@ export default function CuratorPage() {
   const [selectedWanderer, setSelectedWanderer] = useState("");
   const [wandererSearch, setWandererSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showSourceReview, setShowSourceReview] = useState(false);
 
   const allGrid = useMemo(() => getGridStaffs(), []);
 
@@ -223,13 +225,27 @@ export default function CuratorPage() {
           </Badge>
         </div>
 
-        {/* Link to Edit Review */}
-        <div className="mb-6">
+        {/* Links to other curator tools */}
+        <div className="mb-6 flex flex-wrap gap-3">
           <a href="/edit-review" className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2">
             <Shield className="w-4 h-4" />
             Tree Edit Proposals →
           </a>
+          <button
+            onClick={() => setShowSourceReview(!showSourceReview)}
+            className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2"
+          >
+            <BookOpen className="w-4 h-4" />
+            Source Review {showSourceReview ? "▾" : "→"}
+          </button>
         </div>
+
+        {/* Source Review Panel */}
+        {showSourceReview && (
+          <div className="mb-8 p-4 rounded-xl border border-border/40 bg-card/40">
+            <SourceReviewPanel />
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
