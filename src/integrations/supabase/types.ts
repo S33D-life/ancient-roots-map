@@ -1429,6 +1429,8 @@ export type Database = {
       }
       research_trees: {
         Row: {
+          anchor_chain: string | null
+          anchored_at: string | null
           country: string
           created_at: string
           crown_spread: string | null
@@ -1438,11 +1440,15 @@ export type Database = {
           girth_or_stem: string | null
           height_m: number | null
           id: string
+          immutable_anchor_reference: string | null
+          immutable_record_id: string | null
           latitude: number | null
           linked_tree_id: string | null
           locality_text: string
           longitude: number | null
+          metadata_hash: string | null
           province: string | null
+          record_status: string
           size_index: number | null
           source_doc_title: string
           source_doc_url: string
@@ -1455,8 +1461,12 @@ export type Database = {
           tree_name: string | null
           updated_at: string
           user_annotations: Json | null
+          verification_score: number | null
+          verified_by: string | null
         }
         Insert: {
+          anchor_chain?: string | null
+          anchored_at?: string | null
           country?: string
           created_at?: string
           crown_spread?: string | null
@@ -1466,11 +1476,15 @@ export type Database = {
           girth_or_stem?: string | null
           height_m?: number | null
           id?: string
+          immutable_anchor_reference?: string | null
+          immutable_record_id?: string | null
           latitude?: number | null
           linked_tree_id?: string | null
           locality_text: string
           longitude?: number | null
+          metadata_hash?: string | null
           province?: string | null
+          record_status?: string
           size_index?: number | null
           source_doc_title: string
           source_doc_url: string
@@ -1483,8 +1497,12 @@ export type Database = {
           tree_name?: string | null
           updated_at?: string
           user_annotations?: Json | null
+          verification_score?: number | null
+          verified_by?: string | null
         }
         Update: {
+          anchor_chain?: string | null
+          anchored_at?: string | null
           country?: string
           created_at?: string
           crown_spread?: string | null
@@ -1494,11 +1512,15 @@ export type Database = {
           girth_or_stem?: string | null
           height_m?: number | null
           id?: string
+          immutable_anchor_reference?: string | null
+          immutable_record_id?: string | null
           latitude?: number | null
           linked_tree_id?: string | null
           locality_text?: string
           longitude?: number | null
+          metadata_hash?: string | null
           province?: string | null
+          record_status?: string
           size_index?: number | null
           source_doc_title?: string
           source_doc_url?: string
@@ -1511,6 +1533,8 @@ export type Database = {
           tree_name?: string | null
           updated_at?: string
           user_annotations?: Json | null
+          verification_score?: number | null
+          verified_by?: string | null
         }
         Relationships: [
           {
