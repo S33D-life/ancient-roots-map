@@ -29,8 +29,11 @@ import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
 import { useTreeSources } from "@/hooks/use-tree-sources";
+import { useTreeCheckins, useCheckinStats } from "@/hooks/use-tree-checkins";
 import ContributeSourceModal from "@/components/ContributeSourceModal";
 import TreeSourcesDisplay from "@/components/TreeSourcesDisplay";
+import CanopyCheckinModal from "@/components/CanopyCheckinModal";
+import CanopyVisitsTimeline from "@/components/CanopyVisitsTimeline";
 import TreeMarkets from "@/components/TreeMarkets";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -66,6 +69,7 @@ const TreeDetailPage = () => {
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
+  const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -83,6 +87,8 @@ const TreeDetailPage = () => {
   // Centralized offerings via shared hook (with realtime)
   const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType } = useOfferings({ treeId: id, realtime: true });
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
+  const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
+  const checkinStats = useCheckinStats(id, userId);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -533,6 +539,14 @@ const TreeDetailPage = () => {
           />
         )}
 
+        {/* Canopy Visits Section */}
+        <CanopyVisitsTimeline
+          checkins={checkins}
+          stats={checkinStats}
+          loading={checkinsLoading}
+          onCheckin={() => setCanopyCheckinOpen(true)}
+        />
+
         {/* Sources Section */}
         <TreeSourcesDisplay
           verified={verifiedSources}
@@ -593,6 +607,17 @@ const TreeDetailPage = () => {
         treeId={id!}
         treeName={tree?.name || ""}
         onSourceAdded={refetchSources}
+      />
+
+      <CanopyCheckinModal
+        open={canopyCheckinOpen}
+        onOpenChange={setCanopyCheckinOpen}
+        treeId={id!}
+        treeName={tree?.name || ""}
+        treeSpecies={tree?.species || ""}
+        treeLat={tree?.latitude}
+        treeLng={tree?.longitude}
+        onCheckinComplete={refetchCheckins}
       />
     </div>
   );

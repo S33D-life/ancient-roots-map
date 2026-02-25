@@ -2018,6 +2018,77 @@ export type Database = {
           },
         ]
       }
+      tree_checkins: {
+        Row: {
+          birdsong_heard: boolean | null
+          canopy_proof: boolean
+          checked_in_at: string
+          created_at: string
+          fungi_present: boolean | null
+          health_notes: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          media_url: string | null
+          minted_status: string
+          mood_score: number | null
+          reflection: string | null
+          season_stage: string
+          tree_id: string
+          updated_at: string
+          user_id: string
+          weather: string | null
+        }
+        Insert: {
+          birdsong_heard?: boolean | null
+          canopy_proof?: boolean
+          checked_in_at?: string
+          created_at?: string
+          fungi_present?: boolean | null
+          health_notes?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          media_url?: string | null
+          minted_status?: string
+          mood_score?: number | null
+          reflection?: string | null
+          season_stage?: string
+          tree_id: string
+          updated_at?: string
+          user_id: string
+          weather?: string | null
+        }
+        Update: {
+          birdsong_heard?: boolean | null
+          canopy_proof?: boolean
+          checked_in_at?: string
+          created_at?: string
+          fungi_present?: boolean | null
+          health_notes?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          media_url?: string | null
+          minted_status?: string
+          mood_score?: number | null
+          reflection?: string | null
+          season_stage?: string
+          tree_id?: string
+          updated_at?: string
+          user_id?: string
+          weather?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_checkins_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_edit_proposals: {
         Row: {
           confidence: string
