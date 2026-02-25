@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -111,8 +111,19 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
 
   const cfg = typeConfig[type];
 
+  // Smart role suggestion based on content keywords
+  const STEWARDSHIP_KEYWORDS = /\b(species|season|blossom|leaf|bark|trunk|girth|height|canopy|wildlife|bird|fungi|lichen|moss|root|branch|crown|measurement|survey|observation|ecology|habitat|biodiversity|pollinator|insect|growth|decay|disease|health|circumference|diameter)\b/i;
+  const ANCHORED_KEYWORDS = /\b(family|memory|remember|childhood|grandmother|grandfather|mother|father|love|heart|wedding|birthday|song|prayer|wish|dream|story|personal|feeling|emotion|grief|joy|peace|meditation)\b/i;
 
-
+  useEffect(() => {
+    const text = `${title} ${content}`;
+    if (text.trim().length < 5) return;
+    if (STEWARDSHIP_KEYWORDS.test(text)) {
+      setTreeRole("stewardship");
+    } else if (ANCHORED_KEYWORDS.test(text)) {
+      setTreeRole("anchored");
+    }
+  }, [title, content]);
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processFile(file);

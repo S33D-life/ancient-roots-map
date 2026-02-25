@@ -706,6 +706,15 @@ const TreeDetailPage = () => {
         treeLng={tree?.longitude}
         onCheckinComplete={refetchCheckins}
       />
+
+      {/* Edit proposal nudge — appears once per tree */}
+      <ContextualWhisper
+        id={`edit-nudge-${id}`}
+        message="🔍 Spot something that needs updating? Help keep the record accurate."
+        cta={{ label: "Propose Edit", to: "#" }}
+        delay={8000}
+        position="bottom-right"
+      />
     </div>
   );
 };
