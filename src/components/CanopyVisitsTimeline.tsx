@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  TreeDeciduous, ChevronDown, Heart, MapPin, Leaf, Calendar,
+  TreeDeciduous, ChevronDown, Heart, MapPin, Leaf, Calendar, Flame,
 } from "lucide-react";
 import type { TreeCheckin } from "@/hooks/use-tree-checkins";
 import type { CheckinStats } from "@/hooks/use-tree-checkins";
@@ -84,8 +84,24 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
             </div>
           )}
         </div>
-      )}
+        )}
 
+        {/* Streak counter */}
+        {(stats.currentStreak > 0 || stats.longestStreak > 1) && (
+          <div className="flex items-center gap-3 mb-4">
+            {stats.currentStreak > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                <Flame className="w-3.5 h-3.5 text-primary" />
+                <span className="text-xs font-serif text-primary">{stats.currentStreak} day streak</span>
+              </div>
+            )}
+            {stats.longestStreak > 1 && (
+              <span className="text-[10px] text-muted-foreground font-serif">
+                Best: {stats.longestStreak} days
+              </span>
+            )}
+          </div>
+        )}
       {/* Timeline */}
       {displayCheckins.length > 0 && (
         <div className="space-y-2 mb-4">

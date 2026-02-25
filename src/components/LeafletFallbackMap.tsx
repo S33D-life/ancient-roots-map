@@ -414,6 +414,7 @@ const LITE_CSS = `
 .wc-dot:hover{transform:scale(1.4)!important;opacity:1!important}
 @keyframes wcGlow{0%,100%{opacity:0.5}50%{opacity:0.8}}
 .wc-waterway{animation:wcGlow 4s ease-in-out infinite}
+@keyframes seedPulse{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.2);opacity:1}}
 `;
 
 const btnBase: React.CSSProperties = {
@@ -496,6 +497,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showSeedTraces, setShowSeedTraces] = useState(false);
   const [showSharedTrees, setShowSharedTrees] = useState(false);
   const [showTribeActivity, setShowTribeActivity] = useState(false);
+  const [showBloomedSeeds, setShowBloomedSeeds] = useState(false);
+  const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
+  const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Waters & Commons pilgrimage lens
   const [showWatersCommons, setShowWatersCommons] = useState(false);
@@ -1958,6 +1962,68 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [addTreeCoords, watersCommonsPois, showWatersCommons]);
 
+  // ── Bloomed Seeds layer ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (bloomedSeedLayerRef.current) {
+      map.removeLayer(bloomedSeedLayerRef.current);
+      bloomedSeedLayerRef.current = null;
+    }
+
+    if (!showBloomedSeeds) { setBloomedSeedCount(0); return; }
+
+    const loadSeeds = async () => {
+      const now = new Date().toISOString();
+      const { data } = await supabase
+        .from("planted_seeds")
+        .select("id, latitude, longitude, tree_id, blooms_at, planter_id")
+        .is("collected_at", null)
+        .lte("blooms_at", now)
+        .not("latitude", "is", null)
+        .not("longitude", "is", null)
+        .limit(200);
+
+      if (!data || data.length === 0) { setBloomedSeedCount(0); return; }
+      setBloomedSeedCount(data.length);
+
+      const layer = L.layerGroup();
+      data.forEach((seed: any) => {
+        const seedIcon = L.divIcon({
+          className: "bloomed-seed-marker",
+          html: `<div style="
+            width: 18px; height: 18px; border-radius: 50%;
+            background: radial-gradient(circle, hsla(120, 70%, 60%, 0.9), hsla(120, 60%, 40%, 0.5));
+            box-shadow: 0 0 12px hsla(120, 70%, 55%, 0.6), 0 0 24px hsla(120, 60%, 50%, 0.3);
+            animation: seedPulse 2s ease-in-out infinite;
+            border: 2px solid hsla(120, 80%, 70%, 0.7);
+          "></div>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9],
+        });
+
+        const marker = L.marker([seed.latitude, seed.longitude], { icon: seedIcon });
+        const popup = document.createElement("div");
+        popup.style.cssText = "font-family: serif; text-align: center;";
+        popup.innerHTML = `<div style="font-size:13px;color:hsl(120,50%,40%)">🌱 Bloomed Seed</div>
+          <div style="font-size:10px;color:#888;margin-top:2px">Ready to collect</div>`;
+        marker.bindPopup(popup);
+        layer.addLayer(marker);
+      });
+
+      layer.addTo(map);
+      bloomedSeedLayerRef.current = layer;
+    };
+    loadSeeds();
+
+    return () => {
+      if (bloomedSeedLayerRef.current && map.hasLayer(bloomedSeedLayerRef.current)) {
+        map.removeLayer(bloomedSeedLayerRef.current);
+      }
+    };
+  }, [showBloomedSeeds]);
+
   const handleFindMe = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     setLocating(true);
@@ -2416,6 +2482,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     Sense the presence of others — gently, like traces in a forest.
                   </p>
                   {[
+                    { label: "🌱 Bloomed Seeds", desc: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(!showBloomedSeeds), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined },
                     { label: "◎ Recent Visits", desc: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => setShowRecentVisits(!showRecentVisits) },
                     { label: "✿ Seed & Offering Traces", desc: "Subtle pulses that fade over time", active: showSeedTraces, toggle: () => setShowSeedTraces(!showSeedTraces) },
                     { label: "◐ Shared Trees", desc: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => setShowSharedTrees(!showSharedTrees) },

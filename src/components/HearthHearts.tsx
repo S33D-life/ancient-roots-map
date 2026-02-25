@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart, TreeDeciduous, Sprout, Sparkles } from "lucide-react";
+import { Heart, TreeDeciduous, Sprout, Sparkles, Gift } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import GiftSeedInbox from "@/components/GiftSeedInbox";
 
 interface HeartActivity {
   id: string;
@@ -21,6 +22,7 @@ const TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; colo
   sower: { label: "Sower", icon: TreeDeciduous, color: "42 80% 55%" },
   windfall: { label: "Windfall", icon: Sparkles, color: "280 60% 60%" },
   tree: { label: "Tree", icon: TreeDeciduous, color: "120 40% 40%" },
+  gift: { label: "Gift", icon: Gift, color: "330 70% 55%" },
 };
 
 const HearthHearts = ({ userId }: HearthHeartsProps) => {
@@ -119,6 +121,15 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
           <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Plant seeds near trees to start collecting hearts</p>
         </div>
       )}
+
+      {/* Gift Seed Inbox */}
+      <div className="pt-2">
+        <div className="flex items-center gap-2 mb-3">
+          <Gift className="w-4 h-4 text-primary" />
+          <h3 className="font-serif text-sm tracking-widest text-primary uppercase">Gift Seeds</h3>
+        </div>
+        <GiftSeedInbox userId={userId} />
+      </div>
     </div>
   );
 };

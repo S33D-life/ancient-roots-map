@@ -29,6 +29,8 @@ export interface CheckinStats {
   lastVisit: string | null;
   seasonsCovered: string[];
   seasonPercent: number;
+  currentStreak: number;
+  longestStreak: number;
 }
 
 const ALL_SEASONS = ["bud", "leaf", "blossom", "fruit", "bare"];
@@ -59,7 +61,7 @@ export function useTreeCheckins(treeId?: string) {
 export function useCheckinStats(treeId?: string, userId?: string | null): CheckinStats {
   const [stats, setStats] = useState<CheckinStats>({
     totalVisits: 0, firstVisit: null, lastVisit: null,
-    seasonsCovered: [], seasonPercent: 0,
+    seasonsCovered: [], seasonPercent: 0, currentStreak: 0, longestStreak: 0,
   });
 
   useEffect(() => {
@@ -73,12 +75,34 @@ export function useCheckinStats(treeId?: string, userId?: string | null): Checki
       .then(({ data }) => {
         if (!data || data.length === 0) return;
         const seasons = [...new Set(data.map(d => d.season_stage).filter(s => ALL_SEASONS.includes(s)))];
+
+        // Calculate streaks (consecutive days with check-ins)
+        const daySet = new Set(data.map(d => d.checked_in_at.split("T")[0]));
+        const sortedDays = [...daySet].sort();
+        let currentStreak = 0;
+        let longestStreak = 0;
+        let streak = 1;
+        const today = new Date().toISOString().split("T")[0];
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+
+        for (let i = 1; i < sortedDays.length; i++) {
+          const prev = new Date(sortedDays[i - 1]).getTime();
+          const curr = new Date(sortedDays[i]).getTime();
+          if (curr - prev <= 86400000) { streak++; } else { longestStreak = Math.max(longestStreak, streak); streak = 1; }
+        }
+        longestStreak = Math.max(longestStreak, streak);
+
+        const lastDay = sortedDays[sortedDays.length - 1];
+        currentStreak = (lastDay === today || lastDay === yesterday) ? streak : 0;
+
         setStats({
           totalVisits: data.length,
           firstVisit: data[0].checked_in_at,
           lastVisit: data[data.length - 1].checked_in_at,
           seasonsCovered: seasons,
           seasonPercent: Math.round((seasons.length / ALL_SEASONS.length) * 100),
+          currentStreak,
+          longestStreak,
         });
       });
   }, [treeId, userId]);
