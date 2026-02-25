@@ -5,6 +5,8 @@ import {
   TreeDeciduous, Gift, Heart, Music, Sprout, Archive,
   Star, Loader2, Wand2
 } from "lucide-react";
+import JourneyBridge from "@/components/JourneyBridge";
+import JourneyStatusBar from "@/components/JourneyStatusBar";
 import type { TetolLevel } from "@/contexts/TetolLevelContext";
 
 interface TimelineEvent {
@@ -118,6 +120,9 @@ const PersonalLegend = ({ userId }: PersonalLegendProps) => {
 
   return (
     <div className="space-y-8">
+      {/* Journey status — persistent identity bar */}
+      <JourneyStatusBar className="justify-center" />
+
       <div className="text-center mb-6">
         <h2 className="font-serif text-lg text-primary tracking-wider mb-1">Personal Legend</h2>
         <p className="text-xs text-muted-foreground/60 font-serif">{events.length} chapters written</p>
@@ -189,6 +194,9 @@ const PersonalLegend = ({ userId }: PersonalLegendProps) => {
           </div>
         </div>
       ))}
+
+      {/* Journey Bridge → next step */}
+      <JourneyBridge current="hearth" hasStaff={events.some(e => e.type === "ceremony")} />
     </div>
   );
 };
