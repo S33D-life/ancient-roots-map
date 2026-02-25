@@ -52,7 +52,7 @@ interface Proposal {
 const EARN_ACTIONS = [
   {
     icon: MapPin, label: "Map a Tree", hearts: 10, cooldown: "No limit",
-    guard: "GPS required", link: "/map?addTree=true",
+    guard: "GPS required", link: "/add-tree",
     desc: "+1 bonus for photo offering",
   },
   {

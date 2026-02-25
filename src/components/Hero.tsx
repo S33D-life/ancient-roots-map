@@ -350,7 +350,7 @@ const Hero = () => {
               </Link>
             </Button>
             <Button variant="sacred" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
-              <Link to="/map?addTree=true">
+              <Link to="/add-tree">
                 <TreeDeciduous className="w-5 h-5 mr-2" />
                 Claim a Tree Encounter
               </Link>
