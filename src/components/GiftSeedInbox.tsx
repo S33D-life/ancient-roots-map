@@ -47,6 +47,18 @@ const GiftSeedInbox = ({ userId }: GiftSeedInboxProps) => {
       console.error("Heart tx error:", error);
     }
 
+    // Record referral for direct gifts (invite-code gifts handled by DB trigger)
+    if (gift.sender_id && !gift.invite_code) {
+      await supabase.from("referrals").insert({
+        inviter_id: gift.sender_id,
+        invitee_id: userId,
+      }).then(({ error: refErr }) => {
+        if (refErr && !refErr.message.includes("duplicate")) {
+          console.error("Referral error:", refErr);
+        }
+      });
+    }
+
     setJustActivated(prev => new Set(prev).add(gift.id));
     setActivating(null);
     toast(`🌱 +${gift.seeds_count} S33D Heart${gift.seeds_count > 1 ? "s" : ""} sprouted from gift!`);

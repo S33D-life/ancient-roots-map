@@ -35,6 +35,7 @@ import TreeSourcesDisplay from "@/components/TreeSourcesDisplay";
 import CanopyCheckinModal from "@/components/CanopyCheckinModal";
 import CanopyVisitsTimeline from "@/components/CanopyVisitsTimeline";
 import TreeMarkets from "@/components/TreeMarkets";
+import StewardshipLeaderboard from "@/components/StewardshipLeaderboard";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -389,6 +390,9 @@ const TreeDetailPage = () => {
             delay={1200}
           />
         </div>
+
+        {/* Stewardship Leaderboard */}
+        <StewardshipLeaderboard treeId={id!} />
 
         {/* Cycle Markets for this tree */}
         <TreeMarkets treeId={id!} treeSpecies={tree.species} />
