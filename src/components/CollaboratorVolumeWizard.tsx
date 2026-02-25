@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, BookOpen, Lock, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, BookOpen, Lock, Sparkles, Link, Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WizardProps {
   open: boolean;
@@ -26,6 +27,8 @@ export interface WizardData {
   resonance_map: string;
   divergence_map: string;
   integration_intent: string;
+  document_url: string;
+  document_file_url: string;
 }
 
 const STEPS = [
@@ -49,6 +52,9 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [themeInput, setThemeInput] = useState("");
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<WizardData>({
     collaborator_name: "",
     collaborator_project: "",
@@ -59,6 +65,8 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
     resonance_map: "",
     divergence_map: "",
     integration_intent: "exploring",
+    document_url: "",
+    document_file_url: "",
   });
 
   const update = (field: keyof WizardData, value: any) =>
@@ -81,6 +89,27 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
     return true;
   };
 
+  const handleFileUpload = async (file: File) => {
+    setUploadingFile(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const uid = session?.session?.user?.id;
+      if (!uid) { toast.error("Please sign in first"); return; }
+      const ext = file.name.split(".").pop() || "pdf";
+      const path = `${uid}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("collaborator-files").upload(path, file);
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from("collaborator-files").getPublicUrl(path);
+      update("document_file_url", urlData.publicUrl);
+      setSelectedFileName(file.name);
+      toast.success("File uploaded");
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
@@ -92,7 +121,9 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
         collaborator_name: "", collaborator_project: "", document_title: "",
         document_version: "1.0", themes: [], essence_summary: "",
         resonance_map: "", divergence_map: "", integration_intent: "exploring",
+        document_url: "", document_file_url: "",
       });
+      setSelectedFileName("");
       setStep(0);
       onClose();
     } catch {
@@ -196,6 +227,58 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
                     ))}
                   </div>
                 </div>
+
+                {/* Document Attachment */}
+                <div className="space-y-2">
+                  <Label className="font-serif text-xs">Attach Document</Label>
+                  <p className="text-[10px] text-muted-foreground font-serif">
+                    Add a link or upload a PDF/document file (optional)
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Link className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <Input
+                      value={data.document_url}
+                      onChange={(e) => update("document_url", e.target.value)}
+                      placeholder="https://…"
+                      className="font-serif text-xs flex-1"
+                      type="url"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt,.md"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="font-serif text-xs gap-1.5"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingFile}
+                    >
+                      <Upload className="w-3 h-3" />
+                      {uploadingFile ? "Uploading…" : "Upload file"}
+                    </Button>
+                    {(data.document_file_url || selectedFileName) && (
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-serif">
+                        <FileText className="w-3 h-3" />
+                        <span className="truncate max-w-[140px]">{selectedFileName || "Uploaded"}</span>
+                        <button
+                          onClick={() => { update("document_file_url", ""); setSelectedFileName(""); }}
+                          className="text-destructive hover:text-destructive/80"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </>
             )}
 
@@ -288,6 +371,20 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
                       {data.themes.map((t) => (
                         <Badge key={t} variant="outline" className="text-[10px] font-serif">{t}</Badge>
                       ))}
+                    </div>
+                  )}
+                  {(data.document_url || data.document_file_url) && (
+                    <div className="flex items-center gap-1.5 pt-1 text-[10px] text-muted-foreground">
+                      {data.document_url && (
+                        <span className="flex items-center gap-1 font-serif">
+                          <Link className="w-3 h-3" /> Link attached
+                        </span>
+                      )}
+                      {data.document_file_url && (
+                        <span className="flex items-center gap-1 font-serif">
+                          <FileText className="w-3 h-3" /> File uploaded
+                        </span>
+                      )}
                     </div>
                   )}
                   <div className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">

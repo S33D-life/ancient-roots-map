@@ -437,7 +437,9 @@ export type Database = {
           collaborator_project: string | null
           created_at: string
           divergence_map: string | null
+          document_file_url: string | null
           document_title: string
+          document_url: string | null
           document_version: string | null
           essence_summary: string | null
           experiment_status: string
@@ -462,7 +464,9 @@ export type Database = {
           collaborator_project?: string | null
           created_at?: string
           divergence_map?: string | null
+          document_file_url?: string | null
           document_title: string
+          document_url?: string | null
           document_version?: string | null
           essence_summary?: string | null
           experiment_status?: string
@@ -487,7 +491,9 @@ export type Database = {
           collaborator_project?: string | null
           created_at?: string
           divergence_map?: string | null
+          document_file_url?: string | null
           document_title?: string
+          document_url?: string | null
           document_version?: string | null
           essence_summary?: string | null
           experiment_status?: string
