@@ -8,12 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus } from "lucide-react";
+import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus, Users, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import maplibregl from "maplibre-gl";
 import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
 import OfferingCelebration from "@/components/OfferingCelebration";
+import NearbyTreesSheet from "@/components/NearbyTreesSheet";
+import CanopyCheckinModal from "@/components/CanopyCheckinModal";
 
 interface AddTreeDialogProps {
   open: boolean;
@@ -61,6 +63,12 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [photoDate, setPhotoDate] = useState<string | null>(null);
   const [droppedPhotoFile, setDroppedPhotoFile] = useState<File | null>(null);
   const [uploadingOffering, setUploadingOffering] = useState(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [nearbySheetOpen, setNearbySheetOpen] = useState(false);
+  const [checkinModalOpen, setCheckinModalOpen] = useState(false);
+  const [checkinTreeData, setCheckinTreeData] = useState<{ id: string; name: string; species: string; latitude: number; longitude: number } | null>(null);
+  const [showDuplicateGuard, setShowDuplicateGuard] = useState(false);
+  const [duplicateTree, setDuplicateTree] = useState<{ id: string; name: string; distanceM: number } | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const dragCounter = useRef(0);
@@ -250,11 +258,14 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       return;
     }
     setFindingMe(true);
+    setGpsAccuracy(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setFindingMe(false);
         const foundLat = pos.coords.latitude;
         const foundLng = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy;
+        setGpsAccuracy(Math.round(accuracy));
         startAdjustMode(foundLat, foundLng);
         fetchWhat3words(foundLat, foundLng);
       },
@@ -413,6 +424,43 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     if (file) handlePhotoDrop(file);
   }, [handlePhotoDrop]);
 
+  // Check for nearby duplicates before creating
+  const checkForDuplicates = useCallback(async (): Promise<boolean> => {
+    if (lat === null || lng === null) return false;
+    const DUPLICATE_RADIUS_M = 25;
+    const degLat = DUPLICATE_RADIUS_M / 110540;
+    const degLng = DUPLICATE_RADIUS_M / (111320 * Math.cos((lat * Math.PI) / 180));
+    try {
+      const { data } = await supabase
+        .from("trees")
+        .select("id, name, latitude, longitude")
+        .gte("latitude", lat - degLat)
+        .lte("latitude", lat + degLat)
+        .gte("longitude", lng - degLng)
+        .lte("longitude", lng + degLng)
+        .limit(5);
+
+      if (data && data.length > 0) {
+        const closest = data
+          .filter((t) => t.latitude != null && t.longitude != null)
+          .map((t) => ({
+            ...t,
+            distanceM: getDistance(lat, lng, t.latitude!, t.longitude!),
+          }))
+          .sort((a, b) => a.distanceM - b.distanceM)[0];
+
+        if (closest && closest.distanceM <= DUPLICATE_RADIUS_M) {
+          setDuplicateTree({ id: closest.id, name: closest.name, distanceM: Math.round(closest.distanceM) });
+          setShowDuplicateGuard(true);
+          return true;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return false;
+  }, [lat, lng]);
+
   const handleSubmit = async () => {
     if (!species.trim()) {
       toast({ title: "Missing fields", description: "Please fill in species", variant: "destructive" });
@@ -420,6 +468,15 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
     setLoading(true);
     try {
+      // Duplicate guard
+      if (!showDuplicateGuard) {
+        const hasDuplicate = await checkForDuplicates();
+        if (hasDuplicate) {
+          setLoading(false);
+          return; // Wait for user decision
+        }
+      }
+      setShowDuplicateGuard(false);
       const { data: { user } } = await supabase.auth.getUser();
 
       // If not logged in, store tree data and redirect to auth
@@ -695,6 +752,38 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 <Button type="button" variant="outline" className="w-full gap-2 font-serif" onClick={handleFindMe} disabled={findingMe}>
                   {findingMe ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
                   Find Me — Use My Location
+                </Button>
+
+                {/* GPS accuracy indicator */}
+                {gpsAccuracy !== null && (
+                  <div className="flex items-center gap-2 text-xs rounded-lg px-3 py-2" style={{
+                    background: gpsAccuracy <= 15 ? 'hsla(120, 30%, 20%, 0.3)' : 'hsla(42, 30%, 20%, 0.3)',
+                    border: `1px solid ${gpsAccuracy <= 15 ? 'hsla(120, 30%, 30%, 0.3)' : 'hsla(42, 40%, 30%, 0.3)'}`,
+                  }}>
+                    <div className="w-2 h-2 rounded-full" style={{
+                      background: gpsAccuracy <= 15 ? 'hsl(120, 50%, 50%)' : gpsAccuracy <= 30 ? 'hsl(42, 80%, 55%)' : 'hsl(0, 60%, 55%)',
+                      boxShadow: `0 0 6px ${gpsAccuracy <= 15 ? 'hsla(120, 50%, 50%, 0.5)' : gpsAccuracy <= 30 ? 'hsla(42, 80%, 55%, 0.5)' : 'hsla(0, 60%, 55%, 0.5)'}`,
+                    }} />
+                    <span className="font-serif text-muted-foreground">
+                      GPS accuracy ~{gpsAccuracy}m
+                      {gpsAccuracy > 20 && " · Drag pin for precision"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Check in to existing tree */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2 font-serif text-xs"
+                  style={{
+                    borderColor: 'hsla(120, 40%, 35%, 0.3)',
+                    color: 'hsl(120, 45%, 55%)',
+                  }}
+                  onClick={() => setNearbySheetOpen(true)}
+                >
+                  <Users className="h-4 w-4" />
+                  Check in to an already mapped tree
                 </Button>
 
                 <div className="space-y-2">
@@ -980,7 +1069,102 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
             50% { box-shadow: 0 0 20px hsla(42, 80%, 50%, 0.4); }
           }
         `}</style>
+        {/* Duplicate guard overlay */}
+        <AnimatePresence>
+          {showDuplicateGuard && duplicateTree && (
+            <motion.div
+              className="absolute inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm rounded-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="mx-6 p-5 rounded-xl max-w-sm" style={{
+                background: 'linear-gradient(135deg, hsla(30, 25%, 12%, 0.98), hsla(25, 20%, 8%, 0.98))',
+                border: '1px solid hsla(42, 50%, 35%, 0.4)',
+              }}>
+                <div className="flex items-start gap-3 mb-4">
+                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                  <div>
+                    <p className="font-serif text-sm" style={{ color: 'hsl(42, 75%, 65%)' }}>
+                      An Ancient Friend may already be mapped here
+                    </p>
+                    <p className="font-serif text-xs text-muted-foreground mt-1">
+                      "{duplicateTree.name}" is {duplicateTree.distanceM}m away. Would you like to check in instead?
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1 text-xs font-serif"
+                    style={{
+                      background: 'linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))',
+                      color: 'hsl(120, 50%, 65%)',
+                      border: '1px solid hsla(120, 40%, 35%, 0.4)',
+                    }}
+                    onClick={() => {
+                      setShowDuplicateGuard(false);
+                      navigate(`/tree/${encodeURIComponent(duplicateTree.id)}`);
+                      onOpenChange(false);
+                    }}
+                  >
+                    <MapPin className="w-3 h-3 mr-1" /> Check In Instead
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-xs font-serif"
+                    onClick={() => {
+                      setShowDuplicateGuard(false);
+                      handleSubmit();
+                    }}
+                  >
+                    Create Anyway
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </DialogContent>
+
+      {/* Nearby trees sheet for check-in */}
+      <NearbyTreesSheet
+        open={nearbySheetOpen}
+        onOpenChange={setNearbySheetOpen}
+        userLat={lat}
+        userLng={lng}
+        onSelectTree={(tree) => {
+          setNearbySheetOpen(false);
+          setCheckinTreeData({
+            id: tree.id,
+            name: tree.name,
+            species: tree.species,
+            latitude: tree.latitude,
+            longitude: tree.longitude,
+          });
+          setCheckinModalOpen(true);
+        }}
+      />
+
+      {/* Canopy check-in modal */}
+      {checkinTreeData && (
+        <CanopyCheckinModal
+          open={checkinModalOpen}
+          onOpenChange={(v) => {
+            setCheckinModalOpen(v);
+            if (!v) {
+              onOpenChange(false);
+              navigate(`/tree/${encodeURIComponent(checkinTreeData.id)}`);
+            }
+          }}
+          treeId={checkinTreeData.id}
+          treeName={checkinTreeData.name}
+          treeSpecies={checkinTreeData.species}
+          treeLat={checkinTreeData.latitude}
+          treeLng={checkinTreeData.longitude}
+        />
+      )}
     </Dialog>
   );
 };
