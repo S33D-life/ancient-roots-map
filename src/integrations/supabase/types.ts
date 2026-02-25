@@ -530,6 +530,42 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_seeds: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          hearts_earned: number | null
+          id: string
+          invite_code: string | null
+          message: string | null
+          recipient_id: string | null
+          seeds_count: number
+          sender_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          hearts_earned?: number | null
+          id?: string
+          invite_code?: string | null
+          message?: string | null
+          recipient_id?: string | null
+          seeds_count?: number
+          sender_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          hearts_earned?: number | null
+          id?: string
+          invite_code?: string | null
+          message?: string | null
+          recipient_id?: string | null
+          seeds_count?: number
+          sender_id?: string
+        }
+        Relationships: []
+      }
       greenhouse_plants: {
         Row: {
           created_at: string
@@ -866,6 +902,54 @@ export type Database = {
           {
             foreignKeyName: "market_resolutions_resolved_outcome_id_fkey"
             columns: ["resolved_outcome_id"]
+            isOneToOne: false
+            referencedRelation: "market_outcomes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_seed_stakes: {
+        Row: {
+          hearts_earned: number | null
+          id: string
+          market_id: string
+          outcome_id: string
+          resolved_at: string | null
+          seeds_count: number
+          staked_at: string
+          user_id: string
+        }
+        Insert: {
+          hearts_earned?: number | null
+          id?: string
+          market_id: string
+          outcome_id: string
+          resolved_at?: string | null
+          seeds_count?: number
+          staked_at?: string
+          user_id: string
+        }
+        Update: {
+          hearts_earned?: number | null
+          id?: string
+          market_id?: string
+          outcome_id?: string
+          resolved_at?: string | null
+          seeds_count?: number
+          staked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_seed_stakes_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_seed_stakes_outcome_id_fkey"
+            columns: ["outcome_id"]
             isOneToOne: false
             referencedRelation: "market_outcomes"
             referencedColumns: ["id"]

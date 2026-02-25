@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
@@ -9,7 +9,10 @@ import { useMarkets } from "@/hooks/use-markets";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Search, Flame, TreePine, Leaf, Globe, TrendingUp, Settings2 } from "lucide-react";
+import { Loader2, Plus, Search, Flame, TreePine, Leaf, Globe, TrendingUp, Settings2, Sprout, Gift } from "lucide-react";
+import GiftSeedSender from "@/components/GiftSeedSender";
+import { useMarketSeeds } from "@/hooks/use-market-seeds";
+import { supabase } from "@/integrations/supabase/client";
 
 const SEASONAL_PULSE = [
   { month: "February", highlight: "Snowdrops blooming · Hazel catkins releasing · Blackbirds singing at dusk" },
@@ -24,6 +27,13 @@ const CycleMarketsPage = () => {
   const [tab, setTab] = useState("featured");
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  const { marketSeedsRemaining, giftSeedsRemaining } = useMarketSeeds(userId);
 
   const { markets: openMarkets, loading: loadingOpen, refetch } = useMarkets({ status: "open" });
   const { markets: resolvedMarkets, loading: loadingResolved } = useMarkets({ status: "resolved" });
@@ -68,8 +78,18 @@ const CycleMarketsPage = () => {
                 <span className="text-xs font-serif text-muted-foreground border border-border/40 px-2 py-0.5 rounded-full">Phase 1</span>
               </div>
               <p className="text-xs font-serif text-muted-foreground max-w-md">
-                Predict natural-cycle outcomes. Stake S33D Hearts. Fund local grove projects.
+                Predict natural-cycle outcomes. Stake seeds. Fund local grove projects.
               </p>
+              {userId && (
+                <div className="flex items-center gap-3 mt-1.5">
+                  <span className="text-[11px] font-serif text-muted-foreground flex items-center gap-1">
+                    <Sprout className="w-3 h-3 text-primary" /> {marketSeedsRemaining} market seeds
+                  </span>
+                  <span className="text-[11px] font-serif text-muted-foreground flex items-center gap-1">
+                    <Gift className="w-3 h-3 text-primary" /> {giftSeedsRemaining} gift seeds
+                  </span>
+                </div>
+              )}
             </div>
             <div className="md:text-right">
               <p className="text-[10px] font-serif text-muted-foreground uppercase tracking-wider mb-0.5">Seasonal Pulse · {currentMonth}</p>
@@ -91,6 +111,7 @@ const CycleMarketsPage = () => {
               className="pl-9 font-serif text-sm h-9"
             />
           </div>
+          <GiftSeedSender />
           <Button
             onClick={() => setCreateOpen(true)}
             className="font-serif text-xs gap-1.5 h-9 shrink-0"
@@ -160,8 +181,8 @@ const CycleMarketsPage = () => {
           transition={{ delay: 0.8 }}
           className="text-center text-[11px] text-muted-foreground font-serif mt-12 max-w-md mx-auto"
         >
-          🌿 All markets use in-app S33D Hearts only — not real money. Nature cycles &amp; local ecology only.
-          A portion of every market routes to local grove funds and research.
+          🌿 Stake seeds to predict nature's cycles — seeds sprout into hearts when markets resolve.
+          Winners share the seed pool. A portion routes to local grove funds and research.
         </motion.p>
       </div>
 

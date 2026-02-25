@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays } from "lucide-react";
+import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,13 @@ const councilRooms = [
     comingSoon: true,
   },
   {
+    id: "markets",
+    title: "Cycle Markets",
+    description: "Stake seeds on nature's predictions",
+    icon: BarChart3,
+    internalUrl: "/markets",
+  },
+  {
     id: "next",
     title: "Next Council",
     description: "Upcoming council dates and details",
@@ -45,6 +53,7 @@ const councilRooms = [
 ];
 
 const CouncilOfLifePage = () => {
+  const navigate = useNavigate();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
@@ -159,6 +168,8 @@ const CouncilOfLifePage = () => {
                   onClick={() => {
                     if (isComingSoon) {
                       setPodModalOpen(true);
+                    } else if ('internalUrl' in room && room.internalUrl) {
+                      navigate(room.internalUrl);
                     } else if ('externalUrl' in room && room.externalUrl) {
                       window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
                     } else {
