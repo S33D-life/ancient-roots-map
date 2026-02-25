@@ -52,13 +52,15 @@ const HivesIndexPage = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [treesRes, heartsRes] = await Promise.all([
+      const [treesRes, heartsRes, researchRes] = await Promise.all([
         supabase.from("trees").select("id, name, species, nation, created_by, created_at").order("created_at", { ascending: false }),
         supabase.from("species_heart_transactions").select("species_family, amount"),
+        supabase.from("research_trees").select("id, tree_name, species_common, species_scientific, country, created_at").order("created_at", { ascending: false }).limit(1000),
       ]);
 
       const trees = treesRes.data || [];
       const hearts = heartsRes.data || [];
+      const researchTrees = researchRes.data || [];
 
       const heartsByFamily: Record<string, number> = {};
       hearts.forEach(h => {
@@ -66,13 +68,29 @@ const HivesIndexPage = () => {
       });
 
       const stats: Record<string, HiveStats> = {};
-      const hiveTreeMap: Record<string, typeof trees> = {};
+      const hiveTreeMap: Record<string, { id: string; name: string; species: string; nation: string | null; created_by: string | null }[]> = {};
 
+      // Map user trees
       trees.forEach(t => {
         const hive = getHiveForSpecies(t.species);
         if (!hive) return;
         if (!hiveTreeMap[hive.family]) hiveTreeMap[hive.family] = [];
         hiveTreeMap[hive.family].push(t);
+      });
+
+      // Map research trees (use species_common or species_scientific for matching)
+      researchTrees.forEach(rt => {
+        const speciesName = rt.species_common || rt.species_scientific;
+        const hive = getHiveForSpecies(speciesName);
+        if (!hive) return;
+        if (!hiveTreeMap[hive.family]) hiveTreeMap[hive.family] = [];
+        hiveTreeMap[hive.family].push({
+          id: rt.id,
+          name: rt.tree_name || speciesName,
+          species: speciesName,
+          nation: rt.country,
+          created_by: null,
+        });
       });
 
       for (const [family, hiveTrees] of Object.entries(hiveTreeMap)) {
