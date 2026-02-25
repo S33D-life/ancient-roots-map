@@ -102,6 +102,13 @@ interface WishlistItem {
 
 const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger", "vault", "archive"];
 
+// Friendly URL aliases so links like /library/ancient-friends resolve correctly
+const ROOM_ALIASES: Record<string, string> = {
+  "ancient-friends": "gallery",
+  "resources": "tree-resources",
+  "wishing-tree": "wishlist",
+};
+
 /** Collective Vault card for DAOs */
 const CollectiveVaultCard = ({ name, description, members, hearts, slug }: { name: string; description: string; members: number; hearts: number; slug: string }) => (
   <div className="rounded-xl border border-border/30 p-4 space-y-2" style={{ background: 'linear-gradient(135deg, hsl(28 20% 14% / 0.8), hsl(22 18% 11% / 0.9))' }}>
@@ -187,7 +194,8 @@ const GalleryPage = () => {
   const [searchParams] = useSearchParams();
   const { room: roomPathParam } = useParams<{ room?: string }>();
   const navigate = useNavigate();
-  const roomParam = (roomPathParam && VALID_ROOMS.includes(roomPathParam)) ? roomPathParam : searchParams.get("room");
+  const resolvedRoom = roomPathParam ? (ROOM_ALIASES[roomPathParam] || roomPathParam) : null;
+  const roomParam = (resolvedRoom && VALID_ROOMS.includes(resolvedRoom)) ? resolvedRoom : searchParams.get("room");
   const { showEntrance: showSplash, dismissEntrance: dismissSplash } = useEntranceOnce("gallery", !roomParam);
   const [showLanding, setShowLanding] = useState(!roomParam);
   const [activeTab, setActiveTab] = useState<string>(roomParam || "staff-room");
