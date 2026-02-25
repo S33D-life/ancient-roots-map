@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
+import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
 import { SLUG_MAP } from "@/config/countryRegistry";
 
 /* ─── Types ─── */
@@ -290,7 +292,8 @@ const CountryPortalPage = () => {
 
   return (
     <PageShell>
-      <div className="min-h-screen pb-24">
+      <Header />
+      <div className="min-h-screen pb-24 pt-16">
         {/* ─── A) Hero ─── */}
         <section className="relative px-4 pt-12 pb-8 text-center">
           <motion.div
@@ -521,6 +524,7 @@ const CountryPortalPage = () => {
           </div>
         </section>
       </div>
+      <BottomNav />
     </PageShell>
   );
 };
