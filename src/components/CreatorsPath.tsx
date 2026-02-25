@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import creatorsPathBg from "@/assets/creators-path-bg.jpeg";
+import JourneyBridge from "@/components/JourneyBridge";
+import JourneyStatusBar from "@/components/JourneyStatusBar";
 import type { CachedStaff } from "@/hooks/use-wallet";
 
 interface CreatorsPathProps {
@@ -97,6 +99,8 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
 
   return (
     <div className="space-y-10">
+      {/* Journey status bar */}
+      <JourneyStatusBar className="justify-center" />
       {/* Hero Banner */}
       <div className="relative rounded-xl overflow-hidden h-64 md:h-80">
         <img src={creatorsPathBg} alt="Creator's Paradise Path" className="absolute inset-0 w-full h-full object-cover" />
@@ -219,6 +223,9 @@ const CreatorsPath = ({ userId, activeStaff }: CreatorsPathProps) => {
           </div>
         </div>
       )}
+
+      {/* Journey Bridge → next step */}
+      <JourneyBridge current="path" hasStaff={!!activeStaff} />
     </div>
   );
 };

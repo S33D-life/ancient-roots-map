@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import JourneyBridge from "@/components/JourneyBridge";
 import { useNavigate as useRouterNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -776,6 +777,11 @@ export default function StaffRoomGallery() {
           </div>
         </div>
       )}
+
+      {/* Journey Bridge — threading to Map Room */}
+      <div className="max-w-3xl mx-auto px-4">
+        <JourneyBridge current="staff" hasStaff={hasLinkedStaff} />
+      </div>
     </>
   );
 }
