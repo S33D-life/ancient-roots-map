@@ -294,11 +294,11 @@ const CountryPortalPage = () => {
 
   const handleMapNavigate = (tree: ResearchTree) => {
     if (tree.latitude && tree.longitude) {
-      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&research=on`);
+      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&country=${countrySlug}&origin=atlas`);
     }
   };
 
-  const openMapLayer = () => navigate("/map?research=on");
+  const openMapLayer = () => navigate(`/map?country=${countrySlug}&origin=atlas`);
 
   return (
     <PageShell>
