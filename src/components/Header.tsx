@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon, Wand2, Music, Sprout, ScrollText, TreePine, Palette, Lock } from "lucide-react";
+import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon, Wand2, Music, Sprout, ScrollText, TreePine, Palette, Lock, BarChart3 } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
@@ -281,58 +281,83 @@ const Header = () => {
               <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                 <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[200px]" style={{ background: 'hsl(var(--popover))' }}>
                   <Link to="/library" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <TreeDeciduous className="w-4 h-4 shrink-0" />
-                    <span>Ancient Friends</span>
+                    <Heart className="w-4 h-4 shrink-0" />
+                    <span>The Hearth</span>
                   </Link>
+                  <Link to="/dashboard?tab=activity" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <BarChart3 className="w-4 h-4 shrink-0" />
+                    <span>Activity</span>
+                  </Link>
+                  <Link to="/vault" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Lock className="w-4 h-4 shrink-0" />
+                    <span>Heartwood Vault</span>
+                  </Link>
+                  <div className="my-1 mx-2 h-px" style={{ background: 'hsl(var(--border) / 0.3)' }} />
                   <Link to="/library/staff-room" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Wand2 className="w-4 h-4 shrink-0" />
                     <span>Staff Room</span>
                   </Link>
-                  <Link to="/library/wishing-tree" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Sparkles className="w-4 h-4 shrink-0" />
-                    <span>Wishing Tree</span>
+                  <Link to="/library/gallery" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <TreeDeciduous className="w-4 h-4 shrink-0" />
+                    <span>Ancient Friends</span>
                   </Link>
                   <Link to="/library/music-room" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Music className="w-4 h-4 shrink-0" />
                     <span>Music Room</span>
                   </Link>
-                  <Link to="/library/seed-cellar" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Sprout className="w-4 h-4 shrink-0" />
-                    <span>Seed Cellar</span>
-                  </Link>
-                  <Link to="/library/greenhouse" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Leaf className="w-4 h-4 shrink-0" />
-                    <span>Greenhouse</span>
-                  </Link>
-                  <Link to="/library/creators-path" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Palette className="w-4 h-4 shrink-0" />
-                    <span>Creator's Path</span>
-                  </Link>
-                  <Link to="/library/tree-resources" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/library/ledger" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <ScrollText className="w-4 h-4 shrink-0" />
-                    <span>Tree Resources</span>
-                  </Link>
-                  <Link to="/vault" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Lock className="w-4 h-4 shrink-0" />
-                    <span>Vault</span>
+                    <span>Scrolls & Records</span>
                   </Link>
                 </div>
               </div>
             </div>
-            <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Leaf className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
+            <div className="relative group">
+              <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+                <Leaf className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+                <div className="flex flex-col leading-tight">
+                  <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
+                  <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
+                </div>
+              </Link>
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
+                  <Link to="/council-of-life" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Leaf className="w-4 h-4 shrink-0" />
+                    <span>Council Portal</span>
+                  </Link>
+                  <Link to="/cycle-markets" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <BarChart3 className="w-4 h-4 shrink-0" />
+                    <span>Cycle Markets</span>
+                  </Link>
+                  <Link to="/value-tree" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <TreeDeciduous className="w-4 h-4 shrink-0" />
+                    <span>Value Tree</span>
+                  </Link>
+                </div>
               </div>
-            </Link>
-            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
+            </div>
+            <div className="relative group">
+              <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+                <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+                <div className="flex flex-col leading-tight">
+                  <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
+                  <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
+                </div>
+              </Link>
+              <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
+                  <Link to="/golden-dream" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Sparkles className="w-4 h-4 shrink-0" />
+                    <span>Vision</span>
+                  </Link>
+                  <Link to="/docs" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <ScrollText className="w-4 h-4 shrink-0" />
+                    <span>Rewards Guide</span>
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </div>
           </nav>
 
           <div className="flex items-center gap-2">

@@ -61,35 +61,51 @@ One minor improvement: ensure the `AddTreeDialog` and `AddOfferingDialog` compon
 
 ### 1. Site Map
 
+### 1. TETOL Navigation Architecture
+
 ```
-/                   → S33D Home (landing)
-/auth               → Auth (login/signup)
-/map                → Ancient Friends Atlas (roots)
-/library            → Heartwood Library (trunk)
-  /library/vault    → IAM Heartwood Vault
-/dashboard          → Hearth (personal hub)
-  Tab: Legend       → Personal timeline
-  Tab: Activity     → Living activity dashboard ← NEW
-  Tab: yOur Pod     → Trees, wishlist, greenhouse, vault
-  Tab: Search       → Global grove search
-  Tab: Hearts       → Heart economy summary
-  Tab: Fellowship   → Wanderers & leaderboard
-  Tab: Settings     → Profile, identity, sign out
-/council            → Council of Life (canopy)
-/golden-dream       → yOur Golden Dream (crown)
-/hives              → Species Hives index
-/hive/:slug         → Individual hive
-/cycle-markets      → Prediction markets
-/docs               → Rewards guide
-/value-tree         → Value Tree governance
+TETOL — 4 Levels Only
+═══════════════════════════════════════════════
+
+1. ROOTS (Ancient Friends Atlas) → /map
+   ├── Map (full atlas)
+   ├── Countries (World Atlas) → /atlas, /atlas/:country
+   ├── Species Hives → /hives, /hive/:slug
+   ├── Tree Filters & Layers (Living Layers sidebar)
+   ├── Add Tree (map center button)
+   └── Cycle Progress (map indicators)
+
+2. TRUNK (Heartwood Library) → /library
+   ├── The Hearth (opening narrative + CTAs)
+   ├── Heartwood Vault (Hearts economy) → /vault
+   ├── Activity Dashboard → /dashboard?tab=activity
+   ├── Staff Room → /library/staff-room
+   ├── Map Room (Ancient Friends gallery) → /library/gallery
+   ├── Music Room → /library/music-room
+   ├── Scrolls & Records (Ledger) → /library/ledger
+   ├── Greenhouse → /library/greenhouse
+   ├── Wishing Tree → /library/wishlist
+   ├── Seed Cellar → /library/seed-cellar
+   ├── Creator's Path → /library/creators-path
+   └── Tree Resources → /library/tree-resources
+
+3. CANOPY (Council of Life) → /council-of-life
+   ├── Council Portal (upcoming, attendance rewards)
+   ├── Cycle Markets → /cycle-markets
+   └── Value Tree (governance) → /value-tree
+
+4. CROWN (yOur Golden Dream) → /golden-dream
+   ├── Vision & Blueprint
+   ├── Rewards Guide → /docs
+   └── Archives
 ```
 
 ### 2. Global Navigation Structure
 
-- **Header**: Logo → Home | HeARTwood dropdown | Heart count | Profile avatar
-- **BottomNav** (mobile 4-tab): Atlas | Library | Hearth | Council
-- **HeARTwood dropdown**: All library rooms + Vault link
-- **Hearth tabs**: Legend | Activity | yOur Pod | Search | Hearts | Fellowship | Settings
+- **Header (desktop)**: 4 TETOL links with hover dropdowns | S33D logo (TETOL menu) | Heart count | Profile
+- **BottomNav (mobile)**: Roots | Trunk | Canopy | Crown (4 tabs only)
+- **TETOL Menu (⌘K)**: Full tree visualization with search
+- **Hearth tabs** (within Trunk): Legend | Activity | yOur Pod | Search | Hearts | Fellowship | Settings
 
 ### 3. Activity Dashboard (Living Layer) — Sections
 
