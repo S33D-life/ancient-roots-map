@@ -318,9 +318,17 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-center">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Branding title */}
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
+            The Living Atlas of<br />Ancient Friends
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            Mapping the world's most storied trees — one encounter at a time.
+          </p>
+
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-2">
             <AnimatedCounter target={stats.trees} label="Ancient Trees" />
             <AnimatedCounter target={stats.species} label="Species Mapped" />
             <AnimatedCounter target={stats.nations} label="Nations" />
