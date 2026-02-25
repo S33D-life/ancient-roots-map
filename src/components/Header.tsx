@@ -283,7 +283,7 @@ const Header = () => {
             </Link>
               <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
                 <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[200px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/library" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Heart className="w-4 h-4 shrink-0" />
                     <span>The Hearth</span>
                   </Link>

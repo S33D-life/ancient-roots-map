@@ -221,73 +221,73 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
             }}
           />
 
-          {/* Crown - Golden Dream */}
-          <TreeNode
-            item={treeItems[0]}
-            index={0}
-            visible={visible}
-            onClick={handleItemClick}
-            glowColor="hsl(42 90% 55% / 0.4)"
-            nodeStyle="crown"
+        {/* Crown - Golden Dream (index 3 in array) */}
+        <TreeNode
+          item={treeItems[3]}
+          index={0}
+          visible={visible}
+          onClick={handleItemClick}
+          glowColor="hsl(42 90% 55% / 0.4)"
+          nodeStyle="crown"
+        />
+
+        {/* Branch connectors - canopy */}
+        <BranchLines visible={visible} delay={0.35} side="both" />
+
+        {/* Canopy - Council of Life (index 2 in array) */}
+        <TreeNode
+          item={treeItems[2]}
+          index={1}
+          visible={visible}
+          onClick={handleItemClick}
+          glowColor="hsl(120 40% 40% / 0.3)"
+          nodeStyle="canopy"
+        />
+
+        {/* Trunk - Heartwood Library (index 1 in array) */}
+        <TreeNode
+          item={treeItems[1]}
+          index={2}
+          visible={visible}
+          onClick={handleItemClick}
+          glowColor="hsl(30 40% 35% / 0.3)"
+          nodeStyle="trunk"
+        />
+
+        {/* Root tendrils */}
+        <BranchLines visible={visible} delay={0.65} side="roots" />
+
+        {/* S33D home link — just above the roots */}
+        <button
+          onClick={(e) => handleItemClick("/", e)}
+          className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(10px)",
+            transition: "all 0.5s ease-out 0.7s",
+          }}
+        >
+          <Sprout
+            className="w-6 h-6 transition-all duration-300 group-hover:scale-110"
+            style={{ color: "hsl(var(--primary))" }}
           />
-
-          {/* Branch connectors - canopy */}
-          <BranchLines visible={visible} delay={0.35} side="both" />
-
-          {/* Canopy - Council of Life */}
-          <TreeNode
-            item={treeItems[1]}
-            index={1}
-            visible={visible}
-            onClick={handleItemClick}
-            glowColor="hsl(120 40% 40% / 0.3)"
-            nodeStyle="canopy"
-          />
-
-          {/* Trunk - Heartwood */}
-          <TreeNode
-            item={treeItems[2]}
-            index={2}
-            visible={visible}
-            onClick={handleItemClick}
-            glowColor="hsl(30 40% 35% / 0.3)"
-            nodeStyle="trunk"
-          />
-
-          {/* Root tendrils */}
-          <BranchLines visible={visible} delay={0.65} side="roots" />
-
-          {/* S33D home link — just above the roots */}
-          <button
-            onClick={(e) => handleItemClick("/", e)}
-            className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(10px)",
-              transition: "all 0.5s ease-out 0.7s",
-            }}
+          <span
+            className="font-serif text-xs tracking-[0.3em] uppercase transition-all duration-300 group-hover:tracking-[0.4em]"
+            style={{ color: "hsl(var(--muted-foreground))" }}
           >
-            <Sprout
-              className="w-6 h-6 transition-all duration-300 group-hover:scale-110"
-              style={{ color: "hsl(var(--primary))" }}
-            />
-            <span
-              className="font-serif text-xs tracking-[0.3em] uppercase transition-all duration-300 group-hover:tracking-[0.4em]"
-              style={{ color: "hsl(var(--muted-foreground))" }}
-            >
-              S33D
-            </span>
-          </button>
+            S33D
+          </span>
+        </button>
 
-          {/* Roots - Ancient Friends */}
-          <TreeNode
-            item={treeItems[3]}
-            index={3}
-            visible={visible}
-            onClick={handleItemClick}
-            glowColor="hsl(80 30% 30% / 0.3)"
-            nodeStyle="roots"
-          />
+        {/* Roots - Ancient Friends (index 0 in array) */}
+        <TreeNode
+          item={treeItems[0]}
+          index={3}
+          visible={visible}
+          onClick={handleItemClick}
+          glowColor="hsl(80 30% 30% / 0.3)"
+          nodeStyle="roots"
+        />
         </div>
 
         {/* Close hint */}

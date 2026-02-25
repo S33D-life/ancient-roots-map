@@ -66,7 +66,7 @@ const CycleMarketsPage = () => {
 
       {/* Seasonal Pulse Banner */}
       <div
-        className="border-b border-border/30"
+        className="border-b border-border/30 pt-20"
         style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--accent) / 0.05))" }}
       >
         <div className="container mx-auto px-4 py-5 max-w-5xl">

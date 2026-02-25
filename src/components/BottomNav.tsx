@@ -4,7 +4,7 @@ import { TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/map", icon: TreeDeciduous, label: "Roots", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/"] },
-  { to: "/library", icon: BookOpen, label: "Trunk", matchPrefixes: ["/library", "/vault", "/dashboard"] },
+  { to: "/library", icon: BookOpen, label: "Trunk", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard"] },
   { to: "/council-of-life", icon: Leaf, label: "Canopy", matchPrefixes: ["/council"] },
   { to: "/golden-dream", icon: Sparkles, label: "Crown", matchPrefixes: ["/golden-dream", "/value-tree"] },
 ] as const;

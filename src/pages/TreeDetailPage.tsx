@@ -179,14 +179,20 @@ const TreeDetailPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Link
-          to="/map"
-          className="inline-flex items-center text-muted-foreground hover:text-primary mb-6 font-serif text-sm tracking-wide transition-colors"
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+        <button
+          onClick={() => {
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/map");
+            }
+          }}
+          className="inline-flex items-center text-muted-foreground hover:text-primary mb-6 font-serif text-sm tracking-wide transition-colors bg-transparent border-none cursor-pointer p-0"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Map
-        </Link>
+          Back
+        </button>
 
         {/* Tree Info Card */}
         <div className="relative mb-10 rounded-xl border border-border overflow-hidden bg-card/60 backdrop-blur">

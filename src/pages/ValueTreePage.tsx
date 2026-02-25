@@ -461,7 +461,7 @@ const ValueTreePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
         {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
