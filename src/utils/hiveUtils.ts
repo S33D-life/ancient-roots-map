@@ -28,12 +28,12 @@ const HIVE_META: Record<string, Omit<HiveInfo, "family" | "slug" | "representati
   Rosaceae: { displayName: "Cherry & Rose Hive", description: "Cherries, hawthorns, rowans, and apples — the blossoming lineage.", accentHsl: "340 60% 55%", icon: "🌸" },
   Betulaceae: { displayName: "Birch & Hazel Hive", description: "Birches, hazels, alders, and hornbeams — silver-barked pioneers.", accentHsl: "45 50% 60%", icon: "🍂" },
   Salicaceae: { displayName: "Willow & Poplar Hive", description: "Willows and poplars — guardians of waterways and riverbanks.", accentHsl: "170 45% 40%", icon: "🌿" },
-  Cupressaceae: { displayName: "Cypress & Redwood Hive", description: "Cypresses, junipers, and the towering redwoods — ancient giants.", accentHsl: "160 35% 30%", icon: "🏔️" },
+  Cupressaceae: { displayName: "Cypress & Redwood Hive", description: "Cypresses, junipers, sugi cedars, and the towering redwoods — ancient giants.", accentHsl: "160 35% 30%", icon: "🏔️" },
   Sapindaceae: { displayName: "Maple & Sycamore Hive", description: "Maples, sycamores, and horse chestnuts — the autumn painters.", accentHsl: "15 70% 50%", icon: "🍁" },
   Oleaceae: { displayName: "Ash & Olive Hive", description: "Ashes, olives, and privets — wind-resistant and enduring.", accentHsl: "80 30% 40%", icon: "🫒" },
   Taxaceae: { displayName: "Yew Hive", description: "The ancient yews — guardians of sacred groves and churchyards.", accentHsl: "140 50% 25%", icon: "🌑" },
-  Malvaceae: { displayName: "Lime & Baobab Hive", description: "Limes, lindens, kapoks, and baobabs — heart-leaved giants.", accentHsl: "60 50% 45%", icon: "💛" },
-  Ulmaceae: { displayName: "Elm Hive", description: "The enduring elms — cathedral-crowned survivors.", accentHsl: "90 35% 35%", icon: "🏛️" },
+  Malvaceae: { displayName: "Lime & Baobab Hive", description: "Limes, lindens, kapoks, ceibas, and baobabs — heart-leaved giants.", accentHsl: "60 50% 45%", icon: "💛" },
+  Ulmaceae: { displayName: "Elm & Zelkova Hive", description: "The enduring elms and zelkovas — cathedral-crowned survivors.", accentHsl: "90 35% 35%", icon: "🏛️" },
   Platanaceae: { displayName: "Plane Hive", description: "London planes and oriental planes — urban forest champions.", accentHsl: "40 40% 50%", icon: "🌆" },
   Moraceae: { displayName: "Fig & Banyan Hive", description: "Figs, mulberries, and sacred banyans — the sheltering kin.", accentHsl: "25 55% 40%", icon: "🕌" },
   Magnoliaceae: { displayName: "Magnolia Hive", description: "Magnolias and tulip trees — among the most ancient flowering lineages.", accentHsl: "300 40% 60%", icon: "🪷" },
@@ -41,6 +41,12 @@ const HIVE_META: Record<string, Omit<HiveInfo, "family" | "slug" | "representati
   Juglandaceae: { displayName: "Walnut Hive", description: "Walnuts — noble nut-bearers of temperate forests.", accentHsl: "30 45% 35%", icon: "🥜" },
   Myrtaceae: { displayName: "Eucalyptus & Pohutukawa Hive", description: "Eucalyptus, pohutukawa — fragrant evergreens of the southern hemisphere.", accentHsl: "0 55% 50%", icon: "🔥" },
   Ginkgoaceae: { displayName: "Ginkgo Hive", description: "The sole surviving ginkgo — a living fossil spanning 270 million years.", accentHsl: "50 70% 50%", icon: "🍃" },
+  Fabaceae: { displayName: "Legume Tree Hive", description: "Acacias, rain trees, msasa, and mopane — nitrogen-fixing woodland pillars.", accentHsl: "42 55% 45%", icon: "🌾" },
+  Lauraceae: { displayName: "Camphor & Laurel Hive", description: "Camphor trees, bay laurels — aromatic sentinels of warm forests.", accentHsl: "130 35% 40%", icon: "🍃" },
+  Arecaceae: { displayName: "Palm Hive", description: "Wax palms, moriche palms — towering tropical sentinels.", accentHsl: "110 50% 45%", icon: "🌴" },
+  Bignoniaceae: { displayName: "Trumpet Tree Hive", description: "Jacarandas and trumpet trees — flowering spectacles of the tropics.", accentHsl: "270 50% 55%", icon: "🎺" },
+  Meliaceae: { displayName: "Mahogany & Cedar Hive", description: "Mahoganies, neem, and tropical cedars — noble hardwoods.", accentHsl: "20 50% 35%", icon: "🪵" },
+  Podocarpaceae: { displayName: "Yellowwood Hive", description: "Yellowwoods and totara — ancient southern conifers.", accentHsl: "55 40% 35%", icon: "🏞️" },
 };
 
 function slugify(family: string): string {

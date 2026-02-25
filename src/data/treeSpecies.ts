@@ -216,11 +216,70 @@ const TREE_SPECIES: TreeSpecies[] = [
   { common: "Bald Cypress", scientific: "Taxodium distichum", family: "Cupressaceae", aliases: ["Swamp Cypress"] },
   { common: "Jacaranda", scientific: "Jacaranda mimosifolia", family: "Bignoniaceae" },
   { common: "Flame Tree", scientific: "Delonix regia", family: "Fabaceae", aliases: ["Royal Poinciana"] },
-  { common: "Kapok", scientific: "Ceiba pentandra", family: "Malvaceae" },
+  { common: "Kapok", scientific: "Ceiba pentandra", family: "Malvaceae", aliases: ["Ceiba"] },
   { common: "Moringa", scientific: "Moringa oleifera", family: "Moringaceae", aliases: ["Drumstick Tree"] },
   { common: "Argan", scientific: "Argania spinosa", family: "Sapotaceae" },
   { common: "Frankincense", scientific: "Boswellia sacra", family: "Burseraceae" },
   { common: "Myrrh", scientific: "Commiphora myrrha", family: "Burseraceae" },
+
+  // ── Japanese species ──
+  { common: "Japanese Cedar", scientific: "Cryptomeria japonica", family: "Cupressaceae", aliases: ["Sugi"] },
+  { common: "Hinoki Cypress", scientific: "Chamaecyparis obtusa", family: "Cupressaceae" },
+  { common: "Japanese Beech", scientific: "Fagus crenata", family: "Fagaceae" },
+  { common: "Japanese Zelkova", scientific: "Zelkova serrata", family: "Ulmaceae" },
+  { common: "Japanese Black Pine", scientific: "Pinus thunbergii", family: "Pinaceae" },
+  { common: "Japanese Red Pine", scientific: "Pinus densiflora", family: "Pinaceae" },
+
+  // ── Russian / Siberian species ──
+  { common: "Siberian Larch", scientific: "Larix sibirica", family: "Pinaceae" },
+  { common: "Dahurian Larch", scientific: "Larix gmelinii", family: "Pinaceae" },
+  { common: "Siberian Pine", scientific: "Pinus sibirica", family: "Pinaceae", aliases: ["Siberian Cedar Pine"] },
+  { common: "Siberian Fir", scientific: "Abies sibirica", family: "Pinaceae" },
+  { common: "Erman Birch", scientific: "Betula ermanii", family: "Betulaceae", aliases: ["Stone Birch"] },
+  { common: "Yezo Spruce", scientific: "Picea jezoensis", family: "Pinaceae" },
+  { common: "Korean Pine", scientific: "Pinus koraiensis", family: "Pinaceae" },
+  { common: "Manchurian Elm", scientific: "Ulmus laciniata", family: "Ulmaceae" },
+  { common: "Manchurian Ash", scientific: "Fraxinus mandshurica", family: "Oleaceae" },
+  { common: "Greek Juniper", scientific: "Juniperus excelsa", family: "Cupressaceae" },
+  { common: "Colchic Boxwood", scientific: "Buxus colchica", family: "Buxaceae" },
+
+  // ── Colombian / Tropical species ──
+  { common: "Wax Palm", scientific: "Ceroxylon quindiuense", family: "Arecaceae", aliases: ["Quindío Wax Palm"] },
+  { common: "Rain Tree", scientific: "Samanea saman", family: "Fabaceae", aliases: ["Samán"] },
+  { common: "Trumpet Tree", scientific: "Cecropia peltata", family: "Urticaceae", aliases: ["Yarumo"] },
+  { common: "Colombian Oak", scientific: "Quercus humboldtii", family: "Fagaceae", aliases: ["Andean Oak"] },
+  { common: "Spanish Cedar", scientific: "Cedrela odorata", family: "Meliaceae" },
+  { common: "Mahogany", scientific: "Swietenia macrophylla", family: "Meliaceae", aliases: ["Big-leaf Mahogany"] },
+  { common: "Rubber Tree", scientific: "Hevea brasiliensis", family: "Euphorbiaceae" },
+  { common: "Moriche Palm", scientific: "Mauritia flexuosa", family: "Arecaceae" },
+  { common: "Pink Trumpet Tree", scientific: "Tabebuia rosea", family: "Bignoniaceae" },
+  { common: "Yellow Trumpet Tree", scientific: "Handroanthus chrysanthus", family: "Bignoniaceae", aliases: ["Guayacán Amarillo"] },
+  { common: "Caracolí", scientific: "Anacardium excelsum", family: "Anacardiaceae" },
+  { common: "Ice Cream Bean", scientific: "Inga edulis", family: "Fabaceae", aliases: ["Guamo"] },
+  { common: "Salmwood", scientific: "Cordia alliodora", family: "Boraginaceae", aliases: ["Nogal Cafetero"] },
+  { common: "Paper Bark Tree", scientific: "Polylepis quadrijuga", family: "Rosaceae", aliases: ["Polylepis"] },
+
+  // ── Zimbabwe / African species ──
+  { common: "Sycamore Fig", scientific: "Ficus sycomorus", family: "Moraceae" },
+  { common: "Fever Tree", scientific: "Acacia xanthophloea", family: "Fabaceae" },
+  { common: "Mopane", scientific: "Colophospermum mopane", family: "Fabaceae" },
+  { common: "Msasa", scientific: "Brachystegia spiciformis", family: "Fabaceae" },
+  { common: "Yellowwood", scientific: "Podocarpus latifolius", family: "Podocarpaceae" },
+  { common: "Forest Newtonia", scientific: "Newtonia buchananii", family: "Fabaceae" },
+  { common: "Red Mangrove", scientific: "Rhizophora mangle", family: "Rhizophoraceae" },
+
+  // ── Chinese species ──
+  { common: "Chinese Juniper", scientific: "Juniperus chinensis", family: "Cupressaceae" },
+  { common: "Tibetan Juniper", scientific: "Juniperus tibetica", family: "Cupressaceae" },
+  { common: "Chinese Arborvitae", scientific: "Platycladus orientalis", family: "Cupressaceae" },
+  { common: "Huangshan Pine", scientific: "Pinus hwangshanensis", family: "Pinaceae" },
+  { common: "Chinese Fir", scientific: "Cunninghamia lanceolata", family: "Cupressaceae" },
+  { common: "Qinghai Spruce", scientific: "Picea crassifolia", family: "Pinaceae" },
+  { common: "Yunnan Cypress", scientific: "Cupressus duclouxiana", family: "Cupressaceae" },
+  { common: "Chinese Locust", scientific: "Sophora japonica", family: "Fabaceae", aliases: ["Japanese Pagoda Tree"] },
+  { common: "Chinese Elm", scientific: "Ulmus pumila", family: "Ulmaceae", aliases: ["Siberian Elm"] },
+  { common: "Masson Pine", scientific: "Pinus massoniana", family: "Pinaceae" },
+  { common: "Chinese Tallow", scientific: "Triadica sebifera", family: "Euphorbiaceae" },
 ];
 
 export default TREE_SPECIES;

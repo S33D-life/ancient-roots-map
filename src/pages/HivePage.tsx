@@ -72,17 +72,44 @@ const HivePage = () => {
   useEffect(() => {
     if (!hive) { setLoading(false); return; }
     const fetchData = async () => {
-      // Fetch all trees, filter client-side by species family
-      const { data: allTrees } = await supabase
-        .from("trees")
-        .select("id, name, species, what3words, latitude, longitude, estimated_age, created_at, nation")
-        .order("created_at", { ascending: false });
+      // Fetch all trees + research trees in parallel
+      const [treesResult, researchResult] = await Promise.all([
+        supabase
+          .from("trees")
+          .select("id, name, species, what3words, latitude, longitude, estimated_age, created_at, nation")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("research_trees")
+          .select("id, tree_name, species_common, species_scientific, country, latitude, longitude, created_at")
+          .order("created_at", { ascending: false })
+          .limit(1000),
+      ]);
 
-      const hiveTrees = (allTrees || []).filter(t => {
+      // Filter user trees by hive family
+      const hiveTrees = (treesResult.data || []).filter(t => {
         const match = matchSpecies(t.species);
         return match && match.family === hive.family;
       });
-      setTrees(hiveTrees);
+
+      // Filter research trees by hive family and merge
+      const researchTrees = (researchResult.data || []).filter(rt => {
+        const speciesName = rt.species_common || rt.species_scientific;
+        const match = matchSpecies(speciesName);
+        return match && match.family === hive.family;
+      }).map(rt => ({
+        id: rt.id,
+        name: rt.tree_name || rt.species_common || rt.species_scientific,
+        species: rt.species_common || rt.species_scientific,
+        what3words: null,
+        latitude: rt.latitude ? Number(rt.latitude) : null,
+        longitude: rt.longitude ? Number(rt.longitude) : null,
+        estimated_age: null as number | null,
+        created_at: rt.created_at,
+        nation: rt.country,
+      }));
+
+      const allTrees = [...hiveTrees, ...researchTrees];
+      setTrees(allTrees);
 
       // Fetch species heart transactions for this family
       const [offsRes, speciesHeartsRes, influenceRes] = await Promise.all([
