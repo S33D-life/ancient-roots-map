@@ -98,11 +98,11 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     country: "United States",
     slug: "united-states",
     flag: "🇺🇸",
-    descriptor: "Champion & Historic Trees",
-    portalTitle: "United States — Champion & Historic Trees",
+    descriptor: "National Champion Trees",
+    portalTitle: "United States — Champion Trees",
     portalSubtitle:
-      "A research layer drawn from national and state champion tree registers.",
-    sourceLabel: "Champion tree records",
+      "The largest known individuals by species, scored by the National Champion Tree formula.",
+    sourceLabel: "American Forests register",
   },
   {
     country: "Brazil",
