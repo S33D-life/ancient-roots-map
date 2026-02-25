@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { MarketOutcome } from "@/hooks/use-markets";
 import MarketSeedStaker from "@/components/MarketSeedStaker";
 import GiftSeedSender from "@/components/GiftSeedSender";
+import MarketResolutionPanel from "@/components/MarketResolutionPanel";
 
 const SCOPE_ICONS: Record<string, React.ReactNode> = {
   tree: <TreePine className="w-4 h-4" />,
@@ -439,6 +440,18 @@ const MarketDetailPage = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Resolution Panel — shown when market is closed but not yet resolved */}
+        {market.status === "closed" && (
+          <MarketResolutionPanel
+            marketId={market.id}
+            outcomes={market.outcomes}
+            stakes={market.stakes}
+            totalStaked={market.totalStaked}
+            winnerPoolPercent={market.winner_pool_percent}
+            onResolved={refetch}
+          />
         )}
 
         {/* Disclaimer */}

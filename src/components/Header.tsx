@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
 import TeotagGuide from "./TeotagGuide";
+import { toast } from "sonner";
 
 
 const Header = () => {
@@ -108,6 +109,34 @@ const Header = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Realtime heart balance — live updates + toast on earn
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('header-hearts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'heart_transactions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          const amount = payload.new?.amount || 0;
+          const heartType = payload.new?.heart_type || 'heart';
+          if (amount > 0) {
+            setHeartsCount((prev) => (prev ?? 0) + amount);
+            const label = heartType === 'windfall' ? '🌊 Windfall' : heartType === 'sower' ? '🌱 Sower' : heartType === 'wanderer' ? '🚶 Wanderer' : '❤️ Heart';
+            toast(`${label} +${amount}`, { description: "S33D Hearts earned", duration: 3000 });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id]);
 
   const checkPendingActivity = async (userId: string) => {
     // Check for bloomed seeds not yet collected
