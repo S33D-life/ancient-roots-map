@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, TreeDeciduous, ExternalLink } from "lucide-react";
+import { MapPin, TreeDeciduous, ExternalLink, Star, Users2 } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useHomeMeetings } from "@/hooks/use-home-meetings";
+import { useWishToggle } from "@/hooks/use-wish-toggle";
 
 // Ancient Friends gallery — each entry is a painterly tree background
 // linked to a real Ancient Friend in the database
@@ -218,8 +220,9 @@ const Hero = () => {
   const [visitorNumber, setVisitorNumber] = useState<number | null>(null);
   const [friendIndex, setFriendIndex] = useState(0);
   const visitRecorded = useRef(false);
+  const lastShownIndex = useRef<number | null>(null);
 
-  // Record visit and get assigned Ancient Friend
+  // Record visit and get assigned Ancient Friend — with improved picker
   useEffect(() => {
     if (visitRecorded.current) return;
     visitRecorded.current = true;
@@ -230,13 +233,27 @@ const Hero = () => {
       });
       if (data && data.length > 0) {
         setVisitorNumber(data[0].visitor_number);
-        setFriendIndex(data[0].ancient_friend_index);
+        let idx = data[0].ancient_friend_index;
+        // Avoid showing same tree as last session
+        const lastIdx = sessionStorage.getItem("s33d_last_hero_idx");
+        if (lastIdx !== null && parseInt(lastIdx) === idx) {
+          idx = (idx + 1) % ANCIENT_FRIENDS_GALLERY.length;
+        }
+        sessionStorage.setItem("s33d_last_hero_idx", String(idx));
+        lastShownIndex.current = idx;
+        setFriendIndex(idx);
       }
     };
     recordVisit();
   }, []);
 
   const currentFriend = ANCIENT_FRIENDS_GALLERY[friendIndex];
+
+  // Home meetings tracking
+  const { count: meetingsCount } = useHomeMeetings(currentFriend.treeId);
+
+  // Wish toggle for featured tree
+  const { isWished, toggle: toggleWish, loading: wishLoading, isLoggedIn } = useWishToggle(currentFriend.treeId);
 
   // Preload the next image to avoid flicker on re-visits
   const nextFriend = useMemo(() => {
@@ -370,29 +387,69 @@ const Hero = () => {
             />
           </button>
 
+          {/* TETOL facilitation microcopy */}
+          <p className="text-[10px] text-muted-foreground/60 font-serif italic tracking-wide">
+            A meeting beneath an Ancient Friend
+          </p>
+
           {/* Ancient Friend details below Teotag */}
-          <Link
-            to={`/tree/${currentFriend.treeId}`}
-            className="w-full max-w-xs"
-          >
-            <div
-              className="rounded-xl px-4 py-2.5 backdrop-blur-md border flex items-center gap-3"
-              style={{
-                background: 'hsl(var(--card) / 0.7)',
-                borderColor: 'hsl(var(--border) / 0.4)',
-              }}
+          <div className="w-full max-w-xs space-y-1.5">
+            <Link
+              to={`/tree/${currentFriend.treeId}`}
+              className="block"
             >
-              <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-xs text-muted-foreground font-serif">
-                  {visitorNumber ? `Visit #${visitorNumber.toLocaleString()}` : "Today's Ancient Friend"}
-                </p>
-                <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
-                <p className="text-xs text-muted-foreground italic">{currentFriend.species}</p>
+              <div
+                className="rounded-xl px-4 py-2.5 backdrop-blur-md border flex items-center gap-3"
+                style={{
+                  background: 'hsl(var(--card) / 0.7)',
+                  borderColor: 'hsl(var(--border) / 0.4)',
+                }}
+              >
+                <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-xs text-muted-foreground font-serif">
+                    {visitorNumber ? `Visit #${visitorNumber.toLocaleString()}` : "Today's Ancient Friend"}
+                  </p>
+                  <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
+                  <p className="text-xs text-muted-foreground italic">{currentFriend.species}</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               </div>
-              <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            </Link>
+
+            {/* Meetings counter + Wish toggle row */}
+            <div className="flex items-center justify-between px-1">
+              <button
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-serif backdrop-blur-sm border transition-colors"
+                style={{
+                  background: 'hsl(var(--card) / 0.5)',
+                  borderColor: 'hsl(var(--border) / 0.3)',
+                  color: 'hsl(var(--muted-foreground))',
+                }}
+                title="Unique trees you've met on the Home grove"
+              >
+                <Users2 className="w-3 h-3" />
+                Meetings: {meetingsCount}
+              </button>
+
+              {isLoggedIn && (
+                <button
+                  onClick={(e) => { e.preventDefault(); toggleWish(); }}
+                  disabled={wishLoading}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-serif backdrop-blur-sm border transition-all"
+                  style={{
+                    background: isWished ? 'hsl(45 100% 55% / 0.15)' : 'hsl(var(--card) / 0.5)',
+                    borderColor: isWished ? 'hsl(45 80% 50% / 0.4)' : 'hsl(var(--border) / 0.3)',
+                    color: isWished ? 'hsl(45 80% 60%)' : 'hsl(var(--muted-foreground))',
+                  }}
+                  title={isWished ? "Remove from Wishlist" : "Add to Wishlist"}
+                >
+                  <Star className={`w-3 h-3 ${isWished ? "fill-current" : ""}`} />
+                  {isWished ? "Wished" : "Wish"}
+                </button>
+              )}
             </div>
-          </Link>
+          </div>
         </div>
       </div>
 
