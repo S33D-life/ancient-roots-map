@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Lock, Users, Globe, Beaker, Plus, Save, TreeDeciduous, HelpCircle } from "lucide-react";
+import { BookOpen, Lock, Users, Globe, Beaker, Plus, Save, TreeDeciduous, HelpCircle, Link, FileText, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { CollaboratorVolume, CollaboratorExperiment } from "@/hooks/use-collaborator-volumes";
@@ -130,6 +130,39 @@ const CollaboratorVolumeDetail = ({ volume, open, onClose, onUpdate, isOwner }: 
               <p className="text-sm font-serif text-foreground/90 leading-relaxed">
                 {volume.essence_summary}
               </p>
+            </div>
+          )}
+
+          {/* Document Attachments */}
+          {(volume.document_url || volume.document_file_url) && (
+            <div className="space-y-2">
+              <p className="text-[10px] font-serif text-muted-foreground uppercase tracking-wider">Attached Document</p>
+              <div className="flex flex-wrap gap-2">
+                {volume.document_url && (
+                  <a
+                    href={volume.document_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-serif text-primary hover:text-primary/80 transition-colors rounded-md border border-primary/20 px-3 py-1.5"
+                  >
+                    <Link className="w-3 h-3" />
+                    View Link
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+                {volume.document_file_url && (
+                  <a
+                    href={volume.document_file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-serif text-primary hover:text-primary/80 transition-colors rounded-md border border-primary/20 px-3 py-1.5"
+                  >
+                    <FileText className="w-3 h-3" />
+                    View File
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+              </div>
             </div>
           )}
 

@@ -25,6 +25,8 @@ export interface CollaboratorVolume {
   linked_council_sessions: string[];
   ring_hearts_awarded: boolean;
   ripple_hearts_awarded: boolean;
+  document_url: string | null;
+  document_file_url: string | null;
 }
 
 export interface CollaboratorExperiment {
