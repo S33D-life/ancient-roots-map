@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon } from "lucide-react";
+import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon, Wand2, Music, Sprout, ScrollText, TreePine, Palette, Lock } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
@@ -253,26 +253,72 @@ const Header = () => {
                   <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
                 </div>
               </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-popover border border-border rounded-lg shadow-lg py-1.5 min-w-[180px]">
-                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
+                  <Link to="/map" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <TreeDeciduous className="w-4 h-4 shrink-0" />
+                    <span>Map</span>
+                  </Link>
+                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Globe className="w-4 h-4 shrink-0" />
                     <span>Countries</span>
                   </Link>
-                  <Link to="/hives" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/hives" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Hexagon className="w-4 h-4 shrink-0" />
                     <span>Hives</span>
                   </Link>
                 </div>
               </div>
             </div>
-            <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
+            <div className="relative group">
+              <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
               <BookOpen className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
                 <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">HeARTwood </span>Library</span>
                 <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Heartwood</span>
               </div>
             </Link>
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[200px]" style={{ background: 'hsl(var(--popover))' }}>
+                  <Link to="/library" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <TreeDeciduous className="w-4 h-4 shrink-0" />
+                    <span>Ancient Friends</span>
+                  </Link>
+                  <Link to="/library/staff-room" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Wand2 className="w-4 h-4 shrink-0" />
+                    <span>Staff Room</span>
+                  </Link>
+                  <Link to="/library/wishing-tree" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Sparkles className="w-4 h-4 shrink-0" />
+                    <span>Wishing Tree</span>
+                  </Link>
+                  <Link to="/library/music-room" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Music className="w-4 h-4 shrink-0" />
+                    <span>Music Room</span>
+                  </Link>
+                  <Link to="/library/seed-cellar" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Sprout className="w-4 h-4 shrink-0" />
+                    <span>Seed Cellar</span>
+                  </Link>
+                  <Link to="/library/greenhouse" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Leaf className="w-4 h-4 shrink-0" />
+                    <span>Greenhouse</span>
+                  </Link>
+                  <Link to="/library/creators-path" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Palette className="w-4 h-4 shrink-0" />
+                    <span>Creator's Path</span>
+                  </Link>
+                  <Link to="/library/tree-resources" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <ScrollText className="w-4 h-4 shrink-0" />
+                    <span>Tree Resources</span>
+                  </Link>
+                  <Link to="/vault" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Lock className="w-4 h-4 shrink-0" />
+                    <span>Vault</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
               <Leaf className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
