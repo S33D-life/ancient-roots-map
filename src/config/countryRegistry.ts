@@ -94,6 +94,56 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
       "A research layer of India's heritage and culturally significant trees.",
     sourceLabel: "Heritage records",
   },
+  {
+    country: "United States",
+    slug: "united-states",
+    flag: "🇺🇸",
+    descriptor: "Champion & Historic Trees",
+    portalTitle: "United States — Champion & Historic Trees",
+    portalSubtitle:
+      "A research layer drawn from national and state champion tree registers.",
+    sourceLabel: "Champion tree records",
+  },
+  {
+    country: "Brazil",
+    slug: "brazil",
+    flag: "🇧🇷",
+    descriptor: "Árvores Patrimônio",
+    portalTitle: "Brazil — Heritage Trees",
+    portalSubtitle:
+      "A research layer honouring Brazil's immense arboreal heritage across biomes.",
+    sourceLabel: "Heritage records",
+  },
+  {
+    country: "Zimbabwe",
+    slug: "zimbabwe",
+    flag: "🇿🇼",
+    descriptor: "Sacred & Heritage Trees",
+    portalTitle: "Zimbabwe — Sacred & Heritage Trees",
+    portalSubtitle:
+      "A research layer preserving Zimbabwe's sacred groves and heritage trees.",
+    sourceLabel: "Heritage sources",
+  },
+  {
+    country: "Italy",
+    slug: "italy",
+    flag: "🇮🇹",
+    descriptor: "Alberi Monumentali",
+    portalTitle: "Italy — Monumental Trees",
+    portalSubtitle:
+      "A research layer from Italy's official register of monumental trees.",
+    sourceLabel: "MIPAAF register",
+  },
+  {
+    country: "Colombia",
+    slug: "colombia",
+    flag: "🇨🇴",
+    descriptor: "Árboles Patrimoniales",
+    portalTitle: "Colombia — Heritage Trees",
+    portalSubtitle:
+      "A research layer celebrating Colombia's extraordinary biodiversity and heritage trees.",
+    sourceLabel: "Heritage records",
+  },
 ];
 
 export default COUNTRY_REGISTRY;
