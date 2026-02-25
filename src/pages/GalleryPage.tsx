@@ -64,6 +64,7 @@ import seedCellarWindow from "@/assets/seed-cellar-window.png";
 import Footer from "@/components/Footer";
 import { deduplicateForGallery, type EncounterCluster } from "@/utils/treeEncounterClustering";
 import DashboardVault from "@/components/dashboard/DashboardVault";
+import LibraryVaultPreview from "@/components/LibraryVaultPreview";
 import { useWallet } from "@/hooks/use-wallet";
 import NFTreeStudio from "@/components/NFTreeStudio";
 import TreeCard from "@/components/TreeCard";
@@ -788,10 +789,10 @@ const GalleryPage = () => {
         <HeartwoodBackground />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-24 pb-12 px-4">
-          {/* Title area with breathing radial glow */}
-          <div className="relative flex flex-col items-center">
-            {/* Breathing glow backdrop — respects prefers-reduced-motion */}
+        <div className="relative z-10 flex flex-col items-center min-h-screen pt-24 pb-12 px-4">
+          {/* ── The Hearth — Opening Section ────────────── */}
+          <div className="relative flex flex-col items-center mb-10 max-w-xl text-center">
+            {/* Breathing glow backdrop */}
             <div
               className="absolute inset-0 -inset-x-16 -inset-y-8 pointer-events-none motion-safe:animate-[titleBreathe_6s_ease-in-out_infinite]"
               aria-hidden="true"
@@ -801,7 +802,7 @@ const GalleryPage = () => {
               }}
             />
             <h1
-              className="relative text-5xl md:text-7xl font-serif tracking-wider mb-4 text-center"
+              className="relative text-5xl md:text-7xl font-serif tracking-wider mb-3"
               style={{
                 color: 'hsl(38 75% 65%)',
                 textShadow: '0 0 50px hsl(38 80% 35% / 0.5), 0 2px 20px hsl(25 60% 20% / 0.6), 0 0 2px hsl(20 20% 8% / 0.9)',
@@ -810,14 +811,57 @@ const GalleryPage = () => {
               HEARTWOOD
             </h1>
             <p
-              className="relative font-serif text-lg md:text-xl mb-12 text-center max-w-md"
-              style={{
-                color: 'hsl(38 50% 75% / 0.7)',
-                textShadow: '0 1px 8px hsl(20 20% 8% / 0.8)',
-              }}
+              className="relative font-serif text-base md:text-lg mb-6"
+              style={{ color: 'hsl(38 50% 75% / 0.7)', textShadow: '0 1px 8px hsl(20 20% 8% / 0.8)' }}
             >
-              A Library of Love
+              The living centre. All rooms branch from the Heart.
             </p>
+
+            {/* Mythic narrative block */}
+            <p
+              className="relative font-serif text-sm leading-relaxed max-w-md mb-8"
+              style={{ color: 'hsl(38 35% 65% / 0.55)' }}
+            >
+              This is where the fire burns quietly — where your journey is remembered,
+              your offerings are kept, and the grove grows from every heart that visits.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                onClick={() => navigate("/map")}
+                className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
+                  color: 'hsl(38 80% 85%)',
+                  border: '1px solid hsl(38 50% 40% / 0.5)',
+                }}
+              >
+                Enter the Map
+              </button>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+                style={{
+                  background: 'hsl(25 20% 12% / 0.8)',
+                  color: 'hsl(38 50% 70%)',
+                  border: '1px solid hsl(38 40% 30% / 0.4)',
+                }}
+              >
+                View Your Grove
+              </button>
+              <button
+                onClick={() => navigate("/dashboard?tab=activity")}
+                className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+                style={{
+                  background: 'hsl(25 20% 12% / 0.8)',
+                  color: 'hsl(38 50% 70%)',
+                  border: '1px solid hsl(38 40% 30% / 0.4)',
+                }}
+              >
+                Active Opportunities
+              </button>
+            </div>
           </div>
 
           <style>{`
@@ -827,29 +871,43 @@ const GalleryPage = () => {
             }
           `}</style>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl w-full">
-            {[
-              { key: "staff-room", label: "Staff Room", desc: "144 Sacred Staffs" },
-              { key: "gallery", label: "Ancient Friends", desc: "The Living Atlas" },
-              { key: "music-room", label: "Music Room", desc: "Tree Radio" },
-              { key: "greenhouse", label: "Greenhouse", desc: "Houseplants & Saplings" },
-              { key: "wishlist", label: "Wishing Tree", desc: "Trees you dream to visit" },
-              { key: "seed-cellar", label: "Seed Cellar", desc: "Living Data Archive" },
-              { key: "creators-path", label: "Creator's Path", desc: "Your Journey" },
-              { key: "tree-resources", label: "Tree Resources", desc: "Project Directory" },
-              { key: "ledger", label: "Ledger", desc: "Data & Strings" },
-            ].map((item) => (
-              <button
-                key={item.key}
-                onClick={() => { setActiveTab(item.key); setShowLanding(false); }}
-                className="group relative rounded-xl border border-amber-700/40 p-5 md:p-6 text-left transition-all duration-300 hover:border-amber-500/60 hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, hsl(28 30% 10% / 0.85), hsl(25 25% 8% / 0.9))' }}
-              >
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at center, hsl(35 70% 40% / 0.15), transparent 70%)' }} />
-                <h3 className="font-serif text-amber-300/90 text-sm md:text-base mb-1 relative z-10">{item.label}</h3>
-                <p className="text-amber-200/40 text-xs relative z-10">{item.desc}</p>
-              </button>
-            ))}
+          {/* ── Vault Preview — economy snapshot ───────── */}
+          <div className="w-full max-w-2xl mb-10">
+            <LibraryVaultPreview />
+          </div>
+
+          {/* ── Room Branches ──────────────────────────── */}
+          <div className="w-full max-w-2xl">
+            <p
+              className="font-serif text-xs tracking-[0.2em] uppercase text-center mb-4"
+              style={{ color: 'hsl(38 30% 50% / 0.5)' }}
+            >
+              Rooms of the Library
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              {[
+                { key: "staff-room", label: "🪵 Staff Room", desc: "144 Sacred Staffs" },
+                { key: "gallery", label: "🗺 Map Room", desc: "Ancient Friends Atlas" },
+                { key: "music-room", label: "🎵 Music Room", desc: "Tree Radio" },
+                { key: "greenhouse", label: "🌱 Greenhouse", desc: "Houseplants & Saplings" },
+                { key: "wishlist", label: "⭐ Wishing Tree", desc: "Trees you dream to visit" },
+                { key: "seed-cellar", label: "📦 Seed Cellar", desc: "Living Data Archive" },
+                { key: "creators-path", label: "🎨 Creator's Path", desc: "Your Journey" },
+                { key: "tree-resources", label: "📖 Tree Resources", desc: "Project Directory" },
+                { key: "ledger", label: "📜 Scrolls & Ledger", desc: "Council Records" },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => { setActiveTab(item.key); setShowLanding(false); }}
+                  className="group relative rounded-xl border border-amber-700/40 p-5 md:p-6 text-left transition-all duration-300 hover:border-amber-500/60 hover:scale-105"
+                  style={{ background: 'linear-gradient(135deg, hsl(28 30% 10% / 0.85), hsl(25 25% 8% / 0.9))' }}
+                >
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at center, hsl(35 70% 40% / 0.15), transparent 70%)' }} />
+                  <h3 className="font-serif text-amber-300/90 text-sm md:text-base mb-1 relative z-10">{item.label}</h3>
+                  <p className="text-amber-200/40 text-xs relative z-10">{item.desc}</p>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

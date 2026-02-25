@@ -407,7 +407,7 @@ const DashboardPage = () => {
             <ReturnPill />
           </div>
 
-          <Tabs defaultValue="legend" className="space-y-6">
+          <Tabs defaultValue={new URLSearchParams(window.location.search).get("tab") || "legend"} className="space-y-6">
             {/* Tab navigation — scrollable on mobile */}
             <TabsList className="w-full justify-start bg-card/50 backdrop-blur border border-border/50 rounded-xl p-1 overflow-x-auto flex-nowrap">
               {TAB_ITEMS.map((tab) => (
