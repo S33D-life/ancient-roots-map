@@ -56,6 +56,7 @@ const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
 const UKCountryPage = lazy(() => import("./pages/UKCountryPage"));
 const USACountryPage = lazy(() => import("./pages/USACountryPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
+const AddTreePage = lazy(() => import("./pages/AddTreePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,6 +108,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/map" element={<MapPage />} />
+                <Route path="/add-tree" element={<AddTreePage />} />
                 <Route path="/atlas" element={<WorldAtlasPage />} />
                 <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />

@@ -137,7 +137,7 @@ export const DiscoveryRow = () => {
 
 /* ─── 2. Participation Pathways ─── */
 const PATHWAYS = [
-  { icon: MapPin, label: "Map a Tree", desc: "Drop a what3words photo and claim an encounter", to: "/map?addTree=true", color: "120 45% 45%" },
+  { icon: MapPin, label: "Map a Tree", desc: "Drop a what3words photo and claim an encounter", to: "/add-tree", color: "120 45% 45%" },
   { icon: Globe, label: "Explore the Atlas", desc: "Wander the planetary grove of Ancient Friends", to: "/map", color: "195 60% 50%" },
   { icon: Heart, label: "Earn Hearts", desc: "Visit trees, leave offerings, grow your reservoir", to: "/dashboard", color: "0 72% 55%" },
   { icon: Users, label: "Join a Hive", desc: "Find your species family and build together", to: "/hives", color: "45 100% 55%" },
