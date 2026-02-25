@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree, RotateCcw, Circle, TreePine, ExternalLink } from "lucide-react";
+import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree, RotateCcw, Circle, TreePine, ExternalLink, Maximize2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
@@ -80,6 +80,12 @@ interface LiteMapFiltersProps {
   onAgeBandChange?: (a: AgeBand) => void;
   girthBand?: GirthBand;
   onGirthBandChange?: (g: GirthBand) => void;
+  /** Controlled refine panel state (lifted to parent) */
+  refineOpen?: boolean;
+  onRefineOpenChange?: (open: boolean) => void;
+  /** Fullscreen toggle rendered in top bar where Refine used to be */
+  onFullscreenToggle?: () => void;
+  isFullscreen?: boolean;
 }
 
 /* ── Shared chip styles using HSL design tokens ── */
@@ -106,8 +112,14 @@ const LiteMapFilters = ({
   onAgeBandChange,
   girthBand = "all",
   onGirthBandChange,
+  refineOpen: controlledRefineOpen,
+  onRefineOpenChange,
+  onFullscreenToggle,
+  isFullscreen,
 }: LiteMapFiltersProps) => {
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [internalPanelOpen, setInternalPanelOpen] = useState(false);
+  const panelOpen = controlledRefineOpen ?? internalPanelOpen;
+  const setPanelOpen = onRefineOpenChange ?? setInternalPanelOpen;
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
 
   const isAllSpecies = species.length === 0;
@@ -249,31 +261,22 @@ const LiteMapFilters = ({
 
           <div className="flex-1" />
 
-          {/* Refine button */}
-          <motion.button
-            whileTap={{ scale: 0.93 }}
-            onClick={() => setPanelOpen(!panelOpen)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-serif backdrop-blur-md transition-all duration-200"
-            style={{
-              background: panelOpen ? `hsla(${activeAccent}, 0.15)` : "hsla(30, 25%, 10%, 0.85)",
-              color: panelOpen ? `hsl(${activeAccent})` : "hsla(42, 30%, 55%, 0.7)",
-              border: `1px solid ${panelOpen ? `hsla(${activeAccent}, 0.35)` : "hsla(42, 40%, 30%, 0.3)"}`,
-              boxShadow: panelOpen ? `0 0 8px hsla(${activeAccent}, 0.12)` : "none",
-            }}
-          >
-            <Filter className="w-3 h-3" /> Refine
-            {activeFilterCount > 0 && (
-              <span
-                className="ml-0.5 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold"
-                style={{
-                  background: `hsl(${activeAccent})`,
-                  color: "hsl(30, 25%, 10%)",
-                }}
-              >
-                {activeFilterCount}
-              </span>
-            )}
-          </motion.button>
+          {/* Fullscreen button (replaces Refine which moved to bottom bar) */}
+          {onFullscreenToggle && (
+            <motion.button
+              whileTap={{ scale: 0.93 }}
+              onClick={onFullscreenToggle}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-serif backdrop-blur-md transition-all duration-200"
+              style={{
+                background: isFullscreen ? `hsla(${activeAccent}, 0.15)` : "hsla(30, 25%, 10%, 0.85)",
+                color: isFullscreen ? `hsl(${activeAccent})` : "hsla(42, 30%, 55%, 0.7)",
+                border: `1px solid ${isFullscreen ? `hsla(${activeAccent}, 0.35)` : "hsla(42, 40%, 30%, 0.3)"}`,
+                boxShadow: isFullscreen ? `0 0 8px hsla(${activeAccent}, 0.12)` : "none",
+              }}
+            >
+              <Maximize2 className="w-3 h-3" /> <span className="hidden md:inline">Full Screen</span>
+            </motion.button>
+          )}
         </div>
 
         {/* Active filter chips — second row, only when filters are active */}
