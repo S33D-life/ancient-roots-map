@@ -2872,6 +2872,10 @@ export type Database = {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
       }
+      increment_proposal_support: {
+        Args: { p_id: string; p_weight: number }
+        Returns: undefined
+      }
       record_visit: {
         Args: { p_user_id?: string }
         Returns: {

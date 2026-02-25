@@ -15,6 +15,9 @@ import { useMarkets } from "@/hooks/use-markets";
 import MarketCard from "@/components/MarketCard";
 import { motion } from "framer-motion";
 import OfferingList from "@/components/OfferingList";
+import HiveSpeciesLeaderboard from "@/components/HiveSpeciesLeaderboard";
+import InfluenceWeightedVoting from "@/components/InfluenceWeightedVoting";
+import BloomingClock from "@/components/BloomingClock";
 
 interface TreeRow {
   id: string;
@@ -531,39 +534,14 @@ const HivePage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Curators Leaderboard */}
-                <Card className="bg-card/60 backdrop-blur border-border/40">
-                  <CardContent className="p-5">
-                    <h4 className="text-sm font-serif mb-3 text-foreground flex items-center gap-2">
-                      🛡️ Top Curators
-                    </h4>
-                    {topCurators.length === 0 ? (
-                      <p className="text-xs text-muted-foreground font-serif">No curators yet — be the first!</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {topCurators.map(([uid, inf], i) => (
-                          <div key={uid} className="flex items-center gap-2 text-xs font-serif">
-                            <span className="text-muted-foreground w-4">{i + 1}.</span>
-                            <span className="flex-1 text-muted-foreground truncate">{uid.slice(0, 8)}…</span>
-                            <span className="tabular-nums" style={{ color: "hsl(42, 80%, 50%)" }}>{inf} influence</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                {/* Species Heart Leaderboard */}
+                <HiveSpeciesLeaderboard family={hive.family} accentHsl={hive.accentHsl} icon={hive.icon} />
 
-                {/* Proposals — Coming Soon */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {["Proposals", "Staking Governance"].map(item => (
-                    <Card key={item} className="bg-card/60 backdrop-blur border-border/40">
-                      <CardContent className="p-5 text-center">
-                        <p className="font-serif text-sm text-foreground mb-1">{item}</p>
-                        <Badge variant="outline" className="text-[10px] font-serif">Coming Soon</Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                {/* Blooming Clock for hive species */}
+                <BloomingClock />
+
+                {/* Influence-Weighted Proposals */}
+                <InfluenceWeightedVoting hiveFamily={hive.family} />
               </div>
             </TabsContent>
           </Tabs>

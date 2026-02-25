@@ -8,6 +8,7 @@ import JourneyNudge from "@/components/JourneyNudge";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
+import BloomingClock from "@/components/BloomingClock";
 import TreeShareCard from "@/components/TreeShareCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -624,6 +625,11 @@ const TreeDetailPage = () => {
             onOpenChange={setBirdsongOpen}
             onOfferingSaved={() => setBirdsongCount((c) => c + 1)}
           />
+        )}
+
+        {/* Blooming Clock — phenology for this species */}
+        {tree?.species && (
+          <BloomingClock species={tree.species} region={tree.nation} />
         )}
 
         {/* Canopy Visits Section */}
