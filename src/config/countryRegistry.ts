@@ -174,6 +174,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
       "A research layer honouring China's millennia-old cypresses, ginkgos, and sacred mountain pines.",
     sourceLabel: "Heritage records",
   },
+  {
+    country: "Russia",
+    slug: "russia",
+    flag: "🇷🇺",
+    descriptor: "Ancient & Monumental Trees",
+    portalTitle: "Russia — Ancient & Monumental Trees",
+    portalSubtitle:
+      "A research layer spanning Russia's boreal larches, Caucasian relicts, and taiga cedar pines.",
+    sourceLabel: "Heritage records",
+  },
 ];
 
 export default COUNTRY_REGISTRY;
