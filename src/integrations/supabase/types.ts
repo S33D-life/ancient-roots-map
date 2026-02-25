@@ -1725,6 +1725,42 @@ export type Database = {
           },
         ]
       }
+      species_phenology: {
+        Row: {
+          avg_mood: number | null
+          id: string
+          month: number
+          observation_count: number
+          region: string | null
+          season_stage: string
+          species: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          avg_mood?: number | null
+          id?: string
+          month: number
+          observation_count?: number
+          region?: string | null
+          season_stage: string
+          species: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          avg_mood?: number | null
+          id?: string
+          month?: number
+          observation_count?: number
+          region?: string | null
+          season_stage?: string
+          species?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       staffs: {
         Row: {
           circle_id: number
@@ -2751,6 +2787,7 @@ export type Database = {
       }
     }
     Functions: {
+      aggregate_phenology: { Args: never; Returns: undefined }
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
       claim_windfall_hearts: {
         Args: { p_tree_id: string; p_user_id: string }
@@ -2795,6 +2832,16 @@ export type Database = {
           name: string
           photo_url: string
           species: string
+        }[]
+      }
+      get_stewardship_leaderboard: {
+        Args: { p_tree_id: string; result_limit?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          offering_count: number
+          total_impact: number
+          user_id: string
         }[]
       }
       get_tree_leaderboard: {
