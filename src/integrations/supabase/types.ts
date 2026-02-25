@@ -2678,7 +2678,71 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tree_sources_public: {
+        Row: {
+          contributor_name: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          research_tree_id: string | null
+          source_title: string | null
+          source_type: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+          tree_id: string | null
+          updated_at: string | null
+          url: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          contributor_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          research_tree_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          tree_id?: string | null
+          updated_at?: string | null
+          url?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          contributor_name?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          research_tree_id?: string | null
+          source_title?: string | null
+          source_type?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          tree_id?: string | null
+          updated_at?: string | null
+          url?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_sources_research_tree_id_fkey"
+            columns: ["research_tree_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }

@@ -16,7 +16,6 @@ export interface TreeSource {
   verified_at: string | null;
   verification_notes: string | null;
   contributor_name: string | null;
-  contributor_email: string | null;
 }
 
 export function useTreeSources(treeId?: string, researchTreeId?: string) {
