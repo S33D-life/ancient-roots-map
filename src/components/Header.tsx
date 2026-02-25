@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame } from "lucide-react";
+import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon } from "lucide-react";
 import teotagLogo from "@/assets/teotag.jpeg";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
@@ -252,6 +252,20 @@ const Header = () => {
                 <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
               </div>
             </Link>
+            <Link to="/atlas" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
+              <Globe className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm lg:text-base">Countries</span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">World Atlas</span>
+              </div>
+            </Link>
+            <Link to="/hives" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
+              <Hexagon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm lg:text-base">Hives</span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">Species Families</span>
+              </div>
+            </Link>
             <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
               <BookOpen className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
@@ -264,13 +278,6 @@ const Header = () => {
               <div className="flex flex-col leading-tight">
                 <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
                 <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
-              </div>
-            </Link>
-            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
               </div>
             </Link>
           </nav>
