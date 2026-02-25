@@ -55,7 +55,7 @@ const STEPS: StepDef[] = [
   {
     key: "map",
     label: "Map Room",
-    sublabel: "The Living Atlas",
+    sublabel: "The Arboreal Atlas",
     icon: MapIcon,
     to: "/map",
     accentHsl: "120 45% 45%",
