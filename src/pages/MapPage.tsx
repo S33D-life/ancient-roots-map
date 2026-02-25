@@ -10,6 +10,7 @@ import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
+const WishlistPilgrimageNudge = lazy(() => import("@/components/WishlistPilgrimageNudge"));
 
 
 const MapPage = () => {
@@ -55,6 +56,10 @@ const MapPage = () => {
           message="Tap any marker to meet an Ancient Friend, or long-press the map to claim a new encounter."
           delay={8000}
           position="bottom-center"
+        />
+        <WishlistPilgrimageNudge
+          userLat={paramLat}
+          userLng={paramLng}
         />
       </Suspense>
     </div>

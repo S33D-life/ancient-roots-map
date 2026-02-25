@@ -64,6 +64,7 @@ const HivePage = () => {
   const [offerings, setOfferings] = useState<OfferingRow[]>([]);
   const [speciesHearts, setSpeciesHearts] = useState<SpeciesHeartTx[]>([]);
   const [influenceTxs, setInfluenceTxs] = useState<InfluenceTx[]>([]);
+  const [profileMap, setProfileMap] = useState<Record<string, { full_name: string | null; avatar_url: string | null }>>({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("trees");
   const { counts: globalOfferingCounts } = useOfferingCounts();
@@ -127,6 +128,19 @@ const HivePage = () => {
       setOfferings(offsRes.data || []);
       setSpeciesHearts(speciesHeartsRes.data || []);
       setInfluenceTxs(influenceRes.data || []);
+
+      // Resolve user profiles for leaderboard display
+      const allUserIds = new Set<string>();
+      (speciesHeartsRes.data || []).forEach((tx: any) => allUserIds.add(tx.user_id));
+      (influenceRes.data || []).forEach((tx: any) => allUserIds.add(tx.user_id));
+      const uniqueIds = Array.from(allUserIds).slice(0, 50);
+      if (uniqueIds.length > 0) {
+        const { data: profiles } = await supabase.rpc("get_safe_profiles", { p_ids: uniqueIds });
+        const pMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
+        (profiles || []).forEach((p: any) => { pMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url }; });
+        setProfileMap(pMap);
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -347,6 +361,32 @@ const HivePage = () => {
                       </div>
                     </div>
 
+                    {/* Collective Progress Bar */}
+                    {totalSpeciesHearts > 0 && (() => {
+                      const milestone = Math.ceil(totalSpeciesHearts / 1000) * 1000;
+                      const progress = (totalSpeciesHearts / milestone) * 100;
+                      return (
+                        <div className="mb-6 space-y-1.5">
+                          <div className="flex justify-between text-[10px] font-serif text-muted-foreground">
+                            <span>Hive Growth</span>
+                            <span>{totalSpeciesHearts} / {milestone.toLocaleString()} {hive.icon}</span>
+                          </div>
+                          <div className="h-2 rounded-full overflow-hidden" style={{ background: `hsl(${hive.accentHsl} / 0.15)` }}>
+                            <motion.div
+                              className="h-full rounded-full"
+                              style={{ background: `linear-gradient(90deg, hsl(${hive.accentHsl} / 0.6), hsl(${hive.accentHsl}))` }}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${progress}%` }}
+                              transition={{ duration: 1, ease: "easeOut" }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-muted-foreground/60 font-serif italic">
+                            Collective species heart accumulation across all {hive.displayName.replace(" Hive", "")} trees
+                          </p>
+                        </div>
+                      );
+                    })()}
+
                     {/* Recent issuance */}
                     {speciesHearts.length > 0 && (
                       <div className="border-t border-border/30 pt-4">
@@ -399,8 +439,8 @@ const HivePage = () => {
                           {topWanderers.map(([uid, hearts], i) => (
                             <div key={uid} className="flex items-center gap-2 text-xs font-serif">
                               <span className="text-muted-foreground w-4">{i + 1}.</span>
-                              <span className="flex-1 text-muted-foreground truncate">{uid.slice(0, 8)}…</span>
-                              <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>{hearts}</span>
+                              <span className="flex-1 text-foreground truncate">{profileMap[uid]?.full_name || `Wanderer ${uid.slice(0, 6)}`}</span>
+                              <span className="tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>{hearts} {hive.icon}</span>
                             </div>
                           ))}
                         </div>
