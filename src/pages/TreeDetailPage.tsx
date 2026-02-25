@@ -28,6 +28,9 @@ import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
+import { useTreeSources } from "@/hooks/use-tree-sources";
+import ContributeSourceModal from "@/components/ContributeSourceModal";
+import TreeSourcesDisplay from "@/components/TreeSourcesDisplay";
 import TreeMarkets from "@/components/TreeMarkets";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -62,6 +65,7 @@ const TreeDetailPage = () => {
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [shareCardOpen, setShareCardOpen] = useState(false);
+  const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -78,6 +82,7 @@ const TreeDetailPage = () => {
 
   // Centralized offerings via shared hook (with realtime)
   const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType } = useOfferings({ treeId: id, realtime: true });
+  const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -528,6 +533,14 @@ const TreeDetailPage = () => {
           />
         )}
 
+        {/* Sources Section */}
+        <TreeSourcesDisplay
+          verified={verifiedSources}
+          pending={pendingSources}
+          loading={sourcesLoading}
+          onContribute={() => setContributeSourceOpen(true)}
+        />
+
         {/* Offering History — grouped by meeting */}
         {userId && allMeetings.length > 0 && (
           <div className="mt-12">
@@ -572,6 +585,14 @@ const TreeDetailPage = () => {
         open={proposeEditOpen}
         onOpenChange={setProposeEditOpen}
         tree={tree}
+      />
+
+      <ContributeSourceModal
+        open={contributeSourceOpen}
+        onOpenChange={setContributeSourceOpen}
+        treeId={id!}
+        treeName={tree?.name || ""}
+        onSourceAdded={refetchSources}
       />
     </div>
   );
