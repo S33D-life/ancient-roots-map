@@ -13,8 +13,8 @@ const NAV_ITEMS = [
 const BottomNav = () => {
   const { pathname } = useLocation();
 
-  // Hide on fullscreen pages
-  if (pathname === "/map" || pathname === "/atlas") return null;
+  // Hide only on the fullscreen map
+  if (pathname === "/map") return null;
 
   return (
     <nav
@@ -34,7 +34,7 @@ const BottomNav = () => {
             <Link
               key={to}
               to={to}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors"
+              className="relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-0"
               style={{
                 color: active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.55)",
               }}
