@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { MarketOutcome } from "@/hooks/use-markets";
+import MarketSeedStaker from "@/components/MarketSeedStaker";
+import GiftSeedSender from "@/components/GiftSeedSender";
 
 const SCOPE_ICONS: Record<string, React.ReactNode> = {
   tree: <TreePine className="w-4 h-4" />,
@@ -356,6 +358,17 @@ const MarketDetailPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Seed Staking Module */}
+        {market.status === "open" && new Date(market.close_time) > new Date() && (
+          <div className="mb-6">
+            <MarketSeedStaker
+              marketId={market.id}
+              outcomes={market.outcomes}
+              isOpen={true}
+            />
+          </div>
+        )}
 
         {/* Evidence & Resolution accordion */}
         <Card className="bg-card/60 backdrop-blur border-border/40 mb-6">
