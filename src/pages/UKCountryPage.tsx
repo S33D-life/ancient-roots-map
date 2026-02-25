@@ -357,7 +357,7 @@ const UKCountryPage = () => {
           </section>
         )}
 
-        {/* ═══ SECTION 3 — Paul Woods Featured Contribution ═══ */}
+        {/* ═══ SECTION 3 — Paul Wood Lineage (Featured Contribution) ═══ */}
         <section className="px-4 max-w-3xl mx-auto mb-10">
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <Card className="border-[hsl(42_88%_45%/0.4)] bg-gradient-to-br from-card via-card to-[hsl(42_30%_14%)] relative overflow-hidden">
@@ -366,46 +366,72 @@ const UKCountryPage = () => {
 
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[hsl(42_95%_55%/0.15)] border border-[hsl(42_95%_55%/0.3)] flex items-center justify-center">
-                    <Award className="w-6 h-6 text-[hsl(42_95%_55%)]" />
+                  <div className="w-14 h-14 rounded-full bg-[hsl(42_95%_55%/0.15)] border-2 border-[hsl(42_95%_55%/0.3)] flex items-center justify-center">
+                    <Award className="w-7 h-7 text-[hsl(42_95%_55%)]" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg font-serif text-foreground">
-                      Paul Woods
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-[hsl(42_95%_55%/0.7)] font-medium mb-0.5">Data Lineage</p>
+                    <CardTitle className="text-xl font-serif text-foreground">
+                      Paul Wood
                     </CardTitle>
-                    <p className="text-xs text-[hsl(42_95%_55%)] font-medium">1,000 Street Trees</p>
+                    <p className="text-xs text-muted-foreground italic mt-0.5">
+                      Author — <span className="text-[hsl(42_95%_55%/0.9)]">Tree Hunting</span>
+                    </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Thank you to Paul Woods for the monumental work of recording and sharing <strong className="text-foreground">1,000 UK street trees</strong> — a living testament
-                  to urban green guardianship. Each entry is a small act of noticing, an anchor of care planted in data.
+                  This research layer is seeded from Paul Wood's extraordinary project —
+                  <strong className="text-foreground"> 1,000 Trees to Find in Britain and Ireland's Towns and Cities</strong>.
+                  Each entry is a named, located, storied tree, recorded with care and shared openly.
+                  His work forms the living foundation of the UK atlas.
                 </p>
 
-                <div className="grid grid-cols-3 gap-2">
+                <blockquote className="border-l-2 border-[hsl(42_95%_55%/0.4)] pl-4 py-1">
+                  <p className="text-sm font-serif italic text-muted-foreground leading-relaxed">
+                    "There's a glorious tree around every corner, if you know where to look"
+                  </p>
+                </blockquote>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <div className="text-center p-3 rounded-lg bg-muted/30 border border-border/30">
-                    <p className="text-lg font-serif font-bold text-[hsl(42_95%_55%)]">1,000</p>
+                    <p className="text-xl font-serif font-bold text-[hsl(42_95%_55%)]">1,000</p>
                     <p className="text-[10px] text-muted-foreground">Trees Recorded</p>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-muted/30 border border-border/30">
-                    <p className="text-lg font-serif font-bold text-foreground">Street</p>
+                    <p className="text-xl font-serif font-bold text-foreground">GPS</p>
+                    <p className="text-[10px] text-muted-foreground">Located</p>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-muted/30 border border-border/30">
+                    <p className="text-xl font-serif font-bold text-foreground">Street</p>
                     <p className="text-[10px] text-muted-foreground">Tree Focus</p>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-muted/30 border border-border/30">
-                    <p className="text-lg font-serif font-bold text-foreground">Urban</p>
-                    <p className="text-[10px] text-muted-foreground">Guardianship</p>
+                    <p className="text-xl font-serif font-bold text-foreground">2025</p>
+                    <p className="text-[10px] text-muted-foreground">Published</p>
                   </div>
+                </div>
+
+                <div className="bg-muted/20 border border-border/30 rounded-lg p-4">
+                  <p className="text-xs font-serif font-medium text-foreground mb-1 flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-[hsl(42_95%_55%)]" /> Book
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Tree Hunting: 1,000 Trees to Find in Britain and Ireland's Towns and Cities</strong>
+                    <br />
+                    <span className="text-xs">Paul Wood · Particular Books · May 2025</span>
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   <Button variant="mystical" size="sm" asChild>
                     <a href={PAUL_WOODS_SHEET} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-3.5 h-3.5 mr-1" /> View Master Spreadsheet
+                      <ExternalLink className="w-3.5 h-3.5 mr-1" /> View Source Data
                     </a>
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => navigate("/map?research=on")}>
-                    <MapIcon className="w-3.5 h-3.5 mr-1" /> See on Map
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/map?research=on&lat=54.5&lng=-2&zoom=5")}>
+                    <MapIcon className="w-3.5 h-3.5 mr-1" /> See All 1,000 on Map
                   </Button>
                 </div>
               </CardContent>
@@ -570,10 +596,10 @@ const UKCountryPage = () => {
         <section className="px-4 max-w-3xl mx-auto pb-8">
           <div className="border-t border-border/30 pt-6 space-y-3 text-center">
             <p className="text-xs text-muted-foreground/60">
-              Data sources: Heritage tree registers, community contributions, urban forestry records
+              Data lineage: Paul Wood — <em>Tree Hunting</em> (Particular Books, 2025) · Heritage registers · Community contributions
             </p>
             <p className="text-xs text-[hsl(42_95%_55%/0.7)] italic">
-              Special thanks to Paul Woods — 1,000 Street Trees & his ongoing contribution to urban tree knowledge
+              Thank you to Paul Wood for 1,000 named, storied, GPS-located street trees — the living root of this atlas
             </p>
             <div className="flex justify-center gap-4 text-[10px] text-muted-foreground/40">
               <Link to="/atlas" className="hover:text-primary transition-colors">World Atlas</Link>
