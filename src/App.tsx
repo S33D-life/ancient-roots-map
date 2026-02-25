@@ -53,6 +53,7 @@ const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
 const PilgrimagePathwaysPage = lazy(() => import("./pages/PilgrimagePathwaysPage"));
 const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
+const UKCountryPage = lazy(() => import("./pages/UKCountryPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 
 const queryClient = new QueryClient({
@@ -139,6 +140,7 @@ const App = () => {
                 <Route path="/markets" element={<CycleMarketsPage />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
+                <Route path="/atlas/united-kingdom" element={<UKCountryPage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
