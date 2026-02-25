@@ -19,7 +19,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Filter } from "lucide-react";
 import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES, AGE_BANDS, GIRTH_BANDS, type AgeBand, type GirthBand } from "./LiteMapFilters";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
@@ -80,6 +80,8 @@ interface LeafletFallbackMapProps {
   initialZoom?: number;
   initialW3w?: string;
   initialTreeId?: string;
+  onFullscreenToggle?: () => void;
+  isFullscreen?: boolean;
 }
 
 /* ── Shared tier & species logic ── */
@@ -421,7 +423,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, onFullscreenToggle, isFullscreen }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -484,6 +486,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
   const [livingLayersOpen, setLivingLayersOpen] = useState(false);
+  const [refineOpen, setRefineOpen] = useState(false);
   const [hivesCollapsed, setHivesCollapsed] = useState(false);
   const [signalsCollapsed, setSignalsCollapsed] = useState(true);
   const [structuresCollapsed, setStructuresCollapsed] = useState(true);
@@ -2029,6 +2032,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onAgeBandChange={setAgeBand}
         girthBand={girthBand}
         onGirthBandChange={setGirthBand}
+        refineOpen={refineOpen}
+        onRefineOpenChange={setRefineOpen}
+        onFullscreenToggle={onFullscreenToggle}
+        isFullscreen={isFullscreen}
       />
 
       {/* Discovery cue */}
@@ -2484,7 +2491,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const globeEmphasis = perspective === "collective";
         return (
           <>
-            <div className="absolute bottom-8 left-3 z-[1000]">
+            <div className="absolute bottom-8 left-3 z-[1000] flex gap-2">
               <button
                 onClick={() => setLivingLayersOpen(!livingLayersOpen)}
                 className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
@@ -2497,6 +2504,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 title="Living Layers"
               >
                 <Layers className="w-[18px] h-[18px]" />
+              </button>
+              <button
+                onClick={() => setRefineOpen(!refineOpen)}
+                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                style={{
+                  ...btnBase,
+                  color: refineOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  background: refineOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  boxShadow: refineOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
+                }}
+                title="Refine filters"
+              >
+                <Filter className="w-[18px] h-[18px]" />
               </button>
             </div>
 

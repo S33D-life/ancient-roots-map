@@ -92,9 +92,11 @@ interface MapProps {
   initialLng?: number;
   initialZoom?: number;
   initialTreeId?: string;
+  onFullscreenToggle?: () => void;
+  isFullscreen?: boolean;
 }
 
-const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom, initialTreeId }: MapProps) => {
+const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom, initialTreeId, onFullscreenToggle, isFullscreen }: MapProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const autoAddTree = searchParams.get("addTree") === "true";
@@ -711,7 +713,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} onFullscreenToggle={onFullscreenToggle} isFullscreen={isFullscreen} />
         </Suspense>
       </div>
     );
