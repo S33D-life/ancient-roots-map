@@ -8,6 +8,7 @@ import S33dEntrance from "@/components/S33dEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import {
   IdentitySection,
+  DiscoveryRow,
   ParticipationSection,
   MapPreviewSection,
   LivingScrollSection,
@@ -31,6 +32,9 @@ const Index = () => {
 
         {/* 2. Poetic tagline + value points */}
         <IdentitySection />
+
+        {/* 2b. Quick discovery — Countries & Hives */}
+        <DiscoveryRow />
 
         {/* 3. Participation pathways */}
         <ParticipationSection />

@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Flame, Waves } from "lucide-react";
+import { TreeDeciduous, BookOpen, Flame, Globe, Hexagon } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/map", icon: TreeDeciduous, label: "Atlas" },
+  { to: "/atlas", icon: Globe, label: "Countries" },
+  { to: "/hives", icon: Hexagon, label: "Hives" },
   { to: "/library", icon: BookOpen, label: "Library" },
-  { to: "/markets", icon: Waves, label: "Markets" },
   { to: "/dashboard", icon: Flame, label: "Hearth" },
 ] as const;
 

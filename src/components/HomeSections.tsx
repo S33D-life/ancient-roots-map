@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   MapPin, Heart, TreeDeciduous, Users, Sparkles, BookOpen,
-  Leaf, Crown, Globe, Music, Sprout, ScrollText
+  Leaf, Crown, Globe, Music, Sprout, ScrollText, Hexagon, ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef } from "react";
@@ -59,6 +59,81 @@ export const IdentitySection = () => (
     </div>
   </section>
 );
+
+/* ─── 1b. Quick discovery row — Countries & Hives ─── */
+export const DiscoveryRow = () => {
+  const [treeCount, setTreeCount] = useState(0);
+
+  useEffect(() => {
+    supabase.from("trees").select("id", { count: "exact", head: true }).then(({ count }) => {
+      if (count) setTreeCount(count);
+    });
+  }, []);
+
+  return (
+    <section className="py-8 md:py-12">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <Link
+              to="/atlas"
+              className="group flex items-center gap-4 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 hover:bg-card/60 hover:border-primary/30 transition-all duration-300"
+            >
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "hsl(195 60% 50% / 0.15)" }}
+              >
+                <Globe className="w-5 h-5" style={{ color: "hsl(195 60% 50%)" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-serif text-sm text-foreground/90 group-hover:text-primary transition-colors">
+                  Browse by Country
+                </p>
+                <p className="text-[11px] text-muted-foreground/60">
+                  {treeCount > 0 ? `${treeCount.toLocaleString()} trees across nations` : "Explore country atlases"}
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+            </Link>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.08 }}
+          >
+            <Link
+              to="/hives"
+              className="group flex items-center gap-4 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 hover:bg-card/60 hover:border-primary/30 transition-all duration-300"
+            >
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "hsl(45 100% 55% / 0.15)" }}
+              >
+                <Hexagon className="w-5 h-5" style={{ color: "hsl(45 100% 55%)" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-serif text-sm text-foreground/90 group-hover:text-primary transition-colors">
+                  Species Hives
+                </p>
+                <p className="text-[11px] text-muted-foreground/60">
+                  Find your botanical family
+                </p>
+              </div>
+              <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 /* ─── 2. Participation Pathways ─── */
 const PATHWAYS = [
