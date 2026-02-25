@@ -33,12 +33,17 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Pre-fill invite code from URL
+  // Pre-fill invite code from URL, also capture gift param
   useEffect(() => {
     const code = searchParams.get("invite");
+    const giftCode = searchParams.get("gift");
     if (code) {
       setInviteCode(code);
       setView("signup"); // auto-switch to signup if arriving via invite
+    }
+    if (giftCode) {
+      localStorage.setItem("s33d_gift_code", giftCode);
+      setView("signup");
     }
   }, [searchParams]);
 
@@ -62,6 +67,41 @@ const AuthPage = () => {
         if (storedCode && session.user) {
           await recordReferral(session.user.id, storedCode);
           localStorage.removeItem("s33d_invite_code");
+        }
+
+        // Auto-claim gift seed if arriving via gift link
+        const giftCode = localStorage.getItem("s33d_gift_code");
+        if (giftCode && session.user) {
+          try {
+            // Find the gift seed by invite_code and assign recipient
+            const { data: gift } = await supabase
+              .from("gift_seeds")
+              .select("id, seeds_count, sender_id")
+              .eq("invite_code", giftCode)
+              .is("recipient_id", null)
+              .is("activated_at", null)
+              .maybeSingle();
+
+            if (gift && gift.sender_id !== session.user.id) {
+              // Assign recipient and activate
+              await supabase.from("gift_seeds").update({
+                recipient_id: session.user.id,
+                activated_at: new Date().toISOString(),
+                hearts_earned: gift.seeds_count,
+              }).eq("id", gift.id);
+
+              // Issue heart
+              await supabase.from("heart_transactions").insert({
+                user_id: session.user.id,
+                tree_id: "00000000-0000-0000-0000-000000000000",
+                heart_type: "gift",
+                amount: gift.seeds_count,
+              });
+            }
+          } catch (e) {
+            console.error("Gift seed claim error:", e);
+          }
+          localStorage.removeItem("s33d_gift_code");
         }
 
         // Save pending tree if one was captured before auth
