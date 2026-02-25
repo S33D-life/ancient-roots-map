@@ -245,27 +245,27 @@ const Header = () => {
           </div>
           
           <nav className="hidden md:flex items-center gap-3 lg:gap-5">
-            <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <TreeDeciduous className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">Ancient Friends </span>Atlas</span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
+            <div className="relative group">
+              <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+                <TreeDeciduous className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+                <div className="flex flex-col leading-tight">
+                  <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">Ancient Friends </span>Atlas</span>
+                  <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
+                </div>
+              </Link>
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="bg-popover border border-border rounded-lg shadow-lg py-1.5 min-w-[180px]">
+                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Globe className="w-4 h-4 shrink-0" />
+                    <span>Countries</span>
+                  </Link>
+                  <Link to="/hives" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Hexagon className="w-4 h-4 shrink-0" />
+                    <span>Hives</span>
+                  </Link>
+                </div>
               </div>
-            </Link>
-            <Link to="/atlas" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Globe className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base">Countries</span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">World Atlas</span>
-              </div>
-            </Link>
-            <Link to="/hives" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
-              <Hexagon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base">Hives</span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">Species Families</span>
-              </div>
-            </Link>
+            </div>
             <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
               <BookOpen className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
@@ -278,6 +278,13 @@ const Header = () => {
               <div className="flex flex-col leading-tight">
                 <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
                 <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
+              </div>
+            </Link>
+            <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 group">
+              <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
+                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
               </div>
             </Link>
           </nav>
