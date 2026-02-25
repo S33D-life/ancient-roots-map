@@ -282,7 +282,7 @@ const HivePage = () => {
               {trees.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground font-serif">No Ancient Friends mapped in this hive yet.</p>
-                  <Button onClick={() => navigate("/map")} variant="outline" className="mt-4 font-serif gap-2">
+                  <Button onClick={() => navigate(`/map?hive=${family}&origin=hive`)} variant="outline" className="mt-4 font-serif gap-2">
                     <Map className="w-4 h-4" /> Open Atlas
                   </Button>
                 </div>

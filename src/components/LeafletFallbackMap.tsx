@@ -1,4 +1,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import MapContextIndicator from "./MapContextIndicator";
+import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
+import { getHiveBySlug } from "@/utils/hiveUtils";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
@@ -80,6 +83,9 @@ interface LeafletFallbackMapProps {
   initialZoom?: number;
   initialW3w?: string;
   initialTreeId?: string;
+  initialCountry?: string;
+  initialHive?: string;
+  initialOrigin?: string;
   onFullscreenToggle?: () => void;
   isFullscreen?: boolean;
 }
@@ -424,7 +430,7 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, onFullscreenToggle, isFullscreen }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, onFullscreenToggle, isFullscreen }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -510,6 +516,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [watersCommonsLoading, setWatersCommonsLoading] = useState(false);
   const [watersCommonsPois, setWatersCommonsPois] = useState<LandscapePOI[]>([]);
   const [watersCommonsWhisper, setWatersCommonsWhisper] = useState<string | null>(null);
+
+  // Deep-link context state
+  const [contextLabel, setContextLabel] = useState<string | null>(null);
+  const deepLinkAppliedRef = useRef(false);
 
   // hiveMap moved after filteredTrees declaration
 
@@ -720,6 +730,59 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       seedLayerRef.current = null;
     };
   }, []);
+
+  // Deep-link: auto-apply country/hive/species filters and zoom
+  useEffect(() => {
+    if (deepLinkAppliedRef.current) return;
+    const map = mapRef.current;
+    if (!map) return;
+    // Wait a tick for map to be ready
+    const timer = setTimeout(() => {
+      if (deepLinkAppliedRef.current) return;
+      deepLinkAppliedRef.current = true;
+
+      let label: string | null = null;
+
+      // Country deep-link: zoom to bounding box
+      if (initialCountry) {
+        const entry = getEntryBySlug(initialCountry);
+        if (entry?.bbox) {
+          const [south, west, north, east] = entry.bbox;
+          map.fitBounds([[south, west], [north, east]], { padding: [20, 20], animate: true, duration: 1.5 });
+          label = `${entry.flag} ${entry.country}`;
+        }
+      }
+
+      // Hive deep-link: auto-apply species filter for the hive
+      if (initialHive) {
+        const hive = getHiveBySlug(initialHive);
+        if (hive) {
+          // Set species filter to representative species
+          const speciesNames = hive.representativeSpecies.slice(0, 10);
+          if (speciesNames.length > 0) {
+            setSpecies(speciesNames);
+          }
+          label = label ? `${label} · ${hive.displayName}` : `${hive.icon} ${hive.displayName}`;
+        }
+      }
+
+      // Species deep-link (from URL param, single species)
+      if (!initialHive && trees.length > 0) {
+        const params = new URLSearchParams(window.location.search);
+        const speciesParam = params.get("species");
+        if (speciesParam) {
+          setSpecies([speciesParam]);
+          label = label || `🌿 ${speciesParam}`;
+        }
+      }
+
+      if (label) {
+        setContextLabel(label);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [initialCountry, initialHive, trees.length]);
+
 
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
@@ -2119,6 +2182,20 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           ✦ {discoveryCount} new {discoveryCount === 1 ? "tree" : "trees"} discovered
         </div>
       )}
+
+      {/* Context indicator for deep-linked views */}
+      <MapContextIndicator
+        label={contextLabel}
+        treeCount={filteredTrees.length}
+        origin={initialOrigin}
+        onClear={() => {
+          setContextLabel(null);
+          setSpecies([]);
+          const map = mapRef.current;
+          if (map) map.setView([25, 10], 3, { animate: true });
+          window.history.replaceState(null, "", "/map");
+        }}
+      />
 
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (

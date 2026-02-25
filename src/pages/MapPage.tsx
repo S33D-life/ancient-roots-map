@@ -21,6 +21,9 @@ const MapPage = () => {
   const paramZoom = searchParams.get("zoom") ? parseFloat(searchParams.get("zoom")!) : undefined;
   const paramSpecies = searchParams.get("species") || undefined;
   const paramTreeId = searchParams.get("treeId") || undefined;
+  const paramCountry = searchParams.get("country") || undefined;
+  const paramHive = searchParams.get("hive") || undefined;
+  const paramOrigin = searchParams.get("origin") || undefined;
 
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
@@ -35,7 +38,7 @@ const MapPage = () => {
 
   return (
     <div className="fixed inset-0 z-[10] bg-background">
-      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} />
+      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramOrigin} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} />
       
       {/* Standard header — hidden in fullscreen */}
       {!isFullscreen && <Header />}
