@@ -22,6 +22,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import LibraryRoomTabs from "@/components/LibraryRoomTabs";
 import { toast } from "sonner";
+import CollaboratorShelf from "@/components/CollaboratorShelf";
+import { useCommunityVolumes } from "@/hooks/use-collaborator-volumes";
+import CollaboratorVolumeCard from "@/components/CollaboratorVolumeCard";
 import { MapPin, Plus, Image as ImageIcon, FileText, Music, Link as LinkIcon, Upload, Download, Loader2, Heart, Trash2, Wand2, Radio, ChevronDown, Save, Share2, ExternalLink, Eye, Maximize2, Minimize2, Users, User, Globe, Map, Archive, Sparkles } from "lucide-react";
 import {
   getSpiralStaffs,
@@ -1428,6 +1431,17 @@ const GalleryPage = () => {
 
           <TabsContent value="wishlist" className="space-y-6">
             <WishingTreeUnified />
+          </TabsContent>
+
+          {/* Volumes Tab — Collaborator Volumes */}
+          <TabsContent value="volumes" className="space-y-6">
+            {currentUserId ? (
+              <CollaboratorShelf userId={currentUserId} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-sm text-muted-foreground font-serif">Sign in to manage your Collaborator Volumes.</p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Vaults Tab */}
