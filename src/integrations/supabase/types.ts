@@ -2345,8 +2345,10 @@ export type Database = {
           girth_cm: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
+          is_churchyard_tree: boolean | null
           latitude: number | null
           lineage: string | null
+          linked_churchyard_id: string | null
           longitude: number | null
           name: string
           nation: string | null
@@ -2370,8 +2372,10 @@ export type Database = {
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
+          is_churchyard_tree?: boolean | null
           latitude?: number | null
           lineage?: string | null
+          linked_churchyard_id?: string | null
           longitude?: number | null
           name: string
           nation?: string | null
@@ -2395,8 +2399,10 @@ export type Database = {
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
+          is_churchyard_tree?: boolean | null
           latitude?: number | null
           lineage?: string | null
+          linked_churchyard_id?: string | null
           longitude?: number | null
           name?: string
           nation?: string | null
@@ -2408,6 +2414,68 @@ export type Database = {
           species?: string
           state?: string | null
           updated_at?: string
+          what3words?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trees_linked_churchyard_id_fkey"
+            columns: ["linked_churchyard_id"]
+            isOneToOne: false
+            referencedRelation: "uk_churchyards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      uk_churchyards: {
+        Row: {
+          address: string | null
+          church_name: string
+          created_at: string
+          denomination: string | null
+          id: string
+          last_mapped_at: string | null
+          latitude: number | null
+          longitude: number | null
+          oldest_tree_estimate: number | null
+          region: string
+          submitted_by: string | null
+          trees_mapped_count: number
+          updated_at: string
+          verified: boolean
+          what3words: string | null
+        }
+        Insert: {
+          address?: string | null
+          church_name: string
+          created_at?: string
+          denomination?: string | null
+          id?: string
+          last_mapped_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          oldest_tree_estimate?: number | null
+          region?: string
+          submitted_by?: string | null
+          trees_mapped_count?: number
+          updated_at?: string
+          verified?: boolean
+          what3words?: string | null
+        }
+        Update: {
+          address?: string | null
+          church_name?: string
+          created_at?: string
+          denomination?: string | null
+          id?: string
+          last_mapped_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          oldest_tree_estimate?: number | null
+          region?: string
+          submitted_by?: string | null
+          trees_mapped_count?: number
+          updated_at?: string
+          verified?: boolean
           what3words?: string | null
         }
         Relationships: []
