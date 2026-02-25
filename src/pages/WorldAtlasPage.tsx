@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
+import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 
@@ -286,7 +288,8 @@ const WorldAtlasPage = () => {
 
   return (
     <PageShell>
-      <div className="min-h-screen pb-24">
+      <Header />
+      <div className="min-h-screen pb-24 pt-16">
 
         {/* ─── A) Hero / Threshold ─── */}
         <section className="relative px-4 pt-10 pb-6 text-center overflow-hidden">
@@ -638,6 +641,7 @@ const WorldAtlasPage = () => {
           </div>
         </section>
       </div>
+      <BottomNav />
     </PageShell>
   );
 };
