@@ -355,6 +355,7 @@ const TreeDetailPage = () => {
             treeLat={tree.latitude}
             treeLng={tree.longitude}
             userId={userId}
+            treeSpecies={tree.species}
           />
         </div>
 
