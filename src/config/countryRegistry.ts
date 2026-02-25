@@ -154,6 +154,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
       "A research layer honouring Greece's legendary planes, olives, and sacred groves.",
     sourceLabel: "Heritage records",
   },
+  {
+    country: "Canada",
+    slug: "canada",
+    flag: "🇨🇦",
+    descriptor: "Champion & Heritage Trees",
+    portalTitle: "Canada — Champion & Heritage Trees",
+    portalSubtitle:
+      "A research layer honouring Canada's ancient cedars, old-growth giants, and boreal elders.",
+    sourceLabel: "Heritage records",
+  },
 ];
 
 export default COUNTRY_REGISTRY;
