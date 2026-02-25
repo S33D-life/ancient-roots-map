@@ -144,6 +144,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
       "A research layer celebrating Colombia's extraordinary biodiversity and heritage trees.",
     sourceLabel: "Heritage records",
   },
+  {
+    country: "Greece",
+    slug: "greece",
+    flag: "🇬🇷",
+    descriptor: "Ancient & Sacred Trees",
+    portalTitle: "Greece — Ancient & Sacred Trees",
+    portalSubtitle:
+      "A research layer honouring Greece's legendary planes, olives, and sacred groves.",
+    sourceLabel: "Heritage records",
+  },
 ];
 
 export default COUNTRY_REGISTRY;
