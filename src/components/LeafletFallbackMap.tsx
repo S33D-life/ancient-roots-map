@@ -463,7 +463,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showExternalTrees, setShowExternalTrees] = useState(false);
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
   const [showHiveLayer, setShowHiveLayer] = useState(false);
-  const [showResearchLayer, setShowResearchLayer] = useState(false);
+  const [showResearchLayer, setShowResearchLayer] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('research') === 'on';
+    } catch { return false; }
+  });
   const [researchTreeCount, setResearchTreeCount] = useState(0);
   const [researchLoading, setResearchLoading] = useState(false);
   const [birdsongSeason, setBirdsongSeason] = useState<string>("all");
@@ -1661,7 +1666,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         .from('research_trees')
         .select('id,species_scientific,species_common,tree_name,locality_text,province,latitude,longitude,geo_precision,description,height_m,girth_or_stem,crown_spread,designation_type,source_doc_title,source_doc_url,source_doc_year,source_program,status')
         .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+        .not('longitude', 'is', null)
+        .limit(5000);
 
       setResearchLoading(false);
 
@@ -2171,7 +2177,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   {[
                     { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
                     { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
-                    { label: "📜 Champion Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "DFFE" },
+                    { label: "📜 Research Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
                     { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : `${enabledSources.length} src` },
                   ].map((layer) => (
                     <button
