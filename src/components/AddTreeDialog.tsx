@@ -73,6 +73,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const navigate = useNavigate();
   const dragCounter = useRef(0);
   const w3wInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -799,6 +800,18 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   </div>
                 </div>
 
+                {/* Hidden persistent file input for mobile compatibility */}
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoDrop(file);
+                    e.target.value = '';
+                  }}
+                />
                 {/* Drop zone for what3words photo */}
                 <div
                   className={`relative rounded-lg border-2 border-dashed p-4 text-center transition-all cursor-pointer ${
@@ -813,14 +826,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   }}
                   onClick={() => {
                     if (!extractingPhoto) {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'image/*';
-                      input.onchange = (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0];
-                        if (file) handlePhotoDrop(file);
-                      };
-                      input.click();
+                      photoInputRef.current?.click();
                     }
                   }}
                 >
