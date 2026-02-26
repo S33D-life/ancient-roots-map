@@ -38,6 +38,9 @@ import CanopyVisitsTimeline from "@/components/CanopyVisitsTimeline";
 import TreeMarkets from "@/components/TreeMarkets";
 import StewardshipLeaderboard from "@/components/StewardshipLeaderboard";
 import LinkedVolumesPanel from "@/components/LinkedVolumesPanel";
+import SendWhisperModal from "@/components/SendWhisperModal";
+import WhisperCollector from "@/components/WhisperCollector";
+import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -73,6 +76,8 @@ const TreeDetailPage = () => {
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
+  const [whisperModalOpen, setWhisperModalOpen] = useState(false);
+  const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -95,6 +100,12 @@ const TreeDetailPage = () => {
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
+
+  // Check for available whispers at this tree
+  useEffect(() => {
+    if (!userId || !tree) return;
+    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+  }, [userId, tree]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -401,6 +412,38 @@ const TreeDetailPage = () => {
 
         {/* Cycle Markets for this tree */}
         <TreeMarkets treeId={id!} treeSpecies={tree.species} />
+
+        {/* Whisper Button */}
+        {userId && tree && (
+          <div className="mb-6">
+            <Button
+              onClick={() => setWhisperModalOpen(true)}
+              variant="outline"
+              className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Send a Whisper Through This Tree
+            </Button>
+          </div>
+        )}
+
+        {/* Whisper Collector — available whispers at this tree */}
+        {availableWhispers.length > 0 && userId && tree && (
+          <div className="mb-6">
+            <WhisperCollector
+              whispers={availableWhispers}
+              userId={userId}
+              treeId={tree.id}
+              treeName={tree.name}
+              onCollected={() => {
+                // Refresh available whispers
+                if (userId && tree) {
+                  checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                }
+              }}
+            />
+          </div>
+        )}
 
         {/* Birdsong Offering Button */}
         <div className="mb-6">
@@ -716,6 +759,16 @@ const TreeDetailPage = () => {
         treeLng={tree?.longitude}
         onCheckinComplete={refetchCheckins}
       />
+
+      {tree && (
+        <SendWhisperModal
+          open={whisperModalOpen}
+          onOpenChange={setWhisperModalOpen}
+          treeId={tree.id}
+          treeName={tree.name}
+          treeSpecies={tree.species}
+        />
+      )}
 
       {/* Edit proposal nudge — appears once per tree */}
       <ContextualWhisper

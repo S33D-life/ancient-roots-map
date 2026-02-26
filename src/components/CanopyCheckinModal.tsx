@@ -10,6 +10,8 @@ import { issueRewards } from "@/utils/issueRewards";
 import type { RewardResult } from "@/utils/issueRewards";
 import RewardReceipt from "@/components/RewardReceipt";
 import PostEncounterShare from "@/components/PostEncounterShare";
+import WhisperCollector from "@/components/WhisperCollector";
+import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -85,6 +87,7 @@ export default function CanopyCheckinModal({
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
   const [showShareOverlay, setShowShareOverlay] = useState(false);
+  const [checkinWhispers, setCheckinWhispers] = useState<TreeWhisper[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -181,6 +184,11 @@ export default function CanopyCheckinModal({
       }
     }
 
+    // Check for whispers at this tree
+    if (userId) {
+      checkWhispersAtTree(userId, treeId, treeSpecies).then(setCheckinWhispers);
+    }
+
     setSubmitted(true);
     setSubmitting(false);
     setShowReceipt(true);
@@ -274,6 +282,23 @@ export default function CanopyCheckinModal({
                 >
                   Daily heart cap reached for this tree (3 per day).
                 </motion.p>
+              )}
+
+              {/* Whisper Collector — reveal whispers found at this tree */}
+              {checkinWhispers.length > 0 && userId && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.0 }}
+                  className="w-full max-w-sm"
+                >
+                  <WhisperCollector
+                    whispers={checkinWhispers}
+                    userId={userId}
+                    treeId={treeId}
+                    treeName={treeName}
+                  />
+                </motion.div>
               )}
 
               <motion.div
