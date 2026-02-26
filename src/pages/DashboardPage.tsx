@@ -331,7 +331,7 @@ const DashboardPage = () => {
   }
 
     const TAB_ITEMS = [
-      { value: "hearth", label: "Hearth", icon: Flame },
+      { value: "hearth", label: "Embers", icon: Flame },
       { value: "activity", label: "Activity", icon: Activity },
       { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length },
       { value: "leaderboard", label: "Fellowship", icon: Trophy },
