@@ -12,6 +12,7 @@ import { User } from "@supabase/supabase-js";
 import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
+import ManualStaffPicker from "@/components/ManualStaffPicker";
 import { Link } from "react-router-dom";
 
 interface VisibleFields {
@@ -346,30 +347,29 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         </CardContent>
       </Card>
 
-      {/* Active Staff */}
-      {wallet.activeStaff && (
-        <Card className="border-border/50 bg-card/60 backdrop-blur">
-          <CardContent className="p-5">
-            <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-serif">Linked Staff</h3>
-            <Link to={`/staff/${wallet.activeStaff.id}`} className="flex items-center gap-4 group">
-              <div className="w-14 h-14 rounded-lg overflow-hidden border-2 border-primary/40 shrink-0">
-                <img
-                  src={wallet.activeStaff.image_url || `/images/staffs/${wallet.activeStaff.species_code.toLowerCase()}.jpeg`}
-                  alt={wallet.activeStaff.species}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-serif text-sm text-foreground group-hover:text-primary transition-colors">{wallet.activeStaff.species}</p>
-                <p className="text-xs text-muted-foreground font-mono">{wallet.activeStaff.id}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {wallet.activeStaff.is_origin_spiral ? "Origin Spiral" : `Circle ${wallet.activeStaff.circle_id}`} · Staff #{wallet.activeStaff.staff_number}
-                </p>
-              </div>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+      {/* Manual Staff Picker */}
+      <ManualStaffPicker
+        userId={user.id}
+        currentStaffId={(wallet.activeStaff as any)?.id || null}
+        onLinked={(staff) => {
+          if (staff) {
+            wallet.selectStaff({
+              code: staff.id,
+              tokenId: staff.token_id,
+              speciesId: 0,
+              circleId: staff.circle_id,
+              variantId: 0,
+              staffNumber: staff.staff_number,
+              isOriginSpiral: staff.is_origin_spiral,
+              name: staff.species,
+              species: staff.species,
+              image: staff.image_url || `/images/staffs/${staff.species_code.toLowerCase()}.jpeg`,
+            });
+          } else {
+            wallet.clearActiveStaff();
+          }
+        }}
+      />
 
       {/* Wallet */}
       <div>
