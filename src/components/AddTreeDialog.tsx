@@ -299,57 +299,51 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   // Drag-and-drop what3words photo extraction
   const handlePhotoDrop = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
-      toast({ title: "Invalid file", description: "Please drop an image file", variant: "destructive" });
+      toast({ title: "Invalid file", description: "Please upload an image file", variant: "destructive" });
       return;
     }
     setExtractingPhoto(true);
-    // Store the file for later upload as offering
     setDroppedPhotoFile(file);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
       // Extract EXIF date from photo
       const exifDate = await extractExifDate(file);
       if (exifDate) {
         setPhotoDate(exifDate);
-        toast({ title: "Photo date found", description: new Date(exifDate).toLocaleDateString() });
       }
 
-      toast({ title: "Analyzing image…", description: "Extracting what3words address from photo" });
+      toast({ title: "📷 Photo added", description: "This will become your first offering" });
 
-      const { data, error } = await supabase.functions.invoke('extract-what3words-from-image', {
-        body: { imageData: base64 },
-      });
-      if (error) throw error;
-      if (!data.success) {
-        toast({ title: "No address found", description: data.error || "Could not find a what3words address in the image", variant: "destructive" });
-        return;
-      }
-
-      const w3w = data.what3words;
-      setWhat3words(w3w);
-      toast({ title: "Address detected!", description: `///​${w3w}` });
-
-      // Auto-convert to coordinates
+      // Silently try to extract what3words from photo as a bonus
       try {
-        const result = await convertToCoordinates(w3w);
-        if (result?.coordinates) {
-          setLat(result.coordinates.lat);
-          setLng(result.coordinates.lng);
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const { data, error } = await supabase.functions.invoke('extract-what3words-from-image', {
+          body: { imageData: base64 },
+        });
+        if (!error && data?.success && data.what3words) {
+          const w3w = data.what3words;
+          setWhat3words(w3w);
+          toast({ title: "Bonus: address detected!", description: `///​${w3w}` });
+          try {
+            const result = await convertToCoordinates(w3w);
+            if (result?.coordinates) {
+              setLat(result.coordinates.lat);
+              setLng(result.coordinates.lng);
+            }
+          } catch {
+            // silently ignore
+          }
         }
-      } catch (coordErr: any) {
-        if (coordErr?.message === 'quota_exceeded') {
-          toast({ title: "Quota reached", description: "Coordinates will be converted later", variant: "destructive" });
-        }
+      } catch {
+        // w3w extraction is optional
       }
     } catch (err) {
-      console.error('Photo drop error:', err);
-      toast({ title: "Extraction failed", description: "Could not process the image", variant: "destructive" });
+      console.error('Photo processing error:', err);
     } finally {
       setExtractingPhoto(false);
     }
@@ -701,6 +695,69 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
               onDrop={onDrop}
             >
               <div className="space-y-4">
+                {/* Hidden persistent file input for mobile compatibility */}
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoDrop(file);
+                    e.target.value = '';
+                  }}
+                />
+                {/* Photo of the tree — PRIMARY action */}
+                <div
+                  className={`relative rounded-lg border-2 border-dashed p-5 text-center transition-all cursor-pointer ${
+                    isDragging
+                      ? 'border-primary bg-primary/10 scale-[1.02]'
+                      : droppedPhotoFile
+                        ? 'border-green-600/40 hover:border-green-600/60'
+                        : 'border-border/50 hover:border-border'
+                  }`}
+                  style={{
+                    background: isDragging
+                      ? 'hsla(42, 80%, 50%, 0.08)'
+                      : droppedPhotoFile
+                        ? 'hsla(120, 30%, 15%, 0.3)'
+                        : 'hsla(0, 0%, 100%, 0.02)',
+                  }}
+                  onClick={() => {
+                    if (!extractingPhoto) {
+                      photoInputRef.current?.click();
+                    }
+                  }}
+                >
+                  {extractingPhoto ? (
+                    <div className="flex flex-col items-center gap-2 py-1">
+                      <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                      <span className="text-xs font-serif text-muted-foreground">Processing photo…</span>
+                    </div>
+                  ) : droppedPhotoFile ? (
+                    <div className="flex flex-col items-center gap-1.5 py-1">
+                      <Check className="h-5 w-5" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                      <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>
+                        📷 {droppedPhotoFile.name}
+                      </span>
+                      <span className="text-[10px] font-serif text-muted-foreground/60">
+                        This will become your first offering · Tap to change
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 py-1">
+                      <ImagePlus className="h-6 w-6" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(42, 60%, 50%)' }} />
+                      <span className="text-sm font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(42, 50%, 55%)' }}>
+                        {isDragging ? 'Drop photo here' : 'Add a photo of your tree'}
+                      </span>
+                      <span className="text-[10px] font-serif text-muted-foreground/50">
+                        Take a photo or choose from your library
+                      </span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-2 relative">
                   <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
                   <Input
@@ -772,6 +829,15 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   </div>
                 )}
 
+                {lat && lng && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg p-2" style={{ background: 'hsla(120, 30%, 20%, 0.3)', border: '1px solid hsla(120, 30%, 30%, 0.3)' }}>
+                    <span className="font-mono">📍 {lat.toFixed(6)}, {lng.toFixed(6)}</span>
+                    <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => startAdjustMode(lat, lng)}>
+                      <MapPin className="h-3 w-3 mr-1" /> Adjust
+                    </Button>
+                  </div>
+                )}
+
                 {/* Check in to existing tree */}
                 <Button
                   type="button"
@@ -799,70 +865,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     </Button>
                   </div>
                 </div>
-
-                {/* Hidden persistent file input for mobile compatibility */}
-                <input
-                  ref={photoInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePhotoDrop(file);
-                    e.target.value = '';
-                  }}
-                />
-                {/* Drop zone for what3words photo */}
-                <div
-                  className={`relative rounded-lg border-2 border-dashed p-4 text-center transition-all cursor-pointer ${
-                    isDragging
-                      ? 'border-primary bg-primary/10 scale-[1.02]'
-                      : 'border-border/50 hover:border-border'
-                  }`}
-                  style={{
-                    background: isDragging
-                      ? 'hsla(42, 80%, 50%, 0.08)'
-                      : 'hsla(0, 0%, 100%, 0.02)',
-                  }}
-                  onClick={() => {
-                    if (!extractingPhoto) {
-                      photoInputRef.current?.click();
-                    }
-                  }}
-                >
-                  {extractingPhoto ? (
-                    <div className="flex flex-col items-center gap-2 py-1">
-                      <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
-                      <span className="text-xs font-serif text-muted-foreground">Extracting address from photo…</span>
-                    </div>
-                  ) : droppedPhotoFile && !extractingPhoto ? (
-                    <div className="flex flex-col items-center gap-1.5 py-1">
-                      <Check className="h-5 w-5" style={{ color: 'hsl(120, 50%, 55%)' }} />
-                      <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>
-                        📷 {droppedPhotoFile.name} — will be your first offering
-                      </span>
-                      <span className="text-[10px] font-serif text-muted-foreground/60">
-                        Tap to choose a different photo
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1.5 py-1">
-                      <ImagePlus className="h-5 w-5" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(0, 0%, 45%)' }} />
-                      <span className="text-xs font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(0, 0%, 50%)' }}>
-                        {isDragging ? 'Drop photo here' : 'Drag a what3words photo here, or tap to browse'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {lat && lng && (
-                  <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg p-2" style={{ background: 'hsla(120, 30%, 20%, 0.3)', border: '1px solid hsla(120, 30%, 30%, 0.3)' }}>
-                    <span className="font-mono">📍 {lat.toFixed(6)}, {lng.toFixed(6)}</span>
-                    <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => startAdjustMode(lat, lng)}>
-                      <MapPin className="h-3 w-3 mr-1" /> Adjust
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           )}
