@@ -186,6 +186,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Heritage records",
     bbox: [41.2, 19.6, 81.8, 180],
   },
+  {
+    country: "France",
+    slug: "france",
+    flag: "🇫🇷",
+    descriptor: "Arbres Remarquables",
+    portalTitle: "France — Remarkable Trees",
+    portalSubtitle: "A research layer honouring France's ancient oaks, twisted beeches, and legendary forest groves.",
+    sourceLabel: "Heritage records",
+    bbox: [41.3, -5.1, 51.1, 9.6],
+  },
 ];
 
 export default COUNTRY_REGISTRY;
