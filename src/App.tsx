@@ -57,6 +57,7 @@ const UKCountryPage = lazy(() => import("./pages/UKCountryPage"));
 const USACountryPage = lazy(() => import("./pages/USACountryPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 const AddTreePage = lazy(() => import("./pages/AddTreePage"));
+const CityTemplatePage = lazy(() => import("./pages/CityTemplatePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -145,6 +146,7 @@ const App = () => {
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/united-kingdom" element={<UKCountryPage />} />
                 <Route path="/atlas/united-states" element={<USACountryPage />} />
+                <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
