@@ -7,33 +7,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search, Leaf, BookOpen, Flame } from "lucide-react";
+import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
-import { useUserOfferingCount } from "@/hooks/use-offering-counts";
+
 import hearthBg from "@/assets/hearth-bg.jpeg";
 import HearthEntrance from "@/components/HearthEntrance";
 import Footer from "@/components/Footer";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
-import WishingTreeUnified from "@/components/WishingTreeUnified";
 import DashboardProfile from "@/components/dashboard/DashboardProfile";
-import Greenhouse from "@/components/Greenhouse";
-import DashboardVault from "@/components/dashboard/DashboardVault";
 import DashboardLeaderboard from "@/components/dashboard/DashboardLeaderboard";
 import PersonalLegend from "@/components/dashboard/PersonalLegend";
 import DashboardWanderers from "@/components/dashboard/DashboardWanderers";
 import GrovePulse from "@/components/GrovePulse";
 import DashboardCanopyKeeper from "@/components/dashboard/DashboardCanopyKeeper";
-import HearthHearts from "@/components/HearthHearts";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
 import GlobalSearch from "@/components/GlobalSearch";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
 import HearthWarmth from "@/components/dashboard/HearthWarmth";
-import CollaboratorShelf from "@/components/CollaboratorShelf";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 
@@ -186,8 +181,6 @@ const DashboardPage = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [trees, setTrees] = useState<Tree[]>([]);
-  const [wishlistCount, setWishlistCount] = useState(0);
-  const [plantCount, setPlantCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { showEntrance, dismissEntrance } = useEntranceOnce("dashboard");
   const [isImporting, setIsImporting] = useState(false);
@@ -196,9 +189,6 @@ const DashboardPage = () => {
   const [showIdentityBloom, setShowIdentityBloom] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Unified offering count — consistent across all surfaces
-  const { count: offeringCount } = useUserOfferingCount(user?.id ?? null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -210,7 +200,6 @@ const DashboardPage = () => {
         setTimeout(() => {
           fetchProfile(session.user.id);
           fetchUserTrees(session.user.id);
-          fetchPlantCount(session.user.id);
         }, 0);
       }
     });
@@ -223,7 +212,6 @@ const DashboardPage = () => {
       } else {
         fetchProfile(session.user.id);
         fetchUserTrees(session.user.id);
-        fetchPlantCount(session.user.id);
       }
       setLoading(false);
     });
@@ -247,10 +235,6 @@ const DashboardPage = () => {
     setTrees(data || []);
   };
 
-  const fetchPlantCount = async (userId: string) => {
-    const { count } = await supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId);
-    setPlantCount(count || 0);
-  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -348,12 +332,10 @@ const DashboardPage = () => {
 
     const TAB_ITEMS = [
       { value: "hearth", label: "Hearth", icon: Flame },
-      { value: "legend", label: "Legend", icon: ScrollText },
       { value: "activity", label: "Activity", icon: Activity },
-      { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
-      { value: "search", label: "Search", icon: Search },
-      { value: "hearts", label: "Hearts", icon: Heart },
+      { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length },
       { value: "leaderboard", label: "Fellowship", icon: Trophy },
+      { value: "search", label: "Search", icon: Search },
       { value: "profile", label: "Settings", icon: Settings },
     ];
 
@@ -432,28 +414,25 @@ const DashboardPage = () => {
             </TabsList>
 
             <TabsContent value="hearth">
-              {user && <HearthWarmth userId={user.id} />}
-            </TabsContent>
-
-            <TabsContent value="legend">
               {user && (
                 <div className="space-y-8">
                   <GrovePulse userId={user.id} />
-                  <PersonalLegend userId={user.id} />
+                  <HearthWarmth userId={user.id} />
                 </div>
               )}
             </TabsContent>
 
             <TabsContent value="activity">
-              {user && <DashboardActivity userId={user.id} />}
+              {user && (
+                <div className="space-y-8">
+                  <DashboardActivity userId={user.id} />
+                  <PersonalLegend userId={user.id} />
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="search">
               <GlobalSearch open={true} onClose={() => {}} embedded />
-            </TabsContent>
-
-            <TabsContent value="hearts">
-              {user && <HearthHearts userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="pod">
@@ -474,28 +453,6 @@ const DashboardPage = () => {
                 {/* Section: Trees You Sit Beneath */}
                 <PodSection icon={Leaf} label="Trees You Sit Beneath" accent>
                   {user && <DashboardCanopyKeeper userId={user.id} />}
-                </PodSection>
-
-                {/* Section: Wishlist */}
-                <PodSection icon={Star} label="Wishlist" count={wishlistCount} accent>
-                  {user && (
-                    <WishingTreeUnified compact onCountChange={setWishlistCount} />
-                  )}
-                </PodSection>
-
-                {/* Section: Seed Pods */}
-                <PodSection icon={Sprout} label="Seed Pods" count={plantCount}>
-                  <Greenhouse />
-                </PodSection>
-
-                {/* Section: Collaborator Volumes */}
-                <PodSection icon={BookOpen} label="Collaborator Volumes">
-                  {user && <CollaboratorShelf userId={user.id} />}
-                </PodSection>
-
-                {/* Section: IAM Heartwood Vault */}
-                <PodSection icon={Archive} label="IAM Heartwood Vault" accent>
-                  {user && <DashboardVault userId={user.id} />}
                 </PodSection>
               </div>
             </TabsContent>
