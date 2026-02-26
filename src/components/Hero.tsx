@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous, ExternalLink, Star, Users2 } from "lucide-react";
+import LivingCensus from "@/components/LivingCensus";
 import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
@@ -169,53 +170,11 @@ const FallingLeaves = () => {
 };
 
 
-const AnimatedCounter = ({ target, label }: { target: number; label: string }) => {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
-  const lastTarget = useRef(0);
-
-  useEffect(() => {
-    // Reset animation flag when target changes from 0 to a real value
-    if (target > 0 && lastTarget.current === 0) {
-      hasAnimated.current = false;
-    }
-    lastTarget.current = target;
-
-    const el = ref.current;
-    if (!el || target === 0) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 1500;
-          const start = performance.now();
-          const animate = (now: number) => {
-            const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.round(eased * target));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [target]);
-
-  return (
-    <div className="space-y-2" ref={ref}>
-      <div className="text-4xl md:text-4xl font-serif font-bold text-mystical">{count.toLocaleString()}</div>
-      <div className="text-xs md:text-sm text-muted-foreground">{label}</div>
-    </div>
-  );
-};
+// AnimatedCounter removed — replaced by LivingCensus component
 
 const Hero = () => {
   const [isDark, setIsDark] = useState(!document.documentElement.classList.contains('light'));
-  const [stats, setStats] = useState({ trees: 0, species: 0, nations: 0 });
+  
   const [isHovering, setIsHovering] = useState(false);
   const [visitorNumber, setVisitorNumber] = useState<number | null>(null);
   const [friendIndex, setFriendIndex] = useState(0);
@@ -269,21 +228,7 @@ const Hero = () => {
     img2.src = nextFriend.image;
   }, [currentFriend, nextFriend]);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      // Use count-only queries to avoid 1000-row limit
-      const [treesRes, speciesRes] = await Promise.all([
-        supabase.from('trees').select('id', { count: 'exact', head: true }),
-        supabase.from('trees').select('species, nation'),
-      ]);
-      const treeCount = treesRes.count || 0;
-      const data = speciesRes.data || [];
-      const species = new Set(data.map(t => t.species).filter(Boolean));
-      const nations = new Set(data.map(t => t.nation).filter(Boolean));
-      setStats({ trees: treeCount, species: species.size, nations: nations.size });
-    };
-    fetchStats();
-  }, []);
+  
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -351,12 +296,8 @@ const Hero = () => {
 
         {/* Bottom stack: Stats → CTA buttons → Teotag → Ancient Friend */}
         <div className="flex flex-col items-center gap-3 px-4 mt-6">
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto w-full">
-            <AnimatedCounter target={stats.trees} label="Ancient Trees" />
-            <AnimatedCounter target={stats.species} label="Species Mapped" />
-            <AnimatedCounter target={stats.nations} label="Nations" />
-          </div>
+          {/* Living Census — real-time global counter */}
+          <LivingCensus />
 
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none pt-2">
