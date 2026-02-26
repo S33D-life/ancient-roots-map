@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useReferrals } from "@/hooks/use-referrals";
@@ -7,12 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
-  Gift, TreeDeciduous, Heart, Copy, Users, ArrowLeft, Loader2, Sprout, Share2,
+  Gift, TreeDeciduous, Heart, Copy, Users, ArrowLeft, Loader2, Sprout, Share2, Milestone,
 } from "lucide-react";
+
+/* ── Milestones — presented as grove growth, not leaderboard ── */
+const MILESTONES = [
+  { count: 1, label: "First Seed", emoji: "🌱" },
+  { count: 3, label: "Sapling Grove", emoji: "🌿" },
+  { count: 7, label: "Young Canopy", emoji: "🌳" },
+  { count: 15, label: "Spreading Roots", emoji: "🌲" },
+  { count: 30, label: "Ancient Network", emoji: "🏛️" },
+];
 
 const ReferralsPage = () => {
   const [userId, setUserId] = useState<string | null>(null);
@@ -23,12 +33,8 @@ const ReferralsPage = () => {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        navigate("/auth");
-        return;
-      }
+      if (!user) { navigate("/auth"); return; }
       setUserId(user.id);
-      // Fetch existing invite link
       supabase
         .from("invite_links")
         .select("code")
@@ -36,13 +42,29 @@ const ReferralsPage = () => {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle()
-        .then(({ data }) => {
-          if (data) setInviteCode(data.code);
-        });
+        .then(({ data }) => { if (data) setInviteCode(data.code); });
     });
   }, [navigate]);
 
   const { referrals, referredBy, totalTreesFromReferrals, loading } = useReferrals(userId ?? undefined);
+
+  // Milestone progress
+  const currentMilestone = useMemo(() => {
+    for (let i = MILESTONES.length - 1; i >= 0; i--) {
+      if (referrals.length >= MILESTONES[i].count) return MILESTONES[i];
+    }
+    return null;
+  }, [referrals.length]);
+
+  const nextMilestone = useMemo(() => {
+    return MILESTONES.find(m => m.count > referrals.length) || null;
+  }, [referrals.length]);
+
+  const milestoneProgress = nextMilestone
+    ? Math.min(100, (referrals.length / nextMilestone.count) * 100)
+    : 100;
+
+  const heartsFromNetwork = totalTreesFromReferrals * 10;
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -55,7 +77,7 @@ const ReferralsPage = () => {
       ta.style.opacity = "0";
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand("copy"); } catch { /* noop */ }
+      try { document.execCommand("copy"); } catch {}
       document.body.removeChild(ta);
       return true;
     }
@@ -83,6 +105,20 @@ const ReferralsPage = () => {
 
   const shareLink = inviteCode ? `${window.location.origin}/auth?invite=${inviteCode}` : null;
 
+  const shareVia = (platform: "whatsapp" | "telegram" | "native") => {
+    if (!shareLink) return;
+    const text = "🌳 Join me in the Living Atlas of Ancient Friends. Map trees, earn hearts, grow a grove.";
+    const fullText = `${text}\n\n${shareLink}`;
+
+    if (platform === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, "_blank");
+    } else if (platform === "telegram") {
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(text)}`, "_blank");
+    } else if (navigator.share) {
+      navigator.share({ title: "S33D.life — Ancient Friends", text, url: shareLink }).catch(() => {});
+    }
+  };
+
   if (!userId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -94,7 +130,7 @@ const ReferralsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <main className="container max-w-2xl mx-auto px-4 py-8 pb-24 space-y-6">
         {/* Back */}
         <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground font-serif">
           <ArrowLeft className="w-4 h-4" /> Back to Hearth
@@ -105,10 +141,17 @@ const ReferralsPage = () => {
           <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
             <Gift className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-serif">Referral Impact</h1>
+          <h1 className="text-3xl font-serif">Your Grove</h1>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            See the ripple effect of your ancient friend connections. Every wanderer you invite plants seeds in the grove.
+            See the living network you've grown. Every wanderer you invite plants seeds in the grove.
           </p>
+
+          {/* Grove Spread Badge */}
+          {referrals.length > 0 && (
+            <Badge variant="outline" className="text-xs border-primary/40 font-serif gap-1">
+              🌿 Grove Spread: {referrals.length}
+            </Badge>
+          )}
         </div>
 
         {/* Stats */}
@@ -130,11 +173,35 @@ const ReferralsPage = () => {
           <Card className="bg-card/50 backdrop-blur border-border/40 text-center">
             <CardContent className="p-4">
               <Heart className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-3xl font-serif text-foreground">{totalTreesFromReferrals * 10}</p>
-              <p className="text-[10px] text-muted-foreground">Hearts Inspired</p>
+              <p className="text-3xl font-serif text-foreground">{heartsFromNetwork}</p>
+              <p className="text-[10px] text-muted-foreground">Hearts from Network</p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Milestone Progress */}
+        {nextMilestone && (
+          <Card className="bg-card/50 backdrop-blur border-border/40">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center justify-between text-xs font-serif">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  {currentMilestone ? (
+                    <span>{currentMilestone.emoji} {currentMilestone.label}</span>
+                  ) : (
+                    <span>🌰 Getting Started</span>
+                  )}
+                </span>
+                <span className="text-primary/70">
+                  {nextMilestone.emoji} {nextMilestone.label} ({nextMilestone.count})
+                </span>
+              </div>
+              <Progress value={milestoneProgress} className="h-2" />
+              <p className="text-[10px] text-muted-foreground text-center">
+                {nextMilestone.count - referrals.length} more wanderer{nextMilestone.count - referrals.length !== 1 ? "s" : ""} to reach {nextMilestone.label}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Referred by */}
         {referredBy && (
@@ -153,32 +220,60 @@ const ReferralsPage = () => {
           <CardHeader className="pb-3">
             <CardTitle className="font-serif text-lg flex items-center gap-2">
               <Share2 className="w-5 h-5 text-primary" />
-              Your Invite Link
+              Invite to the Grove
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {shareLink ? (
-              <div className="flex gap-2">
-                <Input
-                  value={shareLink}
-                  readOnly
-                  className="font-mono text-xs"
-                  onClick={(e) => (e.target as HTMLInputElement).select()}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0 gap-1 font-serif"
-                  onClick={async () => {
-                    await copyToClipboard(shareLink);
-                    toast({ title: "Copied!", description: "Link copied to clipboard" });
-                  }}
-                >
-                  <Copy className="w-3.5 h-3.5" /> Copy
-                </Button>
-              </div>
+              <>
+                <div className="flex gap-2">
+                  <Input
+                    value={shareLink}
+                    readOnly
+                    className="font-mono text-xs"
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 gap-1 font-serif min-h-[44px]"
+                    onClick={async () => {
+                      await copyToClipboard(shareLink);
+                      toast({ title: "Copied!", description: "Link copied to clipboard" });
+                    }}
+                  >
+                    <Copy className="w-3.5 h-3.5" /> Copy
+                  </Button>
+                </div>
+
+                {/* Quick share buttons — 1 tap */}
+                <div className="flex gap-2">
+                  {typeof navigator !== "undefined" && "share" in navigator && (
+                    <Button
+                      onClick={() => shareVia("native")}
+                      className="flex-1 font-serif text-xs gap-1.5 min-h-[44px]"
+                    >
+                      <Share2 className="w-3.5 h-3.5" /> Share
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => shareVia("whatsapp")}
+                    className="flex-1 font-serif text-xs gap-1.5 min-h-[44px]"
+                  >
+                    💬 WhatsApp
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => shareVia("telegram")}
+                    className="flex-1 font-serif text-xs gap-1.5 min-h-[44px]"
+                  >
+                    ✈️ Telegram
+                  </Button>
+                </div>
+              </>
             ) : (
-              <Button onClick={generateInvite} disabled={generating} className="w-full font-serif gap-1">
+              <Button onClick={generateInvite} disabled={generating} className="w-full font-serif gap-1 min-h-[44px]">
                 {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />}
                 Generate Invite Link
               </Button>
@@ -186,17 +281,6 @@ const ReferralsPage = () => {
             <p className="text-[11px] text-muted-foreground">
               Share this link with friends. When they sign up and map trees, you'll see the impact here.
             </p>
-            {inviteCode && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Or share code:</span>
-                <Badge variant="outline" className="font-mono cursor-pointer" onClick={async () => {
-                  await copyToClipboard(inviteCode);
-                  toast({ title: "Code copied!" });
-                }}>
-                  {inviteCode} <Copy className="w-2.5 h-2.5 ml-1" />
-                </Badge>
-              </div>
-            )}
           </CardContent>
         </Card>
 

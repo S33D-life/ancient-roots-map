@@ -9,6 +9,7 @@ import { haversineKm } from "@/utils/mapGeometry";
 import { issueRewards } from "@/utils/issueRewards";
 import type { RewardResult } from "@/utils/issueRewards";
 import RewardReceipt from "@/components/RewardReceipt";
+import PostEncounterShare from "@/components/PostEncounterShare";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -24,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
   Loader2, MapPin, Leaf, Sun, Cloud, CloudRain,
-  Snowflake, Wind, Camera, Heart, TreeDeciduous, CheckCircle2,
+  Snowflake, Wind, Camera, Heart, TreeDeciduous, CheckCircle2, Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -83,6 +84,7 @@ export default function CanopyCheckinModal({
   const [submitted, setSubmitted] = useState(false);
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showShareOverlay, setShowShareOverlay] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -101,6 +103,7 @@ export default function CanopyCheckinModal({
       setSubmitted(false);
       setRewardResult(null);
       setSoftMode(false);
+      setShowShareOverlay(false);
       checkGeo();
     }
   }, [open]);
@@ -277,9 +280,16 @@ export default function CanopyCheckinModal({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.9 }}
+                className="flex gap-2"
               >
-                <Button onClick={() => onOpenChange(false)} className="font-serif mt-2">
+                <Button onClick={() => onOpenChange(false)} variant="outline" className="font-serif mt-2">
                   Return
+                </Button>
+                <Button
+                  onClick={() => setShowShareOverlay(true)}
+                  className="font-serif mt-2 gap-1.5"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Share
                 </Button>
               </motion.div>
             </div>
@@ -296,6 +306,14 @@ export default function CanopyCheckinModal({
             actionLabel={`Check-in at ${treeName}`}
           />
         )}
+
+        <PostEncounterShare
+          visible={showShareOverlay}
+          onDismiss={() => setShowShareOverlay(false)}
+          treeName={treeName}
+          treeSpecies={treeSpecies}
+          shareLink={`${window.location.origin}/tree/${treeId}`}
+        />
       </>
     );
   }
