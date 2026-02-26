@@ -34,7 +34,7 @@ export default function CuratorAssignPanel({ staffCode, onAssigned }: CuratorAss
     if (loaded) return;
     const [staffRes, profileRes] = await Promise.all([
       supabase.from("staffs").select("owner_user_id").eq("id", staffCode).single(),
-      supabase.from("profiles").select("id, full_name, avatar_url").eq("is_discoverable", true).order("full_name"),
+      supabase.rpc("search_discoverable_profiles", { search_query: "", result_limit: 100 }),
     ]);
     const ownerId = staffRes.data?.owner_user_id || null;
     setCurrentOwnerId(ownerId);
