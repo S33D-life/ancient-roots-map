@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus, Users, AlertTriangle } from "lucide-react";
+import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus, Users, AlertTriangle, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 import maplibregl from "maplibre-gl";
@@ -695,12 +695,24 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
               onDrop={onDrop}
             >
               <div className="space-y-4">
-                {/* Hidden persistent file input for mobile compatibility */}
+                {/* Hidden file input for CAMERA capture */}
                 <input
                   ref={photoInputRef}
                   type="file"
                   accept="image/*"
                   capture="environment"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoDrop(file);
+                    e.target.value = '';
+                  }}
+                />
+                {/* Hidden file input for LIBRARY selection (no capture attr) */}
+                <input
+                  id="photo-library-input"
+                  type="file"
+                  accept="image/*"
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
@@ -724,11 +736,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                         ? 'hsla(120, 30%, 15%, 0.3)'
                         : 'hsla(0, 0%, 100%, 0.02)',
                   }}
-                  onClick={() => {
-                    if (!extractingPhoto) {
-                      photoInputRef.current?.click();
-                    }
-                  }}
                 >
                   {extractingPhoto ? (
                     <div className="flex flex-col items-center gap-2 py-1">
@@ -736,7 +743,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       <span className="text-xs font-serif text-muted-foreground">Processing photo…</span>
                     </div>
                   ) : droppedPhotoFile ? (
-                    <div className="flex flex-col items-center gap-1.5 py-1">
+                    <div className="flex flex-col items-center gap-1.5 py-1" onClick={() => photoInputRef.current?.click()}>
                       <Check className="h-5 w-5" style={{ color: 'hsl(120, 50%, 55%)' }} />
                       <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>
                         📷 {droppedPhotoFile.name}
@@ -746,14 +753,39 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       </span>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-2 py-1">
+                    <div className="flex flex-col items-center gap-3 py-2">
                       <ImagePlus className="h-6 w-6" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(42, 60%, 50%)' }} />
                       <span className="text-sm font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(42, 50%, 55%)' }}>
                         {isDragging ? 'Drop photo here' : 'Add a photo of your tree'}
                       </span>
-                      <span className="text-[10px] font-serif text-muted-foreground/50">
-                        Take a photo or choose from your library
-                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            photoInputRef.current?.click();
+                          }}
+                        >
+                          <Camera className="h-3.5 w-3.5 mr-1" />
+                          Take Photo
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            document.getElementById('photo-library-input')?.click();
+                          }}
+                        >
+                          <ImagePlus className="h-3.5 w-3.5 mr-1" />
+                          Choose from Library
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
