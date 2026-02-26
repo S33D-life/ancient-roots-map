@@ -59,6 +59,7 @@ const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 const AddTreePage = lazy(() => import("./pages/AddTreePage"));
 const CityTemplatePage = lazy(() => import("./pages/CityTemplatePage"));
 const WhispersPage = lazy(() => import("./pages/WhispersPage"));
+const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -151,6 +152,7 @@ const App = () => {
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 <Route path="/whispers" element={<WhispersPage />} />
+                <Route path="/api/docs" element={<ApiDocsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
