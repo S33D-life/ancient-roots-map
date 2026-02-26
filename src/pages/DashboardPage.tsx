@@ -27,6 +27,8 @@ import GrovePulse from "@/components/GrovePulse";
 import DashboardCanopyKeeper from "@/components/dashboard/DashboardCanopyKeeper";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
+import SpeciesDiscoveryTrail from "@/components/SpeciesDiscoveryTrail";
+import SeasonalRitualCalendar from "@/components/SeasonalRitualCalendar";
 import GlobalSearch from "@/components/GlobalSearch";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
@@ -420,6 +422,8 @@ const DashboardPage = () => {
                 <div className="space-y-8">
                   <FirstEncounterFunnel userId={user.id} />
                   <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
+                  <SpeciesDiscoveryTrail userId={user.id} />
+                  <SeasonalRitualCalendar />
                   <GrovePulse userId={user.id} />
                   <HearthWarmth userId={user.id} />
                 </div>

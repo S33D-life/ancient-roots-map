@@ -19,6 +19,9 @@ import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 import FloatingBugButton from "@/components/FloatingBugButton";
 
+const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
+const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
+
 // Lazy-load all route pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
 const MapPage = lazy(() => import("./pages/MapPage"));
@@ -109,6 +112,10 @@ const App = () => {
           <TetolLevelProvider>
             <BottomNav />
             <FloatingBugButton />
+            <Suspense fallback={null}>
+              <ProximityNudge />
+              <OfflineSyncBanner />
+            </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
