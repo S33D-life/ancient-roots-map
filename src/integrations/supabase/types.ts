@@ -2481,6 +2481,124 @@ export type Database = {
           },
         ]
       }
+      tree_whisper_collections: {
+        Row: {
+          collected_at: string
+          collected_tree_id: string | null
+          id: string
+          user_id: string
+          whisper_id: string
+        }
+        Insert: {
+          collected_at?: string
+          collected_tree_id?: string | null
+          id?: string
+          user_id: string
+          whisper_id: string
+        }
+        Update: {
+          collected_at?: string
+          collected_tree_id?: string | null
+          id?: string
+          user_id?: string
+          whisper_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_whisper_collections_collected_tree_id_fkey"
+            columns: ["collected_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_whisper_collections_whisper_id_fkey"
+            columns: ["whisper_id"]
+            isOneToOne: false
+            referencedRelation: "tree_whispers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_whispers: {
+        Row: {
+          circle_id: string | null
+          collected_at: string | null
+          collected_tree_id: string | null
+          created_at: string
+          delivery_scope: string
+          delivery_species_key: string | null
+          delivery_tree_id: string | null
+          expires_at: string | null
+          id: string
+          media_url: string | null
+          message_content: string
+          recipient_scope: string
+          recipient_user_id: string | null
+          sender_user_id: string
+          status: string
+          tree_anchor_id: string
+        }
+        Insert: {
+          circle_id?: string | null
+          collected_at?: string | null
+          collected_tree_id?: string | null
+          created_at?: string
+          delivery_scope?: string
+          delivery_species_key?: string | null
+          delivery_tree_id?: string | null
+          expires_at?: string | null
+          id?: string
+          media_url?: string | null
+          message_content: string
+          recipient_scope?: string
+          recipient_user_id?: string | null
+          sender_user_id: string
+          status?: string
+          tree_anchor_id: string
+        }
+        Update: {
+          circle_id?: string | null
+          collected_at?: string | null
+          collected_tree_id?: string | null
+          created_at?: string
+          delivery_scope?: string
+          delivery_species_key?: string | null
+          delivery_tree_id?: string | null
+          expires_at?: string | null
+          id?: string
+          media_url?: string | null
+          message_content?: string
+          recipient_scope?: string
+          recipient_user_id?: string | null
+          sender_user_id?: string
+          status?: string
+          tree_anchor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_whispers_collected_tree_id_fkey"
+            columns: ["collected_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_whispers_delivery_tree_id_fkey"
+            columns: ["delivery_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_whispers_tree_anchor_id_fkey"
+            columns: ["tree_anchor_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_wishlist: {
         Row: {
           created_at: string
