@@ -2420,6 +2420,69 @@ export type Database = {
         }
         Relationships: []
       }
+      time_tree_entries: {
+        Row: {
+          created_at: string
+          emotional_tone: string | null
+          hearts_awarded: number
+          id: string
+          is_tree_real: boolean
+          linked_wish_id: string | null
+          meeting_realised: boolean
+          moon_phase: string
+          participant_one: string
+          participant_two: string
+          pilgrimage_flag: boolean
+          reward_timestamp: string | null
+          tree_name: string
+          tree_reference_id: string | null
+          updated_at: string
+          user_id: string
+          what_shared: string
+          where_sitting: string | null
+        }
+        Insert: {
+          created_at?: string
+          emotional_tone?: string | null
+          hearts_awarded?: number
+          id?: string
+          is_tree_real?: boolean
+          linked_wish_id?: string | null
+          meeting_realised?: boolean
+          moon_phase?: string
+          participant_one: string
+          participant_two: string
+          pilgrimage_flag?: boolean
+          reward_timestamp?: string | null
+          tree_name: string
+          tree_reference_id?: string | null
+          updated_at?: string
+          user_id: string
+          what_shared: string
+          where_sitting?: string | null
+        }
+        Update: {
+          created_at?: string
+          emotional_tone?: string | null
+          hearts_awarded?: number
+          id?: string
+          is_tree_real?: boolean
+          linked_wish_id?: string | null
+          meeting_realised?: boolean
+          moon_phase?: string
+          participant_one?: string
+          participant_two?: string
+          pilgrimage_flag?: boolean
+          reward_timestamp?: string | null
+          tree_name?: string
+          tree_reference_id?: string | null
+          updated_at?: string
+          user_id?: string
+          what_shared?: string
+          where_sitting?: string | null
+        }
+        Relationships: []
+      }
       tree_change_log: {
         Row: {
           change_set: Json

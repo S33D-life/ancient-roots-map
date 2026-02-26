@@ -65,6 +65,7 @@ const KenyaCountryPage = lazy(() => import("./pages/KenyaCountryPage"));
 const EthiopiaCountryPage = lazy(() => import("./pages/EthiopiaCountryPage"));
 const TanzaniaCountryPage = lazy(() => import("./pages/TanzaniaCountryPage"));
 const DRCongoCountryPage = lazy(() => import("./pages/DRCongoCountryPage"));
+const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -162,6 +163,7 @@ const App = () => {
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 <Route path="/whispers" element={<WhispersPage />} />
+                <Route path="/time-tree" element={<TimeTreePage />} />
                 <Route path="/api/docs" element={<ApiDocsPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
