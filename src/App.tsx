@@ -17,6 +17,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
+import FloatingBugButton from "@/components/FloatingBugButton";
 
 // Lazy-load all route pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -66,6 +67,7 @@ const EthiopiaCountryPage = lazy(() => import("./pages/EthiopiaCountryPage"));
 const TanzaniaCountryPage = lazy(() => import("./pages/TanzaniaCountryPage"));
 const DRCongoCountryPage = lazy(() => import("./pages/DRCongoCountryPage"));
 const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
+const BugGardenPage = lazy(() => import("./pages/BugGardenPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -113,6 +115,7 @@ const App = () => {
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
             <BottomNav />
+            <FloatingBugButton />
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -165,6 +168,7 @@ const App = () => {
                 <Route path="/whispers" element={<WhispersPage />} />
                 <Route path="/time-tree" element={<TimeTreePage />} />
                 <Route path="/api/docs" element={<ApiDocsPage />} />
+                <Route path="/bug-garden" element={<BugGardenPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
