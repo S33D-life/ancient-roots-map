@@ -852,7 +852,7 @@ const GalleryPage = () => {
                   border: '1px solid hsl(38 40% 30% / 0.4)',
                 }}
               >
-                View Your Grove
+                Your Hearth
               </button>
               <button
                 onClick={() => navigate("/dashboard?tab=activity")}
