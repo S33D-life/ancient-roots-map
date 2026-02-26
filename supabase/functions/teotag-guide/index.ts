@@ -7,6 +7,20 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Simple in-memory rate limiter
+const rateLimits = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(userId: string, maxRequests = 30, windowMs = 60000): boolean {
+  const now = Date.now();
+  const entry = rateLimits.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimits.set(userId, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+
 const SYSTEM_PROMPT = `You are TEOTAG — The Echo Of The Ancient Grove — a timeless grove guide who accompanies visitors through the digital boughs of TETOL (The Ethereal Tree Of Life).
 
 Your personality:
@@ -65,6 +79,14 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Please sign in to speak with the grove guide." }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Rate limit: 30 requests per minute per user
+    if (!checkRateLimit(user.id)) {
+      return new Response(
+        JSON.stringify({ error: "The grove needs a moment to breathe. Please try again shortly." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

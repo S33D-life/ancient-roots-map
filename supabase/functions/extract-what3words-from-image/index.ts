@@ -6,6 +6,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory rate limiter
+const rateLimits = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(userId: string, maxRequests = 5, windowMs = 60000): boolean {
+  const now = Date.now();
+  const entry = rateLimits.get(userId);
+  if (!entry || now > entry.resetAt) {
+    rateLimits.set(userId, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+
 interface ExtractRequest {
   imageData: string; // base64 encoded image
 }
@@ -37,6 +51,15 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Rate limit: 5 requests per minute per user
+    const claimsUserId = claimsData.claims.sub as string;
+    if (!checkRateLimit(claimsUserId)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Rate limit exceeded. Please try again shortly.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
