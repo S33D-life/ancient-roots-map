@@ -6,6 +6,34 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Simple in-memory rate limiter
+const rateLimits = new Map<string, { count: number; resetAt: number }>();
+function checkRateLimit(userId: string, maxRequests = 10, windowMs = 60000): boolean {
+  const now = Date.now();
+  const key = `ipfs_${userId}`;
+  const entry = rateLimits.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimits.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (entry.count >= maxRequests) return false;
+  entry.count++;
+  return true;
+}
+
+async function verifyAssetOwnership(
+  supabase: ReturnType<typeof createClient>,
+  assetId: string,
+  userId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("sync_assets")
+    .select("user_id")
+    .eq("id", assetId)
+    .single();
+  return data?.user_id === userId;
+}
+
 interface PinataResponse {
   IpfsHash: string;
   PinSize: number;
@@ -51,6 +79,14 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Rate limit: 10 requests per minute per user
+    if (!checkRateLimit(userId, 10, 60000)) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { action, ...params } = await req.json();
 
     switch (action) {
@@ -155,6 +191,16 @@ Deno.serve(async (req) => {
 
       case "unpin": {
         const { cid, asset_id, project_id } = params;
+        // Verify ownership before unpinning
+        if (asset_id) {
+          const isOwner = await verifyAssetOwnership(supabase, asset_id, userId);
+          if (!isOwner) {
+            return new Response(
+              JSON.stringify({ error: "You do not own this asset" }),
+              { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
         const unpinRes = await fetch(
           `https://api.pinata.cloud/pinning/unpin/${cid}`,
           {
@@ -318,6 +364,16 @@ Deno.serve(async (req) => {
       case "anchor_ethereum": {
         // Anchor asset hash to Ethereum
         const { asset_id, cycle_id, project_id, content_hash } = params;
+        // Verify ownership before anchoring
+        if (asset_id) {
+          const isOwner = await verifyAssetOwnership(supabase, asset_id, userId);
+          if (!isOwner) {
+            return new Response(
+              JSON.stringify({ error: "You do not own this asset" }),
+              { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
         const ETH_RPC = Deno.env.get("ETHEREUM_RPC_URL");
         if (!ETH_RPC) {
           throw new Error("ETHEREUM_RPC_URL not configured");
@@ -392,6 +448,16 @@ Deno.serve(async (req) => {
       case "anchor_bitcoin": {
         // Bitcoin anchoring via OpenTimestamps-style hash commitment
         const { asset_id, cycle_id, project_id, content_hash } = params;
+        // Verify ownership before anchoring
+        if (asset_id) {
+          const isOwner = await verifyAssetOwnership(supabase, asset_id, userId);
+          if (!isOwner) {
+            return new Response(
+              JSON.stringify({ error: "You do not own this asset" }),
+              { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
 
         // Create anchor record with OTS-compatible data
         const { data: anchor } = await supabase
