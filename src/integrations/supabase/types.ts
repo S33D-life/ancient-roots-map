@@ -587,6 +587,45 @@ export type Database = {
         }
         Relationships: []
       }
+      content_flags: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       daily_reward_caps: {
         Row: {
           checkin_count: number
@@ -2931,6 +2970,30 @@ export type Database = {
           updated_at?: string
           verified?: boolean
           what3words?: string | null
+        }
+        Relationships: []
+      }
+      user_heart_balances: {
+        Row: {
+          influence_tokens: number
+          s33d_hearts: number
+          species_hearts: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          influence_tokens?: number
+          s33d_hearts?: number
+          species_hearts?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          influence_tokens?: number
+          s33d_hearts?: number
+          species_hearts?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
