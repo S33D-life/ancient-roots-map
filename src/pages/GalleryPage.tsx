@@ -1152,6 +1152,21 @@ const GalleryPage = () => {
             <TreeResources />
           </TabsContent>
 
+          {/* Greenhouse — houseplants & saplings */}
+          <TabsContent value="greenhouse" className="space-y-6">
+            <Greenhouse />
+          </TabsContent>
+
+          {/* Wishing Tree — trees you dream to visit */}
+          <TabsContent value="wishlist" className="space-y-6">
+            <WishingTreeUnified />
+          </TabsContent>
+
+          {/* Bookshelf — personal reading */}
+          <TabsContent value="bookshelf" className="space-y-6">
+            <PersonalBookshelf userId={currentUserId || ""} />
+          </TabsContent>
+
           <TabsContent value="seed-cellar" className="space-y-6">
             {/* Interactive entrance image */}
             <div
