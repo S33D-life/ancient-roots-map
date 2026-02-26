@@ -153,7 +153,7 @@ const CountryCard = ({ stat, isPioneer }: { stat: CountryStats; isPioneer?: bool
         </div>
 
         <div className="flex gap-2 pt-1">
-          {stat.status === "active" ? (
+          {stat.status === "active" || stat.status === "growing" ? (
             <Button variant="sacred" size="sm" className="h-7 text-xs flex-1" asChild>
               <Link to={`/atlas/${stat.slug}`}>
                 Open Atlas <ChevronRight className="w-3 h-3 ml-1" />
@@ -212,9 +212,18 @@ const WorldAtlasPage = () => {
         });
       });
 
+      // Slugs that have dedicated atlas pages built
+      const DEDICATED_PAGE_SLUGS = new Set([
+        "south-africa", "united-kingdom", "ireland", "australia", "new-zealand",
+        "japan", "india", "united-states", "brazil", "zimbabwe", "italy",
+        "colombia", "greece", "canada", "china", "russia", "france",
+        "nigeria", "kenya", "ethiopia", "tanzania", "dr-congo",
+      ]);
+
       // Proposed countries (in registry but no data yet)
       COUNTRY_REGISTRY.forEach((reg) => {
         if (!countryMap.has(reg.country)) {
+          const hasPage = DEDICATED_PAGE_SLUGS.has(reg.slug);
           stats.push({
             country: reg.country,
             slug: reg.slug,
@@ -223,7 +232,7 @@ const WorldAtlasPage = () => {
             treeCount: 0,
             verifiedCount: 0,
             sourceCount: 0,
-            status: "proposed",
+            status: hasPage ? "growing" : "proposed",
           });
         }
       });
@@ -365,9 +374,9 @@ const WorldAtlasPage = () => {
                     <div>
                       <p className="px-3 pt-2.5 pb-1 text-[10px] font-sans uppercase tracking-wider text-muted-foreground/60">Countries</p>
                       {filteredCountries.map(c => (
-                        <Link
+                         <Link
                           key={c.country}
-                          to={c.status === "active" ? `/atlas/${c.slug}` : "#"}
+                          to={(c.status === "active" || c.status === "growing") ? `/atlas/${c.slug}` : "#"}
                           onClick={() => setSearchQuery("")}
                           className="flex items-center gap-2.5 px-3 py-2 hover:bg-primary/5 transition-colors"
                         >
