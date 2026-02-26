@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import AncientFriendsExplorer from "@/components/AncientFriendsExplorer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +12,9 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
   Heart, Loader2, Trash2, TreeDeciduous, Pencil, MapPin, Globe, User, Users,
-  Search, Map, Plus, Wand2, Star,
+  Search, Map, Plus, Wand2, Star, Compass, Clock,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 
 interface WishlistItem {
@@ -63,6 +65,7 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [pinForm, setPinForm] = useState({ name: "", description: "" });
   const [pinSaving, setPinSaving] = useState(false);
+  const [showExplorer, setShowExplorer] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -112,6 +115,28 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
     items.forEach(i => { if (i.tree?.species) s.add(i.tree.species); });
     return Array.from(s).sort();
   }, [items]);
+
+  // Trees formatted for the swipe explorer
+  const wishlistTrees = useMemo(() => {
+    return items
+      .filter(i => i.tree && i.tree.latitude && i.tree.longitude && i.user_id === currentUserId)
+      .map(i => ({
+        id: i.tree!.id,
+        name: i.tree!.name,
+        species: i.tree!.species,
+        what3words: i.tree!.what3words || "",
+        latitude: i.tree!.latitude!,
+        longitude: i.tree!.longitude!,
+        description: null,
+        lineage: null,
+        state: i.tree!.state || null,
+        nation: i.tree!.nation || null,
+        estimated_age: i.tree!.estimated_age || null,
+        grove_scale: null,
+        created_at: i.created_at,
+        created_by: null,
+      }));
+  }, [items, currentUserId]);
 
   const filtered = useMemo(() => {
     return items.filter(item => {
@@ -202,11 +227,35 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
             >
               <img src={wishingTreeImage} alt="Wishing Tree" className="w-full h-full object-cover" />
             </div>
-            <div>
+            <div className="space-y-2">
               <h2 className="text-lg md:text-xl font-serif text-primary">Wishing Tree</h2>
               <p className="text-xs font-serif text-muted-foreground">
                 Trees you dream of visiting someday
               </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs font-serif"
+                  style={{ borderColor: "hsla(42, 60%, 50%, 0.3)", color: "hsl(42, 80%, 60%)" }}
+                  onClick={() => setShowExplorer(true)}
+                  disabled={wishlistTrees.length === 0}
+                >
+                  <Compass className="w-3.5 h-3.5" />
+                  Explore Wishes
+                </Button>
+                <Link to="/time-tree">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-xs font-serif"
+                    style={{ borderColor: "hsla(180, 40%, 40%, 0.3)", color: "hsl(180, 50%, 60%)" }}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    Time Tree
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </Card>
@@ -497,6 +546,15 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Swipe Explorer for wished trees */}
+      {showExplorer && wishlistTrees.length > 0 && (
+        <AncientFriendsExplorer
+          trees={wishlistTrees}
+          onClose={() => setShowExplorer(false)}
+          onWishlist={() => {}}
+        />
+      )}
     </div>
   );
 };
