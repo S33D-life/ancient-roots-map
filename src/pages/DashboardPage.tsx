@@ -16,6 +16,7 @@ import hearthBg from "@/assets/hearth-bg.jpeg";
 import HearthEntrance from "@/components/HearthEntrance";
 import Footer from "@/components/Footer";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import GroveIdentityCard from "@/components/dashboard/GroveIdentityCard";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
 import DashboardProfile from "@/components/dashboard/DashboardProfile";
 import DashboardLeaderboard from "@/components/dashboard/DashboardLeaderboard";
@@ -416,6 +417,7 @@ const DashboardPage = () => {
             <TabsContent value="hearth">
               {user && (
                 <div className="space-y-8">
+                  <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
                   <GrovePulse userId={user.id} />
                   <HearthWarmth userId={user.id} />
                 </div>
