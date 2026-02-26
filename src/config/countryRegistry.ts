@@ -196,6 +196,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Heritage records",
     bbox: [41.3, -5.1, 51.1, 9.6],
   },
+  {
+    country: "Nigeria",
+    slug: "nigeria",
+    flag: "🇳🇬",
+    descriptor: "Sacred Groves & Sentinels",
+    portalTitle: "Nigeria — Sacred Groves & Sentinels",
+    portalSubtitle: "Savannah Sentinels, Sacred Groves & Rainforest Giants — a living map of Nigeria's arboreal heritage.",
+    sourceLabel: "Cultural heritage sources",
+    bbox: [4.3, 2.7, 13.9, 14.7],
+  },
 ];
 
 export default COUNTRY_REGISTRY;
