@@ -1,4 +1,4 @@
-import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone } from "lucide-react";
+import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone, Bug } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
 import { resetWhispers } from "@/components/ContextualWhisper";
@@ -60,6 +60,11 @@ const Footer = () => {
           <Link to="/install" className="inline-flex items-center gap-1.5 hover:text-primary transition-colors">
             <Smartphone className="w-3 h-3" />
             Plant this app
+          </Link>
+          <Dot />
+          <Link to="/bug-garden" className="inline-flex items-center gap-1.5 hover:text-primary transition-colors">
+            <Bug className="w-3 h-3" />
+            Bug Garden
           </Link>
           <Dot />
           <span className="text-xs text-muted-foreground/60">EST 2016 · hello@s33d.life</span>

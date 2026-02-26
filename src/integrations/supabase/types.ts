@@ -250,41 +250,190 @@ export type Database = {
           },
         ]
       }
+      bug_comments: {
+        Row: {
+          bug_id: string
+          comment: string
+          created_at: string
+          id: string
+          internal_only: boolean
+          user_id: string
+        }
+        Insert: {
+          bug_id: string
+          comment: string
+          created_at?: string
+          id?: string
+          internal_only?: boolean
+          user_id: string
+        }
+        Update: {
+          bug_id?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          internal_only?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bug_comments_bug_id_fkey"
+            columns: ["bug_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bug_reports: {
         Row: {
           actual: string
+          app_version: string | null
+          assigned_to: string | null
+          attachments: string[] | null
           created_at: string
+          device_info: string | null
+          diagnostics: Json | null
+          duplicate_of_bug_id: string | null
           expected: string
+          feature_area: string
+          frequency: string
+          hearts_awarded_total: number
           id: string
+          include_diagnostics: boolean
+          page_route: string | null
+          reward_state: string
           severity: string
           status: string
           steps: string
           title: string
+          triage_notes: string | null
+          updated_at: string
+          upvotes_count: number
           user_id: string | null
+          watchers_count: number
         }
         Insert: {
           actual: string
+          app_version?: string | null
+          assigned_to?: string | null
+          attachments?: string[] | null
           created_at?: string
+          device_info?: string | null
+          diagnostics?: Json | null
+          duplicate_of_bug_id?: string | null
           expected: string
+          feature_area?: string
+          frequency?: string
+          hearts_awarded_total?: number
           id?: string
+          include_diagnostics?: boolean
+          page_route?: string | null
+          reward_state?: string
           severity?: string
           status?: string
           steps: string
           title: string
+          triage_notes?: string | null
+          updated_at?: string
+          upvotes_count?: number
           user_id?: string | null
+          watchers_count?: number
         }
         Update: {
           actual?: string
+          app_version?: string | null
+          assigned_to?: string | null
+          attachments?: string[] | null
           created_at?: string
+          device_info?: string | null
+          diagnostics?: Json | null
+          duplicate_of_bug_id?: string | null
           expected?: string
+          feature_area?: string
+          frequency?: string
+          hearts_awarded_total?: number
           id?: string
+          include_diagnostics?: boolean
+          page_route?: string | null
+          reward_state?: string
           severity?: string
           status?: string
           steps?: string
           title?: string
+          triage_notes?: string | null
+          updated_at?: string
+          upvotes_count?: number
           user_id?: string | null
+          watchers_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bug_reports_duplicate_of_bug_id_fkey"
+            columns: ["duplicate_of_bug_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bug_upvotes: {
+        Row: {
+          bug_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          bug_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          bug_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bug_upvotes_bug_id_fkey"
+            columns: ["bug_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bug_watchers: {
+        Row: {
+          bug_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          bug_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          bug_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bug_watchers_bug_id_fkey"
+            columns: ["bug_id"]
+            isOneToOne: false
+            referencedRelation: "bug_reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ceremony_logs: {
         Row: {
@@ -3398,6 +3547,10 @@ export type Database = {
     }
     Functions: {
       aggregate_phenology: { Args: never; Returns: undefined }
+      award_bug_hearts: {
+        Args: { p_amount: number; p_bug_id: string; p_curator_id: string }
+        Returns: undefined
+      }
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
       claim_windfall_hearts: {
         Args: { p_tree_id: string; p_user_id: string }
