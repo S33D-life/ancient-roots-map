@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Shield, X, ChevronRight } from "lucide-react";
+import { Heart, X, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getHiveInfo } from "@/utils/hiveUtils";
 
@@ -13,24 +13,19 @@ interface RewardReceiptProps {
   actionLabel?: string;
 }
 
+/**
+ * RewardReceipt — simplified to show a single Heart total.
+ * Species Hearts and Influence are tracked internally but
+ * presented only as subtle secondary info, not separate rows.
+ */
 const RewardReceipt = ({
   visible, onClose, s33dHearts = 0, speciesHearts = 0,
   speciesFamily, influence = 0, actionLabel = "Action",
 }: RewardReceiptProps) => {
   const hive = speciesFamily ? getHiveInfo(speciesFamily) : null;
+  const totalHearts = s33dHearts + speciesHearts;
 
-  if (!visible) return null;
-
-  const rewards = [
-    s33dHearts > 0 && { icon: "❤️", label: "S33D Hearts", amount: s33dHearts, color: "hsl(0, 65%, 55%)" },
-    speciesHearts > 0 && hive && {
-      icon: hive.icon,
-      label: `${hive.displayName.replace(" Hive", "")} Hearts`,
-      amount: speciesHearts,
-      color: `hsl(${hive.accentHsl})`,
-    },
-    influence > 0 && { icon: "🛡️", label: "Influence", amount: influence, color: "hsl(42, 80%, 50%)" },
-  ].filter(Boolean) as { icon: string; label: string; amount: number; color: string }[];
+  if (!visible || totalHearts === 0) return null;
 
   return (
     <AnimatePresence>
@@ -65,42 +60,59 @@ const RewardReceipt = ({
                 <X className="w-4 h-4" />
               </button>
 
-              <motion.span
-                className="text-4xl block mb-3"
+              <motion.div
+                className="flex items-center justify-center gap-2 mb-3"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 400 }}
               >
-                ✨
-              </motion.span>
+                <Heart className="w-8 h-8 text-primary fill-primary/20" />
+              </motion.div>
 
-              <h3 className="text-lg font-serif text-foreground mb-1">Tokens Earned</h3>
-              <p className="text-xs text-muted-foreground font-serif mb-5">{actionLabel}</p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <span className="text-4xl font-serif font-bold text-primary tabular-nums">+{totalHearts}</span>
+                <p className="text-sm text-muted-foreground font-serif mt-1">Hearts earned</p>
+              </motion.div>
 
-              <div className="space-y-3">
-                {rewards.map((r, i) => (
-                  <motion.div
-                    key={r.label}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-border/40 bg-secondary/10"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + i * 0.1 }}
-                  >
-                    <span className="text-2xl">{r.icon}</span>
-                    <span className="flex-1 text-sm font-serif text-foreground text-left">{r.label}</span>
-                    <span className="text-lg font-serif font-bold tabular-nums" style={{ color: r.color }}>
-                      +{r.amount}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
+              <motion.p
+                className="text-xs text-muted-foreground/60 font-serif mt-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {actionLabel}
+              </motion.p>
 
-              {/* Journey connection — nudge to hive or vault */}
-              {hive && (
+              {/* Subtle breakdown — only shown if multiple sources */}
+              {speciesHearts > 0 && hive && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
+                  className="mt-4 flex items-center justify-center gap-3 text-[10px] font-serif text-muted-foreground/50"
+                >
+                  <span>❤️ {s33dHearts} S33D</span>
+                  <span>·</span>
+                  <span>{hive.icon} {speciesHearts} {hive.displayName.replace(" Hive", "")}</span>
+                  {influence > 0 && (
+                    <>
+                      <span>·</span>
+                      <span>🛡️ {influence} Influence</span>
+                    </>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Journey connection — nudge to hive */}
+              {hive && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
                   className="mt-4"
                 >
                   <Link

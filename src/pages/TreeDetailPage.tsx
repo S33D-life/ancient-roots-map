@@ -4,7 +4,6 @@ import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom"
 import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
-import JourneyNudge from "@/components/JourneyNudge";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
@@ -74,6 +73,7 @@ const TreeDetailPage = () => {
   const [birdsongOpen, setBirdsongOpen] = useState(false);
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
+  const [sectionTab, setSectionTab] = useState<string>("overview");
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
@@ -351,380 +351,330 @@ const TreeDetailPage = () => {
           </div>
         </div>
 
-        {/* Encounter Cluster — shared wanderer encounters */}
-        <EncounterClusterPanel tree={tree} />
-
-        {/* Meeting Timer */}
-        <div className="mb-6">
-          <MeetingTimer
-            treeId={id!}
-            treeName={tree.name}
-            treeSpecies={tree.species}
-            userId={userId}
-            onMeetingChange={setActiveMeeting}
-            onStatusChange={setMeetingStatus}
-          />
-        </div>
-
-        {/* Seed Economy */}
-        <div className="mb-6">
-          <SeedPlanter
-            treeId={id!}
-            treeLat={tree.latitude}
-            treeLng={tree.longitude}
-            userId={userId}
-            treeSpecies={tree.species}
-          />
-        </div>
-
-        {/* Tree Heart Pool */}
-        <div className="mb-6">
-          <TreeHeartPool treeId={id!} userId={userId} />
-        </div>
-
-        {/* Journey Nudges — connect this tree to the wider ecosystem */}
-        <div className="space-y-2 mb-8">
-          {(() => {
-            const hive = tree.species ? getHiveForSpecies(tree.species) : null;
-            return hive ? (
-              <JourneyNudge
-                icon={hive.icon}
-                message={`Explore the ${hive.displayName} — see all ${tree.species} trees and their collective radio.`}
-                to={`/hive/${hive.slug}`}
-                label="Visit Hive"
-                delay={800}
-              />
-            ) : null;
-          })()}
-          <JourneyNudge
-            icon="📚"
-            message="This tree's offerings live in the Heartwood Library alongside all Ancient Friends."
-            to="/library/ancient-friends"
-            label="Library"
-            delay={1200}
-          />
-        </div>
-
-        {/* Species Attestation */}
-        <div className="mb-6">
-          <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
-        </div>
-
-        {/* Stewardship Leaderboard */}
-        <StewardshipLeaderboard treeId={id!} />
-
-        {/* Linked Collaborator Volumes */}
-        <LinkedVolumesPanel treeId={id!} />
-
-        {/* Cycle Markets for this tree */}
-        <TreeMarkets treeId={id!} treeSpecies={tree.species} />
-
-        {/* Whisper Button */}
-        {userId && tree && (
-          <div className="mb-6">
-            <Button
-              onClick={() => setWhisperModalOpen(true)}
-              variant="outline"
-              className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Send a Whisper Through This Tree
-            </Button>
-          </div>
-        )}
-
-        {/* Whisper Collector — available whispers at this tree */}
-        {availableWhispers.length > 0 && userId && tree && (
-          <div className="mb-6">
-            <WhisperCollector
-              whispers={availableWhispers}
-              userId={userId}
-              treeId={tree.id}
-              treeName={tree.name}
-              onCollected={() => {
-                // Refresh available whispers
-                if (userId && tree) {
-                  checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
-                }
-              }}
-            />
-          </div>
-        )}
-
-        {/* Birdsong Offering Button */}
-        <div className="mb-6">
-          <Button
-            onClick={() => setBirdsongOpen(true)}
-            variant="outline"
-            className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-          >
-            <Bird className="h-4 w-4" />
-            Offer a Birdsong
-            {birdsongCount > 0 && (
-              <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
-            )}
-          </Button>
-        </div>
-
-        {/* ── Tree Record (Stewardship offerings) ── */}
-        {stewardshipOfferings.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
-              <h2 className="text-xl font-serif text-primary tracking-widest uppercase flex items-center gap-2">
-                🌳 Tree Record
-              </h2>
-              <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
-            </div>
-            <p className="text-xs text-muted-foreground font-serif mb-3 text-center">
-              Shared stewardship records — observations, documentation, and seasonal data contributed to this tree's public archive.
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              {stewardshipOfferings.map((off) => (
-                <Card key={off.id} className="bg-card/60 backdrop-blur border-l-2 border-l-primary/50 border-primary/20">
-                  <CardContent className="p-3 flex items-center gap-3">
-                    {off.media_url && off.type === "photo" && (
-                      <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                      <span className="text-[10px] text-muted-foreground/60 font-mono">
-                        {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                      </span>
-                    </div>
-                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary gap-1">
-                      📋 {off.type}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── Beneath This Tree (Anchored offerings) ── */}
-        {anchoredOfferings.length > 0 && (
-          <div className="mb-8">
-            <button
-              onClick={() => setShowAnchored(!showAnchored)}
-              className="w-full flex items-center gap-3 mb-4"
-            >
-              <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
-              <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
-                🏡 Anchored Memories
-                <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
-                <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
-              </span>
-              <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
-            </button>
-            <AnimatePresence>
-              {showAnchored && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="space-y-2 overflow-hidden"
-                >
-                  <p className="text-xs text-muted-foreground font-serif mb-2 text-center italic">
-                    Personal reflections and memories anchored to this tree.
-                  </p>
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {anchoredOfferings.map((off) => (
-                      <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
-                        <CardContent className="p-3 flex items-center gap-3">
-                          {off.media_url && off.type === "photo" && (
-                            <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
-                            <span className="text-[10px] text-muted-foreground/60 font-mono">
-                              {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                            </span>
-                          </div>
-                          <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
-                            🌿 {off.type}
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-
-        {/* Offerings Section (all by type) */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
-          <h2 className="text-2xl font-serif text-primary tracking-widest uppercase">
-            Offerings
-          </h2>
-          <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
-        </div>
-
-        {/* Gate: offerings require active/expiring meeting */}
-        {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
-          <div className="mb-6 p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
-            <p className="text-sm text-muted-foreground font-serif">
-              {meetingStatus === "expired"
-                ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
-                : meetingStatus === "none"
-                ? "Meet this Ancient Friend to open a 12-hour offering window."
-                : "This meeting cannot be used for offerings."}
-            </p>
-          </div>
-        )}
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg">
-            {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
-              <TabsTrigger
-                key={type}
-                value={type}
-                className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-              >
-                {offeringIcons[type]}
-                {offeringLabels[type]}
-                <span className="text-[10px] opacity-60">
-                  ({getOfferingsByType(type).length})
-                </span>
-              </TabsTrigger>
-            ))}
-            <TabsTrigger
-              value="birdsong"
-              className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-            >
-              <Bird className="h-4 w-4" />
-              Birdsong
-              <span className="text-[10px] opacity-60">({birdsongCount})</span>
+        {/* ══════ Top-Level Section Tabs ══════ */}
+        <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
+          <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
+            <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Encounters
+            </TabsTrigger>
+            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Offerings
             </TabsTrigger>
           </TabsList>
 
-          {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
-            <TabsContent key={type} value={type}>
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
-                  {offeringLabels[type]}
-                </h3>
-                <Button
-                  size="sm"
-                  onClick={() => handleAddOffering(type)}
-                  disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
-                  className="font-serif tracking-wider text-xs gap-1.5"
-                  title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
-                >
-                  <Sparkles className="h-3 w-3" />
-                  Add {offeringLabels[type].slice(0, -1)}
-                </Button>
+          {/* ── OVERVIEW TAB ── */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Photo Gallery */}
+            {photoOfferings.length > 0 && (
+              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
+            )}
+
+            {/* Tree Heart Pool */}
+            <TreeHeartPool treeId={id!} userId={userId} />
+
+            {/* Blooming Clock */}
+            {tree?.species && (
+              <BloomingClock species={tree.species} region={tree.nation} />
+            )}
+
+            {/* Species Attestation */}
+            <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
+
+            {/* Tree Record (Stewardship offerings) */}
+            {stewardshipOfferings.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
+                  <h2 className="text-xl font-serif text-primary tracking-widest uppercase flex items-center gap-2">
+                    🌳 Tree Record
+                  </h2>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
+                </div>
+                <p className="text-xs text-muted-foreground font-serif mb-3 text-center">
+                  Shared stewardship records contributed to this tree's public archive.
+                </p>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {stewardshipOfferings.map((off) => (
+                    <Card key={off.id} className="bg-card/60 backdrop-blur border-l-2 border-l-primary/50 border-primary/20">
+                      <CardContent className="p-3 flex items-center gap-3">
+                        {off.media_url && off.type === "photo" && (
+                          <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
+                          <span className="text-[10px] text-muted-foreground/60 font-mono">
+                            {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                          </span>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary gap-1">
+                          📋 {off.type}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {getOfferingsByType(type).length === 0 ? (
-                <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
-              ) : type === "photo" ? (
-                <PhotoGrid
-                  offerings={getOfferingsByType(type)}
-                  onImageClick={(i) => setLightboxIndex(i)}
-                />
-              ) : type === "poem" || type === "story" ? (
-                <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                  {getOfferingsByType(type).map((offering) => (
-                    <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                      <LiteraryCard offering={offering} type={type} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              ) : type === "song" ? (
-                <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                  {getOfferingsByType(type).map((offering) => (
-                    <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                      <SongCard offering={offering} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              ) : type === "book" ? (
-                <BookShelf offerings={getOfferingsByType(type)} />
-              ) : (
-                <motion.div className="grid gap-4 md:grid-cols-2" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                  {getOfferingsByType(type).map((offering) => (
-                    <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                      <NftCard offering={offering} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </TabsContent>
-          ))}
+            {/* Sources */}
+            <TreeSourcesDisplay
+              verified={verifiedSources}
+              pending={pendingSources}
+              loading={sourcesLoading}
+              onContribute={() => setContributeSourceOpen(true)}
+            />
 
-          <TabsContent value="birdsong">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
+            {/* Stewardship Leaderboard */}
+            <StewardshipLeaderboard treeId={id!} />
+          </TabsContent>
+
+          {/* ── ENCOUNTERS TAB ── */}
+          <TabsContent value="encounters" className="space-y-6">
+            {/* Encounter Cluster */}
+            <EncounterClusterPanel tree={tree} />
+
+            {/* Meeting Timer */}
+            <MeetingTimer
+              treeId={id!}
+              treeName={tree.name}
+              treeSpecies={tree.species}
+              userId={userId}
+              onMeetingChange={setActiveMeeting}
+              onStatusChange={setMeetingStatus}
+            />
+
+            {/* Canopy Visits Timeline */}
+            <CanopyVisitsTimeline
+              checkins={checkins}
+              stats={checkinStats}
+              loading={checkinsLoading}
+              onCheckin={() => setCanopyCheckinOpen(true)}
+            />
+
+            {/* Seed Economy */}
+            <SeedPlanter
+              treeId={id!}
+              treeLat={tree.latitude}
+              treeLng={tree.longitude}
+              userId={userId}
+              treeSpecies={tree.species}
+            />
+
+            {/* Whispers */}
+            {userId && tree && (
               <Button
-                size="sm"
-                onClick={() => setBirdsongOpen(true)}
-                className="font-serif tracking-wider text-xs gap-1.5"
+                onClick={() => setWhisperModalOpen(true)}
+                variant="outline"
+                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
               >
-                <Bird className="h-3 w-3" />
-                Add Birdsong
+                <MessageSquare className="h-4 w-4" />
+                Send a Whisper Through This Tree
               </Button>
-            </div>
-            <BirdsongTab treeId={id!} />
+            )}
+
+            {availableWhispers.length > 0 && userId && tree && (
+              <WhisperCollector
+                whispers={availableWhispers}
+                userId={userId}
+                treeId={tree.id}
+                treeName={tree.name}
+                onCollected={() => {
+                  if (userId && tree) {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }
+                }}
+              />
+            )}
+
+            {/* Anchored Memories */}
+            {anchoredOfferings.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowAnchored(!showAnchored)}
+                  className="w-full flex items-center gap-3 mb-4"
+                >
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
+                  <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
+                    🏡 Anchored Memories
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
+                    <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
+                  </span>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
+                </button>
+                <AnimatePresence>
+                  {showAnchored && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {anchoredOfferings.map((off) => (
+                          <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
+                            <CardContent className="p-3 flex items-center gap-3">
+                              {off.media_url && off.type === "photo" && (
+                                <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
+                                <span className="text-[10px] text-muted-foreground/60 font-mono">
+                                  {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                                </span>
+                              </div>
+                              <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
+                                🌿 {off.type}
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* ── OFFERINGS TAB ── */}
+          <TabsContent value="offerings" className="space-y-6">
+            {/* Gate: offerings require active/expiring meeting */}
+            {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
+              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
+                <p className="text-sm text-muted-foreground font-serif">
+                  {meetingStatus === "expired"
+                    ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
+                    : meetingStatus === "none"
+                    ? "Meet this Ancient Friend to open a 12-hour offering window."
+                    : "This meeting cannot be used for offerings."}
+                </p>
+              </div>
+            )}
+
+            {/* Birdsong Button */}
+            <Button
+              onClick={() => setBirdsongOpen(true)}
+              variant="outline"
+              className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+            >
+              <Bird className="h-4 w-4" />
+              Offer a Birdsong
+              {birdsongCount > 0 && (
+                <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
+              )}
+            </Button>
+
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg">
+                {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
+                  <TabsTrigger
+                    key={type}
+                    value={type}
+                    className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                  >
+                    {offeringIcons[type]}
+                    {offeringLabels[type]}
+                    <span className="text-[10px] opacity-60">
+                      ({getOfferingsByType(type).length})
+                    </span>
+                  </TabsTrigger>
+                ))}
+                <TabsTrigger
+                  value="birdsong"
+                  className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                >
+                  <Bird className="h-4 w-4" />
+                  Birdsong
+                  <span className="text-[10px] opacity-60">({birdsongCount})</span>
+                </TabsTrigger>
+              </TabsList>
+
+              {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
+                <TabsContent key={type} value={type}>
+                  <div className="flex justify-between items-center mb-5">
+                    <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
+                      {offeringLabels[type]}
+                    </h3>
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddOffering(type)}
+                      disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
+                      className="font-serif tracking-wider text-xs gap-1.5"
+                      title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      Add {offeringLabels[type].slice(0, -1)}
+                    </Button>
+                  </div>
+
+                  {getOfferingsByType(type).length === 0 ? (
+                    <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
+                  ) : type === "photo" ? (
+                    <PhotoGrid offerings={getOfferingsByType(type)} onImageClick={(i) => setLightboxIndex(i)} />
+                  ) : type === "poem" || type === "story" ? (
+                    <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+                      {getOfferingsByType(type).map((offering) => (
+                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                          <LiteraryCard offering={offering} type={type} />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  ) : type === "song" ? (
+                    <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+                      {getOfferingsByType(type).map((offering) => (
+                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                          <SongCard offering={offering} />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  ) : type === "book" ? (
+                    <BookShelf offerings={getOfferingsByType(type)} />
+                  ) : (
+                    <motion.div className="grid gap-4 md:grid-cols-2" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+                      {getOfferingsByType(type).map((offering) => (
+                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                          <NftCard offering={offering} />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </TabsContent>
+              ))}
+
+              <TabsContent value="birdsong">
+                <div className="flex justify-between items-center mb-5">
+                  <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
+                  <Button size="sm" onClick={() => setBirdsongOpen(true)} className="font-serif tracking-wider text-xs gap-1.5">
+                    <Bird className="h-3 w-3" /> Add Birdsong
+                  </Button>
+                </div>
+                <BirdsongTab treeId={id!} />
+              </TabsContent>
+            </Tabs>
+
+            {/* Offering History */}
+            {userId && allMeetings.length > 0 && (
+              <div className="mt-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
+                  <h2 className="text-xl font-serif text-primary tracking-widest uppercase">
+                    Offering History
+                  </h2>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
+                </div>
+                <OfferingHistory offerings={offerings} meetings={allMeetings} />
+              </div>
+            )}
+
+            {/* Linked Volumes & Markets (secondary context) */}
+            <LinkedVolumesPanel treeId={id!} />
+            <TreeMarkets treeId={id!} treeSpecies={tree.species} />
           </TabsContent>
         </Tabs>
 
-        {/* Birdsong Offering Flow */}
-        {tree && (
-          <BirdsongOfferingFlow
-            treeId={id!}
-            treeName={tree.name}
-            treeLat={tree.latitude ? Number(tree.latitude) : null}
-            treeLng={tree.longitude ? Number(tree.longitude) : null}
-            open={birdsongOpen}
-            onOpenChange={setBirdsongOpen}
-            onOfferingSaved={() => setBirdsongCount((c) => c + 1)}
-          />
-        )}
-
-        {/* Blooming Clock — phenology for this species */}
-        {tree?.species && (
-          <BloomingClock species={tree.species} region={tree.nation} />
-        )}
-
-        {/* Canopy Visits Section */}
-        <CanopyVisitsTimeline
-          checkins={checkins}
-          stats={checkinStats}
-          loading={checkinsLoading}
-          onCheckin={() => setCanopyCheckinOpen(true)}
-        />
-
-        {/* Sources Section */}
-        <TreeSourcesDisplay
-          verified={verifiedSources}
-          pending={pendingSources}
-          loading={sourcesLoading}
-          onContribute={() => setContributeSourceOpen(true)}
-        />
-
-        {/* Offering History — grouped by meeting */}
-        {userId && allMeetings.length > 0 && (
-          <div className="mt-12">
-            <div className="flex items-center gap-3 mb-6">
-              <div
-                className="h-px flex-1"
-                style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }}
-              />
-              <h2 className="text-xl font-serif text-primary tracking-widest uppercase">
-                Offering History
-              </h2>
-              <div
-                className="h-px flex-1"
-                style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }}
-              />
-            </div>
-            <OfferingHistory offerings={offerings} meetings={allMeetings} />
-          </div>
-        )}
       </div>
 
       {/* Lightbox */}

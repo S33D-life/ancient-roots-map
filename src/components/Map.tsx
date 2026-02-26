@@ -27,7 +27,7 @@ const FindMeButton = lazy(() => import("./FindMeButton"));
 const MistOverlay = lazy(() => import("./MistOverlay"));
 const TreeImportExport = lazy(() => import("./TreeImportExport"));
 const TreeRadio = lazy(() => import("./TreeRadio"));
-const MapIdleNudge = lazy(() => import("./MapIdleNudge"));
+
 
 // Defer the massive maplibre-gl bundle — only imported if WebGL path is ever activated
 const maplibreglPromise = () => import("maplibre-gl");
@@ -940,9 +940,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         </div>
       </div>
 
-      <Suspense fallback={null}>
-        <MapIdleNudge trees={filteredTrees} offeringCounts={offeringCounts} mapCenter={mapCenter} />
-      </Suspense>
 
       {/* Staff Room button */}
       <button
