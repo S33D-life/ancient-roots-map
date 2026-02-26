@@ -206,6 +206,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Cultural heritage sources",
     bbox: [4.3, 2.7, 13.9, 14.7],
   },
+  {
+    country: "Kenya",
+    slug: "kenya",
+    flag: "🇰🇪",
+    descriptor: "Sacred Trees & Highland Cedars",
+    portalTitle: "Kenya — Sacred Trees & Highland Cedars",
+    portalSubtitle: "Rift Valley Figs, Highland Cedars & Coastal Baobabs — a living map of Kenya's arboreal heritage.",
+    sourceLabel: "Cultural heritage sources",
+    bbox: [-4.7, 33.9, 5.0, 41.9],
+  },
 ];
 
 export default COUNTRY_REGISTRY;
