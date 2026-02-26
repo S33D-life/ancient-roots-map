@@ -74,6 +74,7 @@ import TreeCard from "@/components/TreeCard";
 // TetolBreadcrumb removed — Library uses its own contextual breadcrumb
 import TetolBridge from "@/components/TetolBridge";
 import GalleryFilterDrawer from "@/components/GalleryFilterDrawer";
+import PersonalBookshelf from "@/components/PersonalBookshelf";
 
 interface Tree {
   id: string;
@@ -1431,6 +1432,17 @@ const GalleryPage = () => {
 
           <TabsContent value="wishlist" className="space-y-6">
             <WishingTreeUnified />
+          </TabsContent>
+
+          {/* Bookshelf Tab */}
+          <TabsContent value="bookshelf" className="space-y-6">
+            {currentUserId ? (
+              <PersonalBookshelf userId={currentUserId} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-sm text-muted-foreground font-serif">Sign in to access your Bookshelf.</p>
+              </div>
+            )}
           </TabsContent>
 
           {/* Volumes Tab — Collaborator Volumes */}

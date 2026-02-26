@@ -11,6 +11,7 @@ interface RoomTab {
 
 const ROOMS: RoomTab[] = [
   { value: "gallery", label: "Ancient Friends", icon: <Globe className="w-4 h-4" /> },
+  { value: "bookshelf", label: "Bookshelf", icon: <BookOpen className="w-4 h-4" /> },
   { value: "staff-room", label: "Staff Room", icon: <Wand2 className="w-4 h-4" /> },
   { value: "music-room", label: "Music Room", icon: <Music className="w-4 h-4" /> },
   { value: "greenhouse", label: "Greenhouse", icon: <Sprout className="w-4 h-4" /> },
