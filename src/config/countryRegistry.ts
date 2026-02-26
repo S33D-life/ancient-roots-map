@@ -236,6 +236,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Cultural heritage sources",
     bbox: [-11.7, 29.3, -1.0, 40.4],
   },
+  {
+    country: "Democratic Republic of the Congo",
+    slug: "dr-congo",
+    flag: "🇨🇩",
+    descriptor: "Congo Basin Giants & River Guardians",
+    portalTitle: "DR Congo — Congo Basin Giants & River Guardians",
+    portalSubtitle: "Congo Basin Giants, Okapi Forest Elders & River Guardians — a living map of DR Congo's arboreal heritage.",
+    sourceLabel: "Cultural heritage sources",
+    bbox: [-13.5, 12.2, 5.4, 31.3],
+  },
 ];
 
 export default COUNTRY_REGISTRY;
