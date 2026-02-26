@@ -226,6 +226,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Cultural heritage sources",
     bbox: [3.4, 33.0, 14.9, 48.0],
   },
+  {
+    country: "Tanzania",
+    slug: "tanzania",
+    flag: "🇹🇿",
+    descriptor: "Baobab Giants & Montane Forests",
+    portalTitle: "Tanzania — Baobab Giants & Montane Forests",
+    portalSubtitle: "Baobab Giants, Kilimanjaro Cedars & Rift Valley Fig Elders — a living map of Tanzania's arboreal heritage.",
+    sourceLabel: "Cultural heritage sources",
+    bbox: [-11.7, 29.3, -1.0, 40.4],
+  },
 ];
 
 export default COUNTRY_REGISTRY;
