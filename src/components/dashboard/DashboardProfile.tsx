@@ -14,6 +14,7 @@ import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
 import { Link } from "react-router-dom";
+import HearthAccountSecurity from "@/components/dashboard/HearthAccountSecurity";
 
 interface VisibleFields {
   bio: boolean;
@@ -346,6 +347,9 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
           </div>
         </CardContent>
       </Card>
+
+      {/* Account & Security */}
+      <HearthAccountSecurity user={user} walletAddress={wallet.address} />
 
       {/* Manual Staff Picker */}
       <ManualStaffPicker
