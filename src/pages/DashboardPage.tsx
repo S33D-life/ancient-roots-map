@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search, Leaf, BookOpen } from "lucide-react";
+import { Loader2, TreeDeciduous, Star, Sprout, Settings, Archive, Trophy, ScrollText, Users, Heart, Search, Leaf, BookOpen, Flame } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -32,6 +32,7 @@ import PageShell from "@/components/PageShell";
 import GlobalSearch from "@/components/GlobalSearch";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
+import HearthWarmth from "@/components/dashboard/HearthWarmth";
 import CollaboratorShelf from "@/components/CollaboratorShelf";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
@@ -346,6 +347,7 @@ const DashboardPage = () => {
   }
 
     const TAB_ITEMS = [
+      { value: "hearth", label: "Hearth", icon: Flame },
       { value: "legend", label: "Legend", icon: ScrollText },
       { value: "activity", label: "Activity", icon: Activity },
       { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length + wishlistCount + plantCount },
@@ -409,7 +411,7 @@ const DashboardPage = () => {
             <ReturnPill />
           </div>
 
-          <Tabs defaultValue={new URLSearchParams(window.location.search).get("tab") || "legend"} className="space-y-6">
+          <Tabs defaultValue={new URLSearchParams(window.location.search).get("tab") || "hearth"} className="space-y-6">
             {/* Tab navigation — scrollable on mobile */}
             <TabsList className="w-full justify-start bg-card/50 backdrop-blur border border-border/50 rounded-xl p-1 overflow-x-auto flex-nowrap">
               {TAB_ITEMS.map((tab) => (
@@ -428,6 +430,10 @@ const DashboardPage = () => {
                 </TabsTrigger>
               ))}
             </TabsList>
+
+            <TabsContent value="hearth">
+              {user && <HearthWarmth userId={user.id} />}
+            </TabsContent>
 
             <TabsContent value="legend">
               {user && (
