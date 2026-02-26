@@ -144,7 +144,11 @@ const OfferingList = ({
                 exit={{ opacity: 0, x: 8, height: 0 }}
                 transition={{ delay: Math.min(i, 10) * 0.02, duration: 0.2 }}
               >
-                <Card className="bg-card/60 backdrop-blur border-border/40">
+                <Card className={`backdrop-blur border-border/40 ${
+                  off.tree_role === 'stewardship' 
+                    ? 'bg-card/60 border-l-2 border-l-primary/40' 
+                    : 'bg-card/40'
+                }`}>
                   <CardContent className="p-3 flex items-center gap-3">
                     {off.media_url && off.type === "photo" && (
                       <img
@@ -172,7 +176,12 @@ const OfferingList = ({
                         })}
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-border/30 gap-0.5">
+                    <Badge variant="outline" className={`text-[10px] font-serif shrink-0 capitalize gap-0.5 ${
+                      off.tree_role === 'stewardship' 
+                        ? 'border-primary/30 text-primary' 
+                        : 'border-border/30'
+                    }`}>
+                      {off.tree_role === 'stewardship' ? '📋' : '🌿'}
                       {(off as any).visibility && (off as any).visibility !== "public" && visibilityIcons[(off as any).visibility]}
                       {off.type}
                     </Badge>

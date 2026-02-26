@@ -11,6 +11,7 @@ import type { RewardResult } from "@/utils/issueRewards";
 import RewardReceipt from "@/components/RewardReceipt";
 import PostEncounterShare from "@/components/PostEncounterShare";
 import WhisperCollector from "@/components/WhisperCollector";
+import SeasonalBonusBadge, { useSeasonalBonus } from "@/components/SeasonalBonusBadge";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -161,12 +162,28 @@ export default function CanopyCheckinModal({
       return;
     }
 
-    // Issue rewards
+    // Check for seasonal bloom sync bonus
+    let seasonalBonusAmount = 0;
+    const currentMonth = new Date().getMonth() + 1;
+    const { data: phenoData } = await supabase
+      .from("species_phenology")
+      .select("season_stage")
+      .eq("species", treeSpecies)
+      .eq("month", currentMonth)
+      .order("observation_count", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (phenoData && phenoData.season_stage === seasonStage) {
+      seasonalBonusAmount = 1; // Bloom sync bonus
+    }
+
+    // Issue rewards (with optional seasonal bonus)
     const reward = await issueRewards({
       userId,
       treeId,
       treeSpecies,
       actionType: "checkin",
+      s33dAmount: 1 + seasonalBonusAmount,
     });
     setRewardResult(reward);
 
@@ -428,6 +445,7 @@ export default function CanopyCheckinModal({
                 </button>
               ))}
             </div>
+            <SeasonalBonusBadge species={treeSpecies} currentSeasonStage={seasonStage} />
           </div>
 
           {/* Weather */}
