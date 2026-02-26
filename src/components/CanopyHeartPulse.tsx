@@ -67,7 +67,7 @@ const CanopyHeartPulse = () => {
                 className="font-serif text-xs italic leading-tight"
                 style={{ color: "hsl(42, 60%, 65%)" }}
               >
-                The tree feels you nearby.
+                +{lastEvent.reward.s33dHearts + lastEvent.reward.speciesHearts} Hearts — the tree feels you nearby
               </span>
               <span
                 className="font-serif text-[10px] tracking-wider mt-0.5"

@@ -135,58 +135,52 @@ export const DiscoveryRow = () => {
   );
 };
 
-/* ─── 2. Participation Pathways ─── */
-const PATHWAYS = [
-  { icon: MapPin, label: "Map a Tree", desc: "Drop a what3words photo and claim an encounter", to: "/add-tree", color: "120 45% 45%" },
-  { icon: Globe, label: "Explore the Atlas", desc: "Wander the planetary grove of Ancient Friends", to: "/map", color: "195 60% 50%" },
-  { icon: Heart, label: "Earn Hearts", desc: "Visit trees, leave offerings, grow your reservoir", to: "/dashboard", color: "0 72% 55%" },
-  { icon: Users, label: "Join a Hive", desc: "Find your species family and build together", to: "/hives", color: "45 100% 55%" },
-  { icon: Leaf, label: "Attend Council", desc: "Shape governance with fellow wanderers", to: "/council-of-life", color: "195 50% 45%" },
-];
-
+/* ─── 2. Focused CTA — single primary action ─── */
 export const ParticipationSection = () => (
   <section id="participate" className="py-16 md:py-24">
-    <div className="container mx-auto px-4 max-w-5xl">
+    <div className="container mx-auto px-4 max-w-2xl text-center">
       <motion.h2
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="text-2xl md:text-3xl font-serif text-center mb-4"
+        className="text-2xl md:text-3xl font-serif mb-3"
       >
-        Ways to Participate
+        Begin Your Journey
       </motion.h2>
-      <p className="text-center text-muted-foreground text-sm mb-10 max-w-lg mx-auto">
-        Every wanderer walks a different path. Find yours.
+      <p className="text-muted-foreground text-sm mb-8 max-w-md mx-auto">
+        Every ancient tree has a story. Find yours.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {PATHWAYS.map((p, i) => {
-          const Icon = p.icon;
-          return (
-            <motion.div
-              key={p.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-            >
-              <Link
-                to={p.to}
-                className="group flex flex-col items-center text-center gap-3 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm p-5 h-full hover:border-primary/40 hover:bg-card/60 transition-all duration-300"
-              >
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-                  style={{ background: `hsl(${p.color} / 0.15)` }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: `hsl(${p.color})` }} />
-                </div>
-                <span className="font-serif text-sm text-foreground/90">{p.label}</span>
-                <span className="text-[11px] text-muted-foreground leading-snug">{p.desc}</span>
-              </Link>
-            </motion.div>
-          );
-        })}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col sm:flex-row items-center justify-center gap-4"
+      >
+        <Link to="/add-tree">
+          <Button variant="mystical" size="lg" className="gap-2 text-base px-8">
+            <MapPin className="w-5 h-5" />
+            Map Your First Ancient Friend
+          </Button>
+        </Link>
+        <Link to="/map">
+          <Button variant="outline" size="lg" className="gap-2 text-sm px-6 border-border/40 text-muted-foreground hover:text-foreground">
+            <Globe className="w-4 h-4" />
+            Explore the Atlas
+          </Button>
+        </Link>
+      </motion.div>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.4 }}
+        className="mt-6 text-xs text-muted-foreground/50 font-serif"
+      >
+        +10 Hearts for every tree you map
+      </motion.p>
     </div>
   </section>
 );

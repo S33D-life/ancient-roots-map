@@ -8,7 +8,7 @@ import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChar
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import CanopyEntrance from "@/components/CanopyEntrance";
+import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
@@ -62,7 +62,7 @@ const CouncilOfLifePage = () => {
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
-    return <CanopyEntrance onComplete={handleEntranceComplete} />;
+    return <LevelEntrance phases={[{ src: councilHomeBg, alt: "The Canopy" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
   if (isFullscreen && activeRoom) {

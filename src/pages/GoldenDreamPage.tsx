@@ -7,7 +7,7 @@ import { Maximize2, Minimize2, BookOpen, Cherry, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
-import CrownEntrance from "@/components/CrownEntrance";
+import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
@@ -47,7 +47,7 @@ const GoldenDreamPage = () => {
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
-    return <CrownEntrance onComplete={handleEntranceComplete} />;
+    return <LevelEntrance phases={[{ src: isDark ? goldenDreamNight : goldenDreamBanner, alt: "The Crown" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
   if (isFullscreen && activeRoom) {
