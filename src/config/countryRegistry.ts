@@ -216,6 +216,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Cultural heritage sources",
     bbox: [-4.7, 33.9, 5.0, 41.9],
   },
+  {
+    country: "Ethiopia",
+    slug: "ethiopia",
+    flag: "🇪🇹",
+    descriptor: "Church Forests & Highland Junipers",
+    portalTitle: "Ethiopia — Church Forests & Highland Junipers",
+    portalSubtitle: "Church Forest Guardians, Highland Junipers & Rift Valley Fig Elders — a living map of Ethiopia's arboreal heritage.",
+    sourceLabel: "Cultural heritage sources",
+    bbox: [3.4, 33.0, 14.9, 48.0],
+  },
 ];
 
 export default COUNTRY_REGISTRY;

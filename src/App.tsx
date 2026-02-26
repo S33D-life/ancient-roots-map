@@ -62,6 +62,7 @@ const WhispersPage = lazy(() => import("./pages/WhispersPage"));
 const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
 const NigeriaCountryPage = lazy(() => import("./pages/NigeriaCountryPage"));
 const KenyaCountryPage = lazy(() => import("./pages/KenyaCountryPage"));
+const EthiopiaCountryPage = lazy(() => import("./pages/EthiopiaCountryPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -152,6 +153,7 @@ const App = () => {
                 <Route path="/atlas/united-states" element={<USACountryPage />} />
                 <Route path="/atlas/nigeria" element={<NigeriaCountryPage />} />
                 <Route path="/atlas/kenya" element={<KenyaCountryPage />} />
+                <Route path="/atlas/ethiopia" element={<EthiopiaCountryPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
