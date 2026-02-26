@@ -106,6 +106,78 @@ export type Database = {
         }
         Relationships: []
       }
+      bookshelf_entries: {
+        Row: {
+          author: string
+          catalog_book_id: string | null
+          cover_url: string | null
+          created_at: string
+          genre: string | null
+          id: string
+          linked_council_sessions: string[] | null
+          linked_tree_ids: string[] | null
+          offering_id: string | null
+          quote: string | null
+          reflection: string | null
+          species_category: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          author: string
+          catalog_book_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          linked_council_sessions?: string[] | null
+          linked_tree_ids?: string[] | null
+          offering_id?: string | null
+          quote?: string | null
+          reflection?: string | null
+          species_category?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          author?: string
+          catalog_book_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          genre?: string | null
+          id?: string
+          linked_council_sessions?: string[] | null
+          linked_tree_ids?: string[] | null
+          offering_id?: string | null
+          quote?: string | null
+          reflection?: string | null
+          species_category?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookshelf_entries_catalog_book_id_fkey"
+            columns: ["catalog_book_id"]
+            isOneToOne: false
+            referencedRelation: "book_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookshelf_entries_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bug_reports: {
         Row: {
           actual: string
