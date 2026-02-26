@@ -224,47 +224,74 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
     }
   }, []);
 
-  // Resolve Apple Music link by track ID lookup
-  const resolveAppleMusicLink = useCallback(async (input: string) => {
-    const parsed = parseAppleMusicInput(input);
-    if (!parsed.trackId) return false;
+  // Resolve any music link (Spotify, YouTube, Apple Music) via edge function
+  const resolveMusicLink = useCallback(async (input: string): Promise<boolean> => {
+    // Extract URL from input
+    const urlMatch = input.match(/https?:\/\/[^\s"'<>)}\]]+/i);
+    if (!urlMatch) return false;
+    const url = urlMatch[0];
+
+    // Detect platform
+    const isMusic = /open\.spotify\.com|spotify\.link|youtube\.com|youtu\.be|music\.youtube\.com|music\.apple\.com|itunes\.apple\.com/i.test(url);
+    if (!isMusic) return false;
 
     setLinkResolving(true);
     setSearching(true);
     setHasSearched(true);
+
     try {
-      const res = await fetch(
-        `https://itunes.apple.com/lookup?id=${parsed.trackId}&entity=song`
-      );
-      const data = await res.json();
-      if (data.results && data.results.length > 0) {
-        const track = data.results.find((r: any) => r.wrapperType === "track") || data.results[0];
-        if (track) {
-          const song = normalizeITunes(track as iTunesResult);
-          handleSelect(song);
-          setLinkResolving(false);
-          setSearching(false);
-          return true;
+      // For Apple Music, try direct iTunes lookup first (faster, no edge function)
+      if (/music\.apple\.com|itunes\.apple\.com/i.test(url)) {
+        const parsed = parseAppleMusicInput(input);
+        if (parsed.trackId) {
+          const res = await fetch(`https://itunes.apple.com/lookup?id=${parsed.trackId}&entity=song`);
+          const data = await res.json();
+          const track = data.results?.find((r: any) => r.wrapperType === "track");
+          if (track) {
+            handleSelect(normalizeITunes(track as iTunesResult));
+            return true;
+          }
         }
       }
+
+      // Resolve via edge function for Spotify/YouTube (avoids CORS)
+      const { data, error } = await supabase.functions.invoke("resolve-music-link", {
+        body: { url },
+      });
+
+      if (error || !data || data.error) return false;
+
+      const song: CatalogSong = {
+        id: `resolved-${Date.now()}`,
+        title: data.title || "Unknown",
+        artist: data.artist || "",
+        album: data.album || null,
+        genre: null,
+        artwork_url: data.artwork_url || null,
+        preview_url: data.preview_url || null,
+        external_url: data.external_url || url,
+        source: data.source === "spotify" ? "spotify" : data.source === "youtube" ? "youtube" : "itunes",
+      };
+      handleSelect(song);
+      return true;
     } catch {
-      // fall through to normal search
+      return false;
+    } finally {
+      setLinkResolving(false);
+      setSearching(false);
     }
-    setLinkResolving(false);
-    setSearching(false);
-    return false;
   }, []);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
 
-    // Detect Apple Music links
-    if (/music\.apple\.com|itunes\.apple\.com/i.test(value)) {
+    // Detect any music link (Spotify, YouTube, Apple Music)
+    if (/open\.spotify\.com|spotify\.link|youtube\.com|youtu\.be|music\.youtube\.com|music\.apple\.com|itunes\.apple\.com/i.test(value)) {
       searchTimerRef.current = setTimeout(async () => {
-        const resolved = await resolveAppleMusicLink(value);
+        const resolved = await resolveMusicLink(value);
         if (!resolved) performSearch(value);
-      }, 200);
+      }, 300);
       return;
     }
 
@@ -348,7 +375,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
         <Input
           value={query}
           onChange={(e) => { handleQueryChange(e.target.value); if (selectedSong) { setSelectedSong(null); setCustomMode(false); } }}
-          placeholder="Search songs or paste an Apple Music link..."
+          placeholder="Search songs or paste a Spotify / YouTube / Apple Music link..."
           className="pl-10 pr-10 font-serif h-12 text-sm bg-secondary/20 border-border/30 focus:border-primary/50"
           autoFocus={!selectedSong}
         />
@@ -380,7 +407,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                 <div>
                   <p className="text-sm font-serif text-foreground/80">Choose a song for this Ancient Friend</p>
                     <p className="text-[11px] text-muted-foreground/60 mt-1">
-                      Search our catalog, Apple Music, or paste a link
+                      Search our catalog, or paste a Spotify / YouTube / Apple Music link
                     </p>
                 </div>
 
@@ -595,7 +622,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                         <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{selectedSong.genre}</Badge>
                       )}
                       <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/30">
-                        {selectedSong.source === "itunes" ? "Apple Music" : "Sacred Catalog"}
+                        {selectedSong.source === "itunes" ? "Apple Music" : selectedSong.source === "spotify" ? "Spotify" : selectedSong.source === "youtube" ? "YouTube" : "Sacred Catalog"}
                       </Badge>
                     </div>
                   </div>
@@ -615,7 +642,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                     className="block px-4 py-2 text-[10px] text-primary/50 hover:text-primary font-serif tracking-wider border-t border-border/20 transition-colors"
                   >
                     <ExternalLink className="w-3 h-3 inline mr-1" />
-                    Listen on {selectedSong.source === "itunes" ? "Apple Music" : "streaming"}
+                    Listen on {selectedSong.source === "itunes" ? "Apple Music" : selectedSong.source === "spotify" ? "Spotify" : selectedSong.source === "youtube" ? "YouTube" : "streaming"}
                   </a>
                 )}
               </div>
