@@ -766,6 +766,53 @@ export type Database = {
         }
         Relationships: []
       }
+      grove_quests: {
+        Row: {
+          companion_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress_a: number
+          progress_b: number
+          quest_type: string
+          status: string
+          target_count: number
+          target_species: string | null
+        }
+        Insert: {
+          companion_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress_a?: number
+          progress_b?: number
+          quest_type?: string
+          status?: string
+          target_count?: number
+          target_species?: string | null
+        }
+        Update: {
+          companion_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress_a?: number
+          progress_b?: number
+          quest_type?: string
+          status?: string
+          target_count?: number
+          target_species?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grove_quests_companion_id_fkey"
+            columns: ["companion_id"]
+            isOneToOne: false
+            referencedRelation: "grove_companions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       heart_campaigns: {
         Row: {
           created_at: string
@@ -1823,6 +1870,44 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      species_attestations: {
+        Row: {
+          attested_species: string
+          confidence: string
+          created_at: string
+          id: string
+          notes: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          attested_species: string
+          confidence?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          attested_species?: string
+          confidence?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "species_attestations_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       species_heart_transactions: {
         Row: {

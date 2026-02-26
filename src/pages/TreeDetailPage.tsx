@@ -8,6 +8,7 @@ import JourneyNudge from "@/components/JourneyNudge";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
+import SpeciesAttestation from "@/components/SpeciesAttestation";
 import BloomingClock from "@/components/BloomingClock";
 import TreeShareCard from "@/components/TreeShareCard";
 import { Card, CardContent } from "@/components/ui/card";
@@ -404,6 +405,11 @@ const TreeDetailPage = () => {
           />
         </div>
 
+        {/* Species Attestation */}
+        <div className="mb-6">
+          <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
+        </div>
+
         {/* Stewardship Leaderboard */}
         <StewardshipLeaderboard treeId={id!} />
 
@@ -471,11 +477,11 @@ const TreeDetailPage = () => {
               <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
             </div>
             <p className="text-xs text-muted-foreground font-serif mb-3 text-center">
-              Observations, documentation, and seasonal records contributed to this tree's archive.
+              Shared stewardship records — observations, documentation, and seasonal data contributed to this tree's public archive.
             </p>
             <div className="grid gap-3 md:grid-cols-2">
               {stewardshipOfferings.map((off) => (
-                <Card key={off.id} className="bg-card/60 backdrop-blur border-primary/20">
+                <Card key={off.id} className="bg-card/60 backdrop-blur border-l-2 border-l-primary/50 border-primary/20">
                   <CardContent className="p-3 flex items-center gap-3">
                     {off.media_url && off.type === "photo" && (
                       <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
@@ -486,8 +492,8 @@ const TreeDetailPage = () => {
                         {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary">
-                      {off.type}
+                    <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary gap-1">
+                      📋 {off.type}
                     </Badge>
                   </CardContent>
                 </Card>
@@ -505,7 +511,7 @@ const TreeDetailPage = () => {
             >
               <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
               <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
-                🏡 Beneath This Tree
+                🏡 Anchored Memories
                 <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
                 <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
               </span>
@@ -517,26 +523,31 @@ const TreeDetailPage = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="grid gap-3 md:grid-cols-2 overflow-hidden"
+                  className="space-y-2 overflow-hidden"
                 >
-                  {anchoredOfferings.map((off) => (
-                    <Card key={off.id} className="bg-card/40 backdrop-blur border-border/30">
-                      <CardContent className="p-3 flex items-center gap-3">
-                        {off.media_url && off.type === "photo" && (
-                          <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                          <span className="text-[10px] text-muted-foreground/60 font-mono">
-                            {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                          </span>
-                        </div>
-                        <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-border/30">
-                          {off.type}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  <p className="text-xs text-muted-foreground font-serif mb-2 text-center italic">
+                    Personal reflections and memories anchored to this tree.
+                  </p>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {anchoredOfferings.map((off) => (
+                      <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
+                        <CardContent className="p-3 flex items-center gap-3">
+                          {off.media_url && off.type === "photo" && (
+                            <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
+                            <span className="text-[10px] text-muted-foreground/60 font-mono">
+                              {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                            </span>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
+                            🌿 {off.type}
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
