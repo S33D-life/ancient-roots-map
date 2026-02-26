@@ -1,0 +1,63 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "S33D Root System API",
+    "version": "1.0.0",
+    "description": "The Root System — API for the TETOL (The Ethereal Tree Of Life) ecosystem. Access Ancient Friends, offerings, whispers, and navigate the digital grove programmatically.\n\nBase URL: Use the /api-gateway edge function endpoint.",
+    "contact": { "name": "S33D Grove Keepers", "url": "https://www.s33d.life" }
+  },
+  "servers": [
+    { "url": "https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/api-gateway", "description": "Production" }
+  ],
+  "security": [{ "BearerAuth": [] }, { "ApiKeyAuth": [] }],
+  "paths": {
+    "/api/v1/health": {
+      "get": { "summary": "Health check", "operationId": "getHealth", "tags": ["Meta"], "security": [], "responses": { "200": { "description": "API is healthy" } } }
+    },
+    "/api/v1/meta/capabilities": {
+      "get": { "summary": "Capability manifest", "operationId": "getCapabilities", "tags": ["Meta"], "security": [], "description": "Machine-readable manifest for TEOTAG self-configuration.", "responses": { "200": { "description": "Manifest JSON" } } }
+    },
+    "/api/v1/meta/me": {
+      "get": { "summary": "Who am I?", "operationId": "getMe", "tags": ["Meta"], "responses": { "200": { "description": "Current auth context" } } }
+    },
+    "/api/v1/trees": {
+      "get": {
+        "summary": "List Ancient Friends", "operationId": "listTrees", "tags": ["Trees"], "security": [],
+        "parameters": [
+          { "name": "country", "in": "query", "schema": { "type": "string" } },
+          { "name": "species", "in": "query", "schema": { "type": "string" } },
+          { "name": "is_churchyard", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "bbox", "in": "query", "schema": { "type": "string" }, "description": "south,west,north,east" },
+          { "name": "near", "in": "query", "schema": { "type": "string" }, "description": "lat,lng,radiusKm" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20, "maximum": 100 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Paginated tree list" } }
+      }
+    },
+    "/api/v1/trees/{id}": {
+      "get": { "summary": "Get tree details", "operationId": "getTree", "tags": ["Trees"], "security": [], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Tree" }, "404": { "description": "Not found" } } }
+    },
+    "/api/v1/trees/{id}/offerings": {
+      "get": { "summary": "Offerings for a tree", "operationId": "getTreeOfferings", "tags": ["Trees", "Offerings"], "security": [], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }, { "name": "type", "in": "query", "schema": { "type": "string" } }, { "name": "limit", "in": "query", "schema": { "type": "integer" } }, { "name": "cursor", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "Offerings" } } }
+    },
+    "/api/v1/trees/{id}/whispers": {
+      "get": { "summary": "Public whispers anchored to tree", "operationId": "getTreeWhispers", "tags": ["Trees", "Whispers"], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Whispers" } } }
+    },
+    "/api/v1/offerings": {
+      "get": { "summary": "List offerings", "operationId": "listOfferings", "tags": ["Offerings"], "parameters": [{ "name": "visibility", "in": "query", "schema": { "type": "string", "enum": ["public", "mine"] } }, { "name": "tree_id", "in": "query", "schema": { "type": "string" } }, { "name": "type", "in": "query", "schema": { "type": "string" } }, { "name": "limit", "in": "query", "schema": { "type": "integer" } }, { "name": "cursor", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "Offerings" } } }
+    },
+    "/api/v1/offerings/{id}": {
+      "get": { "summary": "Get offering", "operationId": "getOffering", "tags": ["Offerings"], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Offering" }, "404": { "description": "Not found" } } }
+    },
+    "/api/v1/search": {
+      "get": { "summary": "Unified search", "operationId": "search", "tags": ["Search"], "security": [], "parameters": [{ "name": "q", "in": "query", "required": true, "schema": { "type": "string" } }, { "name": "types", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated: trees, offerings" }], "responses": { "200": { "description": "Results" } } }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" },
+      "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "x-api-key" }
+    }
+  }
+}

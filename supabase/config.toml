@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.birdsong-identify]
 verify_jwt = false
+
+[functions.api-gateway]
+verify_jwt = false
+
+[functions.resolve-music-link]
+verify_jwt = false
+
+[functions.teotag-guide]
+verify_jwt = false
