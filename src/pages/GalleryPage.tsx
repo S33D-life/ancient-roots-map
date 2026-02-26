@@ -105,13 +105,17 @@ interface WishlistItem {
   trees: Tree;
 }
 
-const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "tree-resources", "ledger", "vault", "archive"];
+const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "scrolls", "vault", "bookshelf"];
 
 // Friendly URL aliases so links like /library/ancient-friends resolve correctly
 const ROOM_ALIASES: Record<string, string> = {
   "ancient-friends": "gallery",
-  "resources": "tree-resources",
+  "resources": "creators-path",
+  "tree-resources": "creators-path",
   "wishing-tree": "wishlist",
+  "ledger": "scrolls",
+  "volumes": "scrolls",
+  "archive": "scrolls",
 };
 
 /** Collective Vault card for DAOs */
@@ -209,10 +213,6 @@ const GalleryPage = () => {
   const [vaultRevealed, setVaultRevealed] = useState(!!roomParam && roomParam === "vault");
 
   const handleTabChange = (tab: string) => {
-    if (tab === "archive") {
-      navigate("/living-archive");
-      return;
-    }
     setActiveTab(tab);
     navigate(`/library/${tab}`, { replace: true });
   };
@@ -1148,9 +1148,7 @@ const GalleryPage = () => {
 
           <TabsContent value="creators-path" className="space-y-6">
             <CreatorsPath userId={currentUserId || undefined} activeStaff={wallet.activeStaff} />
-          </TabsContent>
-
-          <TabsContent value="tree-resources" className="space-y-6">
+            {/* Resources folded into Creator's Path */}
             <TreeResources />
           </TabsContent>
 
@@ -1187,7 +1185,8 @@ const GalleryPage = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="ledger" className="space-y-6">
+          {/* Scrolls & Records — merged Ledger + Volumes + Archive */}
+          <TabsContent value="scrolls" className="space-y-6">
 
             {/* Heart Reservoir Rankings */}
             <TreeReservoirLeaderboard />
@@ -1402,58 +1401,18 @@ const GalleryPage = () => {
                 </Card>
               </div>
             )}
-          </TabsContent>
 
-          <TabsContent value="greenhouse" className="space-y-6">
-            {/* Interactive entrance image */}
-            <div
-              className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
-              onClick={() => setShowGreenhouseContent(!showGreenhouseContent)}
-            >
-              <img
-                src={greenhouseWindow}
-                alt="The Greenhouse"
-                className="w-full h-64 md:h-96 object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
-                <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">🌿 The Greenhouse</h3>
-                <p className="text-sm text-foreground/70 mt-1 font-serif">
-                  {showGreenhouseContent ? "Click to close" : "Enter the botanical sanctuary"}
-                </p>
-              </div>
+            {/* Collaborator Volumes section */}
+            <div className="pt-4">
+              <h2 className="text-xl font-serif text-foreground/90 tracking-wide mb-4">Collaborator Volumes</h2>
+              {currentUserId ? (
+                <CollaboratorShelf userId={currentUserId} />
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-sm text-muted-foreground font-serif">Sign in to manage your Collaborator Volumes.</p>
+                </div>
+              )}
             </div>
-
-            {showGreenhouseContent && (
-              <div className="animate-fade-in">
-                <Greenhouse />
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="wishlist" className="space-y-6">
-            <WishingTreeUnified />
-          </TabsContent>
-
-          {/* Bookshelf Tab */}
-          <TabsContent value="bookshelf" className="space-y-6">
-            {currentUserId ? (
-              <PersonalBookshelf userId={currentUserId} />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-sm text-muted-foreground font-serif">Sign in to access your Bookshelf.</p>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Volumes Tab — Collaborator Volumes */}
-          <TabsContent value="volumes" className="space-y-6">
-            {currentUserId ? (
-              <CollaboratorShelf userId={currentUserId} />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-sm text-muted-foreground font-serif">Sign in to manage your Collaborator Volumes.</p>
-              </div>
-            )}
           </TabsContent>
 
           {/* Vaults Tab */}
