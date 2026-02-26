@@ -147,6 +147,7 @@ const App = () => {
                 <Route path="/atlas/united-kingdom" element={<UKCountryPage />} />
                 <Route path="/atlas/united-states" element={<USACountryPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
+                <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
