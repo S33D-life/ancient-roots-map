@@ -13,7 +13,7 @@ import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
 
 import hearthBg from "@/assets/hearth-bg.jpeg";
-import HearthEntrance from "@/components/HearthEntrance";
+import LevelEntrance from "@/components/LevelEntrance";
 import Footer from "@/components/Footer";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import GroveIdentityCard from "@/components/dashboard/GroveIdentityCard";
@@ -321,7 +321,7 @@ const DashboardPage = () => {
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
-    return <HearthEntrance onComplete={handleEntranceComplete} />;
+    return <LevelEntrance phases={[{ src: hearthBg, alt: "The Hearth" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
   if (loading) {

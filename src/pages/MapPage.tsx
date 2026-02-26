@@ -2,7 +2,7 @@ import { useState, useCallback, lazy, Suspense } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
-import RootsEntrance from "@/components/RootsEntrance";
+import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 
@@ -33,7 +33,7 @@ const MapPage = () => {
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
-    return <RootsEntrance onComplete={handleEntranceComplete} />;
+    return <LevelEntrance phases={[{ src: "/images/hero-trees/ancient-oak-mist.jpeg", alt: "The Roots" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
   return (

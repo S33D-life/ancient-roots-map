@@ -7,7 +7,7 @@ import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import AmanitaFlush from "@/components/AmanitaFlush";
 import AncientFriendsExplorer from "@/components/AncientFriendsExplorer";
-import HeartwoodEntrance from "@/components/HeartwoodEntrance";
+import LevelEntrance from "@/components/LevelEntrance";
 import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import { supabase } from "@/integrations/supabase/client";
@@ -781,7 +781,7 @@ const GalleryPage = () => {
 
   if (showSplash) {
     return (
-      <HeartwoodEntrance onComplete={() => dismissSplash()} />
+      <LevelEntrance phases={[{ src: heartwoodLanding, alt: "The Heartwood Library" }]} phaseDuration={1200} fadeDuration={600} onComplete={() => dismissSplash()} />
     );
   }
 

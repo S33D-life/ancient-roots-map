@@ -54,18 +54,11 @@ const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
 const PilgrimagePathwaysPage = lazy(() => import("./pages/PilgrimagePathwaysPage"));
 const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
-const UKCountryPage = lazy(() => import("./pages/UKCountryPage"));
-const USACountryPage = lazy(() => import("./pages/USACountryPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 const AddTreePage = lazy(() => import("./pages/AddTreePage"));
 const CityTemplatePage = lazy(() => import("./pages/CityTemplatePage"));
 const WhispersPage = lazy(() => import("./pages/WhispersPage"));
 const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
-const NigeriaCountryPage = lazy(() => import("./pages/NigeriaCountryPage"));
-const KenyaCountryPage = lazy(() => import("./pages/KenyaCountryPage"));
-const EthiopiaCountryPage = lazy(() => import("./pages/EthiopiaCountryPage"));
-const TanzaniaCountryPage = lazy(() => import("./pages/TanzaniaCountryPage"));
-const DRCongoCountryPage = lazy(() => import("./pages/DRCongoCountryPage"));
 const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
 const BugGardenPage = lazy(() => import("./pages/BugGardenPage"));
 
@@ -155,13 +148,6 @@ const App = () => {
                 <Route path="/markets" element={<CycleMarketsPage />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
-                <Route path="/atlas/united-kingdom" element={<UKCountryPage />} />
-                <Route path="/atlas/united-states" element={<USACountryPage />} />
-                <Route path="/atlas/nigeria" element={<NigeriaCountryPage />} />
-                <Route path="/atlas/kenya" element={<KenyaCountryPage />} />
-                <Route path="/atlas/ethiopia" element={<EthiopiaCountryPage />} />
-                <Route path="/atlas/tanzania" element={<TanzaniaCountryPage />} />
-                <Route path="/atlas/dr-congo" element={<DRCongoCountryPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />

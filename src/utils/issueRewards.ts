@@ -6,6 +6,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { matchSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { toast } from "sonner";
 
 const DAILY_CHECKIN_CAP = 3;
 
@@ -113,11 +114,28 @@ export async function issueRewards(params: IssueParams): Promise<RewardResult | 
     });
   }
 
-  return {
+  const result: RewardResult = {
     s33dHearts: s33dAmt,
     speciesHearts: speciesAmt,
     influence: influenceAmt,
     speciesFamily: family,
     hiveName,
   };
+
+  // Show a subtle toast so the user always knows they earned hearts
+  const total = s33dAmt + speciesAmt;
+  if (total > 0) {
+    const ACTION_LABELS: Record<string, string> = {
+      checkin: "Check-in",
+      mapping: "Tree mapped",
+      offering: "Offering",
+      curation: "Curation",
+    };
+    toast(`🌿 +${total} Hearts`, {
+      description: ACTION_LABELS[actionType] || actionType,
+      duration: 3000,
+    });
+  }
+
+  return result;
 }
