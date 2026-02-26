@@ -15,6 +15,7 @@ import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import { SLUG_MAP } from "@/config/countryRegistry";
+import { getCitiesByCountry } from "@/config/cityRegistry";
 import VerificationPipeline from "@/components/VerificationPipeline";
 import ImmutableTreeCard from "@/components/ImmutableTreeCard";
 
@@ -554,6 +555,32 @@ const CountryPortalPage = () => {
             </TabsContent>
           </Tabs>
         </section>
+
+        {/* ─── City Portals ─── */}
+        {(() => {
+          const cities = getCitiesByCountry(countrySlug || "");
+          if (!cities.length) return null;
+          return (
+            <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" /> Explore Cities
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {cities.map(city => (
+                  <Card key={city.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${city.slug}`)}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-serif font-bold text-foreground">{city.name}</p>
+                        <p className="text-xs text-muted-foreground italic">{city.tagline}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ─── H) Footer Bridge ─── */}
         <section className="px-4 max-w-3xl mx-auto mt-12">

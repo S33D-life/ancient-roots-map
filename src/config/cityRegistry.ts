@@ -41,6 +41,18 @@ const CITY_REGISTRY: CityRegistryEntry[] = [
     treePalette: ["Oak", "London Plane", "Yew"],
     waterway: "Thames",
   },
+  {
+    name: "Paris",
+    slug: "paris",
+    countrySlug: "france",
+    countryName: "France",
+    region: "Île-de-France",
+    bbox: [48.35, 2.05, 48.95, 2.80],
+    center: [48.8566, 2.3522],
+    tagline: "Ancient roots beneath the city of light.",
+    treePalette: ["Cedar", "Oak", "Robinia"],
+    waterway: "Seine",
+  },
 ];
 
 export default CITY_REGISTRY;
