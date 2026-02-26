@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart, Sparkles, Sprout, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -9,30 +9,36 @@ interface EconomyStats {
   activeSeeds: number;
 }
 
+const POLL_INTERVAL = 30_000; // 30s polling instead of Realtime
+
 const HeartEconomySummary = () => {
   const [stats, setStats] = useState<EconomyStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+
+  const fetchStats = useCallback(async () => {
+    const [heartsRes, windfallsRes, seedsRes] = await Promise.all([
+      supabase.from("user_heart_balances").select("s33d_hearts"),
+      supabase.from("tree_heart_pools").select("windfall_count"),
+      supabase
+        .from("planted_seeds")
+        .select("id", { count: "exact", head: true })
+        .is("collected_by", null),
+    ]);
+
+    const totalHearts = (heartsRes.data || []).reduce((s, r) => s + (r.s33d_hearts || 0), 0);
+    const totalWindfalls = (windfallsRes.data || []).reduce((s, r) => s + (r.windfall_count || 0), 0);
+    const activeSeeds = seedsRes.count || 0;
+
+    setStats({ totalHearts, totalWindfalls, activeSeeds });
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    const fetch = async () => {
-      const [heartsRes, windfallsRes, seedsRes] = await Promise.all([
-        supabase.from("heart_transactions").select("amount"),
-        supabase.from("tree_heart_pools").select("windfall_count"),
-        supabase
-          .from("planted_seeds")
-          .select("id", { count: "exact", head: true })
-          .is("collected_by", null),
-      ]);
-
-      const totalHearts = (heartsRes.data || []).reduce((s, r) => s + (r.amount || 0), 0);
-      const totalWindfalls = (windfallsRes.data || []).reduce((s, r) => s + (r.windfall_count || 0), 0);
-      const activeSeeds = seedsRes.count || 0;
-
-      setStats({ totalHearts, totalWindfalls, activeSeeds });
-      setLoading(false);
-    };
-    fetch();
-  }, []);
+    fetchStats();
+    intervalRef.current = setInterval(fetchStats, POLL_INTERVAL);
+    return () => clearInterval(intervalRef.current);
+  }, [fetchStats]);
 
   if (loading) {
     return (
@@ -49,19 +55,19 @@ const HeartEconomySummary = () => {
       icon: Heart,
       label: "Hearts Minted",
       value: stats.totalHearts,
-      color: "hsl(0, 65%, 55%)",
+      color: "hsl(var(--primary))",
     },
     {
       icon: Sparkles,
       label: "Windfalls Triggered",
       value: stats.totalWindfalls,
-      color: "hsl(270, 50%, 60%)",
+      color: "hsl(var(--accent))",
     },
     {
       icon: Sprout,
       label: "Active Seeds",
       value: stats.activeSeeds,
-      color: "hsl(120, 45%, 50%)",
+      color: "hsl(120 45% 50%)",
     },
   ];
 
@@ -77,7 +83,6 @@ const HeartEconomySummary = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1, duration: 0.4 }}
           >
-            {/* Subtle glow */}
             <div
               className="absolute inset-0 pointer-events-none opacity-[0.08]"
               style={{
