@@ -29,7 +29,7 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
 import SpeciesDiscoveryTrail from "@/components/SpeciesDiscoveryTrail";
 import SeasonalRitualCalendar from "@/components/SeasonalRitualCalendar";
-import GlobalSearch from "@/components/GlobalSearch";
+import AncientFriendPassport from "@/components/AncientFriendPassport";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
 import HearthWarmth from "@/components/dashboard/HearthWarmth";
@@ -337,9 +337,7 @@ const DashboardPage = () => {
     const TAB_ITEMS = [
       { value: "hearth", label: "Embers", icon: Flame },
       { value: "activity", label: "Activity", icon: Activity },
-      { value: "pod", label: "yOur Pod", icon: Sprout, count: trees.length },
-      { value: "leaderboard", label: "Fellowship", icon: Trophy },
-      { value: "search", label: "Search", icon: Search },
+      { value: "pod", label: "My Grove", icon: Sprout, count: trees.length },
       { value: "profile", label: "Settings", icon: Settings },
     ];
 
@@ -424,8 +422,10 @@ const DashboardPage = () => {
                   <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
                   <SpeciesDiscoveryTrail userId={user.id} />
                   <SeasonalRitualCalendar />
+                  <AncientFriendPassport userId={user.id} />
                   <GrovePulse userId={user.id} />
                   <HearthWarmth userId={user.id} />
+                  <DashboardLeaderboard currentUserId={user.id} />
                 </div>
               )}
             </TabsContent>
@@ -437,10 +437,6 @@ const DashboardPage = () => {
                   <PersonalLegend userId={user.id} />
                 </div>
               )}
-            </TabsContent>
-
-            <TabsContent value="search">
-              <GlobalSearch open={true} onClose={() => {}} embedded />
             </TabsContent>
 
             <TabsContent value="pod">
@@ -462,17 +458,10 @@ const DashboardPage = () => {
                 <PodSection icon={Leaf} label="Trees You Sit Beneath" accent>
                   {user && <DashboardCanopyKeeper userId={user.id} />}
                 </PodSection>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="leaderboard">
-              <div className="space-y-6">
-                <PodSection icon={Users} label="Fellow Wanderers" accent defaultOpen>
+                {/* Fellow Wanderers */}
+                <PodSection icon={Users} label="Fellow Wanderers" accent>
                   {user && <DashboardWanderers userId={user.id} />}
-                </PodSection>
-
-                <PodSection icon={Trophy} label="Community Leaderboard">
-                  <DashboardLeaderboard currentUserId={user?.id} />
                 </PodSection>
               </div>
             </TabsContent>

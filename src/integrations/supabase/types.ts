@@ -2068,6 +2068,50 @@ export type Database = {
           },
         ]
       }
+      root_mail: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          discovered_at: string | null
+          discovered_by: string | null
+          id: string
+          is_anonymous: boolean
+          tree_id: string
+          visible_after: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          discovered_at?: string | null
+          discovered_by?: string | null
+          id?: string
+          is_anonymous?: boolean
+          tree_id: string
+          visible_after?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          discovered_at?: string | null
+          discovered_by?: string | null
+          id?: string
+          is_anonymous?: boolean
+          tree_id?: string
+          visible_after?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "root_mail_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_songs: {
         Row: {
           artist: string
@@ -2097,6 +2141,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      seasonal_witnesses: {
+        Row: {
+          created_at: string
+          id: string
+          offering_id: string | null
+          photo_url: string | null
+          season: string
+          tree_id: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offering_id?: string | null
+          photo_url?: string | null
+          season: string
+          tree_id: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offering_id?: string | null
+          photo_url?: string | null
+          season?: string
+          tree_id?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_witnesses_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seasonal_witnesses_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seed_ingest_logs: {
         Row: {
