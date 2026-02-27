@@ -227,6 +227,10 @@ export default function CuratorPage() {
 
         {/* Links to other curator tools */}
         <div className="mb-6 flex flex-wrap gap-3">
+          <a href="/evolution" className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2">
+            <Shield className="w-4 h-4" />
+            Evolution Dashboard →
+          </a>
           <a href="/edit-review" className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2">
             <Shield className="w-4 h-4" />
             Tree Edit Proposals →

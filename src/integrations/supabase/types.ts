@@ -3638,6 +3638,42 @@ export type Database = {
       }
     }
     Functions: {
+      admin_daily_signups: {
+        Args: { days_back?: number }
+        Returns: {
+          day: string
+          signups: number
+        }[]
+      }
+      admin_daily_trees: {
+        Args: { days_back?: number }
+        Returns: {
+          day: string
+          trees_mapped: number
+        }[]
+      }
+      admin_economy_health: { Args: never; Returns: Json }
+      admin_feature_health: { Args: never; Returns: Json }
+      admin_geographic_coverage: {
+        Args: never
+        Returns: {
+          nation: string
+          offering_count: number
+          tree_count: number
+          wanderer_count: number
+        }[]
+      }
+      admin_platform_overview: { Args: never; Returns: Json }
+      admin_species_coverage: {
+        Args: never
+        Returns: {
+          checkin_count: number
+          offering_count: number
+          species: string
+          tree_count: number
+          unique_visitors: number
+        }[]
+      }
       aggregate_phenology: { Args: never; Returns: undefined }
       award_bug_hearts: {
         Args: { p_amount: number; p_bug_id: string; p_curator_id: string }
