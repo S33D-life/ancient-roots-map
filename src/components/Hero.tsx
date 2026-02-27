@@ -283,24 +283,18 @@ const Hero = () => {
       {isDark ? <FairyDust /> : <FallingLeaves />}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-32 text-center flex flex-col min-h-screen justify-end pb-8">
-        <div className="max-w-4xl mx-auto space-y-6 mb-auto mt-auto">
+      <div className="relative z-10 container mx-auto px-4 pt-24 pb-8 text-center flex flex-col min-h-screen">
+        <div className="max-w-4xl mx-auto space-y-4">
           {/* Branding title */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
             The Arboreal Atlas of<br />Ancient Friends
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Mapping the world's most storied trees — one encounter at a time.
+            Map ancient trees. Earn hearts. Protect what matters.
           </p>
-        </div>
 
-        {/* Bottom stack: Stats → CTA buttons → Teotag → Ancient Friend */}
-        <div className="flex flex-col items-center gap-3 px-4 mt-6">
-          {/* Living Census — real-time global counter */}
-          <LivingCensus />
-
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none pt-2">
+          {/* CTA buttons — above the fold */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none mx-auto pt-2">
             <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/map">
                 <MapPin className="w-5 h-5 mr-2" />
@@ -314,6 +308,12 @@ const Hero = () => {
               </Link>
             </Button>
           </div>
+        </div>
+
+        {/* Bottom stack: Stats → Teotag → Ancient Friend */}
+        <div className="flex flex-col items-center gap-3 px-4 mt-auto">
+          {/* Living Census — real-time global counter */}
+          <LivingCensus />
 
           {/* Centred Teotag logo — opens TETOL menu */}
           <button
