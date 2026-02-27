@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/map", icon: TreeDeciduous, label: "Roots", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/"] },
-  { to: "/library", icon: BookOpen, label: "Trunk", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard"] },
-  { to: "/council-of-life", icon: Leaf, label: "Canopy", matchPrefixes: ["/council"] },
-  { to: "/golden-dream", icon: Sparkles, label: "Crown", matchPrefixes: ["/golden-dream", "/value-tree"] },
+  { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/"] },
+  { to: "/library", icon: BookOpen, label: "Library", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard"] },
+  { to: "/council-of-life", icon: Leaf, label: "Council", matchPrefixes: ["/council"] },
+  { to: "/golden-dream", icon: Sparkles, label: "Dream", matchPrefixes: ["/golden-dream", "/value-tree"] },
 ] as const;
 
 const BottomNav = () => {

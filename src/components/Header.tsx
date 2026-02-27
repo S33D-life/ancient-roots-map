@@ -284,9 +284,9 @@ const Header = () => {
                     <Heart className="w-4 h-4 shrink-0" />
                     <span>The Hearth</span>
                   </Link>
-                  <Link to="/dashboard?tab=activity" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/dashboard?tab=journey" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <BarChart3 className="w-4 h-4 shrink-0" />
-                    <span>Activity</span>
+                    <span>Journey</span>
                   </Link>
                   <Link to="/vault" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Lock className="w-4 h-4 shrink-0" />

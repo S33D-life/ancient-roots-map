@@ -398,7 +398,7 @@ const AuthPage = () => {
           <img src={teotagLogo} alt="S33D" className="w-24 h-24 rounded-full mx-auto border-2 border-primary/40 glow-subtle" />
           <h2 className="text-3xl font-serif tracking-wider">S33D.life</h2>
           <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
-            Join the ancient grove. Map trees, collect Non-Fungible Twigs, and walk the Creator's Path.
+            Map the world's ancient trees, earn S33D Hearts, and help protect living heritage.
           </p>
           <div className="flex justify-center gap-6 pt-4">
             <div className="text-center">
