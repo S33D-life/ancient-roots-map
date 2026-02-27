@@ -65,6 +65,7 @@ const WhispersPage = lazy(() => import("./pages/WhispersPage"));
 const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
 const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
 const BugGardenPage = lazy(() => import("./pages/BugGardenPage"));
+const AdminEvolutionPage = lazy(() => import("./pages/AdminEvolutionPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -164,6 +165,7 @@ const App = () => {
                 <Route path="/time-tree" element={<TimeTreePage />} />
                 <Route path="/api/docs" element={<ApiDocsPage />} />
                 <Route path="/bug-garden" element={<BugGardenPage />} />
+                <Route path="/evolution" element={<AdminEvolutionPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
