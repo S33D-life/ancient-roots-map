@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Leaf, TreeDeciduous, Moon, BookOpen, Heart, Eye, Users, ChevronDown, ChevronUp, Sparkles, Calendar } from "lucide-react";
+import { Flame, Leaf, TreeDeciduous, BookOpen, Heart, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -347,30 +347,12 @@ const HearthWarmth = ({ userId }: HearthWarmthProps) => {
       </WarmthModule>
 
       <WarmthModule
-        icon={<Users className="w-4 h-4" />}
-        title="From Wanderers"
-        accent="160 40% 45%"
-        defaultOpen={true}
-      >
-        <FromWanderers userId={userId} />
-      </WarmthModule>
-
-      <WarmthModule
         icon={<TreeDeciduous className="w-4 h-4" />}
         title="Trees in Bloom"
         accent="120 45% 40%"
-        defaultOpen={false}
+        defaultOpen={true}
       >
         <TreesInBloom userId={userId} />
-      </WarmthModule>
-
-      <WarmthModule
-        icon={<Moon className="w-4 h-4" />}
-        title="Council Circle"
-        accent="220 50% 55%"
-        defaultOpen={false}
-      >
-        <CouncilCircle />
       </WarmthModule>
     </div>
   );

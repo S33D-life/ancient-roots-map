@@ -351,29 +351,40 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
       {/* Account & Security */}
       <HearthAccountSecurity user={user} walletAddress={wallet.address} />
 
-      {/* Manual Staff Picker */}
-      <ManualStaffPicker
-        userId={user.id}
-        currentStaffId={(wallet.activeStaff as any)?.id || null}
-        onLinked={(staff) => {
-          if (staff) {
-            wallet.selectStaff({
-              code: staff.id,
-              tokenId: staff.token_id,
-              speciesId: 0,
-              circleId: staff.circle_id,
-              variantId: 0,
-              staffNumber: staff.staff_number,
-              isOriginSpiral: staff.is_origin_spiral,
-              name: staff.species,
-              species: staff.species,
-              image: staff.image_url || `/images/staffs/${staff.species_code.toLowerCase()}.jpeg`,
-            });
-          } else {
-            wallet.clearActiveStaff();
-          }
-        }}
-      />
+      {/* Staff Identity */}
+      <Card className="border-border/50 bg-card/60 backdrop-blur">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" />
+            <h3 className="text-sm uppercase tracking-widest text-primary font-serif">Staff Identity</h3>
+          </div>
+          <p className="text-xs text-muted-foreground font-serif">
+            Your Staff anchors your identity in the grove. Link or change your active Staff below.
+          </p>
+          <ManualStaffPicker
+            userId={user.id}
+            currentStaffId={(wallet.activeStaff as any)?.id || null}
+            onLinked={(staff) => {
+              if (staff) {
+                wallet.selectStaff({
+                  code: staff.id,
+                  tokenId: staff.token_id,
+                  speciesId: 0,
+                  circleId: staff.circle_id,
+                  variantId: 0,
+                  staffNumber: staff.staff_number,
+                  isOriginSpiral: staff.is_origin_spiral,
+                  name: staff.species,
+                  species: staff.species,
+                  image: staff.image_url || `/images/staffs/${staff.species_code.toLowerCase()}.jpeg`,
+                });
+              } else {
+                wallet.clearActiveStaff();
+              }
+            }}
+          />
+        </CardContent>
+      </Card>
 
       {/* Wallet */}
       <div>
