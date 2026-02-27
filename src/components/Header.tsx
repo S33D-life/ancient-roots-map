@@ -11,13 +11,14 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
 import TeotagGuide from "./TeotagGuide";
 import { toast } from "sonner";
+import { useHeartBalance } from "@/hooks/use-heart-balance";
+import LivingStreak from "./LivingStreak";
 
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [heartsCount, setHeartsCount] = useState<number | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   
   const [tetolOpen, setTetolOpen] = useState(false);
@@ -87,7 +88,6 @@ const Header = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchHearts(session.user.id);
         fetchAvatar(session.user.id);
         checkPendingActivity(session.user.id);
       }
@@ -97,11 +97,9 @@ const Header = () => {
       (event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchHearts(session.user.id);
           fetchAvatar(session.user.id);
           checkPendingActivity(session.user.id);
         } else {
-          setHeartsCount(null);
           setAvatarUrl(null);
         }
       }
@@ -110,7 +108,11 @@ const Header = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Realtime heart balance — live updates + toast on earn
+  // Use unified heart balance hook
+  const heartBalance = useHeartBalance(user?.id ?? null);
+  const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
+
+  // Realtime heart toast — listen for new heart_transactions
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -127,7 +129,6 @@ const Header = () => {
           const amount = payload.new?.amount || 0;
           const heartType = payload.new?.heart_type || 'heart';
           if (amount > 0) {
-            setHeartsCount((prev) => (prev ?? 0) + amount);
             const label = heartType === 'windfall' ? '🌊 Windfall' : heartType === 'sower' ? '🌱 Sower' : heartType === 'wanderer' ? '🚶 Wanderer' : '❤️ Heart';
             toast(`${label} +${amount}`, { description: "S33D Hearts earned", duration: 3000 });
           }
@@ -149,40 +150,7 @@ const Header = () => {
     setHasPendingActivity((bloomedSeeds || 0) > 0);
   };
 
-  const fetchHearts = async (userId: string) => {
-    const [treesRes, offeringsRes, plantsRes, wishlistRes, heartTxRes, photoOfferingsRes] = await Promise.all([
-      supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
-      supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
-      supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("heart_transactions").select("amount").eq("user_id", userId),
-      // Count distinct trees with photo offerings by this user
-      supabase.from("offerings").select("tree_id").eq("created_by", userId).eq("type", "photo"),
-    ]);
-    const tc = treesRes.count || 0;
-    const oc = offeringsRes.count || 0;
-    const pc = plantsRes.count || 0;
-    const wc = wishlistRes.count || 0;
-
-    const heartTxTotal = (heartTxRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
-
-    // Count unique trees with photos
-    const photoTreeIds = new Set((photoOfferingsRes.data || []).map((o: any) => o.tree_id));
-    const photoTreeCount = photoTreeIds.size;
-
-    let total = tc * 10 + photoTreeCount; // +1 heart per tree mapped with photo
-    const milestones: [number, number, string][] = [
-      [tc, 1, "10"], [tc, 5, "25"], [tc, 10, "50"], [tc, 25, "100"], [tc, 50, "200"], [tc, 100, "500"], [tc, 250, "1000"],
-      [oc, 1, "5"], [oc, 10, "30"], [oc, 25, "75"], [oc, 50, "200"], [oc, 100, "500"],
-      [pc, 1, "5"], [pc, 5, "20"], [pc, 15, "60"],
-      [wc, 3, "15"], [wc, 10, "50"],
-    ];
-    for (const [count, threshold, hearts] of milestones) {
-      if (count >= threshold) total += parseInt(hearts);
-    }
-    total += heartTxTotal;
-    setHeartsCount(total);
-  };
+  // fetchHearts removed — unified useHeartBalance hook handles this
 
   const fetchAvatar = async (userId: string) => {
     const { data } = await supabase.from("profiles").select("avatar_url").eq("id", userId).maybeSingle();
@@ -413,6 +381,7 @@ const Header = () => {
                   )}
                 </div>
                 <span className="font-serif">S33D</span>
+                <LivingStreak streak={heartBalance.streak} />
                 {heartsCount !== null && heartsCount > 0 && (
                   <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
                     <Heart className="w-3 h-3 fill-primary/40" />
