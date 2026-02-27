@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame } from "lucide-react";
+import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame, Compass } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -15,7 +15,7 @@ import { convertToCoordinates } from "@/utils/what3words";
 import hearthBg from "@/assets/hearth-bg.jpeg";
 import LevelEntrance from "@/components/LevelEntrance";
 import Footer from "@/components/Footer";
-import DashboardOverview from "@/components/dashboard/DashboardOverview";
+// DashboardOverview kept for potential future use
 import GroveIdentityCard from "@/components/dashboard/GroveIdentityCard";
 import FirstEncounterFunnel from "@/components/FirstEncounterFunnel";
 import DashboardTrees from "@/components/dashboard/DashboardTrees";
@@ -23,16 +23,17 @@ import DashboardProfile from "@/components/dashboard/DashboardProfile";
 import DashboardLeaderboard from "@/components/dashboard/DashboardLeaderboard";
 import PersonalLegend from "@/components/dashboard/PersonalLegend";
 import DashboardWanderers from "@/components/dashboard/DashboardWanderers";
-import GrovePulse from "@/components/GrovePulse";
+// GrovePulse removed — redundant with GroveIdentityCard
 import DashboardCanopyKeeper from "@/components/dashboard/DashboardCanopyKeeper";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import PageShell from "@/components/PageShell";
-import SpeciesDiscoveryTrail from "@/components/SpeciesDiscoveryTrail";
-import SeasonalRitualCalendar from "@/components/SeasonalRitualCalendar";
 import AncientFriendPassport from "@/components/AncientFriendPassport";
 import IdentityBloom from "@/components/IdentityBloom";
 import DashboardActivity from "@/components/dashboard/DashboardActivity";
 import HearthWarmth from "@/components/dashboard/HearthWarmth";
+import EarnableToday from "@/components/dashboard/EarnableToday";
+import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
+import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 
@@ -336,7 +337,7 @@ const DashboardPage = () => {
 
     const TAB_ITEMS = [
       { value: "hearth", label: "Embers", icon: Flame },
-      { value: "activity", label: "Activity", icon: Activity },
+      { value: "journey", label: "Journey", icon: Compass },
       { value: "pod", label: "My Grove", icon: Sprout, count: trees.length },
       { value: "profile", label: "Settings", icon: Settings },
     ];
@@ -420,21 +421,20 @@ const DashboardPage = () => {
                 <div className="space-y-8">
                   <FirstEncounterFunnel userId={user.id} />
                   <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
-                  <SpeciesDiscoveryTrail userId={user.id} />
-                  <SeasonalRitualCalendar />
-                  <AncientFriendPassport userId={user.id} />
-                  <GrovePulse userId={user.id} />
                   <HearthWarmth userId={user.id} />
-                  <DashboardLeaderboard currentUserId={user.id} />
+                  <EarnableToday userId={user.id} />
+                  <ActiveCampaigns />
+                  <HearthCrossLinks />
                 </div>
               )}
             </TabsContent>
 
-            <TabsContent value="activity">
+            <TabsContent value="journey">
               {user && (
                 <div className="space-y-8">
-                  <DashboardActivity userId={user.id} />
                   <PersonalLegend userId={user.id} />
+                  <AncientFriendPassport userId={user.id} />
+                  <DashboardActivity userId={user.id} />
                 </div>
               )}
             </TabsContent>
@@ -462,6 +462,11 @@ const DashboardPage = () => {
                 {/* Fellow Wanderers */}
                 <PodSection icon={Users} label="Fellow Wanderers" accent>
                   {user && <DashboardWanderers userId={user.id} />}
+                </PodSection>
+
+                {/* Community Leaderboard */}
+                <PodSection icon={Trophy} label="Leaderboard" accent>
+                  {user && <DashboardLeaderboard currentUserId={user.id} />}
                 </PodSection>
               </div>
             </TabsContent>
