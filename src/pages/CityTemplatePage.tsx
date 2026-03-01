@@ -14,6 +14,7 @@ import {
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
+import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 
 /* ─── Stat Tile ─── */
 const StatTile = ({ label, value, icon: Icon }: { label: string; value: number | string; icon: React.ElementType }) => (
@@ -158,14 +159,13 @@ const CityTemplatePage = () => {
             transition={{ duration: 0.6 }}
             className="relative z-10 max-w-2xl mx-auto"
           >
-            {/* Parent link */}
-            <Link
-              to={`/atlas/${city.countrySlug}`}
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mb-3"
-            >
-              <ChevronLeft className="w-3 h-3" />
-              {city.countryName}
-            </Link>
+            {/* Breadcrumb */}
+            <div className="mb-3 flex justify-center">
+              <AtlasBreadcrumb segments={[
+                { label: city.countryName, to: `/atlas/${city.countrySlug}` },
+                { label: city.name },
+              ]} />
+            </div>
 
             <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-2">
               {city.name}
@@ -441,7 +441,7 @@ const CityTemplatePage = () => {
                 {siblingCities.length > 0 && (
                   siblingCities.map((sc) => (
                     <Button key={sc.slug} variant="ghost" size="sm" asChild>
-                      <Link to={`/country/${sc.countrySlug}/${sc.slug}`}>
+                      <Link to={`/atlas/${sc.countrySlug}/${sc.slug}`}>
                         {sc.name}
                       </Link>
                     </Button>
