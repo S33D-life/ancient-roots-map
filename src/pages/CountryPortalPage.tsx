@@ -556,6 +556,26 @@ const CountryPortalPage = () => {
           </Tabs>
         </section>
 
+        {/* ─── Canton Portals (Switzerland-specific) ─── */}
+        {countrySlug === "switzerland" && (
+          <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+            <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+              <Compass className="w-4 h-4 text-primary" /> Explore Cantons
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Card className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate("/atlas/switzerland/valais")}>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-serif font-bold text-foreground">🏔️ Valais (Wallis)</p>
+                    <p className="text-xs text-muted-foreground italic">Alpine Elders of Stone, Ice & Light</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        )}
+
         {/* ─── City Portals ─── */}
         {(() => {
           const cities = getCitiesByCountry(countrySlug || "");
