@@ -1796,6 +1796,7 @@ export type Database = {
           meeting_id: string | null
           nft_link: string | null
           sealed_by_staff: string | null
+          sky_stamp_id: string | null
           title: string
           tree_id: string
           tree_role: string
@@ -1812,6 +1813,7 @@ export type Database = {
           meeting_id?: string | null
           nft_link?: string | null
           sealed_by_staff?: string | null
+          sky_stamp_id?: string | null
           title: string
           tree_id: string
           tree_role?: string
@@ -1828,6 +1830,7 @@ export type Database = {
           meeting_id?: string | null
           nft_link?: string | null
           sealed_by_staff?: string | null
+          sky_stamp_id?: string | null
           title?: string
           tree_id?: string
           tree_role?: string
@@ -1840,6 +1843,13 @@ export type Database = {
             columns: ["meeting_id"]
             isOneToOne: false
             referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offerings_sky_stamp_id_fkey"
+            columns: ["sky_stamp_id"]
+            isOneToOne: false
+            referencedRelation: "sky_stamps"
             referencedColumns: ["id"]
           },
           {
@@ -2357,6 +2367,68 @@ export type Database = {
           visitor_number?: number
         }
         Relationships: []
+      }
+      sky_stamps: {
+        Row: {
+          cache_key: string | null
+          created_at: string
+          id: string
+          lat: number
+          lng: number
+          seal: Json | null
+          sky_core: Json | null
+          sky_planets: Json | null
+          source_checkin_id: string | null
+          source_offering_id: string | null
+          source_tree_id: string | null
+          source_whisper_id: string | null
+          timezone: string | null
+          user_id: string
+          weather: Json | null
+        }
+        Insert: {
+          cache_key?: string | null
+          created_at?: string
+          id?: string
+          lat: number
+          lng: number
+          seal?: Json | null
+          sky_core?: Json | null
+          sky_planets?: Json | null
+          source_checkin_id?: string | null
+          source_offering_id?: string | null
+          source_tree_id?: string | null
+          source_whisper_id?: string | null
+          timezone?: string | null
+          user_id: string
+          weather?: Json | null
+        }
+        Update: {
+          cache_key?: string | null
+          created_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          seal?: Json | null
+          sky_core?: Json | null
+          sky_planets?: Json | null
+          source_checkin_id?: string | null
+          source_offering_id?: string | null
+          source_tree_id?: string | null
+          source_whisper_id?: string | null
+          timezone?: string | null
+          user_id?: string
+          weather?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sky_stamps_source_tree_id_fkey"
+            columns: ["source_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       song_catalog: {
         Row: {
@@ -2889,6 +2961,7 @@ export type Database = {
           privacy: string
           reflection: string | null
           season_stage: string
+          sky_stamp_id: string | null
           tree_id: string
           updated_at: string
           user_id: string
@@ -2912,6 +2985,7 @@ export type Database = {
           privacy?: string
           reflection?: string | null
           season_stage?: string
+          sky_stamp_id?: string | null
           tree_id: string
           updated_at?: string
           user_id: string
@@ -2935,6 +3009,7 @@ export type Database = {
           privacy?: string
           reflection?: string | null
           season_stage?: string
+          sky_stamp_id?: string | null
           tree_id?: string
           updated_at?: string
           user_id?: string
@@ -2942,6 +3017,13 @@ export type Database = {
           weather_snapshot_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tree_checkins_sky_stamp_id_fkey"
+            columns: ["sky_stamp_id"]
+            isOneToOne: false
+            referencedRelation: "sky_stamps"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tree_checkins_tree_id_fkey"
             columns: ["tree_id"]
@@ -3226,6 +3308,7 @@ export type Database = {
           recipient_scope: string
           recipient_user_id: string | null
           sender_user_id: string
+          sky_stamp_id: string | null
           status: string
           tree_anchor_id: string
         }
@@ -3244,6 +3327,7 @@ export type Database = {
           recipient_scope?: string
           recipient_user_id?: string | null
           sender_user_id: string
+          sky_stamp_id?: string | null
           status?: string
           tree_anchor_id: string
         }
@@ -3262,6 +3346,7 @@ export type Database = {
           recipient_scope?: string
           recipient_user_id?: string | null
           sender_user_id?: string
+          sky_stamp_id?: string | null
           status?: string
           tree_anchor_id?: string
         }
@@ -3278,6 +3363,13 @@ export type Database = {
             columns: ["delivery_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_whispers_sky_stamp_id_fkey"
+            columns: ["sky_stamp_id"]
+            isOneToOne: false
+            referencedRelation: "sky_stamps"
             referencedColumns: ["id"]
           },
           {

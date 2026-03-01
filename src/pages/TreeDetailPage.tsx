@@ -43,6 +43,7 @@ import WhisperCollector from "@/components/WhisperCollector";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import WeatherCard from "@/components/WeatherCard";
 import TreeCheckinButton from "@/components/TreeCheckinButton";
+import SkystampSeal from "@/components/SkystampSeal";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -887,6 +888,7 @@ const PhotoGrid = ({
                   <Share2 className="w-3.5 h-3.5" />
                 </button>
                 <SealedByLabel staff={offering.sealed_by_staff} />
+                <SkystampSeal skyStampId={(offering as any).sky_stamp_id} compact />
               </div>
             </div>
           </div>
@@ -937,6 +939,7 @@ const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingTy
             <Share2 className="w-3.5 h-3.5" />
           </button>
           <SealedByLabel staff={offering.sealed_by_staff} />
+          <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
         </div>
       </div>
     </CardContent>
@@ -987,6 +990,7 @@ const SongCard = ({ offering }: { offering: Offering }) => (
               <Share2 className="w-3.5 h-3.5" />
             </button>
             <SealedByLabel staff={offering.sealed_by_staff} />
+            <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
           </div>
         </div>
       </div>
@@ -1031,6 +1035,7 @@ const NftCard = ({ offering }: { offering: Offering }) => (
             <Share2 className="w-3.5 h-3.5" />
           </button>
           <SealedByLabel staff={offering.sealed_by_staff} />
+          <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
         </div>
       </div>
     </CardContent>
@@ -1246,6 +1251,7 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
                           <Share2 className="w-3.5 h-3.5" />
                         </button>
                         <SealedByLabel staff={offering.sealed_by_staff} />
+                        <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
                       </div>
                     </div>
                   </CardContent>
