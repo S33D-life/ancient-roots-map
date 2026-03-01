@@ -2147,6 +2147,63 @@ export type Database = {
           },
         ]
       }
+      region_notable_trees: {
+        Row: {
+          accessibility: string | null
+          common_name: string
+          country: string
+          created_at: string
+          estimated_age_label: string | null
+          estimated_age_years: number | null
+          id: string
+          lat: number | null
+          locality: string | null
+          lon: number | null
+          municipality: string
+          province: string
+          region: string
+          relevance: string | null
+          scientific_name: string
+          source_url: string | null
+        }
+        Insert: {
+          accessibility?: string | null
+          common_name: string
+          country?: string
+          created_at?: string
+          estimated_age_label?: string | null
+          estimated_age_years?: number | null
+          id: string
+          lat?: number | null
+          locality?: string | null
+          lon?: number | null
+          municipality: string
+          province?: string
+          region?: string
+          relevance?: string | null
+          scientific_name: string
+          source_url?: string | null
+        }
+        Update: {
+          accessibility?: string | null
+          common_name?: string
+          country?: string
+          created_at?: string
+          estimated_age_label?: string | null
+          estimated_age_years?: number | null
+          id?: string
+          lat?: number | null
+          locality?: string | null
+          lon?: number | null
+          municipality?: string
+          province?: string
+          region?: string
+          relevance?: string | null
+          scientific_name?: string
+          source_url?: string | null
+        }
+        Relationships: []
+      }
       research_trees: {
         Row: {
           anchor_chain: string | null
