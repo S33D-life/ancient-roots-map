@@ -113,10 +113,15 @@ const FeaturedTreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate
         <Badge variant="outline" className="text-[10px]">~1,600m</Badge>
       </div>
       <div className="flex flex-wrap gap-2 pt-2">
-        <Button variant="mystical" size="sm" onClick={() => onNavigate(tree)}>
+        <Button variant="mystical" size="sm" asChild>
+          <Link to="/atlas/switzerland/valais/king-of-bavleux">
+            <Eye className="w-3.5 h-3.5 mr-1" /> Full Profile
+          </Link>
+        </Button>
+        <Button variant="sacred" size="sm" onClick={() => onNavigate(tree)}>
           <MapIcon className="w-3.5 h-3.5 mr-1" /> View on Map
         </Button>
-        <Button variant="sacred" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild>
           <Link to="/time-tree">
             <Sparkles className="w-3.5 h-3.5 mr-1" /> Time Tree
           </Link>
