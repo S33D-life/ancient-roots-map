@@ -55,7 +55,7 @@ export default function SourceReviewPanel() {
 
   const loadSources = async () => {
     setLoading(true);
-    let q = supabase.from("tree_sources").select("*").order("submitted_at", { ascending: false });
+    let q = (supabase.from as any)("tree_sources_public").select("*").order("submitted_at", { ascending: false });
     if (statusFilter !== "all") q = q.eq("verification_status", statusFilter);
     const { data } = await q.limit(200);
     setSources((data as TreeSource[]) || []);

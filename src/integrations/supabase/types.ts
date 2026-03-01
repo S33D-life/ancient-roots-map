@@ -3853,7 +3853,6 @@ export type Database = {
       tree_sources_public: {
         Row: {
           contributor_name: string | null
-          created_at: string | null
           description: string | null
           id: string | null
           research_tree_id: string | null
@@ -3862,7 +3861,6 @@ export type Database = {
           submitted_at: string | null
           submitted_by: string | null
           tree_id: string | null
-          updated_at: string | null
           url: string | null
           verification_notes: string | null
           verification_status: string | null
@@ -3871,7 +3869,6 @@ export type Database = {
         }
         Insert: {
           contributor_name?: string | null
-          created_at?: string | null
           description?: string | null
           id?: string | null
           research_tree_id?: string | null
@@ -3880,7 +3877,6 @@ export type Database = {
           submitted_at?: string | null
           submitted_by?: string | null
           tree_id?: string | null
-          updated_at?: string | null
           url?: string | null
           verification_notes?: string | null
           verification_status?: string | null
@@ -3889,7 +3885,6 @@ export type Database = {
         }
         Update: {
           contributor_name?: string | null
-          created_at?: string | null
           description?: string | null
           id?: string | null
           research_tree_id?: string | null
@@ -3898,7 +3893,6 @@ export type Database = {
           submitted_at?: string | null
           submitted_by?: string | null
           tree_id?: string | null
-          updated_at?: string | null
           url?: string | null
           verification_notes?: string | null
           verification_status?: string | null

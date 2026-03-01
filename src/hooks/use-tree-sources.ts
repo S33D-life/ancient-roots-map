@@ -25,7 +25,7 @@ export function useTreeSources(treeId?: string, researchTreeId?: string) {
   const fetch = useCallback(async () => {
     if (!treeId && !researchTreeId) { setSources([]); setLoading(false); return; }
     setLoading(true);
-    let query = supabase.from("tree_sources").select("*");
+    let query = (supabase.from as any)("tree_sources_public").select("*");
     if (treeId) query = query.eq("tree_id", treeId);
     if (researchTreeId) query = query.eq("research_tree_id", researchTreeId);
     query = query.order("submitted_at", { ascending: false });
