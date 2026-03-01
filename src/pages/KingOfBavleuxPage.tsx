@@ -103,7 +103,9 @@ const KingOfBavleuxPage = () => {
   const [loreOpen, setLoreOpen] = useState(false);
   const [ecologyOpen, setEcologyOpen] = useState(false);
 
+  const treeId = "da8927c6-3c18-4b6e-8d4d-72e50f674570";
   const mapUrl = "/map?lat=46.114&lng=7.508&zoom=15&country=switzerland&origin=atlas";
+  const treeUrl = `/tree/${treeId}`;
 
   return (
     <PageShell>
@@ -169,11 +171,11 @@ const KingOfBavleuxPage = () => {
 
             {/* CTAs */}
             <div className="flex flex-wrap justify-center gap-3">
-              <Button variant="mystical" onClick={() => navigate(mapUrl)}>
-                <TreeDeciduous className="w-4 h-4 mr-1" /> Mint Ancient Friend
+              <Button variant="mystical" onClick={() => navigate(treeUrl)}>
+                <TreeDeciduous className="w-4 h-4 mr-1" /> Visit Tree Profile
               </Button>
               <Button variant="sacred" asChild>
-                <Link to="/library">
+                <Link to={treeUrl}>
                   <Leaf className="w-4 h-4 mr-1" /> Leave Offering
                 </Link>
               </Button>
@@ -342,7 +344,7 @@ const KingOfBavleuxPage = () => {
               <p className="text-[10px] text-muted-foreground">
                 Minting produces: Personal NFT · Library copy · Gift copy (12h transfer window)
               </p>
-              <Button variant="mystical" className="w-full" onClick={() => navigate(mapUrl)}>
+              <Button variant="mystical" className="w-full" onClick={() => navigate(treeUrl)}>
                 <TreeDeciduous className="w-4 h-4 mr-1" /> Begin Mint Ceremony
               </Button>
             </CardContent>
@@ -383,6 +385,7 @@ const KingOfBavleuxPage = () => {
               { label: "Valais Portal", to: "/atlas/switzerland/valais", icon: MapPin },
               { label: "Larch Hive", to: "/hive/larch", icon: Compass },
               { label: "View on Map", to: mapUrl, icon: Shield },
+              { label: "Tree Profile", to: treeUrl, icon: Eye },
               { label: "Switzerland Atlas", to: "/atlas/switzerland", icon: Mountain },
             ].map(l => (
               <Button key={l.label} variant="outline" className="h-auto py-3 flex-col gap-1" asChild>
