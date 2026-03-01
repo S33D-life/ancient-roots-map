@@ -2,9 +2,10 @@
  * InfluenceUpvoteButton — compact upvote with scope chooser drawer.
  * Shows on offering cards alongside existing heart/like.
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowBigUp, TreePine, Leaf, MapPin, ChevronDown, Info, Loader2, Undo2 } from "lucide-react";
+import { useUIFlow } from "@/contexts/UIFlowContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -60,6 +61,15 @@ const InfluenceUpvoteButton = ({
   const [ledgerData, setLedgerData] = useState<any[]>([]);
   const [ledgerLoading, setLedgerLoading] = useState(false);
   const { toast } = useToast();
+  const { enterFlow, exitFlow } = useUIFlow();
+
+  // Suppress popups when drawer or ledger is open
+  useEffect(() => {
+    if (drawerOpen || ledgerOpen) {
+      enterFlow("offering");
+      return () => exitFlow();
+    }
+  }, [drawerOpen, ledgerOpen, enterFlow, exitFlow]);
 
   const {
     availableScopes,
@@ -82,7 +92,8 @@ const InfluenceUpvoteButton = ({
   });
 
   const hasVoted = existingVotes.length > 0;
-  const displayScore = influenceScore + totalVotedWeight;
+  // influence_score on the offering already includes all active votes via DB trigger
+  const displayScore = influenceScore;
 
   const handleVote = useCallback(
     async (scope: InfluenceScope) => {
@@ -165,14 +176,14 @@ const InfluenceUpvoteButton = ({
               )}
             </button>
           </TooltipTrigger>
-          <TooltipContent className="font-serif text-xs">
+          <TooltipContent className="font-serif text-xs max-w-[200px]">
             {!userId
               ? "Sign in to influence-upvote"
               : !hasAnyInfluence
-              ? "Earn influence to amplify offerings"
+              ? "Earn influence through stewardship to amplify offerings"
               : hasVoted
-              ? `You've applied ${totalVotedWeight} influence`
-              : "Amplify with your influence"}
+              ? `Your applied influence: +${totalVotedWeight}`
+              : "Influence reflects stewardship in this scope"}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
