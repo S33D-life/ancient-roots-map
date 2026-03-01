@@ -2,11 +2,11 @@
  * GroveViewOverlay — "Living Earth Mode"
  *
  * A mythic ecological overlay that transforms the map into a breathing,
- * living forest view. Shows Grove Signals panel and mythic time selector.
+ * living forest view. Shows Grove Signals panel, mythic time selector,
+ * and live event stream.
  */
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, X } from "lucide-react";
 import { useGroveEvents, MYTHIC_TIMEFRAMES, type MythicTimeframe } from "@/hooks/use-grove-events";
 
 interface GroveViewOverlayProps {
@@ -17,7 +17,7 @@ interface GroveViewOverlayProps {
 const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
   const [timeframe, setTimeframe] = useState<MythicTimeframe>("moon");
   const [signalsExpanded, setSignalsExpanded] = useState(true);
-  const { signals, loading } = useGroveEvents(timeframe);
+  const { signals, loading, liveEventCount } = useGroveEvents(timeframe);
 
   return (
     <>
@@ -54,6 +54,22 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
         )}
       </AnimatePresence>
 
+      {/* Mycelial network overlay — subtle connection lines */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.01, 0.04, 0.01] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute inset-0 z-[5] pointer-events-none"
+            style={{
+              background: "radial-gradient(circle at 50% 80%, hsla(120, 40%, 30%, 0.08) 0%, transparent 30%), radial-gradient(circle at 20% 60%, hsla(120, 50%, 35%, 0.06) 0%, transparent 25%), radial-gradient(circle at 80% 40%, hsla(42, 60%, 40%, 0.05) 0%, transparent 20%)",
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ── Grove Signals Panel (bottom-left) ── */}
       <AnimatePresence>
         {active && (
@@ -62,7 +78,7 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute bottom-24 left-3 z-[1000] max-w-[220px]"
+            className="absolute bottom-24 left-3 z-[1000] max-w-[230px]"
           >
             {/* Collapse toggle */}
             <button
@@ -85,6 +101,20 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
                   🌿
                 </motion.span>
                 Grove Signals
+                {liveEventCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[8px] font-bold"
+                    style={{
+                      background: "hsla(120, 60%, 45%, 0.3)",
+                      color: "hsl(120, 60%, 65%)",
+                      border: "1px solid hsla(120, 50%, 50%, 0.4)",
+                    }}
+                  >
+                    •
+                  </motion.span>
+                )}
               </span>
               <span style={{ transform: signalsExpanded ? "rotate(0)" : "rotate(-90deg)", transition: "transform 0.2s" }}>▾</span>
             </button>
@@ -149,6 +179,12 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
                         value={loading ? "…" : signals.offeringsThisMoon.toLocaleString()}
                         color="42, 80%, 55%"
                       />
+                      <SignalRow
+                        icon="👣"
+                        label="Wanderers Active"
+                        value={loading ? "…" : signals.activeWanderers.toLocaleString()}
+                        color="260, 45%, 60%"
+                      />
                       {signals.mostLovedWisdom && (
                         <div className="pt-1 border-t" style={{ borderColor: "hsla(120, 30%, 30%, 0.2)" }}>
                           <p className="text-[8px] font-serif uppercase tracking-wider mb-1" style={{ color: "hsl(42, 40%, 45%)" }}>
@@ -163,6 +199,38 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
                         </div>
                       )}
                     </div>
+
+                    {/* Live event stream indicator */}
+                    {signals.recentEvents.length > 0 && (
+                      <div className="pt-1 border-t" style={{ borderColor: "hsla(120, 30%, 30%, 0.2)" }}>
+                        <p className="text-[8px] font-serif uppercase tracking-wider mb-1" style={{ color: "hsl(120, 35%, 45%)" }}>
+                          ✦ Live Mycelial Whispers
+                        </p>
+                        <div className="space-y-1 max-h-[60px] overflow-hidden">
+                          {signals.recentEvents.slice(0, 3).map(evt => (
+                            <motion.div
+                              key={evt.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="flex items-center gap-1.5 text-[9px] font-serif"
+                              style={{ color: "hsl(120, 30%, 50%)" }}
+                            >
+                              <motion.span
+                                animate={{ opacity: [0.4, 1, 0.4] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="text-[8px]"
+                              >
+                                ◌
+                              </motion.span>
+                              <span>
+                                {evt.type === 'OFFERING_CREATED' ? 'New offering stirred' : 
+                                 evt.type === 'HEART_EARNED' ? 'Heart gathered' : 'Signal received'}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
