@@ -22,7 +22,8 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye } from "lucide-react";
+import GroveViewOverlay from "./GroveViewOverlay";
 import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
@@ -500,6 +501,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showBloomedSeeds, setShowBloomedSeeds] = useState(false);
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
+  
+  // GroveView — Living Earth Mode
+  const [groveViewActive, setGroveViewActive] = useState(false);
 
   // Waters & Commons pilgrimage lens
   const [showWatersCommons, setShowWatersCommons] = useState(false);
@@ -626,11 +630,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const visualSections: VisualLayerSection[] = useMemo(() => [
     {
       key: "signals",
-      title: "Living Signals",
+      title: "Mycelial Whispers",
       icon: "✦",
       layers: [
         { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(v => !v) },
-        { key: "offering-glow", label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
+        { key: "offering-glow", label: "🔥 Forest Warmth", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
         { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
       ],
       subContent: showBirdsongHeat ? (
@@ -661,19 +665,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     },
     {
       key: "structures",
-      title: "Structures & Context",
+      title: "Grove Borders & Archives",
       icon: "🌿",
       layers: [
         { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(v => !v) },
         { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(v => !v) },
-        { key: "research", label: "📜 Research Grove", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
-        { key: "immutable", label: "🔱 Immutable Ancient Friends", active: showImmutableLayer, toggle: () => setShowImmutableLayer(v => !v), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
-        { key: "external", label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(v => !v), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
+        { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
+        { key: "immutable", label: "🔱 Minted Sigils", active: showImmutableLayer, toggle: () => setShowImmutableLayer(v => !v), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
+        { key: "external", label: "🗺️ Distant Groves", active: showExternalTrees, toggle: () => setShowExternalTrees(v => !v), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
       ],
     },
     {
       key: "pilgrimage",
-      title: "Pilgrimage Lenses",
+      title: "Sacred Waters",
       icon: "🌊",
       accent: "hsl(200, 50%, 58%)",
       layers: [
@@ -682,7 +686,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     },
     {
       key: "wanderer",
-      title: "Wanderer Activity",
+      title: "Fresh Footprints",
       icon: "◌",
       accent: "hsl(260, 35%, 60%)",
       layers: [
@@ -2262,6 +2266,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }}
       />
 
+      {/* GroveView Living Earth Mode */}
+      <GroveViewOverlay active={groveViewActive} onToggle={() => setGroveViewActive(v => !v)} />
+
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] flex flex-col items-center gap-2 animate-fade-in">
@@ -2321,6 +2328,31 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     </span>
                   ) : null;
                 })()}
+              </button>
+              {/* Living Earth Mode toggle */}
+              <button
+                onClick={() => setGroveViewActive(v => !v)}
+                className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                style={{
+                  ...btnBase,
+                  color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
+                  background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
+                  boxShadow: groveViewActive ? `0 0 14px hsla(120, 50%, 40%, 0.3), ${btnBase.boxShadow}` : btnBase.boxShadow,
+                  border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
+                }}
+                title="Living Earth Mode"
+              >
+                <Eye className="w-[18px] h-[18px]" />
+                {groveViewActive && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                    style={{
+                      background: "hsl(120, 55%, 50%)",
+                      boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
+                      animation: "ancientGlow 3s ease-in-out infinite",
+                    }}
+                  />
+                )}
               </button>
             </div>
 
