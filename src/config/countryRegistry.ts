@@ -246,6 +246,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Cultural heritage sources",
     bbox: [-13.5, 12.2, 5.4, 31.3],
   },
+  {
+    country: "Switzerland",
+    slug: "switzerland",
+    flag: "🇨🇭",
+    descriptor: "Ancient Alpine Trees & Monumental Sentinels",
+    portalTitle: "Switzerland — Ancient Alpine Trees",
+    portalSubtitle: "Larch elders, stone-pine sentinels & lime guardians — a living map of Switzerland's arboreal heritage across 26 cantons.",
+    sourceLabel: "Heritage & cantonal records",
+    bbox: [45.8, 5.9, 47.8, 10.5],
+  },
 ];
 
 export default COUNTRY_REGISTRY;
