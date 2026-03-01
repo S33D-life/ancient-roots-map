@@ -19,6 +19,7 @@ import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/
 import TreeRolePicker, { type TreeRole } from "@/components/TreeRolePicker";
 import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
+import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -109,6 +110,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
   const [showRewardReceipt, setShowRewardReceipt] = useState(false);
   const [visibility, setVisibility] = useState<OfferingVisibility>(type === "photo" ? "public" : "tribe");
   const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
+  const [quote, setQuote] = useState<QuoteData>({ text: "", author: "", source: "" });
 
   const cfg = typeConfig[type];
 
@@ -208,7 +210,11 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
 
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
 
-      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
+      const quoteText = quote.text.trim() || null;
+      const quoteAuthor = quoteText ? (quote.author.trim() || null) : null;
+      const quoteSource = quoteText ? (quote.source.trim() || null) : null;
+
+      const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
         tree_id: treeId,
         type,
         title: title.trim(),
@@ -221,6 +227,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         visibility: type === "photo" ? "public" : visibility,
         tree_role: treeRole,
         impact_weight: impactWeight,
+        quote_text: quoteText,
+        quote_author: quoteAuthor,
+        quote_source: quoteSource,
       }).select("id").single();
       if (error) throw error;
 
@@ -274,6 +283,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       setNftLink("");
       setSealedByStaff("");
       setTaggedUsers([]);
+      setQuote({ text: "", author: "", source: "" });
       clearSelectedFile();
       return; // onOpenChange handled by celebration timeout
     } catch (err: any) {
@@ -613,6 +623,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
 
             {/* Tree role picker */}
             <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
+
+            {/* Quote section */}
+            <OfferingQuoteInput value={quote} onChange={setQuote} />
 
             {/* Visibility picker (not shown for photos — always public) */}
             {type !== "photo" && (

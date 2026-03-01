@@ -44,7 +44,7 @@ import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import WeatherCard from "@/components/WeatherCard";
 import TreeCheckinButton from "@/components/TreeCheckinButton";
 import SkystampSeal from "@/components/SkystampSeal";
-
+import OfferingQuoteBlock from "@/components/OfferingQuoteBlock";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -922,6 +922,13 @@ const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingTy
           {offering.content}
         </div>
       )}
+      {(offering as any).quote_text && (
+        <OfferingQuoteBlock
+          text={(offering as any).quote_text}
+          author={(offering as any).quote_author}
+          source={(offering as any).quote_source}
+        />
+      )}
       <div className="flex items-center justify-between mt-4">
         <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
           {new Date(offering.created_at).toLocaleDateString("en-GB", {
@@ -957,6 +964,13 @@ const SongCard = ({ offering }: { offering: Offering }) => (
           <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
           {offering.content && (
             <p className="text-sm text-foreground/70 font-serif mt-1">{offering.content}</p>
+          )}
+          {(offering as any).quote_text && (
+            <OfferingQuoteBlock
+              text={(offering as any).quote_text}
+              author={(offering as any).quote_author}
+              source={(offering as any).quote_source}
+            />
           )}
           {offering.media_url && (
             <audio controls className="w-full mt-3 rounded-lg" style={{ height: 36 }}>
@@ -1007,6 +1021,13 @@ const NftCard = ({ offering }: { offering: Offering }) => (
       </div>
       {offering.content && (
         <p className="text-sm text-foreground/70 font-serif">{offering.content}</p>
+      )}
+      {(offering as any).quote_text && (
+        <OfferingQuoteBlock
+          text={(offering as any).quote_text}
+          author={(offering as any).quote_author}
+          source={(offering as any).quote_source}
+        />
       )}
       {offering.nft_link && (
         <a
