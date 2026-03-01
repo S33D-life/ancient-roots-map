@@ -26,13 +26,15 @@ import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye } from "lucide-
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
 import BloomingClockDial from "./BloomingClockDial";
+import BloomingClockParticles from "./BloomingClockParticles";
+import BloomingClockSigils from "./BloomingClockSigils";
 import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useFoodCycles, type CycleStage, STAGE_VISUALS } from "@/hooks/use-food-cycles";
+import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 
 interface Tree {
   id: string;
@@ -530,6 +532,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [bloomStageFilter, setBloomStageFilter] = useState<CycleStage | "all">("all");
   const [bloomConstellationMode, setBloomConstellationMode] = useState(false);
   const [bloomMonth, setBloomMonth] = useState(new Date().getMonth() + 1);
+  const [bloomRegionStages, setBloomRegionStages] = useState<RegionStageInfo[]>([]);
 
   // Waters & Commons pilgrimage lens
   const [showWatersCommons, setShowWatersCommons] = useState(false);
@@ -2508,7 +2511,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onEventPulses={setCurrentEventPulses}
       />
 
-      {/* Blooming Clock — Global Seasonal Atlas layer */}
+      {/* Blooming Clock — Global Seasonal Atlas */}
       <BloomingClockLayer
         map={mapRef.current}
         foods={foodCycles}
@@ -2517,7 +2520,31 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         active={showBloomingClock}
         constellationMode={bloomConstellationMode}
         monthOverride={bloomMonth}
+        onRegionStages={setBloomRegionStages}
       />
+
+      {/* Blooming Clock — Canvas particle system */}
+      <BloomingClockParticles
+        map={mapRef.current}
+        active={showBloomingClock && !bloomConstellationMode}
+        sources={bloomRegionStages.map(rs => ({
+          lat: rs.region.lat,
+          lng: rs.region.lng,
+          stage: rs.stage,
+          isPeak: rs.isPeak,
+          foodIcon: rs.food.icon,
+          foodName: rs.food.name,
+        }))}
+      />
+
+      {/* Blooming Clock — Seasonal sigils legend */}
+      {showBloomingClock && bloomRegionStages.length > 0 && (
+        <BloomingClockSigils
+          activeStages={[...new Set(bloomRegionStages.map(rs => rs.stage))]}
+          currentMonth={bloomMonth}
+          foodCount={bloomRegionStages.length}
+        />
+      )}
 
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (
