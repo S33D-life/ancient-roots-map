@@ -15,6 +15,7 @@ import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
 import { Link } from "react-router-dom";
 import HearthAccountSecurity from "@/components/dashboard/HearthAccountSecurity";
+import PresenceWeatherSettings from "@/components/dashboard/PresenceWeatherSettings";
 
 interface VisibleFields {
   bio: boolean;
@@ -350,6 +351,9 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
 
       {/* Account & Security */}
       <HearthAccountSecurity user={user} walletAddress={wallet.address} />
+
+      {/* Presence, Notifications & Weather Settings */}
+      <PresenceWeatherSettings userId={user.id} />
 
       {/* Staff Identity */}
       <Card className="border-border/50 bg-card/60 backdrop-blur">

@@ -13,6 +13,7 @@ import TeotagGuide from "./TeotagGuide";
 import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import LivingStreak from "./LivingStreak";
+import NotificationBell from "./NotificationBell";
 
 
 const Header = () => {
@@ -357,6 +358,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
+            {user && <NotificationBell />}
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden h-10 w-10">
               <Sunrise className={`w-4 h-4 absolute transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />
               <Stars className={`w-4 h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
