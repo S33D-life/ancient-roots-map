@@ -164,7 +164,7 @@ export const ParticipationSection = () => (
             Map Your First Ancient Friend
           </Button>
         </Link>
-        <Link to="/map">
+        <Link to="/atlas">
           <Button variant="outline" size="lg" className="gap-2 text-sm px-6 border-border/40 text-muted-foreground hover:text-foreground">
             <Globe className="w-4 h-4" />
             Explore the Atlas
