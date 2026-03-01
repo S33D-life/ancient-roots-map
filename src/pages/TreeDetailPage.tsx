@@ -45,6 +45,8 @@ import WeatherCard from "@/components/WeatherCard";
 import TreeCheckinButton from "@/components/TreeCheckinButton";
 import SkystampSeal from "@/components/SkystampSeal";
 import OfferingQuoteBlock from "@/components/OfferingQuoteBlock";
+import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
+import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -76,6 +78,7 @@ const TreeDetailPage = () => {
   const [birdsongOpen, setBirdsongOpen] = useState(false);
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
+  const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>("overview");
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
@@ -195,6 +198,28 @@ const TreeDetailPage = () => {
   };
 
   const photoOfferings = getOfferingsByType("photo").filter((o) => o.media_url);
+
+  /** Sort offerings by selected mode */
+  const sortOfferings = (items: Offering[]) => {
+    const now = Date.now();
+    const sorted = [...items];
+    switch (sortMode) {
+      case "hot":
+        return sorted.sort((a, b) => ((b as any).hot_score || 0) - ((a as any).hot_score || 0));
+      case "top_24h":
+        return sorted
+          .filter((o) => now - new Date(o.created_at).getTime() < 86400000)
+          .sort((a, b) => ((b as any).influence_score || 0) - ((a as any).influence_score || 0));
+      case "top_7d":
+        return sorted
+          .filter((o) => now - new Date(o.created_at).getTime() < 604800000)
+          .sort((a, b) => ((b as any).influence_score || 0) - ((a as any).influence_score || 0));
+      case "top_all":
+        return sorted.sort((a, b) => ((b as any).influence_score || 0) - ((a as any).influence_score || 0));
+      default: // "new"
+        return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -608,49 +633,52 @@ const TreeDetailPage = () => {
 
               {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
                 <TabsContent key={type} value={type}>
-                  <div className="flex justify-between items-center mb-5">
+                  <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
                     <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
                       {offeringLabels[type]}
                     </h3>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddOffering(type)}
-                      disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
-                      className="font-serif tracking-wider text-xs gap-1.5"
-                      title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
-                    >
-                      <Sparkles className="h-3 w-3" />
-                      Add {offeringLabels[type].slice(0, -1)}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <OfferingSortControls value={sortMode} onChange={setSortMode} />
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddOffering(type)}
+                        disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
+                        className="font-serif tracking-wider text-xs gap-1.5"
+                        title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Add {offeringLabels[type].slice(0, -1)}
+                      </Button>
+                    </div>
                   </div>
 
                   {getOfferingsByType(type).length === 0 ? (
                     <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
                   ) : type === "photo" ? (
-                    <PhotoGrid offerings={getOfferingsByType(type)} onImageClick={(i) => setLightboxIndex(i)} />
+                    <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
                   ) : type === "poem" || type === "story" ? (
                     <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {getOfferingsByType(type).map((offering) => (
+                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
                         <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <LiteraryCard offering={offering} type={type} />
+                          <LiteraryCard offering={offering} type={type} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
                         </motion.div>
                       ))}
                     </motion.div>
                   ) : type === "song" ? (
                     <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {getOfferingsByType(type).map((offering) => (
+                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
                         <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <SongCard offering={offering} />
+                          <SongCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
                         </motion.div>
                       ))}
                     </motion.div>
                   ) : type === "book" ? (
-                    <BookShelf offerings={getOfferingsByType(type)} />
+                    <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
                   ) : (
                     <motion.div className="grid gap-4 md:grid-cols-2" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {getOfferingsByType(type).map((offering) => (
+                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
                         <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <NftCard offering={offering} />
+                          <NftCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
                         </motion.div>
                       ))}
                     </motion.div>
@@ -898,7 +926,14 @@ const PhotoGrid = ({
   );
 };
 
-const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingType }) => (
+interface CardInfluenceProps {
+  treeId?: string;
+  userId?: string | null;
+  treeSpecies?: string | null;
+  treeNation?: string | null;
+}
+
+const LiteraryCard = ({ offering, type, treeId, userId, treeSpecies, treeNation }: { offering: Offering; type: OfferingType } & CardInfluenceProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <div
       className="h-0.5"
@@ -938,6 +973,16 @@ const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingTy
           })}
         </p>
         <div className="flex items-center gap-3">
+          {treeId && (
+            <InfluenceUpvoteButton
+              offeringId={offering.id}
+              treeId={treeId}
+              treeSpecies={treeSpecies}
+              treeNation={treeNation}
+              userId={userId ?? null}
+              influenceScore={(offering as any).influence_score || 0}
+            />
+          )}
           <button
             onClick={() => shareOffering(offering)}
             className="text-muted-foreground/60 hover:text-primary transition-colors"
@@ -953,7 +998,7 @@ const LiteraryCard = ({ offering, type }: { offering: Offering; type: OfferingTy
   </Card>
 );
 
-const SongCard = ({ offering }: { offering: Offering }) => (
+const SongCard = ({ offering, treeId, userId, treeSpecies, treeNation }: { offering: Offering } & CardInfluenceProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
       <div className="flex items-start gap-4">
@@ -996,6 +1041,17 @@ const SongCard = ({ offering }: { offering: Offering }) => (
                 Apple Music
               </a>
             )}
+            {treeId && (
+              <InfluenceUpvoteButton
+                offeringId={offering.id}
+                treeId={treeId}
+                treeSpecies={treeSpecies}
+                treeNation={treeNation}
+                userId={userId ?? null}
+                influenceScore={(offering as any).influence_score || 0}
+                compact
+              />
+            )}
             <button
               onClick={() => shareOffering(offering)}
               className="text-muted-foreground/60 hover:text-primary transition-colors"
@@ -1012,7 +1068,7 @@ const SongCard = ({ offering }: { offering: Offering }) => (
   </Card>
 );
 
-const NftCard = ({ offering }: { offering: Offering }) => (
+const NftCard = ({ offering, treeId, userId, treeSpecies, treeNation }: { offering: Offering } & CardInfluenceProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/40 transition-colors">
     <CardContent className="p-5">
       <div className="flex items-center gap-2 mb-2">
@@ -1048,6 +1104,16 @@ const NftCard = ({ offering }: { offering: Offering }) => (
           })}
         </p>
         <div className="flex items-center gap-3">
+          {treeId && (
+            <InfluenceUpvoteButton
+              offeringId={offering.id}
+              treeId={treeId}
+              treeSpecies={treeSpecies}
+              treeNation={treeNation}
+              userId={userId ?? null}
+              influenceScore={(offering as any).influence_score || 0}
+            />
+          )}
           <button
             onClick={() => shareOffering(offering)}
             className="text-muted-foreground/60 hover:text-primary transition-colors"

@@ -1279,6 +1279,68 @@ export type Database = {
           },
         ]
       }
+      influence_vote_budgets: {
+        Row: {
+          id: string
+          spent: number
+          user_id: string
+          vote_date: string
+        }
+        Insert: {
+          id?: string
+          spent?: number
+          user_id: string
+          vote_date?: string
+        }
+        Update: {
+          id?: string
+          spent?: number
+          user_id?: string
+          vote_date?: string
+        }
+        Relationships: []
+      }
+      influence_votes: {
+        Row: {
+          created_at: string
+          id: string
+          offering_id: string
+          revoked_at: string | null
+          scope_key: string
+          scope_type: string
+          user_id: string
+          weight_applied: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offering_id: string
+          revoked_at?: string | null
+          scope_key: string
+          scope_type: string
+          user_id: string
+          weight_applied?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offering_id?: string
+          revoked_at?: string | null
+          scope_key?: string
+          scope_type?: string
+          user_id?: string
+          weight_applied?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_votes_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invite_links: {
         Row: {
           code: string
@@ -1790,14 +1852,19 @@ export type Database = {
           content: string | null
           created_at: string
           created_by: string | null
+          hot_score: number
           id: string
           impact_weight: number
+          influence_score: number
+          influence_score_by_scope: Json | null
+          influence_votes_count: number
           media_url: string | null
           meeting_id: string | null
           nft_link: string | null
           quote_author: string | null
           quote_source: string | null
           quote_text: string | null
+          ranked_at: string | null
           sealed_by_staff: string | null
           sky_stamp_id: string | null
           title: string
@@ -1810,14 +1877,19 @@ export type Database = {
           content?: string | null
           created_at?: string
           created_by?: string | null
+          hot_score?: number
           id?: string
           impact_weight?: number
+          influence_score?: number
+          influence_score_by_scope?: Json | null
+          influence_votes_count?: number
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
           quote_author?: string | null
           quote_source?: string | null
           quote_text?: string | null
+          ranked_at?: string | null
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
           title: string
@@ -1830,14 +1902,19 @@ export type Database = {
           content?: string | null
           created_at?: string
           created_by?: string | null
+          hot_score?: number
           id?: string
           impact_weight?: number
+          influence_score?: number
+          influence_score_by_scope?: Json | null
+          influence_votes_count?: number
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
           quote_author?: string | null
           quote_source?: string | null
           quote_text?: string | null
+          ranked_at?: string | null
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
           title?: string
@@ -3964,6 +4041,10 @@ export type Database = {
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
       claim_windfall_hearts: {
         Args: { p_tree_id: string; p_user_id: string }
+        Returns: number
+      }
+      compute_hot_score: {
+        Args: { p_created_at: string; p_influence: number }
         Returns: number
       }
       get_offering_counts: {
