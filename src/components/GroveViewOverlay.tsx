@@ -3,42 +3,64 @@
  *
  * A mythic ecological overlay that transforms the map into a breathing,
  * living forest view. Shows Grove Signals panel, mythic time selector,
- * and live event stream.
+ * live event stream, and seasonal atmosphere shifts.
  */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useGroveEvents, MYTHIC_TIMEFRAMES, type MythicTimeframe } from "@/hooks/use-grove-events";
+import {
+  useGroveEvents,
+  MYTHIC_TIMEFRAMES,
+  getCurrentSeason,
+  SEASON_PALETTE,
+  type MythicTimeframe,
+  type EventPulse,
+} from "@/hooks/use-grove-events";
 
 interface GroveViewOverlayProps {
   active: boolean;
   onToggle: () => void;
+  userLat?: number;
+  /** Tree lookup for coordinate pulses */
+  treeLookup?: Map<string, { lat: number; lng: number }>;
+  /** Callback to render event pulses on the map */
+  onEventPulses?: (pulses: EventPulse[]) => void;
 }
 
-const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
+const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses }: GroveViewOverlayProps) => {
   const [timeframe, setTimeframe] = useState<MythicTimeframe>("moon");
   const [signalsExpanded, setSignalsExpanded] = useState(true);
-  const { signals, loading, liveEventCount } = useGroveEvents(timeframe);
+  const { signals, loading, liveEventCount, eventPulses } = useGroveEvents(timeframe, treeLookup);
+
+  // Pass pulses up to map for rendering
+  if (onEventPulses && active) {
+    onEventPulses(eventPulses);
+  }
+
+  // Seasonal atmosphere
+  const season = useMemo(() => getCurrentSeason(userLat), [userLat]);
+  const palette = SEASON_PALETTE[season];
 
   return (
     <>
-      {/* Living Earth atmosphere overlay */}
+      {/* Seasonal atmosphere overlay */}
       <AnimatePresence>
         {active && (
           <motion.div
+            key={`atmosphere-${season}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.2 }}
+            transition={{ duration: 1.5 }}
             className="absolute inset-0 z-[5] pointer-events-none"
             style={{
-              background: "radial-gradient(ellipse at 50% 50%, hsla(160, 30%, 8%, 0.35) 0%, hsla(120, 25%, 5%, 0.55) 60%, hsla(100, 20%, 3%, 0.7) 100%)",
+              background: `radial-gradient(ellipse at 50% 50%, ${palette.primary} 0%, ${palette.secondary} 60%, ${palette.glow} 100%)`,
               mixBlendMode: "multiply",
             }}
           />
         )}
       </AnimatePresence>
 
-      {/* Breathing shimmer for active mode */}
+      {/* Breathing shimmer — seasonal tinted */}
       <AnimatePresence>
         {active && (
           <motion.div
@@ -48,13 +70,13 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
             className="absolute inset-0 z-[6] pointer-events-none"
             style={{
-              background: "radial-gradient(circle at 30% 40%, hsla(42, 80%, 55%, 0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, hsla(120, 50%, 40%, 0.1) 0%, transparent 40%)",
+              background: `radial-gradient(circle at 30% 40%, hsla(42, 80%, 55%, 0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, ${palette.glow} 0%, transparent 40%)`,
             }}
           />
         )}
       </AnimatePresence>
 
-      {/* Mycelial network overlay — subtle connection lines */}
+      {/* Mycelial network — subtle */}
       <AnimatePresence>
         {active && (
           <motion.div
@@ -64,7 +86,7 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
             className="absolute inset-0 z-[5] pointer-events-none"
             style={{
-              background: "radial-gradient(circle at 50% 80%, hsla(120, 40%, 30%, 0.08) 0%, transparent 30%), radial-gradient(circle at 20% 60%, hsla(120, 50%, 35%, 0.06) 0%, transparent 25%), radial-gradient(circle at 80% 40%, hsla(42, 60%, 40%, 0.05) 0%, transparent 20%)",
+              background: `radial-gradient(circle at 50% 80%, ${palette.primary} 0%, transparent 30%), radial-gradient(circle at 20% 60%, ${palette.secondary} 0%, transparent 25%), radial-gradient(circle at 80% 40%, ${palette.glow} 0%, transparent 20%)`,
             }}
           />
         )}
@@ -137,6 +159,18 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
                       backdropFilter: "blur(12px)",
                     }}
                   >
+                    {/* Season indicator */}
+                    <div
+                      className="text-[9px] font-serif text-center py-1 rounded-md"
+                      style={{
+                        background: palette.primary,
+                        color: "hsl(42, 60%, 70%)",
+                        border: `1px solid ${palette.glow}`,
+                      }}
+                    >
+                      {palette.label}
+                    </div>
+
                     {/* Mythic Time Selector */}
                     <div className="flex gap-1">
                       {MYTHIC_TIMEFRAMES.map(tf => (
@@ -161,46 +195,23 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
 
                     {/* Signal rows */}
                     <div className="space-y-1.5">
-                      <SignalRow
-                        icon="🌿"
-                        label="Trees Stirring"
-                        value={loading ? "…" : signals.treesStirring.toLocaleString()}
-                        color="120, 45%, 55%"
-                      />
-                      <SignalRow
-                        icon="❤️"
-                        label="Hearts Gathered"
-                        value={loading ? "…" : signals.heartsGathered.toLocaleString()}
-                        color="0, 65%, 55%"
-                      />
-                      <SignalRow
-                        icon="🌙"
-                        label="Offerings"
-                        value={loading ? "…" : signals.offeringsThisMoon.toLocaleString()}
-                        color="42, 80%, 55%"
-                      />
-                      <SignalRow
-                        icon="👣"
-                        label="Wanderers Active"
-                        value={loading ? "…" : signals.activeWanderers.toLocaleString()}
-                        color="260, 45%, 60%"
-                      />
+                      <SignalRow icon="🌿" label="Trees Stirring" value={loading ? "…" : signals.treesStirring.toLocaleString()} color="120, 45%, 55%" />
+                      <SignalRow icon="❤️" label="Hearts Gathered" value={loading ? "…" : signals.heartsGathered.toLocaleString()} color="0, 65%, 55%" />
+                      <SignalRow icon="🌙" label="Offerings" value={loading ? "…" : signals.offeringsThisMoon.toLocaleString()} color="42, 80%, 55%" />
+                      <SignalRow icon="👣" label="Wanderers Active" value={loading ? "…" : signals.activeWanderers.toLocaleString()} color="260, 45%, 60%" />
                       {signals.mostLovedWisdom && (
                         <div className="pt-1 border-t" style={{ borderColor: "hsla(120, 30%, 30%, 0.2)" }}>
                           <p className="text-[8px] font-serif uppercase tracking-wider mb-1" style={{ color: "hsl(42, 40%, 45%)" }}>
                             📜 Most Loved Wisdom
                           </p>
-                          <p
-                            className="text-[10px] font-serif italic leading-relaxed line-clamp-2"
-                            style={{ color: "hsl(42, 60%, 65%)" }}
-                          >
+                          <p className="text-[10px] font-serif italic leading-relaxed line-clamp-2" style={{ color: "hsl(42, 60%, 65%)" }}>
                             "{signals.mostLovedWisdom}"
                           </p>
                         </div>
                       )}
                     </div>
 
-                    {/* Live event stream indicator */}
+                    {/* Live event stream */}
                     {signals.recentEvents.length > 0 && (
                       <div className="pt-1 border-t" style={{ borderColor: "hsla(120, 30%, 30%, 0.2)" }}>
                         <p className="text-[8px] font-serif uppercase tracking-wider mb-1" style={{ color: "hsl(120, 35%, 45%)" }}>
@@ -223,7 +234,7 @@ const GroveViewOverlay = ({ active, onToggle }: GroveViewOverlayProps) => {
                                 ◌
                               </motion.span>
                               <span>
-                                {evt.type === 'OFFERING_CREATED' ? 'New offering stirred' : 
+                                {evt.type === 'OFFERING_CREATED' ? 'New offering stirred' :
                                  evt.type === 'HEART_EARNED' ? 'Heart gathered' : 'Signal received'}
                               </span>
                             </motion.div>
