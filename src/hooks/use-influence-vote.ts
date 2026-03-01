@@ -1,9 +1,11 @@
 /**
  * Hook for Influence Upvoting on Offerings.
- * Handles weight calculation, budget tracking, vote/retract, and scope resolution.
+ * Uses atomic RPC for cast/retract, supports optimistic UI,
+ * and can optionally consume pre-fetched token data from InfluenceTokenContext.
  */
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useInfluenceTokens } from "@/contexts/InfluenceTokenContext";
 
 export type ScopeType = "tree" | "species" | "place";
 
@@ -63,6 +65,10 @@ export function useInfluenceVote({
   const [loading, setLoading] = useState(false);
   const [voting, setVoting] = useState(false);
 
+  // Try to use pre-fetched tokens from context (eliminates N+1 queries)
+  const tokenCtx = useInfluenceTokens();
+  const hasContextTokens = tokenCtx.tokens.loaded;
+
   const dailyRemaining = DAILY_BUDGET - dailySpent;
 
   const fetchState = useCallback(async () => {
@@ -74,91 +80,76 @@ export function useInfluenceVote({
     }
     setLoading(true);
     try {
-      // Fetch user's influence tokens grouped by scope
-      const { data: txns } = await supabase
-        .from("influence_transactions")
-        .select("tree_id, species_family, scope, amount")
-        .eq("user_id", userId);
+      // Build scopes from context tokens (single query at page level) or fallback
+      let treeTotal: number, speciesTotal: number, placeTotal: number;
 
-      const tokens = txns || [];
+      if (hasContextTokens) {
+        treeTotal = tokenCtx.getTreeTotal(treeId);
+        speciesTotal = treeSpecies ? tokenCtx.getSpeciesTotal(treeSpecies) : 0;
+        placeTotal = treeNation ? tokenCtx.getPlaceTotal(treeNation) : 0;
+      } else {
+        // Fallback: fetch directly (for pages without InfluenceTokenProvider)
+        const { data: txns } = await supabase
+          .from("influence_transactions")
+          .select("tree_id, species_family, scope, amount")
+          .eq("user_id", userId);
 
-      // Aggregate by scope
-      const treeTotal = tokens
-        .filter((t) => t.tree_id === treeId)
-        .reduce((s, t) => s + t.amount, 0);
-
-      const speciesTotal = treeSpecies
-        ? tokens
-            .filter((t) => t.species_family === treeSpecies)
-            .reduce((s, t) => s + t.amount, 0)
-        : 0;
-
-      const placeTotal = treeNation
-        ? tokens
-            .filter(
-              (t) =>
-                t.scope === "global" || t.scope === treeNation
-            )
-            .reduce((s, t) => s + t.amount, 0) * 0.1 // place influence is a fraction of global
-        : 0;
+        const tokens = txns || [];
+        treeTotal = tokens.filter((t) => t.tree_id === treeId).reduce((s, t) => s + t.amount, 0);
+        speciesTotal = treeSpecies
+          ? tokens.filter((t) => t.species_family === treeSpecies).reduce((s, t) => s + t.amount, 0)
+          : 0;
+        placeTotal = treeNation
+          ? tokens.filter((t) => t.scope === "global" || t.scope === treeNation).reduce((s, t) => s + t.amount, 0) * 0.1
+          : 0;
+      }
 
       const scopes: InfluenceScope[] = [];
       if (treeTotal > 0) {
         scopes.push({
-          type: "tree",
-          key: treeId,
-          label: "Tree",
-          availableInfluence: treeTotal,
-          computedWeight: computeWeight(treeTotal, "tree"),
+          type: "tree", key: treeId, label: "Tree",
+          availableInfluence: treeTotal, computedWeight: computeWeight(treeTotal, "tree"),
         });
       }
       if (speciesTotal > 0 && treeSpecies) {
         scopes.push({
-          type: "species",
-          key: treeSpecies,
-          label: "Species Hive",
-          availableInfluence: speciesTotal,
-          computedWeight: computeWeight(speciesTotal, "species"),
+          type: "species", key: treeSpecies, label: "Species Hive",
+          availableInfluence: speciesTotal, computedWeight: computeWeight(speciesTotal, "species"),
         });
       }
       if (placeTotal > 0 && treeNation) {
         scopes.push({
-          type: "place",
-          key: `country_${treeNation}`,
-          label: treeNation,
-          availableInfluence: Math.round(placeTotal),
-          computedWeight: computeWeight(placeTotal, "place"),
+          type: "place", key: `country_${treeNation}`, label: treeNation,
+          availableInfluence: Math.round(placeTotal), computedWeight: computeWeight(placeTotal, "place"),
         });
       }
 
       setAvailableScopes(scopes);
 
-      // Fetch existing votes for this offering by this user
-      const { data: votes } = await supabase
-        .from("influence_votes")
-        .select("*")
-        .eq("offering_id", offeringId)
-        .eq("user_id", userId)
-        .is("revoked_at", null);
+      // Fetch existing votes + daily budget in parallel
+      const [votesRes, budgetRes] = await Promise.all([
+        supabase
+          .from("influence_votes")
+          .select("*")
+          .eq("offering_id", offeringId)
+          .eq("user_id", userId)
+          .is("revoked_at", null),
+        supabase
+          .from("influence_vote_budgets")
+          .select("spent")
+          .eq("user_id", userId)
+          .eq("vote_date", new Date().toISOString().split("T")[0])
+          .maybeSingle(),
+      ]);
 
-      setExistingVotes((votes as InfluenceVote[]) || []);
-
-      // Fetch daily budget
-      const today = new Date().toISOString().split("T")[0];
-      const { data: budget } = await supabase
-        .from("influence_vote_budgets")
-        .select("spent")
-        .eq("user_id", userId)
-        .eq("vote_date", today)
-        .maybeSingle();
-
-      setDailySpent(budget?.spent || 0);
+      setExistingVotes((votesRes.data as InfluenceVote[]) || []);
+      setDailySpent(budgetRes.data?.spent || 0);
     } catch (err) {
       console.error("Error fetching influence state:", err);
     } finally {
       setLoading(false);
     }
-  }, [userId, offeringId, treeId, treeSpecies, treeNation]);
+  }, [userId, offeringId, treeId, treeSpecies, treeNation, hasContextTokens, tokenCtx]);
 
   useEffect(() => {
     fetchState();
@@ -170,45 +161,36 @@ export function useInfluenceVote({
   );
 
   const castVote = useCallback(
-    async (scope: InfluenceScope): Promise<boolean> => {
-      if (!userId || voting) return false;
-      if (hasVotedInScope(scope.key)) return false;
+    async (scope: InfluenceScope): Promise<{ success: boolean; weight: number }> => {
+      if (!userId || voting) return { success: false, weight: 0 };
+      if (hasVotedInScope(scope.key)) return { success: false, weight: 0 };
 
       const weight = Math.min(scope.computedWeight, dailyRemaining);
-      if (weight <= 0) return false;
+      if (weight <= 0) return { success: false, weight: 0 };
 
       setVoting(true);
       try {
-        // Insert vote
-        const { error: voteErr } = await supabase.from("influence_votes").insert({
-          offering_id: offeringId,
-          user_id: userId,
-          scope_type: scope.type,
-          scope_key: scope.key,
-          weight_applied: weight,
+        // Use atomic RPC
+        const { data, error } = await supabase.rpc("cast_influence_vote", {
+          p_offering_id: offeringId,
+          p_user_id: userId,
+          p_scope_type: scope.type,
+          p_scope_key: scope.key,
+          p_weight: weight,
         });
-        if (voteErr) throw voteErr;
 
-        // Update daily budget
-        const today = new Date().toISOString().split("T")[0];
-        const { error: budgetErr } = await supabase
-          .from("influence_vote_budgets")
-          .upsert(
-            { user_id: userId, vote_date: today, spent: dailySpent + weight },
-            { onConflict: "user_id,vote_date" }
-          );
-        if (budgetErr) console.warn("Budget update failed:", budgetErr);
+        if (error) throw error;
 
         await fetchState();
-        return true;
+        return { success: true, weight };
       } catch (err) {
         console.error("Error casting influence vote:", err);
-        return false;
+        return { success: false, weight: 0 };
       } finally {
         setVoting(false);
       }
     },
-    [userId, voting, offeringId, dailyRemaining, dailySpent, fetchState, hasVotedInScope]
+    [userId, voting, offeringId, dailyRemaining, fetchState, hasVotedInScope]
   );
 
   const retractVote = useCallback(
@@ -219,21 +201,12 @@ export function useInfluenceVote({
 
       setVoting(true);
       try {
-        const { error } = await supabase
-          .from("influence_votes")
-          .update({ revoked_at: new Date().toISOString() })
-          .eq("id", vote.id);
+        // Use atomic RPC
+        const { error } = await supabase.rpc("retract_influence_vote", {
+          p_vote_id: vote.id,
+          p_user_id: userId,
+        });
         if (error) throw error;
-
-        // Refund budget
-        const today = new Date().toISOString().split("T")[0];
-        const newSpent = Math.max(0, dailySpent - vote.weight_applied);
-        await supabase
-          .from("influence_vote_budgets")
-          .upsert(
-            { user_id: userId, vote_date: today, spent: newSpent },
-            { onConflict: "user_id,vote_date" }
-          );
 
         await fetchState();
         return true;
@@ -244,7 +217,7 @@ export function useInfluenceVote({
         setVoting(false);
       }
     },
-    [userId, voting, existingVotes, dailySpent, fetchState]
+    [userId, voting, existingVotes, fetchState]
   );
 
   return {
