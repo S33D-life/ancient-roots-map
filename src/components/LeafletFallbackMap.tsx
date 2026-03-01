@@ -25,6 +25,7 @@ import {
 import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye } from "lucide-react";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
+import BloomingClockDial from "./BloomingClockDial";
 import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
@@ -528,6 +529,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
   const [bloomStageFilter, setBloomStageFilter] = useState<CycleStage | "all">("all");
   const [bloomConstellationMode, setBloomConstellationMode] = useState(false);
+  const [bloomMonth, setBloomMonth] = useState(new Date().getMonth() + 1);
 
   // Waters & Commons pilgrimage lens
   const [showWatersCommons, setShowWatersCommons] = useState(false);
@@ -749,20 +751,25 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "constellation", label: "🌾 Constellation Mode", active: bloomConstellationMode, toggle: () => { setBloomConstellationMode(v => !v); if (!showBloomingClock) setShowBloomingClock(true); }, accent: "42, 70%, 55%" },
       ],
       subContent: showBloomingClock ? (
-        <div className="pl-7 pt-1 space-y-2">
+        <div className="pl-4 pt-2 space-y-3">
+          {/* Seasonal time dial */}
+          <BloomingClockDial
+            currentMonth={bloomMonth}
+            onMonthChange={setBloomMonth}
+          />
           {/* Stage filter */}
           <div>
-            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(340, 50%, 60%)" }}>Cycle Stage</p>
+            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(42, 40%, 55%)" }}>Cycle Stage</p>
             <div className="flex flex-wrap gap-1">
               {([{ key: "all", label: "All", icon: "🌍" }, ...Object.entries(STAGE_VISUALS).map(([k, v]) => ({ key: k, label: v.label, icon: v.icon }))] as { key: string; label: string; icon: string }[]).map(s => (
                 <button
                   key={s.key}
                   onClick={() => setBloomStageFilter(s.key as CycleStage | "all")}
-                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all"
+                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all duration-500"
                   style={{
-                    background: bloomStageFilter === s.key ? "hsla(340, 50%, 40%, 0.3)" : "transparent",
-                    color: bloomStageFilter === s.key ? "hsl(340, 55%, 65%)" : "hsl(42, 30%, 45%)",
-                    border: bloomStageFilter === s.key ? "1px solid hsla(340, 50%, 50%, 0.4)" : "1px solid transparent",
+                    background: bloomStageFilter === s.key ? "hsla(42, 40%, 40%, 0.25)" : "transparent",
+                    color: bloomStageFilter === s.key ? "hsl(42, 65%, 65%)" : "hsl(42, 25%, 48%)",
+                    border: bloomStageFilter === s.key ? "1px solid hsla(42, 40%, 45%, 0.3)" : "1px solid transparent",
                   }}
                 >
                   {s.icon} {s.label}
@@ -772,15 +779,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           </div>
           {/* Food selector */}
           <div>
-            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(42, 50%, 55%)" }}>Foods</p>
+            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(42, 40%, 55%)" }}>Foods</p>
             <div className="flex flex-wrap gap-1">
               <button
                 onClick={() => setSelectedFoodIds([])}
-                className="px-2 py-1 rounded-md text-[10px] font-serif transition-all"
+                className="px-2 py-1 rounded-md text-[10px] font-serif transition-all duration-500"
                 style={{
-                  background: selectedFoodIds.length === 0 ? "hsla(42, 50%, 40%, 0.3)" : "transparent",
-                  color: selectedFoodIds.length === 0 ? "hsl(42, 80%, 65%)" : "hsl(42, 30%, 45%)",
-                  border: selectedFoodIds.length === 0 ? "1px solid hsla(42, 50%, 50%, 0.3)" : "1px solid transparent",
+                  background: selectedFoodIds.length === 0 ? "hsla(42, 40%, 40%, 0.25)" : "transparent",
+                  color: selectedFoodIds.length === 0 ? "hsl(42, 70%, 65%)" : "hsl(42, 25%, 48%)",
+                  border: selectedFoodIds.length === 0 ? "1px solid hsla(42, 40%, 45%, 0.3)" : "1px solid transparent",
                 }}
               >
                 All
@@ -791,11 +798,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   onClick={() => setSelectedFoodIds(prev =>
                     prev.includes(f.id) ? prev.filter(id => id !== f.id) : [...prev, f.id]
                   )}
-                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all"
+                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all duration-500"
                   style={{
-                    background: selectedFoodIds.includes(f.id) ? "hsla(42, 50%, 40%, 0.25)" : "transparent",
-                    color: selectedFoodIds.includes(f.id) ? "hsl(42, 80%, 65%)" : "hsl(42, 30%, 45%)",
-                    border: selectedFoodIds.includes(f.id) ? "1px solid hsla(42, 50%, 50%, 0.3)" : "1px solid transparent",
+                    background: selectedFoodIds.includes(f.id) ? "hsla(42, 40%, 40%, 0.2)" : "transparent",
+                    color: selectedFoodIds.includes(f.id) ? "hsl(42, 70%, 65%)" : "hsl(42, 25%, 48%)",
+                    border: selectedFoodIds.includes(f.id) ? "1px solid hsla(42, 40%, 45%, 0.3)" : "1px solid transparent",
                   }}
                 >
                   {f.icon} {f.name}
@@ -812,7 +819,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
-      showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, foodCycles]);
+      showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles]);
 
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
@@ -2509,6 +2516,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         stageFilter={bloomStageFilter}
         active={showBloomingClock}
         constellationMode={bloomConstellationMode}
+        monthOverride={bloomMonth}
       />
 
       {/* Empty state */}
