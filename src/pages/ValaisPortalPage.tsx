@@ -14,6 +14,7 @@ import {
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
+import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 import BottomNav from "@/components/BottomNav";
 
 /* ─── Types ─── */
@@ -255,12 +256,12 @@ const ValaisPortalPage = () => {
             className="relative max-w-2xl mx-auto text-center"
           >
             {/* Breadcrumb */}
-            <Link
-              to="/atlas/switzerland"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mb-4"
-            >
-              <ArrowLeft className="w-3 h-3" /> 🇨🇭 Switzerland
-            </Link>
+            <div className="mb-4">
+              <AtlasBreadcrumb segments={[
+                { label: "🇨🇭 Switzerland", to: "/atlas/switzerland" },
+                { label: "Valais" },
+              ]} />
+            </div>
 
             <p className="text-4xl mb-2">🏔️</p>
             <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-1">

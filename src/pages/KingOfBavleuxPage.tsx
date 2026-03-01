@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
+import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 
 /* ═══ Inline floating needle animation ═══ */
 const FloatingNeedle = ({ delay, left }: { delay: number; left: string }) => (
@@ -135,16 +136,12 @@ const KingOfBavleuxPage = () => {
             className="relative px-4 pt-12 pb-10 max-w-2xl mx-auto text-center"
           >
             {/* Breadcrumb */}
-            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mb-6">
-              <Link to="/atlas/switzerland" className="hover:text-primary transition-colors flex items-center gap-1">
-                <ArrowLeft className="w-3 h-3" /> 🇨🇭 Switzerland
-              </Link>
-              <ChevronRight className="w-3 h-3" />
-              <Link to="/atlas/switzerland/valais" className="hover:text-primary transition-colors">
-                Valais
-              </Link>
-              <ChevronRight className="w-3 h-3" />
-              <span className="text-foreground">King of Bavleux</span>
+            <div className="mb-6 flex justify-center">
+              <AtlasBreadcrumb segments={[
+                { label: "🇨🇭 Switzerland", to: "/atlas/switzerland" },
+                { label: "Valais", to: "/atlas/switzerland/valais" },
+                { label: "King of Bavleux" },
+              ]} />
             </div>
 
             {/* Larch Hive sigil */}

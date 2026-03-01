@@ -22,6 +22,7 @@ import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 import FloatingBugButton from "@/components/FloatingBugButton";
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
+const FloatingAtlasButton = lazy(() => import("@/components/FloatingAtlasButton"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
 
 // Lazy-load all route pages for code splitting
@@ -120,6 +121,7 @@ const App = () => {
             <BottomNav />
             <FloatingBugButton />
             <Suspense fallback={null}>
+              <FloatingAtlasButton />
               <ProximityNudge />
               <OfflineSyncBanner />
             </Suspense>

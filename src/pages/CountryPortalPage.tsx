@@ -16,6 +16,8 @@ import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import { SLUG_MAP } from "@/config/countryRegistry";
 import { getCitiesByCountry } from "@/config/cityRegistry";
+import { getCantonsByCountry } from "@/config/cantonRegistry";
+import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 import VerificationPipeline from "@/components/VerificationPipeline";
 import ImmutableTreeCard from "@/components/ImmutableTreeCard";
 
@@ -307,6 +309,10 @@ const CountryPortalPage = () => {
       <div className="min-h-screen pb-24 pt-16">
         {/* ─── A) Hero ─── */}
         <section className="relative px-4 pt-12 pb-8 text-center">
+          {/* Breadcrumb */}
+          <div className="max-w-3xl mx-auto mb-4 flex justify-center">
+            <AtlasBreadcrumb segments={[{ label: `${config.countryFlag} ${config.country}` }]} />
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -556,25 +562,31 @@ const CountryPortalPage = () => {
           </Tabs>
         </section>
 
-        {/* ─── Canton Portals (Switzerland-specific) ─── */}
-        {countrySlug === "switzerland" && (
-          <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
-            <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-              <Compass className="w-4 h-4 text-primary" /> Explore Cantons
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Card className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate("/atlas/switzerland/valais")}>
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-serif font-bold text-foreground">🏔️ Valais (Wallis)</p>
-                    <p className="text-xs text-muted-foreground italic">Alpine Elders of Stone, Ice & Light</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </CardContent>
-              </Card>
-            </div>
-          </section>
-        )}
+        {/* ─── Canton / State Portals (registry-driven) ─── */}
+        {(() => {
+          const cantons = getCantonsByCountry(countrySlug || "");
+          if (!cantons.length) return null;
+          return (
+            <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" /> Explore Cantons
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {cantons.map(canton => (
+                  <Card key={canton.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${canton.slug}`)}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-serif font-bold text-foreground">{canton.icon} {canton.name}</p>
+                        <p className="text-xs text-muted-foreground italic">{canton.tagline}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ─── City Portals ─── */}
         {(() => {
