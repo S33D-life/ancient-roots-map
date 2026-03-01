@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 import { MapFilterProvider } from "@/contexts/MapFilterContext";
+import { UIFlowProvider } from "@/contexts/UIFlowContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
@@ -114,6 +115,7 @@ const App = () => {
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
           <MapFilterProvider>
+          <UIFlowProvider>
             <BottomNav />
             <FloatingBugButton />
             <Suspense fallback={null}>
@@ -172,6 +174,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+          </UIFlowProvider>
           </MapFilterProvider>
           </TetolLevelProvider>
         </BrowserRouter>
