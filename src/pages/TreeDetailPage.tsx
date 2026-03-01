@@ -41,6 +41,8 @@ import LinkedVolumesPanel from "@/components/LinkedVolumesPanel";
 import SendWhisperModal from "@/components/SendWhisperModal";
 import WhisperCollector from "@/components/WhisperCollector";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
+import WeatherCard from "@/components/WeatherCard";
+import TreeCheckinButton from "@/components/TreeCheckinButton";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -246,6 +248,14 @@ const TreeDetailPage = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
+                <TreeCheckinButton
+                  treeId={id!}
+                  treeName={tree.name}
+                  treeLat={tree.latitude}
+                  treeLng={tree.longitude}
+                  userId={userId}
+                  onCheckinComplete={() => refetchCheckins()}
+                />
                 <Button
                   variant="outline"
                   size="sm"
@@ -367,6 +377,9 @@ const TreeDetailPage = () => {
 
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Weather at the Tree */}
+            <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
+
             {/* Photo Gallery */}
             {photoOfferings.length > 0 && (
               <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />

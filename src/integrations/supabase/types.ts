@@ -1651,6 +1651,108 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          digest_mode: string
+          max_daily_pushes: number
+          nearby_mode: boolean
+          nearby_radius_m: number
+          push_enabled: boolean
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          topic_cantons: string[]
+          topic_councils: string[]
+          topic_countries: string[]
+          topic_species: string[]
+          topic_trees: string[]
+          updated_at: string
+          user_id: string
+          weather_unit: string
+          wind_unit: string
+        }
+        Insert: {
+          created_at?: string
+          digest_mode?: string
+          max_daily_pushes?: number
+          nearby_mode?: boolean
+          nearby_radius_m?: number
+          push_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          topic_cantons?: string[]
+          topic_councils?: string[]
+          topic_countries?: string[]
+          topic_species?: string[]
+          topic_trees?: string[]
+          updated_at?: string
+          user_id: string
+          weather_unit?: string
+          wind_unit?: string
+        }
+        Update: {
+          created_at?: string
+          digest_mode?: string
+          max_daily_pushes?: number
+          nearby_mode?: boolean
+          nearby_radius_m?: number
+          push_enabled?: boolean
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          topic_cantons?: string[]
+          topic_councils?: string[]
+          topic_countries?: string[]
+          topic_species?: string[]
+          topic_trees?: string[]
+          updated_at?: string
+          user_id?: string
+          weather_unit?: string
+          wind_unit?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          deep_link: string | null
+          dismissed: boolean
+          id: string
+          metadata: Json | null
+          priority: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          deep_link?: string | null
+          dismissed?: boolean
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          deep_link?: string | null
+          dismissed?: boolean
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       offering_tags: {
         Row: {
           created_at: string
@@ -2774,6 +2876,7 @@ export type Database = {
           birdsong_heard: boolean | null
           canopy_proof: boolean
           checked_in_at: string
+          checkin_method: string
           created_at: string
           fungi_present: boolean | null
           health_notes: string | null
@@ -2783,17 +2886,20 @@ export type Database = {
           media_url: string | null
           minted_status: string
           mood_score: number | null
+          privacy: string
           reflection: string | null
           season_stage: string
           tree_id: string
           updated_at: string
           user_id: string
           weather: string | null
+          weather_snapshot_id: string | null
         }
         Insert: {
           birdsong_heard?: boolean | null
           canopy_proof?: boolean
           checked_in_at?: string
+          checkin_method?: string
           created_at?: string
           fungi_present?: boolean | null
           health_notes?: string | null
@@ -2803,17 +2909,20 @@ export type Database = {
           media_url?: string | null
           minted_status?: string
           mood_score?: number | null
+          privacy?: string
           reflection?: string | null
           season_stage?: string
           tree_id: string
           updated_at?: string
           user_id: string
           weather?: string | null
+          weather_snapshot_id?: string | null
         }
         Update: {
           birdsong_heard?: boolean | null
           canopy_proof?: boolean
           checked_in_at?: string
+          checkin_method?: string
           created_at?: string
           fungi_present?: boolean | null
           health_notes?: string | null
@@ -2823,12 +2932,14 @@ export type Database = {
           media_url?: string | null
           minted_status?: string
           mood_score?: number | null
+          privacy?: string
           reflection?: string | null
           season_stage?: string
           tree_id?: string
           updated_at?: string
           user_id?: string
           weather?: string | null
+          weather_snapshot_id?: string | null
         }
         Relationships: [
           {
@@ -2836,6 +2947,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_checkins_weather_snapshot_id_fkey"
+            columns: ["weather_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "weather_snapshots"
             referencedColumns: ["id"]
           },
         ]
@@ -3568,6 +3686,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      weather_snapshots: {
+        Row: {
+          alerts: Json | null
+          current_clouds: number | null
+          current_feels_like: number | null
+          current_humidity: number | null
+          current_temp: number | null
+          current_uvi: number | null
+          current_visibility: number | null
+          current_weather_code: number | null
+          current_weather_desc: string | null
+          current_weather_icon: string | null
+          current_wind_gust: number | null
+          current_wind_speed: number | null
+          daily_forecast: Json | null
+          fetched_at: string
+          id: string
+          latitude: number
+          longitude: number
+          rain_1h: number | null
+          snow_1h: number | null
+          source: string
+        }
+        Insert: {
+          alerts?: Json | null
+          current_clouds?: number | null
+          current_feels_like?: number | null
+          current_humidity?: number | null
+          current_temp?: number | null
+          current_uvi?: number | null
+          current_visibility?: number | null
+          current_weather_code?: number | null
+          current_weather_desc?: string | null
+          current_weather_icon?: string | null
+          current_wind_gust?: number | null
+          current_wind_speed?: number | null
+          daily_forecast?: Json | null
+          fetched_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          rain_1h?: number | null
+          snow_1h?: number | null
+          source?: string
+        }
+        Update: {
+          alerts?: Json | null
+          current_clouds?: number | null
+          current_feels_like?: number | null
+          current_humidity?: number | null
+          current_temp?: number | null
+          current_uvi?: number | null
+          current_visibility?: number | null
+          current_weather_code?: number | null
+          current_weather_desc?: string | null
+          current_weather_icon?: string | null
+          current_wind_gust?: number | null
+          current_wind_speed?: number | null
+          daily_forecast?: Json | null
+          fetched_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          rain_1h?: number | null
+          snow_1h?: number | null
+          source?: string
+        }
+        Relationships: []
       }
     }
     Views: {
