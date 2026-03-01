@@ -22,8 +22,9 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Filter } from "lucide-react";
-import LiteMapFilters, { LitePerspective, GroveScale, GROVE_SCALES, AGE_BANDS, GIRTH_BANDS, type AgeBand, type GirthBand } from "./LiteMapFilters";
+import { Navigation, Loader2, Globe, TreePine, Plus, Filter } from "lucide-react";
+import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
+import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
@@ -455,14 +456,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
 
-  // Filter state
+  // Filter state — species remains local (multi-select), others from context
   const [species, setSpecies] = useState<string[]>([]);
-  const [perspective, setPerspective] = useState<LitePerspective>("collective");
+  const { perspective, setPerspective, ageBand, girthBand, groveScale } = useMapFilters();
   const [lineageFilter, setLineageFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
-  const [groveScale, setGroveScale] = useState<GroveScale>("all");
-  const [ageBand, setAgeBand] = useState<AgeBand>("all");
-  const [girthBand, setGirthBand] = useState<GirthBand>("all");
 
   // Layer visibility toggles
   const [showSeeds, setShowSeeds] = useState(true);
@@ -493,12 +491,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [birdsongSeason, setBirdsongSeason] = useState<string>("all");
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
-  const [livingLayersOpen, setLivingLayersOpen] = useState(false);
-  const [refineOpen, setRefineOpen] = useState(false);
-  const [hivesCollapsed, setHivesCollapsed] = useState(false);
-  const [signalsCollapsed, setSignalsCollapsed] = useState(true);
-  const [structuresCollapsed, setStructuresCollapsed] = useState(true);
-  const [wandererCollapsed, setWandererCollapsed] = useState(true);
+  const [atlasFilterOpen, setAtlasFilterOpen] = useState(false);
+  // (collapsed state now managed inside AtlasFilter)
   const [showRecentVisits, setShowRecentVisits] = useState(false);
   const [showSeedTraces, setShowSeedTraces] = useState(false);
   const [showSharedTrees, setShowSharedTrees] = useState(false);
@@ -628,7 +622,84 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return Array.from(m.values()).sort((a, b) => b.count - a.count);
   }, [trees]);
 
-  // Stable references for offering counts and photos
+  /** Visual layer sections for AtlasFilter — renderer-specific toggles passed as props */
+  const visualSections: VisualLayerSection[] = useMemo(() => [
+    {
+      key: "signals",
+      title: "Living Signals",
+      icon: "✦",
+      layers: [
+        { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(v => !v) },
+        { key: "offering-glow", label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
+        { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
+      ],
+      subContent: showBirdsongHeat ? (
+        <div className="pl-7 pt-1 flex flex-wrap gap-1">
+          <p className="w-full text-[9px] font-serif mb-0.5" style={{ color: "hsl(200, 50%, 55%)" }}>Season</p>
+          {[
+            { key: "all", label: "All", color: "hsl(200, 60%, 60%)" },
+            { key: "spring", label: "🌱", color: "hsl(120, 55%, 50%)" },
+            { key: "summer", label: "☀️", color: "hsl(45, 80%, 50%)" },
+            { key: "autumn", label: "🍂", color: "hsl(25, 75%, 50%)" },
+            { key: "winter", label: "❄️", color: "hsl(200, 60%, 55%)" },
+          ].map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setBirdsongSeason(s.key)}
+              className="px-2 py-1 rounded-md text-[11px] transition-all"
+              style={{
+                background: birdsongSeason === s.key ? "hsla(200, 50%, 40%, 0.3)" : "transparent",
+                color: birdsongSeason === s.key ? s.color : "hsl(42, 30%, 45%)",
+                border: birdsongSeason === s.key ? `1px solid ${s.color}` : "1px solid transparent",
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      ) : undefined,
+    },
+    {
+      key: "structures",
+      title: "Structures & Context",
+      icon: "🌿",
+      layers: [
+        { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(v => !v) },
+        { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(v => !v) },
+        { key: "research", label: "📜 Research Grove", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
+        { key: "immutable", label: "🔱 Immutable Ancient Friends", active: showImmutableLayer, toggle: () => setShowImmutableLayer(v => !v), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
+        { key: "external", label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(v => !v), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
+      ],
+    },
+    {
+      key: "pilgrimage",
+      title: "Pilgrimage Lenses",
+      icon: "🌊",
+      accent: "hsl(200, 50%, 58%)",
+      layers: [
+        { key: "waters", label: "🌊 Waters & Commons", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK", accent: "200, 60%, 65%" },
+      ],
+    },
+    {
+      key: "wanderer",
+      title: "Wanderer Activity",
+      icon: "◌",
+      accent: "hsl(260, 35%, 60%)",
+      layers: [
+        { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(v => !v), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
+        { key: "recent-visits", label: "◎ Recent Visits", active: showRecentVisits, toggle: () => setShowRecentVisits(v => !v), accent: "260, 55%, 70%" },
+        { key: "seed-traces", label: "✿ Seed & Offering Traces", active: showSeedTraces, toggle: () => setShowSeedTraces(v => !v), accent: "260, 55%, 70%" },
+        { key: "shared-trees", label: "◐ Shared Trees", active: showSharedTrees, toggle: () => setShowSharedTrees(v => !v), accent: "260, 55%, 70%" },
+        { key: "tribe-activity", label: "⊛ Tribe Activity", active: showTribeActivity, toggle: () => setShowTribeActivity(v => !v), accent: "260, 55%, 70%" },
+      ],
+    },
+  ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
+      showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
+      showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
+      externalTreeCount, showWatersCommons, watersCommonsLoading,
+      watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
+      showSharedTrees, showTribeActivity, showHiveLayer]);
+
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
   const treePhotosRef = useRef(treePhotos);
@@ -2142,28 +2213,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       {/* Search */}
       <LiteMapSearch trees={trees} onSelect={handleSearchSelect} />
 
-      {/* Filters */}
-      <LiteMapFilters
-        species={species}
-        onSpeciesChange={setSpecies}
-        perspective={perspective}
-        onPerspectiveChange={setPerspective}
+      {/* Unified Atlas Filter */}
+      <AtlasFilter
         speciesCounts={speciesCounts}
         totalVisible={filteredTrees.length}
+        selectedSpecies={species}
+        onSpeciesChange={setSpecies}
         lineageFilter={lineageFilter}
         onLineageChange={setLineageFilter}
         availableLineages={availableLineages}
         projectFilter={projectFilter}
         onProjectChange={setProjectFilter}
         availableProjects={availableProjects}
-        groveScale={groveScale}
-        onGroveScaleChange={setGroveScale}
-        ageBand={ageBand}
-        onAgeBandChange={setAgeBand}
-        girthBand={girthBand}
-        onGirthBandChange={setGirthBand}
-        refineOpen={refineOpen}
-        onRefineOpenChange={setRefineOpen}
+        hiveMap={hiveMap}
+        visualSections={visualSections}
+        panelOpen={atlasFilterOpen}
+        onPanelOpenChange={setAtlasFilterOpen}
         onFullscreenToggle={onFullscreenToggle}
         isFullscreen={isFullscreen}
       />
@@ -2220,416 +2285,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* ═══ Living Layers Sidebar ═══ */}
-      <div
-        className="absolute top-0 left-0 z-[1002] h-full pointer-events-none"
-        style={{ width: "min(68%, 420px)" }}
-      >
-        <div
-          className="h-full pointer-events-auto flex flex-col transition-transform duration-200 ease-out"
-          onTouchStart={(e) => { (e.currentTarget as any)._swipeX = e.touches[0].clientX; }}
-          onTouchEnd={(e) => {
-            const startX = (e.currentTarget as any)._swipeX;
-            if (startX != null && e.changedTouches[0].clientX - startX < -50) setLivingLayersOpen(false);
-          }}
-          style={{
-            transform: livingLayersOpen ? "translateX(0)" : "translateX(-100%)",
-            background: "hsla(150, 15%, 8%, 0.92)",
-            borderRight: "1px solid hsla(42, 40%, 30%, 0.35)",
-            borderRadius: "0 14px 14px 0",
-            boxShadow: livingLayersOpen ? "4px 0 24px rgba(0,0,0,0.35)" : "none",
-            backdropFilter: "blur(14px)",
-          }}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 pt-16 pb-3 shrink-0">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4" style={{ color: "hsl(42, 60%, 55%)" }} />
-              <p className="text-sm font-serif tracking-wider" style={{ color: "hsl(42, 50%, 60%)" }}>
-                Living Layers
-              </p>
-            </div>
-            <button
-              onClick={() => setLivingLayersOpen(false)}
-              className="w-7 h-7 flex items-center justify-center rounded-full transition-colors hover:bg-white/10"
-              style={{ color: "hsl(42, 50%, 55%)" }}
-              aria-label="Close layers"
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto pb-24 overscroll-contain">
-
-            {/* ── 1. Species Hives (primary, open by default) ── */}
-            <div className="border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
-              <button
-                onClick={() => setHivesCollapsed(!hivesCollapsed)}
-                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-                style={{ color: "hsl(42, 55%, 58%)" }}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">🐝</span>
-                  <span className="text-[13px] font-serif font-medium">Species Hives</span>
-                  <span className="text-[10px] font-sans tabular-nums" style={{ color: "hsl(42, 40%, 45%)" }}>
-                    {hiveMap.length}
-                  </span>
-                </span>
-                <span className="text-[10px] transition-transform" style={{ transform: hivesCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
-              </button>
-
-              {!hivesCollapsed && (
-                <div className="px-3 pb-3 space-y-0.5">
-                  {/* Hive layer toggle */}
-                  <button
-                    onClick={() => setShowHiveLayer(!showHiveLayer)}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md mb-1 transition-colors text-[11px] font-sans"
-                    style={{
-                      color: showHiveLayer ? "hsl(42, 80%, 60%)" : "hsl(42, 40%, 45%)",
-                      background: showHiveLayer ? "hsla(42, 50%, 30%, 0.15)" : "transparent",
-                    }}
-                  >
-                    <div
-                      className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center"
-                      style={{
-                        borderColor: showHiveLayer ? "hsl(42, 80%, 55%)" : "hsla(42, 40%, 30%, 0.5)",
-                        background: showHiveLayer ? "hsla(42, 80%, 50%, 0.2)" : "transparent",
-                      }}
-                    >
-                      {showHiveLayer && <span className="text-[9px]">✓</span>}
-                    </div>
-                    Colour markers by family
-                  </button>
-
-                  {hiveMap.map(({ hive, count, speciesList }) => {
-                    const hue = hslStringToHue(hive.accentHsl);
-                    const isFiltered = species.length > 0 && speciesList.some(rs =>
-                      species.some(s => s.toLowerCase() === rs.toLowerCase())
-                    );
-                    return (
-                      <button
-                        key={hive.family}
-                        onClick={() => isFiltered ? setSpecies([]) : setSpecies(speciesList)}
-                        className="w-full flex items-center gap-3 py-2 px-2 rounded-lg transition-all group"
-                        style={{ background: isFiltered ? `hsla(${hue}, 40%, 25%, 0.25)` : "transparent" }}
-                      >
-                        <span
-                          className="inline-block w-3 h-3 rounded-sm shrink-0 transition-shadow"
-                          style={{
-                            background: `hsl(${hue}, 55%, 45%)`,
-                            boxShadow: isFiltered ? `0 0 8px hsl(${hue}, 55%, 45%)` : "none",
-                            border: isFiltered ? `1.5px solid hsl(${hue}, 55%, 55%)` : "1px solid hsla(0,0%,100%,0.15)",
-                          }}
-                        />
-                        <span
-                          className="text-[12px] font-serif group-hover:underline truncate"
-                          style={{ color: isFiltered ? `hsl(${hue}, 55%, 65%)` : "hsl(0, 0%, 62%)" }}
-                        >
-                          {hive.icon} {hive.displayName}
-                        </span>
-                        <span className="text-[10px] font-sans ml-auto pl-2 tabular-nums shrink-0" style={{ color: "hsl(42, 40%, 45%)" }}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                  {species.length > 0 && (
-                    <button
-                      onClick={() => setSpecies([])}
-                      className="text-[10px] font-sans mt-1.5 transition-colors block mx-auto"
-                      style={{ color: "hsl(42, 50%, 55%)" }}
-                    >
-                      Show all hives
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ── 2. Living Signals ── */}
-            <div className="border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
-              <button
-                onClick={() => setSignalsCollapsed(!signalsCollapsed)}
-                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-                style={{ color: "hsl(42, 55%, 58%)" }}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">✦</span>
-                  <span className="text-[13px] font-serif font-medium">Living Signals</span>
-                </span>
-                <span className="text-[10px] transition-transform" style={{ transform: signalsCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
-              </button>
-
-              {!signalsCollapsed && (
-                <div className="px-3 pb-3 space-y-0.5">
-                  {[
-                    { label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(!showSeeds) },
-                    { label: "✨ Offering Glow", active: showOfferingGlow, toggle: () => setShowOfferingGlow(!showOfferingGlow) },
-                    { label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(!showBirdsongHeat), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
-                  ].map((layer) => (
-                    <button
-                      key={layer.label}
-                      onClick={layer.toggle}
-                      className="w-full flex items-center gap-2.5 px-2 py-2.5 rounded-md text-left transition-colors"
-                      style={{ color: layer.active ? "hsl(42, 80%, 60%)" : "hsl(42, 40%, 45%)" }}
-                    >
-                      <div
-                        className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0"
-                        style={{
-                          borderColor: layer.active ? "hsl(42, 80%, 55%)" : "hsla(42, 40%, 30%, 0.5)",
-                          background: layer.active ? "hsla(42, 80%, 50%, 0.2)" : "transparent",
-                        }}
-                      >
-                        {layer.active && <span className="text-[9px]">✓</span>}
-                      </div>
-                      <span className="text-[12px] font-serif">{layer.label}</span>
-                      {(layer as any).extra && (
-                        <span className="text-[9px] font-sans ml-auto" style={{ color: "hsl(180, 50%, 55%)" }}>
-                          {(layer as any).extra}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-
-                  {/* Birdsong season sub-filter */}
-                  {showBirdsongHeat && (
-                    <div className="pl-7 pt-1 flex flex-wrap gap-1">
-                      <p className="w-full text-[9px] font-serif mb-0.5" style={{ color: "hsl(200, 50%, 55%)" }}>Season</p>
-                      {[
-                        { key: "all", label: "All", color: "hsl(200, 60%, 60%)" },
-                        { key: "spring", label: "🌱", color: "hsl(120, 55%, 50%)" },
-                        { key: "summer", label: "☀️", color: "hsl(45, 80%, 50%)" },
-                        { key: "autumn", label: "🍂", color: "hsl(25, 75%, 50%)" },
-                        { key: "winter", label: "❄️", color: "hsl(200, 60%, 55%)" },
-                      ].map((s) => (
-                        <button
-                          key={s.key}
-                          onClick={() => setBirdsongSeason(s.key)}
-                          className="px-2 py-1 rounded-md text-[11px] transition-all"
-                          style={{
-                            background: birdsongSeason === s.key ? "hsla(200, 50%, 40%, 0.3)" : "transparent",
-                            color: birdsongSeason === s.key ? s.color : "hsl(42, 30%, 45%)",
-                            border: birdsongSeason === s.key ? `1px solid ${s.color}` : "1px solid transparent",
-                          }}
-                        >
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ── 3. Structures & Context (collapsed by default) ── */}
-            <div className="border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
-              <button
-                onClick={() => setStructuresCollapsed(!structuresCollapsed)}
-                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-                style={{ color: "hsl(42, 55%, 58%)" }}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">🌿</span>
-                  <span className="text-[13px] font-serif font-medium">Structures & Context</span>
-                </span>
-                <span className="text-[10px] transition-transform" style={{ transform: structuresCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
-              </button>
-
-              {!structuresCollapsed && (
-                <div className="px-3 pb-3 space-y-0.5">
-                  {[
-                    { label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(!showGroves) },
-                    { label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(!showRootThreads) },
-                    { label: "📜 Research Grove", active: showResearchLayer, toggle: () => setShowResearchLayer(!showResearchLayer), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
-                    { label: "🔱 Immutable Ancient Friends", active: showImmutableLayer, toggle: () => setShowImmutableLayer(!showImmutableLayer), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
-                    { label: "🗺️ External Trees", active: showExternalTrees, toggle: () => setShowExternalTrees(!showExternalTrees), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : `${enabledSources.length} src` },
-                  ].map((layer) => (
-                    <button
-                      key={layer.label}
-                      onClick={layer.toggle}
-                      className="w-full flex items-center gap-2.5 px-2 py-2.5 rounded-md text-left transition-colors"
-                      style={{ color: layer.active ? "hsl(42, 80%, 60%)" : "hsl(42, 40%, 45%)" }}
-                    >
-                      <div
-                        className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0"
-                        style={{
-                          borderColor: layer.active ? "hsl(42, 80%, 55%)" : "hsla(42, 40%, 30%, 0.5)",
-                          background: layer.active ? "hsla(42, 80%, 50%, 0.2)" : "transparent",
-                        }}
-                      >
-                        {layer.active && <span className="text-[9px]">✓</span>}
-                      </div>
-                      <span className="text-[12px] font-serif">{layer.label}</span>
-                      {(layer as any).extra && (
-                        <span className="text-[9px] font-sans ml-auto" style={{ color: "hsl(180, 50%, 55%)" }}>
-                          {(layer as any).extra}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ── 3b. Pilgrimage Lenses (collapsed by default) ── */}
-            <div className="border-b" style={{ borderColor: "hsla(200, 40%, 30%, 0.2)" }}>
-              <button
-                onClick={() => setWatersCommonsCollapsed(!watersCommonsCollapsed)}
-                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-                style={{ color: "hsl(200, 50%, 58%)" }}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">🌊</span>
-                  <span className="text-[13px] font-serif font-medium">Pilgrimage Lenses</span>
-                </span>
-                <span className="text-[10px] transition-transform" style={{ transform: watersCommonsCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
-              </button>
-
-              {!watersCommonsCollapsed && (
-                <div className="px-3 pb-3 space-y-1">
-                  <p className="text-[10px] font-sans px-2 pb-1.5 leading-relaxed" style={{ color: "hsla(200, 30%, 55%, 0.7)" }}>
-                    Where trees, water, and people have long met.
-                  </p>
-                  <button
-                    onClick={() => setShowWatersCommons(!showWatersCommons)}
-                    className="w-full flex items-center gap-2.5 px-2 py-2.5 rounded-md text-left transition-colors"
-                    style={{ color: showWatersCommons ? "hsl(200, 60%, 65%)" : "hsl(42, 40%, 45%)" }}
-                  >
-                    <div
-                      className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0"
-                      style={{
-                        borderColor: showWatersCommons ? "hsl(200, 55%, 55%)" : "hsla(42, 40%, 30%, 0.5)",
-                        background: showWatersCommons ? "hsla(200, 55%, 50%, 0.2)" : "transparent",
-                      }}
-                    >
-                      {showWatersCommons && <span className="text-[9px]">✓</span>}
-                    </div>
-                    <span className="text-[12px] font-serif">🌊 Waters & Commons</span>
-                    <span className="text-[9px] font-sans ml-auto" style={{ color: "hsl(200, 50%, 55%)" }}>
-                      {showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK"}
-                    </span>
-                  </button>
-
-                  {showWatersCommons && (
-                    <div className="pl-7 pt-1 space-y-1">
-                      {(["waterway", "churchyard", "parkland", "commons"] as const).map((cat) => {
-                        const meta = GUARDIAN_TAGS[cat];
-                        const count = watersCommonsPois.filter(p => p.category === cat).length;
-                        return (
-                          <div
-                            key={cat}
-                            className="flex items-center gap-2 px-1 py-1 text-[10px] font-sans"
-                            style={{ color: count > 0 ? meta.color : "hsl(42, 30%, 40%)" }}
-                          >
-                            <span
-                              className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
-                              style={{ background: meta.color, opacity: count > 0 ? 0.8 : 0.3 }}
-                            />
-                            <span>{meta.icon} {meta.tag}</span>
-                            {count > 0 && (
-                              <span className="ml-auto tabular-nums">{count}</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* ── 4. Wanderer Activity (collapsed & off by default) ── */}
-            <div className="border-b" style={{ borderColor: "hsla(42, 40%, 30%, 0.2)" }}>
-              <button
-                onClick={() => setWandererCollapsed(!wandererCollapsed)}
-                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
-                style={{ color: "hsl(260, 35%, 60%)" }}
-              >
-                <span className="flex items-center gap-2">
-                  <span className="text-base">◌</span>
-                  <span className="text-[13px] font-serif font-medium">Wanderer Activity</span>
-                </span>
-                <span className="text-[10px] transition-transform" style={{ transform: wandererCollapsed ? "rotate(-90deg)" : "rotate(0)" }}>▾</span>
-              </button>
-
-              {!wandererCollapsed && (
-                <div className="px-3 pb-3 space-y-0.5">
-                  <p className="text-[10px] font-sans px-2 pb-2 leading-relaxed" style={{ color: "hsla(260, 20%, 55%, 0.7)" }}>
-                    Sense the presence of others — gently, like traces in a forest.
-                  </p>
-                  {[
-                    { label: "🌱 Bloomed Seeds", desc: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(!showBloomedSeeds), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined },
-                    { label: "◎ Recent Visits", desc: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => setShowRecentVisits(!showRecentVisits) },
-                    { label: "✿ Seed & Offering Traces", desc: "Subtle pulses that fade over time", active: showSeedTraces, toggle: () => setShowSeedTraces(!showSeedTraces) },
-                    { label: "◐ Shared Trees", desc: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => setShowSharedTrees(!showSharedTrees) },
-                    { label: "⊛ Tribe Activity", desc: "Opt-in visibility for invited wanderers", active: showTribeActivity, toggle: () => setShowTribeActivity(!showTribeActivity) },
-                  ].map((layer) => (
-                    <button
-                      key={layer.label}
-                      onClick={layer.toggle}
-                      className="w-full flex flex-col gap-0.5 px-2 py-2.5 rounded-md text-left transition-colors group"
-                    >
-                      <div className="flex items-center gap-2.5" style={{ color: layer.active ? "hsl(260, 55%, 70%)" : "hsl(260, 25%, 45%)" }}>
-                        <div
-                          className="w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-all"
-                          style={{
-                            borderColor: layer.active ? "hsl(260, 55%, 65%)" : "hsla(260, 30%, 35%, 0.5)",
-                            background: layer.active ? "hsla(260, 55%, 55%, 0.2)" : "transparent",
-                            boxShadow: layer.active ? "0 0 6px hsla(260, 60%, 60%, 0.3)" : "none",
-                          }}
-                        >
-                          {layer.active && <span className="block w-1.5 h-1.5 rounded-full" style={{ background: "hsl(260, 60%, 70%)" }} />}
-                        </div>
-                        <span className="text-[12px] font-serif">{layer.label}</span>
-                      </div>
-                      <span className="text-[9px] font-sans pl-6 leading-snug" style={{ color: "hsla(260, 20%, 50%, 0.6)" }}>
-                        {layer.desc}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Add tree — contextual action at bottom of sidebar */}
-            <div className="px-4 py-4">
-              <button
-                onClick={() => {
-                  const map = mapRef.current;
-                  if (map) {
-                    const c = map.getCenter();
-                    setAddTreeCoords({ lat: c.lat, lng: c.lng });
-                  } else {
-                    setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-                  }
-                  setAddDialogOpen(true);
-                  setLivingLayersOpen(false);
-                }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all active:scale-95 text-[12px] font-serif"
-                style={{
-                  background: "hsla(42, 40%, 25%, 0.2)",
-                  border: "1px solid hsla(42, 40%, 30%, 0.35)",
-                  color: "hsl(42, 60%, 55%)",
-                }}
-              >
-                <Plus className="w-4 h-4" /> Add Ancient Friend
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Invisible map tap catcher to close sidebar */}
-      {livingLayersOpen && (
-        <div
-          className="absolute inset-0 z-[1001]"
-          style={{ left: "min(68%, 420px)" }}
-          onClick={() => setLivingLayersOpen(false)}
-        />
-      )}
-
-      {/* Bottom controls: Layers left, locate+compass centre */}
+      {/* Bottom controls: unified Atlas Filter + locate + add + compass */}
       {(() => {
         const modeAccent = perspective === "personal" ? "120, 50%, 45%" : perspective === "tribe" ? "200, 55%, 50%" : "42, 90%, 55%";
         const addEmphasis = perspective === "personal";
@@ -2638,28 +2294,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           <>
             <div className="absolute bottom-8 left-3 z-[1000] flex gap-2">
               <button
-                onClick={() => setLivingLayersOpen(!livingLayersOpen)}
+                onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
                 className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
                 style={{
                   ...btnBase,
-                  color: livingLayersOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                  background: livingLayersOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
-                  boxShadow: livingLayersOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
+                  color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  boxShadow: atlasFilterOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
                 }}
-                title="Living Layers"
-              >
-                <Layers className="w-[18px] h-[18px]" />
-              </button>
-              <button
-                onClick={() => setRefineOpen(!refineOpen)}
-                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
-                style={{
-                  ...btnBase,
-                  color: refineOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                  background: refineOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
-                  boxShadow: refineOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
-                }}
-                title="Refine filters"
+                title="Atlas Filter"
               >
                 <Filter className="w-[18px] h-[18px]" />
               </button>
