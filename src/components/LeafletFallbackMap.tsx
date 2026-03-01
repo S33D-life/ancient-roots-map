@@ -24,12 +24,14 @@ import {
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye } from "lucide-react";
 import GroveViewOverlay from "./GroveViewOverlay";
+import BloomingClockLayer from "./BloomingClockLayer";
 import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useFoodCycles, type CycleStage, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 
 interface Tree {
   id: string;
@@ -520,6 +522,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   // GroveView — Living Earth Mode
   const [groveViewActive, setGroveViewActive] = useState(false);
 
+  // Blooming Clock — Global Seasonal Atlas
+  const { foods: foodCycles, loading: foodCyclesLoading } = useFoodCycles();
+  const [showBloomingClock, setShowBloomingClock] = useState(false);
+  const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
+  const [bloomStageFilter, setBloomStageFilter] = useState<CycleStage | "all">("all");
+  const [bloomConstellationMode, setBloomConstellationMode] = useState(false);
+
   // Waters & Commons pilgrimage lens
   const [showWatersCommons, setShowWatersCommons] = useState(false);
   const [watersCommonsCollapsed, setWatersCommonsCollapsed] = useState(true);
@@ -730,12 +739,80 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "tribe-activity", label: "⊛ Tribe Activity", active: showTribeActivity, toggle: () => setShowTribeActivity(v => !v), accent: "260, 55%, 70%" },
       ],
     },
+    {
+      key: "blooming-clock",
+      title: "🌸 Blooming Clock",
+      icon: "🌸",
+      accent: "hsl(340, 55%, 65%)",
+      layers: [
+        { key: "seasonal-foods", label: "🌸 Seasonal Foods", active: showBloomingClock, toggle: () => setShowBloomingClock(v => !v), accent: "340, 55%, 65%" },
+        { key: "constellation", label: "🌾 Constellation Mode", active: bloomConstellationMode, toggle: () => { setBloomConstellationMode(v => !v); if (!showBloomingClock) setShowBloomingClock(true); }, accent: "42, 70%, 55%" },
+      ],
+      subContent: showBloomingClock ? (
+        <div className="pl-7 pt-1 space-y-2">
+          {/* Stage filter */}
+          <div>
+            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(340, 50%, 60%)" }}>Cycle Stage</p>
+            <div className="flex flex-wrap gap-1">
+              {([{ key: "all", label: "All", icon: "🌍" }, ...Object.entries(STAGE_VISUALS).map(([k, v]) => ({ key: k, label: v.label, icon: v.icon }))] as { key: string; label: string; icon: string }[]).map(s => (
+                <button
+                  key={s.key}
+                  onClick={() => setBloomStageFilter(s.key as CycleStage | "all")}
+                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all"
+                  style={{
+                    background: bloomStageFilter === s.key ? "hsla(340, 50%, 40%, 0.3)" : "transparent",
+                    color: bloomStageFilter === s.key ? "hsl(340, 55%, 65%)" : "hsl(42, 30%, 45%)",
+                    border: bloomStageFilter === s.key ? "1px solid hsla(340, 50%, 50%, 0.4)" : "1px solid transparent",
+                  }}
+                >
+                  {s.icon} {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Food selector */}
+          <div>
+            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(42, 50%, 55%)" }}>Foods</p>
+            <div className="flex flex-wrap gap-1">
+              <button
+                onClick={() => setSelectedFoodIds([])}
+                className="px-2 py-1 rounded-md text-[10px] font-serif transition-all"
+                style={{
+                  background: selectedFoodIds.length === 0 ? "hsla(42, 50%, 40%, 0.3)" : "transparent",
+                  color: selectedFoodIds.length === 0 ? "hsl(42, 80%, 65%)" : "hsl(42, 30%, 45%)",
+                  border: selectedFoodIds.length === 0 ? "1px solid hsla(42, 50%, 50%, 0.3)" : "1px solid transparent",
+                }}
+              >
+                All
+              </button>
+              {foodCycles.map(f => (
+                <button
+                  key={f.id}
+                  onClick={() => setSelectedFoodIds(prev =>
+                    prev.includes(f.id) ? prev.filter(id => id !== f.id) : [...prev, f.id]
+                  )}
+                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all"
+                  style={{
+                    background: selectedFoodIds.includes(f.id) ? "hsla(42, 50%, 40%, 0.25)" : "transparent",
+                    color: selectedFoodIds.includes(f.id) ? "hsl(42, 80%, 65%)" : "hsl(42, 30%, 45%)",
+                    border: selectedFoodIds.includes(f.id) ? "1px solid hsla(42, 50%, 50%, 0.3)" : "1px solid transparent",
+                  }}
+                >
+                  {f.icon} {f.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : undefined,
+    },
   ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
       externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
-      showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow]);
+      showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
+      showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, foodCycles]);
 
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
@@ -2422,6 +2499,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         userLat={userLatLng?.[0]}
         treeLookup={treeLookup}
         onEventPulses={setCurrentEventPulses}
+      />
+
+      {/* Blooming Clock — Global Seasonal Atlas layer */}
+      <BloomingClockLayer
+        map={mapRef.current}
+        foods={foodCycles}
+        selectedFoodIds={selectedFoodIds}
+        stageFilter={bloomStageFilter}
+        active={showBloomingClock}
+        constellationMode={bloomConstellationMode}
       />
 
       {/* Empty state */}
