@@ -11,9 +11,9 @@ import {
   DiscoveryRow,
   ParticipationSection,
   MapPreviewSection,
-  LivingScrollSection,
   TetolNavSection,
 } from "@/components/HomeSections";
+import { WisdomOfTheGrove } from "@/components/WisdomOfTheGrove";
 
 const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
@@ -42,8 +42,8 @@ const Index = () => {
         {/* 4. Interactive map preview */}
         <MapPreviewSection />
 
-        {/* 5. Living scroll — wisdom showcase */}
-        <LivingScrollSection />
+        {/* 5. Wisdom of the Grove — community quotes + world wisdom */}
+        <WisdomOfTheGrove />
 
         {/* 6. TETOL navigation anchors */}
         <TetolNavSection />

@@ -1199,6 +1199,36 @@ export type Database = {
           },
         ]
       }
+      external_wisdom_cache: {
+        Row: {
+          author_name: string | null
+          expires_at: string
+          fetched_at: string
+          id: string
+          provider: string
+          quote_text: string
+          source_title: string | null
+        }
+        Insert: {
+          author_name?: string | null
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          provider?: string
+          quote_text: string
+          source_title?: string | null
+        }
+        Update: {
+          author_name?: string | null
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          provider?: string
+          quote_text?: string
+          source_title?: string | null
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -2371,6 +2401,35 @@ export type Database = {
             columns: ["market_id"]
             isOneToOne: false
             referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_likes: {
+        Row: {
+          created_at: string
+          id: string
+          offering_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offering_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offering_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_likes_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
             referencedColumns: ["id"]
           },
         ]
@@ -4485,6 +4544,23 @@ export type Database = {
           offering_count: number
           total_impact: number
           user_id: string
+        }[]
+      }
+      get_top_grove_quotes: {
+        Args: { p_limit?: number; p_timeframe?: string }
+        Returns: {
+          computed_score: number
+          created_at: string
+          created_by: string
+          creator_avatar: string
+          creator_name: string
+          influence_score: number
+          like_count: number
+          offering_id: string
+          quote_author: string
+          quote_source: string
+          quote_text: string
+          tree_id: string
         }[]
       }
       get_tree_bio_regions: {
