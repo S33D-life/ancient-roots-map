@@ -398,8 +398,14 @@ const LITE_CSS = `
 .atlas-leaflet-popup .leaflet-popup-content{margin:0!important}
 .atlas-leaflet-popup .leaflet-popup-tip{background:hsl(30,15%,10%)!important;border:1px solid hsla(42,40%,30%,0.4)!important}
 .atlas-leaflet-popup .leaflet-popup-close-button{color:hsl(42,60%,55%)!important;font-size:18px!important;top:6px!important;right:8px!important}
-.leaflet-tile-pane{filter:sepia(0.25) saturate(0.85) brightness(0.9)}
+.leaflet-tile-pane{filter:sepia(0.25) saturate(0.85) brightness(0.9);transition:filter 1.2s ease-in-out}
+.grove-view-active .leaflet-tile-pane{filter:sepia(0.35) saturate(0.7) brightness(0.65) hue-rotate(-10deg)}
 @media(max-width:768px){.leaflet-tile-pane{filter:sepia(0.1) brightness(0.95)}}
+@media(max-width:768px){.grove-view-active .leaflet-tile-pane{filter:sepia(0.3) saturate(0.7) brightness(0.7) hue-rotate(-10deg)}}
+@keyframes groveBreath{0%,100%{filter:drop-shadow(0 0 4px hsla(120,60%,45%,0.2)) brightness(1)}50%{filter:drop-shadow(0 0 10px hsla(120,60%,45%,0.5)) brightness(1.08)}}
+.grove-view-active .marker-wrap{animation:groveBreath 4s ease-in-out infinite!important}
+.grove-view-active .marker-ancient{animation:groveBreath 3s ease-in-out infinite,ancientGlow 3.5s ease-in-out infinite!important}
+.grove-view-active .tree-cluster{box-shadow:0 0 12px hsla(120,50%,40%,0.3),0 0 4px hsla(42,60%,45%,0.2)!important;transition:box-shadow 1s ease-in-out}
 .leaflet-control-zoom a{background:hsla(30,30%,12%,0.9)!important;color:hsl(42,60%,60%)!important;border:1px solid hsla(42,40%,30%,0.4)!important;border-radius:8px!important;width:34px!important;height:34px!important;line-height:34px!important;font-size:16px!important;transition:background .15s!important}
 .leaflet-control-zoom a:active{background:hsla(42,40%,20%,0.9)!important}
 .leaflet-control-zoom{border:none!important;border-radius:8px!important;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.25)!important}
@@ -2210,8 +2216,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   }, []);
 
   return (
-    <div className={className || "absolute inset-0"} style={{ height: '100dvh' }}>
-      <div ref={containerRef} className="w-full h-full" style={{ background: '#f0ede6' }} />
+    <div className={`${className || "absolute inset-0"} ${groveViewActive ? "grove-view-active" : ""}`} style={{ height: '100dvh' }}>
+      <div ref={containerRef} className="w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
       <style>{LITE_CSS}</style>
 
       {/* Search */}

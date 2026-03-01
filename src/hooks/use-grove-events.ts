@@ -3,8 +3,9 @@
  *
  * Aggregates recent activity across trees, offerings, hearts, and checkins
  * into a single normalized event stream, filtered by mythic timeframe.
+ * Includes realtime subscriptions for live pulse.
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type MythicTimeframe = "now" | "today" | "moon" | "all_seasons";
@@ -29,6 +30,8 @@ export interface GroveSignals {
   heartsGathered: number;
   offeringsThisMoon: number;
   mostLovedWisdom: string | null;
+  recentEvents: GroveEvent[];
+  activeWanderers: number;
 }
 
 function getTimeframeCutoff(tf: MythicTimeframe): string {
@@ -47,57 +50,112 @@ export function useGroveEvents(timeframe: MythicTimeframe) {
     heartsGathered: 0,
     offeringsThisMoon: 0,
     mostLovedWisdom: null,
+    recentEvents: [],
+    activeWanderers: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [liveEventCount, setLiveEventCount] = useState(0);
+  const channelRef = useRef<any>(null);
 
   const cutoff = useMemo(() => getTimeframeCutoff(timeframe), [timeframe]);
 
+  const fetchSignals = useCallback(async () => {
+    const [treesRes, offeringsRes, heartsRes, quoteRes, wanderersRes] = await Promise.all([
+      // Trees stirring = trees with any offering in timeframe
+      supabase
+        .from("offerings")
+        .select("tree_id", { count: "exact", head: true })
+        .gte("created_at", cutoff),
+      // Offerings this period
+      supabase
+        .from("offerings")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", cutoff),
+      // Hearts gathered
+      supabase
+        .from("heart_transactions")
+        .select("amount")
+        .gte("created_at", cutoff),
+      // Most liked quote
+      supabase
+        .from("offerings")
+        .select("quote_text, influence_score")
+        .not("quote_text", "is", null)
+        .order("influence_score", { ascending: false })
+        .limit(1),
+      // Active wanderers (unique creators in timeframe)
+      supabase
+        .from("offerings")
+        .select("created_by", { count: "exact", head: true })
+        .gte("created_at", cutoff)
+        .not("created_by", "is", null),
+    ]);
+
+    const heartTotal = heartsRes.data?.reduce((sum, h) => sum + (h.amount || 0), 0) || 0;
+
+    setSignals(prev => ({
+      ...prev,
+      treesStirring: treesRes.count || 0,
+      heartsGathered: heartTotal,
+      offeringsThisMoon: offeringsRes.count || 0,
+      mostLovedWisdom: quoteRes.data?.[0]?.quote_text || null,
+      activeWanderers: wanderersRes.count || 0,
+    }));
+    setLoading(false);
+  }, [cutoff]);
+
+  // Initial fetch
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-
-    const fetch = async () => {
-      const [treesRes, offeringsRes, heartsRes, quoteRes] = await Promise.all([
-        // Trees stirring = trees with any offering/checkin in timeframe
-        supabase
-          .from("offerings")
-          .select("tree_id", { count: "exact", head: true })
-          .gte("created_at", cutoff),
-        // Offerings this period
-        supabase
-          .from("offerings")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", cutoff),
-        // Hearts gathered
-        supabase
-          .from("heart_transactions")
-          .select("amount")
-          .gte("created_at", cutoff),
-        // Most liked quote (from offerings with quote_text)
-        supabase
-          .from("offerings")
-          .select("quote_text, influence_score")
-          .not("quote_text", "is", null)
-          .order("influence_score", { ascending: false })
-          .limit(1),
-      ]);
-
-      if (cancelled) return;
-
-      const heartTotal = heartsRes.data?.reduce((sum, h) => sum + (h.amount || 0), 0) || 0;
-
-      setSignals({
-        treesStirring: treesRes.count || 0,
-        heartsGathered: heartTotal,
-        offeringsThisMoon: offeringsRes.count || 0,
-        mostLovedWisdom: quoteRes.data?.[0]?.quote_text || null,
-      });
-      setLoading(false);
-    };
-
-    fetch();
+    fetchSignals().then(() => { if (cancelled) return; });
     return () => { cancelled = true; };
-  }, [cutoff]);
+  }, [fetchSignals]);
 
-  return { signals, loading };
+  // Realtime subscription for live event pulses
+  useEffect(() => {
+    // Subscribe to offerings for live event stream
+    const channel = supabase
+      .channel('grove-events-live')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'offerings' },
+        (payload) => {
+          setLiveEventCount(c => c + 1);
+          const newEvent: GroveEvent = {
+            id: payload.new.id,
+            type: 'OFFERING_CREATED',
+            timestamp: payload.new.created_at,
+            treeId: payload.new.tree_id,
+          };
+          setSignals(prev => ({
+            ...prev,
+            offeringsThisMoon: prev.offeringsThisMoon + 1,
+            recentEvents: [newEvent, ...prev.recentEvents].slice(0, 10),
+          }));
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'heart_transactions' },
+        (payload) => {
+          setSignals(prev => ({
+            ...prev,
+            heartsGathered: prev.heartsGathered + (payload.new.amount || 0),
+          }));
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, []);
+
+  return { signals, loading, liveEventCount };
 }
