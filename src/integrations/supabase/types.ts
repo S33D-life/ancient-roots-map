@@ -136,6 +136,7 @@ export type Database = {
           governance_status: string
           id: string
           name: string
+          parent_id: string | null
           primary_watersheds: string[]
           type: string
           updated_at: string
@@ -153,6 +154,7 @@ export type Database = {
           governance_status?: string
           id: string
           name: string
+          parent_id?: string | null
           primary_watersheds?: string[]
           type?: string
           updated_at?: string
@@ -170,11 +172,20 @@ export type Database = {
           governance_status?: string
           id?: string
           name?: string
+          parent_id?: string | null
           primary_watersheds?: string[]
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bio_regions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       birdsong_offerings: {
         Row: {

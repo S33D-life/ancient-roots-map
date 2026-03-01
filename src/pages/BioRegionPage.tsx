@@ -32,6 +32,22 @@ interface BioRegion {
   center_lat: number | null;
   center_lon: number | null;
   governance_status: string;
+  parent_id: string | null;
+}
+
+interface LinkedTree {
+  id: string;
+  name: string;
+  species: string;
+  latitude: number | null;
+  longitude: number | null;
+  nation: string | null;
+}
+
+interface ChildBioRegion {
+  id: string;
+  name: string;
+  type: string;
 }
 
 /* ━━━ Type badge color ━━━ */
@@ -91,29 +107,70 @@ const BioRegionPage = () => {
   const [ecologyOpen, setEcologyOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState<string | null>(null);
   const [speciesFilter, setSpeciesFilter] = useState<string | null>(null);
-  const [treeCount, setTreeCount] = useState(0);
+  const [linkedTrees, setLinkedTrees] = useState<LinkedTree[]>([]);
+  const [childRegions, setChildRegions] = useState<ChildBioRegion[]>([]);
+  const [parentRegion, setParentRegion] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+
+      // Fetch bio-region
       const { data } = await supabase
         .from("bio_regions")
-        .select("*")
+        .select("id, name, type, countries, climate_band, elevation_range, dominant_species, primary_watersheds, biome_description, center_lat, center_lon, governance_status, parent_id")
         .eq("id", slug ?? "")
         .maybeSingle();
-      if (data) setRegion(data as unknown as BioRegion);
+      if (data) {
+        setRegion(data as unknown as BioRegion);
 
-      // Get tree count for this bio-region
-      const { count } = await supabase
+        // Fetch parent if exists
+        if (data.parent_id) {
+          const { data: parent } = await supabase
+            .from("bio_regions")
+            .select("id, name")
+            .eq("id", data.parent_id)
+            .maybeSingle();
+          if (parent) setParentRegion(parent as { id: string; name: string });
+        }
+      }
+
+      // Fetch child bio-regions
+      const { data: children } = await supabase
+        .from("bio_regions")
+        .select("id, name, type")
+        .eq("parent_id", slug ?? "");
+      if (children) setChildRegions(children as ChildBioRegion[]);
+
+      // Fetch linked trees via junction
+      const { data: junctionData } = await supabase
         .from("bio_region_trees")
-        .select("id", { count: "exact", head: true })
+        .select("tree_id")
         .eq("bio_region_id", slug ?? "");
-      setTreeCount(count ?? 0);
+
+      if (junctionData && junctionData.length > 0) {
+        const treeIds = junctionData.map(j => j.tree_id);
+        const { data: treesData } = await supabase
+          .from("trees")
+          .select("id, name, species, latitude, longitude, nation")
+          .in("id", treeIds);
+        if (treesData) setLinkedTrees(treesData as LinkedTree[]);
+      }
 
       setLoading(false);
     };
     load();
   }, [slug]);
+
+  // Filtered trees based on active filters
+  const filteredTrees = useMemo(() => {
+    let result = linkedTrees;
+    if (countryFilter) result = result.filter(t => t.nation === countryFilter);
+    if (speciesFilter) result = result.filter(t => t.species?.toLowerCase().includes(speciesFilter.toLowerCase()));
+    return result;
+  }, [linkedTrees, countryFilter, speciesFilter]);
+
+  const treeCount = linkedTrees.length;
 
   const mapUrl = region
     ? `/map?lat=${region.center_lat}&lng=${region.center_lon}&zoom=${region.type.includes("Mountain") ? 6 : region.type.includes("Wetland") && region.countries.length > 1 ? 5 : 8}&origin=atlas`
@@ -334,14 +391,84 @@ const BioRegionPage = () => {
           </div>
         </section>
 
+        {/* ═══════ CHILD / PARENT BIO-REGIONS ═══════ */}
+        {(parentRegion || childRegions.length > 0) && (
+          <section className="px-4 max-w-3xl mx-auto mb-6">
+            <Card className="border-primary/15 bg-card/50">
+              <CardContent className="p-4 space-y-3">
+                {parentRegion && (
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Parent Bio-Region</p>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/atlas/bio-regions/${parentRegion.id}`}>
+                        <Layers className="w-3 h-3 mr-1" /> {parentRegion.name} <ArrowRight className="w-3 h-3 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+                {childRegions.length > 0 && (
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Sub-Regions</p>
+                    <div className="flex flex-wrap gap-2">
+                      {childRegions.map(cr => (
+                        <Button key={cr.id} variant="outline" size="sm" asChild>
+                          <Link to={`/atlas/bio-regions/${cr.id}`}>
+                            {typeEmoji(cr.type)} {cr.name} <ArrowRight className="w-3 h-3 ml-1" />
+                          </Link>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
         {/* ═══════ TABS ═══════ */}
         <section className="px-4 max-w-3xl mx-auto">
-          <Tabs defaultValue="countries">
+          <Tabs defaultValue="trees">
             <TabsList className="bg-card/50 border border-primary/20 mb-4">
+              <TabsTrigger value="trees">Trees ({filteredTrees.length})</TabsTrigger>
               <TabsTrigger value="countries">Countries</TabsTrigger>
               <TabsTrigger value="species">Species Hives</TabsTrigger>
-              <TabsTrigger value="councils">Councils & Offerings</TabsTrigger>
+              <TabsTrigger value="councils">Councils</TabsTrigger>
             </TabsList>
+
+            {/* Trees linked to this bio-region */}
+            <TabsContent value="trees">
+              {filteredTrees.length === 0 ? (
+                <Card className="border-primary/10">
+                  <CardContent className="p-6 text-center">
+                    <TreeDeciduous className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No trees linked to this bio-region yet.</p>
+                    <Button variant="sacred" size="sm" className="mt-3" asChild>
+                      <Link to="/add-tree"><Plus className="w-3.5 h-3.5 mr-1" /> Map an Ancient Friend</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {filteredTrees.map(t => (
+                    <Card key={t.id} className="border-primary/10 hover:border-primary/30 transition-all cursor-pointer"
+                      onClick={() => t.latitude && t.longitude && navigate(`/map?lat=${t.latitude}&lng=${t.longitude}&zoom=15&origin=atlas`)}>
+                      <CardContent className="p-3 space-y-1">
+                        <p className="text-sm font-serif font-bold text-foreground">{t.name}</p>
+                        <p className="text-[10px] text-muted-foreground italic">{t.species}</p>
+                        <div className="flex items-center gap-2">
+                          {t.nation && <Badge variant="outline" className="text-[10px]"><Globe className="w-2.5 h-2.5 mr-0.5" /> {t.nation}</Badge>}
+                          {t.latitude ? (
+                            <Badge variant="outline" className="text-[10px] text-emerald-500 border-emerald-500/30"><MapPin className="w-2.5 h-2.5 mr-0.5" /> GPS</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-400/30">📍 Needs GPS</Badge>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
             {/* Countries in this bio-region */}
             <TabsContent value="countries">
