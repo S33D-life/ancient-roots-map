@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -31,15 +32,7 @@ interface TreeRow {
   nation: string | null;
 }
 
-interface OfferingRow {
-  id: string;
-  tree_id: string;
-  title: string;
-  type: string;
-  media_url: string | null;
-  created_at: string;
-  created_by: string | null;
-}
+type OfferingRow = Database["public"]["Tables"]["offerings"]["Row"];
 
 interface SpeciesHeartTx {
   id: string;
@@ -118,7 +111,7 @@ const HivePage = () => {
       // Fetch species heart transactions for this family
       const [offsRes, speciesHeartsRes, influenceRes] = await Promise.all([
         hiveTrees.length > 0
-          ? supabase.from("offerings").select("id, tree_id, title, type, media_url, created_at, created_by")
+          ? supabase.from("offerings").select("*")
               .in("tree_id", hiveTrees.map(t => t.id).slice(0, 100))
               .order("created_at", { ascending: false }).limit(200)
           : Promise.resolve({ data: [] }),
@@ -469,11 +462,13 @@ const HivePage = () => {
             {/* Offerings Tab */}
             <TabsContent value="offerings">
               <OfferingList
-                offerings={offerings as any}
-                treeLookup={trees.map(t => ({ id: t.id, name: t.name }))}
+                offerings={offerings}
+                treeLookup={trees.map(t => ({ id: t.id, name: t.name, species: t.species, nation: t.nation }))}
                 pageSize={50}
                 emptyMessage="No offerings yet in this hive."
                 showTreeLink
+                sortable
+                variant="full"
               />
             </TabsContent>
 

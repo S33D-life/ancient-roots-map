@@ -45,6 +45,7 @@ import WeatherCard from "@/components/WeatherCard";
 import TreeCheckinButton from "@/components/TreeCheckinButton";
 import SkystampSeal from "@/components/SkystampSeal";
 import OfferingQuoteBlock from "@/components/OfferingQuoteBlock";
+import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -656,29 +657,13 @@ const TreeDetailPage = () => {
                     <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
                   ) : type === "photo" ? (
                     <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
-                  ) : type === "poem" || type === "story" ? (
-                    <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
-                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <LiteraryCard offering={offering} type={type} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  ) : type === "song" ? (
-                    <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
-                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <SongCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
-                        </motion.div>
-                      ))}
-                    </motion.div>
                   ) : type === "book" ? (
                     <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
                   ) : (
-                    <motion.div className="grid gap-4 md:grid-cols-2" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+                    <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
                       {sortOfferings(getOfferingsByType(type)).map((offering) => (
                         <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <NftCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
+                          <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
                         </motion.div>
                       ))}
                     </motion.div>
@@ -926,208 +911,7 @@ const PhotoGrid = ({
   );
 };
 
-interface CardInfluenceProps {
-  treeId?: string;
-  userId?: string | null;
-  treeSpecies?: string | null;
-  treeNation?: string | null;
-}
 
-const LiteraryCard = ({ offering, type, treeId, userId, treeSpecies, treeNation }: { offering: Offering; type: OfferingType } & CardInfluenceProps) => (
-  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
-    <div
-      className="h-0.5"
-      style={{
-        background:
-          type === "poem"
-            ? "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), transparent)"
-            : "linear-gradient(90deg, transparent, hsl(var(--accent) / 0.3), transparent)",
-      }}
-    />
-    <CardContent className="p-5 md:p-6">
-      <h4 className="font-serif text-lg text-primary mb-3 tracking-wide">{offering.title}</h4>
-      {offering.content && (
-        <div
-          className={`font-serif leading-relaxed text-foreground/85 ${
-            type === "poem"
-              ? "whitespace-pre-wrap text-center italic border-l-0"
-              : "whitespace-pre-wrap border-l-2 border-primary/20 pl-4"
-          }`}
-        >
-          {offering.content}
-        </div>
-      )}
-      {(offering as any).quote_text && (
-        <OfferingQuoteBlock
-          text={(offering as any).quote_text}
-          author={(offering as any).quote_author}
-          source={(offering as any).quote_source}
-        />
-      )}
-      <div className="flex items-center justify-between mt-4">
-        <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
-          {new Date(offering.created_at).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
-        <div className="flex items-center gap-3">
-          {treeId && (
-            <InfluenceUpvoteButton
-              offeringId={offering.id}
-              treeId={treeId}
-              treeSpecies={treeSpecies}
-              treeNation={treeNation}
-              userId={userId ?? null}
-              influenceScore={(offering as any).influence_score || 0}
-            />
-          )}
-          <button
-            onClick={() => shareOffering(offering)}
-            className="text-muted-foreground/60 hover:text-primary transition-colors"
-            title="Share"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-          </button>
-          <SealedByLabel staff={offering.sealed_by_staff} />
-          <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const SongCard = ({ offering, treeId, userId, treeSpecies, treeNation }: { offering: Offering } & CardInfluenceProps) => (
-  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
-    <CardContent className="p-5">
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
-          <Music className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
-          {offering.content && (
-            <p className="text-sm text-foreground/70 font-serif mt-1">{offering.content}</p>
-          )}
-          {(offering as any).quote_text && (
-            <OfferingQuoteBlock
-              text={(offering as any).quote_text}
-              author={(offering as any).quote_author}
-              source={(offering as any).quote_source}
-            />
-          )}
-          {offering.media_url && (
-            <audio controls className="w-full mt-3 rounded-lg" style={{ height: 36 }}>
-              <source src={offering.media_url} />
-            </audio>
-          )}
-          <div className="flex items-center flex-wrap gap-3 mt-3">
-            <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
-              {new Date(offering.created_at).toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-            {offering.nft_link && offering.nft_link.includes("apple.com") && (
-              <a
-                href={offering.nft_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[10px] text-primary/70 hover:text-primary font-serif tracking-wider"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Apple Music
-              </a>
-            )}
-            {treeId && (
-              <InfluenceUpvoteButton
-                offeringId={offering.id}
-                treeId={treeId}
-                treeSpecies={treeSpecies}
-                treeNation={treeNation}
-                userId={userId ?? null}
-                influenceScore={(offering as any).influence_score || 0}
-                compact
-              />
-            )}
-            <button
-              onClick={() => shareOffering(offering)}
-              className="text-muted-foreground/60 hover:text-primary transition-colors"
-              title="Share"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-            </button>
-            <SealedByLabel staff={offering.sealed_by_staff} />
-            <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
-          </div>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const NftCard = ({ offering, treeId, userId, treeSpecies, treeNation }: { offering: Offering } & CardInfluenceProps) => (
-  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/40 transition-colors">
-    <CardContent className="p-5">
-      <div className="flex items-center gap-2 mb-2">
-        <Sparkles className="h-4 w-4 text-primary" />
-        <h4 className="font-serif text-base text-primary tracking-wide">{offering.title}</h4>
-      </div>
-      {offering.content && (
-        <p className="text-sm text-foreground/70 font-serif">{offering.content}</p>
-      )}
-      {(offering as any).quote_text && (
-        <OfferingQuoteBlock
-          text={(offering as any).quote_text}
-          author={(offering as any).quote_author}
-          source={(offering as any).quote_source}
-        />
-      )}
-      {offering.nft_link && (
-        <a
-          href={offering.nft_link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block mt-3 text-xs font-serif text-primary/80 hover:text-primary underline underline-offset-4 tracking-wider"
-        >
-          View on marketplace →
-        </a>
-      )}
-      <div className="flex items-center justify-between mt-3">
-        <p className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
-          {new Date(offering.created_at).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </p>
-        <div className="flex items-center gap-3">
-          {treeId && (
-            <InfluenceUpvoteButton
-              offeringId={offering.id}
-              treeId={treeId}
-              treeSpecies={treeSpecies}
-              treeNation={treeNation}
-              userId={userId ?? null}
-              influenceScore={(offering as any).influence_score || 0}
-            />
-          )}
-          <button
-            onClick={() => shareOffering(offering)}
-            className="text-muted-foreground/60 hover:text-primary transition-colors"
-            title="Share"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-          </button>
-          <SealedByLabel staff={offering.sealed_by_staff} />
-          <SkystampSeal skyStampId={(offering as any).sky_stamp_id} />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 /* ---------- Book Shelf ---------- */
 
