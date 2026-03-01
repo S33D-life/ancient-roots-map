@@ -12,7 +12,7 @@ import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Filter, X, Leaf, GitBranch, FolderTree, RotateCcw,
-  Maximize2, ExternalLink, Layers,
+  Maximize2, ExternalLink, Layers, SlidersHorizontal,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
@@ -127,7 +127,21 @@ const AtlasFilter = ({
   } = useMapFilters();
 
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["hives"]));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["hives", "signals", "structures"]));
+
+  // Count active visual layers for badge
+  const activeLayerCount = useMemo(() =>
+    visualSections.reduce((sum, s) => sum + s.layers.filter(l => l.active).length, 0),
+    [visualSections]
+  );
+
+  const handleResetLayers = useCallback(() => {
+    visualSections.forEach(section => {
+      section.layers.forEach(layer => {
+        if (layer.active) layer.toggle();
+      });
+    });
+  }, [visualSections]);
 
   const isAllSpecies = selectedSpecies.length === 0;
   const totalFilterCount = activeFilterCount + (isAllSpecies ? 0 : 1) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
@@ -356,9 +370,9 @@ const AtlasFilter = ({
               </div>
 
               <div className="px-4 pb-2 flex items-center justify-between">
-                <h3 className="text-sm font-serif tracking-wider flex items-center gap-2" style={{ color: `hsl(${activeAccent})` }}>
-                  <Filter className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
-                  Atlas Filter
+               <h3 className="text-sm font-serif tracking-wider flex items-center gap-2" style={{ color: `hsl(${activeAccent})` }}>
+                  <Layers className="w-3.5 h-3.5" style={{ opacity: 0.6 }} />
+                  Filters & Layers
                 </h3>
                 <div className="flex items-center gap-2">
                   {singleSpeciesHive && (
@@ -369,13 +383,22 @@ const AtlasFilter = ({
                       {singleSpeciesHive.icon} View Hive <ExternalLink className="w-2.5 h-2.5" />
                     </Link>
                   )}
-                  {totalFilterCount > 0 && (
+                  {activeLayerCount > 0 && (
                     <motion.button
                       whileTap={{ scale: 0.9 }}
-                      onClick={handleResetAll}
+                      onClick={handleResetLayers}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif text-muted-foreground hover:text-foreground bg-muted/30 hover:bg-muted/50 border border-border/30 transition-colors"
+                    >
+                      <RotateCcw className="w-2.5 h-2.5" /> Layers
+                    </motion.button>
+                  )}
+                  {(totalFilterCount > 0 || activeLayerCount > 0) && (
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => { handleResetAll(); handleResetLayers(); }}
                       className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-serif text-primary/70 hover:text-primary bg-primary/8 hover:bg-primary/15 border border-primary/20 transition-colors"
                     >
-                      <RotateCcw className="w-2.5 h-2.5" /> Clear All
+                      <RotateCcw className="w-2.5 h-2.5" /> All
                     </motion.button>
                   )}
                 </div>
@@ -497,7 +520,20 @@ const AtlasFilter = ({
                     </CollapsibleSection>
                   )}
 
-                  {/* ── Visual Layer Sections (from map renderer) ── */}
+                  {/* ── Visual Layers divider ── */}
+                  {visualSections.length > 0 && (
+                    <div className="flex items-center gap-2 pt-2">
+                      <Layers className="w-3 h-3 text-muted-foreground/50" />
+                      <span className="text-[9px] font-serif text-muted-foreground/70 uppercase tracking-[0.15em]">
+                        Map Layers
+                      </span>
+                      {activeLayerCount > 0 && (
+                        <span className="text-[8px] font-bold rounded-full px-1.5 py-0.5 bg-primary/15 text-primary border border-primary/25">
+                          {activeLayerCount} active
+                        </span>
+                      )}
+                    </div>
+                  )}
                   {visualSections.map(section => (
                     <CollapsibleSection
                       key={section.key}
