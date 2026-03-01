@@ -1250,6 +1250,116 @@ export type Database = {
         }
         Relationships: []
       }
+      food_cycles: {
+        Row: {
+          created_at: string
+          cultural_associations: string | null
+          dormant_months: number[]
+          flowering_months: number[]
+          fruiting_months: number[]
+          harvest_months: number[]
+          hemisphere: string
+          icon: string
+          id: string
+          name: string
+          notes: string | null
+          peak_months: number[]
+          regions: Json
+          scientific_name: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cultural_associations?: string | null
+          dormant_months?: number[]
+          flowering_months?: number[]
+          fruiting_months?: number[]
+          harvest_months?: number[]
+          hemisphere?: string
+          icon?: string
+          id?: string
+          name: string
+          notes?: string | null
+          peak_months?: number[]
+          regions?: Json
+          scientific_name?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cultural_associations?: string | null
+          dormant_months?: number[]
+          flowering_months?: number[]
+          fruiting_months?: number[]
+          harvest_months?: number[]
+          hemisphere?: string
+          icon?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          peak_months?: number[]
+          regions?: Json
+          scientific_name?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      food_producers: {
+        Row: {
+          contact_link: string | null
+          country: string | null
+          created_at: string
+          food_cycle_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          region: string | null
+          seasonal_window: string | null
+          user_id: string | null
+          verified_status: string
+        }
+        Insert: {
+          contact_link?: string | null
+          country?: string | null
+          created_at?: string
+          food_cycle_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          region?: string | null
+          seasonal_window?: string | null
+          user_id?: string | null
+          verified_status?: string
+        }
+        Update: {
+          contact_link?: string | null
+          country?: string | null
+          created_at?: string
+          food_cycle_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          region?: string | null
+          seasonal_window?: string | null
+          user_id?: string | null
+          verified_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_producers_food_cycle_id_fkey"
+            columns: ["food_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "food_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gift_seeds: {
         Row: {
           activated_at: string | null
