@@ -1795,6 +1795,9 @@ export type Database = {
           media_url: string | null
           meeting_id: string | null
           nft_link: string | null
+          quote_author: string | null
+          quote_source: string | null
+          quote_text: string | null
           sealed_by_staff: string | null
           sky_stamp_id: string | null
           title: string
@@ -1812,6 +1815,9 @@ export type Database = {
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
+          quote_author?: string | null
+          quote_source?: string | null
+          quote_text?: string | null
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
           title: string
@@ -1829,6 +1835,9 @@ export type Database = {
           media_url?: string | null
           meeting_id?: string | null
           nft_link?: string | null
+          quote_author?: string | null
+          quote_source?: string | null
+          quote_text?: string | null
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
           title?: string
