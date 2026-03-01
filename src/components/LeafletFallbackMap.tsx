@@ -22,7 +22,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Filter } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Plus, Layers } from "lucide-react";
 import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
@@ -2295,16 +2295,32 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             <div className="absolute bottom-8 left-3 z-[1000] flex gap-2">
               <button
                 onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
-                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
                 style={{
                   ...btnBase,
                   color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
                   background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
                   boxShadow: atlasFilterOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
                 }}
-                title="Atlas Filter"
+                title="Filters & Layers"
               >
-                <Filter className="w-[18px] h-[18px]" />
+                <Layers className="w-[18px] h-[18px]" />
+                {(() => {
+                  const activeLayers = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
+                  const totalActive = activeLayers + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
+                  return totalActive > 0 ? (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
+                      style={{
+                        background: `hsl(${modeAccent})`,
+                        color: "hsl(30, 20%, 10%)",
+                        boxShadow: `0 0 6px hsla(${modeAccent}, 0.4)`,
+                      }}
+                    >
+                      {totalActive}
+                    </span>
+                  ) : null;
+                })()}
               </button>
             </div>
 
