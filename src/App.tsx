@@ -68,6 +68,7 @@ const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
 const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
 const BugGardenPage = lazy(() => import("./pages/BugGardenPage"));
 const AdminEvolutionPage = lazy(() => import("./pages/AdminEvolutionPage"));
+const KingOfBavleuxPage = lazy(() => import("./pages/KingOfBavleuxPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -162,6 +163,7 @@ const App = () => {
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/switzerland/valais" element={<ValaisPortalPage />} />
+                <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<KingOfBavleuxPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
