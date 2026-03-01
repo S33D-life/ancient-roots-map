@@ -1,6 +1,6 @@
 /**
  * InfluenceUpvoteButton — compact upvote with scope chooser drawer.
- * Shows on offering cards alongside existing heart/like.
+ * Features: optimistic UI, scope badges, atomic RPC voting.
  */
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -35,9 +35,7 @@ interface InfluenceUpvoteButtonProps {
   treeSpecies?: string | null;
   treeNation?: string | null;
   userId: string | null;
-  /** Current influence score from offering */
   influenceScore?: number;
-  /** Compact mode for small cards */
   compact?: boolean;
 }
 
@@ -45,6 +43,12 @@ const scopeIcon: Record<string, React.ReactNode> = {
   tree: <TreePine className="h-3.5 w-3.5" />,
   species: <Leaf className="h-3.5 w-3.5" />,
   place: <MapPin className="h-3.5 w-3.5" />,
+};
+
+const scopeEmoji: Record<string, string> = {
+  tree: "🌳",
+  species: "🌿",
+  place: "📍",
 };
 
 const InfluenceUpvoteButton = ({
@@ -60,10 +64,10 @@ const InfluenceUpvoteButton = ({
   const [ledgerOpen, setLedgerOpen] = useState(false);
   const [ledgerData, setLedgerData] = useState<any[]>([]);
   const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [optimisticBoost, setOptimisticBoost] = useState(0);
   const { toast } = useToast();
   const { enterFlow, exitFlow } = useUIFlow();
 
-  // Suppress popups when drawer or ledger is open
   useEffect(() => {
     if (drawerOpen || ledgerOpen) {
       enterFlow("offering");
@@ -91,20 +95,32 @@ const InfluenceUpvoteButton = ({
     userId,
   });
 
+  // Reset optimistic boost when real data arrives
+  useEffect(() => {
+    setOptimisticBoost(0);
+  }, [influenceScore]);
+
   const hasVoted = existingVotes.length > 0;
-  // influence_score on the offering already includes all active votes via DB trigger
-  const displayScore = influenceScore;
+  const displayScore = influenceScore + optimisticBoost;
+
+  // Determine primary voted scope for badge display
+  const votedScopeType = existingVotes.length > 0 ? existingVotes[0].scope_type : null;
 
   const handleVote = useCallback(
     async (scope: InfluenceScope) => {
-      const success = await castVote(scope);
-      if (success) {
+      // Optimistic UI: immediately show the score bump
+      setOptimisticBoost((prev) => prev + scope.computedWeight);
+
+      const result = await castVote(scope);
+      if (result.success) {
         toast({
-          title: `+${scope.computedWeight} influence`,
+          title: `+${result.weight} influence`,
           description: `${scope.label} influence applied`,
         });
         setDrawerOpen(false);
       } else {
+        // Revert optimistic boost on failure
+        setOptimisticBoost((prev) => prev - scope.computedWeight);
         toast({
           title: "Could not vote",
           description: dailyRemaining <= 0 ? "Daily influence budget exhausted" : "Vote failed",
@@ -117,13 +133,21 @@ const InfluenceUpvoteButton = ({
 
   const handleRetract = useCallback(
     async (scopeKey: string) => {
+      const vote = existingVotes.find((v) => v.scope_key === scopeKey);
+      if (vote) {
+        // Optimistic: immediately reduce
+        setOptimisticBoost((prev) => prev - vote.weight_applied);
+      }
       const success = await retractVote(scopeKey);
       if (success) {
         toast({ title: "Vote retracted" });
         setDrawerOpen(false);
+      } else if (vote) {
+        // Revert
+        setOptimisticBoost((prev) => prev + vote.weight_applied);
       }
     },
-    [retractVote, toast]
+    [retractVote, toast, existingVotes]
   );
 
   const openLedger = useCallback(async () => {
@@ -172,6 +196,12 @@ const InfluenceUpvoteButton = ({
                   {displayScore >= 100
                     ? `${(displayScore / 100).toFixed(0)}c`
                     : displayScore.toFixed(displayScore < 10 ? 1 : 0)}
+                </span>
+              )}
+              {/* Scope badge: tiny icon showing which scope was voted */}
+              {hasVoted && votedScopeType && (
+                <span className="text-[9px] opacity-70" title={`Voted via ${votedScopeType}`}>
+                  {scopeEmoji[votedScopeType] || ""}
                 </span>
               )}
             </button>
@@ -270,7 +300,6 @@ const InfluenceUpvoteButton = ({
               );
             })}
 
-            {/* Influence Ledger link */}
             {displayScore > 0 && (
               <button
                 onClick={openLedger}

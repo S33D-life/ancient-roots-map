@@ -4039,6 +4039,16 @@ export type Database = {
         Returns: undefined
       }
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
+      cast_influence_vote: {
+        Args: {
+          p_offering_id: string
+          p_scope_key: string
+          p_scope_type: string
+          p_user_id: string
+          p_weight: number
+        }
+        Returns: string
+      }
       claim_windfall_hearts: {
         Args: { p_tree_id: string; p_user_id: string }
         Returns: number
@@ -4137,6 +4147,10 @@ export type Database = {
           total_visits: number
           visitor_number: number
         }[]
+      }
+      retract_influence_vote: {
+        Args: { p_user_id: string; p_vote_id: string }
+        Returns: undefined
       }
       search_books: {
         Args: { query: string; result_limit?: number }

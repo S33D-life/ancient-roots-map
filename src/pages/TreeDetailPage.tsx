@@ -48,6 +48,7 @@ import OfferingQuoteBlock from "@/components/OfferingQuoteBlock";
 import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
+import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -223,6 +224,7 @@ const TreeDetailPage = () => {
   };
 
   return (
+    <InfluenceTokenProvider userId={userId}>
     <div className="min-h-screen bg-background">
       <Header />
 
@@ -767,6 +769,7 @@ const TreeDetailPage = () => {
         position="bottom-right"
       />
     </div>
+    </InfluenceTokenProvider>
   );
 };
 
