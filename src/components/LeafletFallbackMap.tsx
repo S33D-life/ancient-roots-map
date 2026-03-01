@@ -26,6 +26,7 @@ import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye } from "lucide-
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
 import BloomingClockDial from "./BloomingClockDial";
+import BloomingClockFace from "./BloomingClockFace";
 import BloomingClockParticles from "./BloomingClockParticles";
 import BloomingClockSigils from "./BloomingClockSigils";
 import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
@@ -754,65 +755,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "constellation", label: "🌾 Constellation Mode", active: bloomConstellationMode, toggle: () => { setBloomConstellationMode(v => !v); if (!showBloomingClock) setShowBloomingClock(true); }, accent: "42, 70%, 55%" },
       ],
       subContent: showBloomingClock ? (
-        <div className="pl-4 pt-2 space-y-3">
-          {/* Seasonal time dial */}
-          <BloomingClockDial
+        <div className="pt-2 flex flex-col items-center">
+          <BloomingClockFace
             currentMonth={bloomMonth}
             onMonthChange={setBloomMonth}
+            stageFilter={bloomStageFilter}
+            onStageChange={setBloomStageFilter}
+            foods={foodCycles}
+            selectedFoodIds={selectedFoodIds}
+            onFoodToggle={(id) => setSelectedFoodIds(prev =>
+              prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+            )}
+            onFoodClear={() => setSelectedFoodIds([])}
           />
-          {/* Stage filter */}
-          <div>
-            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(42, 40%, 55%)" }}>Cycle Stage</p>
-            <div className="flex flex-wrap gap-1">
-              {([{ key: "all", label: "All", icon: "🌍" }, ...Object.entries(STAGE_VISUALS).map(([k, v]) => ({ key: k, label: v.label, icon: v.icon }))] as { key: string; label: string; icon: string }[]).map(s => (
-                <button
-                  key={s.key}
-                  onClick={() => setBloomStageFilter(s.key as CycleStage | "all")}
-                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all duration-500"
-                  style={{
-                    background: bloomStageFilter === s.key ? "hsla(42, 40%, 40%, 0.25)" : "transparent",
-                    color: bloomStageFilter === s.key ? "hsl(42, 65%, 65%)" : "hsl(42, 25%, 48%)",
-                    border: bloomStageFilter === s.key ? "1px solid hsla(42, 40%, 45%, 0.3)" : "1px solid transparent",
-                  }}
-                >
-                  {s.icon} {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {/* Food selector */}
-          <div>
-            <p className="text-[9px] font-serif mb-1" style={{ color: "hsl(42, 40%, 55%)" }}>Foods</p>
-            <div className="flex flex-wrap gap-1">
-              <button
-                onClick={() => setSelectedFoodIds([])}
-                className="px-2 py-1 rounded-md text-[10px] font-serif transition-all duration-500"
-                style={{
-                  background: selectedFoodIds.length === 0 ? "hsla(42, 40%, 40%, 0.25)" : "transparent",
-                  color: selectedFoodIds.length === 0 ? "hsl(42, 70%, 65%)" : "hsl(42, 25%, 48%)",
-                  border: selectedFoodIds.length === 0 ? "1px solid hsla(42, 40%, 45%, 0.3)" : "1px solid transparent",
-                }}
-              >
-                All
-              </button>
-              {foodCycles.map(f => (
-                <button
-                  key={f.id}
-                  onClick={() => setSelectedFoodIds(prev =>
-                    prev.includes(f.id) ? prev.filter(id => id !== f.id) : [...prev, f.id]
-                  )}
-                  className="px-2 py-1 rounded-md text-[10px] font-serif transition-all duration-500"
-                  style={{
-                    background: selectedFoodIds.includes(f.id) ? "hsla(42, 40%, 40%, 0.2)" : "transparent",
-                    color: selectedFoodIds.includes(f.id) ? "hsl(42, 70%, 65%)" : "hsl(42, 25%, 48%)",
-                    border: selectedFoodIds.includes(f.id) ? "1px solid hsla(42, 40%, 45%, 0.3)" : "1px solid transparent",
-                  }}
-                >
-                  {f.icon} {f.name}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       ) : undefined,
     },
