@@ -71,6 +71,8 @@ const BugGardenPage = lazy(() => import("./pages/BugGardenPage"));
 const AdminEvolutionPage = lazy(() => import("./pages/AdminEvolutionPage"));
 const KingOfBavleuxPage = lazy(() => import("./pages/KingOfBavleuxPage"));
 const DolomitiAmpezzoPage = lazy(() => import("./pages/DolomitiAmpezzoPage"));
+const BioRegionsIndexPage = lazy(() => import("./pages/BioRegionsIndexPage"));
+const BioRegionPage = lazy(() => import("./pages/BioRegionPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -168,6 +170,8 @@ const App = () => {
                 <Route path="/atlas/switzerland/valais" element={<ValaisPortalPage />} />
                 <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<KingOfBavleuxPage />} />
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<DolomitiAmpezzoPage />} />
+                <Route path="/atlas/bio-regions" element={<BioRegionsIndexPage />} />
+                <Route path="/atlas/bio-regions/:slug" element={<BioRegionPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />

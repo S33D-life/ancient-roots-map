@@ -86,6 +86,96 @@ export type Database = {
         }
         Relationships: []
       }
+      bio_region_trees: {
+        Row: {
+          bio_region_id: string
+          created_at: string
+          id: string
+          tree_id: string
+        }
+        Insert: {
+          bio_region_id: string
+          created_at?: string
+          id?: string
+          tree_id: string
+        }
+        Update: {
+          bio_region_id?: string
+          created_at?: string
+          id?: string
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bio_region_trees_bio_region_id_fkey"
+            columns: ["bio_region_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bio_region_trees_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bio_regions: {
+        Row: {
+          biome_description: string | null
+          boundary_geojson: Json | null
+          center_lat: number | null
+          center_lon: number | null
+          climate_band: string | null
+          countries: string[]
+          created_at: string
+          dominant_species: string[]
+          elevation_range: string | null
+          governance_status: string
+          id: string
+          name: string
+          primary_watersheds: string[]
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          biome_description?: string | null
+          boundary_geojson?: Json | null
+          center_lat?: number | null
+          center_lon?: number | null
+          climate_band?: string | null
+          countries?: string[]
+          created_at?: string
+          dominant_species?: string[]
+          elevation_range?: string | null
+          governance_status?: string
+          id: string
+          name: string
+          primary_watersheds?: string[]
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          biome_description?: string | null
+          boundary_geojson?: Json | null
+          center_lat?: number | null
+          center_lon?: number | null
+          climate_band?: string | null
+          countries?: string[]
+          created_at?: string
+          dominant_species?: string[]
+          elevation_range?: string | null
+          governance_status?: string
+          id?: string
+          name?: string
+          primary_watersheds?: string[]
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       birdsong_offerings: {
         Row: {
           audio_cid: string | null
