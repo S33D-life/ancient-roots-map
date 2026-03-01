@@ -19,6 +19,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
+import AppUpdateBanner from "@/components/AppUpdateBanner";
 import FloatingBugButton from "@/components/FloatingBugButton";
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
@@ -117,6 +118,7 @@ const App = () => {
         {/* <ChatPanel /> */}
         
         <CanopyHeartPulse />
+        <AppUpdateBanner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
           <MapFilterProvider>
