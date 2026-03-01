@@ -505,6 +505,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showSharedTrees, setShowSharedTrees] = useState(false);
   const [showTribeActivity, setShowTribeActivity] = useState(false);
   const [showBloomedSeeds, setShowBloomedSeeds] = useState(false);
+  const [showHeartGlow, setShowHeartGlow] = useState(false);
+  const [showChurchyards, setShowChurchyards] = useState(false);
+  const [showWaterways, setShowWaterways] = useState(false);
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
@@ -641,7 +644,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       layers: [
         { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(v => !v) },
         { key: "offering-glow", label: "🔥 Forest Warmth", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
+        { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => setShowHeartGlow(v => !v), accent: "0, 65%, 55%" },
         { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
+        { key: "hive-layer", label: "🐝 Species Hives", active: showHiveLayer, toggle: () => setShowHiveLayer(v => !v), accent: "42, 70%, 55%" },
       ],
       subContent: showBirdsongHeat ? (
         <div className="pl-7 pt-1 flex flex-wrap gap-1">
@@ -677,23 +682,27 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => setShowGroves(v => !v) },
         { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(v => !v) },
         { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
+        { key: "champion", label: "🏆 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: "DFFE" },
         { key: "immutable", label: "🔱 Minted Sigils", active: showImmutableLayer, toggle: () => setShowImmutableLayer(v => !v), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
         { key: "external", label: "🗺️ Distant Groves", active: showExternalTrees, toggle: () => setShowExternalTrees(v => !v), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
       ],
     },
     {
       key: "pilgrimage",
-      title: "Sacred Waters",
-      icon: "🌊",
-      accent: "hsl(200, 50%, 58%)",
+      title: "Sacred & Spiritual",
+      icon: "⛪",
+      accent: "hsl(35, 65%, 55%)",
       layers: [
-        { key: "waters", label: "🌊 Waters & Commons", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK", accent: "200, 60%, 65%" },
+        { key: "waters", label: "🌊 Waterside Guardians", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK", accent: "200, 60%, 65%" },
+        { key: "churchyards", label: "⛪ Churchyards & Sacred Sites", active: showChurchyards, toggle: () => { setShowChurchyards(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "35, 65%, 55%" },
+        { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "145, 50%, 50%" },
+        { key: "commons", label: "🌾 Commons Witnesses", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "75, 50%, 50%" },
       ],
     },
     {
       key: "wanderer",
-      title: "Fresh Footprints",
-      icon: "◌",
+      title: "Fellow Wanderers",
+      icon: "👣",
       accent: "hsl(260, 35%, 60%)",
       layers: [
         { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(v => !v), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
@@ -706,9 +715,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
-      externalTreeCount, showWatersCommons, watersCommonsLoading,
+      externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
-      showSharedTrees, showTribeActivity, showHiveLayer]);
+      showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow]);
 
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
