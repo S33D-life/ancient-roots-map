@@ -133,7 +133,8 @@ export function useInfluenceVote({
       setAvailableScopes(scopes);
 
       // Fetch existing votes for this offering by this user
-      const { data: votes } = await (supabase.from as any)("influence_votes")
+      const { data: votes } = await supabase
+        .from("influence_votes")
         .select("*")
         .eq("offering_id", offeringId)
         .eq("user_id", userId)
@@ -143,7 +144,8 @@ export function useInfluenceVote({
 
       // Fetch daily budget
       const today = new Date().toISOString().split("T")[0];
-      const { data: budget } = await (supabase.from as any)("influence_vote_budgets")
+      const { data: budget } = await supabase
+        .from("influence_vote_budgets")
         .select("spent")
         .eq("user_id", userId)
         .eq("vote_date", today)
@@ -177,7 +179,7 @@ export function useInfluenceVote({
       setVoting(true);
       try {
         // Insert vote
-        const { error: voteErr } = await (supabase.from as any)("influence_votes").insert({
+        const { error: voteErr } = await supabase.from("influence_votes").insert({
           offering_id: offeringId,
           user_id: userId,
           scope_type: scope.type,
@@ -188,7 +190,8 @@ export function useInfluenceVote({
 
         // Update daily budget
         const today = new Date().toISOString().split("T")[0];
-        const { error: budgetErr } = await (supabase.from as any)("influence_vote_budgets")
+        const { error: budgetErr } = await supabase
+          .from("influence_vote_budgets")
           .upsert(
             { user_id: userId, vote_date: today, spent: dailySpent + weight },
             { onConflict: "user_id,vote_date" }
@@ -215,7 +218,8 @@ export function useInfluenceVote({
 
       setVoting(true);
       try {
-        const { error } = await (supabase.from as any)("influence_votes")
+        const { error } = await supabase
+          .from("influence_votes")
           .update({ revoked_at: new Date().toISOString() })
           .eq("id", vote.id);
         if (error) throw error;
@@ -223,7 +227,8 @@ export function useInfluenceVote({
         // Refund budget
         const today = new Date().toISOString().split("T")[0];
         const newSpent = Math.max(0, dailySpent - vote.weight_applied);
-        await (supabase.from as any)("influence_vote_budgets")
+        await supabase
+          .from("influence_vote_budgets")
           .upsert(
             { user_id: userId, vote_date: today, spent: newSpent },
             { onConflict: "user_id,vote_date" }
@@ -259,7 +264,8 @@ export function useInfluenceVote({
 
 /** Fetch influence votes for an offering (for ledger display) */
 export async function fetchInfluenceLedger(offeringId: string) {
-  const { data } = await (supabase.from as any)("influence_votes")
+  const { data } = await supabase
+    .from("influence_votes")
     .select("id, scope_type, scope_key, weight_applied, created_at")
     .eq("offering_id", offeringId)
     .is("revoked_at", null)
