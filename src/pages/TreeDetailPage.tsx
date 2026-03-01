@@ -87,6 +87,7 @@ const TreeDetailPage = () => {
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
+  const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -164,7 +165,21 @@ const TreeDetailPage = () => {
       setBirdsongCount(count || 0);
     };
 
-    Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount()]).then(() => setLoading(false));
+    const fetchEcoBelonging = async () => {
+      const { data } = await supabase
+        .from("bio_region_trees")
+        .select("bio_region_id")
+        .eq("tree_id", id);
+      if (data && data.length > 0) {
+        const { data: regions } = await supabase
+          .from("bio_regions")
+          .select("id, name, type")
+          .in("id", data.map(d => d.bio_region_id));
+        if (regions) setEcoBelonging(regions as Array<{ id: string; name: string; type: string }>);
+      }
+    };
+
+    Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount(), fetchEcoBelonging()]).then(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -379,10 +394,14 @@ const TreeDetailPage = () => {
                   <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-3 font-serif animate-fade-in">
                     {tree.nation && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌍 {tree.nation}</span>}
                     {tree.state && <span className="bg-secondary/50 px-3 py-1 rounded-full">📍 {tree.state}</span>}
-                    {tree.bioregion && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌿 {tree.bioregion}</span>}
                     {tree.estimated_age && (
                       <span className="bg-secondary/50 px-3 py-1 rounded-full">🕰️ ~{tree.estimated_age} years</span>
                     )}
+                    {ecoBelonging.map(br => (
+                      <Link key={br.id} to={`/atlas/bio-regions/${br.id}`} className="bg-primary/10 text-primary px-3 py-1 rounded-full hover:bg-primary/20 transition-colors">
+                        🌿 {br.name}
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>

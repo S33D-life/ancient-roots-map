@@ -59,7 +59,7 @@ const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
 const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
 const PilgrimagePathwaysPage = lazy(() => import("./pages/PilgrimagePathwaysPage"));
-const ValaisPortalPage = lazy(() => import("./pages/ValaisPortalPage"));
+// ValaisPortalPage removed — served by CountryPortalPage with canton filter
 const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 const AddTreePage = lazy(() => import("./pages/AddTreePage"));
@@ -70,7 +70,7 @@ const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
 const BugGardenPage = lazy(() => import("./pages/BugGardenPage"));
 const AdminEvolutionPage = lazy(() => import("./pages/AdminEvolutionPage"));
 const KingOfBavleuxPage = lazy(() => import("./pages/KingOfBavleuxPage"));
-const DolomitiAmpezzoPage = lazy(() => import("./pages/DolomitiAmpezzoPage"));
+// DolomitiAmpezzoPage removed — served by BioRegionPage /atlas/bio-regions/dolomites-ampezzo-cadore
 const BioRegionsIndexPage = lazy(() => import("./pages/BioRegionsIndexPage"));
 const BioRegionPage = lazy(() => import("./pages/BioRegionPage"));
 
@@ -146,7 +146,7 @@ const App = () => {
                 <Route path="/council-of-life" element={<CouncilOfLifePage />} />
                 <Route path="/assets" element={<AssetsPage />} />
                 <Route path="/vault" element={<VaultPage />} />
-                <Route path="/heartwood/vault" element={<VaultPage />} />
+                {/* /heartwood/vault removed — consolidated to /vault */}
                 <Route path="/radio" element={<RadioPage />} />
                 <Route path="/visits" element={<VisitsPage />} />
                 <Route path="/referrals" element={<ReferralsPage />} />
@@ -167,9 +167,10 @@ const App = () => {
                 <Route path="/markets" element={<CycleMarketsPage />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
-                <Route path="/atlas/switzerland/valais" element={<ValaisPortalPage />} />
-                <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<KingOfBavleuxPage />} />
-                <Route path="/atlas/italy/dolomiti-ampezzo" element={<DolomitiAmpezzoPage />} />
+                {/* Hardcoded sub-portals removed — redirect to generic routes */}
+                <Route path="/atlas/switzerland/valais" element={<Navigate to="/atlas/switzerland" replace />} />
+                <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<Navigate to="/atlas/switzerland" replace />} />
+                <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />
                 <Route path="/atlas/bio-regions" element={<BioRegionsIndexPage />} />
                 <Route path="/atlas/bio-regions/:slug" element={<BioRegionPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />

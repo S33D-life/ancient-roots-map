@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock, Flame } from "lucide-react";
+import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock, Flame, Layers } from "lucide-react";
 import { useMarkets } from "@/hooks/use-markets";
 import MarketCard from "@/components/MarketCard";
 import { motion } from "framer-motion";
@@ -63,6 +63,7 @@ const HivePage = () => {
   const [profileMap, setProfileMap] = useState<Record<string, { full_name: string | null; avatar_url: string | null }>>({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("trees");
+  const [bioRegionDist, setBioRegionDist] = useState<Array<{ id: string; name: string; type: string; count: number }>>([]);
   const { counts: globalOfferingCounts } = useOfferingCounts();
   const { markets: hiveMarkets, loading: loadingMarkets } = useMarkets({ hiveId: family });
 
@@ -135,6 +136,30 @@ const HivePage = () => {
         const pMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
         (profiles || []).forEach((p: any) => { pMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url }; });
         setProfileMap(pMap);
+      }
+
+      // Fetch bio-region distribution for this hive's species
+      if (hiveTrees.length > 0) {
+        const treeIds = hiveTrees.map(t => t.id).slice(0, 500);
+        const { data: junctions } = await supabase
+          .from("bio_region_trees")
+          .select("bio_region_id")
+          .in("tree_id", treeIds);
+        if (junctions && junctions.length > 0) {
+          const regionIds = [...new Set(junctions.map(j => j.bio_region_id))];
+          const regionCounts: Record<string, number> = {};
+          junctions.forEach(j => { regionCounts[j.bio_region_id] = (regionCounts[j.bio_region_id] || 0) + 1; });
+          const { data: regions } = await supabase
+            .from("bio_regions")
+            .select("id, name, type")
+            .in("id", regionIds);
+          if (regions) {
+            setBioRegionDist(regions.map(r => ({
+              id: r.id, name: r.name, type: r.type,
+              count: regionCounts[r.id] || 0,
+            })).sort((a, b) => b.count - a.count));
+          }
+        }
       }
 
       setLoading(false);
@@ -267,6 +292,9 @@ const HivePage = () => {
                 <Flame className="w-3.5 h-3.5 mr-1.5" /> Markets {hiveMarkets.length > 0 && `(${hiveMarkets.length})`}
               </TabsTrigger>
               <TabsTrigger value="lore" className="font-serif text-xs tracking-wider">📜 Lore</TabsTrigger>
+              <TabsTrigger value="ecology" className="font-serif text-xs tracking-wider">
+                <Layers className="w-3.5 h-3.5 mr-1.5" /> Ecology
+              </TabsTrigger>
               <TabsTrigger value="governance" className="font-serif text-xs tracking-wider">🏛️ Council</TabsTrigger>
             </TabsList>
 
@@ -490,6 +518,38 @@ const HivePage = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Ecology Tab — Bio-Region Distribution */}
+            <TabsContent value="ecology">
+              <div className="space-y-4">
+                <Card className="bg-card/60 backdrop-blur border-border/40">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-serif mb-4 flex items-center gap-2" style={{ color: `hsl(${hive.accentHsl})` }}>
+                      <Layers className="w-5 h-5" /> Distribution Across Bio-Regions
+                    </h3>
+                    {bioRegionDist.length === 0 ? (
+                      <p className="text-sm text-muted-foreground font-serif">No bio-region links for this hive's trees yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {bioRegionDist.map(br => (
+                          <Link key={br.id} to={`/atlas/bio-regions/${br.id}`}>
+                            <Card className="border-primary/10 hover:border-primary/30 transition-all cursor-pointer">
+                              <CardContent className="p-4 flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-serif font-bold text-foreground">{br.name}</p>
+                                  <p className="text-[10px] text-muted-foreground">{br.type}</p>
+                                </div>
+                                <Badge variant="outline" className="text-xs">{br.count} trees</Badge>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Governance Tab */}
