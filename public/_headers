@@ -1,0 +1,16 @@
+# Cache headers for Lovable/Netlify/Vercel-style hosting
+# index.html — never cache aggressively
+/index.html
+  Cache-Control: no-cache, must-revalidate
+
+# Service worker — always revalidate
+/sw.js
+  Cache-Control: no-cache, must-revalidate
+
+# Version check — always fresh
+/version.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Hashed assets — cache forever
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

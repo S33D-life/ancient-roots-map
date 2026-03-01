@@ -4,33 +4,47 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Build-time version stamp
+const BUILD_ID = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
   },
+  define: {
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" mode gives us control — we show the banner ourselves
+      registerType: "prompt",
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
+        // Never precache version.json — always fetch fresh
+        globIgnores: ["**/version.json"],
         runtimeCaching: [
           {
-            // Cache Supabase API responses for offline fallback
+            // Auth & user endpoints — never cache
+            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+            handler: "NetworkOnly",
+          },
+          {
+            // Supabase API — short TTL, network-first
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "supabase-api",
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 },
+              expiration: { maxEntries: 100, maxAgeSeconds: 5 * 60 }, // 5 min (was 1 hour)
               networkTimeoutSeconds: 5,
             },
           },
           {
-            // Cache tree images
+            // Tree images — long cache, CacheFirst is fine for immutable uploads
             urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
             handler: "CacheFirst",
             options: {
@@ -39,7 +53,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Cache map tiles
+            // Map tiles
             urlPattern: /^https:\/\/.*tile.*\.(png|jpg|pbf)$/i,
             handler: "CacheFirst",
             options: {
