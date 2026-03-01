@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
+import ActiveFilterChips from "@/components/ActiveFilterChips";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
@@ -41,7 +42,14 @@ const MapPage = () => {
       <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramOrigin} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} />
       
       {/* Standard header — hidden in fullscreen */}
-      {!isFullscreen && <Header />}
+      {!isFullscreen && (
+        <>
+          <Header />
+          <div className="absolute top-14 left-0 right-0 z-[20]">
+            <ActiveFilterChips />
+          </div>
+        </>
+      )}
 
       {/* Fullscreen: compact floating nav */}
       {isFullscreen && (
