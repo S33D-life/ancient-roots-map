@@ -57,6 +57,7 @@ const DiscoveryPage = lazy(() => import("./pages/DiscoveryPage"));
 const CountryPortalPage = lazy(() => import("./pages/CountryPortalPage"));
 const WorldAtlasPage = lazy(() => import("./pages/WorldAtlasPage"));
 const PilgrimagePathwaysPage = lazy(() => import("./pages/PilgrimagePathwaysPage"));
+const ValaisPortalPage = lazy(() => import("./pages/ValaisPortalPage"));
 const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 const AddTreePage = lazy(() => import("./pages/AddTreePage"));
@@ -158,6 +159,7 @@ const App = () => {
                 <Route path="/markets" element={<CycleMarketsPage />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
+                <Route path="/atlas/switzerland/valais" element={<ValaisPortalPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
