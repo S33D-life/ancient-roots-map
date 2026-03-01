@@ -4215,6 +4215,17 @@ export type Database = {
         Args: { p_created_at: string; p_influence: number }
         Returns: number
       }
+      get_bio_region_trees: {
+        Args: { p_bio_region_id: string }
+        Returns: {
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          nation: string
+          species: string
+        }[]
+      }
       get_offering_counts: {
         Args: never
         Returns: {
@@ -4256,6 +4267,15 @@ export type Database = {
           species: string
         }[]
       }
+      get_species_bio_regions: {
+        Args: { p_species_pattern: string }
+        Returns: {
+          bio_region_id: string
+          bio_region_name: string
+          bio_region_type: string
+          tree_count: number
+        }[]
+      }
       get_stewardship_leaderboard: {
         Args: { p_tree_id: string; result_limit?: number }
         Returns: {
@@ -4264,6 +4284,14 @@ export type Database = {
           offering_count: number
           total_impact: number
           user_id: string
+        }[]
+      }
+      get_tree_bio_regions: {
+        Args: { p_tree_id: string }
+        Returns: {
+          id: string
+          name: string
+          type: string
         }[]
       }
       get_tree_leaderboard: {

@@ -142,20 +142,11 @@ const BioRegionPage = () => {
         .eq("parent_id", slug ?? "");
       if (children) setChildRegions(children as ChildBioRegion[]);
 
-      // Fetch linked trees via junction
-      const { data: junctionData } = await supabase
-        .from("bio_region_trees")
-        .select("tree_id")
-        .eq("bio_region_id", slug ?? "");
-
-      if (junctionData && junctionData.length > 0) {
-        const treeIds = junctionData.map(j => j.tree_id);
-        const { data: treesData } = await supabase
-          .from("trees")
-          .select("id, name, species, latitude, longitude, nation")
-          .in("id", treeIds);
-        if (treesData) setLinkedTrees(treesData as LinkedTree[]);
-      }
+      // Fetch linked trees via single RPC
+      const { data: treesData } = await supabase.rpc("get_bio_region_trees", {
+        p_bio_region_id: slug ?? "",
+      });
+      if (treesData) setLinkedTrees(treesData as LinkedTree[]);
 
       setLoading(false);
     };
