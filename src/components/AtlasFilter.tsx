@@ -525,7 +525,7 @@ const AtlasFilter = ({
                     <div className="flex items-center gap-2 pt-2">
                       <Layers className="w-3 h-3 text-muted-foreground/50" />
                       <span className="text-[9px] font-serif text-muted-foreground/70 uppercase tracking-[0.15em]">
-                        Map Layers
+                        Living Earth Layers
                       </span>
                       {activeLayerCount > 0 && (
                         <span className="text-[8px] font-bold rounded-full px-1.5 py-0.5 bg-primary/15 text-primary border border-primary/25">
