@@ -9,6 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   MapPin, ExternalLink, Scroll, TreeDeciduous, Eye, Compass, Heart,
   BookOpen, ChevronRight, Map as MapIcon, Footprints, Shield, BarChart3, Lock, Sparkles,
+  Layers, ArrowRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
@@ -203,6 +204,7 @@ const CountryPortalPage = () => {
   const [pilgrimagePreset, setPilgrimagePreset] = useState<string>("first-steps");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
+  const [overlappingBioRegions, setOverlappingBioRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
 
   useEffect(() => {
     const fetchTrees = async () => {
@@ -216,6 +218,20 @@ const CountryPortalPage = () => {
       setLoading(false);
     };
     fetchTrees();
+
+    // Fetch overlapping bio-regions for this country
+    const fetchBioRegions = async () => {
+      const { data } = await supabase
+        .from("bio_regions")
+        .select("id, name, type, countries")
+        .order("name");
+      if (data) {
+        const matching = (data as Array<{ id: string; name: string; type: string; countries: string[] }>)
+          .filter(br => br.countries.includes(config.country));
+        setOverlappingBioRegions(matching);
+      }
+    };
+    fetchBioRegions();
   }, [config.country]);
 
   /* ─── Computed stats ─── */
@@ -386,7 +402,42 @@ const CountryPortalPage = () => {
           </Card>
         </section>
 
-        {/* ─── C) Stats ─── */}
+        {/* ─── Bio-Regions overlapping this Country ─── */}
+        {overlappingBioRegions.length > 0 && (
+          <section className="px-4 max-w-3xl mx-auto mb-8">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-primary" /> Bio-Regions in {config.country}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Ecological systems overlapping this country — mountains, watersheds, and forest biomes.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {overlappingBioRegions.map(br => (
+                    <Link key={br.id} to={`/atlas/bio-regions/${br.id}`}>
+                      <Card className="border-primary/10 hover:border-primary/30 transition-all cursor-pointer">
+                        <CardContent className="p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-primary" />
+                            <div>
+                              <p className="text-xs font-serif font-bold text-foreground">{br.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{br.type}</p>
+                            </div>
+                          </div>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
         <section className="px-4 max-w-3xl mx-auto mb-8">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <StatTile label="Champion Records" value={totalCount} icon={TreeDeciduous} />

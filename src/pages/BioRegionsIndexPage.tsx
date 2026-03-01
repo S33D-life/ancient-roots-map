@@ -40,7 +40,7 @@ const BioRegionsIndexPage = () => {
     const load = async () => {
       const { data } = await supabase
         .from("bio_regions")
-        .select("*")
+        .select("id, name, type, countries, climate_band, elevation_range, dominant_species, governance_status, center_lat, center_lon, parent_id")
         .order("name");
       if (data) setRegions(data as unknown as BioRegion[]);
       setLoading(false);
