@@ -406,6 +406,12 @@ const LITE_CSS = `
 .grove-view-active .marker-wrap{animation:groveBreath 4s ease-in-out infinite!important}
 .grove-view-active .marker-ancient{animation:groveBreath 3s ease-in-out infinite,ancientGlow 3.5s ease-in-out infinite!important}
 .grove-view-active .tree-cluster{box-shadow:0 0 12px hsla(120,50%,40%,0.3),0 0 4px hsla(42,60%,45%,0.2)!important;transition:box-shadow 1s ease-in-out}
+@keyframes eventPulseGold{0%{transform:scale(0.3);opacity:0.9}100%{transform:scale(3);opacity:0}}
+@keyframes eventPulseHeart{0%{transform:scale(0.3);opacity:0.8}100%{transform:scale(2.5);opacity:0}}
+.event-pulse-marker{background:transparent!important;border:none!important;pointer-events:none}
+.event-pulse-gold{width:24px;height:24px;border-radius:50%;background:hsla(42,80%,55%,0.6);animation:eventPulseGold 2s ease-out forwards;box-shadow:0 0 12px hsla(42,80%,55%,0.4)}
+.event-pulse-heart{width:20px;height:20px;border-radius:50%;background:hsla(0,70%,55%,0.5);animation:eventPulseHeart 2s ease-out forwards;box-shadow:0 0 10px hsla(0,70%,55%,0.3)}
+.hex-bin-marker{background:transparent!important;border:none!important;pointer-events:none}
 .leaflet-control-zoom a{background:hsla(30,30%,12%,0.9)!important;color:hsl(42,60%,60%)!important;border:1px solid hsla(42,40%,30%,0.4)!important;border-radius:8px!important;width:34px!important;height:34px!important;line-height:34px!important;font-size:16px!important;transition:background .15s!important}
 .leaflet-control-zoom a:active{background:hsla(42,40%,20%,0.9)!important}
 .leaflet-control-zoom{border:none!important;border-radius:8px!important;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.25)!important}
@@ -529,6 +535,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const deepLinkAppliedRef = useRef(false);
 
   // hiveMap moved after filteredTrees declaration
+
+  // Tree lookup for realtime coordinate pulses
+  const treeLookup = useMemo(() => {
+    const m = new Map<string, { lat: number; lng: number }>();
+    trees.forEach(t => m.set(t.id, { lat: t.latitude, lng: t.longitude }));
+    return m;
+  }, [trees]);
+
+  // Event pulse layer ref
+  const eventPulseLayerRef = useRef<L.LayerGroup | null>(null);
+  const hexBinLayerRef = useRef<L.LayerGroup | null>(null);
+  const [currentEventPulses, setCurrentEventPulses] = useState<any[]>([]);
 
   const speciesCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -873,6 +891,122 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return () => clearTimeout(timer);
   }, [initialCountry, initialHive, trees.length]);
 
+  // ── Event pulse rendering on map (gold shimmers at tree coords) ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !groveViewActive) {
+      if (eventPulseLayerRef.current && mapRef.current) {
+        mapRef.current.removeLayer(eventPulseLayerRef.current);
+        eventPulseLayerRef.current = null;
+      }
+      return;
+    }
+
+    if (!eventPulseLayerRef.current) {
+      eventPulseLayerRef.current = L.layerGroup().addTo(map);
+    }
+
+    const layer = eventPulseLayerRef.current;
+    layer.clearLayers();
+
+    currentEventPulses.forEach(pulse => {
+      const cssClass = pulse.type === "offering" ? "event-pulse-gold" : "event-pulse-heart";
+      const icon = L.divIcon({
+        className: "event-pulse-marker",
+        html: `<div class="${cssClass}"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+      L.marker([pulse.lat, pulse.lng], { icon, interactive: false }).addTo(layer);
+    });
+
+    return () => {
+      if (eventPulseLayerRef.current && map.hasLayer(eventPulseLayerRef.current)) {
+        map.removeLayer(eventPulseLayerRef.current);
+        eventPulseLayerRef.current = null;
+      }
+    };
+  }, [groveViewActive, currentEventPulses]);
+
+  // ── H3-like hex-binned wanderer presence heatmap ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !showHeartGlow) {
+      if (hexBinLayerRef.current && mapRef.current) {
+        mapRef.current.removeLayer(hexBinLayerRef.current);
+        hexBinLayerRef.current = null;
+      }
+      return;
+    }
+
+    const loadHexBins = async () => {
+      // Fetch recent offering locations for density visualization
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("offerings")
+        .select("tree_id")
+        .gte("created_at", cutoff)
+        .limit(500);
+
+      if (!data || data.length === 0) return;
+
+      // Resolve coordinates via tree lookup
+      const points: { lat: number; lng: number }[] = [];
+      for (const o of data) {
+        const loc = treeLookup.get(o.tree_id);
+        if (loc) points.push(loc);
+      }
+
+      if (points.length === 0) return;
+
+      // Import computeHexBins
+      const { computeHexBins } = await import("@/hooks/use-grove-events");
+      const zoom = map.getZoom();
+      const resolution = zoom >= 10 ? 0.05 : zoom >= 7 ? 0.2 : zoom >= 4 ? 0.5 : 2;
+      const bins = computeHexBins(points, resolution);
+
+      if (hexBinLayerRef.current) map.removeLayer(hexBinLayerRef.current);
+      const hexLayer = L.layerGroup();
+
+      bins.forEach(bin => {
+        const radius = 8 + bin.intensity * 24;
+        const opacity = 0.15 + bin.intensity * 0.45;
+        const icon = L.divIcon({
+          className: "hex-bin-marker",
+          html: `<div style="
+            width:${radius * 2}px;height:${radius * 2}px;border-radius:50%;
+            background:radial-gradient(circle,hsla(42,80%,55%,${opacity}) 0%,hsla(42,70%,45%,${opacity * 0.3}) 60%,transparent 100%);
+            box-shadow:0 0 ${radius}px hsla(42,80%,55%,${opacity * 0.4});
+            transform:translate(-50%,-50%);
+          "></div>`,
+          iconSize: [radius * 2, radius * 2],
+          iconAnchor: [radius, radius],
+        });
+        L.marker([bin.lat, bin.lng], { icon, interactive: false }).addTo(hexLayer);
+      });
+
+      hexLayer.addTo(map);
+      hexBinLayerRef.current = hexLayer;
+    };
+
+    loadHexBins();
+
+    // Refresh on zoom/pan
+    const onMove = () => loadHexBins();
+    const debounced = (() => {
+      let t: ReturnType<typeof setTimeout>;
+      return () => { clearTimeout(t); t = setTimeout(onMove, 800); };
+    })();
+    map.on("moveend", debounced);
+
+    return () => {
+      map.off("moveend", debounced);
+      if (hexBinLayerRef.current && map.hasLayer(hexBinLayerRef.current)) {
+        map.removeLayer(hexBinLayerRef.current);
+        hexBinLayerRef.current = null;
+      }
+    };
+  }, [showHeartGlow, treeLookup]);
 
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
@@ -2282,7 +2416,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       />
 
       {/* GroveView Living Earth Mode */}
-      <GroveViewOverlay active={groveViewActive} onToggle={() => setGroveViewActive(v => !v)} />
+      <GroveViewOverlay
+        active={groveViewActive}
+        onToggle={() => setGroveViewActive(v => !v)}
+        userLat={userLatLng?.[0]}
+        treeLookup={treeLookup}
+        onEventPulses={setCurrentEventPulses}
+      />
 
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (
