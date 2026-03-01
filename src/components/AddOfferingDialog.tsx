@@ -18,6 +18,7 @@ import RewardReceipt from "@/components/RewardReceipt";
 import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
 import TreeRolePicker, { type TreeRole } from "@/components/TreeRolePicker";
 import { issueRewards, type RewardResult } from "@/utils/issueRewards";
+import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import type { Database } from "@/integrations/supabase/types";
 
 type OfferingType = Database["public"]["Enums"]["offering_type"];
@@ -223,6 +224,24 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }).select("id").single();
       if (error) throw error;
 
+      // Attach Skystamp (fire-and-forget, non-blocking)
+      if (insertedOffering) {
+        supabase.from("trees").select("latitude, longitude").eq("id", treeId).single().then(async ({ data: treeData }) => {
+          if (treeData?.latitude && treeData?.longitude) {
+            const stampId = await createOrReuseSkystamp({
+              lat: treeData.latitude,
+              lng: treeData.longitude,
+              userId: user.id,
+              treeId,
+              offeringId: insertedOffering.id,
+            });
+            if (stampId) {
+              await supabase.from("offerings").update({ sky_stamp_id: stampId } as any).eq("id", insertedOffering.id);
+            }
+          }
+        });
+      }
+
       // Save tags
       if (taggedUsers.length > 0 && insertedOffering) {
         await supabase.from("offering_tags").insert(
@@ -293,6 +312,16 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
+
+      // Attach Skystamp
+      if (insertedOffering) {
+        supabase.from("trees").select("latitude, longitude").eq("id", treeId).single().then(async ({ data: treeData }) => {
+          if (treeData?.latitude && treeData?.longitude) {
+            const stampId = await createOrReuseSkystamp({ lat: treeData.latitude, lng: treeData.longitude, userId: user.id, treeId, offeringId: insertedOffering.id });
+            if (stampId) await supabase.from("offerings").update({ sky_stamp_id: stampId } as any).eq("id", insertedOffering.id);
+          }
+        });
+      }
 
       if (taggedUsers.length > 0 && insertedOffering) {
         await supabase.from("offering_tags").insert(

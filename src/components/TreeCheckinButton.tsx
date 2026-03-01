@@ -14,6 +14,7 @@ import { MapPin, Check, Loader2, Locate, Shield, Cloud } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useWeather, weatherSummary } from "@/hooks/use-weather";
+import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
 import { useUIFlow } from "@/contexts/UIFlowContext";
 
 interface TreeCheckinButtonProps {
@@ -79,7 +80,7 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
 
       const weatherStr = attachWeather && weather ? weatherSummary(weather) : null;
 
-      const { error } = await supabase.from("tree_checkins").insert({
+      const { data: checkinData, error } = await supabase.from("tree_checkins").insert({
         tree_id: treeId,
         user_id: userId,
         latitude: lat,
@@ -90,9 +91,25 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
         checkin_method: useGps ? "gps" : "manual",
         privacy,
         canopy_proof: !!lat,
-      });
+      }).select("id").single();
 
       if (error) throw error;
+
+      // Attach Skystamp (fire-and-forget)
+      if (checkinData && treeLat && treeLng) {
+        createOrReuseSkystamp({
+          lat: treeLat,
+          lng: treeLng,
+          userId,
+          treeId,
+          checkinId: checkinData.id,
+          weather: attachWeather ? weather : null,
+        }).then(async (stampId) => {
+          if (stampId) {
+            await supabase.from("tree_checkins").update({ sky_stamp_id: stampId } as any).eq("id", checkinData.id);
+          }
+        });
+      }
 
       setDone(true);
       toast({ title: "Checked in! 🌳", description: `You're at ${treeName}` });
