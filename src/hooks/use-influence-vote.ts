@@ -69,6 +69,7 @@ export function useInfluenceVote({
     if (!userId) {
       setAvailableScopes([]);
       setExistingVotes([]);
+      setDailySpent(0);
       return;
     }
     setLoading(true);

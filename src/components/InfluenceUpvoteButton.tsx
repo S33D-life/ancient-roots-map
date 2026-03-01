@@ -3,8 +3,8 @@
  * Shows on offering cards alongside existing heart/like.
  */
 import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowBigUp, TreePine, Leaf, MapPin, ChevronDown, Info, Loader2, Undo2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowBigUp, TreePine, Leaf, MapPin, Info, Loader2, Undo2 } from "lucide-react";
 import { useUIFlow } from "@/contexts/UIFlowContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -199,7 +199,7 @@ const InfluenceUpvoteButton = ({
             <DrawerDescription className="font-serif text-xs">
               Choose scope to apply your influence weight.
               <span className="ml-2 font-mono text-muted-foreground/60">
-                Budget: {dailyRemaining.toFixed(1)}/{dailyBudget}
+                Budget: {Math.round(dailyRemaining)}/{dailyBudget} remaining today
               </span>
             </DrawerDescription>
           </DrawerHeader>
