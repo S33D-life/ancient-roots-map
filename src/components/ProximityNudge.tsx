@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TreeDeciduous, Star, X, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
+import { usePopupGate } from "@/contexts/UIFlowContext";
 
 interface NearbyResult {
   id: string;
@@ -32,6 +33,7 @@ const CHECK_INTERVAL_MS = 60_000; // check every 60s
 const DISMISS_KEY = "s33d_proximity_dismissed";
 
 const ProximityNudge = () => {
+  const popupsAllowed = usePopupGate();
   const [nearest, setNearest] = useState<NearbyResult | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const watchId = useRef<number | null>(null);
@@ -134,7 +136,7 @@ const ProximityNudge = () => {
     handleDismiss();
   };
 
-  if (isMapPage || dismissed || !nearest) return null;
+  if (!popupsAllowed || isMapPage || dismissed || !nearest) return null;
 
   const distLabel = nearest.distanceM < 1000
     ? `${Math.round(nearest.distanceM)}m away`

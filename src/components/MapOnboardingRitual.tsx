@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TreeDeciduous, MapPin, Sparkles, X } from "lucide-react";
+import { usePopupGate } from "@/contexts/UIFlowContext";
 
 const RITUAL_SEEN_KEY = "s33d-map-ritual-seen";
 
@@ -10,6 +11,7 @@ const RITUAL_SEEN_KEY = "s33d-map-ritual-seen";
  * not instruction. Appears once per device, dissolves after interaction.
  */
 const MapOnboardingRitual = () => {
+  const popupsAllowed = usePopupGate();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
 
@@ -49,7 +51,7 @@ const MapOnboardingRitual = () => {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && popupsAllowed && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

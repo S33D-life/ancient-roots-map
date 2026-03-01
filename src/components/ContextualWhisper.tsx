@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Link } from "react-router-dom";
+import { usePopupGate } from "@/contexts/UIFlowContext";
 
 const WHISPER_STORE_KEY = "s33d-whispers-seen";
 
@@ -38,6 +39,7 @@ const positionClasses: Record<string, string> = {
 };
 
 const ContextualWhisper = ({ id, message, cta, delay = 2000, position = "bottom-center" }: WhisperConfig) => {
+  const popupsAllowed = usePopupGate();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -51,9 +53,11 @@ const ContextualWhisper = ({ id, message, cta, delay = 2000, position = "bottom-
     markSeen(id);
   };
 
+  const shouldShow = visible && popupsAllowed;
+
   return (
     <AnimatePresence>
-      {visible && (
+      {shouldShow && (
         <motion.div
           initial={{ opacity: 0, y: 16, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
