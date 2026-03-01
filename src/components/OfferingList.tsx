@@ -1,9 +1,5 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Music, FileText, MessageSquare, Sparkles, Mic, BookOpen, Trash2, Loader2, Eye, EyeOff, Users } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -18,38 +14,30 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
+import OfferingCard from "@/components/OfferingCard";
+import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 
 type Offering = Database["public"]["Tables"]["offerings"]["Row"];
-type OfferingType = Database["public"]["Enums"]["offering_type"];
 
-const typeIcons: Record<OfferingType, React.ReactNode> = {
-  photo: <Camera className="h-3.5 w-3.5" />,
-  song: <Music className="h-3.5 w-3.5" />,
-  poem: <FileText className="h-3.5 w-3.5" />,
-  story: <MessageSquare className="h-3.5 w-3.5" />,
-  nft: <Sparkles className="h-3.5 w-3.5" />,
-  voice: <Mic className="h-3.5 w-3.5" />,
-  book: <BookOpen className="h-3.5 w-3.5" />,
-};
-
-const visibilityIcons: Record<string, React.ReactNode> = {
-  private: <EyeOff className="h-2.5 w-2.5" />,
-  tribe: <Users className="h-2.5 w-2.5" />,
-  public: <Eye className="h-2.5 w-2.5" />,
-};
-
-interface TreeLookup {
+export interface TreeContext {
   id: string;
   name: string;
+  species?: string | null;
+  nation?: string | null;
 }
 
 interface OfferingListProps {
   offerings: Offering[];
-  treeLookup?: TreeLookup[];
+  /** Tree lookup for linking + influence context */
+  treeLookup?: TreeContext[];
   /** Items per page (default 20) */
   pageSize?: number;
   emptyMessage?: string;
   showTreeLink?: boolean;
+  /** Display variant: 'full' for rich cards, 'compact' for list rows */
+  variant?: "full" | "compact";
+  /** Enable sort controls */
+  sortable?: boolean;
   /** Called after a successful delete so parent can refresh */
   onDelete?: () => void;
 }
@@ -60,39 +48,53 @@ const OfferingList = ({
   pageSize = 20,
   emptyMessage = "No offerings yet.",
   showTreeLink = true,
+  variant = "compact",
+  sortable = false,
   onDelete,
 }: OfferingListProps) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Offering | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
   }, []);
 
-  // Reset cursor when offerings change (e.g. new data from parent)
   useEffect(() => {
     setCursor(null);
   }, [offerings]);
 
   const treeMap = useMemo(() => {
     if (!treeLookup) return null;
-    const m = new Map<string, string>();
-    treeLookup.forEach((t) => m.set(t.id, t.name));
+    const m = new Map<string, TreeContext>();
+    treeLookup.forEach((t) => m.set(t.id, t));
     return m;
   }, [treeLookup]);
 
-  const sorted = useMemo(
-    () =>
-      [...offerings].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ),
-    [offerings]
-  );
+  const sorted = useMemo(() => {
+    const items = [...offerings];
+    const now = Date.now();
+    switch (sortMode) {
+      case "hot":
+        return items.sort((a, b) => (b.hot_score || 0) - (a.hot_score || 0));
+      case "top_24h":
+        return items
+          .filter((o) => now - new Date(o.created_at).getTime() < 86400000)
+          .sort((a, b) => (b.influence_score || 0) - (a.influence_score || 0));
+      case "top_7d":
+        return items
+          .filter((o) => now - new Date(o.created_at).getTime() < 604800000)
+          .sort((a, b) => (b.influence_score || 0) - (a.influence_score || 0));
+      case "top_all":
+        return items.sort((a, b) => (b.influence_score || 0) - (a.influence_score || 0));
+      default:
+        return items.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+  }, [offerings, sortMode]);
 
-  // Cursor-based pagination: show items up to and including cursor position
   const paginatedItems = useMemo(() => {
     if (!cursor) return sorted.slice(0, pageSize);
     const cursorIdx = sorted.findIndex((o) => o.created_at === cursor);
@@ -130,11 +132,16 @@ const OfferingList = ({
 
   return (
     <>
-      <div className="space-y-2">
+      {sortable && (
+        <div className="flex justify-end mb-4">
+          <OfferingSortControls value={sortMode} onChange={setSortMode} />
+        </div>
+      )}
+
+      <div className={variant === "full" ? "space-y-4" : "space-y-2"}>
         <AnimatePresence mode="popLayout">
           {paginatedItems.map((off, i) => {
-            const treeName = treeMap?.get(off.tree_id);
-            const isAuthor = currentUserId && off.created_by === currentUserId;
+            const treeCtx = treeMap?.get(off.tree_id);
             return (
               <motion.div
                 key={off.id}
@@ -144,60 +151,20 @@ const OfferingList = ({
                 exit={{ opacity: 0, x: 8, height: 0 }}
                 transition={{ delay: Math.min(i, 10) * 0.02, duration: 0.2 }}
               >
-                <Card className={`backdrop-blur border-border/40 ${
-                  off.tree_role === 'stewardship' 
-                    ? 'bg-card/60 border-l-2 border-l-primary/40' 
-                    : 'bg-card/40'
-                }`}>
-                  <CardContent className="p-3 flex items-center gap-3">
-                    {off.media_url && off.type === "photo" && (
-                      <img
-                        src={off.media_url}
-                        alt={off.title}
-                        className="w-12 h-12 rounded object-cover shrink-0"
-                        loading="lazy"
-                      />
-                    )}
-                    <span className="text-primary/70 shrink-0">{typeIcons[off.type]}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                      {showTreeLink && treeName && (
-                        <Link
-                          to={`/tree/${off.tree_id}`}
-                          className="text-[11px] text-primary/70 hover:text-primary font-serif transition-colors"
-                        >
-                          at {treeName}
-                        </Link>
-                      )}
-                      <span className="text-[10px] text-muted-foreground/50 ml-2 font-mono">
-                        {new Date(off.created_at).toLocaleDateString(undefined, {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                    </div>
-                    <Badge variant="outline" className={`text-[10px] font-serif shrink-0 capitalize gap-0.5 ${
-                      off.tree_role === 'stewardship' 
-                        ? 'border-primary/30 text-primary' 
-                        : 'border-border/30'
-                    }`}>
-                      {off.tree_role === 'stewardship' ? '📋' : '🌿'}
-                      {(off as any).visibility && (off as any).visibility !== "public" && visibilityIcons[(off as any).visibility]}
-                      {off.type}
-                    </Badge>
-                    {isAuthor && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
-                        onClick={() => setDeleteTarget(off)}
-                        aria-label="Delete offering"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+                <OfferingCard
+                  offering={off}
+                  variant={variant}
+                  treeId={treeCtx?.id || off.tree_id}
+                  treeSpecies={treeCtx?.species}
+                  treeNation={treeCtx?.nation}
+                  userId={currentUserId}
+                  treeName={treeCtx?.name}
+                  showTreeLink={showTreeLink}
+                  onDelete={(id) => {
+                    const target = offerings.find((o) => o.id === id);
+                    if (target) setDeleteTarget(target);
+                  }}
+                />
               </motion.div>
             );
           })}
