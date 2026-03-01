@@ -948,6 +948,126 @@ export type Database = {
         }
         Relationships: []
       }
+      council_bio_regions: {
+        Row: {
+          bio_region_id: string
+          council_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          bio_region_id: string
+          council_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          bio_region_id?: string
+          council_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_bio_regions_bio_region_id_fkey"
+            columns: ["bio_region_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "council_bio_regions_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      council_trees: {
+        Row: {
+          council_id: string
+          created_at: string
+          id: string
+          tree_id: string
+        }
+        Insert: {
+          council_id: string
+          created_at?: string
+          id?: string
+          tree_id: string
+        }
+        Update: {
+          council_id?: string
+          created_at?: string
+          id?: string
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_trees_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "council_trees_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      councils: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          meeting_cadence: string | null
+          member_count: number
+          name: string
+          notion_link: string | null
+          scope: string
+          scope_ref: string | null
+          slug: string
+          status: string
+          telegram_link: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_cadence?: string | null
+          member_count?: number
+          name: string
+          notion_link?: string | null
+          scope?: string
+          scope_ref?: string | null
+          slug: string
+          status?: string
+          telegram_link?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          meeting_cadence?: string | null
+          member_count?: number
+          name?: string
+          notion_link?: string | null
+          scope?: string
+          scope_ref?: string | null
+          slug?: string
+          status?: string
+          telegram_link?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_reward_caps: {
         Row: {
           checkin_count: number
@@ -1332,6 +1452,45 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hive_bio_regions: {
+        Row: {
+          bio_region_id: string
+          created_at: string
+          hive_id: string
+          id: string
+          tree_count: number
+        }
+        Insert: {
+          bio_region_id: string
+          created_at?: string
+          hive_id: string
+          id?: string
+          tree_count?: number
+        }
+        Update: {
+          bio_region_id?: string
+          created_at?: string
+          hive_id?: string
+          id?: string
+          tree_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hive_bio_regions_bio_region_id_fkey"
+            columns: ["bio_region_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hive_bio_regions_hive_id_fkey"
+            columns: ["hive_id"]
+            isOneToOne: false
+            referencedRelation: "species_hives"
             referencedColumns: ["id"]
           },
         ]
@@ -2788,6 +2947,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      species_hives: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          family_name: string
+          governance_status: string
+          icon: string | null
+          id: string
+          slug: string
+          species_patterns: string[]
+          tree_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          family_name: string
+          governance_status?: string
+          icon?: string | null
+          id?: string
+          slug: string
+          species_patterns?: string[]
+          tree_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          family_name?: string
+          governance_status?: string
+          icon?: string | null
+          id?: string
+          slug?: string
+          species_patterns?: string[]
+          tree_count?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       species_phenology: {
         Row: {
