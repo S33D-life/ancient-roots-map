@@ -179,6 +179,7 @@ function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number, hi
 
 /* ── Popup HTML (aligned with TreeCard visual language) ── */
 function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number): string {
+  if (!tree?.name && !tree?.species) return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
   const tier = getTreeTier(age, offerings);
   const tierLabel = TIER_LABELS[tier];
   const tierBg = tier === "ancient" ? "hsla(42,80%,55%,0.15)" : tier === "storied" ? "hsla(42,60%,50%,0.1)" : "hsla(0,0%,50%,0.08)";

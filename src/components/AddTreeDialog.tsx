@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus, Users, AlertTriangle, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
-import maplibregl from "maplibre-gl";
+// maplibre-gl is dynamically imported in adjustMode useEffect
 import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
 import OfferingCelebration from "@/components/OfferingCelebration";
 import NearbyTreesSheet from "@/components/NearbyTreesSheet";
@@ -76,8 +76,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const markerRef = useRef<maplibregl.Marker | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
   const circleAddedRef = useRef(false);
 
   // Reset on close
@@ -210,41 +210,47 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   useEffect(() => {
     if (!adjustMode || !mapContainerRef.current || lat === null || lng === null) return;
     circleAddedRef.current = false;
+    let cancelled = false;
 
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: SATELLITE_STYLE,
-      center: [lng, lat],
-      zoom: 19,
-      maxZoom: 22,
+    import("maplibre-gl").then((maplibregl) => {
+      if (cancelled || !mapContainerRef.current) return;
+
+      const map = new maplibregl.Map({
+        container: mapContainerRef.current,
+        style: SATELLITE_STYLE,
+        center: [lng, lat],
+        zoom: 19,
+        maxZoom: 22,
+      });
+
+      const markerEl = document.createElement('div');
+      markerEl.style.cssText = 'width:24px;height:24px;border-radius:50%;background:hsl(42,95%,55%);border:2px solid white;cursor:grab;';
+      const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
+        .setLngLat([lng, lat])
+        .addTo(map);
+
+      marker.on("dragend", () => {
+        const pos = marker.getLngLat();
+        const [clampedLat, clampedLng] = clampPosition(pos.lat, pos.lng);
+        if (clampedLat !== pos.lat || clampedLng !== pos.lng) marker.setLngLat([clampedLng, clampedLat]);
+        setLat(clampedLat);
+        setLng(clampedLng);
+      });
+
+      map.on("load", () => {
+        if (circleAddedRef.current) return;
+        circleAddedRef.current = true;
+        const circleGeoJSON = createCircleGeoJSON(lng, lat, MAX_ADJUST_METERS);
+        map.addSource("adjust-radius", { type: "geojson", data: circleGeoJSON });
+        map.addLayer({ id: "adjust-radius-fill", type: "fill", source: "adjust-radius", paint: { "fill-color": "hsl(42, 95%, 55%)", "fill-opacity": 0.1 } });
+        map.addLayer({ id: "adjust-radius-border", type: "line", source: "adjust-radius", paint: { "line-color": "hsl(42, 95%, 55%)", "line-width": 2, "line-dasharray": [3, 2], "line-opacity": 0.6 } });
+      });
+
+      mapRef.current = map;
+      markerRef.current = marker;
     });
 
-    const markerEl = document.createElement('div');
-    markerEl.style.cssText = 'width:24px;height:24px;border-radius:50%;background:hsl(42,95%,55%);border:2px solid white;cursor:grab;';
-    const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
-      .setLngLat([lng, lat])
-      .addTo(map);
-
-    marker.on("dragend", () => {
-      const pos = marker.getLngLat();
-      const [clampedLat, clampedLng] = clampPosition(pos.lat, pos.lng);
-      if (clampedLat !== pos.lat || clampedLng !== pos.lng) marker.setLngLat([clampedLng, clampedLat]);
-      setLat(clampedLat);
-      setLng(clampedLng);
-    });
-
-    map.on("load", () => {
-      if (circleAddedRef.current) return;
-      circleAddedRef.current = true;
-      const circleGeoJSON = createCircleGeoJSON(lng, lat, MAX_ADJUST_METERS);
-      map.addSource("adjust-radius", { type: "geojson", data: circleGeoJSON });
-      map.addLayer({ id: "adjust-radius-fill", type: "fill", source: "adjust-radius", paint: { "fill-color": "hsl(42, 95%, 55%)", "fill-opacity": 0.1 } });
-      map.addLayer({ id: "adjust-radius-border", type: "line", source: "adjust-radius", paint: { "line-color": "hsl(42, 95%, 55%)", "line-width": 2, "line-dasharray": [3, 2], "line-opacity": 0.6 } });
-    });
-
-    mapRef.current = map;
-    markerRef.current = marker;
-    return () => { map.remove(); mapRef.current = null; markerRef.current = null; };
+    return () => { cancelled = true; mapRef.current?.remove(); mapRef.current = null; markerRef.current = null; };
   }, [adjustMode]);
 
   const confirmAdjustment = () => {
