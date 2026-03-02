@@ -10,7 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   MapPin, TreeDeciduous, Compass, Mountain, BookOpen, Map as MapIcon,
   Shield, Sparkles, Filter, Droplets, Thermometer, Leaf, Globe, Layers,
-  Users, ChevronDown, ArrowRight, Plus, Heart, Navigation, Eye,
+  Users, ChevronDown, ArrowRight, Plus, Heart, Navigation, Eye, Calendar,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
@@ -266,6 +266,9 @@ const BioRegionPage = () => {
               </Button>
               <Button variant="sacred" asChild>
                 <Link to="/add-tree"><Plus className="w-4 h-4 mr-1" /> Map an Ancient Friend</Link>
+              </Button>
+              <Button variant="ghost" asChild>
+                <Link to={`/atlas/bio-regions/${slug}/calendar`}><Calendar className="w-4 h-4 mr-1" /> Bioregional Calendar</Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link to="/council"><Users className="w-4 h-4 mr-1" /> Host a Council</Link>
