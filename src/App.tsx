@@ -74,6 +74,7 @@ const KingOfBavleuxPage = lazy(() => import("./pages/KingOfBavleuxPage"));
 // DolomitiAmpezzoPage removed — served by BioRegionPage /atlas/bio-regions/dolomites-ampezzo-cadore
 const BioRegionsIndexPage = lazy(() => import("./pages/BioRegionsIndexPage"));
 const BioRegionPage = lazy(() => import("./pages/BioRegionPage"));
+const PressPage = lazy(() => import("./pages/PressPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -183,6 +184,7 @@ const App = () => {
                 <Route path="/api/docs" element={<ApiDocsPage />} />
                 <Route path="/bug-garden" element={<BugGardenPage />} />
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
+                <Route path="/press" element={<PressPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

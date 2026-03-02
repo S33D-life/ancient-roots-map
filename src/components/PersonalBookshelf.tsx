@@ -1,9 +1,10 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Plus, Eye, EyeOff, Users, TreeDeciduous, Trash2, Share2,
   FolderOpen, ChevronDown, ChevronRight, Pencil, MessageSquareQuote,
-  StickyNote, Sparkles, BookMarked, Package
+  StickyNote, Sparkles, BookMarked, Package, Feather
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +102,7 @@ const DustMotes = () => {
 };
 
 const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -339,6 +341,19 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           <FolderOpen className="h-2.5 w-2.5" /> {shelves.length} {shelves.length === 1 ? "shelf" : "shelves"}
         </Badge>
       </div>
+
+      {/* Quiet doorway to the Living Printing Press */}
+      <button
+        onClick={() => navigate("/press")}
+        className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border/15 transition-all hover:border-primary/20 group"
+        style={{ background: "linear-gradient(135deg, hsl(var(--card) / 0.3), hsl(35 20% 12% / 0.2))" }}
+      >
+        <Feather className="h-4 w-4 text-primary/40 group-hover:text-primary/60 transition-colors" />
+        <div className="text-left">
+          <span className="text-xs font-serif text-foreground/60 group-hover:text-foreground/80 transition-colors">The Living Printing Press</span>
+          <p className="text-[10px] text-muted-foreground/35 font-serif">When a book moves you, shape what it stirred.</p>
+        </div>
+      </button>
 
       {/* Filter + Actions */}
       <div className="flex items-center justify-between gap-2">

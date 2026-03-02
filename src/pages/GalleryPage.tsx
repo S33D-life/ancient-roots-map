@@ -922,7 +922,7 @@ const GalleryPage = () => {
           </div>
 
           {/* ── Room Branches — themed architectural tiles ── */}
-          <LibraryRoomGrid onRoomSelect={(key) => { setActiveTab(key); setShowLanding(false); }} />
+          <LibraryRoomGrid onRoomSelect={(key) => { if (key === 'press') { navigate('/press'); return; } setActiveTab(key); setShowLanding(false); }} />
         </div>
       </div>
     );
