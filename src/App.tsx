@@ -78,6 +78,7 @@ const BioregionCalendarPage = lazy(() => import("./pages/BioregionCalendarPage")
 const PressPage = lazy(() => import("./pages/PressPage"));
 const HowHeartsWorkPage = lazy(() => import("./pages/HowHeartsWorkPage"));
 const CosmicCalendarPage = lazy(() => import("./pages/CosmicCalendarPage"));
+const TreeLedgerPage = lazy(() => import("./pages/TreeLedgerPage"));
 const CalendarSettingsPage = lazy(() => import("./pages/CalendarSettingsPage"));
 
 const queryClient = new QueryClient({
@@ -146,6 +147,7 @@ const App = () => {
                 <Route path="/groves" element={<GrovesPage />} />
                 <Route path="/library" element={<GalleryPage />} />
                 <Route path="/library/:room" element={<GalleryPage />} />
+                <Route path="/ledger" element={<TreeLedgerPage />} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
