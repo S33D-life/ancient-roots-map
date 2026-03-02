@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import { useGeolocation } from "@/hooks/use-geolocation";
 import MapContextIndicator from "./MapContextIndicator";
 import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
 import { getHiveBySlug } from "@/utils/hiveUtils";
@@ -22,7 +23,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair } from "lucide-react";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
 import BloomingClockDial from "./BloomingClockDial";
@@ -469,7 +470,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const hasFittedRef = useRef(false);
   const focusHandledRef = useRef(false);
   const focusHaloRef = useRef<L.Marker | null>(null);
-  const [locating, setLocating] = useState(false);
+  const geo = useGeolocation();
+  const locating = geo.isLocating;
   const [located, setLocated] = useState(false);
   const [userLatLng, setUserLatLng] = useState<[number, number] | null>(null);
   const [discoveryCount, setDiscoveryCount] = useState(0);
@@ -860,16 +862,14 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     // Auto-locate on first load (skip if deep-linked)
     if (!deepLinked && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+      geo.locate("map-auto-init").then((result) => {
+        if (result && mapRef.current) {
+          const latlng: [number, number] = [result.lat, result.lng];
           setUserLatLng(latlng);
           setLocated(true);
-          placeUserMarker(map, latlng, pos.coords.accuracy);
-        },
-        () => { /* silent */ },
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
-      );
+          placeUserMarker(mapRef.current, latlng, result.accuracy);
+        }
+      });
     }
 
     return () => {
@@ -2356,22 +2356,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [showBloomedSeeds]);
 
-  const handleFindMe = useCallback(() => {
-    if (!navigator.geolocation || !mapRef.current) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const latlng: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-        setUserLatLng(latlng);
-        setLocated(true);
-        placeUserMarker(mapRef.current!, latlng, pos.coords.accuracy);
-        mapRef.current?.flyTo(latlng, 14, { duration: 1.2 });
-        setLocating(false);
-      },
-      () => { setLocating(false); },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-    );
-  }, []);
+  const handleFindMe = useCallback(async () => {
+    if (!mapRef.current) return;
+    const result = await geo.locate("map-locate-button");
+    if (result && mapRef.current) {
+      const latlng: [number, number] = [result.lat, result.lng];
+      setUserLatLng(latlng);
+      setLocated(true);
+      placeUserMarker(mapRef.current, latlng, result.accuracy);
+      mapRef.current.flyTo(latlng, 14, { duration: 1.2 });
+    }
+  }, [geo]);
 
   const handleCompassReset = useCallback(() => {
     if (!mapRef.current) return;
@@ -2629,11 +2624,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
                 style={{
                   ...btnBase,
-                  color: locating ? "hsl(42, 40%, 45%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
                 }}
-                title="Find my location"
+                title={geo.error ? `Location: ${geo.error.message}` : "Locate me"}
               >
-                {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Navigation className="w-[18px] h-[18px]" />}
+                {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
               </button>
               <button
                 onClick={() => {
