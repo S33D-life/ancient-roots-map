@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const SEEDS_PER_DAY = 3;
+const SEEDS_PER_DAY = 33;
+const SEEDS_PER_TREE = 3;
 const PROXIMITY_METERS = 100;
 
 interface PlantedSeed {
@@ -104,6 +105,14 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
   const plantSeed = useCallback(async (treeId: string, treeLat: number, treeLng: number): Promise<boolean> => {
     if (!userId || seedsRemaining <= 0) return false;
 
+    // Enforce per-tree daily limit
+    const todaySeeds = allSeeds.filter(s =>
+      s.planter_id === userId &&
+      s.tree_id === treeId &&
+      new Date(s.planted_at) >= getLocalMidnight()
+    );
+    if (todaySeeds.length >= SEEDS_PER_TREE) return false;
+
     // Check GPS proximity
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -141,7 +150,7 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
       console.error("Geolocation error:", err);
       return false;
     }
-  }, [userId, seedsRemaining]);
+  }, [userId, seedsRemaining, allSeeds]);
 
   const collectHeart = useCallback(async (seedId: string): Promise<boolean> => {
     if (!userId) return false;
@@ -217,5 +226,5 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
   };
 }
 
-export { SEEDS_PER_DAY, PROXIMITY_METERS };
+export { SEEDS_PER_DAY, SEEDS_PER_TREE, PROXIMITY_METERS };
 export type { PlantedSeed };
