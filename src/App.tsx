@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, type ComponentType } from "react";
 import { Navigate } from "react-router-dom";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
@@ -26,9 +26,35 @@ import FloatingActionCluster from "@/components/FloatingActionCluster";
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
 
+const lazyImportWithRetry = <T extends ComponentType<any>>(
+  importer: () => Promise<{ default: T }>,
+  key: string,
+) =>
+  lazy(async () => {
+    try {
+      return await importer();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isDynamicImportError =
+        /Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(message);
+
+      if (isDynamicImportError && typeof window !== "undefined") {
+        const retryKey = `s33d-lazy-retry:${key}`;
+        const alreadyRetried = sessionStorage.getItem(retryKey) === "1";
+
+        if (!alreadyRetried) {
+          sessionStorage.setItem(retryKey, "1");
+          window.location.reload();
+        }
+      }
+
+      throw error;
+    }
+  });
+
 // Lazy-load all route pages for code splitting
 const Index = lazy(() => import("./pages/Index"));
-const MapPage = lazy(() => import("./pages/MapPage"));
+const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page");
 const AuthPage = lazy(() => import("./pages/AuthPage"));
 const GrovesPage = lazy(() => import("./pages/GrovesPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
