@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine } from "lucide-react";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { type TreeCardData, type OfferingSummary, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 
@@ -42,7 +42,7 @@ const TreeCard = ({
   onShare,
   onNFTree,
 }: TreeCardProps) => {
-  const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const age = tree.estimated_age ?? 0;
   const tier = useMemo(() => getTreeTier(age, offeringCount), [age, offeringCount]);
   const tierStyle = TIER_COLORS[tier];
@@ -56,11 +56,15 @@ const TreeCard = ({
 
   const handleMapNav = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (tree.latitude && tree.longitude) {
-      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16&treeId=${tree.id}`);
-    } else if (tree.what3words) {
-      navigate(`/map?w3w=${tree.what3words}&treeId=${tree.id}`);
-    }
+    focusMap({
+      type: "tree",
+      id: tree.id,
+      lat: tree.latitude ?? undefined,
+      lng: tree.longitude ?? undefined,
+      w3w: tree.what3words ?? undefined,
+      zoom: 16,
+      source: "tree_card",
+    });
   };
 
   const handleShare = (e: React.MouseEvent) => {

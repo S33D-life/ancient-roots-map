@@ -10,6 +10,7 @@ import {
   Shield, MapPin, Scroll, Eye, TreeDeciduous, Heart,
   Lock, Sparkles, Calendar, User, ExternalLink, Map as MapIcon,
 } from "lucide-react";
+import { useMapFocus } from "@/hooks/use-map-focus";
 
 interface ImmutableTreeProps {
   tree: {
@@ -38,10 +39,26 @@ interface ImmutableTreeProps {
 }
 
 const ImmutableTreeCard = ({ tree, onMapNavigate }: ImmutableTreeProps) => {
+  const { focusMap } = useMapFocus();
   const name = tree.tree_name || tree.species_common || tree.species_scientific;
   const anchorDate = tree.anchored_at
     ? new Date(tree.anchored_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
     : null;
+
+  const handleMapNav = () => {
+    if (onMapNavigate) {
+      onMapNavigate();
+    } else if (tree.latitude && tree.longitude) {
+      focusMap({
+        type: "tree",
+        id: tree.id,
+        lat: tree.latitude,
+        lng: tree.longitude,
+        zoom: 16,
+        source: "tree_card",
+      });
+    }
+  };
 
   return (
     <Card className="relative overflow-hidden border-[hsl(42_80%_50%/0.35)] bg-gradient-to-b from-[hsl(42_30%_12%/0.6)] to-card/80 backdrop-blur-sm shadow-[0_0_20px_hsl(42_80%_50%/0.08)]">
@@ -158,7 +175,7 @@ const ImmutableTreeCard = ({ tree, onMapNavigate }: ImmutableTreeProps) => {
         {/* Actions */}
         <div className="flex items-center gap-2 pt-1">
           {tree.latitude && (
-            <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={onMapNavigate}>
+            <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={handleMapNav}>
               <MapIcon className="w-3 h-3 mr-1" /> View on Map
             </Button>
           )}

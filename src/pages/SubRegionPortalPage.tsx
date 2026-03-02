@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import { getSubRegionBySlug, getSubRegionsByCountry, getSubRegionLabel } from "@/config/subRegionRegistry";
 import { SLUG_MAP } from "@/config/countryRegistry";
@@ -159,15 +160,25 @@ const SubRegionPortalPage = () => {
   const speciesCount = useMemo(() => new Set(trees.map(t => t.species_scientific)).size, [trees]);
   const withCoords = useMemo(() => trees.filter(t => t.latitude != null).length, [trees]);
 
+  const { focusMap } = useMapFocus();
+
   const handleMapNavigate = useCallback((tree: ResearchTree) => {
     if (tree.latitude && tree.longitude) {
-      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&country=${countrySlug}&origin=atlas`);
+      focusMap({
+        type: "tree",
+        id: tree.id || `${tree.latitude}-${tree.longitude}`,
+        lat: tree.latitude,
+        lng: tree.longitude,
+        zoom: 15,
+        countrySlug,
+        source: "atlas_card",
+      });
     }
-  }, [navigate, countrySlug]);
+  }, [focusMap, countrySlug]);
 
   const openMapLayer = useCallback(() => {
-    navigate(`/map?country=${countrySlug}&origin=atlas`);
-  }, [navigate, countrySlug]);
+    focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "atlas_card" });
+  }, [focusMap, countrySlug]);
 
   /* ─── Not found guard ─── */
   if (!region || !country) {

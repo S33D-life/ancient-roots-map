@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import { useCountrySpeciesActivity } from "@/hooks/useCountrySpeciesActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -336,13 +337,24 @@ const CountryPortalPage = () => {
     );
   }
 
+  const { focusMap } = useMapFocus();
+
   const handleMapNavigate = (tree: ResearchTree) => {
     if (tree.latitude && tree.longitude) {
-      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&country=${countrySlug}&origin=atlas`);
+      focusMap({
+        type: "tree",
+        id: tree.id || `${tree.latitude}-${tree.longitude}`,
+        lat: tree.latitude,
+        lng: tree.longitude,
+        zoom: 15,
+        countrySlug,
+        source: "atlas_card",
+      });
     }
   };
 
-  const openMapLayer = () => navigate(`/map?country=${countrySlug}&origin=atlas`);
+
+  const openMapLayer = () => focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "atlas_card" });
 
   return (
     <PageShell>
