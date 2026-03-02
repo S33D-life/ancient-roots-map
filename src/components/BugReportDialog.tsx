@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
-import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles, WifiOff, AlertTriangle } from "lucide-react";
+import { useLocation, Link } from "react-router-dom";
+import { Loader2, ChevronDown, Upload, X, Lightbulb, Sparkles, AlertTriangle } from "lucide-react";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
-import { motion, AnimatePresence } from "framer-motion";
+import { SPARK_FLAGS } from "@/lib/spark-flags";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -15,15 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
+
+// Heavy selects gated behind flag (currently disabled for stability)
+// When ENABLE_HEAVY_SELECTS is true, use Radix Select; otherwise native <select>
 
 const REPORT_TYPES = [
   { value: "bug", label: "🐞 Something isn't working", short: "🐞", desc: "Report a technical issue" },
@@ -119,6 +115,29 @@ interface BugReportDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+/** Native <select> fallback for stability */
+const NativeSelect = ({
+  value,
+  onChange,
+  options,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: readonly { value: string; label: string }[];
+  className?: string;
+}) => (
+  <select
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className={`w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm ${className ?? ""}`}
+  >
+    {options.map((o) => (
+      <option key={o.value} value={o.value}>{o.label}</option>
+    ))}
+  </select>
+);
+
 /** Stable screenshot preview that creates blob URL once per file */
 const ScreenshotThumb = ({ file, onRemove }: { file: File; onRemove: () => void }) => {
   const url = useMemo(() => URL.createObjectURL(file), [file]);
@@ -144,6 +163,7 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
   const [showOptional, setShowOptional] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [screenshots, setScreenshots] = useState<File[]>([]);
+  const [screenshotsEnabled, setScreenshotsEnabled] = useState<boolean>(SPARK_FLAGS.ENABLE_SCREENSHOTS);
   const [uploading, setUploading] = useState(false);
   const [liteMode, setLiteMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -170,7 +190,7 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
     frequency: "once",
     feature_area: guessFeatureArea(location.pathname),
     report_type: "bug",
-    include_diagnostics: true,
+    include_diagnostics: SPARK_FLAGS.ENABLE_DIAGNOSTICS,
   });
 
   const isBug = form.report_type === "bug";
@@ -190,7 +210,7 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
       frequency: "once",
       feature_area: guessFeatureArea(location.pathname),
       report_type: "bug",
-      include_diagnostics: true,
+      include_diagnostics: SPARK_FLAGS.ENABLE_DIAGNOSTICS,
     });
     setShowOptional(false);
     setScreenshots([]);
@@ -198,10 +218,18 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(f => f.size < 5 * 1024 * 1024 && f.type.startsWith("image/"));
-    if (validFiles.length < files.length) toast.error("Only images under 5MB accepted");
-    setScreenshots(prev => [...prev, ...validFiles].slice(0, 3));
+    try {
+      const files = Array.from(e.target.files || []);
+      const validFiles = files.filter(f => f.size < 5 * 1024 * 1024 && f.type.startsWith("image/"));
+      if (validFiles.length < files.length) toast.error("Only images under 5MB accepted");
+      setScreenshots(prev => [...prev, ...validFiles].slice(0, 3));
+      // Clear input value to allow re-selecting the same file
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err) {
+      console.warn("[Spark] screenshot select error", err);
+      setScreenshotsEnabled(false);
+      toast.error("Screenshots disabled due to an error");
+    }
   };
 
   const removeScreenshot = (idx: number) => {
@@ -224,6 +252,7 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
       }
     } catch (err) {
       console.warn("[Spark] screenshot upload error", err);
+      setScreenshotsEnabled(false);
     }
     if (mountedRef.current) setUploading(false);
     return urls;
@@ -257,7 +286,7 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
         return;
       }
 
-      const screenshotUrls = liteMode ? [] : await uploadScreenshots(user.id);
+      const screenshotUrls = (liteMode || !screenshotsEnabled) ? [] : await uploadScreenshots(user.id);
       if (!mountedRef.current) return;
       const diagnosticsData = form.include_diagnostics ? buildDiagnostics() : null;
 
@@ -313,11 +342,7 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
           fallbackMessage="The spark form ran into trouble — please close and try again."
         >
         {submitted ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="py-8 text-center space-y-4"
-          >
+          <div className="py-8 text-center space-y-4">
             <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
               style={{ background: 'hsl(var(--primary) / 0.15)' }}>
               <CouncilSparkIcon className="w-8 h-8 text-primary" />
@@ -330,10 +355,20 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
               <p className="font-medium text-primary/80 mb-1">{REWARD_HINTS[form.report_type]}</p>
               <p>Each refinement strengthens both the digital garden and the living one.</p>
             </div>
-            <Button onClick={() => { reset(); setOpen(false); }} variant="outline" className="mt-2 font-serif">
-              Close
-            </Button>
-          </motion.div>
+            {/* Value Tree link */}
+            <Link
+              to="/value-tree?tab=earn"
+              onClick={() => { reset(); setOpen(false); }}
+              className="inline-flex items-center gap-1.5 text-xs text-primary/80 hover:text-primary font-serif underline underline-offset-2 transition-colors"
+            >
+              🌳 View Hearts & Value Tree
+            </Link>
+            <div>
+              <Button onClick={() => { reset(); setOpen(false); }} variant="outline" className="mt-2 font-serif">
+                Close
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
             <DialogHeader>
@@ -347,14 +382,14 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
             </DialogHeader>
 
             <div className="space-y-4 mt-2">
-              {/* Report Type */}
+              {/* Report Type — segmented buttons (no heavy select) */}
               <div className="grid grid-cols-4 gap-2">
                 {REPORT_TYPES.map((t) => (
                   <button
                     key={t.value}
                     type="button"
                     onClick={() => update("report_type", t.value)}
-                    className={`text-center p-2.5 rounded-lg border text-xs font-serif transition-all ${
+                    className={`text-center p-2.5 rounded-lg border text-xs font-serif transition-colors ${
                       form.report_type === t.value
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border/40 text-muted-foreground hover:border-border"
@@ -425,38 +460,22 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
                 />
               </div>
 
-              {/* Severity + Feature Area */}
+              {/* Severity + Feature Area — native selects for stability */}
               <div className={`grid gap-3 ${isBug ? "grid-cols-2" : "grid-cols-1"}`}>
                 {isBug && (
                   <div className="space-y-1.5">
                     <Label>Severity</Label>
-                    <Select value={form.severity} onValueChange={(v) => update("severity", v)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {SEVERITIES.map((s) => (
-                          <SelectItem key={s.value} value={s.value}>
-                            <span className="text-sm">{s.label}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect value={form.severity} onChange={(v) => update("severity", v)} options={SEVERITIES} />
                   </div>
                 )}
                 <div className="space-y-1.5">
                   <Label>Feature Area</Label>
-                  <Select value={form.feature_area} onValueChange={(v) => update("feature_area", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {FEATURE_AREAS.map((a) => (
-                        <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect value={form.feature_area} onChange={(v) => update("feature_area", v)} options={FEATURE_AREAS} />
                 </div>
               </div>
 
               {/* Screenshot upload */}
-              {!liteMode && (
+              {!liteMode && screenshotsEnabled && (
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1">
                     <Upload className="w-3 h-3" /> Screenshots
@@ -497,54 +516,40 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
                 {showOptional ? "Hide" : "Show"} optional details
               </button>
 
-              <AnimatePresence>
-                {showOptional && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="space-y-4 overflow-hidden"
-                  >
-                    {isBug && (
-                      <div className="space-y-1.5">
-                        <Label htmlFor="spark-steps">Steps to reproduce</Label>
-                        <Textarea
-                          id="spark-steps"
-                          placeholder={"1. Go to…\n2. Click on…\n3. See error"}
-                          value={form.steps}
-                          onChange={(e) => update("steps", e.target.value)}
-                          maxLength={2000}
-                          className="min-h-[80px]"
-                        />
-                      </div>
-                    )}
-
+              {showOptional && (
+                <div className="space-y-4 overflow-hidden">
+                  {isBug && (
                     <div className="space-y-1.5">
-                      <Label>Reproducible?</Label>
-                      <Select value={form.frequency} onValueChange={(v) => update("frequency", v)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {FREQUENCIES.map((f) => (
-                            <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="diagnostics" className="text-sm">Include diagnostic data</Label>
-                      <Switch
-                        id="diagnostics"
-                        checked={form.include_diagnostics}
-                        onCheckedChange={(c) => update("include_diagnostics", c)}
+                      <Label htmlFor="spark-steps">Steps to reproduce</Label>
+                      <Textarea
+                        id="spark-steps"
+                        placeholder={"1. Go to…\n2. Click on…\n3. See error"}
+                        value={form.steps}
+                        onChange={(e) => update("steps", e.target.value)}
+                        maxLength={2000}
+                        className="min-h-[80px]"
                       />
                     </div>
-                    <p className="text-[10px] text-muted-foreground/60 -mt-2">
-                      Page route, device info, screen size — helps us fix faster
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <Label>Reproducible?</Label>
+                    <NativeSelect value={form.frequency} onChange={(v) => update("frequency", v)} options={FREQUENCIES} />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="diagnostics" className="text-sm">Include diagnostic data</Label>
+                    <Switch
+                      id="diagnostics"
+                      checked={form.include_diagnostics}
+                      onCheckedChange={(c) => update("include_diagnostics", c)}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/60 -mt-2">
+                    Page route, device info, screen size — helps us fix faster
+                  </p>
+                </div>
+              )}
 
               {/* Reward hint */}
               <div className="text-[10px] bg-primary/5 border border-primary/10 rounded-lg px-3 py-2 text-primary/70 font-serif">
