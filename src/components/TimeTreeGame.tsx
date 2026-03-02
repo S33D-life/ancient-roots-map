@@ -172,6 +172,24 @@ const TimeTreeGame = () => {
     setAlreadySubmittedToday(true);
     fetchCollectiveStats();
     toast.success(`${(data as any).hearts_awarded > 0 ? `+${(data as any).hearts_awarded} Hearts earned` : "Entry saved"}`);
+
+    // Loop closure: if this Time Tree entry references a wished tree, notify
+    if ((data as any).tree_reference_id && userId) {
+      supabase
+        .from("tree_wishlist")
+        .select("id, trees(name)")
+        .eq("user_id", userId)
+        .eq("tree_id", (data as any).tree_reference_id)
+        .maybeSingle()
+        .then(({ data: wish }) => {
+          if (wish) {
+            toast.success("You've woven a thread to a tree you wished for ⭐", {
+              description: `Your Time Tree entry connects to ${(wish as any).trees?.name || "a wished tree"}.`,
+              duration: 6000,
+            });
+          }
+        });
+    }
   };
 
   const convertToWish = async () => {
