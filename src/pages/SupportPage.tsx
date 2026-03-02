@@ -107,7 +107,7 @@ const SupportPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 space-y-10">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20 space-y-10">
         {/* Page heading */}
         <section className="space-y-2">
           <h1 className="text-2xl font-serif font-semibold text-foreground">
@@ -399,28 +399,7 @@ const SupportPage = () => {
           </div>
         </section>
 
-        {/* ── External support callout ─────────────────────────── */}
-        <section className="rounded-lg border border-border/30 bg-card p-4 space-y-2">
-          <h2 className="text-sm font-serif font-medium text-foreground">
-            Support S33D financially
-          </h2>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            S33D is community-funded. Donations are handled through Giveth.
-          </p>
-          <a
-            href={SUPPORT_CONFIG.external.giveth.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-          >
-            <Heart className="w-3 h-3" />
-            {SUPPORT_CONFIG.external.giveth.label}
-            <ExternalLink className="w-3 h-3 text-muted-foreground" />
-          </a>
-          <p className="text-[10px] text-muted-foreground/50">
-            Opens external site — you'll leave s33d.life
-          </p>
-        </section>
+        {/* Duplicate Giveth callout removed — already shown above */}
       </main>
       <Footer />
 
