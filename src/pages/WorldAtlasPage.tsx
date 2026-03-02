@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import {
   Globe, TreeDeciduous, MapPin, Eye, Shield, Scroll, Footprints,
   ChevronRight, Heart, BookOpen, ExternalLink, Sparkles, Compass,
-  Leaf, Users, Search, X,
+  Leaf, Users, Search, X, Map as MapIcon,
 } from "lucide-react";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
@@ -110,10 +111,21 @@ const GlobeDots = () => {
 
 /* ─── Country Card ─── */
 const CountryCard = ({ stat, isPioneer }: { stat: CountryStats; isPioneer?: boolean }) => {
+  const { focusMap } = useMapFocus();
   const statusColors: Record<string, string> = {
     active: "bg-green-500/15 text-green-400 border-green-500/30",
     growing: "bg-amber-500/15 text-amber-400 border-amber-500/30",
     proposed: "bg-muted text-muted-foreground border-border/40",
+  };
+
+  const handleViewOnMap = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    focusMap({
+      type: "area",
+      id: stat.slug,
+      countrySlug: stat.slug,
+      source: "atlas_card",
+    });
   };
 
   return (
@@ -154,11 +166,16 @@ const CountryCard = ({ stat, isPioneer }: { stat: CountryStats; isPioneer?: bool
 
         <div className="flex gap-2 pt-1">
           {stat.status === "active" || stat.status === "growing" ? (
-            <Button variant="sacred" size="sm" className="h-7 text-xs flex-1" asChild>
-              <Link to={`/atlas/${stat.slug}`}>
-                Open Atlas <ChevronRight className="w-3 h-3 ml-1" />
-              </Link>
-            </Button>
+            <>
+              <Button variant="sacred" size="sm" className="h-7 text-xs flex-1" asChild>
+                <Link to={`/atlas/${stat.slug}`}>
+                  Open Atlas <ChevronRight className="w-3 h-3 ml-1" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleViewOnMap} title="View on Map">
+                <MapIcon className="w-3.5 h-3.5" />
+              </Button>
+            </>
           ) : (
             <Button variant="ghost" size="sm" className="h-7 text-xs flex-1" disabled>
               Coming soon

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -227,13 +228,23 @@ const ValaisPortalPage = () => {
   const speciesCount = new Set(trees.map(t => t.species_scientific)).size;
   const withCoords = trees.filter(t => t.latitude != null).length;
 
+  const { focusMap } = useMapFocus();
+
   const handleMapNavigate = (tree: ResearchTree) => {
     if (tree.latitude && tree.longitude) {
-      navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&country=switzerland&origin=atlas`);
+      focusMap({
+        type: "tree",
+        id: tree.id || `${tree.latitude}-${tree.longitude}`,
+        lat: tree.latitude,
+        lng: tree.longitude,
+        zoom: 15,
+        countrySlug: "switzerland",
+        source: "atlas_card",
+      });
     }
   };
 
-  const openMapLayer = () => navigate("/map?country=switzerland&origin=atlas");
+  const openMapLayer = () => focusMap({ type: "area", id: "switzerland", countrySlug: "switzerland", source: "atlas_card" });
 
   return (
     <PageShell>
