@@ -52,7 +52,7 @@ const MarketDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8 text-center">
+        <div className="container mx-auto px-4 pt-24 pb-20 text-center">
           <p className="text-muted-foreground font-serif">Market not found.</p>
           <Link to="/library/rhythms" className="text-primary hover:underline font-serif mt-4 inline-block">
             ← Back to Rhythms

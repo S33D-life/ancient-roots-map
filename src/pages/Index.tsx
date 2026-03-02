@@ -10,6 +10,7 @@ import {
   IdentitySection,
   DiscoveryRow,
   ParticipationSection,
+  SupportDiscoveryRow,
   TetolNavSection,
 } from "@/components/HomeSections";
 import { WisdomOfTheGrove } from "@/components/WisdomOfTheGrove";
@@ -30,6 +31,7 @@ const Index = () => {
         <IdentitySection />
         <DiscoveryRow />
         <ParticipationSection />
+        <SupportDiscoveryRow />
         <WisdomOfTheGrove />
         <TetolNavSection />
       </main>

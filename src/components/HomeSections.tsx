@@ -330,6 +330,71 @@ export const LivingScrollSection = () => {
   );
 };
 
+/* ─── 4b. Support + Value Tree discovery row ─── */
+export const SupportDiscoveryRow = () => (
+  <section className="py-6 md:py-10">
+    <div className="container mx-auto px-4 max-w-4xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <Link
+            to="/value-tree"
+            className="group flex items-center gap-4 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 hover:bg-card/60 hover:border-primary/30 transition-all duration-300"
+          >
+            <div
+              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "hsl(350 60% 55% / 0.15)" }}
+            >
+              <Heart className="w-5 h-5" style={{ color: "hsl(350 60% 55%)" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-serif text-sm text-foreground/90 group-hover:text-primary transition-colors">
+                Value Tree
+              </p>
+              <p className="text-[11px] text-muted-foreground/60">
+                See how Hearts are earned & spent
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+          </Link>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.08 }}
+        >
+          <Link
+            to="/support"
+            className="group flex items-center gap-4 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm px-5 py-4 hover:bg-card/60 hover:border-primary/30 transition-all duration-300"
+          >
+            <div
+              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "hsl(28 80% 55% / 0.15)" }}
+            >
+              <Sparkles className="w-5 h-5" style={{ color: "hsl(28 80% 55%)" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-serif text-sm text-foreground/90 group-hover:text-primary transition-colors">
+                Support S33D
+              </p>
+              <p className="text-[11px] text-muted-foreground/60">
+                Donate, contribute, or join councils
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+          </Link>
+        </motion.div>
+      </div>
+    </div>
+  </section>
+);
+
 /* ─── 5. TETOL Navigation Anchors ─── */
 const TETOL_NAV = [
   { icon: TreeDeciduous, label: "Ancient Friends", sublabel: "The Roots — Living Atlas", to: "/map", accent: "120 45% 45%" },

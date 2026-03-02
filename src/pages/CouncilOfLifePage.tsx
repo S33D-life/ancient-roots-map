@@ -329,6 +329,43 @@ const CouncilOfLifePage = () => {
           <div className="mt-10">
             <DigitalFireVote />
           </div>
+
+          {/* Loop-closure: cross-links to related features */}
+          <div className="mt-10 rounded-xl border border-border/20 bg-card/30 p-4 space-y-3">
+            <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">
+              Continue your journey
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => navigate("/value-tree")}
+                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
+              >
+                <span className="text-primary">❤️ Value Tree</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">See how Hearts flow</p>
+              </button>
+              <button
+                onClick={() => navigate("/support")}
+                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
+              >
+                <span className="text-primary">🌱 Support S33D</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Contribute beyond governance</p>
+              </button>
+              <button
+                onClick={() => navigate("/map")}
+                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
+              >
+                <span className="text-primary">🗺️ Atlas</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Map an Ancient Friend</p>
+              </button>
+              <button
+                onClick={() => navigate("/library")}
+                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
+              >
+                <span className="text-primary">📚 Library</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Browse offerings & stories</p>
+              </button>
+            </div>
+          </div>
         </div>
         <TetolBridge />
       </main>
