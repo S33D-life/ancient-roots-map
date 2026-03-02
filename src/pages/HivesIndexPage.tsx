@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
@@ -39,6 +40,7 @@ const AnimatedStat = ({ value, color }: { value: number; color?: string }) => {
 
 const HivesIndexPage = () => {
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const allHives = useMemo(() => getAllHives(), []);
   const [hiveStats, setHiveStats] = useState<Record<string, HiveStats>>({});
   const [loading, setLoading] = useState(true);
@@ -197,8 +199,8 @@ const HivesIndexPage = () => {
   , [hiveStats]);
 
   const handleFilterOnMap = useCallback((hive: HiveInfo) => {
-    navigate(`/map?species=${encodeURIComponent(hive.representativeSpecies[0] || hive.family)}`);
-  }, [navigate]);
+    focusMap({ type: "area", id: hive.family, source: "hive", hiveSlug: hive.slug });
+  }, [focusMap]);
 
   const filteredSpecies = useMemo(() => {
     if (!speciesMode) return [];
@@ -359,7 +361,7 @@ const HivesIndexPage = () => {
                   >
                     <Card
                       className="bg-card/60 backdrop-blur border-border/50 hover:border-primary/30 transition-all cursor-pointer group"
-                      onClick={() => navigate(`/map?species=${encodeURIComponent(sp.name)}`)}
+                      onClick={() => focusMap({ type: "area", id: sp.name, source: "hive", hiveSlug: sp.hive.slug })}
                     >
                       <div className="h-0.5 w-full" style={{ background: `hsl(${sp.hive.accentHsl})` }} />
                       <CardContent className="p-3">
@@ -452,7 +454,7 @@ const HivesIndexPage = () => {
                                 style={{ borderColor: `hsl(${hive.accentHsl} / 0.35)` }}
                                 onClick={e => {
                                   e.stopPropagation();
-                                  navigate(`/map?species=${encodeURIComponent(sp)}`);
+                                  focusMap({ type: "area", id: sp, source: "hive" });
                                 }}
                               >
                                 {sp}

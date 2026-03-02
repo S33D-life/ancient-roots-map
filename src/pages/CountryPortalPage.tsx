@@ -635,7 +635,7 @@ const CountryPortalPage = () => {
                         common={s.common}
                         count={s.count}
                         maxCount={speciesRanking[0].count}
-                        onMapClick={() => navigate(`/map?species=${encodeURIComponent(s.scientific)}&research=on`)}
+                        onMapClick={() => focusMap({ type: "area", id: s.scientific, countrySlug, source: "country" })}
                       />
                     ))
                   )}

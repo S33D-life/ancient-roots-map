@@ -10,6 +10,7 @@
 import { memo, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { TreeDeciduous, Eye, MapPin, Heart, Clock, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,6 +48,7 @@ function seedOffset(species: string): number {
 
 const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: Props) => {
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const [selected, setSelected] = useState<SpeciesActivity | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -77,8 +79,8 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
   }, []);
 
   const handleFilterMap = useCallback((sp: SpeciesActivity) => {
-    navigate(`/map?species=${encodeURIComponent(sp.species)}&country=${countrySlug}&origin=atlas`);
-  }, [navigate, countrySlug]);
+    focusMap({ type: "area", id: sp.species, countrySlug, source: "country" });
+  }, [focusMap, countrySlug]);
 
   const handleMapNew = useCallback((sp: SpeciesActivity) => {
     navigate(`/add?species=${encodeURIComponent(sp.species)}&country=${countrySlug}`);

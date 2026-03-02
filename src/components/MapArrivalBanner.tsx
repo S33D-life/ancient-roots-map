@@ -104,7 +104,8 @@ export default function MapArrivalBanner({ arrival, contextLabel }: MapArrivalBa
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="absolute top-16 left-1/2 -translate-x-1/2 z-[25] pointer-events-none"
+          className="absolute left-1/2 -translate-x-1/2 z-[25] pointer-events-none"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 4rem)" }}
         >
           <div
             className="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border"

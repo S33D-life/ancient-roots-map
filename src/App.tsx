@@ -10,7 +10,7 @@ const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
-import ChatPanel from "@/components/ChatPanel";
+
 import DevQAPanel from "@/components/DevQAPanel";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -98,7 +98,7 @@ const ApiDocsPage = lazyImportWithRetry(() => import("./pages/ApiDocsPage"), "ap
 const TimeTreePage = lazyImportWithRetry(() => import("./pages/TimeTreePage"), "time-tree");
 const BugGardenPage = lazyImportWithRetry(() => import("./pages/BugGardenPage"), "bug-garden");
 const AdminEvolutionPage = lazyImportWithRetry(() => import("./pages/AdminEvolutionPage"), "admin-evolution");
-const KingOfBavleuxPage = lazyImportWithRetry(() => import("./pages/KingOfBavleuxPage"), "king-bavleux");
+// KingOfBavleuxPage removed — route redirects to /atlas/switzerland
 // DolomitiAmpezzoPage removed — served by BioRegionPage /atlas/bio-regions/dolomites-ampezzo-cadore
 const BioRegionsIndexPage = lazyImportWithRetry(() => import("./pages/BioRegionsIndexPage"), "bio-regions-index");
 const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"), "bio-region");
@@ -144,7 +144,7 @@ const App = () => {
         <Sonner />
         <StarryNight />
         <DevQAPanel />
-        {/* <ChatPanel /> */}
+        {/* ChatPanel removed — orphan component */}
         
         <CanopyHeartPulse />
         <AppUpdateBanner />
