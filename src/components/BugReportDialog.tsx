@@ -30,6 +30,7 @@ const REPORT_TYPES = [
   { value: "bug", label: "🐞 Something isn't working", short: "🐞", desc: "Report a technical issue" },
   { value: "ux_improvement", label: "🌿 This could flow better", short: "🌿", desc: "Suggest a refinement" },
   { value: "insight", label: "🌞 I have an idea", short: "🌞", desc: "Propose an evolution" },
+  { value: "suggest_tree", label: "🌳 Suggest a tree", short: "🌳", desc: "Add a notable tree" },
 ] as const;
 
 const FEATURE_AREAS = [
@@ -68,6 +69,7 @@ const REWARD_HINTS: Record<string, string> = {
   bug: "Valid bugs earn 3–20 Hearts depending on severity",
   ux_improvement: "Accepted refinements earn 5–15 Hearts",
   insight: "High-value insights earn variable Hearts",
+  suggest_tree: "Verified tree submissions earn 5–25 Hearts",
 };
 
 declare const __BUILD_ID__: string;
@@ -146,6 +148,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
   });
 
   const isBug = form.report_type === "bug";
+  const isTreeSuggestion = form.report_type === "suggest_tree";
 
   const update = (key: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -221,6 +224,9 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       toast.error("Please describe what you expected");
       return;
     }
+    if (isTreeSuggestion) {
+      update("feature_area", "map");
+    }
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -237,7 +243,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
         user_id: user.id,
         title: form.title.trim().slice(0, 200),
         actual: form.actual.trim().slice(0, 2000),
-        expected: isBug ? form.expected.trim().slice(0, 1000) : "N/A",
+        expected: isBug ? form.expected.trim().slice(0, 1000) : isTreeSuggestion ? "Tree suggestion" : "N/A",
         steps: form.steps.trim().slice(0, 2000) || "Not provided",
         suggestion: form.suggestion.trim().slice(0, 2000) || null,
         severity: isBug ? form.severity : "minor",
@@ -319,7 +325,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
 
             <div className="space-y-4 mt-2">
               {/* Report Type */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {REPORT_TYPES.map((t) => (
                   <button
                     key={t.value}
@@ -332,17 +338,17 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                     }`}
                   >
                     <div className="text-lg mb-0.5">{t.short}</div>
-                    <div className="text-[10px] leading-tight">{t.value === "bug" ? "Not working" : t.value === "ux_improvement" ? "Flow better" : "Evolve this"}</div>
+                    <div className="text-[10px] leading-tight">{t.value === "bug" ? "Not working" : t.value === "ux_improvement" ? "Flow better" : t.value === "suggest_tree" ? "Add tree" : "Evolve this"}</div>
                   </button>
                 ))}
               </div>
 
               {/* Title */}
               <div className="space-y-1.5">
-                <Label htmlFor="spark-title">Title *</Label>
+                <Label htmlFor="spark-title">{isTreeSuggestion ? "Tree Name *" : "Title *"}</Label>
                 <Input
                   id="spark-title"
-                  placeholder={isBug ? "e.g. Map markers disappear on zoom" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy insight"}
+                  placeholder={isBug ? "e.g. Map markers disappear on zoom" : isTreeSuggestion ? "e.g. Great Banyan of Howrah" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy insight"}
                   value={form.title}
                   onChange={(e) => update("title", e.target.value)}
                   maxLength={200}
@@ -352,11 +358,11 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
               {/* Description */}
               <div className="space-y-1.5">
                 <Label htmlFor="spark-actual">
-                  {isBug ? "What happened? *" : form.report_type === "ux_improvement" ? "What could flow better? *" : "Describe your idea *"}
+                  {isBug ? "What happened? *" : isTreeSuggestion ? "Why is this tree notable? *" : form.report_type === "ux_improvement" ? "What could flow better? *" : "Describe your idea *"}
                 </Label>
                 <Textarea
                   id="spark-actual"
-                  placeholder={isBug ? "Describe what went wrong…" : form.report_type === "ux_improvement" ? "Describe the experience…" : "Share your vision…"}
+                  placeholder={isBug ? "Describe what went wrong…" : isTreeSuggestion ? "Describe the tree — species, location, island/region, why it matters…" : form.report_type === "ux_improvement" ? "Describe the experience…" : "Share your vision…"}
                   value={form.actual}
                   onChange={(e) => update("actual", e.target.value)}
                   maxLength={2000}
@@ -379,16 +385,16 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 </div>
               )}
 
-              {/* Suggestion (always optional) */}
+              {/* Location / Suggestion */}
               <div className="space-y-1.5">
                 <Label htmlFor="spark-suggestion" className="flex items-center gap-1">
                   <Lightbulb className="w-3 h-3" />
-                  {isBug ? "Suggestion" : "How would you improve this?"}
+                  {isTreeSuggestion ? "Location / Coordinates" : isBug ? "Suggestion" : "How would you improve this?"}
                   <span className="text-muted-foreground/50 text-[10px]">(optional)</span>
                 </Label>
                 <Textarea
                   id="spark-suggestion"
-                  placeholder={isBug ? "How would you fix this?" : "Share your idea for improvement…"}
+                  placeholder={isTreeSuggestion ? "Lat/lng, what3words, or description of location…" : isBug ? "How would you fix this?" : "Share your idea for improvement…"}
                   value={form.suggestion}
                   onChange={(e) => update("suggestion", e.target.value)}
                   maxLength={2000}
