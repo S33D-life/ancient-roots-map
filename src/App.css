@@ -14,8 +14,8 @@ html {
   animation: offering-pulse var(--pulse-duration, 3.6s) var(--pulse-ease, ease-in-out) infinite;
 }
 @keyframes offering-pulse {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.1); }
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.08); }
 }
 .offering-count-badge {
   background: transparent !important;

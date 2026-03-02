@@ -98,13 +98,13 @@ const FireflyFAB = () => {
     setPos(newPos);
     setXY(posToXY(newPos));
     savePos(newPos);
-    console.info("[Firefly] firefly_snap_edge", { edge });
+    // snap silently
   }, []);
 
   const handleTap = useCallback(() => {
     if (debounceRef.current) return;
     debounceRef.current = true;
-    console.info("[Firefly] firefly_opened", { route: window.location.pathname });
+    // open panel
     setPanelOpen(true);
     setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
   }, []);
@@ -126,7 +126,7 @@ const FireflyFAB = () => {
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       e.stopPropagation();
     } catch (err) {
-      console.warn("[Firefly] pointerDown error", err);
+      // pointerDown error — ignore
       isDragging.current = false;
     }
   }, []);
@@ -139,7 +139,6 @@ const FireflyFAB = () => {
 
     if (!dragConfirmed.current && totalMoved.current >= DRAG_THRESHOLD) {
       dragConfirmed.current = true;
-      console.info("[Firefly] firefly_dragged");
     }
 
     if (dragConfirmed.current) {
@@ -166,12 +165,12 @@ const FireflyFAB = () => {
         snapToEdge(xyRef.current.x, xyRef.current.y);
       }
     } catch (err) {
-      console.error("[Firefly] pointerUp error", err);
+      // pointerUp error — ignore
     }
   }, [snapToEdge, handleTap]);
 
   const handleSelectAction = useCallback((type: string) => {
-    console.info("[Firefly] spark_dialog_opened", { type });
+    // action selected
     setPreselectedType(type);
     setDialogEverOpened(true);
     setDialogOpen(true);
