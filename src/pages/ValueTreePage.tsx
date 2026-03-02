@@ -34,6 +34,8 @@ interface ValueNode {
   verification?: string;
   children?: ValueNode[];
   status?: "active" | "experimental" | "seasonal" | "coming_soon";
+  /** Deep-link to the action that earns this reward */
+  actionLink?: string;
 }
 
 interface ProposalNode {
@@ -60,6 +62,7 @@ const ROOT_ACTIONS: ValueNode[] = [
     ],
     cooldown: "3 per tree per day",
     verification: "Self-reported",
+    actionLink: "/map",
     children: [
       {
         id: "checkin-offering",
@@ -73,6 +76,7 @@ const ROOT_ACTIONS: ValueNode[] = [
         ],
         cooldown: "3 per tree per day",
         verification: "Content quality check",
+        actionLink: "/map",
       },
     ],
   },
@@ -87,6 +91,7 @@ const ROOT_ACTIONS: ValueNode[] = [
       { token: "influence", amount: "2", note: "If verified or high-quality" },
     ],
     verification: "Location + species + photo recommended",
+    actionLink: "/add-tree",
     children: [
       {
         id: "mapping-complete",
@@ -99,6 +104,7 @@ const ROOT_ACTIONS: ValueNode[] = [
           { token: "influence", amount: "3" },
         ],
         verification: "All fields completed",
+        actionLink: "/add-tree",
       },
     ],
   },
@@ -111,6 +117,7 @@ const ROOT_ACTIONS: ValueNode[] = [
       { token: "s33d", amount: "1-5" },
       { token: "species", amount: "1" },
     ],
+    actionLink: "/map",
     children: [
       {
         id: "offering-quality",
@@ -123,6 +130,7 @@ const ROOT_ACTIONS: ValueNode[] = [
           { token: "influence", amount: "1" },
         ],
         verification: "Minimum content threshold",
+        actionLink: "/map",
       },
     ],
   },
@@ -136,6 +144,7 @@ const ROOT_ACTIONS: ValueNode[] = [
     ],
     cooldown: "Rate-limited",
     verification: "Peer review for higher tiers",
+    actionLink: "/map",
     children: [
       {
         id: "curation-verify",
@@ -143,6 +152,7 @@ const ROOT_ACTIONS: ValueNode[] = [
         description: "Confirm species, location, or age data.",
         icon: <Check className="w-4 h-4" />,
         rewards: [{ token: "influence", amount: "2" }],
+        actionLink: "/map",
       },
       {
         id: "curation-metadata",
@@ -150,6 +160,7 @@ const ROOT_ACTIONS: ValueNode[] = [
         description: "Species, accessibility tags, story notes.",
         icon: <Leaf className="w-4 h-4" />,
         rewards: [{ token: "influence", amount: "1-3" }],
+        actionLink: "/map",
       },
       {
         id: "curation-resolve",
@@ -158,6 +169,7 @@ const ROOT_ACTIONS: ValueNode[] = [
         icon: <GitBranch className="w-4 h-4" />,
         rewards: [{ token: "influence", amount: "3" }],
         verification: "Curator approval",
+        actionLink: "/map",
       },
     ],
   },
@@ -171,6 +183,7 @@ const ROOT_ACTIONS: ValueNode[] = [
       { token: "influence", amount: "1" },
     ],
     verification: "Cross-referenced by multiple wanderers",
+    actionLink: "/map",
   },
 ];
 
@@ -293,6 +306,7 @@ const TokenBadge = ({ token, amount, note }: RewardOutput) => {
 
 const TreeNode = ({ node, depth = 0 }: { node: ValueNode; depth?: number }) => {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
   const hasChildren = node.children && node.children.length > 0;
 
   return (
@@ -357,21 +371,28 @@ const TreeNode = ({ node, depth = 0 }: { node: ValueNode; depth?: number }) => {
               ))}
             </div>
 
-            {/* Meta row */}
-            {(node.cooldown || node.verification) && (
-              <div className="flex flex-wrap gap-3 mt-2 text-[10px] text-muted-foreground/70 font-serif">
-                {node.cooldown && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {node.cooldown}
-                  </span>
-                )}
-                {node.verification && (
-                  <span className="flex items-center gap-1">
-                    <Check className="w-3 h-3" /> {node.verification}
-                  </span>
-                )}
-              </div>
-            )}
+            {/* Meta row + action link */}
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-muted-foreground/70 font-serif">
+              {node.cooldown && (
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {node.cooldown}
+                </span>
+              )}
+              {node.verification && (
+                <span className="flex items-center gap-1">
+                  <Check className="w-3 h-3" /> {node.verification}
+                </span>
+              )}
+              {node.actionLink && (
+                <span
+                  role="link"
+                  className="flex items-center gap-1 text-primary/70 hover:text-primary cursor-pointer transition-colors"
+                  onClick={(e) => { e.stopPropagation(); navigate(node.actionLink!); }}
+                >
+                  <ArrowRight className="w-3 h-3" /> Do this now
+                </span>
+              )}
+            </div>
           </div>
         </button>
       </div>

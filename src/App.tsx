@@ -184,9 +184,9 @@ const App = () => {
                 <Route path="/visits" element={<VisitsPage />} />
                 <Route path="/referrals" element={<ReferralsPage />} />
                 <Route path="/install" element={<InstallPage />} />
-                <Route path="/share-simulator" element={<ShareSimulatorPage />} />
+                {ShowDevPanel && <Route path="/share-simulator" element={<ShareSimulatorPage />} />}
                 <Route path="/incoming-share" element={<IncomingSharePage />} />
-                <Route path="/test-lab" element={<TestLabPage />} />
+                {ShowDevPanel && <Route path="/test-lab" element={<TestLabPage />} />}
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/curator" element={<CuratorPage />} />
                 <Route path="/sync" element={<SyncDashboardPage />} />
@@ -211,7 +211,7 @@ const App = () => {
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 <Route path="/whispers" element={<WhispersPage />} />
                 <Route path="/time-tree" element={<TimeTreePage />} />
-                <Route path="/api/docs" element={<ApiDocsPage />} />
+                {ShowDevPanel && <Route path="/api/docs" element={<ApiDocsPage />} />}
                 <Route path="/bug-garden" element={<BugGardenPage />} />
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
                 <Route path="/press" element={<PressPage />} />

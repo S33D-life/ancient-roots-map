@@ -1,7 +1,6 @@
-import { TreeDeciduous, Smartphone, Sparkles } from "lucide-react";
+import { TreeDeciduous, Smartphone, Sparkles, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
-import FooterSupportMenu from "@/components/FooterSupportMenu";
 
 const Footer = () => {
   const Dot = () => <span className="text-border/40 select-none" aria-hidden>·</span>;
@@ -20,7 +19,10 @@ const Footer = () => {
             <span className="font-serif">s33d.life</span>
           </div>
           <Dot />
-          <FooterSupportMenu />
+          <Link to="/support" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
+            <Heart className="w-3 h-3" />
+            Support
+          </Link>
           <Dot />
           <Link to="/install" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
             <Smartphone className="w-3 h-3" />
