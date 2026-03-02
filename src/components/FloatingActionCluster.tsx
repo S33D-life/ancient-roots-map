@@ -1,17 +1,19 @@
 /**
  * FloatingActionCluster — unified expandable FAB that consolidates
- * Atlas, Council Spark, and Locate into a single touch point.
+ * Atlas and Council Spark into a single touch point.
+ * 
+ * Location/"Find me" has been consolidated into the map's unified
+ * Locate button — see useGeolocation hook.
  */
 import { useState, useCallback, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Locate } from "lucide-react";
+import { Plus } from "lucide-react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
 import { Z } from "@/lib/z-index";
 import BugReportDialog from "@/components/BugReportDialog";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
-import { toast } from "sonner";
 
 /** Globe resting on an open book – compact SVG icon */
 const GlobeOnBook = ({ className }: { className?: string }) => (
@@ -32,7 +34,7 @@ interface FabItem {
   key: string;
   icon: React.ReactNode;
   label: string;
-  action: "link" | "dialog" | "locate";
+  action: "link" | "dialog";
   to?: string;
 }
 
@@ -42,7 +44,6 @@ const FloatingActionCluster = () => {
   const [open, setOpen] = useState(false);
   const [sparkDialogOpen, setSparkDialogOpen] = useState(false);
   const sparkDebounceRef = useRef(false);
-  const [locating, setLocating] = useState(false);
 
   const handleSparkClick = useCallback(() => {
     // 600ms debounce to prevent double-tap crash
@@ -53,33 +54,11 @@ const FloatingActionCluster = () => {
     setTimeout(() => { sparkDebounceRef.current = false; }, 600);
   }, []);
 
-  const handleLocate = useCallback(() => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not available");
-      return;
-    }
-    setLocating(true);
-    setOpen(false);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocating(false);
-        const url = `/map?lat=${pos.coords.latitude.toFixed(5)}&lng=${pos.coords.longitude.toFixed(5)}&zoom=14`;
-        window.location.href = url;
-      },
-      () => {
-        setLocating(false);
-        toast.error("Could not determine location");
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  }, []);
-
   if (!allowed) return null;
 
   const items: FabItem[] = [
     { key: "atlas", icon: <GlobeOnBook className="w-4 h-4" />, label: "Atlas", action: "link", to: "/atlas" },
     { key: "spark", icon: <CouncilSparkIcon className="w-4 h-4" />, label: "Spark", action: "dialog" },
-    { key: "locate", icon: <Locate className="w-4 h-4" />, label: "Find me", action: "locate" },
   ];
 
   return (
@@ -124,7 +103,7 @@ const FloatingActionCluster = () => {
                 >
                   {item.icon}
                 </Link>
-              ) : item.action === "dialog" ? (
+              ) : (
                 <button
                   onClick={handleSparkClick}
                   className="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95 relative"
@@ -140,20 +119,6 @@ const FloatingActionCluster = () => {
                     className="absolute inset-0 rounded-full animate-pulse opacity-15 pointer-events-none"
                     style={{ boxShadow: "0 0 10px 2px hsl(var(--primary) / 0.3)" }}
                   />
-                </button>
-              ) : (
-                <button
-                  onClick={handleLocate}
-                  disabled={locating}
-                  className="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95"
-                  style={{
-                    background: "hsl(var(--card) / 0.9)",
-                    color: locating ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-                    border: "1px solid hsl(var(--border) / 0.4)",
-                    backdropFilter: "blur(12px)",
-                  }}
-                >
-                  <Locate className={`w-4 h-4 ${locating ? "animate-pulse" : ""}`} />
                 </button>
               )}
             </motion.div>
