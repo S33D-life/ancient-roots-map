@@ -1,19 +1,28 @@
 /**
  * CosmicClock — Minimal cosmic rhythm indicator
- * Shows lunar phase, season, and daily reset countdown.
- * Designed to be calm, lightweight, and informative.
+ * Shows lunar phase, season, daily reset countdown, and optional Mayan day.
  */
+import { useEffect, useState } from "react";
 import { useCosmicClock } from "@/hooks/use-cosmic-clock";
+import { useCalendarLenses } from "@/hooks/use-calendar-lenses";
+import { formatTzolkinLabel } from "@/utils/mayanTzolkin";
+import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 
 interface Props {
-  /** Show full detail (vault mode) vs compact (header mode) */
   variant?: "compact" | "full";
 }
 
 const CosmicClock = ({ variant = "compact" }: Props) => {
   const { lunar, season, countdown, now } = useCosmicClock();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id || null));
+  }, []);
+
+  const { todayMayan } = useCalendarLenses(userId);
 
   const countdownStr = `${String(countdown.hours).padStart(2, "0")}:${String(countdown.minutes).padStart(2, "0")}:${String(countdown.seconds).padStart(2, "0")}`;
 
@@ -28,11 +37,13 @@ const CosmicClock = ({ variant = "compact" }: Props) => {
             >
               <span>{lunar.emoji}</span>
               <span>{season.emoji}</span>
+              {todayMayan && <span className="text-[9px] opacity-60">{todayMayan.signGlyph}</span>}
               <span className="tabular-nums text-[10px] text-muted-foreground/60">{countdownStr}</span>
             </Link>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs max-w-[200px]">
+          <TooltipContent side="bottom" className="text-xs max-w-[220px]">
             <p className="font-medium">{lunar.phaseName} · {season.label}</p>
+            {todayMayan && <p className="text-muted-foreground">{formatTzolkinLabel(todayMayan)}</p>}
             <p className="text-muted-foreground">Daily reset in {countdown.hours}h {countdown.minutes}m</p>
           </TooltipContent>
         </Tooltip>
@@ -40,7 +51,7 @@ const CosmicClock = ({ variant = "compact" }: Props) => {
     );
   }
 
-  // Full variant — for Vault / Dashboard
+  // Full variant
   return (
     <div className="p-4 rounded-xl bg-card/60 backdrop-blur border border-border/30 space-y-3">
       <div className="flex items-center justify-between">
@@ -50,7 +61,7 @@ const CosmicClock = ({ variant = "compact" }: Props) => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className={`grid ${todayMayan ? "grid-cols-4" : "grid-cols-3"} gap-3`}>
         {/* Lunar */}
         <div className="text-center space-y-1">
           <span className="text-2xl">{lunar.emoji}</span>
@@ -67,6 +78,15 @@ const CosmicClock = ({ variant = "compact" }: Props) => {
           </p>
         </div>
 
+        {/* Mayan (if enabled) */}
+        {todayMayan && (
+          <div className="text-center space-y-1">
+            <span className="text-2xl">{todayMayan.signGlyph}</span>
+            <p className="text-[10px] font-serif text-muted-foreground leading-tight">{formatTzolkinLabel(todayMayan)}</p>
+            <p className="text-[9px] text-muted-foreground/50 italic">Tzolkin</p>
+          </div>
+        )}
+
         {/* Reset */}
         <div className="text-center space-y-1">
           <span className="text-2xl">⏳</span>
@@ -74,9 +94,6 @@ const CosmicClock = ({ variant = "compact" }: Props) => {
           <p className="text-[9px] tabular-nums text-muted-foreground/50">{countdownStr}</p>
         </div>
       </div>
-
-      {/* Next cosmic event */}
-      {/* Shown via calendar link */}
     </div>
   );
 };
