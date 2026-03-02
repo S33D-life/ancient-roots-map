@@ -139,7 +139,7 @@ export const WisdomOfTheGrove = () => {
         .from("user_heart_balances")
         .select("s33d_hearts")
         .eq("user_id", user.user.id)
-        .single();
+        .maybeSingle();
       setHeartCount(data?.s33d_hearts ?? 0);
     };
     fetchHearts();

@@ -65,7 +65,7 @@ export function useWallet(userId?: string) {
         .from("profiles")
         .select("wallet_address, active_staff_id")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
       // Load active staff from DB regardless of wallet connection
       if ((data as any)?.active_staff_id) {
@@ -173,7 +173,7 @@ export function useWallet(userId?: string) {
       .from("profiles")
       .select("active_staff_id")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (!(profile as any)?.active_staff_id && staffs.length > 0) {
       await setActiveStaff(staffs[0].code);
@@ -212,7 +212,7 @@ export function useWallet(userId?: string) {
         .from("staffs")
         .select("*")
         .eq("id", staffId)
-        .single();
+        .maybeSingle();
       setState(prev => ({ ...prev, activeStaff: data as unknown as CachedStaff }));
       localStorage.setItem("linked_staff_code", staffId);
       localStorage.setItem("linked_staff_name", (data as any)?.species || staffId);

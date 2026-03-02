@@ -27,7 +27,7 @@ function WhisperCard({ whisper, variant }: { whisper: TreeWhisper; variant: "wai
       .from("trees")
       .select("name")
       .eq("id", whisper.tree_anchor_id)
-      .single()
+      .maybeSingle()
       .then(({ data }) => setTreeName(data?.name || "Unknown"));
   }, [whisper.tree_anchor_id]);
 

@@ -111,14 +111,25 @@ export function useExternalWisdom() {
 
   useEffect(() => {
     const fetchWisdom = async () => {
-      // Check cache first
+      // Fallback quotes pool — no external API dependency
+      const FALLBACK_QUOTES: ExternalWisdom[] = [
+        { quote_text: "The clearest way into the Universe is through a forest wilderness.", author_name: "John Muir", source_title: null },
+        { quote_text: "In every walk with nature one receives far more than he seeks.", author_name: "John Muir", source_title: null },
+        { quote_text: "The creation of a thousand forests is in one acorn.", author_name: "Ralph Waldo Emerson", source_title: null },
+        { quote_text: "A society grows great when old men plant trees in whose shade they shall never sit.", author_name: "Greek Proverb", source_title: null },
+        { quote_text: "He that plants trees loves others besides himself.", author_name: "Thomas Fuller", source_title: null },
+        { quote_text: "Trees are poems that the earth writes upon the sky.", author_name: "Kahlil Gibran", source_title: null },
+        { quote_text: "Between every two pines is a doorway to a new world.", author_name: "John Muir", source_title: null },
+      ];
+
+      // Check cache first — use .maybeSingle() to avoid 406 on empty result
       const { data: cached } = await supabase
         .from("external_wisdom_cache")
         .select("*")
         .gte("expires_at", new Date().toISOString())
         .order("fetched_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (cached) {
         setWisdom({
@@ -130,36 +141,9 @@ export function useExternalWisdom() {
         return;
       }
 
-      // Fetch from Quotable API
-      try {
-        const res = await fetch("https://api.quotable.io/quotes/random?limit=1", {
-          signal: AbortSignal.timeout(5000),
-        });
-        if (res.ok) {
-          const [quote] = await res.json();
-          const wisdom: ExternalWisdom = {
-            quote_text: quote.content,
-            author_name: quote.author,
-            source_title: null,
-          };
-          setWisdom(wisdom);
-
-          // Cache it
-          await supabase.from("external_wisdom_cache").insert({
-            provider: "quotable",
-            quote_text: wisdom.quote_text,
-            author_name: wisdom.author_name,
-            source_title: wisdom.source_title,
-          });
-        }
-      } catch {
-        // Fallback static quote if API fails
-        setWisdom({
-          quote_text: "The clearest way into the Universe is through a forest wilderness.",
-          author_name: "John Muir",
-          source_title: null,
-        });
-      }
+      // Use local fallback (quotable.io is defunct)
+      const pick = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
+      setWisdom(pick);
       setLoading(false);
     };
 

@@ -264,7 +264,7 @@ export default function StaffCeremony({ onComplete, onCancel }: StaffCeremonyPro
       .from("staffs")
       .select("*")
       .eq("id", state.staffCode.trim().toUpperCase())
-      .single();
+      .maybeSingle();
 
     if (data) {
       update({
