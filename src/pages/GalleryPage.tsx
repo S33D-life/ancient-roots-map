@@ -77,6 +77,7 @@ import TreeCard from "@/components/TreeCard";
 import TetolBridge from "@/components/TetolBridge";
 import GalleryFilterDrawer from "@/components/GalleryFilterDrawer";
 import PersonalBookshelf from "@/components/PersonalBookshelf";
+const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
 
 interface Tree {
   id: string;
@@ -107,7 +108,7 @@ interface WishlistItem {
   trees: Tree;
 }
 
-const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "scrolls", "vault", "bookshelf"];
+const VALID_ROOMS = ["staff-room", "gallery", "music-room", "greenhouse", "wishlist", "seed-cellar", "creators-path", "rhythms", "scrolls", "vault", "bookshelf"];
 
 // Friendly URL aliases so links like /library/ancient-friends resolve correctly
 const ROOM_ALIASES: Record<string, string> = {
@@ -118,6 +119,9 @@ const ROOM_ALIASES: Record<string, string> = {
   "ledger": "scrolls",
   "volumes": "scrolls",
   "archive": "scrolls",
+  "markets": "rhythms",
+  "cycle-market": "rhythms",
+  "cycle-markets": "rhythms",
 };
 
 /** Collective Vault card for DAOs */
@@ -1497,6 +1501,13 @@ const GalleryPage = () => {
                 />
               </div>
             </div>
+          </TabsContent>
+
+          {/* Rhythms — Cycle Market */}
+          <TabsContent value="rhythms" className="space-y-6">
+            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+              <CycleMarketRoom />
+            </Suspense>
           </TabsContent>
 
           {/* Hidden Vault Room — revealed by whistle (legacy access) */}

@@ -40,9 +40,9 @@ const councilRooms = [
   {
     id: "markets",
     title: "Cycle Markets",
-    description: "Stake seeds on nature's predictions",
+    description: "Participatory ecological forecasting",
     icon: BarChart3,
-    internalUrl: "/markets",
+    internalUrl: "/library/rhythms",
   },
   {
     id: "next",

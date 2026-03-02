@@ -1277,6 +1277,92 @@ export type Database = {
           },
         ]
       }
+      council_market_links: {
+        Row: {
+          council_id: string
+          created_at: string
+          id: string
+          linked_by: string
+          market_id: string
+          notes: string | null
+        }
+        Insert: {
+          council_id: string
+          created_at?: string
+          id?: string
+          linked_by: string
+          market_id: string
+          notes?: string | null
+        }
+        Update: {
+          council_id?: string
+          created_at?: string
+          id?: string
+          linked_by?: string
+          market_id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_market_links_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "council_market_links_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      council_participation_rewards: {
+        Row: {
+          council_id: string
+          created_at: string
+          gathering_date: string
+          hearts_awarded: number
+          id: string
+          influence_awarded: number
+          notes: string | null
+          reward_type: string
+          user_id: string
+        }
+        Insert: {
+          council_id: string
+          created_at?: string
+          gathering_date: string
+          hearts_awarded?: number
+          id?: string
+          influence_awarded?: number
+          notes?: string | null
+          reward_type?: string
+          user_id: string
+        }
+        Update: {
+          council_id?: string
+          created_at?: string
+          gathering_date?: string
+          hearts_awarded?: number
+          id?: string
+          influence_awarded?: number
+          notes?: string | null
+          reward_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_participation_rewards_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       council_trees: {
         Row: {
           council_id: string
