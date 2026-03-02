@@ -2967,6 +2967,33 @@ export type Database = {
           },
         ]
       }
+      presence_streaks: {
+        Row: {
+          current_streak: number
+          last_presence_date: string | null
+          longest_streak: number
+          total_sessions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_presence_date?: string | null
+          longest_streak?: number
+          total_sessions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_presence_date?: string | null
+          longest_streak?: number
+          total_sessions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       press_chapters: {
         Row: {
           artwork_url: string | null
@@ -4512,9 +4539,11 @@ export type Database = {
           completed_at: string
           created_at: string
           duration_seconds: number
+          geo_validated: boolean
           hearts_awarded: number
           id: string
           reflection: string | null
+          streak_day: number
           tree_id: string
           user_id: string
         }
@@ -4522,9 +4551,11 @@ export type Database = {
           completed_at?: string
           created_at?: string
           duration_seconds?: number
+          geo_validated?: boolean
           hearts_awarded?: number
           id?: string
           reflection?: string | null
+          streak_day?: number
           tree_id: string
           user_id: string
         }
@@ -4532,9 +4563,11 @@ export type Database = {
           completed_at?: string
           created_at?: string
           duration_seconds?: number
+          geo_validated?: boolean
           hearts_awarded?: number
           id?: string
           reflection?: string | null
+          streak_day?: number
           tree_id?: string
           user_id?: string
         }
