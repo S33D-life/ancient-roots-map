@@ -39,6 +39,30 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     icon: "🏔️",
     provinceKey: "Valais",
   },
+  {
+    name: "Zürich (ZH)",
+    slug: "zurich",
+    countrySlug: "switzerland",
+    tagline: "Lakeside limes, urban oaks & Sihl valley elders",
+    icon: "🏙️",
+    provinceKey: "Zürich",
+  },
+  {
+    name: "Genève (GE)",
+    slug: "geneva",
+    countrySlug: "switzerland",
+    tagline: "Lakeside plane trees, Rhône guardians & park sentinels",
+    icon: "⛲",
+    provinceKey: "Genève",
+  },
+  {
+    name: "Basel-Stadt (BS)",
+    slug: "basel-stadt",
+    countrySlug: "switzerland",
+    tagline: "Rhine elders, botanical treasures & urban heritage trees",
+    icon: "🌉",
+    provinceKey: "Basel-Stadt",
+  },
 
   // Indonesia — Island Regions
   {
