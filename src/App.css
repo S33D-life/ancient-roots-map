@@ -4,13 +4,18 @@
   min-height: 100dvh;
 }
 
-/* Offering glow pulse animation */
+/* Smooth scroll behaviour — no snap, gentle easing */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Offering glow pulse animation — toned down */
 .offering-glow-outer {
-  animation: offering-pulse 2.5s ease-in-out infinite;
+  animation: offering-pulse 3s ease-in-out infinite;
 }
 @keyframes offering-pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.15); }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
 }
 .offering-count-badge {
   background: transparent !important;
