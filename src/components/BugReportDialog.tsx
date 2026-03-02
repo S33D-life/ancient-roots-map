@@ -113,6 +113,7 @@ function guessFeatureArea(path: string): string {
 interface BugReportDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  initialReportType?: string;
 }
 
 /** Native <select> fallback for stability */
@@ -156,7 +157,7 @@ const ScreenshotThumb = ({ file, onRemove }: { file: File; onRemove: () => void 
   );
 };
 
-const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) => {
+const BugReportDialog = ({ open = false, onOpenChange, initialReportType }: BugReportDialogProps) => {
   const location = useLocation();
   const setOpen = onOpenChange ?? (() => {});
   const [submitting, setSubmitting] = useState(false);
@@ -189,9 +190,16 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
     severity: "minor",
     frequency: "once",
     feature_area: guessFeatureArea(location.pathname),
-    report_type: "bug",
+    report_type: initialReportType || "bug",
     include_diagnostics: SPARK_FLAGS.ENABLE_DIAGNOSTICS,
   });
+
+  // Sync initialReportType when it changes (from Firefly panel)
+  useEffect(() => {
+    if (initialReportType && open) {
+      setForm(f => ({ ...f, report_type: initialReportType }));
+    }
+  }, [initialReportType, open]);
 
   const isBug = form.report_type === "bug";
   const isTreeSuggestion = form.report_type === "suggest_tree";
@@ -344,12 +352,12 @@ const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) =
         {submitted ? (
           <div className="py-8 text-center space-y-4">
             <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
-              style={{ background: 'hsl(var(--primary) / 0.15)' }}>
-              <CouncilSparkIcon className="w-8 h-8 text-primary" />
+              style={{ background: 'radial-gradient(circle, hsl(48 90% 65% / 0.3), hsl(38 80% 45% / 0.1))' }}>
+              <span className="text-3xl">✦</span>
             </div>
             <h3 className="font-serif text-lg text-foreground">Spark Planted ✨</h3>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              Thank you, Wanderer. Your spark will be reviewed and Hearts awarded when validated.
+              Thank you, Wanderer. Your firefly spark will be reviewed and Hearts awarded when validated.
             </p>
             <div className="text-xs text-muted-foreground/60 bg-muted/30 rounded-lg p-3 max-w-xs mx-auto">
               <p className="font-medium text-primary/80 mb-1">{REWARD_HINTS[form.report_type]}</p>

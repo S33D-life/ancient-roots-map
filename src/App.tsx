@@ -21,7 +21,7 @@ import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 import AppUpdateBanner from "@/components/AppUpdateBanner";
-import DraggableSparkFAB from "@/components/DraggableSparkFAB";
+import FireflyFAB from "@/components/FireflyFAB";
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
@@ -152,7 +152,7 @@ const App = () => {
           <MapFilterProvider>
           <UIFlowProvider>
             <BottomNav />
-            <DraggableSparkFAB />
+            <FireflyFAB />
             <Suspense fallback={null}>
               <ProximityNudge />
               <OfflineSyncBanner />

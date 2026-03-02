@@ -521,11 +521,11 @@ const EarnBranch = () => {
       },
       {
         id: "bug-report",
-        label: "Report a Bug 🐞",
-        description: "Help improve the ecosystem. Verified bugs earn Hearts.",
+        label: "Firefly Contribution 🐞✨💡🌳",
+        description: "Report bugs, suggest improvements, share insights, or propose trees. Validated contributions earn Hearts.",
         icon: <Bug className="w-5 h-5" />,
         category: "Care",
-        estimatedReward: "+5-25 ❤️",
+        estimatedReward: "+3-25 ❤️",
         link: "/bug-garden",
         ready: true,
         priority: 7,
@@ -634,6 +634,28 @@ const EarnBranch = () => {
           <Link to="/how-hearts-work" className="text-[11px] font-serif text-primary hover:underline mt-2 inline-block">
             Learn how Hearts work →
           </Link>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card/40 backdrop-blur border-primary/15 mt-4">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-base">✦</span>
+            <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Firefly Contributions</h4>
+          </div>
+          <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mb-3">
+            Use the floating <span className="text-primary">Firefly ✦</span> button to report bugs, suggest improvements, share insights, or propose trees.
+            Validated contributions earn Hearts:
+          </p>
+          <div className="space-y-1.5 text-[11px] font-serif">
+            <div className="flex justify-between"><span className="text-muted-foreground">🐞 Valid bug report</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+3–20 ❤️</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">✨ Accepted UX refinement</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5–15 ❤️</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">💡 High-value insight</span><span style={{ color: "hsl(0, 65%, 55%)" }}>variable ❤️</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">🌳 Verified tree suggestion</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5–25 ❤️</span></div>
+          </div>
+          <p className="text-[10px] text-muted-foreground/60 font-serif mt-3">
+            Hearts are awarded when your contribution is reviewed and validated. Look for the glowing ✦ orb at the edge of your screen.
+          </p>
         </CardContent>
       </Card>
 
