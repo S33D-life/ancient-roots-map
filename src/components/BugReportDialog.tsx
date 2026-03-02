@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Shield, Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye } from "lucide-react";
+import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -23,11 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 
 const REPORT_TYPES = [
-  { value: "bug", label: "🐞 Bug", desc: "Something is broken or wrong" },
-  { value: "ux_improvement", label: "✨ UX Improvement", desc: "Make something better" },
-  { value: "insight", label: "💡 System Insight", desc: "Share a deeper observation" },
+  { value: "bug", label: "🐞 Something isn't working", short: "🐞", desc: "Report a technical issue" },
+  { value: "ux_improvement", label: "🌿 This could flow better", short: "🌿", desc: "Suggest a refinement" },
+  { value: "insight", label: "🌞 I have an idea", short: "🌞", desc: "Propose an evolution" },
 ] as const;
 
 const FEATURE_AREAS = [
@@ -40,6 +41,7 @@ const FEATURE_AREAS = [
   { value: "wishing_tree", label: "Wishing Tree" },
   { value: "time_tree", label: "Time Tree" },
   { value: "offerings", label: "Offerings" },
+  { value: "council", label: "Council" },
   { value: "account", label: "Account" },
   { value: "radio", label: "Radio" },
   { value: "library", label: "Library" },
@@ -49,10 +51,10 @@ const FEATURE_AREAS = [
 ] as const;
 
 const SEVERITIES = [
-  { value: "blocker", label: "🔴 Critical", desc: "App is broken" },
-  { value: "major", label: "🟠 Major", desc: "Feature doesn't work" },
-  { value: "minor", label: "🟡 Minor", desc: "Works but wrong" },
-  { value: "cosmetic", label: "🔵 Cosmetic", desc: "Visual issue" },
+  { value: "blocker", label: "🔴 Critical" },
+  { value: "major", label: "🟠 Major" },
+  { value: "minor", label: "🟡 Minor" },
+  { value: "cosmetic", label: "🔵 Cosmetic" },
 ] as const;
 
 const FREQUENCIES = [
@@ -63,7 +65,7 @@ const FREQUENCIES = [
 
 const REWARD_HINTS: Record<string, string> = {
   bug: "Valid bugs earn 3–20 Hearts depending on severity",
-  ux_improvement: "Accepted improvements earn 5–15 Hearts",
+  ux_improvement: "Accepted refinements earn 5–15 Hearts",
   insight: "High-value insights earn variable Hearts",
 };
 
@@ -98,7 +100,7 @@ function guessFeatureArea(path: string): string {
   if (path.startsWith("/dashboard") || path.startsWith("/hearth")) return "hearth";
   if (path.startsWith("/vault") || path.startsWith("/heartwood")) return "heartwood";
   if (path.startsWith("/time-tree")) return "time_tree";
-  if (path.startsWith("/council")) return "offerings";
+  if (path.startsWith("/council")) return "council";
   if (path.startsWith("/library")) return "library";
   if (path.startsWith("/radio")) return "radio";
   if (path.startsWith("/groves")) return "groves";
@@ -111,7 +113,6 @@ function guessFeatureArea(path: string): string {
 interface BugReportDialogProps {
   trigger?: React.ReactNode;
   defaultOpen?: boolean;
-  /** Controlled mode — pass open + onOpenChange to manage externally */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -233,7 +234,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       const { error } = await supabase.from("bug_reports").insert(payload as any);
       if (error) {
         if (error.message.includes("rate limit")) {
-          toast.error("You've reached the daily limit (3 reports). Try again tomorrow!");
+          toast.error("You've reached the daily limit (3 sparks). Try again tomorrow!");
         } else {
           throw error;
         }
@@ -256,14 +257,13 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       <DialogTrigger asChild>
         {trigger ?? (
           <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-            <Shield className="w-3.5 h-3.5" />
-            Bounty Hunter
+            <CouncilSparkIcon className="w-3.5 h-3.5" />
+            Council Spark
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
         {submitted ? (
-          /* ── Success confirmation ── */
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -271,30 +271,32 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
           >
             <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
               style={{ background: 'hsl(var(--primary) / 0.15)' }}>
-              <Shield className="w-8 h-8 text-primary" />
+              <CouncilSparkIcon className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="font-serif text-lg text-foreground">Contribution Received</h3>
+            <h3 className="font-serif text-lg text-foreground">Spark Planted ✨</h3>
             <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-              Thank you, Wanderer. Your report will be reviewed and Hearts awarded when validated.
+              Thank you, Wanderer. Your spark will be reviewed and Hearts awarded when validated.
             </p>
             <div className="text-xs text-muted-foreground/60 bg-muted/30 rounded-lg p-3 max-w-xs mx-auto">
               <p className="font-medium text-primary/80 mb-1">{REWARD_HINTS[form.report_type]}</p>
-              <p>You'll be notified when your contribution is reviewed.</p>
+              <p>Each refinement strengthens both the digital garden and the living one.</p>
             </div>
             <Button onClick={() => { reset(); setOpen(false); }} variant="outline" className="mt-2 font-serif">
               Close
             </Button>
           </motion.div>
         ) : (
-          /* ── Report form ── */
           <>
             <DialogHeader>
               <DialogTitle className="font-serif flex items-center gap-2">
-                <Shield className="w-5 h-5 text-primary" />
-                Bounty Hunter
+                <CouncilSparkIcon className="w-5 h-5 text-primary" />
+                Offer a Spark
               </DialogTitle>
-              <p className="text-xs text-muted-foreground font-serif">
-                Help strengthen the garden. Earn Hearts.
+              <p className="text-xs text-muted-foreground font-serif italic">
+                Help the garden flow more beautifully.
+              </p>
+              <p className="text-[10px] text-muted-foreground/50 mt-1">
+                Not everything is broken. Sometimes it simply wants to evolve.
               </p>
             </DialogHeader>
 
@@ -306,24 +308,24 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                     key={t.value}
                     type="button"
                     onClick={() => update("report_type", t.value)}
-                    className={`text-center p-2 rounded-lg border text-xs font-serif transition-all ${
+                    className={`text-center p-2.5 rounded-lg border text-xs font-serif transition-all ${
                       form.report_type === t.value
                         ? "border-primary bg-primary/10 text-foreground"
                         : "border-border/40 text-muted-foreground hover:border-border"
                     }`}
                   >
-                    <div className="text-base mb-0.5">{t.label.split(" ")[0]}</div>
-                    <div className="text-[10px] leading-tight">{t.label.split(" ").slice(1).join(" ")}</div>
+                    <div className="text-lg mb-0.5">{t.short}</div>
+                    <div className="text-[10px] leading-tight">{t.value === "bug" ? "Not working" : t.value === "ux_improvement" ? "Flow better" : "Evolve this"}</div>
                   </button>
                 ))}
               </div>
 
               {/* Title */}
               <div className="space-y-1.5">
-                <Label htmlFor="bug-title">Title *</Label>
+                <Label htmlFor="spark-title">Title *</Label>
                 <Input
-                  id="bug-title"
-                  placeholder={form.report_type === "bug" ? "e.g. Map markers disappear on zoom" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy imbalance insight"}
+                  id="spark-title"
+                  placeholder={form.report_type === "bug" ? "e.g. Map markers disappear on zoom" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy insight"}
                   value={form.title}
                   onChange={(e) => update("title", e.target.value)}
                   maxLength={200}
@@ -332,11 +334,11 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
 
               {/* Description */}
               <div className="space-y-1.5">
-                <Label htmlFor="bug-actual">
-                  {form.report_type === "bug" ? "What happened? *" : form.report_type === "ux_improvement" ? "What could be better? *" : "What did you observe? *"}
+                <Label htmlFor="spark-actual">
+                  {form.report_type === "bug" ? "What happened? *" : form.report_type === "ux_improvement" ? "What could flow better? *" : "What did you observe? *"}
                 </Label>
                 <Textarea
-                  id="bug-actual"
+                  id="spark-actual"
                   placeholder={form.report_type === "bug" ? "Describe what went wrong…" : "Describe your observation…"}
                   value={form.actual}
                   onChange={(e) => update("actual", e.target.value)}
@@ -345,12 +347,12 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 />
               </div>
 
-              {/* Expected (required for bugs, optional otherwise) */}
+              {/* Expected (required for bugs) */}
               {form.report_type === "bug" && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="bug-expected">What did you expect? *</Label>
+                  <Label htmlFor="spark-expected">What did you expect? *</Label>
                   <Textarea
-                    id="bug-expected"
+                    id="spark-expected"
                     placeholder="What should have happened instead…"
                     value={form.expected}
                     onChange={(e) => update("expected", e.target.value)}
@@ -362,13 +364,13 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
 
               {/* Suggestion */}
               <div className="space-y-1.5">
-                <Label htmlFor="bug-suggestion" className="flex items-center gap-1">
+                <Label htmlFor="spark-suggestion" className="flex items-center gap-1">
                   <Lightbulb className="w-3 h-3" />
                   Suggestion
                   <span className="text-muted-foreground/50 text-[10px]">(optional)</span>
                 </Label>
                 <Textarea
-                  id="bug-suggestion"
+                  id="spark-suggestion"
                   placeholder="How would you improve this?"
                   value={form.suggestion}
                   onChange={(e) => update("suggestion", e.target.value)}
@@ -377,7 +379,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 />
               </div>
 
-              {/* Severity + Frequency row */}
+              {/* Severity + Feature Area */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Severity *</Label>
@@ -463,9 +465,9 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                     className="space-y-4 overflow-hidden"
                   >
                     <div className="space-y-1.5">
-                      <Label htmlFor="bug-steps">Steps to reproduce</Label>
+                      <Label htmlFor="spark-steps">Steps to reproduce</Label>
                       <Textarea
-                        id="bug-steps"
+                        id="spark-steps"
                         placeholder="1. Go to…&#10;2. Click on…&#10;3. See error"
                         value={form.steps}
                         onChange={(e) => update("steps", e.target.value)}
@@ -475,7 +477,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label>Frequency</Label>
+                      <Label>Reproducible?</Label>
                       <Select value={form.frequency} onValueChange={(v) => update("frequency", v)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -503,7 +505,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
 
               {/* Reward hint */}
               <div className="text-[10px] bg-primary/5 border border-primary/10 rounded-lg px-3 py-2 text-primary/70 font-serif">
-                💚 {REWARD_HINTS[form.report_type]}
+                ✨ {REWARD_HINTS[form.report_type]}
               </div>
 
               {/* Auto-captured context badge */}
@@ -519,8 +521,8 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
 
               {/* Submit */}
               <Button onClick={submit} disabled={submitting || uploading} className="w-full gap-2 font-serif">
-                {submitting || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <TypeIcon className="w-4 h-4" />}
-                {uploading ? "Uploading…" : submitting ? "Submitting…" : "Submit Bounty"}
+                {submitting || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {uploading ? "Uploading…" : submitting ? "Planting spark…" : "Plant this Spark"}
               </Button>
             </div>
           </>

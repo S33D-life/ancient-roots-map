@@ -1,15 +1,16 @@
 /**
- * BugGardenPage → "Bounty Board"
+ * BugGardenPage → "Council Spark Board"
  * Collective Build Layer — participatory refinement of the ecosystem.
  */
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Shield, ThumbsUp, ChevronRight, Filter, Loader2, Bug, Eye, Lightbulb, Heart, Image as ImageIcon } from "lucide-react";
+import { ThumbsUp, ChevronRight, Filter, Loader2, Bug, Eye, Lightbulb, Heart, Image as ImageIcon, Sparkles, Leaf } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BugReportDialog from "@/components/BugReportDialog";
+import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,10 +62,10 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  new: "🌱 New",
-  triaged: "📋 Triaged",
-  in_progress: "🔨 In Progress",
-  fixed: "✅ Fixed",
+  new: "🌱 Planted",
+  triaged: "📋 Reviewed",
+  in_progress: "🔨 Growing",
+  fixed: "✅ Integrated",
   released: "🚀 Released",
   duplicate: "🔗 Duplicate",
   wont_fix: "🚫 Won't Fix",
@@ -79,7 +80,7 @@ const TYPE_ICONS: Record<string, typeof Bug> = {
 
 const TYPE_LABELS: Record<string, string> = {
   bug: "Bug",
-  ux_improvement: "UX",
+  ux_improvement: "Flow",
   insight: "Insight",
 };
 
@@ -182,7 +183,7 @@ const BugGardenPage = () => {
     if (selectedBug?.id === bugId) {
       setSelectedBug({ ...selectedBug, hearts_awarded_total: selectedBug.hearts_awarded_total + amount, reward_state: "awarded" });
     }
-    toast.success(`💚 ${amount} Hearts awarded`);
+    toast.success(`✨ ${amount} Hearts awarded`);
     setCustomHearts("");
   };
 
@@ -204,7 +205,7 @@ const BugGardenPage = () => {
   const totalHeartsAwarded = bugs.reduce((s, b) => s + b.hearts_awarded_total, 0);
   const fixedCount = bugs.filter(b => ["fixed", "released"].includes(b.status)).length;
 
-  const BugCard = ({ bug }: { bug: BugReport }) => {
+  const SparkCard = ({ bug }: { bug: BugReport }) => {
     const TypeIcon = TYPE_ICONS[bug.report_type] || Bug;
     return (
       <motion.div
@@ -263,10 +264,10 @@ const BugGardenPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-serif text-2xl text-primary tracking-wide flex items-center gap-2">
-              <Shield className="w-6 h-6" /> Bounty Board
+              <CouncilSparkIcon className="w-6 h-6" /> Council Sparks
             </h1>
-            <p className="text-sm text-muted-foreground/70 font-serif">
-              Help strengthen the garden. Earn Hearts.
+            <p className="text-sm text-muted-foreground/70 font-serif italic">
+              Help the garden flow more beautifully.
             </p>
           </div>
           <BugReportDialog />
@@ -275,18 +276,28 @@ const BugGardenPage = () => {
         {/* Stats strip */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: "Reports", value: totalReports },
-            { label: "Resolved", value: fixedCount },
+            { label: "Sparks", value: totalReports, icon: Sparkles },
+            { label: "Integrated", value: fixedCount, icon: Leaf },
             { label: "Hearts Awarded", value: totalHeartsAwarded, icon: Heart },
-          ].map((s) => (
-            <div key={s.label} className="bg-card/50 border border-border/30 rounded-lg p-3 text-center">
-              <div className="text-lg font-serif text-foreground flex items-center justify-center gap-1">
-                {s.icon && <Heart className="w-3.5 h-3.5 text-primary fill-primary/30" />}
-                {s.value}
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <div key={s.label} className="bg-card/50 border border-border/30 rounded-lg p-3 text-center">
+                <div className="text-lg font-serif text-foreground flex items-center justify-center gap-1">
+                  <Icon className="w-3.5 h-3.5 text-primary" />
+                  {s.value}
+                </div>
+                <div className="text-[10px] text-muted-foreground">{s.label}</div>
               </div>
-              <div className="text-[10px] text-muted-foreground">{s.label}</div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+
+        {/* Habitat Pool teaser */}
+        <div className="bg-primary/5 border border-primary/10 rounded-lg px-4 py-3 text-center">
+          <p className="text-xs text-primary/70 font-serif italic">
+            Each refinement strengthens both the digital garden and the living one.
+          </p>
         </div>
 
         {/* Filters */}
@@ -302,6 +313,7 @@ const BugGardenPage = () => {
               <SelectItem value="atlas">Atlas</SelectItem>
               <SelectItem value="hearts">Hearts</SelectItem>
               <SelectItem value="hearth">Hearth</SelectItem>
+              <SelectItem value="council">Council</SelectItem>
               <SelectItem value="time_tree">Time Tree</SelectItem>
               <SelectItem value="offerings">Offerings</SelectItem>
               <SelectItem value="library">Library</SelectItem>
@@ -315,8 +327,8 @@ const BugGardenPage = () => {
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="bug">🐞 Bugs</SelectItem>
-              <SelectItem value="ux_improvement">✨ UX</SelectItem>
-              <SelectItem value="insight">💡 Insights</SelectItem>
+              <SelectItem value="ux_improvement">🌿 Flow</SelectItem>
+              <SelectItem value="insight">🌞 Ideas</SelectItem>
             </SelectContent>
           </Select>
           <span className="text-[10px] text-muted-foreground/50 ml-auto">
@@ -331,19 +343,19 @@ const BugGardenPage = () => {
         ) : (
           <Tabs defaultValue="new">
             <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="new" className="text-xs">New</TabsTrigger>
-              <TabsTrigger value="progress" className="text-xs">In Progress</TabsTrigger>
-              <TabsTrigger value="fixed" className="text-xs">Resolved</TabsTrigger>
-              <TabsTrigger value="mine" className="text-xs">My Reports</TabsTrigger>
+              <TabsTrigger value="new" className="text-xs">Planted</TabsTrigger>
+              <TabsTrigger value="progress" className="text-xs">Growing</TabsTrigger>
+              <TabsTrigger value="fixed" className="text-xs">Integrated</TabsTrigger>
+              <TabsTrigger value="mine" className="text-xs">My Sparks</TabsTrigger>
             </TabsList>
             {["new", "progress", "fixed", "mine"].map((tab) => (
               <TabsContent key={tab} value={tab} className="space-y-2 mt-3">
                 {filterBugs(tab).length === 0 ? (
-                  <p className="text-sm text-muted-foreground/50 text-center py-8 font-serif">
-                    {tab === "mine" ? "You haven't submitted any bounties yet" : "No bounties here — the garden is clear 🌿"}
+                  <p className="text-sm text-muted-foreground/50 text-center py-8 font-serif italic">
+                    {tab === "mine" ? "You haven't planted any sparks yet" : "No sparks here — the garden flows smoothly ✨"}
                   </p>
                 ) : (
-                  filterBugs(tab).map((bug) => <BugCard key={bug.id} bug={bug} />)
+                  filterBugs(tab).map((bug) => <SparkCard key={bug.id} bug={bug} />)
                 )}
               </TabsContent>
             ))}
@@ -421,7 +433,7 @@ const BugGardenPage = () => {
                     <div className="flex items-center gap-1.5 text-sm text-primary bg-primary/5 rounded-lg px-3 py-2">
                       <Heart className="w-4 h-4 fill-primary/30" />
                       <span className="font-serif">{selectedBug.hearts_awarded_total} Hearts awarded</span>
-                      <span className="text-[10px] text-muted-foreground ml-auto">Build Contribution</span>
+                      <span className="text-[10px] text-muted-foreground ml-auto">Council Spark</span>
                     </div>
                   )}
 
@@ -446,7 +458,7 @@ const BugGardenPage = () => {
                         <p className="text-[10px] text-muted-foreground">Award Hearts:</p>
                         {[3, 5, 10, 20].map((amt) => (
                           <Button key={amt} size="sm" variant="outline" className="text-xs h-7" onClick={() => awardHearts(selectedBug.id, amt)}>
-                            +{amt} 💚
+                            +{amt} ✨
                           </Button>
                         ))}
                         <div className="flex items-center gap-1">

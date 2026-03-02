@@ -1894,6 +1894,36 @@ export type Database = {
           },
         ]
       }
+      habitat_pool_ledger: {
+        Row: {
+          allocation_pct: number
+          created_at: string
+          hearts_contributed: number
+          id: string
+          notes: string | null
+          source_id: string | null
+          source_type: string
+        }
+        Insert: {
+          allocation_pct?: number
+          created_at?: string
+          hearts_contributed?: number
+          id?: string
+          notes?: string | null
+          source_id?: string | null
+          source_type?: string
+        }
+        Update: {
+          allocation_pct?: number
+          created_at?: string
+          hearts_contributed?: number
+          id?: string
+          notes?: string | null
+          source_id?: string | null
+          source_type?: string
+        }
+        Relationships: []
+      }
       heart_campaigns: {
         Row: {
           created_at: string

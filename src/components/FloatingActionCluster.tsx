@@ -1,15 +1,15 @@
 /**
  * FloatingActionCluster — unified expandable FAB that consolidates
- * Atlas, Bounty Hunter, and Locate into a single touch point.
- * Prevents stacking of multiple floating buttons on mobile.
+ * Atlas, Council Spark, and Locate into a single touch point.
  */
 import { useState, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Shield, Locate } from "lucide-react";
+import { Plus, Locate } from "lucide-react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
 import { Z } from "@/lib/z-index";
 import BugReportDialog from "@/components/BugReportDialog";
+import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 import { toast } from "sonner";
 
 /** Globe resting on an open book – compact SVG icon */
@@ -39,10 +39,8 @@ const FloatingActionCluster = () => {
   const allowed = usePopupGate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
-  const [bugDialogOpen, setBugDialogOpen] = useState(false);
+  const [sparkDialogOpen, setSparkDialogOpen] = useState(false);
   const [locating, setLocating] = useState(false);
-
-  const isMap = pathname === "/map";
 
   const handleLocate = useCallback(() => {
     if (!navigator.geolocation) {
@@ -69,7 +67,7 @@ const FloatingActionCluster = () => {
 
   const items: FabItem[] = [
     { key: "atlas", icon: <GlobeOnBook className="w-4 h-4" />, label: "Atlas", action: "link", to: "/atlas" },
-    { key: "bounty", icon: <Shield className="w-4 h-4" />, label: "Bounty", action: "dialog" },
+    { key: "spark", icon: <CouncilSparkIcon className="w-4 h-4" />, label: "Spark", action: "dialog" },
     { key: "locate", icon: <Locate className="w-4 h-4" />, label: "Find me", action: "locate" },
   ];
 
@@ -117,16 +115,20 @@ const FloatingActionCluster = () => {
                 </Link>
               ) : item.action === "dialog" ? (
                 <button
-                  onClick={() => { setOpen(false); setBugDialogOpen(true); }}
-                  className="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95"
+                  onClick={() => { setOpen(false); setSparkDialogOpen(true); }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95 relative"
                   style={{
                     background: "hsl(var(--card) / 0.9)",
-                    color: "hsl(var(--muted-foreground))",
+                    color: "hsl(var(--primary))",
                     border: "1px solid hsl(var(--border) / 0.4)",
                     backdropFilter: "blur(12px)",
                   }}
                 >
                   {item.icon}
+                  <span
+                    className="absolute inset-0 rounded-full animate-pulse opacity-15 pointer-events-none"
+                    style={{ boxShadow: "0 0 10px 2px hsl(var(--primary) / 0.3)" }}
+                  />
                 </button>
               ) : (
                 <button
@@ -165,10 +167,10 @@ const FloatingActionCluster = () => {
         </motion.button>
       </div>
 
-      {/* Bounty Hunter dialog (rendered outside the cluster for portal stacking) */}
+      {/* Council Spark dialog (rendered outside for portal stacking) */}
       <BugReportDialog
-        open={bugDialogOpen}
-        onOpenChange={setBugDialogOpen}
+        open={sparkDialogOpen}
+        onOpenChange={setSparkDialogOpen}
       />
 
       {/* Backdrop to close on outside tap */}
