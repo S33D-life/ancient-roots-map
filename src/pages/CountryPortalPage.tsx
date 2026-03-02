@@ -192,14 +192,15 @@ const ResearchTreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate
 const CountryPortalPage = () => {
   const { countrySlug } = useParams<{ countrySlug: string }>();
   const navigate = useNavigate();
-  const entry = SLUG_MAP[countrySlug || ""] || SLUG_MAP["south-africa"];
-  const config = {
+  const entry = SLUG_MAP[countrySlug || ""];
+
+  const config = entry ? {
     country: entry.country,
     countryFlag: entry.flag,
     title: entry.portalTitle,
     subtitle: entry.portalSubtitle,
     sourceLabel: entry.sourceLabel,
-  };
+  } : { country: "", countryFlag: "", title: "", subtitle: "", sourceLabel: "" };
 
   const [trees, setTrees] = useState<ResearchTree[]>([]);
   const [loading, setLoading] = useState(true);
@@ -213,6 +214,7 @@ const CountryPortalPage = () => {
   const { data: speciesActivity, isLoading: speciesLoading } = useCountrySpeciesActivity(config.country);
 
   useEffect(() => {
+    if (!entry) return;
     const fetchTrees = async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -238,7 +240,7 @@ const CountryPortalPage = () => {
       }
     };
     fetchBioRegions();
-  }, [config.country]);
+  }, [config.country, entry]);
 
   /* ─── Computed stats ─── */
   const filteredTrees = useMemo(() => {
@@ -316,6 +318,23 @@ const CountryPortalPage = () => {
     });
     return Array.from(map.values()).sort((a, b) => a.year - b.year);
   }, [trees]);
+
+  // Not-found guard — placed after all hooks
+  if (!entry) {
+    return (
+      <PageShell>
+        <Header />
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 pb-24 pt-16">
+          <p className="text-lg font-serif text-foreground">Country not found</p>
+          <p className="text-sm text-muted-foreground">No atlas entry for "{countrySlug}"</p>
+          <Button variant="sacred" asChild>
+            <Link to="/atlas">← Back to World Atlas</Link>
+          </Button>
+        </div>
+        <BottomNav />
+      </PageShell>
+    );
+  }
 
   const handleMapNavigate = (tree: ResearchTree) => {
     if (tree.latitude && tree.longitude) {

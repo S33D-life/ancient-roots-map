@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { Map, BookOpen, Leaf, Archive } from "lucide-react";
+import { Map, BookOpen, Leaf, Archive, Globe } from "lucide-react";
 
 const links = [
-  { to: "/map", icon: Map, label: "Atlas", sub: "Explore the map" },
+  { to: "/map", icon: Map, label: "Map", sub: "Explore the map" },
+  { to: "/atlas", icon: Globe, label: "Atlas", sub: "Country portals" },
   { to: "/library", icon: BookOpen, label: "Library", sub: "Scrolls & records" },
   { to: "/council-of-life", icon: Leaf, label: "Council", sub: "Join the gathering" },
   { to: "/vault?from=hearth", icon: Archive, label: "Vault", sub: "Your treasury" },

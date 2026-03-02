@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Sparkles, Globe } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/atlas", "/hives", "/hive/"] },
+  { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/"] },
+  { to: "/atlas", icon: Globe, label: "Atlas", matchPrefixes: ["/atlas"] },
   { to: "/library", icon: BookOpen, label: "Library", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard"] },
   { to: "/council-of-life", icon: Leaf, label: "Council", matchPrefixes: ["/council"] },
-  { to: "/golden-dream", icon: Sparkles, label: "Dream", matchPrefixes: ["/golden-dream", "/value-tree"] },
 ] as const;
 
 const BottomNav = () => {
