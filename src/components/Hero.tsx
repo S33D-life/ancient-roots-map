@@ -280,8 +280,8 @@ const Hero = () => {
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
             The Arboreal Atlas of<br />Ancient Friends
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Map ancient trees. Earn hearts. Protect what matters.
+            <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            A living atlas of the world's most ancient trees. Map, explore, and protect.
           </p>
 
           {/* CTA buttons — above the fold */}
@@ -289,13 +289,13 @@ const Hero = () => {
             <Button variant="mystical" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/map">
                 <MapPin className="w-5 h-5 mr-2" />
-                Arrive on the Atlas
+                Explore the Map
               </Link>
             </Button>
             <Button variant="sacred" size="lg" className="min-w-[220px] w-full sm:w-auto text-base h-12 sm:h-11" asChild>
               <Link to="/add-tree">
                 <TreeDeciduous className="w-5 h-5 mr-2" />
-                Claim a Tree Encounter
+                Add a Tree
               </Link>
             </Button>
           </div>
