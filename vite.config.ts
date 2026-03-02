@@ -4,8 +4,9 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Build-time version stamp
-const BUILD_ID = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
+// Build-time version stamp — ISO timestamp + random suffix for uniqueness
+const BUILD_TIMESTAMP = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
+const BUILD_ID = `${BUILD_TIMESTAMP}-${Math.random().toString(36).slice(2, 6)}`;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -34,12 +35,30 @@ export default defineConfig(({ mode }) => ({
             handler: "NetworkOnly",
           },
           {
-            // Supabase API — short TTL, network-first
+            // Trees table — stale-while-revalidate (trees rarely change, great offline)
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/trees.*/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "supabase-trees",
+              expiration: { maxEntries: 300, maxAgeSeconds: 24 * 60 * 60 }, // 24h
+            },
+          },
+          {
+            // Food cycles, bio_regions — mostly static reference data
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(food_cycles|bio_regions|book_catalog|song_catalog).*/i,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "supabase-reference",
+              expiration: { maxEntries: 100, maxAgeSeconds: 7 * 24 * 60 * 60 }, // 7 days
+            },
+          },
+          {
+            // Other Supabase API — short TTL, network-first
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "supabase-api",
-              expiration: { maxEntries: 100, maxAgeSeconds: 5 * 60 }, // 5 min (was 1 hour)
+              expiration: { maxEntries: 150, maxAgeSeconds: 5 * 60 },
               networkTimeoutSeconds: 5,
             },
           },
@@ -49,16 +68,25 @@ export default defineConfig(({ mode }) => ({
             handler: "CacheFirst",
             options: {
               cacheName: "tree-images",
-              expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 },
+              expiration: { maxEntries: 300, maxAgeSeconds: 14 * 24 * 60 * 60 }, // 14 days
             },
           },
           {
-            // Map tiles
+            // Map tiles — aggressive cache
             urlPattern: /^https:\/\/.*tile.*\.(png|jpg|pbf)$/i,
             handler: "CacheFirst",
             options: {
               cacheName: "map-tiles",
               expiration: { maxEntries: 500, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
+          {
+            // Google Fonts — long cache
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts",
+              expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
             },
           },
         ],
