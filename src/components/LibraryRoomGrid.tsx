@@ -17,6 +17,7 @@ const ROOMS = [
   { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",             accentH: 340, particle: "spark"      },
   { key: "tree-resources",label: "📖 Tree Resources",   desc: "Project Directory",        accentH: 160, particle: "page"       },
   { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",          accentH: 42,  particle: "shimmer"    },
+  { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
 ] as const;
 
 /* ── Seasonal ambient hue offset (subtle) ── */

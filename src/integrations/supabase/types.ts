@@ -2545,6 +2545,59 @@ export type Database = {
           },
         ]
       }
+      press_works: {
+        Row: {
+          body: string
+          created_at: string
+          epigraph: string | null
+          form: string
+          id: string
+          published_at: string | null
+          season: string | null
+          source_book_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          epigraph?: string | null
+          form?: string
+          id?: string
+          published_at?: string | null
+          season?: string | null
+          source_book_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          epigraph?: string | null
+          form?: string
+          id?: string
+          published_at?: string | null
+          season?: string | null
+          source_book_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_works_source_book_id_fkey"
+            columns: ["source_book_id"]
+            isOneToOne: false
+            referencedRelation: "bookshelf_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active_staff_id: string | null
