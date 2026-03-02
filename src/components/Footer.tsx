@@ -1,7 +1,6 @@
-import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone, Sparkles } from "lucide-react";
+import { Heart, TreeDeciduous, Smartphone, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
-import { resetWhispers } from "@/components/ContextualWhisper";
 
 const Footer = () => {
   const Dot = () => <span className="text-border/40 select-none" aria-hidden>·</span>;
