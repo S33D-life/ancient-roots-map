@@ -100,7 +100,7 @@ function guessFeatureArea(path: string): string {
   if (path.startsWith("/dashboard") || path.startsWith("/hearth")) return "hearth";
   if (path.startsWith("/vault") || path.startsWith("/heartwood")) return "heartwood";
   if (path.startsWith("/time-tree")) return "time_tree";
-  if (path.startsWith("/council")) return "council";
+  if (path.startsWith("/council") || path.startsWith("/bug-garden")) return "council";
   if (path.startsWith("/library")) return "library";
   if (path.startsWith("/radio")) return "radio";
   if (path.startsWith("/groves")) return "groves";

@@ -288,19 +288,19 @@ const CouncilOfLifePage = () => {
           )}
 
           {/* Recent Sparks */}
-          {recentSparks.length > 0 && (
-            <div className="mt-10">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 flex items-center gap-1.5">
-                  <CouncilSparkIcon className="w-3.5 h-3.5" /> Recent Sparks
-                </h3>
-                <button
-                  onClick={() => navigate("/bug-garden")}
-                  className="text-[10px] text-primary/60 hover:text-primary transition-colors font-serif"
-                >
-                  View all →
-                </button>
-              </div>
+          <div className="mt-10">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 flex items-center gap-1.5">
+                <CouncilSparkIcon className="w-3.5 h-3.5" /> Recent Sparks
+              </h3>
+              <button
+                onClick={() => navigate("/bug-garden")}
+                className="text-[10px] text-primary/60 hover:text-primary transition-colors font-serif"
+              >
+                View all →
+              </button>
+            </div>
+            {recentSparks.length > 0 ? (
               <div className="space-y-2">
                 {recentSparks.map((spark) => {
                   const TypeIcon = spark.report_type === "bug" ? Bug : spark.report_type === "ux_improvement" ? Eye : Lightbulb;
@@ -318,8 +318,12 @@ const CouncilOfLifePage = () => {
                   );
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-xs text-muted-foreground/40 font-serif italic text-center py-4">
+                No sparks yet — be the first to offer one ✨
+              </p>
+            )}
+          </div>
 
           {/* Digital Fire Vote */}
           <div className="mt-10">
