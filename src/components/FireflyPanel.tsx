@@ -4,7 +4,7 @@
  */
 import { useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Bug, Sparkles, Lightbulb, TreePine, ExternalLink } from "lucide-react";
+import { Bug, Sparkles, Lightbulb, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,6 @@ const ACTIONS = [
   { type: "bug", icon: Bug, emoji: "🐞", label: "Report a Bug", desc: "Something isn't working", reward: "3–20" },
   { type: "ux_improvement", icon: Sparkles, emoji: "✨", label: "Improve the Flow", desc: "UX refinement idea", reward: "5–15" },
   { type: "insight", icon: Lightbulb, emoji: "💡", label: "Share an Insight", desc: "Propose an evolution", reward: "variable" },
-  { type: "suggest_tree", icon: TreePine, emoji: "🌳", label: "Suggest a Tree", desc: "Add a notable tree", reward: "5–25" },
 ] as const;
 
 interface FireflyPanelProps {
