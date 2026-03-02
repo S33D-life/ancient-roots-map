@@ -7,6 +7,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
+import MapAtlasControl from "@/components/MapAtlasControl";
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -55,6 +56,10 @@ const MapPage = () => {
           <Header />
           <div className="absolute top-14 left-0 right-0 z-[20]">
             <ActiveFilterChips />
+          </div>
+          {/* Atlas control — top-right, below header */}
+          <div className="absolute top-16 right-3 z-[65]">
+            <MapAtlasControl />
           </div>
         </>
       )}
