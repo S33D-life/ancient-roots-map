@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import Header from "@/components/Header";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -117,8 +118,10 @@ const DiscoveryPage = () => {
   };
 
   return (
+    <>
+    <Header />
     <PageShell>
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 pt-24 pb-20 space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="font-serif text-3xl md:text-4xl text-primary tracking-wide">
@@ -232,6 +235,7 @@ const DiscoveryPage = () => {
         </div>
       </div>
     </PageShell>
+    </>
   );
 };
 

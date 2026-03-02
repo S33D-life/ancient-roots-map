@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Header from "@/components/Header";
 import PageShell from "@/components/PageShell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,8 +49,10 @@ export default function ApiDocsPage() {
   }, []);
 
   return (
+    <>
+    <Header />
     <PageShell>
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 pt-24 pb-20 space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-serif font-bold text-foreground tracking-tight flex items-center justify-center gap-2">
@@ -192,5 +195,6 @@ curl "${API_BASE}/api/v1/search?q=oak&types=trees,offerings"`}</pre>
         </Tabs>
       </div>
     </PageShell>
+    </>
   );
 }
