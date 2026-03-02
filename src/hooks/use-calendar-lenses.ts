@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getLunarInfo, getSolarEvents, getSeasonInfo, type LunarInfo, type CosmicEvent } from "@/hooks/use-cosmic-clock";
 import { getTzolkinDay, formatTzolkinLabel, formatTzolkinPoetic, type TzolkinDay } from "@/utils/mayanTzolkin";
+import { getPhaseDisplay } from "@/hooks/use-phenology";
 
 export interface CalendarLens {
   id: string;
@@ -185,9 +186,22 @@ export function useCalendarLenses(userId: string | null) {
           break;
         }
 
-        // seasonal lens is handled separately via food_cycles
-        case "seasonal":
+        case "seasonal": {
+          // Compute phenology signals for this date from food_cycles (sync, no async in callback)
+          const month = date.getMonth() + 1;
+          const seasonInfo = getSeasonInfo(date, prefs.hemisphere);
+          results.push({
+            lensId: lens.id,
+            lensSlug: lens.slug,
+            lensName: lens.name,
+            lensIcon: seasonInfo.emoji,
+            label: isPoetic
+              ? `${seasonInfo.emoji} ${seasonInfo.label} deepens`
+              : `${seasonInfo.emoji} ${seasonInfo.label}`,
+            detail: `Month ${month} — ${seasonInfo.label} season`,
+          });
           break;
+        }
 
         default:
           break;

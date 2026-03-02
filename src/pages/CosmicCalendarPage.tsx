@@ -1,14 +1,15 @@
 /**
- * Cosmic Calendar — Unified cycle view with modular Calendar Lenses.
+ * Cosmic Calendar — Unified cycle view with modular Calendar Lenses + Phenology signals.
  */
 import { useState, useMemo, useEffect } from "react";
 import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } from "@/hooks/use-cosmic-clock";
 import { useFoodCycles } from "@/hooks/use-food-cycles";
 import { useCalendarLenses } from "@/hooks/use-calendar-lenses";
+import { usePhenology, getPhaseDisplay } from "@/hooks/use-phenology";
 import { getTzolkinDay, formatTzolkinLabel } from "@/utils/mayanTzolkin";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Flower2, Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -218,6 +219,36 @@ const CosmicCalendarPage = () => {
                 </div>
               ))}
             </div>
+
+            {/* Seasonal signals for selected date */}
+            {(() => {
+              const selMonth = selectedDate.getMonth() + 1;
+              const activeSpecies = foods.filter(f =>
+                (f.flowering_months as number[]).includes(selMonth) ||
+                (f.fruiting_months as number[]).includes(selMonth) ||
+                (f.peak_months as number[]).includes(selMonth)
+              );
+              if (activeSpecies.length === 0) return null;
+              return (
+                <div className="pt-2 border-t border-border/20 space-y-1.5">
+                  <p className="text-[10px] font-serif text-muted-foreground/70 flex items-center gap-1">
+                    <Leaf className="w-3 h-3" /> Seasonal signals
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeSpecies.slice(0, 6).map(sp => {
+                      const phase = (sp.peak_months as number[]).includes(selMonth) ? "peak"
+                        : (sp.flowering_months as number[]).includes(selMonth) ? "flowering" : "fruiting";
+                      const display = getPhaseDisplay(phase);
+                      return (
+                        <span key={sp.id} className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/5 text-primary/70 font-serif border border-primary/10">
+                          {sp.icon} {sp.name} · {display.emoji} {display.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
 

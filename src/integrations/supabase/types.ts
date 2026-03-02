@@ -2549,6 +2549,128 @@ export type Database = {
           },
         ]
       }
+      phenology_observations: {
+        Row: {
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          moderation_status: string
+          notes: string | null
+          observation_type: string
+          observed_at: string
+          photo_url: string | null
+          species_key: string | null
+          tree_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          moderation_status?: string
+          notes?: string | null
+          observation_type: string
+          observed_at?: string
+          photo_url?: string | null
+          species_key?: string | null
+          tree_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          moderation_status?: string
+          notes?: string | null
+          observation_type?: string
+          observed_at?: string
+          photo_url?: string | null
+          species_key?: string | null
+          tree_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phenology_observations_species_key_fkey"
+            columns: ["species_key"]
+            isOneToOne: false
+            referencedRelation: "species_index"
+            referencedColumns: ["species_key"]
+          },
+          {
+            foreignKeyName: "phenology_observations_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phenology_signals: {
+        Row: {
+          bioregion_id: string | null
+          confidence: string
+          expires_at: string
+          fetched_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          metadata: Json | null
+          phase: string
+          region_name: string | null
+          signal_date: string
+          source_adapter: string
+          species_key: string | null
+          typical_window_end: number | null
+          typical_window_start: number | null
+        }
+        Insert: {
+          bioregion_id?: string | null
+          confidence?: string
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json | null
+          phase: string
+          region_name?: string | null
+          signal_date: string
+          source_adapter?: string
+          species_key?: string | null
+          typical_window_end?: number | null
+          typical_window_start?: number | null
+        }
+        Update: {
+          bioregion_id?: string | null
+          confidence?: string
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json | null
+          phase?: string
+          region_name?: string | null
+          signal_date?: string
+          source_adapter?: string
+          species_key?: string | null
+          typical_window_end?: number | null
+          typical_window_start?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phenology_signals_species_key_fkey"
+            columns: ["species_key"]
+            isOneToOne: false
+            referencedRelation: "species_index"
+            referencedColumns: ["species_key"]
+          },
+        ]
+      }
       planted_seeds: {
         Row: {
           blooms_at: string
@@ -3510,6 +3632,42 @@ export type Database = {
           slug?: string
           species_patterns?: string[]
           tree_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      species_index: {
+        Row: {
+          common_name: string
+          created_at: string
+          family: string | null
+          icon: string | null
+          id: string
+          scientific_name: string | null
+          species_key: string
+          synonyms: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          common_name: string
+          created_at?: string
+          family?: string | null
+          icon?: string | null
+          id?: string
+          scientific_name?: string | null
+          species_key: string
+          synonyms?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          common_name?: string
+          created_at?: string
+          family?: string | null
+          icon?: string | null
+          id?: string
+          scientific_name?: string | null
+          species_key?: string
+          synonyms?: string[] | null
           updated_at?: string
         }
         Relationships: []
