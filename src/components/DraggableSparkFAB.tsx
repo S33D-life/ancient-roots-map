@@ -1,12 +1,12 @@
 /**
  * DraggableSparkFAB — a draggable floating action button for Council Spark.
  *
- * CRASH-PROOF ARCHITECTURE (v2):
- * - No framer-motion whileTap/whileHover (conflicts with pointer capture on mobile)
- * - Dialog lazy-mounted only when opened
- * - Safe click guard with 800ms debounce
- * - All pointer handlers wrapped in try/catch
- * - Global error hooks for crash capture
+ * CRASH-PROOF ARCHITECTURE (v3):
+ * - FAB freezes position while dialog is open
+ * - Resize listener reads from ref, skips when dialog open or dragging
+ * - Drag moves throttled via RAF
+ * - No autofocus thrash
+ * - No close-time reset flicker
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
@@ -14,7 +14,6 @@ import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 
-// Lazy-load the heavy dialog — never mount until needed
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
 const STORAGE_KEY = "s33d-spark-fab-pos";
@@ -59,19 +58,30 @@ const DraggableSparkFAB = () => {
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
+
   const isDragging = useRef(false);
   const dragStart = useRef({ px: 0, py: 0, ox: 0, oy: 0 });
   const totalMoved = useRef(0);
   const debounceRef = useRef(false);
   const xyRef = useRef(xy);
-  xyRef.current = xy;
+  const posRef = useRef(pos);
+  const dialogOpenRef = useRef(false);
+  const rafId = useRef(0);
 
-  // Recalculate on resize
+  xyRef.current = xy;
+  posRef.current = pos;
+  dialogOpenRef.current = dialogOpen;
+
+  // Resize: register once, read from refs, skip if dialog open or dragging
   useEffect(() => {
-    const onResize = () => setXY(posToXY(pos));
+    const onResize = () => {
+      if (dialogOpenRef.current || isDragging.current) return;
+      const newXY = posToXY(posRef.current);
+      setXY(newXY);
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [pos]);
+  }, []); // empty deps — stable
 
   const snapToEdge = useCallback((cx: number, cy: number) => {
     const vw = window.innerWidth;
@@ -106,6 +116,7 @@ const DraggableSparkFAB = () => {
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (dialogOpenRef.current) return; // frozen while dialog open
     try {
       isDragging.current = true;
       totalMoved.current = 0;
@@ -119,21 +130,25 @@ const DraggableSparkFAB = () => {
     }
   }, []);
 
+  // RAF-throttled drag updates
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
-    try {
-      const dx = e.clientX - dragStart.current.px;
-      const dy = e.clientY - dragStart.current.py;
-      totalMoved.current = Math.abs(dx) + Math.abs(dy);
-      const nx = dragStart.current.ox + dx;
-      const ny = dragStart.current.oy + dy;
+    const cx = e.clientX;
+    const cy = e.clientY;
+    totalMoved.current = Math.abs(cx - dragStart.current.px) + Math.abs(cy - dragStart.current.py);
+
+    cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      const nx = dragStart.current.ox + (cx - dragStart.current.px);
+      const ny = dragStart.current.oy + (cy - dragStart.current.py);
       setXY({ x: nx, y: ny });
-    } catch { /* swallow */ }
+    });
   }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
     isDragging.current = false;
+    cancelAnimationFrame(rafId.current);
     try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
 
     try {
@@ -149,13 +164,13 @@ const DraggableSparkFAB = () => {
 
   const handleDialogChange = useCallback((open: boolean) => {
     setDialogOpen(open);
+    // No state reset on close — BugReportDialog resets on next open internally
   }, []);
 
   if (!allowed) return null;
 
   return (
     <>
-      {/* FAB button — pure CSS, no framer-motion gestures to avoid pointer capture conflicts */}
       <button
         className="fixed flex items-center justify-center rounded-full shadow-lg touch-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-transform active:scale-95 hover:scale-105"
         style={{
@@ -168,7 +183,8 @@ const DraggableSparkFAB = () => {
           color: "hsl(var(--primary))",
           border: "1px solid hsl(var(--border) / 0.4)",
           backdropFilter: "blur(12px)",
-          cursor: isDragging.current ? "grabbing" : "grab",
+          cursor: dialogOpen ? "default" : isDragging.current ? "grabbing" : "grab",
+          pointerEvents: dialogOpen ? "none" : "auto",
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -188,7 +204,6 @@ const DraggableSparkFAB = () => {
         </span>
       </button>
 
-      {/* Dialog — only mount after first open to avoid loading heavy component tree */}
       {dialogEverOpened && (
         <SparkErrorBoundary fallbackMessage="Spark couldn't open — please try again.">
           <Suspense fallback={null}>
