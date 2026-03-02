@@ -3350,6 +3350,7 @@ export type Database = {
           longitude: number | null
           metadata_hash: string | null
           province: string | null
+          record_kind: string
           record_status: string
           size_index: number | null
           source_doc_title: string
@@ -3386,6 +3387,7 @@ export type Database = {
           longitude?: number | null
           metadata_hash?: string | null
           province?: string | null
+          record_kind?: string
           record_status?: string
           size_index?: number | null
           source_doc_title: string
@@ -3422,6 +3424,7 @@ export type Database = {
           longitude?: number | null
           metadata_hash?: string | null
           province?: string | null
+          record_kind?: string
           record_status?: string
           size_index?: number | null
           source_doc_title?: string

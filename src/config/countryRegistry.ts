@@ -23,6 +23,10 @@ export interface CountryRegistryEntry {
   sourceLabel: string;
   /** Bounding box for map auto-zoom [south, west, north, east] */
   bbox?: [number, number, number, number];
+  /** True if data is community-seeded rather than from official registers */
+  isCommunitySeeded?: boolean;
+  /** Custom provenance description (overrides default DFFE text) */
+  provenanceText?: string;
 }
 
 const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
@@ -265,6 +269,8 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     portalSubtitle: "Banyan guardians, rainforest giants & sacred grove elders — a living map of the archipelago's arboreal heritage.",
     sourceLabel: "Heritage & community sources",
     bbox: [-11, 95, 6, 141],
+    isCommunitySeeded: true,
+    provenanceText: "These seeds were planted by the S33D community. Walk among them and help them grow.",
   },
 ];
 
