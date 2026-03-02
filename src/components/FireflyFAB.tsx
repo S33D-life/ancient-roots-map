@@ -11,7 +11,6 @@
  * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
-import { usePopupGate } from "@/contexts/UIFlowContext";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import FireflyPanel from "@/components/FireflyPanel";
@@ -55,7 +54,6 @@ function posToXY(p: StoredPos): { x: number; y: number } {
 }
 
 const FireflyFAB = () => {
-  const allowed = usePopupGate();
   const [panelOpen, setPanelOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
@@ -110,6 +108,13 @@ const FireflyFAB = () => {
     setPanelOpen(true);
     setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
   }, []);
+
+  // onClick fallback for accessibility and automation (keyboard Enter, assistive tech)
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // Skip if drag just happened
+    if (dragConfirmed.current) return;
+    handleTap();
+  }, [handleTap]);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (anyOpenRef.current) return;
@@ -176,7 +181,7 @@ const FireflyFAB = () => {
     setDialogOpen(open);
   }, []);
 
-  if (!allowed) return null;
+  // FAB is always visible — not gated by usePopupGate
 
   const anyOpen = panelOpen || dialogOpen;
 
@@ -202,6 +207,7 @@ const FireflyFAB = () => {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onClick={handleClick}
         aria-label="Firefly: report a bug, suggest improvements, or share insights"
         tabIndex={0}
       >

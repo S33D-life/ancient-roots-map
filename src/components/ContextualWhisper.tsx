@@ -63,7 +63,7 @@ const ContextualWhisper = ({ id, message, cta, delay = 2000, position = "bottom-
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.96 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className={`fixed z-[90] max-w-xs w-auto ${positionClasses[position]}`}
+          className={`fixed z-[60] max-w-xs w-auto ${positionClasses[position]}`}
         >
           <div
             className="rounded-xl px-4 py-3 border backdrop-blur-md shadow-lg flex items-start gap-3"
