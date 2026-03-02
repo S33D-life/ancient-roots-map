@@ -831,43 +831,6 @@ const GalleryPage = () => {
               This is where the fire burns quietly — where your journey is remembered,
               your offerings are kept, and the grove grows from every heart that visits.
             </p>
-
-            {/* CTAs */}
-            <div className="flex flex-wrap justify-center gap-3">
-              <button
-                onClick={() => navigate("/map")}
-                className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-                style={{
-                  background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
-                  color: 'hsl(38 80% 85%)',
-                  border: '1px solid hsl(38 50% 40% / 0.5)',
-                }}
-              >
-                Enter the Map
-              </button>
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-                style={{
-                  background: 'hsl(25 20% 12% / 0.8)',
-                  color: 'hsl(38 50% 70%)',
-                  border: '1px solid hsl(38 40% 30% / 0.4)',
-                }}
-              >
-                Your Hearth
-              </button>
-              <button
-                onClick={() => navigate("/dashboard?tab=activity")}
-                className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-                style={{
-                  background: 'hsl(25 20% 12% / 0.8)',
-                  color: 'hsl(38 50% 70%)',
-                  border: '1px solid hsl(38 40% 30% / 0.4)',
-                }}
-              >
-                Active Opportunities
-              </button>
-            </div>
           </div>
 
           <style>{`
@@ -877,8 +840,8 @@ const GalleryPage = () => {
             }
           `}</style>
 
-          {/* ── Hearth Mantle — clock embedded in architectural space ── */}
-          <div className="relative w-full max-w-md mx-auto mb-10">
+          {/* ── Hearth Mantle — clock ABOVE CTAs as architectural centerpiece ── */}
+          <div className="relative w-full max-w-md mx-auto mb-8">
             {/* Mantle shelf — architectural ledge */}
             <div
               className="relative flex flex-col items-center pt-4 pb-6 rounded-2xl"
@@ -914,6 +877,43 @@ const GalleryPage = () => {
                 seasonal time
               </p>
             </div>
+          </div>
+
+          {/* CTAs — below clock */}
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            <button
+              onClick={() => navigate("/map")}
+              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
+                color: 'hsl(38 80% 85%)',
+                border: '1px solid hsl(38 50% 40% / 0.5)',
+              }}
+            >
+              Enter the Map
+            </button>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'hsl(25 20% 12% / 0.8)',
+                color: 'hsl(38 50% 70%)',
+                border: '1px solid hsl(38 40% 30% / 0.4)',
+              }}
+            >
+              Your Hearth
+            </button>
+            <button
+              onClick={() => navigate("/dashboard?tab=activity")}
+              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'hsl(25 20% 12% / 0.8)',
+                color: 'hsl(38 50% 70%)',
+                border: '1px solid hsl(38 40% 30% / 0.4)',
+              }}
+            >
+              Active Opportunities
+            </button>
           </div>
 
           {/* ── Vault Preview — economy snapshot ───────── */}
