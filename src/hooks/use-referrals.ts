@@ -93,22 +93,12 @@ export function useReferrals(userId: string | undefined) {
  * Record a referral after signup. Call once after the user creates an account.
  */
 export async function recordReferral(inviteeId: string, inviteCode: string) {
-  // Look up the invite link
-  const { data: links } = await supabase
-    .rpc("validate_invite_code", { p_code: inviteCode });
-  const link = links?.[0] || null;
-
-  if (!link) return { error: "Invalid invite code" };
-
-  // Don't self-refer
-  if (link.created_by === inviteeId) return { error: "Cannot refer yourself" };
-
-  const { error } = await supabase.from("referrals").insert({
-    inviter_id: link.created_by,
-    invitee_id: inviteeId,
-    invite_link_id: link.id,
+  const { data, error } = await supabase.rpc("record_referral_secure", {
+    p_invitee_id: inviteeId,
+    p_invite_code: inviteCode,
   });
 
-  if (error?.code === "23505") return { error: "Already referred" }; // unique constraint
-  return { error: error?.message || null };
+  if (error) return { error: error.message };
+  const result = data as { error: string | null };
+  return { error: result?.error || null };
 }

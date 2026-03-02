@@ -5021,6 +5021,10 @@ export type Database = {
         Args: { p_id: string; p_weight: number }
         Returns: undefined
       }
+      record_referral_secure: {
+        Args: { p_invite_code: string; p_invitee_id: string }
+        Returns: Json
+      }
       record_visit: {
         Args: { p_user_id?: string }
         Returns: {
