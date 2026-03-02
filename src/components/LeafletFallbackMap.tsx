@@ -723,9 +723,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     },
     {
       key: "pilgrimage",
-      title: "Sacred & Spiritual",
-      icon: "⛪",
+      title: "Pilgrimage Lenses",
+      icon: "🌊",
       accent: "hsl(35, 65%, 55%)",
+      description: "Where trees, water, and people have long met.",
       layers: [
         { key: "waters", label: "🌊 Waterside Guardians", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK", accent: "200, 60%, 65%" },
         { key: "churchyards", label: "⛪ Churchyards & Sacred Sites", active: showChurchyards, toggle: () => { setShowChurchyards(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "35, 65%, 55%" },
@@ -735,15 +736,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     },
     {
       key: "wanderer",
-      title: "Fellow Wanderers",
-      icon: "👣",
+      title: "Wanderer Activity",
+      icon: "◎",
       accent: "hsl(260, 35%, 60%)",
+      description: "Sense the presence of others — gently, like traces in a forest.",
       layers: [
-        { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(v => !v), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
-        { key: "recent-visits", label: "◎ Recent Visits", active: showRecentVisits, toggle: () => setShowRecentVisits(v => !v), accent: "260, 55%, 70%" },
-        { key: "seed-traces", label: "✿ Seed & Offering Traces", active: showSeedTraces, toggle: () => setShowSeedTraces(v => !v), accent: "260, 55%, 70%" },
-        { key: "shared-trees", label: "◐ Shared Trees", active: showSharedTrees, toggle: () => setShowSharedTrees(v => !v), accent: "260, 55%, 70%" },
-        { key: "tribe-activity", label: "⊛ Tribe Activity", active: showTribeActivity, toggle: () => setShowTribeActivity(v => !v), accent: "260, 55%, 70%" },
+        { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", description: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(v => !v), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
+        { key: "recent-visits", label: "◎ Recent Visits", description: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => setShowRecentVisits(v => !v), accent: "260, 55%, 70%" },
+        { key: "seed-traces", label: "✿ Seed & Offering Traces", description: "Subtle pulses that fade over time", active: showSeedTraces, toggle: () => setShowSeedTraces(v => !v), accent: "260, 55%, 70%" },
+        { key: "shared-trees", label: "◐ Shared Trees", description: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => setShowSharedTrees(v => !v), accent: "260, 55%, 70%" },
+        { key: "tribe-activity", label: "⊛ Tribe Activity", description: "Opt-in visibility for invited wanderers", active: showTribeActivity, toggle: () => setShowTribeActivity(v => !v), accent: "260, 55%, 70%" },
       ],
     },
     {
@@ -2448,6 +2450,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           Object.values(layerMap).forEach(fn => fn(false));
           preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
         }}
+        onAddTree={() => {
+          const map = mapRef.current;
+          if (map) {
+            const c = map.getCenter();
+            setAddTreeCoords({ lat: c.lat, lng: c.lng });
+          } else {
+            setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+          }
+          setAddDialogOpen(true);
+        }}
       />
 
       {/* Discovery cue */}
@@ -2710,6 +2722,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           species: species.length > 0 ? species.join(", ") : "all",
           lineage: lineageFilter,
           project: projectFilter,
+        }}
+        hiveMap={hiveMap}
+        showHiveLayer={showHiveLayer}
+        onHiveLayerToggle={() => setShowHiveLayer(v => !v)}
+        onAddTree={() => {
+          const map = mapRef.current;
+          if (map) {
+            const c = map.getCenter();
+            setAddTreeCoords({ lat: c.lat, lng: c.lng });
+          }
+          setAddDialogOpen(true);
         }}
       />
 
