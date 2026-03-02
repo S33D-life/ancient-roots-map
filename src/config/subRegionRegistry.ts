@@ -1,10 +1,13 @@
 /**
- * Canton / Sub-region registry for countries that have canton-level portals.
+ * Sub-region registry for countries with regional portals.
  *
- * Used by CountryPortalPage to render a dynamic canton grid.
+ * Each country can define its own geographic vocabulary via `levelLabel`:
+ * Cantons (Switzerland), Islands (Indonesia), States, Provinces, Counties, etc.
+ *
+ * Used by CountryPortalPage to render a dynamic sub-region grid.
  */
 
-export interface CantonRegistryEntry {
+export interface SubRegionEntry {
   /** Display name */
   name: string;
   /** URL slug — appended to /atlas/{country}/ */
@@ -19,7 +22,15 @@ export interface CantonRegistryEntry {
   provinceKey: string;
 }
 
-const CANTON_REGISTRY: CantonRegistryEntry[] = [
+/** Geographic vocabulary label per country */
+export const SUB_REGION_LABELS: Record<string, string> = {
+  switzerland: "Cantons",
+  indonesia: "Islands",
+  // Future: "united-kingdom": "Counties", "united-states": "States", etc.
+};
+
+const SUB_REGION_REGISTRY: SubRegionEntry[] = [
+  // Switzerland — Cantons
   {
     name: "Valais (Wallis)",
     slug: "valais",
@@ -28,8 +39,6 @@ const CANTON_REGISTRY: CantonRegistryEntry[] = [
     icon: "🏔️",
     provinceKey: "Valais",
   },
-  // Future cantons can be added here:
-  // { name: "Bern", slug: "bern", countrySlug: "switzerland", ... },
 
   // Indonesia — Island Regions
   {
@@ -90,10 +99,19 @@ const CANTON_REGISTRY: CantonRegistryEntry[] = [
   },
 ];
 
-export default CANTON_REGISTRY;
+export default SUB_REGION_REGISTRY;
 
-export const getCantonsByCountry = (countrySlug: string): CantonRegistryEntry[] =>
-  CANTON_REGISTRY.filter(c => c.countrySlug === countrySlug);
+export const getSubRegionsByCountry = (countrySlug: string): SubRegionEntry[] =>
+  SUB_REGION_REGISTRY.filter(c => c.countrySlug === countrySlug);
 
-export const getCantonBySlug = (countrySlug: string, cantonSlug: string): CantonRegistryEntry | undefined =>
-  CANTON_REGISTRY.find(c => c.countrySlug === countrySlug && c.slug === cantonSlug);
+export const getSubRegionBySlug = (countrySlug: string, regionSlug: string): SubRegionEntry | undefined =>
+  SUB_REGION_REGISTRY.find(c => c.countrySlug === countrySlug && c.slug === regionSlug);
+
+/** Get the geographic vocabulary label for a country (defaults to "Regions") */
+export const getSubRegionLabel = (countrySlug: string): string =>
+  SUB_REGION_LABELS[countrySlug] || "Regions";
+
+// Backwards-compatible aliases
+export type CantonRegistryEntry = SubRegionEntry;
+export const getCantonsByCountry = getSubRegionsByCountry;
+export const getCantonBySlug = getSubRegionBySlug;
