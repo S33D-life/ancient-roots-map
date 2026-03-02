@@ -75,6 +75,7 @@ const KingOfBavleuxPage = lazy(() => import("./pages/KingOfBavleuxPage"));
 const BioRegionsIndexPage = lazy(() => import("./pages/BioRegionsIndexPage"));
 const BioRegionPage = lazy(() => import("./pages/BioRegionPage"));
 const PressPage = lazy(() => import("./pages/PressPage"));
+const HowHeartsWorkPage = lazy(() => import("./pages/HowHeartsWorkPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -185,6 +186,7 @@ const App = () => {
                 <Route path="/bug-garden" element={<BugGardenPage />} />
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
                 <Route path="/press" element={<PressPage />} />
+                <Route path="/how-hearts-work" element={<HowHeartsWorkPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
