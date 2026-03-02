@@ -918,6 +918,17 @@ const GalleryPage = () => {
             >
               Active Opportunities
             </button>
+            <button
+              onClick={() => navigate("/vault?from=hearth")}
+              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'hsl(25 20% 12% / 0.8)',
+                color: 'hsl(38 50% 70%)',
+                border: '1px solid hsl(38 40% 30% / 0.4)',
+              }}
+            >
+              Your Vault
+            </button>
           </div>
 
           {/* ── Vault Preview — economy snapshot ───────── */}
