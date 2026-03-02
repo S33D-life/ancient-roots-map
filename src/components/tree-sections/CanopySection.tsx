@@ -2,11 +2,12 @@
  * CanopySection — inline Council of Life preview for the tree scroll.
  * Canopy = green-toned, communal, gathering energy.
  *
- * Sprinkles: staggered cards, floating icon, vine divider
+ * Sprinkles: staggered cards, floating icon, vine divider, leaf atmosphere
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, Users, ScrollText, Podcast, CalendarDays, ArrowRight } from "lucide-react";
+import LeafAtmosphere from "../LeafAtmosphere";
 
 const COUNCIL_LINKS = [
   { icon: ScrollText, title: "Council Records", description: "Past councils & decisions", to: "/council-of-life" },
@@ -43,6 +44,10 @@ const CanopySection = () => (
       }}
     />
 
+    {/* Leaf atmosphere — green-dominant canopy */}
+    <LeafAtmosphere variant="canopy" />
+    <div className="portal-vignette" />
+
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -50,7 +55,7 @@ const CanopySection = () => (
       transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="relative z-10 max-w-xl text-center space-y-8"
     >
-      {/* Sprinkle 3: Floating icon */}
+      {/* Floating icon */}
       <motion.div
         className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
         style={{ background: "hsl(150 40% 35% / 0.1)" }}
@@ -76,7 +81,7 @@ const CanopySection = () => (
         and the voice of every wanderer who walks beneath the canopy.
       </p>
 
-      {/* Sprinkle 1: Staggered card reveals */}
+      {/* Staggered card reveals */}
       <div className="grid grid-cols-2 gap-3 pt-2 max-w-md mx-auto">
         {COUNCIL_LINKS.map((item, i) => {
           const Icon = item.icon;
@@ -86,16 +91,6 @@ const CanopySection = () => (
               <p className="font-serif text-[13px] text-foreground/75 tracking-wide">{item.title}</p>
               <p className="text-[9px] text-muted-foreground/40 leading-relaxed">{item.description}</p>
             </div>
-          );
-
-          const wrapper = item.href ? (
-            <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer">
-              {card}
-            </a>
-          ) : (
-            <Link key={item.title} to={item.to!}>
-              {card}
-            </Link>
           );
 
           return (
@@ -125,7 +120,6 @@ const CanopySection = () => (
       </Link>
     </motion.div>
 
-    {/* Sprinkle 2: Vine divider */}
     <div className="vine-divider" />
   </section>
 );

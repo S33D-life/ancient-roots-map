@@ -2,11 +2,12 @@
  * TrunkSection — inline Heartwood Library preview for the tree scroll.
  * Trunk = warm ember tones, grounded, intimate.
  *
- * Sprinkles: staggered cards, floating icon, vine divider
+ * Sprinkles: staggered cards, floating icon, vine divider, leaf atmosphere
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BookOpen, Music, Wand2, ScrollText, Lock, ArrowRight } from "lucide-react";
+import LeafAtmosphere from "../LeafAtmosphere";
 
 const LIBRARY_ROOMS = [
   { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
@@ -43,6 +44,10 @@ const TrunkSection = () => (
       }}
     />
 
+    {/* Leaf atmosphere — warm ember gold */}
+    <LeafAtmosphere variant="heartwood" />
+    <div className="portal-vignette" />
+
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -50,7 +55,7 @@ const TrunkSection = () => (
       transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="relative z-10 max-w-xl text-center space-y-8"
     >
-      {/* Sprinkle 3: Floating icon */}
+      {/* Floating icon */}
       <motion.div
         className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
         style={{ background: "hsl(28 55% 45% / 0.1)" }}
@@ -76,7 +81,7 @@ const TrunkSection = () => (
         where your journey is remembered and the grove grows from every heart.
       </p>
 
-      {/* Sprinkle 1: Staggered card reveals */}
+      {/* Staggered card reveals */}
       <div className="grid grid-cols-2 gap-3 pt-2 max-w-md mx-auto">
         {LIBRARY_ROOMS.map((room, i) => {
           const Icon = room.icon;
@@ -110,7 +115,6 @@ const TrunkSection = () => (
       </Link>
     </motion.div>
 
-    {/* Sprinkle 2: Vine divider */}
     <div className="vine-divider" />
   </section>
 );
