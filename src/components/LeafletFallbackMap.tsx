@@ -451,8 +451,8 @@ const btnBase: React.CSSProperties = {
   background: "hsla(30, 30%, 12%, 0.92)",
   border: "1px solid hsla(42, 40%, 30%, 0.5)",
   backdropFilter: "blur(6px)",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
+const BTN_GLOW_CLASS = "glow-button";
 
 /** Globe resting on an open book – compact SVG icon for Atlas */
 const GlobeOnBookIcon = ({ className }: { className?: string }) => (
@@ -480,7 +480,7 @@ function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+      className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${BTN_GLOW_CLASS}`}
       style={{ ...btnBase, color: "hsl(42, 60%, 60%)" }}
       title="World Atlas"
       aria-label="Open World Atlas"
@@ -2601,12 +2601,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             <div className="absolute bottom-[5.5rem] left-3 z-[1000] flex flex-col-reverse gap-2">
               <button
                 onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
-                className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
                 style={{
                   ...btnBase,
                   color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
                   background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
-                  boxShadow: atlasFilterOpen ? `0 0 12px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
                 }}
                 title="Filters & Layers"
               >
@@ -2631,12 +2630,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               {/* Living Earth Mode toggle */}
               <button
                 onClick={() => setGroveViewActive(v => !v)}
-                className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
                 style={{
                   ...btnBase,
                   color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
                   background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
-                  boxShadow: groveViewActive ? `0 0 14px hsla(120, 50%, 40%, 0.3), ${btnBase.boxShadow}` : btnBase.boxShadow,
                   border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
                 }}
                 title="Living Earth Mode"
@@ -2661,7 +2659,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               <button
                 onClick={handleFindMe}
                 disabled={locating}
-                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
                 style={{
                   ...btnBase,
                   color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
@@ -2681,11 +2679,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   }
                   setAddDialogOpen(true);
                 }}
-                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
                 style={{
                   ...btnBase,
                   color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
-                  boxShadow: addEmphasis ? `0 0 10px hsla(${modeAccent}, 0.2), ${btnBase.boxShadow}` : btnBase.boxShadow,
                 }}
                 title="Add tree"
               >
@@ -2693,11 +2690,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               </button>
               <button
                 onClick={handleCompassReset}
-                className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
                 style={{
                   ...btnBase,
                   color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                  boxShadow: globeEmphasis ? `0 0 10px hsla(${modeAccent}, 0.15), ${btnBase.boxShadow}` : btnBase.boxShadow,
                 }}
                 title="Reset view"
               >

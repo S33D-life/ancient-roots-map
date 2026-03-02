@@ -378,4 +378,89 @@ All colors MUST be HSL.
     background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.25), transparent);
     margin: 2rem 0;
   }
+
+  /* ═══════════════════════════════════════════════════
+     GLOW BUTTON SYSTEM — back-lit circular map controls
+     ═══════════════════════════════════════════════════ */
+  .glow-button {
+    position: relative;
+    border-radius: 9999px;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow:
+      inset 0 0 12px rgba(255, 215, 120, 0.25),
+      0 0 18px rgba(255, 200, 80, 0.35);
+  }
+  .glow-button::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 200, 80, 0.45) 0%,
+      rgba(255, 200, 80, 0.25) 35%,
+      rgba(255, 200, 80, 0.1) 60%,
+      transparent 75%
+    );
+    filter: blur(6px);
+    z-index: -1;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .glow-button:hover {
+    transform: scale(1.05);
+    box-shadow:
+      inset 0 0 16px rgba(255, 215, 120, 0.35),
+      0 0 24px rgba(255, 200, 80, 0.5);
+  }
+  .glow-button:active {
+    transform: scale(0.95);
+  }
+
+  /* Emerald variant — active / selected state */
+  .glow-button--emerald {
+    box-shadow:
+      inset 0 0 12px rgba(80, 220, 140, 0.25),
+      0 0 18px rgba(80, 220, 140, 0.35);
+  }
+  .glow-button--emerald::before {
+    background: radial-gradient(
+      circle,
+      rgba(80, 220, 140, 0.45) 0%,
+      rgba(80, 220, 140, 0.25) 35%,
+      rgba(80, 220, 140, 0.1) 60%,
+      transparent 75%
+    );
+  }
+  .glow-button--emerald:hover {
+    box-shadow:
+      inset 0 0 16px rgba(80, 220, 140, 0.35),
+      0 0 24px rgba(80, 220, 140, 0.5);
+  }
+
+  /* Red / ember variant — notification / urgent */
+  .glow-button--ember {
+    box-shadow:
+      inset 0 0 12px rgba(255, 140, 60, 0.25),
+      0 0 18px rgba(255, 120, 50, 0.3);
+  }
+  .glow-button--ember::before {
+    background: radial-gradient(
+      circle,
+      rgba(255, 140, 60, 0.4) 0%,
+      rgba(255, 120, 50, 0.2) 35%,
+      rgba(255, 120, 50, 0.08) 60%,
+      transparent 75%
+    );
+  }
+
+  /* Firefly-only breathing glow */
+  @keyframes glowPulse {
+    0%   { box-shadow: inset 0 0 12px rgba(255,215,120,0.25), 0 0 16px rgba(255,200,80,0.35); }
+    50%  { box-shadow: inset 0 0 18px rgba(255,215,120,0.4),  0 0 24px rgba(255,200,80,0.55); }
+    100% { box-shadow: inset 0 0 12px rgba(255,215,120,0.25), 0 0 16px rgba(255,200,80,0.35); }
+  }
+  .glow-breath {
+    animation: glowPulse 3.5s ease-in-out infinite;
+  }
 }

@@ -40,7 +40,9 @@ const BottomNav = () => {
                 color: active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.5)",
               }}
             >
-              <Icon className="w-5 h-5" />
+              <div className={`relative rounded-full p-1.5 ${active ? "glow-button" : ""}`} style={active ? { boxShadow: "inset 0 0 8px rgba(255,215,120,0.2), 0 0 12px rgba(255,200,80,0.25)" } : {}}>
+                <Icon className="w-5 h-5" />
+              </div>
               <span className="text-[10px] font-serif tracking-wider">{label}</span>
               {active && (
                 <motion.span
