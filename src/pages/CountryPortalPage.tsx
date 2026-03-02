@@ -377,54 +377,58 @@ const CountryPortalPage = () => {
           </motion.div>
         </section>
 
-        {/* ─── B) Provenance Panel ─── */}
-        {entry.isCommunitySeeded ? (
-          <section className="px-4 max-w-3xl mx-auto mb-8">
-            <Card className="border-primary/15 bg-primary/5 backdrop-blur-sm">
-              <CardContent className="py-5 px-5 flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-serif text-foreground mb-1">Community Grove</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {entry.provenanceText || "These seeds were planted by the S33D community. Walk among them and help them grow."}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        ) : citations.length > 0 ? (
-          <section className="px-4 max-w-3xl mx-auto mb-8">
-            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-serif flex items-center gap-2">
-                  <Scroll className="w-4 h-4 text-primary" /> Lineage & Provenance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  These entries are sourced from {config.sourceLabel.toLowerCase()}. Locations may be approximate until verified
-                  by a wanderer in person. Source data is immutable — your notes and verifications live separately.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {citations.map((c, i) => (
-                    <a
-                      key={i}
-                      href={c.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted/60 text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      {c.title.length > 40 ? c.title.slice(0, 37) + "…" : c.title} ({c.year})
-                    </a>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        ) : null}
+        {/* ─── Sub-region Portals (registry-driven) — moved up ─── */}
+        {(() => {
+          const regions = getSubRegionsByCountry(countrySlug || "");
+          if (!regions.length) return null;
+          const label = getSubRegionLabel(countrySlug || "");
+          return (
+            <section className="px-4 max-w-3xl mx-auto mb-8">
+              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" /> Explore {label}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {regions.map(region => (
+                  <Card key={region.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${region.slug}`)}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-serif font-bold text-foreground">{region.icon} {region.name}</p>
+                        <p className="text-xs text-muted-foreground italic">{region.tagline}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ─── City Portals — moved up ─── */}
+        {(() => {
+          const cities = getCitiesByCountry(countrySlug || "");
+          if (!cities.length) return null;
+          return (
+            <section className="px-4 max-w-3xl mx-auto mb-8">
+              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" /> Explore Cities
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {cities.map(city => (
+                  <Card key={city.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${city.slug}`)}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-serif font-bold text-foreground">{city.name}</p>
+                        <p className="text-xs text-muted-foreground italic">{city.tagline}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ─── Bio-Regions overlapping this Country ─── */}
         {overlappingBioRegions.length > 0 && (
@@ -657,58 +661,54 @@ const CountryPortalPage = () => {
           </Tabs>
         </section>
 
-        {/* ─── Sub-region Portals (registry-driven) ─── */}
-        {(() => {
-          const regions = getSubRegionsByCountry(countrySlug || "");
-          if (!regions.length) return null;
-          const label = getSubRegionLabel(countrySlug || "");
-          return (
-            <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
-              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-                <Compass className="w-4 h-4 text-primary" /> Explore {label}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {regions.map(region => (
-                  <Card key={region.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${region.slug}`)}>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-serif font-bold text-foreground">{region.icon} {region.name}</p>
-                        <p className="text-xs text-muted-foreground italic">{region.tagline}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          );
-        })()}
-
-        {/* ─── City Portals ─── */}
-        {(() => {
-          const cities = getCitiesByCountry(countrySlug || "");
-          if (!cities.length) return null;
-          return (
-            <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
-              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-                <Compass className="w-4 h-4 text-primary" /> Explore Cities
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {cities.map(city => (
-                  <Card key={city.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${city.slug}`)}>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-serif font-bold text-foreground">{city.name}</p>
-                        <p className="text-xs text-muted-foreground italic">{city.tagline}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          );
-        })()}
+        {/* ─── Lineage & Provenance — moved to bottom ─── */}
+        {entry.isCommunitySeeded ? (
+          <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+            <Card className="border-primary/15 bg-primary/5 backdrop-blur-sm">
+              <CardContent className="py-5 px-5 flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-serif text-foreground mb-1">Community Grove</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {entry.provenanceText || "These seeds were planted by the S33D community. Walk among them and help them grow."}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : citations.length > 0 ? (
+          <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <Scroll className="w-4 h-4 text-primary" /> Lineage & Provenance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  These entries are sourced from {config.sourceLabel.toLowerCase()}. Locations may be approximate until verified
+                  by a wanderer in person. Source data is immutable — your notes and verifications live separately.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {citations.map((c, i) => (
+                    <a
+                      key={i}
+                      href={c.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted/60 text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      {c.title.length > 40 ? c.title.slice(0, 37) + "…" : c.title} ({c.year})
+                    </a>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : null}
 
         {/* ─── H) Footer Bridge ─── */}
         <section className="px-4 max-w-3xl mx-auto mt-12">
