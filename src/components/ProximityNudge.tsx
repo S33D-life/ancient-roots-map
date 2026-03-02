@@ -151,9 +151,11 @@ const ProximityNudge = () => {
         exit={{ y: 60, opacity: 0, scale: 0.95 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <button
+        <div
           onClick={handleTap}
-          className="w-full rounded-2xl border bg-card/95 backdrop-blur-lg shadow-xl overflow-hidden text-left"
+          role="button"
+          tabIndex={0}
+          className="w-full rounded-2xl border bg-card/95 backdrop-blur-lg shadow-xl overflow-hidden text-left cursor-pointer"
           style={{ borderColor: nearest.isWished ? "hsl(var(--accent) / 0.4)" : "hsl(var(--border))" }}
         >
           <div
@@ -201,7 +203,7 @@ const ProximityNudge = () => {
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-        </button>
+        </div>
       </motion.div>
     </AnimatePresence>
   );
