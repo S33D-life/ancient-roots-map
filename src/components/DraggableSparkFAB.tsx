@@ -1,28 +1,30 @@
 /**
  * DraggableSparkFAB — a draggable floating action button for Council Spark.
- * 
- * - Tap → opens Spark dialog
- * - Drag → repositions; snaps to nearest edge on release
- * - Position persisted in localStorage
- * - Respects usePopupGate() suppression
+ *
+ * CRASH-PROOF ARCHITECTURE (v2):
+ * - No framer-motion whileTap/whileHover (conflicts with pointer capture on mobile)
+ * - Dialog lazy-mounted only when opened
+ * - Safe click guard with 800ms debounce
+ * - All pointer handlers wrapped in try/catch
+ * - Global error hooks for crash capture
  */
-import { useState, useRef, useCallback, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
 import { Z } from "@/lib/z-index";
-import BugReportDialog from "@/components/BugReportDialog";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
+
+// Lazy-load the heavy dialog — never mount until needed
+const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
 const STORAGE_KEY = "s33d-spark-fab-pos";
 const EDGE_PAD = 12;
 const FAB_SIZE = 48;
-const DRAG_THRESHOLD = 8; // px movement before counting as drag
+const DRAG_THRESHOLD = 8;
+const TAP_DEBOUNCE_MS = 800;
 
 interface StoredPos {
-  /** 0-1 ratio from top */
   yRatio: number;
-  /** "left" | "right" */
   edge: "left" | "right";
 }
 
@@ -34,7 +36,6 @@ function loadPos(): StoredPos {
       if (p.yRatio >= 0 && p.yRatio <= 1 && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  // Default: bottom-right
   return { yRatio: 0.72, edge: "right" };
 }
 
@@ -46,8 +47,8 @@ function posToXY(p: StoredPos): { x: number; y: number } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const x = p.edge === "right" ? vw - FAB_SIZE - EDGE_PAD : EDGE_PAD;
-  const maxY = vh - FAB_SIZE - EDGE_PAD - 80; // 80 = room above bottom nav
-  const minY = EDGE_PAD + 56; // below header
+  const maxY = vh - FAB_SIZE - EDGE_PAD - 80;
+  const minY = EDGE_PAD + 56;
   const y = Math.max(minY, Math.min(maxY, p.yRatio * vh));
   return { x, y };
 }
@@ -55,12 +56,15 @@ function posToXY(p: StoredPos): { x: number; y: number } {
 const DraggableSparkFAB = () => {
   const allowed = usePopupGate();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogEverOpened, setDialogEverOpened] = useState(false);
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
   const isDragging = useRef(false);
   const dragStart = useRef({ px: 0, py: 0, ox: 0, oy: 0 });
   const totalMoved = useRef(0);
   const debounceRef = useRef(false);
+  const xyRef = useRef(xy);
+  xyRef.current = xy;
 
   // Recalculate on resize
   useEffect(() => {
@@ -83,52 +87,77 @@ const DraggableSparkFAB = () => {
     savePos(newPos);
   }, []);
 
+  const handleTap = useCallback(() => {
+    if (debounceRef.current) return;
+    debounceRef.current = true;
+
+    const t0 = performance.now();
+    console.info("[Spark] bug_icon_tap", { route: window.location.pathname, ts: t0 });
+
+    try {
+      setDialogEverOpened(true);
+      setDialogOpen(true);
+      console.info("[Spark] bug_icon_nav_success", { elapsed: Math.round(performance.now() - t0) });
+    } catch (err) {
+      console.error("[Spark] bug_icon_nav_fail", err);
+    }
+
+    setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
+  }, []);
+
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    isDragging.current = true;
-    totalMoved.current = 0;
-    dragStart.current = { px: e.clientX, py: e.clientY, ox: xy.x, oy: xy.y };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    e.preventDefault();
-  }, [xy]);
+    try {
+      isDragging.current = true;
+      totalMoved.current = 0;
+      dragStart.current = { px: e.clientX, py: e.clientY, ox: xyRef.current.x, oy: xyRef.current.y };
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      e.preventDefault();
+      e.stopPropagation();
+    } catch (err) {
+      console.warn("[Spark] pointerDown error", err);
+      isDragging.current = false;
+    }
+  }, []);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
-    const dx = e.clientX - dragStart.current.px;
-    const dy = e.clientY - dragStart.current.py;
-    totalMoved.current = Math.abs(dx) + Math.abs(dy);
-    const nx = dragStart.current.ox + dx;
-    const ny = dragStart.current.oy + dy;
-    setXY({ x: nx, y: ny });
+    try {
+      const dx = e.clientX - dragStart.current.px;
+      const dy = e.clientY - dragStart.current.py;
+      totalMoved.current = Math.abs(dx) + Math.abs(dy);
+      const nx = dragStart.current.ox + dx;
+      const ny = dragStart.current.oy + dy;
+      setXY({ x: nx, y: ny });
+    } catch { /* swallow */ }
   }, []);
-
-  // Track latest xy for snap without re-creating handler
-  const xyRef = useRef(xy);
-  xyRef.current = xy;
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
     isDragging.current = false;
     try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
 
-    if (totalMoved.current < DRAG_THRESHOLD) {
-      // It was a tap
-      if (debounceRef.current) return;
-      debounceRef.current = true;
-      console.info("[Spark] spark_open_attempt", { route: window.location.pathname });
-      setDialogOpen(true);
-      setTimeout(() => { debounceRef.current = false; }, 800);
-    } else {
-      // It was a drag — snap to edge
-      snapToEdge(xyRef.current.x, xyRef.current.y);
+    try {
+      if (totalMoved.current < DRAG_THRESHOLD) {
+        handleTap();
+      } else {
+        snapToEdge(xyRef.current.x, xyRef.current.y);
+      }
+    } catch (err) {
+      console.error("[Spark] pointerUp error", err);
     }
-  }, [snapToEdge]);
+  }, [snapToEdge, handleTap]);
+
+  const handleDialogChange = useCallback((open: boolean) => {
+    setDialogOpen(open);
+  }, []);
 
   if (!allowed) return null;
 
   return (
     <>
-      <motion.button
-        className="fixed flex items-center justify-center rounded-full shadow-lg touch-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      {/* FAB button — pure CSS, no framer-motion gestures to avoid pointer capture conflicts */}
+      <button
+        className="fixed flex items-center justify-center rounded-full shadow-lg touch-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-transform active:scale-95 hover:scale-105"
         style={{
           width: FAB_SIZE,
           height: FAB_SIZE,
@@ -146,26 +175,27 @@ const DraggableSparkFAB = () => {
         onPointerUp={handlePointerUp}
         aria-label="Spark: report a bug or suggest an improvement"
         tabIndex={0}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
       >
         <CouncilSparkIcon className="w-5 h-5 pointer-events-none" />
-        {/* Subtle glow affordance */}
         <span
           className="absolute inset-0 rounded-full animate-pulse opacity-10 pointer-events-none"
           style={{ boxShadow: "0 0 12px 3px hsl(var(--primary) / 0.25)" }}
         />
-        {/* Drag grip dots */}
         <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 flex gap-0.5 pointer-events-none">
           <span className="w-1 h-1 rounded-full bg-current opacity-20" />
           <span className="w-1 h-1 rounded-full bg-current opacity-20" />
           <span className="w-1 h-1 rounded-full bg-current opacity-20" />
         </span>
-      </motion.button>
+      </button>
 
-      <SparkErrorBoundary fallbackMessage="Spark couldn't open — please try again.">
-        <BugReportDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-      </SparkErrorBoundary>
+      {/* Dialog — only mount after first open to avoid loading heavy component tree */}
+      {dialogEverOpened && (
+        <SparkErrorBoundary fallbackMessage="Spark couldn't open — please try again.">
+          <Suspense fallback={null}>
+            <BugReportDialog open={dialogOpen} onOpenChange={handleDialogChange} />
+          </Suspense>
+        </SparkErrorBoundary>
+      )}
     </>
   );
 };

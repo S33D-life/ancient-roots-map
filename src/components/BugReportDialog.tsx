@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles, WifiOff, AlertTriangle } from "lucide-react";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,17 +115,31 @@ function guessFeatureArea(path: string): string {
 }
 
 interface BugReportDialogProps {
-  trigger?: React.ReactNode;
-  defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenChange }: BugReportDialogProps) => {
+/** Stable screenshot preview that creates blob URL once per file */
+const ScreenshotThumb = ({ file, onRemove }: { file: File; onRemove: () => void }) => {
+  const url = useMemo(() => URL.createObjectURL(file), [file]);
+  useEffect(() => () => { URL.revokeObjectURL(url); }, [url]);
+  return (
+    <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/40">
+      <img src={url} alt="" className="w-full h-full object-cover" />
+      <button
+        type="button"
+        onClick={onRemove}
+        className="absolute top-0 right-0 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </div>
+  );
+};
+
+const BugReportDialog = ({ open = false, onOpenChange }: BugReportDialogProps) => {
   const location = useLocation();
-  const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
-  const open = controlledOpen ?? internalOpen;
-  const setOpen = onOpenChange ?? setInternalOpen;
+  const setOpen = onOpenChange ?? (() => {});
   const [submitting, setSubmitting] = useState(false);
   const [showOptional, setShowOptional] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -136,25 +149,14 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mountedRef = useRef(true);
 
-  // Unmount guard
   useEffect(() => {
     mountedRef.current = true;
     return () => { mountedRef.current = false; };
   }, []);
 
-  // Revoke blob URLs on cleanup to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      screenshots.forEach(f => {
-        try { URL.revokeObjectURL(URL.createObjectURL(f)); } catch {}
-      });
-    };
-  }, [screenshots]);
-
-  // Log spark open for diagnostics
   useEffect(() => {
     if (open) {
-      console.info("[Spark] spark_open_success", { route: location.pathname, auth: "pending", liteMode });
+      console.info("[Spark] spark_open_success", { route: location.pathname, liteMode });
     }
   }, [open, location.pathname, liteMode]);
 
@@ -210,36 +212,29 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
     if (screenshots.length === 0) return [];
     setUploading(true);
     const urls: string[] = [];
-    for (const file of screenshots) {
-      const ext = file.name.split('.').pop() || 'png';
-      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error } = await supabase.storage.from("bounty-screenshots").upload(path, file);
-      if (!error) {
-        const { data } = supabase.storage.from("bounty-screenshots").getPublicUrl(path);
-        urls.push(data.publicUrl);
+    try {
+      for (const file of screenshots) {
+        const ext = file.name.split('.').pop() || 'png';
+        const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage.from("bounty-screenshots").upload(path, file);
+        if (!error) {
+          const { data } = supabase.storage.from("bounty-screenshots").getPublicUrl(path);
+          urls.push(data.publicUrl);
+        }
       }
+    } catch (err) {
+      console.warn("[Spark] screenshot upload error", err);
     }
-    setUploading(false);
+    if (mountedRef.current) setUploading(false);
     return urls;
   };
 
   const submit = async () => {
-    /**
-     * SPARK SAFETY CHECKLIST:
-     * 1. ✅ Debounce/lock — submitting || uploading guard
-     * 2. ✅ Offline check — navigator.onLine
-     * 3. ✅ Auth guard — checked before any DB call
-     * 4. ✅ try/catch — all async wrapped
-     * 5. ✅ ErrorBoundary — wraps dialog content
-     */
     if (submitting || uploading) return;
-
-    // Offline guard
     if (!navigator.onLine) {
       toast.error("You're offline — try again when connected", { icon: "📡" });
       return;
     }
-
     if (!form.title.trim() || !form.actual.trim()) {
       toast.error("Please fill in the title and description");
       return;
@@ -258,7 +253,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       if (!mountedRef.current) return;
       if (!user) {
         toast.error("Sign in to contribute");
-        setSubmitting(false);
+        if (mountedRef.current) setSubmitting(false);
         return;
       }
 
@@ -303,8 +298,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
     } catch (err: any) {
       console.warn("[Spark] spark_submit_error", err?.message);
       if (mountedRef.current) {
-        toast.error(err.message || "Failed to submit");
-        // Auto-switch to lite mode on error so user can still report
+        toast.error(err?.message || "Failed to submit");
         if (!liteMode) setLiteMode(true);
       }
     } finally {
@@ -314,14 +308,6 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setTimeout(reset, 300); }}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-            <CouncilSparkIcon className="w-3.5 h-3.5" />
-            Council Spark
-          </Button>
-        )}
-      </DialogTrigger>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
         <SparkErrorBoundary
           fallbackMessage="The spark form ran into trouble — please close and try again."
@@ -407,7 +393,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 />
               </div>
 
-              {/* Expected (required for bugs only) */}
+              {/* Expected (bugs only) */}
               {isBug && (
                 <div className="space-y-1.5">
                   <Label htmlFor="spark-expected">What did you expect? *</Label>
@@ -439,7 +425,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 />
               </div>
 
-              {/* Severity (bugs only) + Feature Area (always) */}
+              {/* Severity + Feature Area */}
               <div className={`grid gap-3 ${isBug ? "grid-cols-2" : "grid-cols-1"}`}>
                 {isBug && (
                   <div className="space-y-1.5">
@@ -470,43 +456,36 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
               </div>
 
               {/* Screenshot upload */}
-              <div className="space-y-1.5">
-                <Label className="flex items-center gap-1">
-                  <Upload className="w-3 h-3" /> Screenshots
-                  <span className="text-muted-foreground/50 text-[10px]">(up to 3)</span>
-                </Label>
-                <div className="flex gap-2 flex-wrap">
-                  {screenshots.map((file, idx) => (
-                    <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/40">
-                      <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+              {!liteMode && (
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1">
+                    <Upload className="w-3 h-3" /> Screenshots
+                    <span className="text-muted-foreground/50 text-[10px]">(up to 3)</span>
+                  </Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {screenshots.map((file, idx) => (
+                      <ScreenshotThumb key={idx} file={file} onRemove={() => removeScreenshot(idx)} />
+                    ))}
+                    {screenshots.length < 3 && (
                       <button
                         type="button"
-                        onClick={() => removeScreenshot(idx)}
-                        className="absolute top-0 right-0 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-16 h-16 rounded-lg border border-dashed border-border/60 flex items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
                       >
-                        <X className="w-3 h-3" />
+                        <Upload className="w-4 h-4" />
                       </button>
-                    </div>
-                  ))}
-                  {screenshots.length < 3 && (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-16 h-16 rounded-lg border border-dashed border-border/60 flex items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
-                    >
-                      <Upload className="w-4 h-4" />
-                    </button>
-                  )}
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
-              </div>
+              )}
 
               {/* Optional section toggle */}
               <button
