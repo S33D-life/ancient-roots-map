@@ -31,6 +31,7 @@ import BloomingClockDial from "./BloomingClockDial";
 import BloomingClockFace from "./BloomingClockFace";
 import BloomingClockParticles from "./BloomingClockParticles";
 import BloomingClockSigils from "./BloomingClockSigils";
+import BloomingClockHivePanel from "./BloomingClockHivePanel";
 import AtlasFilter, { type VisualLayerSection, type PerspectivePreset } from "./AtlasFilter";
 
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
@@ -39,6 +40,10 @@ import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
+import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
+import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
+import HiveFruitLayer from "./HiveFruitLayer";
+import HiveFruitPreview from "./HiveFruitPreview";
 
 interface Tree {
   id: string;
@@ -576,7 +581,29 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [bloomMonth, setBloomMonth] = useState(new Date().getMonth() + 1);
   const [bloomRegionStages, setBloomRegionStages] = useState<RegionStageInfo[]>([]);
 
-  // Waters & Commons pilgrimage lens
+  // Hive Fruit Layer — unified seasonal system
+  const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
+  const { activeHiveFamily, setActiveHive } = useHiveSeasonFilter();
+  const [fruitPreview, setFruitPreview] = useState<{
+    hive: HiveInfo;
+    treeCount: number;
+    status: { stage: string; label: string; emoji: string };
+  } | null>(null);
+
+  const handleFruitClick = useCallback((
+    hive: HiveInfo,
+    treeCount: number,
+    _lat: number,
+    _lng: number,
+    status: { stage: string | null; label: string; emoji: string },
+  ) => {
+    setFruitPreview({
+      hive,
+      treeCount,
+      status: { stage: status.stage || "fruiting", label: status.label, emoji: status.emoji },
+    });
+  }, []);
+
   const [showWatersCommons, setShowWatersCommons] = useState(false);
   const [watersCommonsCollapsed, setWatersCommonsCollapsed] = useState(true);
   const watersCommonsLayerRef = useRef<L.LayerGroup | null>(null);
@@ -811,6 +838,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             )}
             onFoodClear={() => setSelectedFoodIds([])}
           />
+          <BloomingClockHivePanel monthOverride={bloomMonth} />
         </div>
       ) : undefined,
     },
@@ -2567,6 +2595,26 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           foodCount={bloomRegionStages.length}
         />
       )}
+
+      {/* Hive Fruit Layer — seasonal fruit indicators */}
+      <HiveFruitLayer
+        map={mapRef.current}
+        trees={filteredTrees}
+        fruitingHives={fruitingHives}
+        activeHiveFamily={activeHiveFamily}
+        onFruitClick={handleFruitClick}
+      />
+
+      {/* Hive Fruit Preview — mini card on fruit click */}
+      <HiveFruitPreview
+        visible={!!fruitPreview}
+        hive={fruitPreview?.hive || { family: "", slug: "", displayName: "", description: "", accentHsl: "0 0% 50%", icon: "🌿", representativeSpecies: [] }}
+        stage={fruitPreview?.status.stage || ""}
+        stageLabel={fruitPreview?.status.label || ""}
+        stageEmoji={fruitPreview?.status.emoji || ""}
+        treeCount={fruitPreview?.treeCount || 0}
+        onClose={() => setFruitPreview(null)}
+      />
 
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (

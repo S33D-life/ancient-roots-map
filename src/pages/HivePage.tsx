@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock, Flame, Layers } from "lucide-react";
+import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock, Flame, Layers, MapPin } from "lucide-react";
 import { useMarkets } from "@/hooks/use-markets";
 import MarketCard from "@/components/MarketCard";
 import { motion } from "framer-motion";
@@ -19,6 +19,7 @@ import OfferingList from "@/components/OfferingList";
 import HiveSpeciesLeaderboard from "@/components/HiveSpeciesLeaderboard";
 import InfluenceWeightedVoting from "@/components/InfluenceWeightedVoting";
 import BloomingClock from "@/components/BloomingClock";
+import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 
 interface TreeRow {
   id: string;
@@ -55,6 +56,8 @@ const HivePage = () => {
   const { family } = useParams<{ family: string }>();
   const navigate = useNavigate();
   const hive = family ? getHiveBySlug(family) : null;
+  const { getStatusForFamily } = useHiveSeasonalStatus();
+  const seasonalStatus = hive ? getStatusForFamily(hive.family) : undefined;
 
   const [trees, setTrees] = useState<TreeRow[]>([]);
   const [offerings, setOfferings] = useState<OfferingRow[]>([]);
@@ -250,6 +253,45 @@ const HivePage = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Seasonal Status Banner */}
+        {seasonalStatus && seasonalStatus.stage && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 rounded-xl border overflow-hidden"
+            style={{
+              borderColor: `hsl(${hive.accentHsl} / 0.3)`,
+              background: `linear-gradient(90deg, hsl(${hive.accentHsl} / 0.08), hsl(${hive.accentHsl} / 0.03))`,
+            }}
+          >
+            <div className="flex items-center justify-between px-5 py-3.5 gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{seasonalStatus.emoji}</span>
+                <div>
+                  <p className="font-serif text-sm" style={{ color: `hsl(${hive.accentHsl})` }}>
+                    {seasonalStatus.label}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-serif">
+                    {seasonalStatus.matchedFoods.length > 0
+                      ? `Based on ${seasonalStatus.matchedFoods.map(f => f.name).slice(0, 3).join(", ")}`
+                      : "Seasonal cycle data"
+                    }
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-serif text-xs gap-1.5"
+                style={{ borderColor: `hsl(${hive.accentHsl} / 0.4)`, color: `hsl(${hive.accentHsl})` }}
+                onClick={() => navigate(`/map?species=${encodeURIComponent(hive.representativeSpecies[0] || hive.family)}&origin=hive`)}
+              >
+                <MapPin className="w-3.5 h-3.5" /> View on Map
+              </Button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Metrics — now includes Species Hearts + Influence */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
