@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useCountrySpeciesActivity } from "@/hooks/useCountrySpeciesActivity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ import { getSubRegionsByCountry, getSubRegionLabel } from "@/config/subRegionReg
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 import VerificationPipeline from "@/components/VerificationPipeline";
 import ImmutableTreeCard from "@/components/ImmutableTreeCard";
+
+const CountrySpeciesSpiral = lazy(() => import("@/components/atlas/CountrySpeciesSpiral"));
 
 /* ─── Types ─── */
 interface ResearchTree {
@@ -205,6 +208,9 @@ const CountryPortalPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
   const [overlappingBioRegions, setOverlappingBioRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
+
+  // Species activity for the spiral
+  const { data: speciesActivity, isLoading: speciesLoading } = useCountrySpeciesActivity(config.country);
 
   useEffect(() => {
     const fetchTrees = async () => {
@@ -465,6 +471,26 @@ const CountryPortalPage = () => {
             <StatTile label="Approx Precision" value={precisionCounts.approx} icon={Eye} />
             <StatTile label="Verified Linked" value={verifiedCount} icon={Heart} />
           </div>
+        </section>
+
+        {/* ─── Species Spiral ─── */}
+        <section className="px-4 max-w-3xl mx-auto mb-8">
+          <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+            <CardContent className="py-6">
+              <Suspense fallback={
+                <div className="py-12 text-center">
+                  <p className="text-sm text-muted-foreground">Loading species spiral…</p>
+                </div>
+              }>
+                <CountrySpeciesSpiral
+                  species={speciesActivity || []}
+                  country={config.country}
+                  countrySlug={countrySlug || ""}
+                  loading={speciesLoading}
+                />
+              </Suspense>
+            </CardContent>
+          </Card>
         </section>
 
         {/* ─── Province filter chips ─── */}
