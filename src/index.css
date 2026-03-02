@@ -62,6 +62,10 @@ All colors MUST be HSL.
     /* Transitions */
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
+    /* ── Arterial Pulse System — one heartbeat for the whole app ── */
+    --pulse-duration: 3.6s;
+    --pulse-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
     /* TETOL Level Accents — default to primary */
     --level-accent: 42 95% 55%;
   }
@@ -494,7 +498,81 @@ All colors MUST be HSL.
     100% { box-shadow: inset 0 0 12px rgba(255,215,120,0.25), 0 0 16px rgba(255,200,80,0.35); }
   }
   .glow-breath {
-    animation: glowPulse 3.5s ease-in-out infinite;
+    animation: glowPulse var(--pulse-duration) var(--pulse-ease) infinite;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     ARTERIAL PULSE SYSTEM — one heartbeat, many nodes
+     ═══════════════════════════════════════════════════ */
+
+  /* Core arterial keyframe — shared by all pulse nodes */
+  @keyframes arterialPulse {
+    0%   { opacity: 0.7; transform: scale(1); }
+    50%  { opacity: 1;   transform: scale(1.025); }
+    100% { opacity: 0.7; transform: scale(1); }
+  }
+
+  /* S33D Logo — Primary Heart Node (very subtle) */
+  .pulse-heart {
+    animation: arterialPulse var(--pulse-duration) var(--pulse-ease) infinite;
+  }
+
+  /* Live dot — gentle opacity heartbeat */
+  @keyframes liveDotPulse {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+  }
+  .pulse-live {
+    animation: liveDotPulse var(--pulse-duration) var(--pulse-ease) infinite;
+  }
+
+  /* CTA idle glow — stops on hover */
+  @keyframes ctaIdleGlow {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+    50%      { box-shadow: 0 0 12px 2px hsl(var(--primary) / 0.08); }
+  }
+  .pulse-cta {
+    animation: ctaIdleGlow var(--pulse-duration) var(--pulse-ease) infinite;
+  }
+  .pulse-cta:hover,
+  .pulse-cta:active,
+  .pulse-cta:focus-visible {
+    animation: none;
+  }
+
+  /* Fruit marker aura — slow, very faint */
+  @keyframes fruitAura {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+    50%      { box-shadow: 0 0 10px 4px hsl(var(--primary) / 0.05); }
+  }
+  .pulse-fruit {
+    animation: fruitAura 4s var(--pulse-ease) infinite;
+  }
+
+  /* Sectional energy — classes applied via body.tree-zone-* */
+  body.tree-zone-atlas-content .pulse-heart { animation-duration: 4.2s; }
+  body.tree-zone-heartwood .pulse-heart    { animation-duration: 3.6s; }
+  body.tree-zone-council .pulse-heart      { animation-duration: 3.2s; }
+  body.tree-zone-golden-dream .pulse-heart { animation-duration: 2.8s; }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-heart,
+    .pulse-live,
+    .pulse-cta,
+    .pulse-fruit,
+    .glow-breath {
+      animation: none !important;
+    }
+  }
+
+  /* Pause all pulses when tab hidden */
+  .tab-hidden .pulse-heart,
+  .tab-hidden .pulse-live,
+  .tab-hidden .pulse-cta,
+  .tab-hidden .pulse-fruit,
+  .tab-hidden .glow-breath {
+    animation-play-state: paused !important;
   }
 
   /* Hive fruit indicator on map */

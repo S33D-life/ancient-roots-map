@@ -137,6 +137,15 @@ const App = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Arterial pulse: pause animations when tab hidden
+  useEffect(() => {
+    const onVis = () => {
+      document.documentElement.classList.toggle("tab-hidden", document.hidden);
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
   return (
     <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>

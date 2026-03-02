@@ -152,7 +152,7 @@ const LivingCensus = () => {
         {/* Live indicator */}
         <div className="flex items-center justify-center gap-1.5 mt-2">
           <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            className="w-1.5 h-1.5 rounded-full pulse-live"
             style={{ background: "hsl(var(--accent))" }}
           />
           <span className="text-[10px] text-muted-foreground/60 font-serif tracking-widest uppercase">
