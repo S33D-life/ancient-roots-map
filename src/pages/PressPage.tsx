@@ -91,6 +91,7 @@ export default function PressPage() {
             <PressEditor
               key={editing === "new" ? "new" : editing.id}
               initial={editing === "new" ? null : editing}
+              userId={userId}
               onSave={save}
               onBack={() => setEditing(null)}
             />

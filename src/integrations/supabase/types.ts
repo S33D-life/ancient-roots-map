@@ -2545,6 +2545,76 @@ export type Database = {
           },
         ]
       }
+      press_chapters: {
+        Row: {
+          artwork_url: string | null
+          body: string
+          chapter_order: number
+          created_at: string
+          epigraph: string | null
+          id: string
+          linked_bio_region_id: string | null
+          linked_tree_id: string | null
+          title: string
+          unlock_mode: string
+          updated_at: string
+          visibility: string
+          work_id: string
+        }
+        Insert: {
+          artwork_url?: string | null
+          body: string
+          chapter_order?: number
+          created_at?: string
+          epigraph?: string | null
+          id?: string
+          linked_bio_region_id?: string | null
+          linked_tree_id?: string | null
+          title: string
+          unlock_mode?: string
+          updated_at?: string
+          visibility?: string
+          work_id: string
+        }
+        Update: {
+          artwork_url?: string | null
+          body?: string
+          chapter_order?: number
+          created_at?: string
+          epigraph?: string | null
+          id?: string
+          linked_bio_region_id?: string | null
+          linked_tree_id?: string | null
+          title?: string
+          unlock_mode?: string
+          updated_at?: string
+          visibility?: string
+          work_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_chapters_linked_bio_region_id_fkey"
+            columns: ["linked_bio_region_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_chapters_linked_tree_id_fkey"
+            columns: ["linked_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_chapters_work_id_fkey"
+            columns: ["work_id"]
+            isOneToOne: false
+            referencedRelation: "press_works"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       press_works: {
         Row: {
           body: string

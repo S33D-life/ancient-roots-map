@@ -16,6 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PressChapterList from "@/components/PressChapterList";
+import { usePressChapters } from "@/hooks/use-press-chapters";
 import type { PressWork, PressWorkForm } from "@/hooks/use-press-works";
 import { toast } from "sonner";
 
@@ -32,11 +34,12 @@ const FORMS: { value: PressWorkForm; label: string; hint: string }[] = [
 
 interface PressEditorProps {
   initial?: PressWork | null;
+  userId: string | null;
   onSave: (work: Partial<PressWork>) => Promise<any>;
   onBack: () => void;
 }
 
-export default function PressEditor({ initial, onSave, onBack }: PressEditorProps) {
+export default function PressEditor({ initial, userId, onSave, onBack }: PressEditorProps) {
   const [title, setTitle] = useState(initial?.title || "");
   const [body, setBody] = useState(initial?.body || "");
   const [form, setForm] = useState<PressWorkForm>(initial?.form || "reflection");
@@ -172,6 +175,24 @@ export default function PressEditor({ initial, onSave, onBack }: PressEditorProp
           }}
         />
       </div>
+
+      {/* Chapters — only for saved works */}
+      {initial?.id && (
+        <ChaptersSection workId={initial.id} userId={userId} />
+      )}
     </motion.div>
+  );
+}
+
+/** Isolated section so the chapter hook only runs for saved works */
+function ChaptersSection({ workId, userId }: { workId: string; userId: string | null }) {
+  const { chapters, saveChapter, removeChapter } = usePressChapters(workId, userId);
+  return (
+    <PressChapterList
+      chapters={chapters}
+      isAuthor={true}
+      onSave={saveChapter}
+      onRemove={removeChapter}
+    />
   );
 }
