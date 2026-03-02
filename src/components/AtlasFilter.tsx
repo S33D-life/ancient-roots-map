@@ -880,19 +880,25 @@ function SidebarToggle({ layer }: { layer: VisualLayerToggle }) {
   return (
     <button
       onClick={layer.toggle}
-      className="w-full flex flex-col gap-0.5 px-1 py-2.5 rounded-md text-left transition-colors"
+      className="w-full flex flex-col gap-0.5 px-1 py-2 rounded-md text-left transition-colors"
     >
       <div className="flex items-center gap-3 w-full">
+        {/* Toggle switch */}
         <div
-          className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+          className="relative w-8 h-[18px] rounded-full shrink-0 transition-all duration-200"
           style={{
-            borderColor: layer.active ? colour : "hsla(0, 0%, 40%, 0.4)",
-            background: layer.active ? `${colour}22` : "transparent",
+            background: layer.active ? `${colour}44` : "hsla(0, 0%, 40%, 0.25)",
+            border: `1px solid ${layer.active ? `${colour}66` : "hsla(0, 0%, 40%, 0.3)"}`,
           }}
         >
-          {layer.active && (
-            <span className="text-[10px] font-bold" style={{ color: colour }}>✓</span>
-          )}
+          <div
+            className="absolute top-[2px] w-3 h-3 rounded-full transition-all duration-200"
+            style={{
+              left: layer.active ? "calc(100% - 14px)" : "2px",
+              background: layer.active ? colour : "hsl(0, 0%, 50%)",
+              boxShadow: layer.active ? `0 0 6px ${colour}66` : "none",
+            }}
+          />
         </div>
         <span
           className="text-[13px] font-serif tracking-wide uppercase flex-1"
@@ -907,7 +913,7 @@ function SidebarToggle({ layer }: { layer: VisualLayerToggle }) {
         )}
       </div>
       {layer.description && (
-        <span className="text-[11px] font-serif pl-8" style={{ color: "hsl(260, 30%, 50%)" }}>
+        <span className="text-[11px] font-serif pl-11" style={{ color: "hsl(260, 30%, 50%)" }}>
           {layer.description}
         </span>
       )}
