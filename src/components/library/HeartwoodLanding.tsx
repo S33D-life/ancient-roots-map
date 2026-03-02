@@ -120,7 +120,7 @@ const HeartwoodLanding = ({ onRoomSelect }: HeartwoodLandingProps) => {
             Your Hearth
           </button>
           <button
-            onClick={() => navigate("/dashboard?tab=activity")}
+            onClick={() => navigate("/value-tree?tab=earn")}
             className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
             style={{
               background: 'hsl(25 20% 12% / 0.8)',
