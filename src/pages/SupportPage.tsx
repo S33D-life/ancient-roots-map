@@ -399,7 +399,30 @@ const SupportPage = () => {
           </div>
         </section>
 
-        {/* Duplicate Giveth callout removed — already shown above */}
+        {/* Loop-closure: where to go next */}
+        <section className="rounded-xl border border-border/20 bg-card/30 p-4 space-y-3">
+          <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">
+            Explore more
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            <Link to="/value-tree" className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left block">
+              <span className="text-primary">❤️ Value Tree</span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">How Hearts are earned</p>
+            </Link>
+            <Link to="/council-of-life" className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left block">
+              <span className="text-primary">🌿 Council</span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Governance & voice</p>
+            </Link>
+            <Link to="/map" className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left block">
+              <span className="text-primary">🗺️ Map</span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find Ancient Friends</p>
+            </Link>
+            <Link to="/atlas" className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left block">
+              <span className="text-primary">🌍 Atlas</span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Explore by country</p>
+            </Link>
+          </div>
+        </section>
       </main>
       <Footer />
 

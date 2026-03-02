@@ -100,7 +100,7 @@ const VisitsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-20 pb-16 px-4 max-w-3xl mx-auto">
+      <main className="pt-24 pb-20 px-4 max-w-3xl mx-auto">
         {/* Hero */}
         <div className="text-center mb-10">
           <h1 className="font-serif text-3xl md:text-4xl text-foreground tracking-wide mb-2">
