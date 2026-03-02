@@ -222,7 +222,7 @@ const Header = () => {
               className="flex items-center bg-transparent border-none p-0 relative"
               onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}
             >
-              <div className="relative">
+              <div className="relative pulse-heart">
                 <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-11 h-11 rounded-full object-cover border-2 border-primary/40 shadow-[0_0_12px_hsla(42,90%,55%,0.25)] hover:shadow-[0_0_20px_hsla(42,90%,55%,0.4)] transition-all duration-300 hover:scale-105" />
                 {hasPendingActivity && (
                   <span
@@ -362,7 +362,7 @@ const Header = () => {
                 onClick={() => setTetolOpen(true)}
                 className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer group"
               >
-                <div className="relative">
+                <div className="relative pulse-heart">
                   <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
                   {hasPendingActivity && (
                     <span

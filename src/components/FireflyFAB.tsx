@@ -220,12 +220,11 @@ const FireflyFAB = () => {
         <span className="relative text-sm" style={{ filter: "drop-shadow(0 0 3px hsl(45 90% 75% / 0.6))" }}>
           ✦
         </span>
-        {/* Breathing pulse */}
+        {/* Breathing pulse — arterial rhythm, pauses when dialog open */}
         <span
-          className="absolute inset-0 rounded-full animate-pulse pointer-events-none"
+          className={`absolute inset-0 rounded-full pointer-events-none ${anyOpen ? '' : 'pulse-cta'}`}
           style={{
             boxShadow: "0 0 16px 5px hsl(45 90% 60% / 0.2)",
-            animationDuration: "3s",
           }}
         />
       </button>

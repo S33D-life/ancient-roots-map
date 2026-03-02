@@ -9,9 +9,9 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Offering glow pulse animation — toned down */
+/* Offering glow pulse — uses arterial rhythm */
 .offering-glow-outer {
-  animation: offering-pulse 3s ease-in-out infinite;
+  animation: offering-pulse var(--pulse-duration, 3.6s) var(--pulse-ease, ease-in-out) infinite;
 }
 @keyframes offering-pulse {
   0%, 100% { opacity: 0.3; transform: scale(1); }
