@@ -16,6 +16,8 @@ import { useBookshelves, type Bookshelf } from "@/hooks/use-bookshelves";
 import { supabase } from "@/integrations/supabase/client";
 import AddToShelfDialog from "@/components/AddToShelfDialog";
 import BookMusingsPanel from "@/components/BookMusingsPanel";
+import BookCsvImportDialog from "@/components/BookCsvImportDialog";
+import LibraryInventoryPortal from "@/components/LibraryInventoryPortal";
 import { toast } from "sonner";
 
 interface PersonalBookshelfProps {
@@ -101,6 +103,7 @@ const DustMotes = () => {
 const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
   const [addOpen, setAddOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [musingsBookId, setMusingsBookId] = useState<string | null>(null);
   const [collapsedShelves, setCollapsedShelves] = useState<Set<string>>(new Set());
@@ -112,6 +115,12 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
 
   const { entries, loading, stats, deleteEntry, updateEntry, refetch } = useBookshelf({ userId, filter });
   const { shelves, createShelf, updateShelf, deleteShelf } = useBookshelves(userId);
+
+  const handleCreateMultipleShelves = async (names: string[]) => {
+    for (const name of names) {
+      await createShelf(name);
+    }
+  };
 
   // Group entries by shelf
   const groupedEntries = useMemo(() => {
@@ -303,6 +312,14 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Library Inventory Portal */}
+      <LibraryInventoryPortal
+        userId={userId}
+        shelves={shelves}
+        onImport={() => setImportOpen(true)}
+        onCreateShelves={handleCreateMultipleShelves}
+      />
+
       {/* Stats bar */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
@@ -545,6 +562,15 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
 
       {/* Add Book Dialog */}
       <AddToShelfDialog open={addOpen} onOpenChange={setAddOpen} userId={userId} />
+
+      {/* CSV Import Dialog */}
+      <BookCsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        userId={userId}
+        shelves={shelves}
+        onComplete={refetch}
+      />
 
       {/* Musings Panel */}
       <BookMusingsPanel
