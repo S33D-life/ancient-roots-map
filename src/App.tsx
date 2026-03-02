@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
+import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 import { MapFilterProvider } from "@/contexts/MapFilterContext";
 import { UIFlowProvider } from "@/contexts/UIFlowContext";
@@ -107,6 +108,7 @@ const App = () => {
   }, []);
 
   return (
+    <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -196,6 +198,7 @@ const App = () => {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    </GlobalErrorBoundary>
   );
 };
 
