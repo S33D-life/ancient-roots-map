@@ -78,7 +78,7 @@ const MapPage = () => {
       <button
         onClick={handleLocateMe}
         disabled={locating}
-        className="absolute bottom-24 right-4 z-[25] flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-serif shadow-lg transition-all hover:scale-105 disabled:opacity-50 border border-border/30"
+        className="absolute bottom-40 right-4 z-[25] flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-serif shadow-lg transition-all hover:scale-105 disabled:opacity-50 border border-border/30"
         style={{
           background: 'hsl(var(--card) / 0.9)',
           backdropFilter: 'blur(8px)',
