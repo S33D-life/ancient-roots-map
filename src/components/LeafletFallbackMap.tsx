@@ -2565,7 +2565,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const globeEmphasis = perspective === "collective";
         return (
           <>
-            <div className="absolute bottom-8 left-3 z-[1000] flex gap-2">
+            <div className="absolute top-3 left-3 z-[1000] flex gap-2">
               <button
                 onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
                 className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
@@ -2622,7 +2622,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               </button>
             </div>
 
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
               <button
                 onClick={handleFindMe}
                 disabled={locating}
