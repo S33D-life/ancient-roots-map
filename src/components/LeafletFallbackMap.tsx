@@ -24,6 +24,7 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
 import BloomingClockDial from "./BloomingClockDial";
@@ -452,6 +453,29 @@ const btnBase: React.CSSProperties = {
   backdropFilter: "blur(6px)",
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
+
+/** Atlas nav button — inline in the map control row */
+function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
+  const navigate = useNavigate();
+  const guardRef = useRef(false);
+  const handleClick = useCallback(() => {
+    if (guardRef.current) return;
+    guardRef.current = true;
+    try { navigate("/atlas"); } catch { /* silent */ }
+    setTimeout(() => { guardRef.current = false; }, 400);
+  }, [navigate]);
+  return (
+    <button
+      onClick={handleClick}
+      className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+      style={{ ...btnBase, color: "hsl(42, 60%, 60%)" }}
+      title="World Atlas"
+      aria-label="Open World Atlas"
+    >
+      <Globe className="w-[18px] h-[18px]" />
+    </button>
+  );
+}
 
 const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, onFullscreenToggle, isFullscreen }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -2616,6 +2640,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   />
                 )}
               </button>
+              {/* Atlas portal */}
+              <AtlasNavButton btnBase={btnBase} />
             </div>
 
             <div className="absolute bottom-[5.5rem] left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
