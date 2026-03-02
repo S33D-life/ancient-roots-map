@@ -189,7 +189,8 @@ const AtlasFilter = ({
   } = useMapFilters();
 
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["hives", "signals", "structures", "species"]));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [hiveBlendMode, setHiveBlendMode] = useState<"exact" | "blend">("blend");
   const [selectedHiveFamilies, setSelectedHiveFamilies] = useState<Set<string>>(new Set());
 
@@ -213,10 +214,18 @@ const AtlasFilter = ({
   const toggleSection = useCallback((key: string) => {
     setExpandedSections(prev => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        // On mobile, auto-collapse other sections (accordion mode)
+        if (isMobile) {
+          next.clear();
+        }
+        next.add(key);
+      }
       return next;
     });
-  }, []);
+  }, [isMobile]);
 
   const singleSpeciesHive = useMemo(() => {
     if (selectedSpecies.length !== 1) return null;
@@ -506,74 +515,84 @@ const AtlasFilter = ({
                         expanded={expandedSections.has("hives")}
                         onToggle={() => toggleSection("hives")}
                       />
-                      {expandedSections.has("hives") && (
-                        <div className="pb-2">
-                          {/* Exact / Blend toggle */}
-                          <div className="flex items-center gap-2 mb-2 px-1">
-                            <span className="text-[9px] font-serif uppercase tracking-wider" style={{ color: "hsl(42, 40%, 45%)" }}>Mode</span>
-                            <div
-                              className="flex rounded-full p-[2px]"
-                              style={{ background: "hsla(42, 25%, 15%, 0.6)", border: "1px solid hsla(42, 40%, 30%, 0.3)" }}
-                            >
-                              {(["exact", "blend"] as const).map(mode => (
-                                <button
-                                  key={mode}
-                                  onClick={() => setHiveBlendMode(mode)}
-                                  className="px-2.5 py-1 rounded-full text-[9px] font-serif tracking-wide transition-all duration-200 flex items-center gap-1"
-                                  style={{
-                                    background: hiveBlendMode === mode ? "hsla(42, 50%, 40%, 0.2)" : "transparent",
-                                    color: hiveBlendMode === mode ? "hsl(42, 65%, 68%)" : "hsl(42, 30%, 40%)",
-                                    border: hiveBlendMode === mode ? "1px solid hsla(42, 50%, 50%, 0.25)" : "1px solid transparent",
-                                  }}
+                      <AnimatePresence initial={false}>
+                        {expandedSections.has("hives") && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pb-2" style={{ background: "hsla(42, 25%, 15%, 0.15)" }}>
+                              {/* Exact / Blend toggle */}
+                              <div className="flex items-center gap-2 mb-2 px-1 pt-1">
+                                <span className="text-[9px] font-serif uppercase tracking-wider" style={{ color: "hsl(42, 40%, 45%)" }}>Mode</span>
+                                <div
+                                  className="flex rounded-full p-[2px]"
+                                  style={{ background: "hsla(42, 25%, 15%, 0.6)", border: "1px solid hsla(42, 40%, 30%, 0.3)" }}
                                 >
-                                  {mode === "blend" && <Blend className="w-2.5 h-2.5" />}
-                                  {mode === "exact" ? "Exact" : "Blend"}
-                                </button>
-                              ))}
-                            </div>
-                            {selectedHiveFamilies.size > 0 && (
-                              <button
-                                onClick={() => { setSelectedHiveFamilies(new Set()); onSpeciesChange([]); }}
-                                className="ml-auto text-[9px] font-serif flex items-center gap-0.5 transition-colors"
-                                style={{ color: "hsl(42, 40%, 45%)" }}
-                              >
-                                <X className="w-2.5 h-2.5" /> Clear
-                              </button>
-                            )}
-                          </div>
+                                  {(["exact", "blend"] as const).map(mode => (
+                                    <button
+                                      key={mode}
+                                      onClick={() => setHiveBlendMode(mode)}
+                                      className="px-2.5 py-1 rounded-full text-[9px] font-serif tracking-wide transition-all duration-200 flex items-center gap-1"
+                                      style={{
+                                        background: hiveBlendMode === mode ? "hsla(42, 50%, 40%, 0.2)" : "transparent",
+                                        color: hiveBlendMode === mode ? "hsl(42, 65%, 68%)" : "hsl(42, 30%, 40%)",
+                                        border: hiveBlendMode === mode ? "1px solid hsla(42, 50%, 50%, 0.25)" : "1px solid transparent",
+                                      }}
+                                    >
+                                      {mode === "blend" && <Blend className="w-2.5 h-2.5" />}
+                                      {mode === "exact" ? "Exact" : "Blend"}
+                                    </button>
+                                  ))}
+                                </div>
+                                {selectedHiveFamilies.size > 0 && (
+                                  <button
+                                    onClick={() => { setSelectedHiveFamilies(new Set()); onSpeciesChange([]); }}
+                                    className="ml-auto text-[9px] font-serif flex items-center gap-0.5 transition-colors"
+                                    style={{ color: "hsl(42, 40%, 45%)" }}
+                                  >
+                                    <X className="w-2.5 h-2.5" /> Clear
+                                  </button>
+                                )}
+                              </div>
 
-                          {/* Hive list with colour dots */}
-                          <div className="space-y-0.5">
-                            {hiveMap.map(({ hive, count, speciesList }) => {
-                              const dotColour = getHiveColourDot(hive.family);
-                              const isSelected = selectedHiveFamilies.has(hive.family);
-                              return (
-                                <button
-                                  key={hive.family}
-                                  onClick={() => handleHiveToggle(hive.family, speciesList)}
-                                  className="w-full flex items-center gap-3 py-2 px-1 transition-all group"
-                                  style={{ background: isSelected ? "hsla(42, 30%, 20%, 0.3)" : "transparent" }}
-                                >
-                                  <span
-                                    className="w-3.5 h-3.5 rounded-full shrink-0"
-                                    style={{
-                                      background: dotColour,
-                                      boxShadow: isSelected ? `0 0 8px ${dotColour}` : `0 0 4px ${dotColour}55`,
-                                      border: isSelected ? "2px solid hsl(0, 0%, 90%)" : "none",
-                                    }}
-                                  />
-                                  <span className="text-[13px] font-serif tracking-wide uppercase flex-1 text-left" style={{ color: isSelected ? "hsl(42, 60%, 65%)" : "hsl(42, 35%, 48%)" }}>
-                                    {hive.icon} {hive.displayName}
-                                  </span>
-                                  <span className="text-[12px] font-sans tabular-nums shrink-0" style={{ color: "hsl(42, 70%, 55%)" }}>
-                                    {count}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
+                              {/* Hive list with colour dots */}
+                              <div className="space-y-0.5">
+                                {hiveMap.map(({ hive, count, speciesList }) => {
+                                  const dotColour = getHiveColourDot(hive.family);
+                                  const isSelected = selectedHiveFamilies.has(hive.family);
+                                  return (
+                                    <button
+                                      key={hive.family}
+                                      onClick={() => handleHiveToggle(hive.family, speciesList)}
+                                      className="w-full flex items-center gap-3 py-2 px-1 transition-all group"
+                                      style={{ background: isSelected ? "hsla(42, 30%, 20%, 0.3)" : "transparent" }}
+                                    >
+                                      <span
+                                        className="w-3.5 h-3.5 rounded-full shrink-0"
+                                        style={{
+                                          background: dotColour,
+                                          boxShadow: isSelected ? `0 0 8px ${dotColour}` : `0 0 4px ${dotColour}55`,
+                                          border: isSelected ? "2px solid hsl(0, 0%, 90%)" : "none",
+                                        }}
+                                      />
+                                      <span className="text-[13px] font-serif tracking-wide uppercase flex-1 text-left" style={{ color: isSelected ? "hsl(42, 60%, 65%)" : "hsl(42, 35%, 48%)" }}>
+                                        {hive.icon} {hive.displayName}
+                                      </span>
+                                      <span className="text-[12px] font-sans tabular-nums shrink-0" style={{ color: "hsl(42, 70%, 55%)" }}>
+                                        {count}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </>
                   )}
 
@@ -585,26 +604,36 @@ const AtlasFilter = ({
                     expanded={expandedSections.has("species")}
                     onToggle={() => toggleSection("species")}
                   />
-                  {expandedSections.has("species") && (
-                    <div className="pb-2">
-                      <div className="flex gap-1.5 flex-wrap mb-2 px-1">
-                        <SidebarChip active={!familyFilter} onClick={() => setFamilyFilter(null)} label="All" />
-                        {availableFamilies.map(f => (
-                          <SidebarChip key={f.name} active={familyFilter === f.name} onClick={() => setFamilyFilter(familyFilter === f.name ? null : f.name)} label={f.name} />
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-5 gap-1.5 px-1">
-                        <StaffGridItem active={isAllSpecies} onClick={() => handleSpeciesToggle("all")} label="TETOL" isAll />
-                        {availableSpecies.map(s => {
-                          const count = speciesCounts[s.species.toLowerCase()] || 0;
-                          const active = selectedSpecies.some(sp => sp.toLowerCase() === s.species.toLowerCase());
-                          return (
-                            <StaffGridItem key={s.key} active={active} onClick={() => handleSpeciesToggle(s.species)} label={s.species} image={s.image} count={count} />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+                  <AnimatePresence initial={false}>
+                    {expandedSections.has("species") && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pb-2" style={{ background: "hsla(42, 25%, 15%, 0.15)" }}>
+                          <div className="flex gap-1.5 flex-wrap mb-2 px-1 pt-1">
+                            <SidebarChip active={!familyFilter} onClick={() => setFamilyFilter(null)} label="All" />
+                            {availableFamilies.map(f => (
+                              <SidebarChip key={f.name} active={familyFilter === f.name} onClick={() => setFamilyFilter(familyFilter === f.name ? null : f.name)} label={f.name} />
+                            ))}
+                          </div>
+                          <div className="grid grid-cols-5 gap-1.5 px-1">
+                            <StaffGridItem active={isAllSpecies} onClick={() => handleSpeciesToggle("all")} label="TETOL" isAll />
+                            {availableSpecies.map(s => {
+                              const count = speciesCounts[s.species.toLowerCase()] || 0;
+                              const active = selectedSpecies.some(sp => sp.toLowerCase() === s.species.toLowerCase());
+                              return (
+                                <StaffGridItem key={s.key} active={active} onClick={() => handleSpeciesToggle(s.species)} label={s.species} image={s.image} count={count} />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* ══════ LIVING SIGNALS ══════ */}
                   {visualSections.map(section => (
@@ -613,43 +642,78 @@ const AtlasFilter = ({
                         icon={section.icon}
                         title={section.title}
                         colour={section.accent || "hsl(42, 70%, 55%)"}
+                        expanded={expandedSections.has(section.key)}
+                        onToggle={() => toggleSection(section.key)}
                       />
-                      {section.description && (
-                        <p className="text-[11px] font-serif italic px-1 pb-1" style={{ color: "hsl(0, 0%, 45%)" }}>
-                          {section.description}
-                        </p>
-                      )}
-                      <div className="space-y-0.5">
-                        {section.layers.map(layer => (
-                          <SidebarToggle key={layer.key} layer={layer} />
-                        ))}
-                        {section.subContent}
-                      </div>
+                      <AnimatePresence initial={false}>
+                        {expandedSections.has(section.key) && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            {section.description && (
+                              <p className="text-[11px] font-serif italic px-1 pb-1" style={{ color: "hsl(0, 0%, 45%)" }}>
+                                {section.description}
+                              </p>
+                            )}
+                            <div
+                              className="space-y-0.5 pb-2 rounded-b-md"
+                              style={{ background: "hsla(42, 25%, 15%, 0.15)" }}
+                            >
+                              {section.layers.map(layer => (
+                                <SidebarToggle key={layer.key} layer={layer} />
+                              ))}
+                              {section.subContent}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   ))}
 
                   {/* ══════ LINEAGE & PROJECT ══════ */}
                   {(availableLineages.length > 0 || availableProjects.length > 0) && (
                     <>
-                      <SidebarSectionHeader icon="🌿" title="Lineage & Project" colour="hsl(42, 55%, 55%)" />
-                      <div className="flex gap-1.5 flex-wrap px-1 pb-1">
-                        {availableLineages.length > 0 && (
-                          <>
-                            <SidebarChip active={lineageFilter === "all"} onClick={() => onLineageChange?.("all")} label="All Lineages" />
-                            {availableLineages.map(l => (
-                              <SidebarChip key={l} active={lineageFilter === l} onClick={() => onLineageChange?.(lineageFilter === l ? "all" : l)} label={l} />
-                            ))}
-                          </>
+                      <SidebarSectionHeader
+                        icon="🌿"
+                        title="Lineage & Project"
+                        colour="hsl(42, 55%, 55%)"
+                        expanded={expandedSections.has("lineage")}
+                        onToggle={() => toggleSection("lineage")}
+                      />
+                      <AnimatePresence initial={false}>
+                        {expandedSections.has("lineage") && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="flex gap-1.5 flex-wrap px-1 pb-1 pt-1" style={{ background: "hsla(42, 25%, 15%, 0.15)" }}>
+                              {availableLineages.length > 0 && (
+                                <>
+                                  <SidebarChip active={lineageFilter === "all"} onClick={() => onLineageChange?.("all")} label="All Lineages" />
+                                  {availableLineages.map(l => (
+                                    <SidebarChip key={l} active={lineageFilter === l} onClick={() => onLineageChange?.(lineageFilter === l ? "all" : l)} label={l} />
+                                  ))}
+                                </>
+                              )}
+                              {availableProjects.length > 0 && (
+                                <>
+                                  <SidebarChip active={projectFilter === "all"} onClick={() => onProjectChange?.("all")} label="All Projects" />
+                                  {availableProjects.map(p => (
+                                    <SidebarChip key={p} active={projectFilter === p} onClick={() => onProjectChange?.(projectFilter === p ? "all" : p)} label={p} />
+                                  ))}
+                                </>
+                              )}
+                            </div>
+                          </motion.div>
                         )}
-                        {availableProjects.length > 0 && (
-                          <>
-                            <SidebarChip active={projectFilter === "all"} onClick={() => onProjectChange?.("all")} label="All Projects" />
-                            {availableProjects.map(p => (
-                              <SidebarChip key={p} active={projectFilter === p} onClick={() => onProjectChange?.(projectFilter === p ? "all" : p)} label={p} />
-                            ))}
-                          </>
-                        )}
-                      </div>
+                      </AnimatePresence>
                     </>
                   )}
                 </div>
@@ -853,12 +917,14 @@ function SidebarSectionHeader({ icon, title, count, colour, expanded, onToggle }
   icon: string; title: string; count?: number; colour: string;
   expanded?: boolean; onToggle?: () => void;
 }) {
-  const Wrapper = onToggle ? "button" : "div";
+  const isClickable = !!onToggle;
   return (
-    <Wrapper
+    <button
       onClick={onToggle}
-      className="w-full flex items-center gap-2 pt-5 pb-2"
+      aria-expanded={expanded}
+      className={`w-full flex items-center gap-2 pt-5 pb-2 text-left ${isClickable ? "cursor-pointer hover:opacity-80" : "cursor-default"}`}
       style={{ borderBottom: `1px solid ${colour}33` }}
+      type="button"
     >
       <span className="text-base">{icon}</span>
       <span className="text-[13px] font-serif tracking-[0.12em] uppercase font-semibold" style={{ color: colour }}>
@@ -867,10 +933,20 @@ function SidebarSectionHeader({ icon, title, count, colour, expanded, onToggle }
       {count !== undefined && (
         <span className="text-[12px] font-sans tabular-nums" style={{ color: colour }}>{count}</span>
       )}
-      {onToggle && (
-        <span className="ml-auto text-[10px]" style={{ color: colour, transform: expanded ? "rotate(0)" : "rotate(-90deg)", transition: "transform 0.2s" }}>▾</span>
+      {isClickable && (
+        <span
+          className="ml-auto text-[10px]"
+          style={{
+            color: colour,
+            transform: expanded ? "rotate(0deg)" : "rotate(-90deg)",
+            transition: "transform 0.25s ease",
+            display: "inline-block",
+          }}
+        >
+          ▾
+        </span>
       )}
-    </Wrapper>
+    </button>
   );
 }
 
