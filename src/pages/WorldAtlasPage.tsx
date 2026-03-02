@@ -321,8 +321,8 @@ const WorldAtlasPage = () => {
 
             <div className="flex flex-wrap justify-center gap-3 mb-4">
               <Button variant="mystical" asChild>
-                <Link to="/map?research=on">
-                  <Globe className="w-4 h-4 mr-1.5" /> Enter the Atlas
+                <Link to="/map">
+                  <Globe className="w-4 h-4 mr-1.5" /> Open Map
                 </Link>
               </Button>
               <Button variant="sacred" onClick={() => {
