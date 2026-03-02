@@ -74,6 +74,7 @@ const KingOfBavleuxPage = lazy(() => import("./pages/KingOfBavleuxPage"));
 // DolomitiAmpezzoPage removed — served by BioRegionPage /atlas/bio-regions/dolomites-ampezzo-cadore
 const BioRegionsIndexPage = lazy(() => import("./pages/BioRegionsIndexPage"));
 const BioRegionPage = lazy(() => import("./pages/BioRegionPage"));
+const BioregionCalendarPage = lazy(() => import("./pages/BioregionCalendarPage"));
 const PressPage = lazy(() => import("./pages/PressPage"));
 const HowHeartsWorkPage = lazy(() => import("./pages/HowHeartsWorkPage"));
 const CosmicCalendarPage = lazy(() => import("./pages/CosmicCalendarPage"));
@@ -179,6 +180,7 @@ const App = () => {
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />
                 <Route path="/atlas/bio-regions" element={<BioRegionsIndexPage />} />
                 <Route path="/atlas/bio-regions/:slug" element={<BioRegionPage />} />
+                <Route path="/atlas/bio-regions/:slug/calendar" element={<BioregionCalendarPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />

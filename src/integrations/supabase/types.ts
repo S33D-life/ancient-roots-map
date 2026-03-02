@@ -130,14 +130,18 @@ export type Database = {
           center_lon: number | null
           climate_band: string | null
           countries: string[]
+          cover_image: string | null
           created_at: string
           dominant_species: string[]
           elevation_range: string | null
+          flagship_species_keys: string[] | null
           governance_status: string
+          hemisphere: string | null
           id: string
           name: string
           parent_id: string | null
           primary_watersheds: string[]
+          short_description: string | null
           type: string
           updated_at: string
         }
@@ -148,14 +152,18 @@ export type Database = {
           center_lon?: number | null
           climate_band?: string | null
           countries?: string[]
+          cover_image?: string | null
           created_at?: string
           dominant_species?: string[]
           elevation_range?: string | null
+          flagship_species_keys?: string[] | null
           governance_status?: string
+          hemisphere?: string | null
           id: string
           name: string
           parent_id?: string | null
           primary_watersheds?: string[]
+          short_description?: string | null
           type?: string
           updated_at?: string
         }
@@ -166,14 +174,18 @@ export type Database = {
           center_lon?: number | null
           climate_band?: string | null
           countries?: string[]
+          cover_image?: string | null
           created_at?: string
           dominant_species?: string[]
           elevation_range?: string | null
+          flagship_species_keys?: string[] | null
           governance_status?: string
+          hemisphere?: string | null
           id?: string
           name?: string
           parent_id?: string | null
           primary_watersheds?: string[]
+          short_description?: string | null
           type?: string
           updated_at?: string
         }
@@ -181,6 +193,118 @@ export type Database = {
           {
             foreignKeyName: "bio_regions_parent_id_fkey"
             columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bioregion_seasonal_markers: {
+        Row: {
+          bioregion_id: string
+          confidence: string
+          created_at: string
+          description: string | null
+          elevation_band: string | null
+          emoji: string | null
+          id: string
+          marker_type: string
+          metadata: Json | null
+          name: string
+          sort_order: number
+          species_keys: string[] | null
+          typical_month_end: number
+          typical_month_start: number
+        }
+        Insert: {
+          bioregion_id: string
+          confidence?: string
+          created_at?: string
+          description?: string | null
+          elevation_band?: string | null
+          emoji?: string | null
+          id?: string
+          marker_type?: string
+          metadata?: Json | null
+          name: string
+          sort_order?: number
+          species_keys?: string[] | null
+          typical_month_end: number
+          typical_month_start: number
+        }
+        Update: {
+          bioregion_id?: string
+          confidence?: string
+          created_at?: string
+          description?: string | null
+          elevation_band?: string | null
+          emoji?: string | null
+          id?: string
+          marker_type?: string
+          metadata?: Json | null
+          name?: string
+          sort_order?: number
+          species_keys?: string[] | null
+          typical_month_end?: number
+          typical_month_start?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bioregion_seasonal_markers_bioregion_id_fkey"
+            columns: ["bioregion_id"]
+            isOneToOne: false
+            referencedRelation: "bio_regions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bioregion_seed_windows: {
+        Row: {
+          bioregion_id: string
+          created_at: string
+          dormant_month_end: number | null
+          dormant_month_start: number | null
+          harvest_month_end: number | null
+          harvest_month_start: number | null
+          id: string
+          notes: string | null
+          sow_month_end: number | null
+          sow_month_start: number | null
+          species_key: string
+          species_name: string
+        }
+        Insert: {
+          bioregion_id: string
+          created_at?: string
+          dormant_month_end?: number | null
+          dormant_month_start?: number | null
+          harvest_month_end?: number | null
+          harvest_month_start?: number | null
+          id?: string
+          notes?: string | null
+          sow_month_end?: number | null
+          sow_month_start?: number | null
+          species_key: string
+          species_name: string
+        }
+        Update: {
+          bioregion_id?: string
+          created_at?: string
+          dormant_month_end?: number | null
+          dormant_month_start?: number | null
+          harvest_month_end?: number | null
+          harvest_month_start?: number | null
+          id?: string
+          notes?: string | null
+          sow_month_end?: number | null
+          sow_month_start?: number | null
+          species_key?: string
+          species_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bioregion_seed_windows_bioregion_id_fkey"
+            columns: ["bioregion_id"]
             isOneToOne: false
             referencedRelation: "bio_regions"
             referencedColumns: ["id"]
