@@ -463,4 +463,14 @@ All colors MUST be HSL.
   .glow-breath {
     animation: glowPulse 3.5s ease-in-out infinite;
   }
+
+  /* Hive fruit indicator on map */
+  .hive-fruit-indicator {
+    background: none !important;
+    border: none !important;
+  }
+  .hive-fruit-dot:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 18px rgba(255, 200, 80, 0.5) !important;
+  }
 }

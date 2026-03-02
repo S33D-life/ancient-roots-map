@@ -4,6 +4,7 @@ import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 import { MapFilterProvider } from "@/contexts/MapFilterContext";
 import { UIFlowProvider } from "@/contexts/UIFlowContext";
+import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
@@ -149,6 +150,7 @@ const App = () => {
         <AppUpdateBanner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
+          <HiveSeasonProvider>
           <MapFilterProvider>
           <UIFlowProvider>
             <BottomNav />
@@ -222,6 +224,7 @@ const App = () => {
             </Suspense>
           </UIFlowProvider>
           </MapFilterProvider>
+          </HiveSeasonProvider>
           </TetolLevelProvider>
         </BrowserRouter>
       </TooltipProvider>
