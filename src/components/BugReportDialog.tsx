@@ -55,8 +55,29 @@ const FREQUENCIES = [
   { value: "once", label: "Once" },
 ] as const;
 
+declare const __BUILD_ID__: string;
+
 function getDeviceInfo() {
   return `${navigator.userAgent} | ${window.innerWidth}x${window.innerHeight} | ${navigator.language}`;
+}
+
+function getCapturedErrors(): string | null {
+  try {
+    const raw = sessionStorage.getItem("s33d-error-log");
+    return raw || null;
+  } catch { return null; }
+}
+
+function buildDiagnostics() {
+  const errors = getCapturedErrors();
+  const buildId = typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "unknown";
+  return {
+    device: getDeviceInfo(),
+    build: buildId,
+    url: window.location.href,
+    timestamp: new Date().toISOString(),
+    recent_errors: errors ? JSON.parse(errors) : [],
+  };
 }
 
 function guessFeatureArea(path: string): string {
@@ -127,6 +148,8 @@ const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
         return;
       }
 
+      const diagnosticsData = form.include_diagnostics ? buildDiagnostics() : null;
+
       const payload: Record<string, unknown> = {
         user_id: user.id,
         title: form.title.trim().slice(0, 200),
@@ -138,7 +161,9 @@ const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
         feature_area: form.feature_area,
         page_route: location.pathname,
         device_info: form.include_diagnostics ? getDeviceInfo() : null,
+        diagnostics: diagnosticsData,
         include_diagnostics: form.include_diagnostics,
+        app_version: typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : null,
         status: "new",
       };
 
@@ -306,8 +331,14 @@ const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
           </AnimatePresence>
 
           {/* Auto-captured context badge */}
-          <div className="text-[10px] text-muted-foreground/50 bg-muted/30 rounded px-2 py-1.5">
-            📍 Route: <code className="text-[10px]">{location.pathname}</code>
+          <div className="text-[10px] text-muted-foreground/50 bg-muted/30 rounded px-2 py-1.5 space-y-0.5">
+            <div>📍 Route: <code className="text-[10px]">{location.pathname}</code></div>
+            {typeof __BUILD_ID__ !== "undefined" && (
+              <div>🔧 Build: <code className="text-[10px]">{__BUILD_ID__}</code></div>
+            )}
+            {getCapturedErrors() && (
+              <div>⚠️ <span className="text-destructive/70">{JSON.parse(getCapturedErrors()!).length} recent error(s) will be attached</span></div>
+            )}
           </div>
 
           {/* Submit */}
