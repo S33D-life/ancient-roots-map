@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { TreePine, Map, Home, BookOpen } from "lucide-react";
+import { TreePine, Map, Home, BookOpen, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 
@@ -14,8 +14,15 @@ const NotFound = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
-        <TreePine className="h-16 w-16 text-primary/40 mb-6" />
+      <div className="flex flex-col items-center justify-center px-4 pt-24 pb-20 text-center min-h-[70vh]">
+        {/* Atmospheric glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at 50% 40%, hsl(var(--primary) / 0.06), transparent 60%)",
+          }}
+        />
+        <TreePine className="h-16 w-16 text-primary/30 mb-6" />
         <h1 className="text-5xl font-serif text-primary mb-3">404</h1>
         <p className="text-lg text-muted-foreground font-serif mb-2">
           This path leads deeper into the unknown forest…
@@ -32,6 +39,9 @@ const NotFound = () => {
           </Button>
           <Button asChild variant="outline" className="font-serif text-xs tracking-wider gap-2">
             <Link to="/library"><BookOpen className="h-3.5 w-3.5" /> Visit Library</Link>
+          </Button>
+          <Button asChild variant="outline" className="font-serif text-xs tracking-wider gap-2">
+            <Link to="/council-of-life"><Leaf className="h-3.5 w-3.5" /> Council</Link>
           </Button>
         </div>
       </div>
