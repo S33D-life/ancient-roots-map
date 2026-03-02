@@ -1249,10 +1249,10 @@ const GalleryPage = () => {
               </div>
             )}
 
-            {/* Tree Ledger - Click to open */}
+            {/* Tree Ledger - Link to full page */}
             <div
               className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
-              onClick={() => setShowTreeLedger(!showTreeLedger)}
+              onClick={() => window.location.href = "/ledger"}
             >
               <img
                 src={councilLedgerWindow}
@@ -1261,16 +1261,17 @@ const GalleryPage = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
                 <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
-                <p className="text-sm text-foreground/70 mt-1">{showTreeLedger ? "Click to close" : "Click to open the Ledger"}</p>
+                <p className="text-sm text-foreground/70 mt-1">Open the transparency explorer →</p>
               </div>
             </div>
 
+            {/* Import/Export Tools */}
             {showTreeLedger && (
               <div className="animate-fade-in">
                 <Card className="border-mystical bg-card/50 backdrop-blur">
                   <CardHeader>
                     <CardTitle className="text-2xl font-serif text-mystical">
-                      Tree Ledger
+                      Data Tools
                     </CardTitle>
                     <CardDescription>
                       Import and export tree data from what3words CSV files
@@ -1278,73 +1279,6 @@ const GalleryPage = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
-                      <div>
-                        <h3 className="text-lg font-serif font-semibold mb-3">Ledger Stats</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                            <p className="text-2xl font-bold text-mystical">{trees.length}</p>
-                            <p className="text-sm text-muted-foreground">Total Trees</p>
-                          </div>
-                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                            <p className="text-2xl font-bold text-mystical">{uniqueSpecies.length}</p>
-                            <p className="text-sm text-muted-foreground">Species</p>
-                          </div>
-                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                            <p className="text-2xl font-bold text-mystical">
-                              {new Set(trees.map(t => t.nation).filter(Boolean)).size}
-                            </p>
-                            <p className="text-sm text-muted-foreground">Nations</p>
-                          </div>
-                          <div className="p-4 border border-mystical rounded-lg bg-background/50">
-                            <p className="text-2xl font-bold text-mystical">
-                              {new Set(trees.map(t => t.state).filter(Boolean)).size}
-                            </p>
-                            <p className="text-sm text-muted-foreground">States/Regions</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="border-t border-mystical pt-4">
-                        <HeartEconomySummary />
-                      </div>
-                      <div className="border-t border-mystical pt-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <h3 className="text-lg font-serif font-semibold">Strings</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {[
-                              { key: "oak" as const, label: "Oak" },
-                              { key: "yew" as const, label: "Yew" },
-                              { key: "beech" as const, label: "Beech" },
-                              { key: "ash" as const, label: "Ash" },
-                              { key: "holly" as const, label: "Holly" },
-                            ].map((s) => (
-                              <Button
-                                key={s.key}
-                                variant={activeString === s.key ? "default" : "outline"}
-                                size="sm"
-                                onClick={(e) => { e.stopPropagation(); setActiveString(s.key); }}
-                              >
-                                {s.label} String
-                              </Button>
-                            ))}
-                          </div>
-                        </div>
-                        <iframe
-                          src={
-                            {
-                              oak: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d8023b4ade8b40e4b5156",
-                              yew: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d80468a76dd551cff272b",
-                              beech: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d80c6a871d19d6dc35bd3",
-                              ash: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d8079b3e3d68121c9e133",
-                              holly: "https://clammy-viscount-ddb.notion.site/ebd/2fc15b58480d801eb6a8f4e80aa5a574",
-                            }[activeString]
-                          }
-                          width="100%"
-                          height="600"
-                          frameBorder="0"
-                          allowFullScreen
-                          className="rounded-lg border border-border"
-                        />
-                      </div>
                       <div className="border-t border-mystical pt-4">
                         <h3 className="text-lg font-serif font-semibold mb-3">Import Data</h3>
                         <p className="text-sm text-muted-foreground mb-4">
