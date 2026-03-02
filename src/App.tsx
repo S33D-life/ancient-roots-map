@@ -171,7 +171,7 @@ const App = () => {
                 <Route path="/value-tree" element={<ValueTreePage />} />
                 <Route path="/living-archive" element={<LivingArchivePage />} />
                 <Route path="/discovery" element={<DiscoveryPage />} />
-                <Route path="/markets" element={<CycleMarketsPage />} />
+                <Route path="/markets" element={<Navigate to="/library/rhythms" replace />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 {/* Hardcoded sub-portals removed — redirect to generic routes */}

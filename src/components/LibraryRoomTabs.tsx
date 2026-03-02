@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import {
-  Wand2, Globe, Music, Sprout, Star, Archive, Paintbrush, BookOpen, ScrollText, Lock,
+  Wand2, Globe, Music, Sprout, Star, Archive, Paintbrush, BookOpen, ScrollText, Lock, Activity,
 } from "lucide-react";
 
 interface RoomTab {
@@ -18,6 +18,7 @@ const ROOMS: RoomTab[] = [
   { value: "wishlist", label: "Wishing Tree", icon: <Star className="w-4 h-4" /> },
   { value: "seed-cellar", label: "Seed Cellar", icon: <Archive className="w-4 h-4" /> },
   { value: "creators-path", label: "Creator's Path", icon: <Paintbrush className="w-4 h-4" /> },
+  { value: "rhythms", label: "Rhythms", icon: <Activity className="w-4 h-4" /> },
   { value: "scrolls", label: "Scrolls & Records", icon: <ScrollText className="w-4 h-4" /> },
   { value: "vault", label: "Vaults", icon: <Lock className="w-4 h-4" /> },
 ];

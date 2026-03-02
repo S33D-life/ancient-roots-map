@@ -54,8 +54,8 @@ const MarketDetailPage = () => {
         <Header />
         <div className="container mx-auto px-4 py-8 text-center">
           <p className="text-muted-foreground font-serif">Market not found.</p>
-          <Link to="/markets" className="text-primary hover:underline font-serif mt-4 inline-block">
-            ← Back to Markets
+          <Link to="/library/rhythms" className="text-primary hover:underline font-serif mt-4 inline-block">
+            ← Back to Rhythms
           </Link>
         </div>
       </div>
@@ -110,10 +110,10 @@ const MarketDetailPage = () => {
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-3xl">
         {/* Breadcrumb */}
         <button
-          onClick={() => navigate("/markets")}
+          onClick={() => navigate("/library/rhythms")}
           className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary font-serif text-sm mb-6 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Cycle Markets
+          <ArrowLeft className="w-4 h-4" /> Heartwood · Rhythms
         </button>
 
         {/* Hero card */}

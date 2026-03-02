@@ -36,7 +36,7 @@ const TreeMarkets = ({ treeId, treeSpecies }: TreeMarketsProps) => {
         ))}
       </div>
       {markets.length > 4 && (
-        <Link to="/markets" className="block text-center text-xs text-primary hover:underline font-serif mt-3">
+        <Link to="/library/rhythms" className="block text-center text-xs text-primary hover:underline font-serif mt-3">
           View all {markets.length} markets →
         </Link>
       )}

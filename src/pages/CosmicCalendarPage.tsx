@@ -6,10 +6,11 @@ import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } 
 import { useFoodCycles } from "@/hooks/use-food-cycles";
 import { useCalendarLenses } from "@/hooks/use-calendar-lenses";
 import { usePhenology, getPhaseDisplay } from "@/hooks/use-phenology";
+import { useMarkets } from "@/hooks/use-markets";
 import { getTzolkinDay, formatTzolkinLabel } from "@/utils/mayanTzolkin";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -18,6 +19,7 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 const CosmicCalendarPage = () => {
   const { lunar, season, countdown } = useCosmicClock();
   const { foods } = useFoodCycles();
+  const { markets: openMarkets } = useMarkets({ status: "open" });
   const [userId, setUserId] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
   const [viewYear, setViewYear] = useState(new Date().getFullYear());
@@ -249,6 +251,41 @@ const CosmicCalendarPage = () => {
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        {/* Active Cycle Opportunities */}
+        {openMarkets.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-serif text-sm text-foreground/80 tracking-wide flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-primary" />
+              Active Cycle Opportunities
+            </h3>
+            <div className="space-y-1.5">
+              {openMarkets.slice(0, 3).map(m => (
+                <Link
+                  key={m.id}
+                  to={`/markets/${m.id}`}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-card/40 border border-border/20 hover:border-primary/30 transition-all"
+                >
+                  <span className="text-lg">🌀</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-serif text-foreground/80 line-clamp-1">{m.title}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {m.totalStaked} hearts staked · Closes {new Date(m.close_time).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-primary/60 font-serif shrink-0">
+                    {m.scope}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            {openMarkets.length > 3 && (
+              <Link to="/library/rhythms" className="block text-center text-[10px] text-primary/60 hover:text-primary font-serif">
+                View all {openMarkets.length} active cycles →
+              </Link>
+            )}
           </div>
         )}
 
