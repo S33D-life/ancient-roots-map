@@ -6,6 +6,7 @@ import Map from "@/components/Map";
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
+import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -30,6 +31,7 @@ const MapPage = () => {
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
+  const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
@@ -39,10 +41,16 @@ const MapPage = () => {
 
   return (
     <div className="fixed inset-0 z-[10] bg-background">
+      {/* Map renders immediately — preloads while blessing is visible */}
       <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramOrigin} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} />
       
-      {/* Standard header — hidden in fullscreen */}
-      {!isFullscreen && (
+      {/* Public Tester Blessing — overlays map, shown once */}
+      {showBlessing && (
+        <PublicTesterBlessing onComplete={() => setShowBlessing(false)} />
+      )}
+
+      {/* Standard header — hidden in fullscreen and during blessing */}
+      {!isFullscreen && !showBlessing && (
         <>
           <Header />
           <div className="absolute top-14 left-0 right-0 z-[20]">
@@ -59,16 +67,17 @@ const MapPage = () => {
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
-      <Suspense fallback={null}>
-        
-        <MapOnboardingRitual />
-        <ContextualWhisper
-          id="map-first-tree"
-          message="Tap any marker to meet an Ancient Friend, or long-press the map to claim a new encounter."
-          delay={8000}
-          position="bottom-center"
-        />
-      </Suspense>
+      {!showBlessing && (
+        <Suspense fallback={null}>
+          <MapOnboardingRitual />
+          <ContextualWhisper
+            id="map-first-tree"
+            message="Tap any marker to meet an Ancient Friend, or long-press the map to claim a new encounter."
+            delay={8000}
+            position="bottom-center"
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
