@@ -4881,6 +4881,10 @@ export type Database = {
         }
         Returns: string
       }
+      claim_gift_seed: {
+        Args: { p_invite_code: string; p_user_id: string }
+        Returns: Json
+      }
       claim_windfall_hearts: {
         Args: { p_tree_id: string; p_user_id: string }
         Returns: number

@@ -20,7 +20,7 @@ export const IdentitySection = () => (
         transition={{ duration: 0.8 }}
         className="font-serif text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground/90 italic"
       >
-        "A globally distributed, locally curated living library of seeds, stories, and mystery."
+        A living atlas of the world's most remarkable trees — mapped by people who walk among them.
       </motion.p>
       <motion.p
         initial={{ opacity: 0 }}
@@ -29,8 +29,8 @@ export const IdentitySection = () => (
         transition={{ duration: 0.8, delay: 0.3 }}
         className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto"
       >
-        S33D maps the world's ancient trees, gathers wisdom from those who walk among them,
-        and weaves it all into a planetary tapestry of living memory.
+        S33D maps ancient trees worldwide, gathers stories from those who visit them,
+        and rewards stewardship with S33D Hearts — a digital currency of care.
       </motion.p>
 
       {/* Value chips */}
@@ -43,7 +43,7 @@ export const IdentitySection = () => (
       >
         {[
           { icon: MapPin, text: "Map trees" },
-          { icon: ScrollText, text: "Gather wisdom" },
+          { icon: ScrollText, text: "Share stories" },
           { icon: Heart, text: "Earn hearts" },
           { icon: Users, text: "Join councils" },
         ].map(({ icon: Icon, text }) => (
@@ -161,7 +161,7 @@ export const ParticipationSection = () => (
         <Link to="/add-tree">
           <Button variant="mystical" size="lg" className="gap-2 text-base px-8">
             <MapPin className="w-5 h-5" />
-            Map Your First Ancient Friend
+            Add Your First Tree
           </Button>
         </Link>
       </motion.div>

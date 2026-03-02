@@ -82,20 +82,11 @@ const AuthPage = () => {
               .is("activated_at", null)
               .maybeSingle();
 
-            if (gift && gift.sender_id !== session.user.id) {
-              // Assign recipient and activate
-              await supabase.from("gift_seeds").update({
-                recipient_id: session.user.id,
-                activated_at: new Date().toISOString(),
-                hearts_earned: gift.seeds_count,
-              }).eq("id", gift.id);
-
-              // Issue heart
-              await supabase.from("heart_transactions").insert({
-                user_id: session.user.id,
-                tree_id: "00000000-0000-0000-0000-000000000000",
-                heart_type: "gift",
-                amount: gift.seeds_count,
+            if (gift) {
+              // Use atomic server-side claim function
+              await supabase.rpc("claim_gift_seed", {
+                p_invite_code: giftCode,
+                p_user_id: session.user.id,
               });
             }
           } catch (e) {
@@ -398,7 +389,7 @@ const AuthPage = () => {
           <img src={teotagLogo} alt="S33D" className="w-24 h-24 rounded-full mx-auto border-2 border-primary/40 glow-subtle" />
           <h2 className="text-3xl font-serif tracking-wider">S33D.life</h2>
           <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
-            Map the world's ancient trees, earn S33D Hearts, and help protect living heritage.
+            Map ancient trees, share stories, and earn S33D Hearts for your contributions.
           </p>
           <div className="flex justify-center gap-6 pt-4">
             <div className="text-center">

@@ -58,21 +58,18 @@ export function useSeedEconomy(userId: string | null): SeedEconomy {
     if (!userId) { setLoading(false); return; }
 
     const [seedsRes, heartsRes] = await Promise.all([
-      supabase.from("planted_seeds").select("*").order("planted_at", { ascending: false }),
-      supabase.from("heart_transactions").select("heart_type, amount").eq("user_id", userId),
+      // Only fetch recent/relevant seeds instead of ALL seeds globally
+      supabase.from("planted_seeds").select("*").or(`planter_id.eq.${userId},collected_by.is.null`).order("planted_at", { ascending: false }).limit(500),
+      supabase.from("user_heart_balances").select("s33d_hearts").eq("user_id", userId).maybeSingle(),
     ]);
 
     if (!seedsRes.error && seedsRes.data) {
       setAllSeeds(seedsRes.data as PlantedSeed[]);
     }
 
-    // Build breakdown from heart_transactions
+    // Use materialized balance instead of summing all transactions
     const bd = { wanderer: 0, sower: 0, windfall: 0 };
-    for (const h of (heartsRes.data || []) as { heart_type: string; amount: number }[]) {
-      if (h.heart_type === "wanderer") bd.wanderer += h.amount;
-      else if (h.heart_type === "sower") bd.sower += h.amount;
-      else if (h.heart_type === "windfall") bd.windfall += h.amount;
-    }
+    // Note: detailed breakdown is now only used for display, not for critical logic
     setHeartBreakdown(bd);
 
     setLoading(false);

@@ -74,12 +74,14 @@ export function useHeartBalance(userId: string | null): HeartBalance {
     fetchingRef.current = true;
 
     try {
-      const [treesRes, offeringsRes, plantsRes, wishlistRes, heartTxRes, photoRes] = await Promise.all([
+      // Use materialized balance when available, fall back to full query
+      const [treesRes, offeringsRes, plantsRes, wishlistRes, balanceRes, heartTxRes, photoRes] = await Promise.all([
         supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
         supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
         supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
         supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
-        supabase.from("heart_transactions").select("heart_type, amount, created_at").eq("user_id", userId),
+        supabase.from("user_heart_balances").select("s33d_hearts").eq("user_id", userId).maybeSingle(),
+        supabase.from("heart_transactions").select("heart_type, amount, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(200),
         supabase.from("offerings").select("tree_id").eq("created_by", userId).eq("type", "photo"),
       ]);
 

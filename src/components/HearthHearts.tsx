@@ -42,12 +42,13 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
       const items = data || [];
       const sum = items.reduce((s, h) => s + (h.amount || 0), 0);
 
-      // Get full total
-      const { data: allData } = await supabase
-        .from("heart_transactions")
-        .select("amount")
-        .eq("user_id", userId);
-      const fullTotal = (allData || []).reduce((s: number, h: any) => s + (h.amount || 0), 0);
+      // Use materialized balance for total (scales to 10k+ users)
+      const { data: balanceData } = await supabase
+        .from("user_heart_balances")
+        .select("s33d_hearts")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const fullTotal = (balanceData as any)?.s33d_hearts || items.reduce((s, h) => s + (h.amount || 0), 0);
 
       // Fetch tree names for recent
       const treeIds = [...new Set(items.map(i => i.tree_id))];
@@ -82,7 +83,7 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
         <Heart className="w-6 h-6 text-primary fill-primary/30" />
         <div className="text-center">
           <p className="text-2xl font-serif text-primary">{total}</p>
-          <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50">Hearts Collected</p>
+          <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50">S33D Hearts — Your Total</p>
         </div>
       </div>
 
@@ -118,7 +119,7 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
         <div className="text-center py-6">
           <Heart className="w-8 h-8 mx-auto mb-2 text-muted-foreground/20" />
           <p className="text-xs font-serif text-muted-foreground/50">No heart activity yet</p>
-          <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Plant seeds near trees to start collecting hearts</p>
+          <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Visit a tree, add an offering, or plant a seed to earn your first hearts</p>
         </div>
       )}
 
