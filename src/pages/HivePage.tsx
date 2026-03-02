@@ -644,6 +644,42 @@ const HivePage = () => {
             </TabsContent>
           </Tabs>
         )}
+
+        {/* Continue your journey — loop closure */}
+        <div className="mt-12 mb-8 px-4">
+          <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-4 text-center">
+            Continue your journey
+          </h3>
+          <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+            <button
+              onClick={() => focusMap({ type: "area", id: hive.family, source: "hive", hiveSlug: family })}
+              className="loop-card font-serif text-left"
+            >
+              <span className="text-primary flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5" /> View on Map
+              </span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find {hive.displayName} trees</p>
+            </button>
+            <Link to="/blooming-clock" className="loop-card font-serif text-left">
+              <span className="text-primary flex items-center gap-1.5">
+                🕰️ Blooming Clock
+              </span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">See seasonal rhythms</p>
+            </Link>
+            <Link to="/atlas" className="loop-card font-serif text-left">
+              <span className="text-primary flex items-center gap-1.5">
+                🌍 Atlas
+              </span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Explore territories</p>
+            </Link>
+            <Link to="/hives" className="loop-card font-serif text-left">
+              <span className="text-primary flex items-center gap-1.5">
+                🐝 All Hives
+              </span>
+              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Browse species families</p>
+            </Link>
+          </div>
+        </div>
       </div>
       <Footer />
     </div>
