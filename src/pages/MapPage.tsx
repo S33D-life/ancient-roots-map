@@ -55,7 +55,7 @@ const MapPage = () => {
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
       {!showBlessing && !isFullscreen && paramArrival && (
-        <MapArrivalBanner arrival={paramArrival} />
+        <MapArrivalBanner arrival={paramArrival} countrySlug={paramCountry} hiveSlug={paramHive} />
       )}
 
       {/* Public Tester Blessing — overlays map, shown once */}

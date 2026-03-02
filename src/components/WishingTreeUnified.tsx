@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import {
   Heart, Loader2, Trash2, TreeDeciduous, Pencil, MapPin, Globe, User, Users,
   Search, Map, Plus, Wand2, Star, Compass, Clock,
@@ -47,6 +48,7 @@ type ViewMode = "collective" | "individual" | "tribe";
 
 const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifiedProps) => {
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -470,7 +472,7 @@ const WishingTreeUnified = ({ compact = false, onCountChange }: WishingTreeUnifi
                         variant="ghost"
                         size="sm"
                         className="text-xs gap-1.5 font-serif"
-                        onClick={() => navigate(`/map?lat=${item.tree!.latitude}&lng=${item.tree!.longitude}&zoom=16`)}
+                        onClick={() => focusMap({ type: "tree", id: item.tree_id || "", lat: item.tree!.latitude, lng: item.tree!.longitude, zoom: 16, source: "search" })}
                       >
                         <Map className="w-3.5 h-3.5" /> Atlas
                       </Button>
