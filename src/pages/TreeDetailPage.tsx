@@ -50,6 +50,8 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 import { useBloomStatus } from "@/hooks/use-bloom-status";
+import PhenologyBadge from "@/components/PhenologyBadge";
+import PhenologyObservationButton from "@/components/PhenologyObservationButton";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -292,16 +294,20 @@ const TreeDetailPage = () => {
                     );
                   })()}
                 </p>
-                {/* Bloom status badge */}
-                {tree.species && (() => {
-                  const bloom = bloomStatus;
-                  if (!bloom || !bloom.stage) return null;
-                  return (
-                    <span className={`inline-flex items-center gap-1 mt-1 text-[11px] font-serif px-2 py-0.5 rounded-full border ${bloom.isActive ? 'border-primary/30 text-primary bg-primary/10' : 'border-border/30 text-muted-foreground bg-card/40'}`}>
-                      {bloom.emoji} {bloom.label}
-                    </span>
-                  );
-                })()}
+                {/* Phenology phase badge */}
+                {tree.species && (
+                  <div className="flex items-center gap-2 flex-wrap mt-1">
+                    <PhenologyBadge
+                      speciesKey={tree.species.toLowerCase().replace(/ /g, "_")}
+                      speciesName={tree.species}
+                    />
+                    <PhenologyObservationButton
+                      treeId={id}
+                      speciesKey={tree.species.toLowerCase().replace(/ /g, "_")}
+                      userId={userId}
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <TreeCheckinButton
