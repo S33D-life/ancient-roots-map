@@ -5,7 +5,7 @@
 
 export const SPARK_FLAGS = {
   /** Use the stable (non-draggable on first ship) FAB on mobile */
-  SPARK_LITE_DEFAULT_ON: true,
+  SPARK_LITE_DEFAULT_ON: false,
   /** Allow screenshot uploads (auto-disables on error) */
   ENABLE_SCREENSHOTS: true,
   /** Attach device/route diagnostics to reports */
