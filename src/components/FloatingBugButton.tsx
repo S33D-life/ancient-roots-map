@@ -23,7 +23,7 @@ const FloatingBugButton = () => {
 
   return (
     <motion.div
-      className="fixed bottom-20 right-3 z-[70] md:bottom-4 touch-none"
+      className="fixed bottom-[5.5rem] right-3 z-[65] md:bottom-4 touch-none"
       drag
       dragMomentum={false}
       dragElastic={0}
