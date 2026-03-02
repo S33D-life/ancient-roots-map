@@ -4480,6 +4480,9 @@ export type Database = {
       user_heart_balances: {
         Row: {
           influence_tokens: number
+          last_earned_at: string | null
+          lifetime_earned: number
+          lifetime_spent: number
           s33d_hearts: number
           species_hearts: number
           updated_at: string
@@ -4487,6 +4490,9 @@ export type Database = {
         }
         Insert: {
           influence_tokens?: number
+          last_earned_at?: string | null
+          lifetime_earned?: number
+          lifetime_spent?: number
           s33d_hearts?: number
           species_hearts?: number
           updated_at?: string
@@ -4494,6 +4500,9 @@ export type Database = {
         }
         Update: {
           influence_tokens?: number
+          last_earned_at?: string | null
+          lifetime_earned?: number
+          lifetime_spent?: number
           s33d_hearts?: number
           species_hearts?: number
           updated_at?: string

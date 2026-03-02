@@ -167,6 +167,7 @@ const DashboardVault = ({ userId }: Props) => {
         seedsRemaining={seedsRemaining}
         activeFilter={heartFilter}
         onSegmentClick={handleSegmentClick}
+        userId={userId}
       />
 
       {/* Active Seeds / Bloom Timers */}
