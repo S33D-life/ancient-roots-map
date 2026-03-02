@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 /* ─── 1. Identity Tagline — shown right after the hero ─── */
 export const IdentitySection = () => (
-  <section id="identity" className="relative py-20 md:py-28 overflow-hidden">
+  <section id="identity" className="relative py-16 md:py-20 overflow-hidden">
     <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
     <div className="container mx-auto px-4 text-center relative z-10 max-w-3xl space-y-6">
       <motion.p
@@ -71,7 +71,7 @@ export const DiscoveryRow = () => {
   }, []);
 
   return (
-    <section className="py-8 md:py-12">
+    <section className="py-6 md:py-10">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <motion.div
@@ -137,7 +137,7 @@ export const DiscoveryRow = () => {
 
 /* ─── 2. Focused CTA — single primary action ─── */
 export const ParticipationSection = () => (
-  <section id="participate" className="py-16 md:py-24">
+  <section id="participate" className="py-14 md:py-20">
     <div className="container mx-auto px-4 max-w-2xl text-center">
       <motion.h2
         initial={{ opacity: 0, y: 12 }}
@@ -164,23 +164,7 @@ export const ParticipationSection = () => (
             Map Your First Ancient Friend
           </Button>
         </Link>
-        <Link to="/atlas">
-          <Button variant="outline" size="lg" className="gap-2 text-sm px-6 border-border/40 text-muted-foreground hover:text-foreground">
-            <Globe className="w-4 h-4" />
-            Explore the Atlas
-          </Button>
-        </Link>
       </motion.div>
-
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.4 }}
-        className="mt-6 text-xs text-muted-foreground/50 font-serif"
-      >
-        +10 Hearts for every tree you map
-      </motion.p>
     </div>
   </section>
 );
@@ -355,7 +339,7 @@ const TETOL_NAV = [
 ];
 
 export const TetolNavSection = () => (
-  <section id="navigate" className="py-16 md:py-24">
+  <section id="navigate" className="py-12 md:py-18">
     <div className="container mx-auto px-4 max-w-4xl">
       <h2 className="text-2xl md:text-3xl font-serif text-center mb-3">
         The Ethereal Tree of Life

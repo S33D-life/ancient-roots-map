@@ -89,9 +89,9 @@ const queryClient = new QueryClient({
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-3">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="font-serif text-sm text-muted-foreground tracking-widest">Loading…</p>
+    <div className="flex flex-col items-center gap-3 animate-in fade-in duration-500">
+      <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
+      <p className="font-serif text-xs text-muted-foreground/50 tracking-widest">Loading…</p>
     </div>
   </div>
 );
