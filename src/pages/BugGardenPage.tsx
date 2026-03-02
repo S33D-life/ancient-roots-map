@@ -1,7 +1,11 @@
+/**
+ * BugGardenPage → "Bounty Board"
+ * Collective Build Layer — participatory refinement of the ecosystem.
+ */
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Bug, ThumbsUp, ChevronRight, Filter, Loader2 } from "lucide-react";
+import { Shield, ThumbsUp, ChevronRight, Filter, Loader2, Bug, Eye, Lightbulb, Heart, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -23,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 type BugReport = {
   id: string;
@@ -31,15 +36,18 @@ type BugReport = {
   actual: string;
   expected: string;
   steps: string;
+  suggestion: string | null;
   severity: string;
   frequency: string;
   feature_area: string;
+  report_type: string;
   status: string;
   upvotes_count: number;
   hearts_awarded_total: number;
   reward_state: string;
   user_id: string;
   triage_notes: string | null;
+  screenshot_urls: string[] | null;
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -63,6 +71,18 @@ const STATUS_LABELS: Record<string, string> = {
   need_info: "❓ Need Info",
 };
 
+const TYPE_ICONS: Record<string, typeof Bug> = {
+  bug: Bug,
+  ux_improvement: Eye,
+  insight: Lightbulb,
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  bug: "Bug",
+  ux_improvement: "UX",
+  insight: "Insight",
+};
+
 const BugGardenPage = () => {
   const [bugs, setBugs] = useState<BugReport[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,20 +90,19 @@ const BugGardenPage = () => {
   const [userUpvotes, setUserUpvotes] = useState<Set<string>>(new Set());
   const [selectedBug, setSelectedBug] = useState<BugReport | null>(null);
   const [filterArea, setFilterArea] = useState("all");
+  const [filterType, setFilterType] = useState("all");
   const [isCurator, setIsCurator] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<any[]>([]);
+  const [customHearts, setCustomHearts] = useState("");
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       setUserId(user.id);
-      // Check curator role
       const { data: roleData } = await supabase
         .from("user_roles")
         .select("role")
@@ -92,7 +111,6 @@ const BugGardenPage = () => {
         .maybeSingle();
       setIsCurator(!!roleData);
 
-      // Load user upvotes
       const { data: upvotes } = await supabase
         .from("bug_upvotes")
         .select("bug_id")
@@ -144,7 +162,6 @@ const BugGardenPage = () => {
     toast.success("Comment added");
   };
 
-  // Curator actions
   const updateBugStatus = async (bugId: string, status: string) => {
     await supabase.from("bug_reports").update({ status } as any).eq("id", bugId);
     setBugs((prev) => prev.map((b) => b.id === bugId ? { ...b, status } : b));
@@ -153,7 +170,7 @@ const BugGardenPage = () => {
   };
 
   const awardHearts = async (bugId: string, amount: number) => {
-    if (!userId) return;
+    if (!userId || amount < 1) return;
     const { error } = await supabase.rpc("award_bug_hearts", {
       p_bug_id: bugId,
       p_amount: amount,
@@ -162,12 +179,17 @@ const BugGardenPage = () => {
     if (error) { toast.error(error.message); return; }
     setBugs((prev) => prev.map((b) => b.id === bugId
       ? { ...b, hearts_awarded_total: b.hearts_awarded_total + amount, reward_state: "awarded" } : b));
+    if (selectedBug?.id === bugId) {
+      setSelectedBug({ ...selectedBug, hearts_awarded_total: selectedBug.hearts_awarded_total + amount, reward_state: "awarded" });
+    }
     toast.success(`💚 ${amount} Hearts awarded`);
+    setCustomHearts("");
   };
 
   const filterBugs = (tab: string) => {
     let filtered = bugs;
     if (filterArea !== "all") filtered = filtered.filter((b) => b.feature_area === filterArea);
+    if (filterType !== "all") filtered = filtered.filter((b) => b.report_type === filterType);
     switch (tab) {
       case "new": return filtered.filter((b) => ["new", "need_info"].includes(b.status));
       case "progress": return filtered.filter((b) => ["triaged", "in_progress"].includes(b.status));
@@ -177,61 +199,101 @@ const BugGardenPage = () => {
     }
   };
 
-  const BugCard = ({ bug }: { bug: BugReport }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="border border-border/40 rounded-lg p-3 hover:border-primary/30 transition-colors cursor-pointer bg-card/40"
-      onClick={() => { setSelectedBug(bug); loadComments(bug.id); }}
-    >
-      <div className="flex items-start gap-2">
-        <button
-          onClick={(e) => { e.stopPropagation(); toggleUpvote(bug.id); }}
-          className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded transition-colors min-w-[36px] ${
-            userUpvotes.has(bug.id) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <ThumbsUp className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-mono">{bug.upvotes_count}</span>
-        </button>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium truncate">{bug.title}</h3>
-          <div className="flex flex-wrap gap-1.5 mt-1.5">
-            <Badge variant="outline" className={`text-[10px] ${SEVERITY_COLORS[bug.severity] || ""}`}>
-              {bug.severity}
-            </Badge>
-            <Badge variant="outline" className="text-[10px]">{bug.feature_area}</Badge>
-            <span className="text-[10px] text-muted-foreground/60">
-              {STATUS_LABELS[bug.status] || bug.status}
-            </span>
+  // Aggregate stats
+  const totalReports = bugs.length;
+  const totalHeartsAwarded = bugs.reduce((s, b) => s + b.hearts_awarded_total, 0);
+  const fixedCount = bugs.filter(b => ["fixed", "released"].includes(b.status)).length;
+
+  const BugCard = ({ bug }: { bug: BugReport }) => {
+    const TypeIcon = TYPE_ICONS[bug.report_type] || Bug;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="border border-border/40 rounded-lg p-3 hover:border-primary/30 transition-colors cursor-pointer bg-card/40"
+        onClick={() => { setSelectedBug(bug); loadComments(bug.id); }}
+      >
+        <div className="flex items-start gap-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleUpvote(bug.id); }}
+            className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded transition-colors min-w-[36px] min-h-[44px] justify-center ${
+              userUpvotes.has(bug.id) ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <ThumbsUp className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-mono">{bug.upvotes_count}</span>
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <TypeIcon className="w-3 h-3 text-muted-foreground shrink-0" />
+              <h3 className="text-sm font-medium truncate">{bug.title}</h3>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <Badge variant="outline" className={`text-[10px] ${SEVERITY_COLORS[bug.severity] || ""}`}>
+                {bug.severity}
+              </Badge>
+              <Badge variant="outline" className="text-[10px]">{bug.feature_area}</Badge>
+              {bug.report_type !== "bug" && (
+                <Badge variant="outline" className="text-[10px] bg-primary/5">{TYPE_LABELS[bug.report_type]}</Badge>
+              )}
+              {bug.hearts_awarded_total > 0 && (
+                <span className="text-[10px] text-primary flex items-center gap-0.5">
+                  <Heart className="w-2.5 h-2.5 fill-primary/40" /> {bug.hearts_awarded_total}
+                </span>
+              )}
+              {bug.screenshot_urls && bug.screenshot_urls.length > 0 && (
+                <ImageIcon className="w-3 h-3 text-muted-foreground/50" />
+              )}
+              <span className="text-[10px] text-muted-foreground/60 ml-auto">
+                {STATUS_LABELS[bug.status] || bug.status}
+              </span>
+            </div>
           </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-1" />
         </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-1" />
-      </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container max-w-2xl mx-auto px-4 pt-24 pb-24 space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-serif text-2xl text-primary tracking-wide flex items-center gap-2">
-              <Bug className="w-6 h-6" /> Bug Garden
+              <Shield className="w-6 h-6" /> Bounty Board
             </h1>
             <p className="text-sm text-muted-foreground/70 font-serif">
-              Help us grow a healthier ecosystem
+              Help strengthen the garden. Earn Hearts.
             </p>
           </div>
           <BugReportDialog />
         </div>
 
-        {/* Filter */}
-        <div className="flex items-center gap-2">
+        {/* Stats strip */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Reports", value: totalReports },
+            { label: "Resolved", value: fixedCount },
+            { label: "Hearts Awarded", value: totalHeartsAwarded, icon: Heart },
+          ].map((s) => (
+            <div key={s.label} className="bg-card/50 border border-border/30 rounded-lg p-3 text-center">
+              <div className="text-lg font-serif text-foreground flex items-center justify-center gap-1">
+                {s.icon && <Heart className="w-3.5 h-3.5 text-primary fill-primary/30" />}
+                {s.value}
+              </div>
+              <div className="text-[10px] text-muted-foreground">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-2 flex-wrap">
           <Filter className="w-3.5 h-3.5 text-muted-foreground" />
           <Select value={filterArea} onValueChange={setFilterArea}>
-            <SelectTrigger className="w-[140px] h-8 text-xs">
+            <SelectTrigger className="w-[130px] h-8 text-xs">
               <SelectValue placeholder="All areas" />
             </SelectTrigger>
             <SelectContent>
@@ -246,8 +308,19 @@ const BugGardenPage = () => {
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-[110px] h-8 text-xs">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="bug">🐞 Bugs</SelectItem>
+              <SelectItem value="ux_improvement">✨ UX</SelectItem>
+              <SelectItem value="insight">💡 Insights</SelectItem>
+            </SelectContent>
+          </Select>
           <span className="text-[10px] text-muted-foreground/50 ml-auto">
-            {bugs.length} reports
+            {bugs.length} total
           </span>
         </div>
 
@@ -260,14 +333,14 @@ const BugGardenPage = () => {
             <TabsList className="grid grid-cols-4 w-full">
               <TabsTrigger value="new" className="text-xs">New</TabsTrigger>
               <TabsTrigger value="progress" className="text-xs">In Progress</TabsTrigger>
-              <TabsTrigger value="fixed" className="text-xs">Fixed</TabsTrigger>
+              <TabsTrigger value="fixed" className="text-xs">Resolved</TabsTrigger>
               <TabsTrigger value="mine" className="text-xs">My Reports</TabsTrigger>
             </TabsList>
             {["new", "progress", "fixed", "mine"].map((tab) => (
               <TabsContent key={tab} value={tab} className="space-y-2 mt-3">
                 {filterBugs(tab).length === 0 ? (
                   <p className="text-sm text-muted-foreground/50 text-center py-8 font-serif">
-                    No bugs here — the garden is clear 🌿
+                    {tab === "mine" ? "You haven't submitted any bounties yet" : "No bounties here — the garden is clear 🌿"}
                   </p>
                 ) : (
                   filterBugs(tab).map((bug) => <BugCard key={bug.id} bug={bug} />)
@@ -277,13 +350,16 @@ const BugGardenPage = () => {
           </Tabs>
         )}
 
-        {/* Bug Detail Dialog */}
+        {/* Detail Dialog */}
         <Dialog open={!!selectedBug} onOpenChange={(o) => !o && setSelectedBug(null)}>
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             {selectedBug && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="font-serif text-lg">{selectedBug.title}</DialogTitle>
+                  <DialogTitle className="font-serif text-lg flex items-center gap-2">
+                    {(() => { const I = TYPE_ICONS[selectedBug.report_type] || Bug; return <I className="w-4 h-4 text-primary" />; })()}
+                    {selectedBug.title}
+                  </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 text-sm">
                   <div className="flex flex-wrap gap-2">
@@ -292,36 +368,67 @@ const BugGardenPage = () => {
                     </Badge>
                     <Badge variant="outline">{selectedBug.feature_area}</Badge>
                     <Badge variant="outline">{selectedBug.frequency}</Badge>
+                    <Badge variant="outline" className="bg-primary/5">{TYPE_LABELS[selectedBug.report_type] || "Bug"}</Badge>
                     <span className="text-xs text-muted-foreground">
                       {STATUS_LABELS[selectedBug.status]}
                     </span>
                   </div>
 
                   <div>
-                    <p className="text-xs text-muted-foreground font-medium mb-1">What happened</p>
+                    <p className="text-xs text-muted-foreground font-medium mb-1">
+                      {selectedBug.report_type === "bug" ? "What happened" : "Observation"}
+                    </p>
                     <p className="text-foreground/80">{selectedBug.actual}</p>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium mb-1">Expected</p>
-                    <p className="text-foreground/80">{selectedBug.expected}</p>
-                  </div>
+                  {selectedBug.expected && selectedBug.expected !== "N/A" && (
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium mb-1">Expected</p>
+                      <p className="text-foreground/80">{selectedBug.expected}</p>
+                    </div>
+                  )}
                   {selectedBug.steps && selectedBug.steps !== "Not provided" && (
                     <div>
                       <p className="text-xs text-muted-foreground font-medium mb-1">Steps</p>
                       <p className="text-foreground/80 whitespace-pre-wrap">{selectedBug.steps}</p>
                     </div>
                   )}
-
-                  {selectedBug.hearts_awarded_total > 0 && (
-                    <div className="text-xs text-primary">
-                      💚 {selectedBug.hearts_awarded_total} Hearts awarded
+                  {selectedBug.suggestion && (
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium mb-1 flex items-center gap-1">
+                        <Lightbulb className="w-3 h-3" /> Suggestion
+                      </p>
+                      <p className="text-foreground/80">{selectedBug.suggestion}</p>
                     </div>
                   )}
 
-                  {/* Curator triage tools */}
+                  {/* Screenshots */}
+                  {selectedBug.screenshot_urls && selectedBug.screenshot_urls.length > 0 && (
+                    <div>
+                      <p className="text-xs text-muted-foreground font-medium mb-1">Screenshots</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {selectedBug.screenshot_urls.map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                            className="w-20 h-20 rounded-lg overflow-hidden border border-border/40 hover:border-primary/50 transition-colors">
+                            <img src={url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hearts awarded */}
+                  {selectedBug.hearts_awarded_total > 0 && (
+                    <div className="flex items-center gap-1.5 text-sm text-primary bg-primary/5 rounded-lg px-3 py-2">
+                      <Heart className="w-4 h-4 fill-primary/30" />
+                      <span className="font-serif">{selectedBug.hearts_awarded_total} Hearts awarded</span>
+                      <span className="text-[10px] text-muted-foreground ml-auto">Build Contribution</span>
+                    </div>
+                  )}
+
+                  {/* Curator tools */}
                   {isCurator && (
                     <div className="border-t border-border/40 pt-3 space-y-3">
-                      <p className="text-xs font-medium text-primary">Curator Tools</p>
+                      <p className="text-xs font-medium text-primary font-serif">Curator Tools</p>
                       <div className="flex flex-wrap gap-1.5">
                         {["triaged", "in_progress", "fixed", "released", "duplicate", "wont_fix", "need_info"].map((s) => (
                           <Button
@@ -335,16 +442,29 @@ const BugGardenPage = () => {
                           </Button>
                         ))}
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => awardHearts(selectedBug.id, 3)}>
-                          +3 💚
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => awardHearts(selectedBug.id, 5)}>
-                          +5 💚
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => awardHearts(selectedBug.id, 10)}>
-                          +10 💚
-                        </Button>
+                      <div className="flex gap-2 flex-wrap items-center">
+                        <p className="text-[10px] text-muted-foreground">Award Hearts:</p>
+                        {[3, 5, 10, 20].map((amt) => (
+                          <Button key={amt} size="sm" variant="outline" className="text-xs h-7" onClick={() => awardHearts(selectedBug.id, amt)}>
+                            +{amt} 💚
+                          </Button>
+                        ))}
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={customHearts}
+                            onChange={(e) => setCustomHearts(e.target.value)}
+                            placeholder="Custom"
+                            className="w-16 h-7 text-xs"
+                          />
+                          <Button size="sm" variant="outline" className="h-7 text-xs"
+                            disabled={!customHearts || parseInt(customHearts) < 1}
+                            onClick={() => awardHearts(selectedBug.id, parseInt(customHearts))}>
+                            Award
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -369,7 +489,7 @@ const BugGardenPage = () => {
                           className="min-h-[40px] text-xs"
                           maxLength={2000}
                         />
-                        <Button size="sm" onClick={submitComment} disabled={!commentText.trim()}>
+                        <Button size="sm" onClick={submitComment} disabled={!commentText.trim()} className="min-h-[44px]">
                           Post
                         </Button>
                       </div>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { Bug, Loader2, ChevronDown } from "lucide-react";
+import { Shield, Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -24,6 +24,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
+const REPORT_TYPES = [
+  { value: "bug", label: "🐞 Bug", desc: "Something is broken or wrong" },
+  { value: "ux_improvement", label: "✨ UX Improvement", desc: "Make something better" },
+  { value: "insight", label: "💡 System Insight", desc: "Share a deeper observation" },
+] as const;
+
 const FEATURE_AREAS = [
   { value: "map", label: "Map" },
   { value: "atlas", label: "Atlas" },
@@ -43,7 +49,7 @@ const FEATURE_AREAS = [
 ] as const;
 
 const SEVERITIES = [
-  { value: "blocker", label: "🔴 Blocker", desc: "App is broken / unusable" },
+  { value: "blocker", label: "🔴 Critical", desc: "App is broken" },
   { value: "major", label: "🟠 Major", desc: "Feature doesn't work" },
   { value: "minor", label: "🟡 Minor", desc: "Works but wrong" },
   { value: "cosmetic", label: "🔵 Cosmetic", desc: "Visual issue" },
@@ -54,6 +60,12 @@ const FREQUENCIES = [
   { value: "sometimes", label: "Sometimes" },
   { value: "once", label: "Once" },
 ] as const;
+
+const REWARD_HINTS: Record<string, string> = {
+  bug: "Valid bugs earn 3–20 Hearts depending on severity",
+  ux_improvement: "Accepted improvements earn 5–15 Hearts",
+  insight: "High-value insights earn variable Hearts",
+};
 
 declare const __BUILD_ID__: string;
 
@@ -106,15 +118,21 @@ const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [showOptional, setShowOptional] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [screenshots, setScreenshots] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: "",
     actual: "",
     expected: "",
     steps: "",
+    suggestion: "",
     severity: "minor",
     frequency: "once",
     feature_area: guessFeatureArea(location.pathname),
+    report_type: "bug",
     include_diagnostics: true,
   });
 
@@ -127,59 +145,97 @@ const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
       actual: "",
       expected: "",
       steps: "",
+      suggestion: "",
       severity: "minor",
       frequency: "once",
       feature_area: guessFeatureArea(location.pathname),
+      report_type: "bug",
       include_diagnostics: true,
     });
     setShowOptional(false);
+    setScreenshots([]);
+    setSubmitted(false);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(f => f.size < 5 * 1024 * 1024 && f.type.startsWith("image/"));
+    if (validFiles.length < files.length) toast.error("Only images under 5MB accepted");
+    setScreenshots(prev => [...prev, ...validFiles].slice(0, 3));
+  };
+
+  const removeScreenshot = (idx: number) => {
+    setScreenshots(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const uploadScreenshots = async (userId: string): Promise<string[]> => {
+    if (screenshots.length === 0) return [];
+    setUploading(true);
+    const urls: string[] = [];
+    for (const file of screenshots) {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("bounty-screenshots").upload(path, file);
+      if (!error) {
+        const { data } = supabase.storage.from("bounty-screenshots").getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+    }
+    setUploading(false);
+    return urls;
   };
 
   const submit = async () => {
-    if (!form.title.trim() || !form.actual.trim() || !form.expected.trim()) {
-      toast.error("Please fill in all required fields");
+    if (!form.title.trim() || !form.actual.trim()) {
+      toast.error("Please fill in the title and description");
+      return;
+    }
+    if (form.report_type === "bug" && !form.expected.trim()) {
+      toast.error("Please describe what you expected");
       return;
     }
     setSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Sign in to report bugs");
+        toast.error("Sign in to contribute");
         return;
       }
 
+      const screenshotUrls = await uploadScreenshots(user.id);
       const diagnosticsData = form.include_diagnostics ? buildDiagnostics() : null;
 
       const payload: Record<string, unknown> = {
         user_id: user.id,
         title: form.title.trim().slice(0, 200),
         actual: form.actual.trim().slice(0, 2000),
-        expected: form.expected.trim().slice(0, 1000),
+        expected: form.expected.trim().slice(0, 1000) || "N/A",
         steps: form.steps.trim().slice(0, 2000) || "Not provided",
+        suggestion: form.suggestion.trim().slice(0, 2000) || null,
         severity: form.severity,
         frequency: form.frequency,
         feature_area: form.feature_area,
+        report_type: form.report_type,
         page_route: location.pathname,
         device_info: form.include_diagnostics ? getDeviceInfo() : null,
         diagnostics: diagnosticsData,
         include_diagnostics: form.include_diagnostics,
         app_version: typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : null,
+        screenshot_urls: screenshotUrls,
         status: "new",
       };
 
       const { error } = await supabase.from("bug_reports").insert(payload as any);
       if (error) {
         if (error.message.includes("rate limit")) {
-          toast.error("You've reached the daily limit of 3 bug reports. Try again tomorrow!");
+          toast.error("You've reached the daily limit (3 reports). Try again tomorrow!");
         } else {
           throw error;
         }
         return;
       }
 
-      toast.success("🐞 Bug report filed — thank you, Wanderer!");
-      reset();
-      setOpen(false);
+      setSubmitted(true);
     } catch (err: any) {
       toast.error(err.message || "Failed to submit");
     } finally {
@@ -187,166 +243,283 @@ const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
     }
   };
 
+  const typeIcon = form.report_type === "bug" ? Bug : form.report_type === "ux_improvement" ? Eye : Lightbulb;
+  const TypeIcon = typeIcon;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setTimeout(reset, 300); }}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
-            <Bug className="w-3.5 h-3.5" />
-            Report Bug
+            <Shield className="w-3.5 h-3.5" />
+            Bounty Hunter
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-serif flex items-center gap-2">
-            <Bug className="w-5 h-5 text-primary" />
-            Report a Bug
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4 mt-2">
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Label htmlFor="bug-title">Title *</Label>
-            <Input
-              id="bug-title"
-              placeholder="e.g. Map markers disappear on zoom"
-              value={form.title}
-              onChange={(e) => update("title", e.target.value)}
-              maxLength={200}
-            />
-          </div>
-
-          {/* What happened */}
-          <div className="space-y-1.5">
-            <Label htmlFor="bug-actual">What happened? *</Label>
-            <Textarea
-              id="bug-actual"
-              placeholder="Describe what went wrong…"
-              value={form.actual}
-              onChange={(e) => update("actual", e.target.value)}
-              maxLength={2000}
-              className="min-h-[70px]"
-            />
-          </div>
-
-          {/* What expected */}
-          <div className="space-y-1.5">
-            <Label htmlFor="bug-expected">What did you expect? *</Label>
-            <Textarea
-              id="bug-expected"
-              placeholder="What should have happened instead…"
-              value={form.expected}
-              onChange={(e) => update("expected", e.target.value)}
-              maxLength={1000}
-              className="min-h-[60px]"
-            />
-          </div>
-
-          {/* Severity + Frequency row */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Severity *</Label>
-              <Select value={form.severity} onValueChange={(v) => update("severity", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {SEVERITIES.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      <span className="text-sm">{s.label}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Frequency *</Label>
-              <Select value={form.frequency} onValueChange={(v) => update("frequency", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FREQUENCIES.map((f) => (
-                    <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Feature area */}
-          <div className="space-y-1.5">
-            <Label>Feature Area *</Label>
-            <Select value={form.feature_area} onValueChange={(v) => update("feature_area", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {FEATURE_AREAS.map((a) => (
-                  <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Optional section toggle */}
-          <button
-            type="button"
-            onClick={() => setShowOptional(!showOptional)}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        {submitted ? (
+          /* ── Success confirmation ── */
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="py-8 text-center space-y-4"
           >
-            <ChevronDown className={`w-3 h-3 transition-transform ${showOptional ? "rotate-180" : ""}`} />
-            {showOptional ? "Hide" : "Show"} optional details
-          </button>
+            <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
+              style={{ background: 'hsl(var(--primary) / 0.15)' }}>
+              <Shield className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="font-serif text-lg text-foreground">Contribution Received</h3>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+              Thank you, Wanderer. Your report will be reviewed and Hearts awarded when validated.
+            </p>
+            <div className="text-xs text-muted-foreground/60 bg-muted/30 rounded-lg p-3 max-w-xs mx-auto">
+              <p className="font-medium text-primary/80 mb-1">{REWARD_HINTS[form.report_type]}</p>
+              <p>You'll be notified when your contribution is reviewed.</p>
+            </div>
+            <Button onClick={() => { reset(); setOpen(false); }} variant="outline" className="mt-2 font-serif">
+              Close
+            </Button>
+          </motion.div>
+        ) : (
+          /* ── Report form ── */
+          <>
+            <DialogHeader>
+              <DialogTitle className="font-serif flex items-center gap-2">
+                <Shield className="w-5 h-5 text-primary" />
+                Bounty Hunter
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground font-serif">
+                Help strengthen the garden. Earn Hearts.
+              </p>
+            </DialogHeader>
 
-          <AnimatePresence>
-            {showOptional && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="space-y-4 overflow-hidden"
-              >
+            <div className="space-y-4 mt-2">
+              {/* Report Type */}
+              <div className="grid grid-cols-3 gap-2">
+                {REPORT_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => update("report_type", t.value)}
+                    className={`text-center p-2 rounded-lg border text-xs font-serif transition-all ${
+                      form.report_type === t.value
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border/40 text-muted-foreground hover:border-border"
+                    }`}
+                  >
+                    <div className="text-base mb-0.5">{t.label.split(" ")[0]}</div>
+                    <div className="text-[10px] leading-tight">{t.label.split(" ").slice(1).join(" ")}</div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Title */}
+              <div className="space-y-1.5">
+                <Label htmlFor="bug-title">Title *</Label>
+                <Input
+                  id="bug-title"
+                  placeholder={form.report_type === "bug" ? "e.g. Map markers disappear on zoom" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy imbalance insight"}
+                  value={form.title}
+                  onChange={(e) => update("title", e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1.5">
+                <Label htmlFor="bug-actual">
+                  {form.report_type === "bug" ? "What happened? *" : form.report_type === "ux_improvement" ? "What could be better? *" : "What did you observe? *"}
+                </Label>
+                <Textarea
+                  id="bug-actual"
+                  placeholder={form.report_type === "bug" ? "Describe what went wrong…" : "Describe your observation…"}
+                  value={form.actual}
+                  onChange={(e) => update("actual", e.target.value)}
+                  maxLength={2000}
+                  className="min-h-[70px]"
+                />
+              </div>
+
+              {/* Expected (required for bugs, optional otherwise) */}
+              {form.report_type === "bug" && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="bug-steps">Steps to reproduce</Label>
+                  <Label htmlFor="bug-expected">What did you expect? *</Label>
                   <Textarea
-                    id="bug-steps"
-                    placeholder="1. Go to…&#10;2. Click on…&#10;3. See error"
-                    value={form.steps}
-                    onChange={(e) => update("steps", e.target.value)}
-                    maxLength={2000}
-                    className="min-h-[80px]"
+                    id="bug-expected"
+                    placeholder="What should have happened instead…"
+                    value={form.expected}
+                    onChange={(e) => update("expected", e.target.value)}
+                    maxLength={1000}
+                    className="min-h-[60px]"
                   />
                 </div>
+              )}
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="diagnostics" className="text-sm">Include diagnostic data</Label>
-                  <Switch
-                    id="diagnostics"
-                    checked={form.include_diagnostics}
-                    onCheckedChange={(c) => update("include_diagnostics", c)}
-                  />
+              {/* Suggestion */}
+              <div className="space-y-1.5">
+                <Label htmlFor="bug-suggestion" className="flex items-center gap-1">
+                  <Lightbulb className="w-3 h-3" />
+                  Suggestion
+                  <span className="text-muted-foreground/50 text-[10px]">(optional)</span>
+                </Label>
+                <Textarea
+                  id="bug-suggestion"
+                  placeholder="How would you improve this?"
+                  value={form.suggestion}
+                  onChange={(e) => update("suggestion", e.target.value)}
+                  maxLength={2000}
+                  className="min-h-[50px]"
+                />
+              </div>
+
+              {/* Severity + Frequency row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Severity *</Label>
+                  <Select value={form.severity} onValueChange={(v) => update("severity", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {SEVERITIES.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>
+                          <span className="text-sm">{s.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <p className="text-[10px] text-muted-foreground/60 -mt-2">
-                  Page route, device info, screen size — helps us fix faster
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <div className="space-y-1.5">
+                  <Label>Feature Area *</Label>
+                  <Select value={form.feature_area} onValueChange={(v) => update("feature_area", v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {FEATURE_AREAS.map((a) => (
+                        <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-          {/* Auto-captured context badge */}
-          <div className="text-[10px] text-muted-foreground/50 bg-muted/30 rounded px-2 py-1.5 space-y-0.5">
-            <div>📍 Route: <code className="text-[10px]">{location.pathname}</code></div>
-            {typeof __BUILD_ID__ !== "undefined" && (
-              <div>🔧 Build: <code className="text-[10px]">{__BUILD_ID__}</code></div>
-            )}
-            {getCapturedErrors() && (
-              <div>⚠️ <span className="text-destructive/70">{JSON.parse(getCapturedErrors()!).length} recent error(s) will be attached</span></div>
-            )}
-          </div>
+              {/* Screenshot upload */}
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1">
+                  <Upload className="w-3 h-3" /> Screenshots
+                  <span className="text-muted-foreground/50 text-[10px]">(up to 3)</span>
+                </Label>
+                <div className="flex gap-2 flex-wrap">
+                  {screenshots.map((file, idx) => (
+                    <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/40">
+                      <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeScreenshot(idx)}
+                        className="absolute top-0 right-0 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {screenshots.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-16 h-16 rounded-lg border border-dashed border-border/60 flex items-center justify-center text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                    >
+                      <Upload className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+              </div>
 
-          {/* Submit */}
-          <Button onClick={submit} disabled={submitting} className="w-full gap-2">
-            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bug className="w-4 h-4" />}
-            {submitting ? "Filing…" : "File Bug Report"}
-          </Button>
-        </div>
+              {/* Optional section toggle */}
+              <button
+                type="button"
+                onClick={() => setShowOptional(!showOptional)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronDown className={`w-3 h-3 transition-transform ${showOptional ? "rotate-180" : ""}`} />
+                {showOptional ? "Hide" : "Show"} optional details
+              </button>
+
+              <AnimatePresence>
+                {showOptional && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="space-y-4 overflow-hidden"
+                  >
+                    <div className="space-y-1.5">
+                      <Label htmlFor="bug-steps">Steps to reproduce</Label>
+                      <Textarea
+                        id="bug-steps"
+                        placeholder="1. Go to…&#10;2. Click on…&#10;3. See error"
+                        value={form.steps}
+                        onChange={(e) => update("steps", e.target.value)}
+                        maxLength={2000}
+                        className="min-h-[80px]"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label>Frequency</Label>
+                      <Select value={form.frequency} onValueChange={(v) => update("frequency", v)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {FREQUENCIES.map((f) => (
+                            <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="diagnostics" className="text-sm">Include diagnostic data</Label>
+                      <Switch
+                        id="diagnostics"
+                        checked={form.include_diagnostics}
+                        onCheckedChange={(c) => update("include_diagnostics", c)}
+                      />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground/60 -mt-2">
+                      Page route, device info, screen size — helps us fix faster
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Reward hint */}
+              <div className="text-[10px] bg-primary/5 border border-primary/10 rounded-lg px-3 py-2 text-primary/70 font-serif">
+                💚 {REWARD_HINTS[form.report_type]}
+              </div>
+
+              {/* Auto-captured context badge */}
+              <div className="text-[10px] text-muted-foreground/50 bg-muted/30 rounded px-2 py-1.5 space-y-0.5">
+                <div>📍 Route: <code className="text-[10px]">{location.pathname}</code></div>
+                {typeof __BUILD_ID__ !== "undefined" && (
+                  <div>🔧 Build: <code className="text-[10px]">{__BUILD_ID__}</code></div>
+                )}
+                {getCapturedErrors() && (
+                  <div>⚠️ <span className="text-destructive/70">{JSON.parse(getCapturedErrors()!).length} recent error(s) will be attached</span></div>
+                )}
+              </div>
+
+              {/* Submit */}
+              <Button onClick={submit} disabled={submitting || uploading} className="w-full gap-2 font-serif">
+                {submitting || uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <TypeIcon className="w-4 h-4" />}
+                {uploading ? "Uploading…" : submitting ? "Submitting…" : "Submit Bounty"}
+              </Button>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -645,10 +645,13 @@ export type Database = {
           id: string
           include_diagnostics: boolean
           page_route: string | null
+          report_type: string
           reward_state: string
+          screenshot_urls: string[] | null
           severity: string
           status: string
           steps: string
+          suggestion: string | null
           title: string
           triage_notes: string | null
           updated_at: string
@@ -672,10 +675,13 @@ export type Database = {
           id?: string
           include_diagnostics?: boolean
           page_route?: string | null
+          report_type?: string
           reward_state?: string
+          screenshot_urls?: string[] | null
           severity?: string
           status?: string
           steps: string
+          suggestion?: string | null
           title: string
           triage_notes?: string | null
           updated_at?: string
@@ -699,10 +705,13 @@ export type Database = {
           id?: string
           include_diagnostics?: boolean
           page_route?: string | null
+          report_type?: string
           reward_state?: string
+          screenshot_urls?: string[] | null
           severity?: string
           status?: string
           steps?: string
+          suggestion?: string | null
           title?: string
           triage_notes?: string | null
           updated_at?: string
