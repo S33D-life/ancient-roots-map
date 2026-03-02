@@ -21,7 +21,11 @@ interface Props {
 }
 
 const AtlasBreadcrumb = ({ segments }: Props) => (
-  <nav aria-label="Atlas breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap">
+  <nav
+    aria-label="Atlas breadcrumb"
+    className="flex items-center gap-1 text-xs text-muted-foreground flex-wrap sticky top-14 z-30 py-2 px-3 md:static md:z-auto md:p-0 backdrop-blur-md md:backdrop-blur-none"
+    style={{ background: 'hsl(var(--background) / 0.85)' }}
+  >
     <Link
       to="/atlas"
       className="hover:text-primary transition-colors flex items-center gap-1 shrink-0"

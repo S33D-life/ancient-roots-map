@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3 } from "lucide-react";
+import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3, TreePine, MapPin } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,38 @@ const CouncilOfLifePage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const [podModalOpen, setPodModalOpen] = useState(false);
+  const [linkedTrees, setLinkedTrees] = useState<Array<{ id: string; name: string; species: string }>>([]);
+  const [linkedRegions, setLinkedRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
+
+  // Fetch linked trees and bio-regions for all councils
+  useEffect(() => {
+    supabase
+      .from("council_trees")
+      .select("tree_id, trees:tree_id(id, name, species)")
+      .limit(12)
+      .then(({ data }) => {
+        if (data) {
+          setLinkedTrees(
+            data
+              .map((d: any) => d.trees)
+              .filter(Boolean)
+          );
+        }
+      });
+    supabase
+      .from("council_bio_regions")
+      .select("bio_region_id, bio_regions:bio_region_id(id, name, type)")
+      .limit(8)
+      .then(({ data }) => {
+        if (data) {
+          setLinkedRegions(
+            data
+              .map((d: any) => d.bio_regions)
+              .filter(Boolean)
+          );
+        }
+      });
+  }, []);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
@@ -200,6 +233,48 @@ const CouncilOfLifePage = () => {
               );
             })}
           </div>
+
+          {/* Linked Trees & Bio-Regions */}
+          {(linkedTrees.length > 0 || linkedRegions.length > 0) && (
+            <div className="mt-10 space-y-4">
+              {linkedTrees.length > 0 && (
+                <div>
+                  <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3 flex items-center gap-1.5">
+                    <TreePine className="h-3 w-3" /> Council Trees
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {linkedTrees.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => navigate(`/map?treeId=${t.id}`)}
+                        className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40"
+                      >
+                        {t.name} <span className="text-muted-foreground/50">· {t.species}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {linkedRegions.length > 0 && (
+                <div>
+                  <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 mb-3 flex items-center gap-1.5">
+                    <MapPin className="h-3 w-3" /> Bio-Regions
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {linkedRegions.map((r) => (
+                      <button
+                        key={r.id}
+                        onClick={() => navigate(`/atlas/bio-regions/${r.id}`)}
+                        className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40"
+                      >
+                        {r.name} <span className="text-muted-foreground/50">· {r.type}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Digital Fire Vote */}
           <div className="mt-10">
