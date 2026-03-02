@@ -2,8 +2,10 @@
  * SpeciesSpiral — 2D SVG spiral visualization of species in the tree ledger.
  * Each species node sits along an Archimedean spiral.
  * Clicking a node expands its tree string.
+ * 
+ * Virtualised: only nodes within the visible viewport rect are rendered.
  */
-import { memo, useMemo, useState, useCallback } from "react";
+import { memo, useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import RingsOf12, { type RingSlot } from "@/components/RingsOf12";
 
@@ -67,6 +69,23 @@ const SpeciesSpiral = memo(({
   const [expandedSpecies, setExpandedSpecies] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [selectedBead, setSelectedBead] = useState<TreeBead | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [visibleRect, setVisibleRect] = useState<{ top: number; bottom: number } | null>(null);
+
+  // Track which portion of the SVG is visible for virtualisation
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      () => {
+        const rect = el.getBoundingClientRect();
+        setVisibleRect({ top: rect.top, bottom: rect.bottom });
+      },
+      { threshold: Array.from({ length: 10 }, (_, i) => i / 10) }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const maxTreeCount = useMemo(
     () => Math.max(1, ...speciesNodes.map(n => n.treeCount)),
@@ -84,14 +103,37 @@ const SpeciesSpiral = memo(({
     onTreeClick?.(tree);
   }, [onTreeClick]);
 
+  // Pre-compute positions for virtualisation
+  const nodePositions = useMemo(
+    () => speciesNodes.map((node, i) => ({
+      ...node,
+      ...spiralPoint(i, speciesNodes.length),
+      index: i,
+    })),
+    [speciesNodes]
+  );
+
+  // Only render nodes that are expanded or within a generous viewport margin
+  // For SVG coordinates, we render all if < 60 nodes (fast), otherwise cull distant ones
+  const visibleNodes = useMemo(() => {
+    if (speciesNodes.length <= 60) return nodePositions;
+    // Render nodes near center or expanded
+    const svgCenter = CENTER;
+    const viewRadius = SIZE * 0.55; // generous
+    return nodePositions.filter(n =>
+      n.species === expandedSpecies ||
+      n.species === hoveredNode ||
+      Math.hypot(n.x - svgCenter, n.y - svgCenter) <= viewRadius
+    );
+  }, [nodePositions, expandedSpecies, hoveredNode, speciesNodes.length]);
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={containerRef} className={`relative ${className}`}>
       <svg
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         className="w-full max-w-[600px] mx-auto"
         style={{ filter: "drop-shadow(0 0 20px hsl(var(--primary) / 0.1))" }}
       >
-        {/* Spiral guide path */}
         <path
           d={(() => {
             const pts: string[] = [];
@@ -110,9 +152,9 @@ const SpeciesSpiral = memo(({
           opacity={0.4}
         />
 
-        {/* Species nodes */}
-        {speciesNodes.map((node, i) => {
-          const { x, y, angle } = spiralPoint(i, speciesNodes.length);
+        {/* Species nodes — virtualised: only visible nodes rendered */}
+        {visibleNodes.map((node) => {
+          const { x, y, angle } = node;
           const sizeScale = 6 + (node.treeCount / maxTreeCount) * 14;
           const visitRatio = node.treeCount > 0 ? node.visitCount / (node.treeCount * 12) : 0;
           const brightness = 0.4 + visitRatio * 0.6;

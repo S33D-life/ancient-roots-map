@@ -111,11 +111,16 @@ function guessFeatureArea(path: string): string {
 interface BugReportDialogProps {
   trigger?: React.ReactNode;
   defaultOpen?: boolean;
+  /** Controlled mode — pass open + onOpenChange to manage externally */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const BugReportDialog = ({ trigger, defaultOpen }: BugReportDialogProps) => {
+const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenChange }: BugReportDialogProps) => {
   const location = useLocation();
-  const [open, setOpen] = useState(defaultOpen ?? false);
+  const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [submitting, setSubmitting] = useState(false);
   const [showOptional, setShowOptional] = useState(false);
   const [submitted, setSubmitted] = useState(false);

@@ -182,15 +182,7 @@ const Header = () => {
           background: 'linear-gradient(180deg, hsl(140 30% 10% / 0.7), hsl(145 28% 8% / 0.8))',
         }}
       />
-      <style>{`
-        .light header { background: hsl(140 20% 92%) !important; border-bottom-color: hsl(140 20% 78%) !important; box-shadow: 0 1px 4px hsl(140 15% 40% / 0.08) !important; }
-        .light header > div:first-child { opacity: 0.15 !important; }
-        .light header > div:nth-child(2) { background: linear-gradient(180deg, hsl(140 20% 92% / 0.75), hsl(145 18% 88% / 0.85)) !important; }
-        @keyframes emberPulse {
-          0%, 100% { opacity: 0.6; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.3); }
-        }
-      `}</style>
+      {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
       <div className="container mx-auto px-4 py-2 relative z-[2]">
         <div className="flex items-center justify-between relative">
           {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
@@ -247,40 +239,40 @@ const Header = () => {
           </div>
           
           <nav className="hidden md:flex items-center gap-3 lg:gap-5">
-            <div className="relative group">
-              <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+            <div className="relative group focus-within:z-[100]">
+              <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
                 <TreeDeciduous className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                 <div className="flex flex-col leading-tight">
                   <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">Ancient Friends </span>Atlas</span>
                   <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
                 </div>
               </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
                 <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/map" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/map" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
                     <TreeDeciduous className="w-4 h-4 shrink-0" />
                     <span>Map</span>
                   </Link>
-                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
                     <Globe className="w-4 h-4 shrink-0" />
                     <span>Countries</span>
                   </Link>
-                  <Link to="/hives" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/hives" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
                     <Hexagon className="w-4 h-4 shrink-0" />
                     <span>Hives</span>
                   </Link>
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+            <div className="relative group focus-within:z-[100]">
+              <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
               <BookOpen className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
               <div className="flex flex-col leading-tight">
                 <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">HeARTwood </span>Library</span>
                 <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Heartwood</span>
               </div>
             </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
                 <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[200px]" style={{ background: 'hsl(var(--popover))' }}>
                   <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Heart className="w-4 h-4 shrink-0" />
@@ -314,17 +306,17 @@ const Header = () => {
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+            <div className="relative group focus-within:z-[100]">
+              <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
                 <Leaf className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                 <div className="flex flex-col leading-tight">
                   <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
                   <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
                 </div>
               </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
                 <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/council-of-life" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/council-of-life" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
                     <Leaf className="w-4 h-4 shrink-0" />
                     <span>Council Portal</span>
                   </Link>
@@ -335,17 +327,17 @@ const Header = () => {
                 </div>
               </div>
             </div>
-            <div className="relative group">
-              <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2">
+            <div className="relative group focus-within:z-[100]">
+              <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
                 <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                 <div className="flex flex-col leading-tight">
                   <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
                   <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
                 </div>
               </Link>
-              <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[100]">
+              <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
                 <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/golden-dream" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <Link to="/golden-dream" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
                     <Sparkles className="w-4 h-4 shrink-0" />
                     <span>Vision</span>
                   </Link>
