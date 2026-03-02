@@ -8,17 +8,18 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
 import MapJourneyOverlay from "@/components/MapJourneyOverlay";
-
+import MapArrivalBanner from "@/components/MapArrivalBanner";
+import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
 
-
+const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured"]);
 
 const MapPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const paramW3w = searchParams.get("w3w") || undefined;
   const paramLat = searchParams.get("lat") ? parseFloat(searchParams.get("lat")!) : undefined;
   const paramLng = searchParams.get("lng") ? parseFloat(searchParams.get("lng")!) : undefined;
@@ -27,7 +28,9 @@ const MapPage = () => {
   const paramTreeId = searchParams.get("treeId") || undefined;
   const paramCountry = searchParams.get("country") || undefined;
   const paramHive = searchParams.get("hive") || undefined;
-  const paramOrigin = searchParams.get("origin") || undefined;
+  // Support both "arrival" (new) and "origin" (legacy) params
+  const rawArrival = searchParams.get("arrival") || searchParams.get("origin") || undefined;
+  const paramArrival: ArrivalOrigin | null = rawArrival && VALID_ARRIVALS.has(rawArrival) ? (rawArrival as ArrivalOrigin) : null;
   const paramJourney = searchParams.get("journey") === "1";
   const paramBbox = searchParams.get("bbox") || undefined;
   const [journeyActive, setJourneyActive] = useState(paramJourney);
@@ -47,9 +50,14 @@ const MapPage = () => {
   return (
     <div className="fixed inset-0 z-[10] bg-background">
       {/* Map renders immediately — preloads while blessing is visible */}
-      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramOrigin} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
+      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
       <MapJourneyOverlay active={journeyActive} />
       
+      {/* Arrival banner — contextual breadcrumb showing how you arrived */}
+      {!showBlessing && !isFullscreen && paramArrival && (
+        <MapArrivalBanner arrival={paramArrival} />
+      )}
+
       {/* Public Tester Blessing — overlays map, shown once */}
       {showBlessing && (
         <PublicTesterBlessing onComplete={() => setShowBlessing(false)} />

@@ -348,13 +348,13 @@ const CountryPortalPage = () => {
         lng: tree.longitude,
         zoom: 15,
         countrySlug,
-        source: "atlas_card",
+        source: "tree",
       });
     }
   };
 
 
-  const openMapLayer = () => focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "atlas_card" });
+  const openMapLayer = () => focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "country" });
 
   return (
     <PageShell>

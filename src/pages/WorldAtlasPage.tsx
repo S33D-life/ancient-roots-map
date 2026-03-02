@@ -124,7 +124,7 @@ const CountryCard = ({ stat, isPioneer }: { stat: CountryStats; isPioneer?: bool
       type: "area",
       id: stat.slug,
       countrySlug: stat.slug,
-      source: "atlas_card",
+      source: "country",
     });
   };
 
