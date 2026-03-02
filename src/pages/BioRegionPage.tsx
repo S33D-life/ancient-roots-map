@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,7 @@ const PillFilter = ({ active, onClick, children }: { active: boolean; onClick: (
 const BioRegionPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const [region, setRegion] = useState<BioRegion | null>(null);
   const [loading, setLoading] = useState(true);
   const [ecologyOpen, setEcologyOpen] = useState(false);
@@ -445,7 +447,7 @@ const BioRegionPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {filteredTrees.map(t => (
                     <Card key={t.id} className="border-primary/10 hover:border-primary/30 transition-all cursor-pointer"
-                      onClick={() => t.latitude && t.longitude && navigate(`/map?lat=${t.latitude}&lng=${t.longitude}&zoom=15&origin=atlas`)}>
+                      onClick={() => t.latitude && t.longitude && focusMap({ type: "tree", id: t.id, lat: t.latitude, lng: t.longitude, source: "region" })}>
                       <CardContent className="p-3 space-y-1">
                         <p className="text-sm font-serif font-bold text-foreground">{t.name}</p>
                         <p className="text-[10px] text-muted-foreground italic">{t.species}</p>

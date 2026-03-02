@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 
 interface Tree {
   id: string;
@@ -357,6 +358,7 @@ const TreeCard = ({
 
 const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsExplorerProps) => {
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [speciesFilter, setSpeciesFilter] = useState("all");
@@ -810,9 +812,9 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
           <button
             onClick={() => {
               if (currentTree?.latitude && currentTree?.longitude) {
-                navigate(`/map?lat=${currentTree.latitude}&lng=${currentTree.longitude}&zoom=16`);
+                focusMap({ type: "tree", id: currentTree.id, lat: currentTree.latitude, lng: currentTree.longitude, source: "tree" });
               } else if (currentTree?.what3words) {
-                navigate(`/map?w3w=${currentTree.what3words}`);
+                focusMap({ type: "tree", id: currentTree.id, w3w: currentTree.what3words, source: "tree" });
               }
             }}
             className="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"

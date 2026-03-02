@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
@@ -56,6 +57,7 @@ const councilRooms = [
 
 const CouncilOfLifePage = () => {
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { showEntrance, dismissEntrance } = useEntranceOnce("council");
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
@@ -257,7 +259,7 @@ const CouncilOfLifePage = () => {
                     {linkedTrees.map((t) => (
                       <button
                         key={t.id}
-                        onClick={() => navigate(`/map?treeId=${t.id}`)}
+                        onClick={() => focusMap({ type: "tree", id: t.id, source: "tree" })}
                         className="text-xs font-serif px-3 py-1.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40"
                       >
                         {t.name} <span className="text-muted-foreground/50">· {t.species}</span>

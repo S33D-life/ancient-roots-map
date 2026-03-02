@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
@@ -54,7 +55,7 @@ interface InfluenceTx {
 
 const HivePage = () => {
   const { family } = useParams<{ family: string }>();
-  const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const hive = family ? getHiveBySlug(family) : null;
   const { getStatusForFamily } = useHiveSeasonalStatus();
   const seasonalStatus = hive ? getStatusForFamily(hive.family) : undefined;
@@ -285,7 +286,7 @@ const HivePage = () => {
                 size="sm"
                 className="font-serif text-xs gap-1.5"
                 style={{ borderColor: `hsl(${hive.accentHsl} / 0.4)`, color: `hsl(${hive.accentHsl})` }}
-                onClick={() => navigate(`/map?species=${encodeURIComponent(hive.representativeSpecies[0] || hive.family)}&origin=hive`)}
+                onClick={() => focusMap({ type: "area", id: hive.family, source: "hive", hiveSlug: family })}
               >
                 <MapPin className="w-3.5 h-3.5" /> View on Map
               </Button>
@@ -345,7 +346,7 @@ const HivePage = () => {
               {trees.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground font-serif">No Ancient Friends mapped in this hive yet.</p>
-                  <Button onClick={() => navigate(`/map?hive=${family}&origin=hive`)} variant="outline" className="mt-4 font-serif gap-2">
+                  <Button onClick={() => focusMap({ type: "area", id: family || "", source: "hive", hiveSlug: family })} variant="outline" className="mt-4 font-serif gap-2">
                     <Map className="w-4 h-4" /> Open Atlas
                   </Button>
                 </div>
