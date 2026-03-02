@@ -19,6 +19,7 @@ import VaultSpeciesHearts from "./vault/VaultSpeciesHearts";
 import VaultInfluence from "./vault/VaultInfluence";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
 import VaultValueTree from "./vault/VaultValueTree";
+import CosmicClock from "@/components/CosmicClock";
 interface Props {
   userId: string;
 }
@@ -155,6 +156,9 @@ const DashboardVault = ({ userId }: Props) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Cosmic Clock */}
+      <CosmicClock variant="full" />
 
       {/* Primary: Heart Balance Ring */}
       <VaultHeartBalance
