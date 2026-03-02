@@ -76,6 +76,8 @@ export interface VisualLayerToggle {
   toggle: () => void;
   extra?: string;
   accent?: string;
+  /** Optional description shown below the toggle */
+  description?: string;
 }
 
 export interface VisualLayerSection {
@@ -86,6 +88,8 @@ export interface VisualLayerSection {
   layers: VisualLayerToggle[];
   /** Optional sub-content rendered when section is expanded */
   subContent?: React.ReactNode;
+  /** Optional section description shown below header */
+  description?: string;
 }
 
 export interface AtlasFilterProps {
@@ -114,6 +118,8 @@ export interface AtlasFilterProps {
   isFullscreen?: boolean;
   /* Perspective visual preset callback */
   onPerspectivePreset?: (preset: PerspectivePreset) => void;
+  /* Add Ancient Friend callback */
+  onAddTree?: () => void;
 }
 
 /* ── Shared chip styles ── */
@@ -144,6 +150,7 @@ const AtlasFilter = ({
   onFullscreenToggle,
   isFullscreen,
   onPerspectivePreset,
+  onAddTree,
 }: AtlasFilterProps) => {
   const {
     ageBand, setAgeBand,
@@ -641,6 +648,11 @@ const AtlasFilter = ({
                       onToggle={toggleSection}
                       accent={section.accent}
                     >
+                      {section.description && (
+                        <p className="text-[11px] font-serif italic px-1 pb-1.5" style={{ color: "hsl(0, 0%, 45%)" }}>
+                          {section.description}
+                        </p>
+                      )}
                       <div className="space-y-0.5">
                         {section.layers.map(layer => (
                           <LayerToggle key={layer.key} layer={layer} />
@@ -649,6 +661,24 @@ const AtlasFilter = ({
                       </div>
                     </CollapsibleSection>
                   ))}
+
+                  {/* ── Add Ancient Friend CTA ── */}
+                  {onAddTree && (
+                    <div className="pt-3">
+                      <button
+                        onClick={() => { onAddTree(); onPanelOpenChange(false); }}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[12px] font-serif tracking-[0.08em] uppercase transition-all active:scale-95"
+                        style={{
+                          background: "hsla(42, 40%, 20%, 0.25)",
+                          border: "1px solid hsla(42, 50%, 40%, 0.3)",
+                          color: `hsl(${activeAccent})`,
+                          boxShadow: `0 2px 10px hsla(${activeAccent}, 0.1)`,
+                        }}
+                      >
+                        + Add Ancient Friend
+                      </button>
+                    </div>
+                  )}
 
                 </div>
               </ScrollArea>
@@ -800,21 +830,28 @@ function LayerToggle({ layer }: { layer: VisualLayerToggle }) {
   return (
     <button
       onClick={layer.toggle}
-      className="w-full flex items-center gap-2.5 px-2 py-2.5 rounded-md text-left transition-colors"
+      className="w-full flex flex-col gap-0.5 px-2 py-2.5 rounded-md text-left transition-colors"
       style={{ color: layer.active ? `hsl(${accent})` : "hsl(42, 40%, 45%)" }}
     >
-      <div
-        className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0"
-        style={{
-          borderColor: layer.active ? `hsl(${accent})` : "hsla(42, 40%, 30%, 0.5)",
-          background: layer.active ? `hsla(${accent.split(",")[0]}, 80%, 50%, 0.2)` : "transparent",
-        }}
-      >
-        {layer.active && <span className="text-[9px]">✓</span>}
+      <div className="flex items-center gap-2.5 w-full">
+        <div
+          className="w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0"
+          style={{
+            borderColor: layer.active ? `hsl(${accent})` : "hsla(42, 40%, 30%, 0.5)",
+            background: layer.active ? `hsla(${accent.split(",")[0]}, 80%, 50%, 0.2)` : "transparent",
+          }}
+        >
+          {layer.active && <span className="text-[9px]">✓</span>}
+        </div>
+        <span className="text-[12px] font-serif">{layer.label}</span>
+        {layer.extra && (
+          <span className="text-[9px] font-sans ml-auto" style={{ color: `hsl(180, 50%, 55%)` }}>{layer.extra}</span>
+        )}
       </div>
-      <span className="text-[12px] font-serif">{layer.label}</span>
-      {layer.extra && (
-        <span className="text-[9px] font-sans ml-auto" style={{ color: `hsl(180, 50%, 55%)` }}>{layer.extra}</span>
+      {layer.description && (
+        <span className="text-[10px] font-serif pl-6" style={{ color: "hsl(0, 0%, 45%)" }}>
+          {layer.description}
+        </span>
       )}
     </button>
   );
