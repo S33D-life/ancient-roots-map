@@ -61,7 +61,7 @@ import ancientFriendsWindow from "@/assets/ancient-friends-window.jpeg";
 import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
-const BloomingClockPortal = lazy(() => import("@/components/BloomingClockPortal"));
+const MantleClock = lazy(() => import("@/components/MantleClock"));
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
@@ -876,14 +876,12 @@ const GalleryPage = () => {
             }
           `}</style>
 
-          {/* ── Blooming Clock Portal — Celestial Instrument ── */}
-          <div className="w-full max-w-2xl mb-10">
+          {/* ── Mantle Clock — Blooming Clock as brass instrument ── */}
+          <div className="w-full flex justify-center mb-8">
             <Suspense fallback={
-              <div className="h-[360px] flex items-center justify-center">
-                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'hsl(42 55% 52%)', borderTopColor: 'transparent' }} />
-              </div>
+              <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsla(42, 30%, 15%, 0.3)' }} />
             }>
-              <BloomingClockPortal />
+              <MantleClock />
             </Suspense>
           </div>
 
