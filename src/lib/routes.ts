@@ -24,4 +24,8 @@ export const ROUTES = {
   HEARTH: "/dashboard",
   /** Vault */
   VAULT: "/vault",
+  /** Value Tree */
+  VALUE_TREE: "/value-tree",
+  /** Value Tree — Earn branch */
+  VALUE_TREE_EARN: "/value-tree?tab=earn",
 } as const;

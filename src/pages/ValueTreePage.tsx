@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +11,10 @@ import {
   Heart, Shield, TreePine, Sprout, GitBranch, Vote,
   ChevronDown, ChevronRight, Clock, Check, Zap, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
+  Bug, UserPlus, Megaphone, Flame, ArrowRight,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useHeartBalance } from "@/hooks/use-heart-balance";
 
 /* ─── Value-node data model ────────────────────────────────── */
 
@@ -455,14 +458,218 @@ const ProposalCard = ({ proposal }: { proposal: ProposalNode }) => {
 
 /* ─── Main Page ────────────────────────────────────────────── */
 
+/* ─── Earn Branch — Dynamic Opportunities ──────────────────── */
+
+interface Opportunity {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  category: string;
+  estimatedReward: string;
+  link: string;
+  ready: boolean;
+  priority: number;
+}
+
+const EarnBranch = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+  const heartBalance = useHeartBalance(userId);
+  const navigate = useNavigate();
+  const [showNotifyModal, setShowNotifyModal] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  const opportunities = useMemo<Opportunity[]>(() => {
+    const tc = heartBalance.counts.trees;
+    const oc = heartBalance.counts.offerings;
+    const items: Opportunity[] = [
+      {
+        id: "map-tree",
+        label: "Map a Tree",
+        description: "Add an Ancient Friend to the living atlas and earn 10 S33D Hearts.",
+        icon: <TreePine className="w-5 h-5" />,
+        category: "Growth",
+        estimatedReward: "+10 ❤️ +3 🌿 +2 🛡️",
+        link: "/add-tree",
+        ready: true,
+        priority: tc === 0 ? 0 : 5,
+      },
+      {
+        id: "offering",
+        label: "Make an Offering",
+        description: "Gift a photo, poem, song, or story to a tree you've visited.",
+        icon: <Music className="w-5 h-5" />,
+        category: "Care",
+        estimatedReward: "+1-5 ❤️ +1 🌿",
+        link: "/map",
+        ready: true,
+        priority: tc > 0 && oc === 0 ? 0 : 4,
+      },
+      {
+        id: "council",
+        label: "Attend or Host a Council",
+        description: "Join or organize a gathering of the Council of Life.",
+        icon: <Users className="w-5 h-5" />,
+        category: "Council",
+        estimatedReward: "+5-20 ❤️ +5 🛡️",
+        link: "/council-of-life",
+        ready: true,
+        priority: 6,
+      },
+      {
+        id: "bug-report",
+        label: "Report a Bug 🐞",
+        description: "Help improve the ecosystem. Verified bugs earn Hearts.",
+        icon: <Bug className="w-5 h-5" />,
+        category: "Care",
+        estimatedReward: "+5-25 ❤️",
+        link: "/bug-garden",
+        ready: true,
+        priority: 7,
+      },
+      {
+        id: "curate",
+        label: "Verify or Curate Data",
+        description: "Confirm species, resolve duplicates, or add missing metadata.",
+        icon: <Eye className="w-5 h-5" />,
+        category: "Curation",
+        estimatedReward: "+1-5 🛡️",
+        link: "/map",
+        ready: true,
+        priority: 8,
+      },
+      {
+        id: "invite",
+        label: "Invite a Wanderer",
+        description: "Share your invite link and earn Hearts when they join.",
+        icon: <UserPlus className="w-5 h-5" />,
+        category: "Growth",
+        estimatedReward: "+5 ❤️ per referral",
+        link: "/referrals",
+        ready: true,
+        priority: 9,
+      },
+      {
+        id: "presence",
+        label: "333-Second Presence",
+        description: "Complete a mindfulness session with an Ancient Friend.",
+        icon: <Sun className="w-5 h-5" />,
+        category: "Presence",
+        estimatedReward: "+10 ❤️ +3 🌿",
+        link: "/map",
+        ready: true,
+        priority: 10,
+      },
+    ];
+    return items.sort((a, b) => a.priority - b.priority);
+  }, [heartBalance.counts]);
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground font-serif mb-2">
+        Active ways to grow the tree — personalized for your journey.
+      </p>
+
+      <div className="space-y-3">
+        {opportunities.map((opp, i) => (
+          <motion.div
+            key={opp.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+          >
+            <div
+              className="relative rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-all cursor-pointer group"
+              onClick={() => opp.ready ? navigate(opp.link) : setShowNotifyModal(opp.id)}
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl" style={{
+                background: opp.priority <= 1
+                  ? "linear-gradient(180deg, hsl(42 80% 50%), hsl(38 70% 40%))"
+                  : "hsl(var(--primary) / 0.3)",
+              }} />
+              <div className="p-4 pl-5 flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-secondary/40 text-primary shrink-0 mt-0.5">
+                  {opp.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h4 className="text-sm font-serif text-foreground">{opp.label}</h4>
+                    {opp.priority === 0 && (
+                      <Badge variant="outline" className="text-[9px] font-serif border-amber-500/40 text-amber-400">
+                        Recommended
+                      </Badge>
+                    )}
+                    {!opp.ready && (
+                      <Badge variant="outline" className="text-[9px] font-serif border-muted-foreground/40 text-muted-foreground">
+                        Preparing…
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">{opp.description}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-[11px] font-serif text-primary/70">{opp.estimatedReward}</span>
+                    <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">{opp.category}</span>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 mt-3" />
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <Card className="bg-card/40 backdrop-blur border-border/30 mt-6">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Flame className="w-4 h-4 text-amber-400" />
+            <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Windfall Progress</h4>
+          </div>
+          <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">
+            Every tree accumulates Hearts toward a <span className="text-amber-400">Windfall</span> at 144 Hearts.
+            Keep mapping trees and making offerings to trigger the next community windfall.
+          </p>
+          <Link to="/how-hearts-work" className="text-[11px] font-serif text-primary hover:underline mt-2 inline-block">
+            Learn how Hearts work →
+          </Link>
+        </CardContent>
+      </Card>
+
+      {showNotifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifyModal(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-card border border-border rounded-2xl p-6 max-w-sm mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-serif text-foreground mb-2">Coming Soon</h3>
+            <p className="text-sm text-muted-foreground font-serif mb-4">
+              This opportunity is being prepared. When ready, you'll earn Hearts for participating.
+            </p>
+            <Button variant="outline" className="w-full font-serif" onClick={() => setShowNotifyModal(null)}>
+              Close
+            </Button>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ─── Main Page ────────────────────────────────────────────── */
+
 const ValueTreePage = () => {
-  const [activeTab, setActiveTab] = useState("how");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "how";
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
-        {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -477,7 +684,6 @@ const ValueTreePage = () => {
           </p>
         </motion.div>
 
-        {/* Token legend */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {[
             { icon: "❤️", label: "S33D Hearts", sub: "Global currency", color: "hsl(0, 65%, 55%)" },
@@ -496,6 +702,9 @@ const ValueTreePage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-secondary/30 border border-border/50 mb-8 flex-wrap h-auto gap-1 p-1.5 w-full justify-start">
+            <TabsTrigger value="earn" className="font-serif text-xs tracking-wider gap-1.5">
+              <Flame className="w-3.5 h-3.5" /> Earn & Grow
+            </TabsTrigger>
             <TabsTrigger value="how" className="font-serif text-xs tracking-wider gap-1.5">
               <Sprout className="w-3.5 h-3.5" /> How Hearts Grow
             </TabsTrigger>
@@ -510,7 +719,10 @@ const ValueTreePage = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Tab 1 — How Hearts Grow */}
+          <TabsContent value="earn">
+            <EarnBranch />
+          </TabsContent>
+
           <TabsContent value="how">
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground font-serif mb-4">
@@ -522,8 +734,6 @@ const ValueTreePage = () => {
                 </motion.div>
               ))}
             </div>
-
-            {/* Safeguards footer */}
             <Card className="bg-card/40 backdrop-blur border-border/30 mt-8">
               <CardContent className="p-5">
                 <h4 className="text-xs font-serif text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
@@ -546,14 +756,11 @@ const ValueTreePage = () => {
             </Card>
           </TabsContent>
 
-          {/* Tab 2 — Fractal Distribution */}
           <TabsContent value="flow">
             <div className="space-y-6">
               <p className="text-xs text-muted-foreground font-serif">
                 How rewards flow through the token system when you interact with a tree.
               </p>
-
-              {/* Main flow diagram */}
               <Card className="bg-card/60 backdrop-blur border-border/40">
                 <CardContent className="p-6">
                   <h4 className="text-sm font-serif text-foreground mb-5">Universal Token Flow</h4>
@@ -566,8 +773,6 @@ const ValueTreePage = () => {
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Distribution cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="bg-card/60 backdrop-blur border-border/40">
                   <CardContent className="p-5 text-center">
@@ -582,7 +787,6 @@ const ValueTreePage = () => {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-card/60 backdrop-blur border-border/40">
                   <CardContent className="p-5 text-center">
                     <span className="text-3xl block mb-2">🌿</span>
@@ -596,7 +800,6 @@ const ValueTreePage = () => {
                     </div>
                   </CardContent>
                 </Card>
-
                 <Card className="bg-card/60 backdrop-blur border-border/40">
                   <CardContent className="p-5 text-center">
                     <span className="text-3xl block mb-2">🛡️</span>
@@ -611,8 +814,6 @@ const ValueTreePage = () => {
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Hive routing explainer */}
               <Card className="bg-card/40 backdrop-blur border-border/30">
                 <CardContent className="p-5">
                   <h4 className="text-xs font-serif text-foreground mb-2 uppercase tracking-wider">Hive Routing</h4>
@@ -626,7 +827,6 @@ const ValueTreePage = () => {
             </div>
           </TabsContent>
 
-          {/* Tab 3 — Growing Value Chains */}
           <TabsContent value="chains">
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground font-serif mb-4">
@@ -640,7 +840,6 @@ const ValueTreePage = () => {
             </div>
           </TabsContent>
 
-          {/* Tab 4 — Proposed Branches */}
           <TabsContent value="proposals">
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-2">
@@ -651,13 +850,11 @@ const ValueTreePage = () => {
                   <Vote className="w-3.5 h-3.5" /> Submit Proposal
                 </Button>
               </div>
-
               {PROPOSALS.map((p, i) => (
                 <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
                   <ProposalCard proposal={p} />
                 </motion.div>
               ))}
-
               <Card className="bg-card/40 backdrop-blur border-border/30">
                 <CardContent className="p-5 text-center">
                   <p className="text-xs text-muted-foreground font-serif">
