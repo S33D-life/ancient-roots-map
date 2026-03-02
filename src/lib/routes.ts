@@ -28,4 +28,6 @@ export const ROUTES = {
   VALUE_TREE: "/value-tree",
   /** Value Tree — Earn branch */
   VALUE_TREE_EARN: "/value-tree?tab=earn",
+  /** Support hub */
+  SUPPORT: "/support",
 } as const;
