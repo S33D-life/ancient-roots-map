@@ -1,6 +1,6 @@
-import { Bug } from "lucide-react";
-import { motion, useDragControls } from "framer-motion";
-import { useState, useEffect } from "react";
+import { Shield } from "lucide-react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 import BugReportDialog from "@/components/BugReportDialog";
 
 const STORAGE_KEY = "bug-btn-pos";
@@ -32,7 +32,6 @@ const FloatingBugButton = () => {
       onDragStart={() => setDragged(true)}
       onDragEnd={(e, info) => {
         handleDragEnd(e, info);
-        // Reset dragged flag after a tick so click handler can check it
         setTimeout(() => setDragged(false), 100);
       }}
       whileDrag={{ scale: 1.15, cursor: "grabbing" }}
@@ -47,12 +46,12 @@ const FloatingBugButton = () => {
               backdropFilter: "blur(12px)",
               color: "hsl(var(--muted-foreground))",
             }}
-            title="Report a bug · drag to reposition"
+            title="Bounty Hunter · drag to reposition"
             onClick={(e) => {
               if (dragged) e.preventDefault();
             }}
           >
-            <Bug className="w-4 h-4" />
+            <Shield className="w-4 h-4" />
           </button>
         }
       />
