@@ -2,11 +2,12 @@
  * CrownSection — inline "yOur Golden Dream" preview for the tree scroll.
  * Crown = brightest, most luminous section. Golden radiance.
  *
- * Sprinkles: staggered cards, floating icon, vine divider
+ * Sprinkles: staggered cards, floating icon, vine divider, leaf atmosphere
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, BookOpen, Cherry, Archive, ArrowRight } from "lucide-react";
+import LeafAtmosphere from "../LeafAtmosphere";
 
 const ROOMS = [
   { icon: BookOpen, title: "Current Vision", description: "The living S33D blueprint", to: "/golden-dream" },
@@ -42,6 +43,10 @@ const CrownSection = () => (
       }}
     />
 
+    {/* Leaf atmosphere — airy gold, upward drift */}
+    <LeafAtmosphere variant="crown" />
+    <div className="portal-vignette" />
+
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -49,7 +54,7 @@ const CrownSection = () => (
       transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="relative z-10 max-w-xl text-center space-y-8"
     >
-      {/* Sprinkle 3: Floating icon */}
+      {/* Floating icon */}
       <motion.div
         className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
         style={{ background: "hsl(45 80% 55% / 0.1)" }}
@@ -75,7 +80,7 @@ const CrownSection = () => (
         The dream grows with the tree.
       </p>
 
-      {/* Sprinkle 1: Staggered card reveals */}
+      {/* Staggered card reveals */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
         {ROOMS.map((room, i) => {
           const Icon = room.icon;
@@ -109,7 +114,6 @@ const CrownSection = () => (
       </Link>
     </motion.div>
 
-    {/* Sprinkle 2: Vine divider to next section */}
     <div className="vine-divider" />
   </section>
 );

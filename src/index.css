@@ -584,4 +584,107 @@ All colors MUST be HSL.
     transform: scale(1.15);
     box-shadow: 0 0 18px rgba(255, 200, 80, 0.5) !important;
   }
+
+  /* ═══════════════════════════════════════════════════
+     LEAF ATMOSPHERE SYSTEM — drifting presence
+     ═══════════════════════════════════════════════════ */
+
+  /* Single leaf drift — vertical fall with gentle sway */
+  @keyframes leafDrift {
+    0%   { transform: translateY(-20px) translateX(0) rotate(var(--leaf-rot, 0deg)); opacity: 0; }
+    8%   { opacity: var(--leaf-opacity, 0.18); }
+    85%  { opacity: var(--leaf-opacity, 0.15); }
+    100% { transform: translateY(calc(100vh + 20px)) translateX(var(--leaf-sway, 30px)) rotate(calc(var(--leaf-rot, 0deg) + 45deg)); opacity: 0; }
+  }
+
+  .leaf-atmosphere-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .leaf-mote {
+    position: absolute;
+    width: var(--leaf-size, 6px);
+    height: var(--leaf-size, 6px);
+    border-radius: 50% 50% 50% 0;
+    opacity: 0;
+    animation: leafDrift var(--leaf-dur, 8s) var(--pulse-ease) var(--leaf-delay, 0s) infinite;
+    will-change: transform, opacity;
+  }
+
+  /* Gold fleck variant */
+  .leaf-mote--gold {
+    background: radial-gradient(circle, hsl(42 80% 60% / 0.6), hsl(45 70% 50% / 0.2));
+    filter: blur(0.5px);
+    --leaf-opacity: 0.2;
+  }
+
+  /* Green silhouette variant */
+  .leaf-mote--green {
+    background: radial-gradient(circle, hsl(140 40% 40% / 0.5), hsl(150 30% 30% / 0.15));
+    filter: blur(1px);
+    --leaf-size: 8px;
+    --leaf-opacity: 0.15;
+  }
+
+  /* Soft distant blur leaf */
+  .leaf-mote--distant {
+    filter: blur(2px);
+    --leaf-size: 10px;
+    --leaf-opacity: 0.08;
+  }
+
+  /* Section-specific leaf color shifts */
+  .leaf-section-heartwood .leaf-mote--gold {
+    background: radial-gradient(circle, hsl(28 70% 55% / 0.5), hsl(35 60% 45% / 0.2));
+  }
+  .leaf-section-heartwood .leaf-mote--green {
+    --leaf-opacity: 0.06;
+  }
+
+  .leaf-section-canopy .leaf-mote--green {
+    background: radial-gradient(circle, hsl(145 45% 42% / 0.5), hsl(160 35% 32% / 0.15));
+    --leaf-opacity: 0.2;
+  }
+  .leaf-section-canopy .leaf-mote--gold {
+    --leaf-opacity: 0.1;
+  }
+
+  .leaf-section-crown .leaf-mote--gold {
+    background: radial-gradient(circle, hsl(45 85% 65% / 0.5), hsl(48 75% 55% / 0.2));
+  }
+  .leaf-section-crown .leaf-mote {
+    animation-direction: reverse; /* upward drift bias */
+  }
+
+  .leaf-section-map .leaf-mote {
+    --leaf-opacity: 0.08;
+  }
+  .leaf-section-map .leaf-mote--green {
+    background: radial-gradient(circle, hsl(150 30% 28% / 0.4), hsl(160 25% 22% / 0.1));
+  }
+
+  /* Portal vignette — adds depth to ring portals */
+  .portal-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.3) 100%);
+  }
+
+  /* Respect prefers-reduced-motion for leaves */
+  @media (prefers-reduced-motion: reduce) {
+    .leaf-mote {
+      animation: none !important;
+      opacity: 0 !important;
+    }
+  }
+
+  /* Pause leaves when tab hidden */
+  .tab-hidden .leaf-mote {
+    animation-play-state: paused !important;
+  }
 }
