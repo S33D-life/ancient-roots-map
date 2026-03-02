@@ -47,7 +47,7 @@ const BottomNav = () => {
                   layoutId="bottomnav-indicator"
                   className="absolute -bottom-0.5 w-6 h-0.5 rounded-full"
                   style={{ background: "hsl(var(--primary) / 0.7)" }}
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.8 }}
                 />
               )}
             </Link>

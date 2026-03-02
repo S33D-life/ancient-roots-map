@@ -16,14 +16,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 import AppUpdateBanner from "@/components/AppUpdateBanner";
-import FloatingBugButton from "@/components/FloatingBugButton";
+import FloatingActionCluster from "@/components/FloatingActionCluster";
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
-const FloatingAtlasButton = lazy(() => import("@/components/FloatingAtlasButton"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
 
 // Lazy-load all route pages for code splitting
@@ -92,14 +91,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-3 animate-in fade-in duration-500">
-      <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
-      <p className="font-serif text-xs text-muted-foreground/50 tracking-widest">Loading…</p>
-    </div>
-  </div>
-);
+const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
   const [supabaseAuthed, setSupabaseAuthed] = useState(false);
@@ -130,9 +122,8 @@ const App = () => {
           <MapFilterProvider>
           <UIFlowProvider>
             <BottomNav />
-            <FloatingBugButton />
+            <FloatingActionCluster />
             <Suspense fallback={null}>
-              <FloatingAtlasButton />
               <ProximityNudge />
               <OfflineSyncBanner />
             </Suspense>

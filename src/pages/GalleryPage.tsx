@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, type Offering } from "@/hooks/use-offerings";
@@ -63,7 +64,8 @@ import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 import LibraryRoomGrid, { EmberDrift } from "@/components/LibraryRoomGrid";
-import wishingTreeImage from "@/assets/wishing-tree.png";
+import HeartwoodLanding from "@/components/library/HeartwoodLanding";
+import AncientFriendsRoom from "@/components/library/AncientFriendsRoom";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
 import Footer from "@/components/Footer";
@@ -793,158 +795,13 @@ const GalleryPage = () => {
 
   if (showLanding) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
-        <Header />
-        {/* Dynamic atmospheric background */}
-        <HeartwoodBackground />
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center min-h-screen pt-24 pb-12 px-4">
-          {/* ── The Hearth — Opening Section ────────────── */}
-          <div className="relative flex flex-col items-center mb-10 max-w-xl text-center">
-            {/* Breathing glow backdrop */}
-            <div
-              className="absolute inset-0 -inset-x-16 -inset-y-8 pointer-events-none motion-safe:animate-[titleBreathe_6s_ease-in-out_infinite]"
-              aria-hidden="true"
-              style={{
-                background: 'radial-gradient(ellipse 70% 60% at 50% 45%, hsl(38 70% 40% / 0.18), hsl(30 60% 25% / 0.06) 55%, transparent 80%)',
-                filter: 'blur(24px)',
-              }}
-            />
-            <h1
-              className="relative text-5xl md:text-7xl font-serif tracking-wider mb-3"
-              style={{
-                color: 'hsl(38 75% 65%)',
-                textShadow: '0 0 50px hsl(38 80% 35% / 0.5), 0 2px 20px hsl(25 60% 20% / 0.6), 0 0 2px hsl(20 20% 8% / 0.9)',
-              }}
-            >
-              HEARTWOOD
-            </h1>
-            <p
-              className="relative font-serif text-base md:text-lg mb-6"
-              style={{ color: 'hsl(38 50% 75% / 0.7)', textShadow: '0 1px 8px hsl(20 20% 8% / 0.8)' }}
-            >
-              The living centre. All rooms branch from the Heart.
-            </p>
-
-            {/* Mythic narrative block */}
-            <p
-              className="relative font-serif text-sm leading-relaxed max-w-md mb-8"
-              style={{ color: 'hsl(38 35% 65% / 0.55)' }}
-            >
-              This is where the fire burns quietly — where your journey is remembered,
-              your offerings are kept, and the grove grows from every heart that visits.
-            </p>
-          </div>
-
-          <style>{`
-            @keyframes titleBreathe {
-              0%, 100% { opacity: 0.5; transform: scale(1); }
-              50% { opacity: 1; transform: scale(1.06); }
-            }
-          `}</style>
-
-          {/* ── Hearth Mantle — clock ABOVE CTAs as architectural centerpiece ── */}
-          <div className="relative w-full max-w-md mx-auto mb-8">
-            {/* Mantle shelf — architectural ledge */}
-            <div
-              className="relative flex flex-col items-center pt-4 pb-6 rounded-2xl"
-              style={{
-                background: 'linear-gradient(180deg, hsl(25 18% 10% / 0.6), hsl(20 15% 8% / 0.3))',
-                borderBottom: '1px solid hsl(42 35% 25% / 0.2)',
-                boxShadow: '0 8px 32px hsl(20 30% 5% / 0.4), inset 0 1px 0 hsl(42 30% 30% / 0.06)',
-              }}
-            >
-              {/* Embers drifting around mantle */}
-              <EmberDrift />
-
-              {/* Mantle glow — warm light behind clock */}
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(circle, hsl(30 60% 30% / 0.12), transparent 70%)',
-                }}
-              />
-
-              {/* Clock */}
-              <Suspense fallback={
-                <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsl(42 30% 15% / 0.3)' }} />
-              }>
-                <MantleClock />
-              </Suspense>
-
-              {/* Mantle inscription */}
-              <p
-                className="font-serif text-[10px] tracking-[0.3em] uppercase mt-3 select-none"
-                style={{ color: 'hsl(42 30% 45% / 0.3)' }}
-              >
-                seasonal time
-              </p>
-            </div>
-          </div>
-
-          {/* CTAs — below clock */}
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
-            <button
-              onClick={() => navigate("/map")}
-              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-              style={{
-                background: 'linear-gradient(135deg, hsl(38 60% 35%), hsl(30 50% 25%))',
-                color: 'hsl(38 80% 85%)',
-                border: '1px solid hsl(38 50% 40% / 0.5)',
-              }}
-            >
-              Enter the Map
-            </button>
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-              style={{
-                background: 'hsl(25 20% 12% / 0.8)',
-                color: 'hsl(38 50% 70%)',
-                border: '1px solid hsl(38 40% 30% / 0.4)',
-              }}
-            >
-              Your Hearth
-            </button>
-            <button
-              onClick={() => navigate("/dashboard?tab=activity")}
-              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-              style={{
-                background: 'hsl(25 20% 12% / 0.8)',
-                color: 'hsl(38 50% 70%)',
-                border: '1px solid hsl(38 40% 30% / 0.4)',
-              }}
-            >
-              Active Opportunities
-            </button>
-            <button
-              onClick={() => navigate("/vault?from=hearth")}
-              className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-              style={{
-                background: 'hsl(25 20% 12% / 0.8)',
-                color: 'hsl(38 50% 70%)',
-                border: '1px solid hsl(38 40% 30% / 0.4)',
-              }}
-            >
-              Your Vault
-            </button>
-          </div>
-
-          {/* ── Vault Preview — economy snapshot ───────── */}
-          <div className="w-full max-w-2xl mb-10">
-            <LibraryVaultPreview />
-          </div>
-
-          {/* ── Room Branches — themed architectural tiles ── */}
-          <LibraryRoomGrid onRoomSelect={(key) => {
-            if (key === 'press') { navigate('/press'); return; }
-            if (key === 'ledger') { setActiveTab('scrolls'); setShowLanding(false); return; }
-            if (key === 'tree-resources') { navigate('/ledger'); return; }
-            setActiveTab(key); setShowLanding(false);
-          }} />
-        </div>
-      </div>
+      <HeartwoodLanding
+        onRoomSelect={(key) => {
+          if (key === 'ledger') { setActiveTab('scrolls'); setShowLanding(false); return; }
+          if (key === 'tree-resources') { navigate('/ledger'); return; }
+          setActiveTab(key); setShowLanding(false);
+        }}
+      />
     );
   }
 
@@ -1060,116 +917,15 @@ const GalleryPage = () => {
           </TabsContent>
 
           <TabsContent value="gallery" className="space-y-6">
-
-            {/* Ancient Friends Window — tap to explore */}
-            <button
-              onClick={() => setShowExplorer(true)}
-              className="relative max-w-[75%] mx-auto rounded-xl overflow-hidden border border-amber-700/40 block hover:scale-[1.02] focus:scale-[1.02] transition-transform duration-300 focus:outline-none group cursor-pointer"
-            >
-              <img 
-                src={ancientFriendsWindow} 
-                alt="Ancient Friends — tap to explore" 
-                className="w-full h-auto object-contain"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <span className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-serif tracking-widest opacity-70 group-hover:opacity-100 transition-opacity" style={{ color: 'hsl(42 80% 60%)' }}>
-                🌿 Tap to Explore
-              </span>
-            </button>
-
-            {/* Explorer overlay */}
-            {showExplorer && (
-              <AncientFriendsExplorer
-                trees={filteredTrees}
-                onClose={() => setShowExplorer(false)}
-                onWishlist={addToWishlist}
-              />
-            )}
-
-            {/* View Toggle & Filters — top for quick access */}
-            <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'hsla(30, 20%, 15%, 0.6)', border: '1px solid hsla(42, 40%, 30%, 0.3)' }}>
-              {([
-                { key: "collective" as const, label: "Collectively", icon: Globe, desc: "All mapped trees" },
-                { key: "individual" as const, label: "Individually", icon: User, desc: "Your mapped trees" },
-                { key: "tribe" as const, label: "Your Tribe", icon: Users, desc: "Your connections' trees" },
-              ]).map(v => (
-                <button
-                  key={v.key}
-                  onClick={() => setGalleryView(v.key)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-serif transition-all flex-1 justify-center"
-                  style={{
-                    background: galleryView === v.key ? 'hsla(42, 70%, 50%, 0.15)' : 'transparent',
-                    color: galleryView === v.key ? 'hsl(42, 80%, 60%)' : 'hsla(42, 20%, 60%, 0.7)',
-                    border: galleryView === v.key ? '1px solid hsla(42, 60%, 50%, 0.3)' : '1px solid transparent',
-                  }}
-                  title={v.desc}
-                >
-                  <v.icon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{v.label}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex justify-end">
-              <GalleryFilterDrawer
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                nameFilter={nameFilter}
-                onNameChange={setNameFilter}
-                w3wFilter={w3wFilter}
-                onW3wChange={setW3wFilter}
-                speciesFilter={speciesFilter}
-                onSpeciesChange={setSpeciesFilter}
-                lineageFilter={lineageFilter}
-                onLineageChange={setLineageFilter}
-                projectFilter={projectFilter}
-                onProjectChange={setProjectFilter}
-                staffFilter={staffFilter}
-                onStaffChange={setStaffFilter}
-                groveScaleFilter={groveScaleFilter}
-                onGroveScaleChange={setGroveScaleFilter}
-                nationFilter={nationFilter}
-                onNationChange={setNationFilter}
-                uniqueSpecies={uniqueSpecies}
-                uniqueLineages={uniqueLineages}
-                uniqueProjects={uniqueProjects}
-                uniqueNations={uniqueNations}
-                staffCodes={staffCodes}
-                onClearAll={clearAllFilters}
-              />
-            </div>
-
-            {/* Tree cards grid */}
-            {loading ? (
-              <p className="text-center py-12">Loading trees...</p>
-            ) : clusteredTrees.length === 0 ? (
-              <p className="text-center py-12 text-muted-foreground">
-                No trees found. Import some trees to get started!
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {clusteredTrees.map((cluster) => {
-                  const tree = cluster.anchor;
-                  const treeOfferingCount = offerings.filter((o) => o.tree_id === tree.id).length;
-                  const photoOffering = offerings.find((o) => o.tree_id === tree.id && o.type === "photo" && o.media_url);
-                  return (
-                    <TreeCard
-                      key={tree.id}
-                      tree={tree}
-                      variant="gallery"
-                      cluster={cluster}
-                      offeringCount={treeOfferingCount}
-                      heroPhotoUrl={photoOffering?.media_url}
-                      wishlistPulseActive={wishlistPulseId === tree.id}
-                      onSelect={(t) => setSelectedTree(t as any)}
-                      onWishlist={addToWishlist}
-                      onShare={handleShare}
-                      onNFTree={(data) => setNftreeTarget(data)}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            <AncientFriendsRoom
+              trees={trees}
+              loading={loading}
+              currentUserId={currentUserId}
+              tribeUserIds={tribeUserIds}
+              treesWithStaff={treesWithStaff}
+              staffCodes={staffCodes}
+              onSelectTree={(t) => setSelectedTree(t)}
+            />
           </TabsContent>
 
           <TabsContent value="staff-room" className="space-y-6">
@@ -1455,7 +1211,7 @@ const GalleryPage = () => {
 
           {/* Rhythms — Cycle Market */}
           <TabsContent value="rhythms" className="space-y-6">
-            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+            <Suspense fallback={<div className="py-12"><PageSkeleton variant="default" /></div>}>
               <CycleMarketRoom />
             </Suspense>
           </TabsContent>
