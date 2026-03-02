@@ -30,8 +30,10 @@ const Index = () => {
         <Hero />
         <IdentitySection />
         <DiscoveryRow />
+        <div className="section-divider max-w-xl mx-auto" />
         <ParticipationSection />
         <SupportDiscoveryRow />
+        <div className="section-divider max-w-xl mx-auto" />
         <WisdomOfTheGrove />
         <TetolNavSection />
       </main>

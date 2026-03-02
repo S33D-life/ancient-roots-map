@@ -359,4 +359,23 @@ All colors MUST be HSL.
   .light header > div:nth-child(2) {
     background: linear-gradient(180deg, hsl(140 20% 92% / 0.75), hsl(145 18% 88% / 0.85)) !important;
   }
+
+  /* ── Unified loop-closure grid card polish ── */
+  .loop-card {
+    @apply text-xs rounded-lg border transition-colors text-left;
+    border-color: hsl(var(--border) / 0.2);
+    background: hsl(var(--card) / 0.4);
+    padding: 0.625rem 0.75rem;
+  }
+  .loop-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    background: hsl(var(--card) / 0.6);
+  }
+
+  /* ── Softer section dividers ── */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.25), transparent);
+    margin: 2rem 0;
+  }
 }

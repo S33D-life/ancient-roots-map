@@ -336,31 +336,19 @@ const CouncilOfLifePage = () => {
               Continue your journey
             </h3>
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => navigate("/value-tree")}
-                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
-              >
+              <button onClick={() => navigate("/value-tree")} className="loop-card font-serif">
                 <span className="text-primary">❤️ Value Tree</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">See how Hearts flow</p>
               </button>
-              <button
-                onClick={() => navigate("/support")}
-                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
-              >
+              <button onClick={() => navigate("/support")} className="loop-card font-serif">
                 <span className="text-primary">🌱 Support S33D</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Contribute beyond governance</p>
               </button>
-              <button
-                onClick={() => navigate("/map")}
-                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
-              >
+              <button onClick={() => navigate("/map")} className="loop-card font-serif">
                 <span className="text-primary">🗺️ Atlas</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Map an Ancient Friend</p>
               </button>
-              <button
-                onClick={() => navigate("/library")}
-                className="text-xs font-serif px-3 py-2.5 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 text-left"
-              >
+              <button onClick={() => navigate("/library")} className="loop-card font-serif">
                 <span className="text-primary">📚 Library</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Browse offerings & stories</p>
               </button>

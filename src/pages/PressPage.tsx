@@ -85,7 +85,7 @@ export default function PressPage() {
     <div className="min-h-screen relative">
       <HeartwoodBackground />
       <Header />
-      <main className="relative z-10 px-4 pb-28 pt-4 max-w-2xl mx-auto">
+      <main className="relative z-10 px-4 pb-20 pt-24 max-w-2xl mx-auto">
         <AnimatePresence mode="wait">
           {editing ? (
             <PressEditor
