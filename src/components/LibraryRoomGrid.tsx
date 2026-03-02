@@ -6,19 +6,26 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 
-/* ── Room definitions with theme colors ── */
-const ROOMS = [
+/* ── Room definitions with theme colors — grouped ── */
+type Room = { key: string; label: string; desc: string; accentH: number; particle: string };
+
+const YOUR_SPACES: Room[] = [
   { key: "staff-room",    label: "🪵 Staff Room",      desc: "144 Sacred Staffs",        accentH: 280, particle: "wand"       },
-  { key: "gallery",       label: "🗺 Map Room",         desc: "Ancient Friends Atlas",    accentH: 200, particle: "compass"    },
-  { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",               accentH: 260, particle: "wave"       },
   { key: "greenhouse",    label: "🌱 Greenhouse",       desc: "Houseplants & Saplings",   accentH: 130, particle: "leaf"       },
   { key: "wishlist",      label: "⭐ Wishing Tree",     desc: "Trees you dream to visit",  accentH: 45,  particle: "star"       },
-  { key: "seed-cellar",   label: "📦 Seed Cellar",      desc: "Living Data Archive",      accentH: 30,  particle: "seed"       },
   { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",             accentH: 340, particle: "spark"      },
+  { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
+];
+
+const COMMUNITY: Room[] = [
+  { key: "gallery",       label: "🗺 Map Room",         desc: "Ancient Friends Atlas",    accentH: 200, particle: "compass"    },
+  { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",               accentH: 260, particle: "wave"       },
+  { key: "seed-cellar",   label: "📦 Seed Cellar",      desc: "Living Data Archive",      accentH: 30,  particle: "seed"       },
   { key: "tree-resources",label: "📖 Tree Resources",   desc: "Project Directory",        accentH: 160, particle: "page"       },
   { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",          accentH: 42,  particle: "shimmer"    },
-  { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
-] as const;
+];
+
+const ALL_ROOMS = [...YOUR_SPACES, ...COMMUNITY];
 
 /* ── Seasonal ambient hue offset (subtle) ── */
 function getSeasonalShift(): number {
@@ -157,6 +164,66 @@ export function EmberDrift() {
   );
 }
 
+/* ── Room Tile ── */
+function RoomTile({ room, idx, seasonShift, onSelect }: { room: Room; idx: number; seasonShift: number; onSelect: (key: string) => void }) {
+  const h = room.accentH + seasonShift;
+  return (
+    <motion.button
+      key={room.key}
+      onClick={() => onSelect(room.key)}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.05, duration: 0.35, ease: "easeOut" }}
+      whileHover={{ scale: 1.03, y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      className="group relative rounded-xl text-left transition-shadow duration-300 overflow-hidden"
+      style={{
+        background: `linear-gradient(145deg, hsl(${h} 18% 12% / 0.9), hsl(${h} 14% 8% / 0.95))`,
+        border: `1px solid hsl(${h} 30% 25% / 0.3)`,
+        boxShadow: `0 2px 8px hsl(${h} 20% 8% / 0.4), inset 0 1px 0 hsl(${h} 30% 30% / 0.08)`,
+        padding: "1.25rem 1.5rem",
+      }}
+    >
+      <div
+        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{
+          background: `radial-gradient(ellipse at 50% 80%, hsl(${h} 60% 40% / 0.12), transparent 70%)`,
+          boxShadow: `inset 0 -1px 0 hsl(${h} 50% 45% / 0.1)`,
+        }}
+      />
+      <div
+        className="absolute bottom-0 left-[15%] right-[15%] h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: `linear-gradient(90deg, transparent, hsl(${h} 55% 50% / 0.3), transparent)` }}
+      />
+      <RoomParticles type={room.particle} accentH={h} />
+      <h3
+        className="font-serif text-sm md:text-base mb-1 relative z-10 transition-colors duration-300"
+        style={{ color: `hsl(${h} 55% 72% / 0.9)` }}
+      >
+        {room.label}
+      </h3>
+      <p
+        className="text-xs relative z-10 transition-colors duration-300"
+        style={{ color: `hsl(${h} 25% 55% / 0.5)` }}
+      >
+        {room.desc}
+      </p>
+    </motion.button>
+  );
+}
+
+/* ── Section Header ── */
+function SectionHeader({ label, seasonShift }: { label: string; seasonShift: number }) {
+  return (
+    <p
+      className="font-serif text-[11px] tracking-[0.15em] uppercase col-span-2 md:col-span-3 mt-2 mb--1"
+      style={{ color: `hsl(${38 + seasonShift} 30% 50% / 0.45)` }}
+    >
+      {label}
+    </p>
+  );
+}
+
 /* ── Main Grid ── */
 interface Props {
   onRoomSelect: (key: string) => void;
@@ -175,64 +242,15 @@ export default function LibraryRoomGrid({ onRoomSelect }: Props) {
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
-        {ROOMS.map((room, idx) => {
-          const h = room.accentH + seasonShift;
-          return (
-            <motion.button
-              key={room.key}
-              onClick={() => onRoomSelect(room.key)}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05, duration: 0.35, ease: "easeOut" }}
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="group relative rounded-xl text-left transition-shadow duration-300 overflow-hidden"
-              style={{
-                background: `linear-gradient(145deg, hsl(${h} 18% 12% / 0.9), hsl(${h} 14% 8% / 0.95))`,
-                border: `1px solid hsl(${h} 30% 25% / 0.3)`,
-                boxShadow: `
-                  0 2px 8px hsl(${h} 20% 8% / 0.4),
-                  inset 0 1px 0 hsl(${h} 30% 30% / 0.08)
-                `,
-                padding: "1.25rem 1.5rem",
-              }}
-            >
-              {/* Hover glow — themed per room */}
-              <div
-                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{
-                  background: `radial-gradient(ellipse at 50% 80%, hsl(${h} 60% 40% / 0.12), transparent 70%)`,
-                  boxShadow: `inset 0 -1px 0 hsl(${h} 50% 45% / 0.1)`,
-                }}
-              />
+        <SectionHeader label="Your Spaces" seasonShift={seasonShift} />
+        {YOUR_SPACES.map((room, idx) => (
+          <RoomTile key={room.key} room={room} idx={idx} seasonShift={seasonShift} onSelect={onRoomSelect} />
+        ))}
 
-              {/* Bottom edge light — architectural depth */}
-              <div
-                className="absolute bottom-0 left-[15%] right-[15%] h-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{
-                  background: `linear-gradient(90deg, transparent, hsl(${h} 55% 50% / 0.3), transparent)`,
-                }}
-              />
-
-              {/* Micro-animation particles */}
-              <RoomParticles type={room.particle} accentH={h} />
-
-              {/* Content */}
-              <h3
-                className="font-serif text-sm md:text-base mb-1 relative z-10 transition-colors duration-300"
-                style={{ color: `hsl(${h} 55% 72% / 0.9)` }}
-              >
-                {room.label}
-              </h3>
-              <p
-                className="text-xs relative z-10 transition-colors duration-300"
-                style={{ color: `hsl(${h} 25% 55% / 0.5)` }}
-              >
-                {room.desc}
-              </p>
-            </motion.button>
-          );
-        })}
+        <SectionHeader label="Community" seasonShift={seasonShift} />
+        {COMMUNITY.map((room, idx) => (
+          <RoomTile key={room.key} room={room} idx={idx + YOUR_SPACES.length} seasonShift={seasonShift} onSelect={onRoomSelect} />
+        ))}
       </div>
     </div>
   );

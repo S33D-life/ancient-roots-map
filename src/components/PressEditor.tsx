@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Save, Send, Feather, ChevronDown, BookOpen, X } from "lucide-react";
+import { ArrowLeft, Save, Send, Feather, ChevronDown, BookOpen, X, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -75,6 +75,8 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
       });
   }, [userId, initial?.source_book_id]);
 
+  const [showPublishPreview, setShowPublishPreview] = useState(false);
+
   const handleSave = async (publish: boolean) => {
     if (!title.trim() || !body.trim()) {
       toast.error("A title and body are needed");
@@ -98,6 +100,7 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
       toast.error("Could not save");
     } finally {
       setSaving(false);
+      setShowPublishPreview(false);
     }
   };
 
@@ -135,11 +138,14 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
           </Button>
           <Button
             size="sm"
-            onClick={() => handleSave(true)}
+            onClick={() => {
+              if (!title.trim() || !body.trim()) { toast.error("A title and body are needed"); return; }
+              setShowPublishPreview(true);
+            }}
             disabled={saving}
             className="font-serif text-xs gap-1 h-8"
           >
-            <Send className="h-3.5 w-3.5" /> Publish
+            <Eye className="h-3.5 w-3.5" /> Preview & Publish
           </Button>
         </div>
       </div>
@@ -236,6 +242,54 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
       {initial?.id && (
         <ChaptersSection workId={initial.id} userId={userId} />
       )}
+
+      {/* ── Publish Preview Modal ── */}
+      <AnimatePresence>
+        {showPublishPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+            onClick={() => setShowPublishPreview(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-lg rounded-xl border border-border/30 p-6 space-y-4"
+              style={{ background: 'hsl(25 18% 10% / 0.95)' }}
+            >
+              <h2 className="font-serif text-lg text-foreground/90 tracking-wide">Preview before publishing</h2>
+              <div className="border-l-2 border-primary/30 pl-4 space-y-2">
+                {epigraph && (
+                  <p className="font-serif text-xs italic text-muted-foreground/60">"{epigraph}"</p>
+                )}
+                <h3 className="font-serif text-xl text-foreground/85">{title}</h3>
+                <p className="text-[11px] text-muted-foreground/50 font-serif">
+                  {FORMS.find(f => f.value === form)?.label} · {wordCount} words
+                  {sourceBookLabel && <span className="ml-2">· Born from: {sourceBookLabel}</span>}
+                </p>
+                <p className="font-serif text-sm text-muted-foreground/70 leading-relaxed line-clamp-4">
+                  {body.slice(0, 300)}{body.length > 300 ? "…" : ""}
+                </p>
+              </div>
+              <p className="text-[11px] text-muted-foreground/40 font-serif">
+                This work will be visible to everyone once published.
+              </p>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="ghost" size="sm" onClick={() => setShowPublishPreview(false)} className="font-serif text-xs h-8">
+                  Go back
+                </Button>
+                <Button size="sm" onClick={() => handleSave(true)} disabled={saving} className="font-serif text-xs gap-1 h-8">
+                  <Send className="h-3.5 w-3.5" /> Publish now
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
