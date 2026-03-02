@@ -14,10 +14,16 @@ import {
   TetolNavSection,
 } from "@/components/HomeSections";
 import { WisdomOfTheGrove } from "@/components/WisdomOfTheGrove";
+import { useTreeScroll } from "@/hooks/use-tree-scroll";
+import TreeScrollIndicator from "@/components/TreeScrollIndicator";
+import CrownSection from "@/components/tree-sections/CrownSection";
+import CanopySection from "@/components/tree-sections/CanopySection";
+import TrunkSection from "@/components/tree-sections/TrunkSection";
 
 const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
+  const { activeSection, scrollToSection } = useTreeScroll();
 
   if (showEntrance) {
     return <S33dEntrance onComplete={handleEntranceComplete} />;
@@ -26,16 +32,39 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+
+      {/* Tree Scroll Indicator — desktop only */}
+      <TreeScrollIndicator
+        activeSection={activeSection}
+        onNavigate={scrollToSection}
+      />
+
       <main className="flex-1">
-        <Hero />
-        <IdentitySection />
-        <DiscoveryRow />
-        <div className="section-divider max-w-xl mx-auto" />
-        <ParticipationSection />
-        <SupportDiscoveryRow />
-        <div className="section-divider max-w-xl mx-auto" />
-        <WisdomOfTheGrove />
-        <TetolNavSection />
+        {/* ── CROWN — yOur Golden Dream ── */}
+        <CrownSection />
+
+        {/* ── CANOPY — Council of Life ── */}
+        <CanopySection />
+
+        {/* ── TRUNK — HeARTwood Library ── */}
+        <TrunkSection />
+
+        {/* ── THRESHOLD — Atlas Hero (scroll starts here) ── */}
+        <div id="atlas-hero">
+          <Hero />
+        </div>
+
+        {/* ── ROOTS — Atlas Content ── */}
+        <div id="atlas-content">
+          <IdentitySection />
+          <DiscoveryRow />
+          <div className="section-divider max-w-xl mx-auto" />
+          <ParticipationSection />
+          <SupportDiscoveryRow />
+          <div className="section-divider max-w-xl mx-auto" />
+          <WisdomOfTheGrove />
+          <TetolNavSection />
+        </div>
       </main>
       <TetolBridge />
       <ContextualWhisper
