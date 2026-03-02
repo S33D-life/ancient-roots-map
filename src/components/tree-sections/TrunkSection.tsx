@@ -1,6 +1,8 @@
 /**
  * TrunkSection — inline Heartwood Library preview for the tree scroll.
  * Trunk = warm ember tones, grounded, intimate.
+ *
+ * Sprinkles: staggered cards, floating icon, vine divider
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -13,12 +15,23 @@ const LIBRARY_ROOMS = [
   { icon: Lock, title: "Vault", description: "Your personal archive", to: "/vault" },
 ];
 
+const EASE = [0.25, 0.46, 0.45, 0.94] as const;
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.15 + i * 0.1, duration: 0.6, ease: EASE as unknown as [number, number, number, number] },
+  }),
+};
+
 const TrunkSection = () => (
   <section
     id="heartwood"
     className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
   >
-    {/* Warm ember tones — restrained, not heavy */}
+    {/* Warm ember tones */}
     <div
       className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
       style={{
@@ -37,12 +50,15 @@ const TrunkSection = () => (
       transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="relative z-10 max-w-xl text-center space-y-8"
     >
-      <div
+      {/* Sprinkle 3: Floating icon */}
+      <motion.div
         className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
         style={{ background: "hsl(28 55% 45% / 0.1)" }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       >
         <BookOpen className="w-6 h-6" style={{ color: "hsl(28 55% 50%)" }} />
-      </div>
+      </motion.div>
 
       <p className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/40">
         The Trunk
@@ -60,19 +76,28 @@ const TrunkSection = () => (
         where your journey is remembered and the grove grows from every heart.
       </p>
 
+      {/* Sprinkle 1: Staggered card reveals */}
       <div className="grid grid-cols-2 gap-3 pt-2 max-w-md mx-auto">
-        {LIBRARY_ROOMS.map((room) => {
+        {LIBRARY_ROOMS.map((room, i) => {
           const Icon = room.icon;
           return (
-            <Link
+            <motion.div
               key={room.title}
-              to={room.to}
-              className="group flex flex-col items-center gap-2.5 px-4 py-5 rounded-xl border border-border/15 bg-card/15 backdrop-blur-sm hover:border-primary/25 hover:bg-card/30 transition-all duration-500"
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={cardVariants}
             >
-              <Icon className="w-4.5 h-4.5 text-primary/50 group-hover:text-primary/80 transition-colors duration-300" />
-              <p className="font-serif text-[13px] text-foreground/75 tracking-wide">{room.title}</p>
-              <p className="text-[9px] text-muted-foreground/40 leading-relaxed">{room.description}</p>
-            </Link>
+              <Link
+                to={room.to}
+                className="group flex flex-col items-center gap-2.5 px-4 py-5 rounded-xl border border-border/15 bg-card/15 backdrop-blur-sm hover:border-primary/25 hover:bg-card/30 transition-all duration-500"
+              >
+                <Icon className="w-4.5 h-4.5 text-primary/50 group-hover:text-primary/80 transition-colors duration-300" />
+                <p className="font-serif text-[13px] text-foreground/75 tracking-wide">{room.title}</p>
+                <p className="text-[9px] text-muted-foreground/40 leading-relaxed">{room.description}</p>
+              </Link>
+            </motion.div>
           );
         })}
       </div>
@@ -84,6 +109,9 @@ const TrunkSection = () => (
         Enter the Heartwood <ArrowRight className="w-3 h-3" />
       </Link>
     </motion.div>
+
+    {/* Sprinkle 2: Vine divider */}
+    <div className="vine-divider" />
   </section>
 );
 
