@@ -345,6 +345,7 @@ export type Database = {
           genre: string | null
           id: string
           is_physical_copy: boolean
+          isbn: string | null
           linked_council_sessions: string[] | null
           linked_tree_ids: string[] | null
           notes_count: number
@@ -353,6 +354,8 @@ export type Database = {
           reflection: string | null
           shelf_id: string | null
           source: string
+          source_id: string | null
+          source_url: string | null
           species_category: string | null
           title: string
           updated_at: string
@@ -367,6 +370,7 @@ export type Database = {
           genre?: string | null
           id?: string
           is_physical_copy?: boolean
+          isbn?: string | null
           linked_council_sessions?: string[] | null
           linked_tree_ids?: string[] | null
           notes_count?: number
@@ -375,6 +379,8 @@ export type Database = {
           reflection?: string | null
           shelf_id?: string | null
           source?: string
+          source_id?: string | null
+          source_url?: string | null
           species_category?: string | null
           title: string
           updated_at?: string
@@ -389,6 +395,7 @@ export type Database = {
           genre?: string | null
           id?: string
           is_physical_copy?: boolean
+          isbn?: string | null
           linked_council_sessions?: string[] | null
           linked_tree_ids?: string[] | null
           notes_count?: number
@@ -397,6 +404,8 @@ export type Database = {
           reflection?: string | null
           shelf_id?: string | null
           source?: string
+          source_id?: string | null
+          source_url?: string | null
           species_category?: string | null
           title?: string
           updated_at?: string
@@ -1880,6 +1889,39 @@ export type Database = {
         }
         Relationships: []
       }
+      library_sources: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          source_type: string
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          source_type?: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          source_type?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       market_funds_ledger: {
         Row: {
           amount: number
@@ -3019,6 +3061,36 @@ export type Database = {
           parsed_url?: string | null
           raw_payload?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      shelf_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_system: boolean
+          name: string
+          shelf_names: string[]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          shelf_names?: string[]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          shelf_names?: string[]
         }
         Relationships: []
       }
