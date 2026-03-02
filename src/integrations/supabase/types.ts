@@ -4041,6 +4041,90 @@ export type Database = {
         }
         Relationships: []
       }
+      support_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          email: string | null
+          event_type: string
+          external_ref: string | null
+          id: string
+          metadata: Json | null
+          provider: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          event_type?: string
+          external_ref?: string | null
+          id?: string
+          metadata?: Json | null
+          provider?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          event_type?: string
+          external_ref?: string | null
+          id?: string
+          metadata?: Json | null
+          provider?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      support_signups: {
+        Row: {
+          availability: string | null
+          created_at: string
+          email: string | null
+          id: string
+          interests: string | null
+          message: string | null
+          name: string
+          signup_type: string
+          skills: string | null
+          telegram_handle: string | null
+          user_id: string | null
+        }
+        Insert: {
+          availability?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string | null
+          message?: string | null
+          name: string
+          signup_type?: string
+          skills?: string | null
+          telegram_handle?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          availability?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string | null
+          message?: string | null
+          name?: string
+          signup_type?: string
+          skills?: string | null
+          telegram_handle?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sync_assets: {
         Row: {
           content_hash: string | null
