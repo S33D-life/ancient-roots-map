@@ -41,10 +41,10 @@ const EarnableToday = ({ userId }: Props) => {
       });
   }, [userId]);
 
-  const seedsRemaining = Math.max(0, 3 - seedsUsed);
+  const seedsRemaining = Math.max(0, 33 - seedsUsed);
 
   const items = [
-    { icon: Sprout, label: "Seeds available", value: `${seedsRemaining}/3`, tip: "Plant seeds near trees to grow hearts. Resets at midnight." },
+    { icon: Sprout, label: "Seeds available", value: `${seedsRemaining}/33`, tip: "Plant up to 33 seeds per day, max 3 per tree. Resets at midnight." },
     { icon: TreeDeciduous, label: "Check-ins today", value: `${checkins}`, tip: "Visit trees to earn S33D Hearts. Max 3 per tree per day." },
     { icon: Heart, label: "Hearts earned", value: `${heartBalance}`, tip: "Total S33D Hearts across all actions." },
   ];
