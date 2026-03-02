@@ -165,7 +165,8 @@ const DraggableSparkFAB = () => {
     // No state reset on close — BugReportDialog resets on next open internally
   }, []);
 
-  if (!allowed) return null;
+  // Temporarily hidden — will fix jitter at next review
+  if (true || !allowed) return null;
 
   return (
     <>
