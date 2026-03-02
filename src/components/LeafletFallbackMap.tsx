@@ -30,6 +30,7 @@ import BloomingClockFace from "./BloomingClockFace";
 import BloomingClockParticles from "./BloomingClockParticles";
 import BloomingClockSigils from "./BloomingClockSigils";
 import AtlasFilter, { type VisualLayerSection, type PerspectivePreset } from "./AtlasFilter";
+import LegacyLayersPanel from "./LegacyLayersPanel";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
@@ -2676,6 +2677,41 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           <span className="italic">{watersCommonsWhisper}</span>
         </div>
       )}
+
+      {/* Legacy Layers Panel — Temporary audit interface */}
+      <LegacyLayersPanel
+        visualSections={visualSections}
+        layerStates={{
+          "seeds": showSeeds,
+          "offering-glow": showOfferingGlow,
+          "heart-glow": showHeartGlow,
+          "birdsong": showBirdsongHeat,
+          "hive-layer": showHiveLayer,
+          "groves": showGroves,
+          "root-threads": showRootThreads,
+          "research": showResearchLayer,
+          "champion": showResearchLayer,
+          "immutable": showImmutableLayer,
+          "external": showExternalTrees,
+          "waters": showWaterways,
+          "churchyards": showChurchyards,
+          "parklands": showWatersCommons,
+          "commons": showWatersCommons,
+          "bloomed-seeds": showBloomedSeeds,
+          "recent-visits": showRecentVisits,
+          "seed-traces": showSeedTraces,
+          "shared-trees": showSharedTrees,
+          "tribe-activity": showTribeActivity,
+          "seasonal-foods": showBloomingClock,
+          "constellation": bloomConstellationMode,
+          "grove-view": groveViewActive,
+        }}
+        filterStates={{
+          species: species.length > 0 ? species.join(", ") : "all",
+          lineage: lineageFilter,
+          project: projectFilter,
+        }}
+      />
 
       {/* Add Tree Dialog */}
       <AddTreeDialog
