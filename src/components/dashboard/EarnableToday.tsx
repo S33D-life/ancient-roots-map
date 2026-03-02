@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sprout, TreeDeciduous, Heart, Info } from "lucide-react";
 
@@ -8,38 +9,48 @@ interface Props {
 }
 
 const EarnableToday = ({ userId }: Props) => {
-  const [seedsUsed, setSeedsUsed] = useState(0);
-  const [checkins, setCheckins] = useState(0);
-  const [heartBalance, setHeartBalance] = useState(0);
+  const today = new Date().toISOString().split("T")[0];
 
-  useEffect(() => {
-    const today = new Date().toISOString().split("T")[0];
+  const { data: seedsUsed = 0 } = useQuery({
+    queryKey: ["seeds-today", userId, today],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("planted_seeds")
+        .select("id", { count: "exact", head: true })
+        .eq("planter_id", userId)
+        .gte("planted_at", today);
+      return count || 0;
+    },
+    staleTime: 60_000,
+    enabled: !!userId,
+  });
 
-    supabase
-      .from("planted_seeds")
-      .select("id", { count: "exact", head: true })
-      .eq("planter_id", userId)
-      .gte("planted_at", today)
-      .then(({ count }) => setSeedsUsed(count || 0));
+  const { data: checkins = 0 } = useQuery({
+    queryKey: ["checkins-today", userId, today],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("daily_reward_caps")
+        .select("checkin_count")
+        .eq("user_id", userId)
+        .eq("reward_date", today);
+      return (data || []).reduce((s, r) => s + r.checkin_count, 0);
+    },
+    staleTime: 30_000,
+    enabled: !!userId,
+  });
 
-    supabase
-      .from("daily_reward_caps")
-      .select("checkin_count")
-      .eq("user_id", userId)
-      .eq("reward_date", today)
-      .then(({ data }) => {
-        const total = (data || []).reduce((s, r) => s + r.checkin_count, 0);
-        setCheckins(total);
-      });
-
-    supabase
-      .from("heart_transactions")
-      .select("amount")
-      .eq("user_id", userId)
-      .then(({ data }) => {
-        setHeartBalance((data || []).reduce((s, r) => s + r.amount, 0));
-      });
-  }, [userId]);
+  const { data: heartBalance = 0 } = useQuery({
+    queryKey: ["heart-balance-total", userId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("heart_transactions")
+        .select("amount")
+        .eq("user_id", userId);
+      return (data || []).reduce((s, r) => s + r.amount, 0);
+    },
+    staleTime: 5 * 60_000,
+    enabled: !!userId,
+  });
 
   const seedsRemaining = Math.max(0, 33 - seedsUsed);
 
