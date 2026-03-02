@@ -1,7 +1,7 @@
-import { Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import BugReportDialog from "@/components/BugReportDialog";
+import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 
 const STORAGE_KEY = "bug-btn-pos";
 
@@ -39,19 +39,24 @@ const FloatingBugButton = () => {
       <BugReportDialog
         trigger={
           <button
-            className="w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 cursor-grab"
+            className="group w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 cursor-grab relative"
             style={{
               background: "hsl(var(--card) / 0.9)",
               border: "1px solid hsl(var(--border) / 0.4)",
               backdropFilter: "blur(12px)",
-              color: "hsl(var(--muted-foreground))",
+              color: "hsl(var(--primary))",
             }}
-            title="Bounty Hunter · drag to reposition"
+            title="Council Spark · drag to reposition"
             onClick={(e) => {
               if (dragged) e.preventDefault();
             }}
           >
-            <Shield className="w-4 h-4" />
+            <CouncilSparkIcon className="w-4 h-4" />
+            {/* Subtle pulse glow */}
+            <span
+              className="absolute inset-0 rounded-full animate-pulse opacity-20 pointer-events-none"
+              style={{ boxShadow: "0 0 12px 2px hsl(var(--primary) / 0.4)" }}
+            />
           </button>
         }
       />

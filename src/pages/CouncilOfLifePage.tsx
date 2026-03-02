@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3, TreePine, MapPin } from "lucide-react";
+import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3, TreePine, MapPin, Sparkles, Bug, Eye, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
+import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 
 const councilRooms = [
@@ -61,6 +62,7 @@ const CouncilOfLifePage = () => {
   const [podModalOpen, setPodModalOpen] = useState(false);
   const [linkedTrees, setLinkedTrees] = useState<Array<{ id: string; name: string; species: string }>>([]);
   const [linkedRegions, setLinkedRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [recentSparks, setRecentSparks] = useState<Array<{ id: string; title: string; report_type: string; status: string; upvotes_count: number; created_at: string }>>([]);
 
   // Fetch linked trees and bio-regions for all councils
   useEffect(() => {
@@ -89,6 +91,15 @@ const CouncilOfLifePage = () => {
               .filter(Boolean)
           );
         }
+      });
+    // Fetch recent council sparks
+    supabase
+      .from("bug_reports")
+      .select("id, title, report_type, status, upvotes_count, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5)
+      .then(({ data }) => {
+        if (data) setRecentSparks(data as any);
       });
   }, []);
 
@@ -273,6 +284,40 @@ const CouncilOfLifePage = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Recent Sparks */}
+          {recentSparks.length > 0 && (
+            <div className="mt-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50 flex items-center gap-1.5">
+                  <CouncilSparkIcon className="w-3.5 h-3.5" /> Recent Sparks
+                </h3>
+                <button
+                  onClick={() => navigate("/bug-garden")}
+                  className="text-[10px] text-primary/60 hover:text-primary transition-colors font-serif"
+                >
+                  View all →
+                </button>
+              </div>
+              <div className="space-y-2">
+                {recentSparks.map((spark) => {
+                  const TypeIcon = spark.report_type === "bug" ? Bug : spark.report_type === "ux_improvement" ? Eye : Lightbulb;
+                  const statusLabel = spark.status === "new" ? "🌱 Planted" : spark.status === "fixed" ? "✅ Integrated" : spark.status === "in_progress" ? "🔨 Growing" : "📋 " + spark.status;
+                  return (
+                    <button
+                      key={spark.id}
+                      onClick={() => navigate("/bug-garden")}
+                      className="w-full text-left text-xs font-serif px-3 py-2 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 flex items-center gap-2"
+                    >
+                      <TypeIcon className="w-3 h-3 text-muted-foreground shrink-0" />
+                      <span className="truncate flex-1">{spark.title}</span>
+                      <span className="text-[10px] text-muted-foreground/50 shrink-0">{statusLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 

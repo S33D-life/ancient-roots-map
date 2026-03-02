@@ -1,4 +1,4 @@
-import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone, Shield } from "lucide-react";
+import { Heart, TreeDeciduous, RotateCcw, Search, Smartphone, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
 import { resetWhispers } from "@/components/ContextualWhisper";
@@ -36,8 +36,8 @@ const Footer = () => {
           </Link>
           <Dot />
           <Link to="/bug-garden" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <Shield className="w-3 h-3" />
-            Bounty Board
+            <Sparkles className="w-3 h-3" />
+            Council Sparks
           </Link>
           <Dot />
           <span className="text-[10px] text-muted-foreground/40">EST 2016</span>
