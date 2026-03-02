@@ -166,7 +166,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     const fetchTrees = async () => {
       try {
         const [treesResult, birdsongResult] = await Promise.all([
-          supabase.from('trees').select('*').not('latitude', 'is', null).not('longitude', 'is', null),
+          supabase.from('trees').select('id,name,species,latitude,longitude,created_by,nation,estimated_age,what3words,lineage,project_name').not('latitude', 'is', null).not('longitude', 'is', null),
           supabase.from('birdsong_offerings').select('tree_id, season'),
         ]);
 
@@ -589,10 +589,14 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     };
   }, [filteredTrees]);
 
-  // Draw golden Creator's Paths
+  // Draw golden Creator's Paths — only when map is ready and trees loaded
+  const creatorPathsDrawn = useRef(false);
   useEffect(() => {
     const m = map.current;
     if (!m || mapStatus !== 'ready') return;
+    // Only draw once per map session to avoid repeated DB calls on every tree update
+    if (creatorPathsDrawn.current) return;
+    creatorPathsDrawn.current = true;
 
     const drawCreatorPaths = async () => {
       if (m.getLayer(CREATOR_PATHS_GLOW_LAYER)) m.removeLayer(CREATOR_PATHS_GLOW_LAYER);
@@ -603,7 +607,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
         .from('offerings')
         .select('tree_id, created_by, created_at')
         .not('created_by', 'is', null)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .limit(500);
 
       if (error || !offerings || offerings.length === 0) return;
 

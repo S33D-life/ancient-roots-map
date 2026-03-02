@@ -101,23 +101,27 @@ const DraggableSparkFAB = () => {
     setXY({ x: nx, y: ny });
   }, []);
 
+  // Track latest xy for snap without re-creating handler
+  const xyRef = useRef(xy);
+  xyRef.current = xy;
+
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
     isDragging.current = false;
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
 
     if (totalMoved.current < DRAG_THRESHOLD) {
       // It was a tap
       if (debounceRef.current) return;
       debounceRef.current = true;
-      console.info("[Spark] spark_click_attempt", { route: window.location.pathname });
+      console.info("[Spark] spark_open_attempt", { route: window.location.pathname });
       setDialogOpen(true);
-      setTimeout(() => { debounceRef.current = false; }, 600);
+      setTimeout(() => { debounceRef.current = false; }, 800);
     } else {
       // It was a drag — snap to edge
-      snapToEdge(xy.x, xy.y);
+      snapToEdge(xyRef.current.x, xyRef.current.y);
     }
-  }, [snapToEdge, xy]);
+  }, [snapToEdge]);
 
   if (!allowed) return null;
 

@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 interface Props {
   children: ReactNode;
   fallbackMessage?: string;
+  onFallbackAction?: () => void;
+  fallbackActionLabel?: string;
 }
 
 interface State {
@@ -64,9 +66,16 @@ class SparkErrorBoundary extends Component<Props, State> {
           <p className="text-sm text-muted-foreground font-serif">
             {this.props.fallbackMessage || "Something flickered — the spark couldn't ignite this time."}
           </p>
-          <Button variant="outline" size="sm" onClick={this.handleRetry} className="font-serif">
-            Try again
-          </Button>
+          <div className="flex items-center justify-center gap-2">
+            <Button variant="outline" size="sm" onClick={this.handleRetry} className="font-serif">
+              Try again
+            </Button>
+            {this.props.onFallbackAction && (
+              <Button variant="default" size="sm" onClick={this.props.onFallbackAction} className="font-serif">
+                {this.props.fallbackActionLabel || "Bug Report Lite"}
+              </Button>
+            )}
+          </div>
         </div>
       );
     }
