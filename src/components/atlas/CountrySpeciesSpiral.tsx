@@ -1,6 +1,11 @@
 /**
  * CountrySpeciesSpiral — golden-angle spiral of the 33 most active species in a country.
- * Lazy-loadable. Responsive. Tooltip on hover, bottom sheet on mobile tap.
+ * 
+ * "Forest Breath" animation: the 3–5 most recently active species gently pulse
+ * using pure CSS/SVG animations (no JS render loops). Respects prefers-reduced-motion.
+ * 
+ * How "recent" is chosen: each species has a `lastActivity` timestamp derived from the
+ * latest tree mapping, check-in, or offering. We sort descending and take the top N (default 4).
  */
 import { memo, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,10 +23,11 @@ interface Props {
   loading?: boolean;
 }
 
-const GOLDEN_ANGLE = 137.508; // degrees
+const GOLDEN_ANGLE = 137.508;
 const MAX_DOTS = 33;
 const SVG_SIZE = 400;
 const CENTER = SVG_SIZE / 2;
+const BREATHING_COUNT = 4; // N most recent to animate (3–5 range)
 
 function goldenSpiralPoint(index: number): { x: number; y: number } {
   const angle = index * GOLDEN_ANGLE * (Math.PI / 180);
@@ -32,12 +38,28 @@ function goldenSpiralPoint(index: number): { x: number; y: number } {
   };
 }
 
+/** Deterministic per-dot timing offset so pulses don't synchronize */
+function seedOffset(species: string): number {
+  let h = 0;
+  for (let i = 0; i < species.length; i++) h = (h * 31 + species.charCodeAt(i)) | 0;
+  return Math.abs(h) % 2000; // 0–2s offset
+}
+
 const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: Props) => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<SpeciesActivity | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
   const maxScore = useMemo(() => Math.max(1, ...species.map(s => s.score)), [species]);
+
+  // Determine the N most recently active species for breathing animation
+  const breathingSet = useMemo(() => {
+    const withTimestamps = species
+      .filter(s => s.lastActivity)
+      .sort((a, b) => new Date(b.lastActivity!).getTime() - new Date(a.lastActivity!).getTime())
+      .slice(0, Math.max(3, Math.min(5, BREATHING_COUNT)));
+    return new Set(withTimestamps.map(s => s.species));
+  }, [species]);
 
   // Fill placeholders if < 33
   const dots = useMemo(() => {
@@ -94,6 +116,36 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
 
   return (
     <div className="relative">
+      {/* Inject CSS keyframes for forest-breath — only once, scoped via unique class */}
+      <style>{`
+        @keyframes forest-breath-scale {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.06); }
+        }
+        @keyframes forest-breath-halo {
+          0% { r: var(--halo-r-start); opacity: 0.25; }
+          60% { opacity: 0.08; }
+          100% { r: var(--halo-r-end); opacity: 0; }
+        }
+        .forest-breath-dot {
+          transform-origin: center;
+          transform-box: fill-box;
+          animation: forest-breath-scale var(--breath-dur, 4.5s) ease-in-out infinite;
+          animation-delay: var(--breath-delay, 0s);
+        }
+        .forest-breath-dot.paused {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .forest-breath-dot {
+            animation: none !important;
+          }
+          .forest-breath-halo {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       {/* Header */}
       <div className="text-center mb-4">
         <h3 className="text-lg font-serif font-bold text-foreground">Species Spiral</h3>
@@ -113,6 +165,8 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
           const isPlaceholder = !sp;
           const isSelected = sp && selected?.species === sp.species;
           const isHovered = sp && hovered === sp.species;
+          const isBreathing = sp && breathingSet.has(sp.species);
+          const isPaused = isSelected || isHovered;
 
           // Size: 4–14 based on score
           const baseSize = isPlaceholder ? 3 : 4 + (sp!.score / maxScore) * 10;
@@ -121,16 +175,57 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
           // Brightness: recent = bright, old = dim
           const brightness = isPlaceholder ? 0.15 : sp!.recentActivity ? 0.85 : 0.4;
 
+          // Breathing timing: 3.8–6.0s with per-dot offset
+          const breathDur = isBreathing ? `${3.8 + (seedOffset(sp!.species) / 2000) * 2.2}s` : undefined;
+          const breathDelay = isBreathing ? `${seedOffset(sp!.species) / 1000}s` : undefined;
+
           return (
             <g key={sp?.species || `placeholder-${i}`}>
-              {/* Pulse for recent */}
-              {sp?.recentActivity && !isPlaceholder && (
-                <circle cx={x} cy={y} r={baseSize + 4} fill="none"
-                  stroke="hsl(var(--primary) / 0.3)" strokeWidth={0.8}>
-                  <animate attributeName="opacity" values="0.5;0.1;0.5" dur="3s" repeatCount="indefinite" />
+              {/* Breathing halo — faint expanding ring for breathing dots */}
+              {isBreathing && !isPaused && !isPlaceholder && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={baseSize + 3}
+                  fill="none"
+                  stroke="hsl(var(--primary) / 0.18)"
+                  strokeWidth={0.6}
+                  className="forest-breath-halo"
+                  style={{
+                    '--halo-r-start': `${baseSize + 3}`,
+                    '--halo-r-end': `${baseSize + 8}`,
+                  } as React.CSSProperties}
+                >
+                  <animate
+                    attributeName="r"
+                    values={`${baseSize + 3};${baseSize + 7};${baseSize + 3}`}
+                    dur={`${6 + (seedOffset(sp!.species) % 4)}s`}
+                    repeatCount="indefinite"
+                  />
+                  <animate
+                    attributeName="opacity"
+                    values="0.2;0.05;0.2"
+                    dur={`${6 + (seedOffset(sp!.species) % 4)}s`}
+                    repeatCount="indefinite"
+                  />
                 </circle>
               )}
 
+              {/* Reduced-motion static indicator for breathing dots */}
+              {isBreathing && !isPlaceholder && (
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={baseSize + 2.5}
+                  fill="none"
+                  stroke="hsl(var(--primary) / 0.25)"
+                  strokeWidth={0.5}
+                  strokeDasharray="2 2"
+                  className="hidden motion-reduce:block"
+                />
+              )}
+
+              {/* Main dot */}
               <circle
                 cx={x}
                 cy={y}
@@ -141,7 +236,14 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
                 }
                 stroke={isSelected ? "hsl(var(--primary))" : "none"}
                 strokeWidth={isSelected ? 1.5 : 0}
-                className={isPlaceholder ? "" : "cursor-pointer transition-all duration-200"}
+                className={[
+                  isPlaceholder ? "" : "cursor-pointer transition-[r,stroke-width] duration-200",
+                  isBreathing && !isPlaceholder ? `forest-breath-dot${isPaused ? " paused" : ""}` : "",
+                ].join(" ")}
+                style={isBreathing && !isPlaceholder ? {
+                  '--breath-dur': breathDur,
+                  '--breath-delay': breathDelay,
+                } as React.CSSProperties : undefined}
                 onClick={() => handleDotClick(sp)}
                 onMouseEnter={() => sp && setHovered(sp.species)}
                 onMouseLeave={() => setHovered(null)}
@@ -182,7 +284,14 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
         })}
       </svg>
 
-      {/* Selected species detail panel (bottom sheet style) */}
+      {/* Legend */}
+      {breathingSet.size > 0 && (
+        <p className="text-center text-[10px] text-muted-foreground/60 mt-2 italic">
+          Breathing seeds — most recent activity
+        </p>
+      )}
+
+      {/* Selected species detail panel */}
       <AnimatePresence>
         {selected && (
           <motion.div
@@ -194,7 +303,6 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
           >
             <Card className="border-primary/20 bg-card/95 backdrop-blur-sm shadow-lg">
               <CardContent className="p-4 space-y-3">
-                {/* Header */}
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="font-serif text-sm font-semibold text-foreground">
@@ -202,6 +310,9 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
                     </h4>
                     <p className="text-[10px] text-muted-foreground">
                       Activity Score: {selected.score.toFixed(1)}
+                      {breathingSet.has(selected.species) && (
+                        <span className="ml-1.5 text-primary/70">· Most recent</span>
+                      )}
                     </p>
                   </div>
                   <button onClick={() => setSelected(null)}
@@ -210,7 +321,6 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
                   </button>
                 </div>
 
-                {/* Stats */}
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div>
                     <p className="text-lg font-serif font-bold text-foreground">{selected.mapped}</p>
@@ -232,7 +342,6 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
                   </div>
                 </div>
 
-                {/* Last activity */}
                 {selected.lastActivity && (
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <Clock className="w-2.5 h-2.5" />
@@ -240,7 +349,6 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
                   </p>
                 )}
 
-                {/* Actions */}
                 <div className="flex gap-2">
                   <Button variant="sacred" size="sm" className="flex-1 text-xs h-8"
                     onClick={() => handleFilterMap(selected)}>
