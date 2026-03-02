@@ -130,7 +130,7 @@ const TreeCard = ({
 
   return (
     <motion.div
-      className="absolute inset-4 sm:inset-8 md:inset-12 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing touch-none"
+      className="absolute inset-4 bottom-2 sm:inset-8 md:inset-12 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing touch-none"
       style={{
         x: isTop ? x : 0,
         rotate: isTop ? rotate : 0,
@@ -779,7 +779,7 @@ const AncientFriendsExplorer = ({ trees, onClose, onWishlist }: AncientFriendsEx
 
       {/* Bottom actions */}
       {!isEnd && (
-        <div className="flex items-center justify-center gap-5 pb-6 pt-2 z-10">
+        <div className="flex items-center justify-center gap-5 pt-2 z-10" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
           <button
             onClick={() => handleSwipe("left")}
             className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90"
