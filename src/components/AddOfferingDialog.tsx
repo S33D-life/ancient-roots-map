@@ -263,10 +263,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }
 
       // Issue species/influence rewards (stewardship gets +2, anchored gets +1)
+      let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const s33dOverride = treeRole === "stewardship" ? 2 : 1;
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering", s33dAmount: s33dOverride });
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) {
+          earnedReward = rr;
           setRewardResult(rr);
         }
       }
@@ -275,7 +277,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       setShowCelebration(true);
       setTimeout(() => {
         setShowCelebration(false);
-        if (rewardResult) { setShowRewardReceipt(true); } else { onOpenChange(false); }
+        if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); }
       }, 2000);
       setTitle("");
       setContent("");
@@ -344,16 +346,17 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }
 
       // Issue rewards
+      let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
 
       setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
       setShowCelebration(true);
       setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
       clearSelectedFile();
-      setTimeout(() => { setShowCelebration(false); if (rewardResult) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -401,16 +404,17 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }
 
       // Issue rewards
+      let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
 
       setCelebrationMsg({ emoji: "🎙️", message: "Voice offering sealed!", subtitle: "Your voice has been offered" });
       setShowCelebration(true);
       setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
       clearSelectedFile();
-      setTimeout(() => { setShowCelebration(false); if (rewardResult) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -463,16 +467,17 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }
 
       // Issue rewards
+      let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
-        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { setRewardResult(rr); }
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
 
       setCelebrationMsg({ emoji: "📖", message: "Book offering sealed!", subtitle: `"${data.title}" by ${data.author}` });
       setShowCelebration(true);
       setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
       clearSelectedFile();
-      setTimeout(() => { setShowCelebration(false); if (rewardResult) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -549,9 +554,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
               <Input
                 id="title"
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value.slice(0, 200))}
                 placeholder={`Name your ${cfg.singular.toLowerCase()}`}
                 className="bg-secondary/20 border-border/50 font-serif"
+                maxLength={200}
                 required
               />
             </div>
@@ -562,8 +568,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
               <Textarea
                 id="content"
                 value={content}
-                onChange={e => setContent(e.target.value)}
+                onChange={e => setContent(e.target.value.slice(0, 5000))}
                 placeholder={cfg.placeholder}
+                maxLength={5000}
                 className="bg-secondary/20 border-border/50 font-serif min-h-[100px]"
               />
             </div>
