@@ -1,6 +1,8 @@
 /**
  * CanopySection — inline Council of Life preview for the tree scroll.
  * Canopy = green-toned, communal, gathering energy.
+ *
+ * Sprinkles: staggered cards, floating icon, vine divider
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -13,12 +15,23 @@ const COUNCIL_LINKS = [
   { icon: CalendarDays, title: "Next Council", description: "Upcoming council dates", to: "/council-of-life" },
 ];
 
+const EASE = [0.25, 0.46, 0.45, 0.94] as const;
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.15 + i * 0.1, duration: 0.6, ease: EASE as unknown as [number, number, number, number] },
+  }),
+};
+
 const CanopySection = () => (
   <section
     id="council"
     className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
   >
-    {/* Green canopy atmosphere — softer, less saturated */}
+    {/* Green canopy atmosphere */}
     <div
       className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
       style={{
@@ -37,12 +50,15 @@ const CanopySection = () => (
       transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="relative z-10 max-w-xl text-center space-y-8"
     >
-      <div
+      {/* Sprinkle 3: Floating icon */}
+      <motion.div
         className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
         style={{ background: "hsl(150 40% 35% / 0.1)" }}
+        animate={{ y: [0, -5, 0] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
       >
         <Leaf className="w-6 h-6" style={{ color: "hsl(150 40% 45%)" }} />
-      </div>
+      </motion.div>
 
       <p className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/40">
         The Canopy
@@ -60,8 +76,9 @@ const CanopySection = () => (
         and the voice of every wanderer who walks beneath the canopy.
       </p>
 
+      {/* Sprinkle 1: Staggered card reveals */}
       <div className="grid grid-cols-2 gap-3 pt-2 max-w-md mx-auto">
-        {COUNCIL_LINKS.map((item) => {
+        {COUNCIL_LINKS.map((item, i) => {
           const Icon = item.icon;
           const card = (
             <div className="group flex flex-col items-center gap-2.5 px-4 py-5 rounded-xl border border-border/15 bg-card/15 backdrop-blur-sm hover:border-primary/25 hover:bg-card/30 transition-all duration-500">
@@ -71,17 +88,31 @@ const CanopySection = () => (
             </div>
           );
 
-          if (item.href) {
-            return (
-              <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer">
-                {card}
-              </a>
-            );
-          }
-          return (
+          const wrapper = item.href ? (
+            <a key={item.title} href={item.href} target="_blank" rel="noopener noreferrer">
+              {card}
+            </a>
+          ) : (
             <Link key={item.title} to={item.to!}>
               {card}
             </Link>
+          );
+
+          return (
+            <motion.div
+              key={item.title}
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={cardVariants}
+            >
+              {item.href ? (
+                <a href={item.href} target="_blank" rel="noopener noreferrer">{card}</a>
+              ) : (
+                <Link to={item.to!}>{card}</Link>
+              )}
+            </motion.div>
           );
         })}
       </div>
@@ -93,6 +124,9 @@ const CanopySection = () => (
         Enter the Council <ArrowRight className="w-3 h-3" />
       </Link>
     </motion.div>
+
+    {/* Sprinkle 2: Vine divider */}
+    <div className="vine-divider" />
   </section>
 );
 

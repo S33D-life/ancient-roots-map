@@ -379,6 +379,34 @@ All colors MUST be HSL.
     margin: 2.5rem 0;
   }
 
+  /* ── Sprinkle 2: Organic vine divider between tree sections ── */
+  .vine-divider {
+    width: 1px;
+    height: 60px;
+    margin: 0 auto;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      hsl(var(--primary) / 0.12) 30%,
+      hsl(var(--primary) / 0.18) 50%,
+      hsl(var(--primary) / 0.12) 70%,
+      transparent
+    );
+    position: relative;
+    z-index: 1;
+  }
+  .vine-divider::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background: hsl(var(--primary) / 0.15);
+  }
+
   /* ── Tree scroll section transitions ── */
   .tree-section-bg {
     transition: opacity 1s ease-in-out;

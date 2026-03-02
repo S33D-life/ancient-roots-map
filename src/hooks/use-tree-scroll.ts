@@ -74,6 +74,19 @@ export function useTreeScroll() {
     }
   }, []);
 
+  // Sprinkle 4: Apply body-level section class for per-section theming
+  useEffect(() => {
+    const body = document.body;
+    // Remove any previous tetol-* classes
+    body.classList.forEach((cls) => {
+      if (cls.startsWith("tree-zone-")) body.classList.remove(cls);
+    });
+    body.classList.add(`tree-zone-${activeSection}`);
+    return () => {
+      body.classList.remove(`tree-zone-${activeSection}`);
+    };
+  }, [activeSection]);
+
   // IntersectionObserver to detect active section
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
