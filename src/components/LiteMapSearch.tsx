@@ -54,7 +54,7 @@ const LiteMapSearch = ({ trees, onSelect }: LiteMapSearchProps) => {
   }, [open]);
 
   return (
-    <div ref={wrapRef} className="absolute top-[4.5rem] left-2 right-14 z-[1002]" style={{ maxWidth: open ? "calc(100% - 120px)" : "44px" }}>
+    <div ref={wrapRef} className="absolute top-[5rem] left-2 right-14 z-[1002]" style={{ maxWidth: open ? "calc(100% - 120px)" : "44px" }}>
       {!open ? (
         <button
           onClick={() => {
