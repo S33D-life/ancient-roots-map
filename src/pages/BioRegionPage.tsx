@@ -165,9 +165,7 @@ const BioRegionPage = () => {
 
   const treeCount = linkedTrees.length;
 
-  const mapUrl = region
-    ? `/map?lat=${region.center_lat}&lng=${region.center_lon}&zoom=${region.type.includes("Mountain") ? 6 : region.type.includes("Wetland") && region.countries.length > 1 ? 5 : 8}&origin=atlas`
-    : "/map";
+  // mapUrl retired — navigation now uses focusMap()
 
   if (loading) {
     return (
@@ -263,7 +261,11 @@ const BioRegionPage = () => {
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
-              <Button variant="mystical" onClick={() => navigate(mapUrl)}>
+              <Button variant="mystical" onClick={() => {
+                if (region?.center_lat && region?.center_lon) {
+                  focusMap({ type: "area", id: slug || "", lat: region.center_lat, lng: region.center_lon, source: "region" });
+                }
+              }}>
                 <MapIcon className="w-4 h-4 mr-1" /> Open Bio-Region Map
               </Button>
               <Button variant="sacred" asChild>
