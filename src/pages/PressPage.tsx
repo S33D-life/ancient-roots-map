@@ -140,10 +140,18 @@ export default function PressPage() {
               )}
 
               {!userId && (
-                <div className="text-center py-12">
+                <div className="text-center py-12 space-y-4">
                   <p className="text-sm font-serif text-muted-foreground/50">
                     Sign in to enter the Press.
                   </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="font-serif text-xs gap-2 border-border/30 hover:border-primary/30"
+                    onClick={() => window.location.assign("/auth")}
+                  >
+                    Sign in
+                  </Button>
                 </div>
               )}
 
