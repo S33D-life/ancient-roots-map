@@ -206,6 +206,42 @@ export default function CanopyCheckinModal({
       checkWhispersAtTree(userId, treeId, treeSpecies).then(setCheckinWhispers);
     }
 
+    // Loop closure: check if any Press chapters are linked to this tree
+    supabase
+      .from("press_chapters")
+      .select("id, title, work_id")
+      .eq("linked_tree_id", treeId)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data: chapter }) => {
+        if (chapter) {
+          toast("A new chapter has unfolded 📖", {
+            description: `"${chapter.title}" — unlocked by your visit`,
+            action: {
+              label: "Read",
+              onClick: () => window.location.assign("/press"),
+            },
+            duration: 8000,
+          });
+        }
+      });
+
+    // Loop closure: check if this tree was on the user's wish list
+    supabase
+      .from("tree_wishlist")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("tree_id", treeId)
+      .maybeSingle()
+      .then(({ data: wish }) => {
+        if (wish) {
+          toast("You've arrived at a tree you wished for ⭐", {
+            description: "A dream made real.",
+            duration: 6000,
+          });
+        }
+      });
+
     setSubmitted(true);
     setSubmitting(false);
     setShowReceipt(true);
