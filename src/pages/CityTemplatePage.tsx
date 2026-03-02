@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getCityBySlug, getCitiesByCountry } from "@/config/cityRegistry";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,7 @@ const StatTile = ({ label, value, icon: Icon }: { label: string; value: number |
 const CityTemplatePage = () => {
   const { countrySlug, citySlug } = useParams<{ countrySlug: string; citySlug: string }>();
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const city = getCityBySlug(countrySlug || "", citySlug || "");
   const siblingCities = getCitiesByCountry(countrySlug || "").filter((c) => c.slug !== citySlug);
 
@@ -112,8 +114,8 @@ const CityTemplatePage = () => {
 
   const openMapFiltered = useCallback(() => {
     if (!city) return;
-    navigate(`/map?lat=${city.center[0]}&lng=${city.center[1]}&zoom=11&origin=city`);
-  }, [city, navigate]);
+    focusMap({ type: "area", id: citySlug || "", lat: city.center[0], lng: city.center[1], zoom: 11, source: "county", countrySlug });
+  }, [city, focusMap, citySlug, countrySlug]);
 
   /* ─── Not found guard ─── */
   if (!city) {
@@ -280,7 +282,7 @@ const CityTemplatePage = () => {
                           </div>
                           <div className="flex gap-2 pt-2">
                             <Button variant="ghost" size="sm" className="h-7 text-xs px-2"
-                              onClick={(e) => { e.stopPropagation(); navigate(`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=16&highlight=${tree.id}`); }}
+                              onClick={(e) => { e.stopPropagation(); focusMap({ type: "tree", id: tree.id, lat: tree.latitude, lng: tree.longitude, zoom: 16, source: "search" }); }}
                             >
                               <Eye className="w-3 h-3 mr-1" /> Map
                             </Button>

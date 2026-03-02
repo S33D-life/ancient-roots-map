@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { TreeDeciduous, Upload, Download, Loader2, ImagePlus, MapPin, Eye, Pencil, Check, Search, X, ChevronLeft, ChevronRight, SkipForward } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useMapFocus } from "@/hooks/use-map-focus";
 import PhotoImport from "@/components/PhotoImport";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -50,6 +51,7 @@ interface QueueItem {
 
 const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImport, onExport }: DashboardTreesProps) => {
   const navigate = useNavigate();
+  const { focusMap } = useMapFocus();
   const { toast } = useToast();
   const [isDragging, setIsDragging] = useState(false);
   const dragCounter = useRef(0);
@@ -439,7 +441,7 @@ const DashboardTrees = ({ trees, isImporting, isExporting, importProgress, onImp
                         <Button variant="outline" size="sm" className="text-xs font-serif gap-1" onClick={() => navigate(`/tree/${currentItem.treeId}`)}>
                           <Eye className="h-3 w-3" /> View
                         </Button>
-                        <Button variant="outline" size="sm" className="text-xs font-serif gap-1" onClick={() => navigate(`/map?focus=${currentItem.treeId}`)}>
+                        <Button variant="outline" size="sm" className="text-xs font-serif gap-1" onClick={() => focusMap({ type: "tree", id: currentItem.treeId!, source: "search" })}>
                           <MapPin className="h-3 w-3" /> Map
                         </Button>
                       </>
