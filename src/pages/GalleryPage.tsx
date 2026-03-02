@@ -62,6 +62,7 @@ import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 const MantleClock = lazy(() => import("@/components/MantleClock"));
+import LibraryRoomGrid, { EmberDrift } from "@/components/LibraryRoomGrid";
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
@@ -876,13 +877,43 @@ const GalleryPage = () => {
             }
           `}</style>
 
-          {/* ── Mantle Clock — Blooming Clock as brass instrument ── */}
-          <div className="w-full flex justify-center mb-8">
-            <Suspense fallback={
-              <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsla(42, 30%, 15%, 0.3)' }} />
-            }>
-              <MantleClock />
-            </Suspense>
+          {/* ── Hearth Mantle — clock embedded in architectural space ── */}
+          <div className="relative w-full max-w-md mx-auto mb-10">
+            {/* Mantle shelf — architectural ledge */}
+            <div
+              className="relative flex flex-col items-center pt-4 pb-6 rounded-2xl"
+              style={{
+                background: 'linear-gradient(180deg, hsl(25 18% 10% / 0.6), hsl(20 15% 8% / 0.3))',
+                borderBottom: '1px solid hsl(42 35% 25% / 0.2)',
+                boxShadow: '0 8px 32px hsl(20 30% 5% / 0.4), inset 0 1px 0 hsl(42 30% 30% / 0.06)',
+              }}
+            >
+              {/* Embers drifting around mantle */}
+              <EmberDrift />
+
+              {/* Mantle glow — warm light behind clock */}
+              <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none"
+                style={{
+                  background: 'radial-gradient(circle, hsl(30 60% 30% / 0.12), transparent 70%)',
+                }}
+              />
+
+              {/* Clock */}
+              <Suspense fallback={
+                <div className="w-[120px] h-[120px] rounded-full" style={{ background: 'hsl(42 30% 15% / 0.3)' }} />
+              }>
+                <MantleClock />
+              </Suspense>
+
+              {/* Mantle inscription */}
+              <p
+                className="font-serif text-[10px] tracking-[0.3em] uppercase mt-3 select-none"
+                style={{ color: 'hsl(42 30% 45% / 0.3)' }}
+              >
+                seasonal time
+              </p>
+            </div>
           </div>
 
           {/* ── Vault Preview — economy snapshot ───────── */}
@@ -890,39 +921,8 @@ const GalleryPage = () => {
             <LibraryVaultPreview />
           </div>
 
-          {/* ── Room Branches ──────────────────────────── */}
-          <div className="w-full max-w-2xl">
-            <p
-              className="font-serif text-xs tracking-[0.2em] uppercase text-center mb-4"
-              style={{ color: 'hsl(38 30% 50% / 0.5)' }}
-            >
-              Rooms of the Library
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {[
-                { key: "staff-room", label: "🪵 Staff Room", desc: "144 Sacred Staffs" },
-                { key: "gallery", label: "🗺 Map Room", desc: "Ancient Friends Atlas" },
-                { key: "music-room", label: "🎵 Music Room", desc: "Tree Radio" },
-                { key: "greenhouse", label: "🌱 Greenhouse", desc: "Houseplants & Saplings" },
-                { key: "wishlist", label: "⭐ Wishing Tree", desc: "Trees you dream to visit" },
-                { key: "seed-cellar", label: "📦 Seed Cellar", desc: "Living Data Archive" },
-                { key: "creators-path", label: "🎨 Creator's Path", desc: "Your Journey" },
-                { key: "tree-resources", label: "📖 Tree Resources", desc: "Project Directory" },
-                { key: "ledger", label: "📜 Scrolls & Ledger", desc: "Council Records" },
-              ].map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => { setActiveTab(item.key); setShowLanding(false); }}
-                  className="group relative rounded-xl border border-amber-700/40 p-5 md:p-6 text-left transition-all duration-300 hover:border-amber-500/60 hover:scale-105"
-                  style={{ background: 'linear-gradient(135deg, hsl(28 30% 10% / 0.85), hsl(25 25% 8% / 0.9))' }}
-                >
-                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'radial-gradient(circle at center, hsl(35 70% 40% / 0.15), transparent 70%)' }} />
-                  <h3 className="font-serif text-amber-300/90 text-sm md:text-base mb-1 relative z-10">{item.label}</h3>
-                  <p className="text-amber-200/40 text-xs relative z-10">{item.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* ── Room Branches — themed architectural tiles ── */}
+          <LibraryRoomGrid onRoomSelect={(key) => { setActiveTab(key); setShowLanding(false); }} />
         </div>
       </div>
     );
