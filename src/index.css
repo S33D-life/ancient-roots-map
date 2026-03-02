@@ -398,6 +398,11 @@ All colors MUST be HSL.
     );
     position: relative;
     z-index: 1;
+    opacity: 0.4;
+    transition: opacity 500ms ease;
+  }
+  .vine-divider.in-view {
+    opacity: 0.6;
   }
   .vine-divider::after {
     content: '';
@@ -673,6 +678,7 @@ All colors MUST be HSL.
     inset: 0;
     pointer-events: none;
     background: radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.3) 100%);
+    will-change: opacity;
   }
 
   /* Respect prefers-reduced-motion for leaves */

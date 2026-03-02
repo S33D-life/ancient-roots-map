@@ -16,11 +16,11 @@ interface Props {
 
 // Fixed leaf configs — no JS randomness at runtime, just CSS custom properties
 const LEAVES = [
-  { type: "gold",    left: "12%", dur: "8s",  delay: "0s",    sway: "25px",  rot: "10deg",  size: "5px" },
-  { type: "green",   left: "38%", dur: "10s", delay: "2.4s",  sway: "-20px", rot: "-15deg", size: "7px" },
-  { type: "gold",    left: "65%", dur: "7s",  delay: "4.8s",  sway: "30px",  rot: "25deg",  size: "4px" },
-  { type: "green",   left: "82%", dur: "9s",  delay: "1.2s",  sway: "-15px", rot: "5deg",   size: "8px" },
-  { type: "distant", left: "50%", dur: "12s", delay: "6s",    sway: "10px",  rot: "-8deg",  size: "10px" },
+  { type: "gold",    left: "12%", dur: "9s",  delay: "0s",    sway: "25px",  rot: "10deg",  size: "5px" },
+  { type: "green",   left: "38%", dur: "11s", delay: "4s",    sway: "-20px", rot: "-15deg", size: "7px" },
+  { type: "gold",    left: "65%", dur: "8s",  delay: "8.5s",  sway: "30px",  rot: "25deg",  size: "4px" },
+  { type: "green",   left: "82%", dur: "10s", delay: "13s",   sway: "-15px", rot: "5deg",   size: "8px" },
+  { type: "distant", left: "50%", dur: "13s", delay: "18s",   sway: "10px",  rot: "-8deg",  size: "10px" },
 ] as const;
 
 const sectionClass: Record<LeafVariant, string> = {
