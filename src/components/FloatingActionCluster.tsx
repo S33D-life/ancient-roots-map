@@ -2,13 +2,14 @@
  * FloatingActionCluster — unified expandable FAB that consolidates
  * Atlas, Council Spark, and Locate into a single touch point.
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Locate } from "lucide-react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
 import { Z } from "@/lib/z-index";
 import BugReportDialog from "@/components/BugReportDialog";
+import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 import { toast } from "sonner";
 
@@ -40,7 +41,17 @@ const FloatingActionCluster = () => {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [sparkDialogOpen, setSparkDialogOpen] = useState(false);
+  const sparkDebounceRef = useRef(false);
   const [locating, setLocating] = useState(false);
+
+  const handleSparkClick = useCallback(() => {
+    // 600ms debounce to prevent double-tap crash
+    if (sparkDebounceRef.current) return;
+    sparkDebounceRef.current = true;
+    setOpen(false);
+    setSparkDialogOpen(true);
+    setTimeout(() => { sparkDebounceRef.current = false; }, 600);
+  }, []);
 
   const handleLocate = useCallback(() => {
     if (!navigator.geolocation) {
@@ -115,7 +126,7 @@ const FloatingActionCluster = () => {
                 </Link>
               ) : item.action === "dialog" ? (
                 <button
-                  onClick={() => { setOpen(false); setSparkDialogOpen(true); }}
+                  onClick={handleSparkClick}
                   className="w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95 relative"
                   style={{
                     background: "hsl(var(--card) / 0.9)",
@@ -168,10 +179,12 @@ const FloatingActionCluster = () => {
       </div>
 
       {/* Council Spark dialog (rendered outside for portal stacking) */}
-      <BugReportDialog
-        open={sparkDialogOpen}
-        onOpenChange={setSparkDialogOpen}
-      />
+      <SparkErrorBoundary fallbackMessage="Spark couldn't open — please try again.">
+        <BugReportDialog
+          open={sparkDialogOpen}
+          onOpenChange={setSparkDialogOpen}
+        />
+      </SparkErrorBoundary>
 
       {/* Backdrop to close on outside tap */}
       <AnimatePresence>
