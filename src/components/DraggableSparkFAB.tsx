@@ -1,12 +1,14 @@
 /**
- * DraggableSparkFAB — a draggable floating action button for Council Spark.
+ * DraggableSparkFAB — stable draggable FAB for Council Spark.
  *
- * CRASH-PROOF ARCHITECTURE (v3):
- * - FAB freezes position while dialog is open
- * - Resize listener reads from ref, skips when dialog open or dragging
- * - Drag moves throttled via RAF
- * - No autofocus thrash
- * - No close-time reset flicker
+ * STABILITY RULES (v4):
+ * - No framer-motion gestures on FAB
+ * - No window.resize listener (orientation-only)
+ * - FAB frozen while dialog open (no position updates, pointer-events: none)
+ * - RAF-throttled drag moves
+ * - preventDefault deferred until drag threshold exceeded
+ * - e.currentTarget for pointer capture (no conflicts)
+ * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
@@ -60,6 +62,7 @@ const DraggableSparkFAB = () => {
   const [xy, setXY] = useState(() => posToXY(pos));
 
   const isDragging = useRef(false);
+  const dragConfirmed = useRef(false);
   const dragStart = useRef({ px: 0, py: 0, ox: 0, oy: 0 });
   const totalMoved = useRef(0);
   const debounceRef = useRef(false);
@@ -76,7 +79,12 @@ const DraggableSparkFAB = () => {
   useEffect(() => {
     const onOrientation = () => {
       if (dialogOpenRef.current) return;
-      setXY(posToXY(posRef.current));
+      // Small delay for orientation to settle
+      setTimeout(() => {
+        if (!dialogOpenRef.current) {
+          setXY(posToXY(posRef.current));
+        }
+      }, 150);
     };
     window.addEventListener("orientationchange", onOrientation);
     return () => window.removeEventListener("orientationchange", onOrientation);
@@ -114,13 +122,15 @@ const DraggableSparkFAB = () => {
   }, []);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if (dialogOpenRef.current) return; // frozen while dialog open
+    if (dialogOpenRef.current) return;
     try {
       isDragging.current = true;
+      dragConfirmed.current = false;
       totalMoved.current = 0;
       dragStart.current = { px: e.clientX, py: e.clientY, ox: xyRef.current.x, oy: xyRef.current.y };
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
-      e.preventDefault();
+      // Use currentTarget to avoid pointer capture conflicts
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      // Do NOT preventDefault here — defer until drag threshold exceeded
       e.stopPropagation();
     } catch (err) {
       console.warn("[Spark] pointerDown error", err);
@@ -135,19 +145,27 @@ const DraggableSparkFAB = () => {
     const cy = e.clientY;
     totalMoved.current = Math.abs(cx - dragStart.current.px) + Math.abs(cy - dragStart.current.py);
 
-    cancelAnimationFrame(rafId.current);
-    rafId.current = requestAnimationFrame(() => {
-      const nx = dragStart.current.ox + (cx - dragStart.current.px);
-      const ny = dragStart.current.oy + (cy - dragStart.current.py);
-      setXY({ x: nx, y: ny });
-    });
+    // Only confirm drag intent after threshold exceeded
+    if (!dragConfirmed.current && totalMoved.current >= DRAG_THRESHOLD) {
+      dragConfirmed.current = true;
+    }
+
+    if (dragConfirmed.current) {
+      e.preventDefault();
+      cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(() => {
+        const nx = dragStart.current.ox + (cx - dragStart.current.px);
+        const ny = dragStart.current.oy + (cy - dragStart.current.py);
+        setXY({ x: nx, y: ny });
+      });
+    }
   }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
     isDragging.current = false;
     cancelAnimationFrame(rafId.current);
-    try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
 
     try {
       if (totalMoved.current < DRAG_THRESHOLD) {
@@ -162,16 +180,15 @@ const DraggableSparkFAB = () => {
 
   const handleDialogChange = useCallback((open: boolean) => {
     setDialogOpen(open);
-    // No state reset on close — BugReportDialog resets on next open internally
   }, []);
 
-  // Temporarily hidden — will fix jitter at next review
-  if (true || !allowed) return null;
+  if (!allowed) return null;
 
   return (
     <>
       <button
-        className="fixed flex items-center justify-center rounded-full shadow-lg touch-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-transform active:scale-95 hover:scale-105"
+        className="fixed flex items-center justify-center rounded-full shadow-lg touch-none select-none md:hidden
+          focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         style={{
           width: FAB_SIZE,
           height: FAB_SIZE,
@@ -182,8 +199,10 @@ const DraggableSparkFAB = () => {
           color: "hsl(var(--primary))",
           border: "1px solid hsl(var(--border) / 0.4)",
           backdropFilter: "blur(12px)",
-          cursor: dialogOpen ? "default" : isDragging.current ? "grabbing" : "grab",
+          cursor: dialogOpen ? "default" : "grab",
           pointerEvents: dialogOpen ? "none" : "auto",
+          transition: isDragging.current ? "none" : "transform 0.15s ease",
+          transform: "scale(1)",
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
