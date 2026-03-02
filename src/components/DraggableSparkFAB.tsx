@@ -13,6 +13,7 @@
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
 import { Z } from "@/lib/z-index";
+import { SPARK_FLAGS } from "@/lib/spark-flags";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 
@@ -182,7 +183,7 @@ const DraggableSparkFAB = () => {
     setDialogOpen(open);
   }, []);
 
-  if (!allowed) return null;
+  if (!allowed || !SPARK_FLAGS.SPARK_LITE_DEFAULT_ON) return null;
 
   return (
     <>
