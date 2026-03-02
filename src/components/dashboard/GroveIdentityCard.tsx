@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { TreeDeciduous, Heart, Sparkles, Sprout, Map, BookOpen, ChevronRight } from "lucide-react";
+import { TreeDeciduous, Heart, Sparkles, Sprout, Map, BookOpen, ChevronRight, Hexagon, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +14,8 @@ interface GroveStats {
   treesVisited: number;
   offeringsMade: number;
   heartsBalance: number;
+  speciesHearts: number;
+  influenceTokens: number;
   seedsPlanted: number;
   daysSinceFirst: number | null;
 }
@@ -24,6 +26,8 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
     treesVisited: 0,
     offeringsMade: 0,
     heartsBalance: 0,
+    speciesHearts: 0,
+    influenceTokens: 0,
     seedsPlanted: 0,
     daysSinceFirst: null,
   });
@@ -34,7 +38,7 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
         supabase.from("trees").select("id, created_at", { count: "exact", head: false }).eq("created_by", userId).order("created_at", { ascending: true }).limit(1),
         supabase.from("tree_checkins").select("tree_id", { count: "exact" }).eq("user_id", userId),
         supabase.from("offerings").select("id", { count: "exact", head: true }).eq("created_by", userId),
-        supabase.from("user_heart_balances").select("s33d_hearts, species_hearts").eq("user_id", userId).maybeSingle(),
+        supabase.from("user_heart_balances").select("s33d_hearts, species_hearts, influence_tokens").eq("user_id", userId).maybeSingle(),
         supabase.from("greenhouse_plants").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
 
@@ -49,7 +53,9 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
         treesLogged: treesRes.count ?? 0,
         treesVisited: uniqueVisited,
         offeringsMade: offeringsRes.count ?? 0,
-        heartsBalance: (heartsRes.data?.s33d_hearts ?? 0) + (heartsRes.data?.species_hearts ?? 0),
+        heartsBalance: heartsRes.data?.s33d_hearts ?? 0,
+        speciesHearts: heartsRes.data?.species_hearts ?? 0,
+        influenceTokens: heartsRes.data?.influence_tokens ?? 0,
         seedsPlanted: plantsRes.count ?? 0,
         daysSinceFirst,
       });
@@ -68,8 +74,9 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
   const statPills = [
     { label: "Trees", value: stats.treesLogged, icon: TreeDeciduous },
     { label: "Visits", value: stats.treesVisited, icon: Map },
-    { label: "Offerings", value: stats.offeringsMade, icon: Sparkles },
     { label: "Hearts", value: stats.heartsBalance, icon: Heart },
+    { label: "Species", value: stats.speciesHearts, icon: Hexagon },
+    { label: "Influence", value: stats.influenceTokens, icon: Zap },
   ];
 
   return (
@@ -97,7 +104,7 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-4 gap-1 px-4 pb-4">
+      <div className="grid grid-cols-5 gap-1 px-4 pb-4">
         {statPills.map((s) => (
           <div
             key={s.label}

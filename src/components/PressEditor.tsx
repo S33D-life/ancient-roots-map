@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Save, Send, Feather, ChevronDown } from "lucide-react";
+import { ArrowLeft, Save, Send, Feather, ChevronDown, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,7 @@ import {
 import PressChapterList from "@/components/PressChapterList";
 import { usePressChapters } from "@/hooks/use-press-chapters";
 import type { PressWork, PressWorkForm } from "@/hooks/use-press-works";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const FORMS: { value: PressWorkForm; label: string; hint: string }[] = [
@@ -44,6 +45,9 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
   const [body, setBody] = useState(initial?.body || "");
   const [form, setForm] = useState<PressWorkForm>(initial?.form || "reflection");
   const [epigraph, setEpigraph] = useState(initial?.epigraph || "");
+  const [sourceBookId, setSourceBookId] = useState<string | null>(initial?.source_book_id || null);
+  const [sourceBookLabel, setSourceBookLabel] = useState<string | null>(null);
+  const [userBooks, setUserBooks] = useState<Array<{ id: string; title: string; author: string }>>([]);
   const [saving, setSaving] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,6 +56,24 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
     const t = setTimeout(() => bodyRef.current?.focus(), 400);
     return () => clearTimeout(t);
   }, []);
+
+  // Fetch user's bookshelf entries for the "Born from…" selector
+  useEffect(() => {
+    if (!userId) return;
+    supabase
+      .from("bookshelf_entries")
+      .select("id, title, author")
+      .eq("user_id", userId)
+      .order("title")
+      .then(({ data }) => {
+        setUserBooks((data || []) as Array<{ id: string; title: string; author: string }>);
+        // Resolve initial label
+        if (initial?.source_book_id && data) {
+          const match = data.find((b: any) => b.id === initial.source_book_id);
+          if (match) setSourceBookLabel(`${(match as any).title} — ${(match as any).author}`);
+        }
+      });
+  }, [userId, initial?.source_book_id]);
 
   const handleSave = async (publish: boolean) => {
     if (!title.trim() || !body.trim()) {
@@ -66,6 +88,7 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
         body: body.trim(),
         form,
         epigraph: epigraph.trim() || null,
+        source_book_id: sourceBookId,
         visibility: publish ? "public" : (initial?.visibility || "private"),
         published_at: publish ? new Date().toISOString() : (initial?.published_at || null),
       });
@@ -137,6 +160,39 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
           </SelectContent>
         </Select>
       </div>
+
+      {/* "Born from…" book link */}
+      {userBooks.length > 0 && (
+        <div className="mb-6">
+          {sourceBookId ? (
+            <div className="flex items-center gap-2 text-xs font-serif text-muted-foreground border border-border/20 rounded-lg px-3 py-2 bg-card/30">
+              <BookOpen className="h-3.5 w-3.5 text-primary/50 shrink-0" />
+              <span className="flex-1 truncate italic">Born from: {sourceBookLabel || "a book"}</span>
+              <button onClick={() => { setSourceBookId(null); setSourceBookLabel(null); }} className="p-0.5 hover:text-foreground transition-colors">
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ) : (
+            <Select onValueChange={(v) => {
+              setSourceBookId(v);
+              const match = userBooks.find(b => b.id === v);
+              if (match) setSourceBookLabel(`${match.title} — ${match.author}`);
+            }}>
+              <SelectTrigger className="h-8 text-xs font-serif border-border/20 bg-transparent text-muted-foreground/50">
+                <BookOpen className="h-3.5 w-3.5 mr-1.5 text-primary/40" />
+                <SelectValue placeholder="Born from a book… (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {userBooks.map((b) => (
+                  <SelectItem key={b.id} value={b.id} className="font-serif text-xs">
+                    {b.title} — <span className="text-muted-foreground">{b.author}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      )}
 
       {/* Epigraph — optional seed quote */}
       <div className="mb-6">
