@@ -256,6 +256,16 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     sourceLabel: "Heritage & cantonal records",
     bbox: [45.8, 5.9, 47.8, 10.5],
   },
+  {
+    country: "Indonesia",
+    slug: "indonesia",
+    flag: "🇮🇩",
+    descriptor: "Pohon Warisan — Heritage & Sacred Trees",
+    portalTitle: "Indonesia — Heritage & Sacred Trees",
+    portalSubtitle: "Banyan guardians, rainforest giants & sacred grove elders — a living map of the archipelago's arboreal heritage.",
+    sourceLabel: "Heritage & community sources",
+    bbox: [-11, 95, 6, 141],
+  },
 ];
 
 export default COUNTRY_REGISTRY;

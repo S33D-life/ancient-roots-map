@@ -30,6 +30,64 @@ const CANTON_REGISTRY: CantonRegistryEntry[] = [
   },
   // Future cantons can be added here:
   // { name: "Bern", slug: "bern", countrySlug: "switzerland", ... },
+
+  // Indonesia — Island Regions
+  {
+    name: "Bali & Nusa Tenggara",
+    slug: "bali-nusa-tenggara",
+    countrySlug: "indonesia",
+    tagline: "Sacred groves & volcanic island forests",
+    icon: "🌺",
+    provinceKey: "Bali & Nusa Tenggara",
+  },
+  {
+    name: "Java",
+    slug: "java",
+    countrySlug: "indonesia",
+    tagline: "Ancient banyans & highland cloud forests",
+    icon: "🏛️",
+    provinceKey: "Java",
+  },
+  {
+    name: "Sumatra",
+    slug: "sumatra",
+    countrySlug: "indonesia",
+    tagline: "Rainforest giants & volcanic sentinels",
+    icon: "🌿",
+    provinceKey: "Sumatra",
+  },
+  {
+    name: "Kalimantan (Borneo)",
+    slug: "kalimantan",
+    countrySlug: "indonesia",
+    tagline: "Dipterocarp cathedrals & peatland guardians",
+    icon: "🦧",
+    provinceKey: "Kalimantan",
+  },
+  {
+    name: "Sulawesi",
+    slug: "sulawesi",
+    countrySlug: "indonesia",
+    tagline: "Endemic forests & coral coast elders",
+    icon: "🦜",
+    provinceKey: "Sulawesi",
+  },
+  {
+    name: "Maluku",
+    slug: "maluku",
+    countrySlug: "indonesia",
+    tagline: "Spice islands & clove tree heritage",
+    icon: "🫚",
+    provinceKey: "Maluku",
+  },
+  {
+    name: "Papua",
+    slug: "papua",
+    countrySlug: "indonesia",
+    tagline: "Montane forests & lowland giants",
+    icon: "🌴",
+    provinceKey: "Papua",
+  },
 ];
 
 export default CANTON_REGISTRY;
