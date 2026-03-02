@@ -23,7 +23,7 @@ const DRAG_THRESHOLD = 8;
 const TAP_DEBOUNCE_MS = 800;
 
 interface StoredPos {
-  yRatio: number;
+  y: number;
   edge: "left" | "right";
 }
 
@@ -32,10 +32,10 @@ function loadPos(): StoredPos {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const p = JSON.parse(raw) as StoredPos;
-      if (p.yRatio >= 0 && p.yRatio <= 1 && (p.edge === "left" || p.edge === "right")) return p;
+      if (typeof p.y === "number" && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  return { yRatio: 0.72, edge: "right" };
+  return { y: Math.round(window.innerHeight * 0.72), edge: "right" };
 }
 
 function savePos(p: StoredPos) {
@@ -48,7 +48,7 @@ function posToXY(p: StoredPos): { x: number; y: number } {
   const x = p.edge === "right" ? vw - FAB_SIZE - EDGE_PAD : EDGE_PAD;
   const maxY = vh - FAB_SIZE - EDGE_PAD - 80;
   const minY = EDGE_PAD + 56;
-  const y = Math.max(minY, Math.min(maxY, p.yRatio * vh));
+  const y = Math.max(minY, Math.min(maxY, p.y));
   return { x, y };
 }
 
@@ -72,16 +72,15 @@ const DraggableSparkFAB = () => {
   posRef.current = pos;
   dialogOpenRef.current = dialogOpen;
 
-  // Resize: register once, read from refs, skip if dialog open or dragging
+  // Orientation-only: reposition on device rotation, never on resize
   useEffect(() => {
-    const onResize = () => {
-      if (dialogOpenRef.current || isDragging.current) return;
-      const newXY = posToXY(posRef.current);
-      setXY(newXY);
+    const onOrientation = () => {
+      if (dialogOpenRef.current) return;
+      setXY(posToXY(posRef.current));
     };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []); // empty deps — stable
+    window.addEventListener("orientationchange", onOrientation);
+    return () => window.removeEventListener("orientationchange", onOrientation);
+  }, []);
 
   const snapToEdge = useCallback((cx: number, cy: number) => {
     const vw = window.innerWidth;
@@ -90,8 +89,7 @@ const DraggableSparkFAB = () => {
     const maxY = vh - FAB_SIZE - EDGE_PAD - 80;
     const minY = EDGE_PAD + 56;
     const clampedY = Math.max(minY, Math.min(maxY, cy));
-    const yRatio = clampedY / vh;
-    const newPos: StoredPos = { yRatio, edge };
+    const newPos: StoredPos = { y: clampedY, edge };
     setPos(newPos);
     setXY(posToXY(newPos));
     savePos(newPos);
