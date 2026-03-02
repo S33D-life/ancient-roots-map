@@ -49,6 +49,7 @@ import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
+import { useBloomStatus } from "@/hooks/use-bloom-status";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -110,6 +111,7 @@ const TreeDetailPage = () => {
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
+  const bloomStatus = useBloomStatus(tree?.species);
 
   // Check for available whispers at this tree
   useEffect(() => {
@@ -290,6 +292,16 @@ const TreeDetailPage = () => {
                     );
                   })()}
                 </p>
+                {/* Bloom status badge */}
+                {tree.species && (() => {
+                  const bloom = bloomStatus;
+                  if (!bloom || !bloom.stage) return null;
+                  return (
+                    <span className={`inline-flex items-center gap-1 mt-1 text-[11px] font-serif px-2 py-0.5 rounded-full border ${bloom.isActive ? 'border-primary/30 text-primary bg-primary/10' : 'border-border/30 text-muted-foreground bg-card/40'}`}>
+                      {bloom.emoji} {bloom.label}
+                    </span>
+                  );
+                })()}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <TreeCheckinButton
