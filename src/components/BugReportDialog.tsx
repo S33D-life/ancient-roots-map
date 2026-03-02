@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles, WifiOff } from "lucide-react";
+import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles, WifiOff, AlertTriangle } from "lucide-react";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -132,7 +132,31 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
   const [submitted, setSubmitted] = useState(false);
   const [screenshots, setScreenshots] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [liteMode, setLiteMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mountedRef = useRef(true);
+
+  // Unmount guard
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  // Revoke blob URLs on cleanup to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      screenshots.forEach(f => {
+        try { URL.revokeObjectURL(URL.createObjectURL(f)); } catch {}
+      });
+    };
+  }, [screenshots]);
+
+  // Log spark open for diagnostics
+  useEffect(() => {
+    if (open) {
+      console.info("[Spark] spark_open_success", { route: location.pathname, auth: "pending", liteMode });
+    }
+  }, [open, location.pathname, liteMode]);
 
   const [form, setForm] = useState({
     title: "",
@@ -228,22 +252,25 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       update("feature_area", "map");
     }
     setSubmitting(true);
+    console.info("[Spark] spark_submit_attempt", { type: form.report_type, route: location.pathname, liteMode });
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!mountedRef.current) return;
       if (!user) {
         toast.error("Sign in to contribute");
         setSubmitting(false);
         return;
       }
 
-      const screenshotUrls = await uploadScreenshots(user.id);
+      const screenshotUrls = liteMode ? [] : await uploadScreenshots(user.id);
+      if (!mountedRef.current) return;
       const diagnosticsData = form.include_diagnostics ? buildDiagnostics() : null;
 
       const payload: Record<string, unknown> = {
         user_id: user.id,
         title: form.title.trim().slice(0, 200),
         actual: form.actual.trim().slice(0, 2000),
-        expected: isBug ? form.expected.trim().slice(0, 1000) : isTreeSuggestion ? "Tree suggestion" : "N/A",
+        expected: isBug ? (form.expected.trim().slice(0, 1000) || "N/A") : isTreeSuggestion ? "Tree suggestion" : "N/A",
         steps: form.steps.trim().slice(0, 2000) || "Not provided",
         suggestion: form.suggestion.trim().slice(0, 2000) || null,
         severity: isBug ? form.severity : "minor",
@@ -260,7 +287,9 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       };
 
       const { error } = await supabase.from("bug_reports").insert(payload as any);
+      if (!mountedRef.current) return;
       if (error) {
+        console.warn("[Spark] spark_submit_error", error.message);
         if (error.message.includes("rate limit")) {
           toast.error("You've reached the daily limit (3 sparks). Try again tomorrow!");
         } else {
@@ -269,11 +298,17 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
         return;
       }
 
+      console.info("[Spark] spark_submit_success", { type: form.report_type });
       setSubmitted(true);
     } catch (err: any) {
-      toast.error(err.message || "Failed to submit");
+      console.warn("[Spark] spark_submit_error", err?.message);
+      if (mountedRef.current) {
+        toast.error(err.message || "Failed to submit");
+        // Auto-switch to lite mode on error so user can still report
+        if (!liteMode) setLiteMode(true);
+      }
     } finally {
-      setSubmitting(false);
+      if (mountedRef.current) setSubmitting(false);
     }
   };
 
@@ -288,7 +323,9 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
         )}
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-        <SparkErrorBoundary fallbackMessage="The spark form ran into trouble — please close and try again.">
+        <SparkErrorBoundary
+          fallbackMessage="The spark form ran into trouble — please close and try again."
+        >
         {submitted ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -535,16 +572,29 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 ✨ {REWARD_HINTS[form.report_type]}
               </div>
 
+              {/* Lite mode toggle */}
+              {!liteMode && (
+                <button
+                  type="button"
+                  onClick={() => setLiteMode(true)}
+                  className="flex items-center gap-1 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  <AlertTriangle className="w-3 h-3" /> Having trouble? Switch to Lite mode
+                </button>
+              )}
+
               {/* Auto-captured context badge */}
-              <div className="text-[10px] text-muted-foreground/50 bg-muted/30 rounded px-2 py-1.5 space-y-0.5">
-                <div>📍 Route: <code className="text-[10px]">{location.pathname}</code></div>
-                {typeof __BUILD_ID__ !== "undefined" && (
-                  <div>🔧 Build: <code className="text-[10px]">{__BUILD_ID__}</code></div>
-                )}
-                {getCapturedErrors() && (
-                  <div>⚠️ <span className="text-destructive/70">{getCapturedErrors()!.length} recent error(s) will be attached</span></div>
-                )}
-              </div>
+              {!liteMode && (
+                <div className="text-[10px] text-muted-foreground/50 bg-muted/30 rounded px-2 py-1.5 space-y-0.5">
+                  <div>📍 Route: <code className="text-[10px]">{location.pathname}</code></div>
+                  {typeof __BUILD_ID__ !== "undefined" && (
+                    <div>🔧 Build: <code className="text-[10px]">{__BUILD_ID__}</code></div>
+                  )}
+                  {(() => { const errs = getCapturedErrors(); return errs ? (
+                    <div>⚠️ <span className="text-destructive/70">{errs.length} recent error(s) will be attached</span></div>
+                  ) : null; })()}
+                </div>
+              )}
 
               {/* Submit */}
               <Button onClick={submit} disabled={submitting || uploading} className="w-full gap-2 font-serif">

@@ -159,8 +159,9 @@ const FloatingActionCluster = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 md:hidden"
-            style={{ zIndex: Z.FLOATING - 1 }}
+            style={{ zIndex: Z.FLOATING - 1, pointerEvents: "auto" }}
             onClick={() => setOpen(false)}
+            aria-hidden="true"
           />
         )}
       </AnimatePresence>
