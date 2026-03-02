@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, type Offering } from "@/hooks/use-offerings";
@@ -61,6 +61,7 @@ import ancientFriendsWindow from "@/assets/ancient-friends-window.jpeg";
 import heartwoodSplashDay from "@/assets/heartwood-splash.png";
 import heartwoodSplashNight from "@/assets/heartwood-splash-night.png";
 import heartwoodLanding from "@/assets/hearth-cave.png";
+const BloomingClockPortal = lazy(() => import("@/components/BloomingClockPortal"));
 import wishingTreeImage from "@/assets/wishing-tree.png";
 import staffRoomWindow from "@/assets/staff-room-window.jpeg";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
@@ -874,6 +875,17 @@ const GalleryPage = () => {
               50% { opacity: 1; transform: scale(1.06); }
             }
           `}</style>
+
+          {/* ── Blooming Clock Portal — Celestial Instrument ── */}
+          <div className="w-full max-w-2xl mb-10">
+            <Suspense fallback={
+              <div className="h-[360px] flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'hsl(42 55% 52%)', borderTopColor: 'transparent' }} />
+              </div>
+            }>
+              <BloomingClockPortal />
+            </Suspense>
+          </div>
 
           {/* ── Vault Preview — economy snapshot ───────── */}
           <div className="w-full max-w-2xl mb-10">
