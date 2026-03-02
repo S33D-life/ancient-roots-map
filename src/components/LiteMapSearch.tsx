@@ -61,12 +61,11 @@ const LiteMapSearch = ({ trees, onSelect }: LiteMapSearchProps) => {
             setOpen(true);
             setTimeout(() => inputRef.current?.focus(), 100);
           }}
-          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90"
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all active:scale-90 glow-button"
           style={{
             background: "hsla(30, 30%, 12%, 0.92)",
             border: "1px solid hsla(42, 40%, 30%, 0.5)",
             backdropFilter: "blur(6px)",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
             color: "hsl(42, 60%, 60%)",
           }}
           title="Search Ancient Friends"

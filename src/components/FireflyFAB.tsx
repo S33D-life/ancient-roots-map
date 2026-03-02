@@ -190,6 +190,7 @@ const FireflyFAB = () => {
       {/* Firefly orb */}
       <button
         className="fixed flex items-center justify-center rounded-full touch-none select-none
+          glow-button glow-breath
           focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         style={{
           width: FAB_SIZE,
@@ -198,11 +199,8 @@ const FireflyFAB = () => {
           top: xy.y,
           zIndex: Z.FLOATING,
           background: "radial-gradient(circle at 40% 35%, hsl(48 90% 65% / 0.9), hsl(38 80% 45% / 0.85))",
-          boxShadow: "0 0 18px 4px hsl(45 90% 60% / 0.3), 0 2px 8px hsl(0 0% 0% / 0.2)",
           cursor: anyOpen ? "default" : "grab",
           pointerEvents: anyOpen ? "none" : "auto",
-          transition: isDragging.current ? "none" : "transform 0.15s ease, box-shadow 0.3s ease",
-          transform: "scale(1)",
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
