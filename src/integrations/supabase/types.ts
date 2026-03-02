@@ -4507,6 +4507,47 @@ export type Database = {
           },
         ]
       }
+      tree_presence_completions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          duration_seconds: number
+          hearts_awarded: number
+          id: string
+          reflection: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          hearts_awarded?: number
+          id?: string
+          reflection?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          duration_seconds?: number
+          hearts_awarded?: number
+          id?: string
+          reflection?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_presence_completions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_projects: {
         Row: {
           api_url: string | null

@@ -25,6 +25,8 @@ interface NFTreeStudioProps {
   treeSpecies: string;
   /** URL of a tree photo to use as the starting canvas */
   photoUrl?: string | null;
+  /** If true, mint is blocked until presence is completed */
+  presenceCompleted?: boolean;
 }
 
 // ── Art Studio Canvas ─────────────────────────────────────────────
@@ -52,7 +54,7 @@ const OVERLAYS = [
   { id: "golden", label: "Golden Glow" },
 ];
 
-const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photoUrl }: NFTreeStudioProps) => {
+const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photoUrl, presenceCompleted = true }: NFTreeStudioProps) => {
   const [activeTab, setActiveTab] = useState<string>("mint");
   const [mintTitle, setMintTitle] = useState(treeName);
   const [mintDescription, setMintDescription] = useState("");
@@ -284,13 +286,18 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
               </div>
             </div>
 
+            {!presenceCompleted && (
+              <p className="text-xs text-destructive/80 font-serif text-center py-2">
+                🌿 Complete a 333-second Presence ritual on the tree page to unlock minting.
+              </p>
+            )}
             <Button
               onClick={handleMint}
-              disabled={minting || !mintTitle.trim()}
+              disabled={minting || !mintTitle.trim() || !presenceCompleted}
               className="w-full gap-2 font-serif"
             >
               {minting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {minting ? "Minting…" : "Mint NFTree"}
+              {minting ? "Minting…" : !presenceCompleted ? "Presence Required" : "Mint NFTree"}
             </Button>
           </TabsContent>
 
@@ -416,11 +423,11 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                   </div>
                   <Button
                     onClick={handleMint}
-                    disabled={minting || !mintTitle.trim()}
+                    disabled={minting || !mintTitle.trim() || !presenceCompleted}
                     className="w-full gap-2 font-serif"
                   >
                     {minting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {minting ? "Minting from Studio…" : "Mint Studio NFTree"}
+                    {minting ? "Minting from Studio…" : !presenceCompleted ? "Presence Required" : "Mint Studio NFTree"}
                   </Button>
                 </div>
               </>

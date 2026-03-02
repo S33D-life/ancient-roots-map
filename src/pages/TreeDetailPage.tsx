@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
-  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird,
+  Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous,
 } from "lucide-react";
 import AddOfferingDialog from "@/components/AddOfferingDialog";
 import ProposeEditDrawer from "@/components/ProposeEditDrawer";
@@ -52,6 +52,8 @@ import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 import { useBloomStatus } from "@/hooks/use-bloom-status";
 import PhenologyBadge from "@/components/PhenologyBadge";
 import PhenologyObservationButton from "@/components/PhenologyObservationButton";
+import PresenceRitual from "@/components/PresenceRitual";
+import { useTreePresence } from "@/hooks/use-tree-presence";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -91,6 +93,7 @@ const TreeDetailPage = () => {
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
+  const [presenceOpen, setPresenceOpen] = useState(false);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -114,6 +117,11 @@ const TreeDetailPage = () => {
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
   const bloomStatus = useBloomStatus(tree?.species);
+  const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
+    treeId: id,
+    treeSpecies: tree?.species || "",
+    userId,
+  });
 
   // Check for available whispers at this tree
   useEffect(() => {
@@ -515,6 +523,34 @@ const TreeDetailPage = () => {
             {/* Encounter Cluster */}
             <EncounterClusterPanel tree={tree} />
 
+            {/* 333s Presence Ritual */}
+            {userId && (
+              <Card className="bg-card/60 backdrop-blur border-primary/20">
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <TreeDeciduous className="w-5 h-5 text-primary/60" />
+                    <div>
+                      <p className="font-serif text-sm text-foreground">Tree Presence (333s)</p>
+                      <p className="text-xs text-muted-foreground font-serif">
+                        {presenceCompleted
+                          ? completedToday ? "✓ Presence completed today" : "✓ Presence completed"
+                          : "Be still with this tree to unlock minting"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant={presenceCompleted ? "outline" : "mystical"}
+                    size="sm"
+                    className="font-serif text-xs shrink-0"
+                    onClick={() => setPresenceOpen(true)}
+                    disabled={completedToday}
+                  >
+                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin Presence"}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Meeting Timer */}
             <MeetingTimer
               treeId={id!}
@@ -804,6 +840,25 @@ const TreeDetailPage = () => {
         cta={{ label: "Propose Edit", to: "#" }}
         delay={8000}
         position="bottom-right"
+      />
+
+      {/* 333s Presence Ritual Overlay */}
+      <PresenceRitual
+        open={presenceOpen}
+        treeName={tree?.name || "Tree"}
+        onComplete={async (reflection) => {
+          setPresenceOpen(false);
+          if (userId && id) {
+            const result = await recordCompletion(reflection);
+            if (result && !result.alreadyRewarded) {
+              const { toast } = await import("sonner");
+              toast.success("🌿 Presence Complete", {
+                description: `+${result.heartsAwarded} Hearts earned`,
+              });
+            }
+          }
+        }}
+        onCancel={() => setPresenceOpen(false)}
       />
     </div>
     </InfluenceTokenProvider>
