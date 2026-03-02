@@ -926,7 +926,12 @@ const GalleryPage = () => {
           </div>
 
           {/* ── Room Branches — themed architectural tiles ── */}
-          <LibraryRoomGrid onRoomSelect={(key) => { if (key === 'press') { navigate('/press'); return; } setActiveTab(key); setShowLanding(false); }} />
+          <LibraryRoomGrid onRoomSelect={(key) => {
+            if (key === 'press') { navigate('/press'); return; }
+            if (key === 'ledger') { setActiveTab('scrolls'); setShowLanding(false); return; }
+            if (key === 'tree-resources') { navigate('/ledger'); return; }
+            setActiveTab(key); setShowLanding(false);
+          }} />
         </div>
       </div>
     );
