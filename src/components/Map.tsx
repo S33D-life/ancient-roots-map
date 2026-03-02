@@ -95,11 +95,14 @@ interface MapProps {
   initialCountry?: string;
   initialHive?: string;
   initialOrigin?: string;
+  initialJourney?: boolean;
+  initialBbox?: string;
   onFullscreenToggle?: () => void;
   isFullscreen?: boolean;
+  onJourneyEnd?: () => void;
 }
 
-const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom, initialTreeId, initialCountry, initialHive, initialOrigin, onFullscreenToggle, isFullscreen }: MapProps) => {
+const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, initialZoom, initialTreeId, initialCountry, initialHive, initialOrigin, initialJourney, initialBbox, onFullscreenToggle, isFullscreen, onJourneyEnd }: MapProps) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const autoAddTree = searchParams.get("addTree") === "true";
@@ -726,7 +729,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} initialCountry={initialCountry} initialHive={initialHive} initialOrigin={initialOrigin} onFullscreenToggle={onFullscreenToggle} isFullscreen={isFullscreen} />
+          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} initialCountry={initialCountry} initialHive={initialHive} initialOrigin={initialOrigin} initialJourney={initialJourney} initialBbox={initialBbox} onFullscreenToggle={onFullscreenToggle} isFullscreen={isFullscreen} onJourneyEnd={onJourneyEnd} />
         </Suspense>
       </div>
     );

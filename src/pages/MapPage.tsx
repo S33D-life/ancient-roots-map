@@ -7,6 +7,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
+import MapJourneyOverlay from "@/components/MapJourneyOverlay";
 
 
 // Non-critical overlays — lazy-loaded after the map is interactive
@@ -27,6 +28,9 @@ const MapPage = () => {
   const paramCountry = searchParams.get("country") || undefined;
   const paramHive = searchParams.get("hive") || undefined;
   const paramOrigin = searchParams.get("origin") || undefined;
+  const paramJourney = searchParams.get("journey") === "1";
+  const paramBbox = searchParams.get("bbox") || undefined;
+  const [journeyActive, setJourneyActive] = useState(paramJourney);
 
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
@@ -43,7 +47,8 @@ const MapPage = () => {
   return (
     <div className="fixed inset-0 z-[10] bg-background">
       {/* Map renders immediately — preloads while blessing is visible */}
-      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramOrigin} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} />
+      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramOrigin} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
+      <MapJourneyOverlay active={journeyActive} />
       
       {/* Public Tester Blessing — overlays map, shown once */}
       {showBlessing && (
