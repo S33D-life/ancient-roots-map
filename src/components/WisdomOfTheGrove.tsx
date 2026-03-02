@@ -226,7 +226,7 @@ export const WisdomOfTheGrove = () => {
 
   if (isLoading) {
     return (
-      <section id="wisdom" className="py-16 md:py-24">
+      <section id="wisdom" className="py-12 md:py-18">
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="text-2xl md:text-3xl font-serif text-center mb-10">
             Wisdom of the Grove
@@ -241,7 +241,7 @@ export const WisdomOfTheGrove = () => {
 
   return (
     <>
-      <section id="wisdom" className="py-16 md:py-24">
+      <section id="wisdom" className="py-12 md:py-18">
         <div className="container mx-auto px-4 max-w-3xl">
           <h2 className="text-2xl md:text-3xl font-serif text-center mb-10">
             Wisdom of the Grove

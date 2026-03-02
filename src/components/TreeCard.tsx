@@ -196,29 +196,26 @@ const TreeCard = ({
           )}
         </div>
 
-        {/* Action bar */}
-        <div className="mt-3 pt-3 border-t border-border/30 flex gap-1.5">
-          <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8">
+        {/* Action bar — simplified */}
+        <div className="mt-3 pt-3 border-t border-border/20 flex gap-1.5">
+          <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
             <Heart
               className="w-3.5 h-3.5 transition-all duration-300"
               style={wishlistPulseActive ? {
                 transform: "scale(1.3)",
                 color: "hsl(var(--primary))",
-                filter: "drop-shadow(0 0 8px hsl(var(--primary) / 0.6))",
+                filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))",
               } : undefined}
             />
-            Wishing Tree
+            Wish
           </Button>
           {(tree.latitude || tree.what3words) && (
-            <Button variant="ghost" size="sm" onClick={handleMapNav} title="View on Map" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" onClick={handleMapNav} title="View on Map" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
               <Map className="w-3.5 h-3.5" />
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={handleShare} title="Share" className="h-8 w-8 p-0">
+          <Button variant="ghost" size="sm" onClick={handleShare} title="Share" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
             <Share2 className="w-3.5 h-3.5" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleNFTree} title="NFTree Studio" className="h-8 w-8 p-0">
-            <Sparkles className="w-3.5 h-3.5" />
           </Button>
         </div>
       </CardContent>

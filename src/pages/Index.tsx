@@ -10,7 +10,6 @@ import {
   IdentitySection,
   DiscoveryRow,
   ParticipationSection,
-  MapPreviewSection,
   TetolNavSection,
 } from "@/components/HomeSections";
 import { WisdomOfTheGrove } from "@/components/WisdomOfTheGrove";
@@ -27,25 +26,11 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">
-        {/* 1. Hero — identity, stats, CTA */}
         <Hero />
-
-        {/* 2. Poetic tagline + value points */}
         <IdentitySection />
-
-        {/* 2b. Quick discovery — Countries & Hives */}
         <DiscoveryRow />
-
-        {/* 3. Participation pathways */}
         <ParticipationSection />
-
-        {/* 4. Interactive map preview */}
-        <MapPreviewSection />
-
-        {/* 5. Wisdom of the Grove — community quotes + world wisdom */}
         <WisdomOfTheGrove />
-
-        {/* 6. TETOL navigation anchors */}
         <TetolNavSection />
       </main>
       <TetolBridge />
@@ -53,7 +38,7 @@ const Index = () => {
         id="home-explore"
         message="Every ancient tree has a story. Tap the Atlas to discover one near you."
         cta={{ label: "Open Atlas", to: "/map" }}
-        delay={3000}
+        delay={4000}
         position="bottom-center"
       />
       <Footer />

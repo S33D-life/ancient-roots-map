@@ -1,12 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, TreeDeciduous, ExternalLink, Star, Users2 } from "lucide-react";
+import { MapPin, TreeDeciduous, ExternalLink } from "lucide-react";
 import LivingCensus from "@/components/LivingCensus";
-import teotagLogo from "@/assets/teotag.jpeg";
 import { Link } from "react-router-dom";
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useHomeMeetings } from "@/hooks/use-home-meetings";
-import { useWishToggle } from "@/hooks/use-wish-toggle";
 
 // Ancient Friends gallery — each entry is a painterly tree background
 // linked to a real Ancient Friend in the database
@@ -208,12 +205,6 @@ const Hero = () => {
 
   const currentFriend = ANCIENT_FRIENDS_GALLERY[friendIndex];
 
-  // Home meetings tracking
-  const { count: meetingsCount } = useHomeMeetings(currentFriend.treeId);
-
-  // Wish toggle for featured tree
-  const { isWished, toggle: toggleWish, loading: wishLoading, isLoggedIn } = useWishToggle(currentFriend.treeId);
-
   // Preload the next image to avoid flicker on re-visits
   const nextFriend = useMemo(() => {
     const nextIdx = (friendIndex + 1) % ANCIENT_FRIENDS_GALLERY.length;
@@ -310,87 +301,34 @@ const Hero = () => {
           </div>
         </div>
 
-        {/* Bottom stack: Stats → Teotag → Ancient Friend */}
-        <div className="flex flex-col items-center gap-3 px-4 mt-auto">
+        {/* Bottom stack: Ancient Friend card — simplified */}
+        <div className="flex flex-col items-center gap-4 px-4 mt-auto pb-4">
           {/* Living Census — real-time global counter */}
           <LivingCensus />
 
-          {/* Centred Teotag logo — opens TETOL menu */}
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent("open-tetol"))}
-            className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
-            aria-label="Open TETOL navigation"
+          {/* Ancient Friend — featured tree card */}
+          <Link
+            to={`/tree/${currentFriend.treeId}`}
+            className="w-full max-w-xs block group"
           >
-            <img 
-              src={teotagLogo} 
-              alt="Teotag" 
-              className="w-14 h-14 rounded-full border-2 border-primary/40 shadow-lg opacity-90 cursor-pointer"
-            />
-          </button>
-
-          {/* TETOL facilitation microcopy */}
-          <p className="text-[10px] text-muted-foreground/60 font-serif italic tracking-wide">
-            A meeting beneath an Ancient Friend
-          </p>
-
-          {/* Ancient Friend details below Teotag */}
-          <div className="w-full max-w-xs space-y-1.5">
-            <Link
-              to={`/tree/${currentFriend.treeId}`}
-              className="block"
+            <div
+              className="rounded-xl px-4 py-3 backdrop-blur-md border flex items-center gap-3 transition-all duration-300 group-hover:border-primary/40"
+              style={{
+                background: 'hsl(var(--card) / 0.6)',
+                borderColor: 'hsl(var(--border) / 0.3)',
+              }}
             >
-              <div
-                className="rounded-xl px-4 py-2.5 backdrop-blur-md border flex items-center gap-3"
-                style={{
-                  background: 'hsl(var(--card) / 0.7)',
-                  borderColor: 'hsl(var(--border) / 0.4)',
-                }}
-              >
-                <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-xs text-muted-foreground font-serif">
-                    {visitorNumber ? `Visit #${visitorNumber.toLocaleString()}` : "Today's Ancient Friend"}
-                  </p>
-                  <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
-                  <p className="text-xs text-muted-foreground italic">{currentFriend.species}</p>
-                </div>
-                <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <TreeDeciduous className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-[10px] text-muted-foreground/60 font-serif">
+                  {visitorNumber ? `Visit #${visitorNumber.toLocaleString()}` : "Today's Ancient Friend"}
+                </p>
+                <p className="font-serif text-sm text-primary truncate">{currentFriend.name}</p>
+                <p className="text-[11px] text-muted-foreground/70 italic">{currentFriend.species}</p>
               </div>
-            </Link>
-
-            {/* Meetings counter + Wish toggle row */}
-            <div className="flex items-center justify-between px-1">
-              <button
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-serif backdrop-blur-sm border transition-colors"
-                style={{
-                  background: 'hsl(var(--card) / 0.5)',
-                  borderColor: 'hsl(var(--border) / 0.3)',
-                  color: 'hsl(var(--muted-foreground))',
-                }}
-                title="Unique trees you've met on the Home grove"
-              >
-                <Users2 className="w-3 h-3" />
-                Meetings: {meetingsCount}
-              </button>
-
-              {isLoggedIn && (
-                <button
-                  onClick={(e) => { e.preventDefault(); toggleWish(); }}
-                  disabled={wishLoading}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-serif backdrop-blur-sm border transition-all"
-                  style={{
-                    background: isWished ? 'hsl(45 100% 55% / 0.15)' : 'hsl(var(--card) / 0.5)',
-                    borderColor: isWished ? 'hsl(45 80% 50% / 0.4)' : 'hsl(var(--border) / 0.3)',
-                    color: isWished ? 'hsl(45 80% 60%)' : 'hsl(var(--muted-foreground))',
-                  }}
-                  title={isWished ? "Remove from Wishlist" : "Add to Wishlist"}
-                >
-                  <Star className={`w-3 h-3 ${isWished ? "fill-current" : ""}`} />
-                  {isWished ? "Wished" : "Wish"}
-                </button>
-              )}
+              <ExternalLink className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors flex-shrink-0" />
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
