@@ -654,6 +654,57 @@ export type Database = {
           },
         ]
       }
+      calendar_lenses: {
+        Row: {
+          attribution: string | null
+          created_at: string
+          description: string | null
+          disclaimer: string | null
+          icon: string | null
+          id: string
+          is_default: boolean
+          lens_type: string
+          lineage: string | null
+          name: string
+          region: string | null
+          slug: string
+          sources: Json | null
+          version: number
+        }
+        Insert: {
+          attribution?: string | null
+          created_at?: string
+          description?: string | null
+          disclaimer?: string | null
+          icon?: string | null
+          id?: string
+          is_default?: boolean
+          lens_type?: string
+          lineage?: string | null
+          name: string
+          region?: string | null
+          slug: string
+          sources?: Json | null
+          version?: number
+        }
+        Update: {
+          attribution?: string | null
+          created_at?: string
+          description?: string | null
+          disclaimer?: string | null
+          icon?: string | null
+          id?: string
+          is_default?: boolean
+          lens_type?: string
+          lineage?: string | null
+          name?: string
+          region?: string | null
+          slug?: string
+          sources?: Json | null
+          version?: number
+        }
+        Relationships: []
+      }
       ceremony_logs: {
         Row: {
           anchor_tx_hash: string | null
@@ -4474,6 +4525,39 @@ export type Database = {
           updated_at?: string
           verified?: boolean
           what3words?: string | null
+        }
+        Relationships: []
+      }
+      user_calendar_preferences: {
+        Row: {
+          created_at: string
+          enabled_lens_ids: string[]
+          hemisphere: string
+          label_style: string
+          primary_lens_id: string | null
+          region: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled_lens_ids?: string[]
+          hemisphere?: string
+          label_style?: string
+          primary_lens_id?: string | null
+          region?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled_lens_ids?: string[]
+          hemisphere?: string
+          label_style?: string
+          primary_lens_id?: string | null
+          region?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
