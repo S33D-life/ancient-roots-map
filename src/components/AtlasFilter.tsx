@@ -12,7 +12,7 @@ import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Filter, X, Leaf, GitBranch, FolderTree, RotateCcw,
-  Maximize2, ExternalLink, Layers, SlidersHorizontal,
+  Maximize2, ExternalLink, Layers, SlidersHorizontal, Blend,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
@@ -23,6 +23,31 @@ import {
   AGE_BANDS, GIRTH_BANDS, GROVE_SCALES, PERSPECTIVES,
   type AgeBand, type GirthBand, type GroveScale, type Perspective,
 } from "@/contexts/MapFilterContext";
+
+/** Perspective visual presets — layer/tuning combos for each mode */
+export type PerspectivePreset = {
+  layers: string[];         // layer keys to activate
+  hiveEmphasis: boolean;
+  bloomingClockVisible: boolean;
+};
+
+export const PERSPECTIVE_PRESETS: Record<Perspective, PerspectivePreset> = {
+  collective: {
+    layers: ["seeds", "offering-glow", "hive-layer"],
+    hiveEmphasis: true,
+    bloomingClockVisible: false,
+  },
+  personal: {
+    layers: ["bloomed-seeds", "recent-visits", "seed-traces"],
+    hiveEmphasis: false,
+    bloomingClockVisible: false,
+  },
+  tribe: {
+    layers: ["tribe-activity", "shared-trees", "groves"],
+    hiveEmphasis: false,
+    bloomingClockVisible: false,
+  },
+};
 
 /* ── Staff species for species grid ── */
 const STAFF_SPECIES: { key: string; species: string; image: string }[] = [
@@ -87,6 +112,8 @@ export interface AtlasFilterProps {
   /* Fullscreen */
   onFullscreenToggle?: () => void;
   isFullscreen?: boolean;
+  /* Perspective visual preset callback */
+  onPerspectivePreset?: (preset: PerspectivePreset) => void;
 }
 
 /* ── Shared chip styles ── */
@@ -116,6 +143,7 @@ const AtlasFilter = ({
   onPanelOpenChange,
   onFullscreenToggle,
   isFullscreen,
+  onPerspectivePreset,
 }: AtlasFilterProps) => {
   const {
     ageBand, setAgeBand,
@@ -128,6 +156,8 @@ const AtlasFilter = ({
 
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["hives", "signals", "structures"]));
+  const [hiveBlendMode, setHiveBlendMode] = useState<"exact" | "blend">("blend");
+  const [selectedHiveFamilies, setSelectedHiveFamilies] = useState<Set<string>>(new Set());
 
   // Count active visual layers for badge
   const activeLayerCount = useMemo(() =>
@@ -193,11 +223,40 @@ const AtlasFilter = ({
     }
   }, [selectedSpecies, onSpeciesChange]);
 
+  // Hive multi-select handler
+  const handleHiveToggle = useCallback((family: string, speciesList: string[]) => {
+    setSelectedHiveFamilies(prev => {
+      const next = new Set(prev);
+      if (next.has(family)) {
+        next.delete(family);
+      } else {
+        next.add(family);
+      }
+      // Compute combined species from all selected hives
+      const allSelectedSpecies: string[] = [];
+      hiveMap.forEach(({ hive, speciesList: sl }) => {
+        if (next.has(hive.family)) {
+          sl.forEach(s => { if (!allSelectedSpecies.includes(s)) allSelectedSpecies.push(s); });
+        }
+      });
+      if (hiveBlendMode === "exact") {
+        onSpeciesChange(allSelectedSpecies);
+      } else {
+        // Blend: add to existing selection
+        const merged = [...selectedSpecies];
+        allSelectedSpecies.forEach(s => { if (!merged.some(m => m.toLowerCase() === s.toLowerCase())) merged.push(s); });
+        onSpeciesChange(next.size === 0 ? [] : merged);
+      }
+      return next;
+    });
+  }, [hiveMap, hiveBlendMode, selectedSpecies, onSpeciesChange]);
+
   const handleResetAll = useCallback(() => {
     onSpeciesChange([]);
     onLineageChange?.("all");
     onProjectChange?.("all");
     setFamilyFilter(null);
+    setSelectedHiveFamilies(new Set());
     resetGlobalFilters();
   }, [onSpeciesChange, onLineageChange, onProjectChange, resetGlobalFilters]);
 
@@ -222,7 +281,10 @@ const AtlasFilter = ({
               return (
                 <motion.button
                   key={p.key}
-                  onClick={() => setPerspective(p.key)}
+                  onClick={() => {
+                    setPerspective(p.key);
+                    if (onPerspectivePreset) onPerspectivePreset(PERSPECTIVE_PRESETS[p.key]);
+                  }}
                   whileTap={{ scale: 0.95 }}
                   className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-serif transition-colors duration-200"
                   style={{
@@ -473,7 +535,7 @@ const AtlasFilter = ({
                     </div>
                   </FilterSection>
 
-                  {/* ── Species Hives (from Living Layers) ── */}
+                  {/* ── Species Hives — Multi-select with Exact/Blend ── */}
                   {hiveMap.length > 0 && (
                     <CollapsibleSection
                       title="Species Hives"
@@ -483,30 +545,65 @@ const AtlasFilter = ({
                       onToggle={toggleSection}
                       count={hiveMap.length}
                     >
+                      {/* Exact / Blend toggle */}
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        <span className="text-[9px] font-serif uppercase tracking-wider" style={{ color: "hsl(42, 40%, 45%)" }}>Mode</span>
+                        <div
+                          className="flex rounded-full p-[2px]"
+                          style={{ background: "hsla(42, 25%, 15%, 0.6)", border: "1px solid hsla(42, 40%, 30%, 0.3)" }}
+                        >
+                          {(["exact", "blend"] as const).map(mode => (
+                            <button
+                              key={mode}
+                              onClick={() => setHiveBlendMode(mode)}
+                              className="px-2.5 py-1 rounded-full text-[9px] font-serif tracking-wide transition-all duration-200 flex items-center gap-1"
+                              style={{
+                                background: hiveBlendMode === mode ? "hsla(42, 50%, 40%, 0.2)" : "transparent",
+                                color: hiveBlendMode === mode ? "hsl(42, 65%, 68%)" : "hsl(42, 30%, 40%)",
+                                border: hiveBlendMode === mode ? "1px solid hsla(42, 50%, 50%, 0.25)" : "1px solid transparent",
+                              }}
+                            >
+                              {mode === "blend" && <Blend className="w-2.5 h-2.5" />}
+                              {mode === "exact" ? "Exact" : "Blend"}
+                            </button>
+                          ))}
+                        </div>
+                        {selectedHiveFamilies.size > 0 && (
+                          <button
+                            onClick={() => { setSelectedHiveFamilies(new Set()); onSpeciesChange([]); }}
+                            className="ml-auto text-[9px] font-serif flex items-center gap-0.5 transition-colors"
+                            style={{ color: "hsl(42, 40%, 45%)" }}
+                          >
+                            <X className="w-2.5 h-2.5" /> Clear
+                          </button>
+                        )}
+                      </div>
                       <div className="space-y-0.5">
                         {hiveMap.map(({ hive, count, speciesList }) => {
                           const hue = hslStringToHue(hive.accentHsl);
-                          const isFiltered = selectedSpecies.length > 0 && speciesList.some(rs =>
-                            selectedSpecies.some(s => s.toLowerCase() === rs.toLowerCase())
-                          );
+                          const isSelected = selectedHiveFamilies.has(hive.family);
                           return (
                             <button
                               key={hive.family}
-                              onClick={() => isFiltered ? onSpeciesChange([]) : onSpeciesChange(speciesList)}
+                              onClick={() => handleHiveToggle(hive.family, speciesList)}
                               className="w-full flex items-center gap-3 py-2 px-2 rounded-lg transition-all group"
-                              style={{ background: isFiltered ? `hsla(${hue}, 40%, 25%, 0.25)` : "transparent" }}
+                              style={{ background: isSelected ? `hsla(${hue}, 40%, 25%, 0.25)` : "transparent" }}
                             >
+                              {/* Checkbox-style colour swatch */}
                               <span
-                                className="inline-block w-3 h-3 rounded-sm shrink-0"
+                                className="inline-flex items-center justify-center w-4 h-4 rounded shrink-0 text-[8px] font-bold transition-all"
                                 style={{
-                                  background: `hsl(${hue}, 55%, 45%)`,
-                                  boxShadow: isFiltered ? `0 0 8px hsl(${hue}, 55%, 45%)` : "none",
-                                  border: isFiltered ? `1.5px solid hsl(${hue}, 55%, 55%)` : "1px solid hsla(0,0%,100%,0.15)",
+                                  background: isSelected ? `hsl(${hue}, 55%, 45%)` : "transparent",
+                                  boxShadow: isSelected ? `0 0 10px hsl(${hue}, 55%, 45%)` : "none",
+                                  border: isSelected ? `1.5px solid hsl(${hue}, 55%, 55%)` : "1.5px solid hsla(0,0%,100%,0.2)",
+                                  color: isSelected ? "hsl(0, 0%, 95%)" : "transparent",
                                 }}
-                              />
+                              >
+                                {isSelected ? "✓" : ""}
+                              </span>
                               <span
                                 className="text-[12px] font-serif group-hover:underline truncate"
-                                style={{ color: isFiltered ? `hsl(${hue}, 55%, 65%)` : "hsl(0, 0%, 62%)" }}
+                                style={{ color: isSelected ? `hsl(${hue}, 55%, 65%)` : "hsl(0, 0%, 62%)" }}
                               >
                                 {hive.icon} {hive.displayName}
                               </span>

@@ -29,7 +29,7 @@ import BloomingClockDial from "./BloomingClockDial";
 import BloomingClockFace from "./BloomingClockFace";
 import BloomingClockParticles from "./BloomingClockParticles";
 import BloomingClockSigils from "./BloomingClockSigils";
-import AtlasFilter, { type VisualLayerSection } from "./AtlasFilter";
+import AtlasFilter, { type VisualLayerSection, type PerspectivePreset } from "./AtlasFilter";
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
@@ -2426,6 +2426,27 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onPanelOpenChange={setAtlasFilterOpen}
         onFullscreenToggle={onFullscreenToggle}
         isFullscreen={isFullscreen}
+        onPerspectivePreset={(preset: PerspectivePreset) => {
+          // Apply layer presets when perspective changes
+          setShowHiveLayer(preset.hiveEmphasis);
+          if (preset.bloomingClockVisible && !showBloomingClock) setShowBloomingClock(true);
+          // Activate recommended layers for this perspective
+          const layerMap: Record<string, (v: boolean) => void> = {
+            "seeds": (v) => setShowSeeds(v),
+            "offering-glow": (v) => setShowOfferingGlow(v),
+            "heart-glow": (v) => setShowHeartGlow(v),
+            "hive-layer": (v) => setShowHiveLayer(v),
+            "groves": (v) => setShowGroves(v),
+            "bloomed-seeds": (v) => setShowBloomedSeeds(v),
+            "recent-visits": (v) => setShowRecentVisits(v),
+            "seed-traces": (v) => setShowSeedTraces(v),
+            "shared-trees": (v) => setShowSharedTrees(v),
+            "tribe-activity": (v) => setShowTribeActivity(v),
+          };
+          // Turn off all, then turn on preset layers
+          Object.values(layerMap).forEach(fn => fn(false));
+          preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
+        }}
       />
 
       {/* Discovery cue */}
