@@ -91,6 +91,7 @@ const CycleMarketsPage = lazy(() => import("./pages/CycleMarketsPage"));
 const MarketDetailPage = lazy(() => import("./pages/MarketDetailPage"));
 const AddTreePage = lazy(() => import("./pages/AddTreePage"));
 const CityTemplatePage = lazy(() => import("./pages/CityTemplatePage"));
+const AtlasSubResolver = lazy(() => import("./pages/AtlasSubResolver"));
 const WhispersPage = lazy(() => import("./pages/WhispersPage"));
 const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
 const TimeTreePage = lazy(() => import("./pages/TimeTreePage"));
@@ -195,15 +196,14 @@ const App = () => {
                 <Route path="/markets" element={<Navigate to="/library/rhythms" replace />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
-                {/* Hardcoded sub-portals removed — redirect to generic routes */}
-                <Route path="/atlas/switzerland/valais" element={<Navigate to="/atlas/switzerland" replace />} />
+                {/* Sub-portal redirects */}
                 <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<Navigate to="/atlas/switzerland" replace />} />
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />
                 <Route path="/atlas/bio-regions" element={<BioRegionsIndexPage />} />
                 <Route path="/atlas/bio-regions/:slug" element={<BioRegionPage />} />
                 <Route path="/atlas/bio-regions/:slug/calendar" element={<BioregionCalendarPage />} />
                 <Route path="/country/:countrySlug/:citySlug" element={<CityTemplatePage />} />
-                <Route path="/atlas/:countrySlug/:citySlug" element={<CityTemplatePage />} />
+                <Route path="/atlas/:countrySlug/:subSlug" element={<AtlasSubResolver />} />
                 <Route path="/atlas/:countrySlug" element={<CountryPortalPage />} />
                 <Route path="/whispers" element={<WhispersPage />} />
                 <Route path="/time-tree" element={<TimeTreePage />} />
