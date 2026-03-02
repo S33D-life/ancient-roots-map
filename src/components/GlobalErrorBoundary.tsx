@@ -48,6 +48,11 @@ class GlobalErrorBoundary extends Component<Props, State> {
   };
 
   handleRetry = () => {
+    // Dynamic import failures can't recover without a full reload
+    if (this.state.error?.message?.includes("dynamically imported module")) {
+      window.location.reload();
+      return;
+    }
     this.setState({ hasError: false, error: null });
   };
 
