@@ -299,7 +299,7 @@ const AtlasFilter = ({
   return (
     <>
       {/* ══ Top bar: Mode Capsule + Count + Fullscreen ══ */}
-      <div className="absolute top-[4.5rem] left-3 right-3 z-[1000] flex flex-col gap-2 animate-fade-in">
+      <div className="absolute top-3 left-3 right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in">
         <div className="flex items-center gap-2">
           {/* Mode Capsule */}
           <div
@@ -425,13 +425,14 @@ const AtlasFilter = ({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute z-[1000] px-2.5 py-0.5 rounded-full text-[9px] font-serif"
+            className="absolute z-[1001] px-3 py-1 rounded-full text-[10px] font-serif tracking-wide backdrop-blur-md"
             style={{
-              top: totalFilterCount > 0 || groveScale !== "all" ? "8.5rem" : "7rem",
+              top: totalFilterCount > 0 || groveScale !== "all" ? "9rem" : "7.5rem",
               left: "0.75rem",
-              background: `hsla(${activeAccent}, 0.1)`,
+              background: `hsla(${activeAccent}, 0.18)`,
               color: `hsl(${activeAccent})`,
-              border: `1px solid hsla(${activeAccent}, 0.2)`,
+              border: `1px solid hsla(${activeAccent}, 0.35)`,
+              boxShadow: `0 2px 10px hsla(${activeAccent}, 0.15)`,
             }}
           >
             {perspective === "personal" ? "🌱 Viewing your mapped trees" : "👥 Viewing tribe trees"}
