@@ -102,8 +102,11 @@ interface LeafletFallbackMapProps {
   initialCountry?: string;
   initialHive?: string;
   initialOrigin?: string;
+  initialJourney?: boolean;
+  initialBbox?: string;
   onFullscreenToggle?: () => void;
   isFullscreen?: boolean;
+  onJourneyEnd?: () => void;
 }
 
 /* ── Shared tier & species logic ── */
@@ -495,7 +498,7 @@ function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
   );
 }
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, onFullscreenToggle, isFullscreen }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, initialJourney, initialBbox, onFullscreenToggle, isFullscreen, onJourneyEnd }: LeafletFallbackMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -962,13 +965,40 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
       let label: string | null = null;
 
-      // Country deep-link: zoom to bounding box
+      // Country deep-link: zoom to bounding box with optional area highlight
       if (initialCountry) {
         const entry = getEntryBySlug(initialCountry);
         if (entry?.bbox) {
           const [south, west, north, east] = entry.bbox;
-          map.fitBounds([[south, west], [north, east]], { padding: [20, 20], animate: true, duration: 1.5 });
+          const bounds: L.LatLngBoundsExpression = [[south, west], [north, east]];
+          map.fitBounds(bounds, { padding: [20, 20], animate: true, duration: initialJourney ? 1.8 : 1.5 });
           label = `${entry.flag} ${entry.country}`;
+
+          // Subtle area highlight rectangle — fades out after 4s
+          if (initialJourney) {
+            const rect = L.rectangle(bounds, {
+              color: 'hsl(42, 80%, 55%)',
+              weight: 1.5,
+              fillColor: 'hsl(42, 80%, 55%)',
+              fillOpacity: 0.06,
+              opacity: 0.5,
+              interactive: false,
+            }).addTo(map);
+            setTimeout(() => {
+              try { map.removeLayer(rect); } catch {}
+              onJourneyEnd?.();
+            }, 4000);
+          } else {
+            onJourneyEnd?.();
+          }
+        }
+      } else if (initialBbox) {
+        // Generic bbox from URL params
+        const parts = initialBbox.split(",").map(Number);
+        if (parts.length === 4 && parts.every(n => !isNaN(n))) {
+          const [south, west, north, east] = parts;
+          map.fitBounds([[south, west], [north, east]], { padding: [20, 20], animate: true, duration: 1.5 });
+          onJourneyEnd?.();
         }
       }
 
@@ -1478,34 +1508,65 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     if (!targetMarker) return;
 
-    // Smooth fly to the tree
-    map.flyTo(targetLatLng, Math.max(initialZoom ?? 17, 17), {
-      duration: 1.2,
-      easeLinearity: 0.4,
-    });
+    // --- Multi-stage ceremonial journey ---
+    const targetZoom = Math.max(initialZoom ?? 17, 17);
+    const currentZoom = map.getZoom();
+    const useJourney = initialJourney && currentZoom < 10;
 
-    // After fly animation completes, expand cluster and highlight
-    const onFlyEnd = () => {
-      map.off('moveend', onFlyEnd);
+    if (useJourney) {
+      // Stage 1: Regional context (zoom ~9)
+      const regionalZoom = Math.min(9, Math.floor((currentZoom + targetZoom) / 2.5));
+      map.flyTo(targetLatLng, regionalZoom, {
+        duration: 0.8,
+        easeLinearity: 0.35,
+      });
+      
+      const onRegionalEnd = () => {
+        map.off('moveend', onRegionalEnd);
+        // Stage 2: Final descent to tree
+        setTimeout(() => {
+          map.flyTo(targetLatLng, targetZoom, {
+            duration: 0.9,
+            easeLinearity: 0.3,
+          });
 
-      // Zoom to cluster bounds to expand it if the marker is clustered
-      const visibleParent = cluster.getVisibleParent(targetMarker!);
-      if (visibleParent && visibleParent !== targetMarker) {
-        // The marker is inside a cluster — zoom to uncluster
-        cluster.zoomToShowLayer(targetMarker!, () => {
-          highlightMarker(map, targetMarker!, targetTree.name);
+          const onFinalEnd = () => {
+            map.off('moveend', onFinalEnd);
+            finishTreeFocus(map, cluster, targetMarker!, targetTree);
+            onJourneyEnd?.();
+          };
+          setTimeout(() => map.once('moveend', onFinalEnd), 80);
+        }, 150);
+      };
+      setTimeout(() => map.once('moveend', onRegionalEnd), 80);
+    } else {
+      // Standard single flyTo
+      map.flyTo(targetLatLng, targetZoom, {
+        duration: 1.2,
+        easeLinearity: 0.4,
+      });
+
+      const onFlyEnd = () => {
+        map.off('moveend', onFlyEnd);
+        finishTreeFocus(map, cluster, targetMarker!, targetTree);
+        onJourneyEnd?.();
+      };
+      setTimeout(() => map.once('moveend', onFlyEnd), 100);
+    }
+
+    function finishTreeFocus(map: L.Map, cluster: any, marker: L.Marker, tree: Tree) {
+      // Expand cluster if needed
+      const visibleParent = cluster.getVisibleParent(marker);
+      if (visibleParent && visibleParent !== marker) {
+        cluster.zoomToShowLayer(marker, () => {
+          showHighlight(map, marker, tree.name);
         });
       } else {
-        highlightMarker(map, targetMarker!, targetTree.name);
+        showHighlight(map, marker, tree.name);
       }
-    };
+    }
 
-    // Small delay to ensure fly animation starts
-    setTimeout(() => {
-      map.once('moveend', onFlyEnd);
-    }, 100);
-
-    function highlightMarker(map: L.Map, marker: L.Marker, treeName: string) {
+    function showHighlight(map: L.Map, marker: L.Marker, treeName: string) {
       // Center precisely on the marker
       map.panTo(marker.getLatLng(), { animate: true, duration: 0.4 });
 
