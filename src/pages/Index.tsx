@@ -6,6 +6,7 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import TetolBridge from "@/components/TetolBridge";
 import S33dEntrance from "@/components/S33dEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
+import { useVineFade } from "@/hooks/use-vine-fade";
 import {
   IdentitySection,
   DiscoveryRow,
@@ -24,6 +25,7 @@ const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
+  useVineFade();
 
   if (showEntrance) {
     return <S33dEntrance onComplete={handleEntranceComplete} />;
