@@ -279,6 +279,63 @@ export type Database = {
         }
         Relationships: []
       }
+      book_notes: {
+        Row: {
+          book_entry_id: string
+          content: string
+          created_at: string
+          id: string
+          note_type: string
+          offered_to_tree_id: string | null
+          offering_id: string | null
+          page_reference: string | null
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          book_entry_id: string
+          content: string
+          created_at?: string
+          id?: string
+          note_type?: string
+          offered_to_tree_id?: string | null
+          offering_id?: string | null
+          page_reference?: string | null
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          book_entry_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          note_type?: string
+          offered_to_tree_id?: string | null
+          offering_id?: string | null
+          page_reference?: string | null
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_notes_book_entry_id_fkey"
+            columns: ["book_entry_id"]
+            isOneToOne: false
+            referencedRelation: "bookshelf_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_notes_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookshelf_entries: {
         Row: {
           author: string
@@ -287,11 +344,15 @@ export type Database = {
           created_at: string
           genre: string | null
           id: string
+          is_physical_copy: boolean
           linked_council_sessions: string[] | null
           linked_tree_ids: string[] | null
+          notes_count: number
           offering_id: string | null
           quote: string | null
           reflection: string | null
+          shelf_id: string | null
+          source: string
           species_category: string | null
           title: string
           updated_at: string
@@ -305,11 +366,15 @@ export type Database = {
           created_at?: string
           genre?: string | null
           id?: string
+          is_physical_copy?: boolean
           linked_council_sessions?: string[] | null
           linked_tree_ids?: string[] | null
+          notes_count?: number
           offering_id?: string | null
           quote?: string | null
           reflection?: string | null
+          shelf_id?: string | null
+          source?: string
           species_category?: string | null
           title: string
           updated_at?: string
@@ -323,11 +388,15 @@ export type Database = {
           created_at?: string
           genre?: string | null
           id?: string
+          is_physical_copy?: boolean
           linked_council_sessions?: string[] | null
           linked_tree_ids?: string[] | null
+          notes_count?: number
           offering_id?: string | null
           quote?: string | null
           reflection?: string | null
+          shelf_id?: string | null
+          source?: string
           species_category?: string | null
           title?: string
           updated_at?: string
@@ -349,7 +418,47 @@ export type Database = {
             referencedRelation: "offerings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookshelf_entries_shelf_id_fkey"
+            columns: ["shelf_id"]
+            isOneToOne: false
+            referencedRelation: "bookshelves"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      bookshelves: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
       }
       bug_comments: {
         Row: {
