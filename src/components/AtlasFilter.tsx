@@ -18,6 +18,33 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link } from "react-router-dom";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
+
+/* ── Hive colour dot mapping — faithful to original Living Layers sidebar ── */
+function getHiveColourDot(family: string): string {
+  const MAP: Record<string, string> = {
+    "Taxaceae": "hsl(120, 65%, 50%)",
+    "Fagaceae": "hsl(35, 85%, 55%)",
+    "Oleaceae": "hsl(55, 70%, 50%)",
+    "Rosaceae": "hsl(340, 70%, 60%)",
+    "Cupressaceae": "hsl(150, 55%, 45%)",
+    "Platanaceae": "hsl(25, 80%, 55%)",
+    "Pinaceae": "hsl(140, 50%, 45%)",
+    "Aquifoliaceae": "hsl(210, 60%, 60%)",
+    "Malvaceae": "hsl(45, 75%, 55%)",
+    "Moraceae": "hsl(15, 75%, 55%)",
+    "Salicaceae": "hsl(130, 55%, 50%)",
+    "Betulaceae": "hsl(40, 70%, 55%)",
+    "Araucariaceae": "hsl(200, 55%, 55%)",
+    "Magnoliaceae": "hsl(300, 50%, 55%)",
+    "Ericaceae": "hsl(220, 55%, 60%)",
+    "Boraginaceae": "hsl(215, 50%, 55%)",
+    "Fabaceae": "hsl(38, 75%, 55%)",
+    "Ulmaceae": "hsl(100, 50%, 48%)",
+    "Sapindaceae": "hsl(10, 70%, 55%)",
+    "Buxaceae": "hsl(205, 55%, 55%)",
+  };
+  return MAP[family] || "hsl(42, 50%, 50%)";
+}
 import {
   useMapFilters,
   AGE_BANDS, GIRTH_BANDS, GROVE_SCALES, PERSPECTIVES,
@@ -596,7 +623,21 @@ const AtlasFilter = ({
                               className="w-full flex items-center gap-3 py-2 px-2 rounded-lg transition-all group"
                               style={{ background: isSelected ? `hsla(${hue}, 40%, 25%, 0.25)` : "transparent" }}
                             >
-                              {/* Checkbox-style colour swatch */}
+                              {/* Colour dot — matches original Living Layers sidebar */}
+                              {(() => {
+                                const dotColour = getHiveColourDot(hive.family);
+                                return (
+                                  <span
+                                    className="w-3.5 h-3.5 rounded-full shrink-0 transition-all"
+                                    style={{
+                                      background: dotColour,
+                                      boxShadow: isSelected ? `0 0 8px ${dotColour}` : `0 0 4px ${dotColour}55`,
+                                      border: isSelected ? `2px solid hsl(0, 0%, 95%)` : "none",
+                                    }}
+                                  />
+                                );
+                              })()}
+                              {/* Checkbox indicator */}
                               <span
                                 className="inline-flex items-center justify-center w-4 h-4 rounded shrink-0 text-[8px] font-bold transition-all"
                                 style={{
