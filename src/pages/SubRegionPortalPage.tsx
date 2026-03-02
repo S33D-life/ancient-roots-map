@@ -171,13 +171,13 @@ const SubRegionPortalPage = () => {
         lng: tree.longitude,
         zoom: 15,
         countrySlug,
-        source: "atlas_card",
+        source: "tree",
       });
     }
   }, [focusMap, countrySlug]);
 
   const openMapLayer = useCallback(() => {
-    focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "atlas_card" });
+    focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "region" });
   }, [focusMap, countrySlug]);
 
   /* ─── Not found guard ─── */

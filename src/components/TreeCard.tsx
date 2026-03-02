@@ -63,7 +63,7 @@ const TreeCard = ({
       lng: tree.longitude ?? undefined,
       w3w: tree.what3words ?? undefined,
       zoom: 16,
-      source: "tree_card",
+      source: "tree",
     });
   };
 

@@ -55,7 +55,7 @@ const ImmutableTreeCard = ({ tree, onMapNavigate }: ImmutableTreeProps) => {
         lat: tree.latitude,
         lng: tree.longitude,
         zoom: 16,
-        source: "tree_card",
+        source: "tree",
       });
     }
   };

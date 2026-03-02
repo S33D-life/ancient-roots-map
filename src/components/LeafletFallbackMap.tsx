@@ -1002,16 +1002,27 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }
       }
 
-      // Hive deep-link: auto-apply species filter for the hive
+      // Hive deep-link: auto-apply species filter + fly to densest region
       if (initialHive) {
         const hive = getHiveBySlug(initialHive);
         if (hive) {
-          // Set species filter to representative species
           const speciesNames = hive.representativeSpecies.slice(0, 10);
           if (speciesNames.length > 0) {
             setSpecies(speciesNames);
           }
           label = label ? `${label} · ${hive.displayName}` : `${hive.icon} ${hive.displayName}`;
+
+          // If arriving from hive origin and no country set, find trees for this hive and fly to them
+          if (initialOrigin === "hive" && !initialCountry && trees.length > 0) {
+            const hiveTrees = trees.filter(t =>
+              speciesNames.some(s => t.species.toLowerCase().includes(s.toLowerCase()))
+            );
+            if (hiveTrees.length > 0) {
+              const bounds = L.latLngBounds(hiveTrees.map(t => [t.latitude, t.longitude] as [number, number]));
+              map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8, animate: true, duration: 1.8 });
+              setTimeout(() => onJourneyEnd?.(), 2000);
+            }
+          }
         }
       }
 
@@ -2487,11 +2498,38 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     if (!mapRef.current) return;
     const result = await geo.locate("map-locate-button");
     if (result && mapRef.current) {
+      const map = mapRef.current;
       const latlng: [number, number] = [result.lat, result.lng];
       setUserLatLng(latlng);
       setLocated(true);
-      placeUserMarker(mapRef.current, latlng, result.accuracy);
-      mapRef.current.flyTo(latlng, 14, { duration: 1.2 });
+      placeUserMarker(map, latlng, result.accuracy);
+      // "Awakening" profile — gentle zoom, slightly slower
+      map.flyTo(latlng, 14, { duration: 1.4, easeLinearity: 0.3 });
+
+      // Soft awakening ripple at user location
+      const ripple = L.circleMarker(latlng, {
+        radius: 0,
+        color: 'hsl(120, 40%, 50%)',
+        fillColor: 'hsl(120, 40%, 50%)',
+        fillOpacity: 0.15,
+        weight: 1.5,
+        opacity: 0.4,
+        interactive: false,
+      }).addTo(map);
+
+      // Animate radius expansion via CSS (Leaflet circles don't animate natively)
+      let frame = 0;
+      const maxFrames = 40;
+      const expandRipple = () => {
+        frame++;
+        const r = (frame / maxFrames) * 60;
+        const opacity = 0.4 * (1 - frame / maxFrames);
+        ripple.setRadius(r);
+        ripple.setStyle({ fillOpacity: 0.15 * (1 - frame / maxFrames), opacity });
+        if (frame < maxFrames) requestAnimationFrame(expandRipple);
+        else { try { map.removeLayer(ripple); } catch {} }
+      };
+      requestAnimationFrame(expandRipple);
     }
   }, [geo]);
 
@@ -2507,22 +2545,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   const handleSearchSelect = useCallback((tree: Tree) => {
     if (!mapRef.current) return;
-    mapRef.current.flyTo([tree.latitude, tree.longitude], 16, { duration: 1.2 });
-    // Open popup after flyTo completes
+    // "Seeking Line" profile — direct, intentional, shorter duration
+    mapRef.current.flyTo([tree.latitude, tree.longitude], 16, {
+      duration: 0.9,
+      easeLinearity: 0.25,
+    });
+    // Open popup after flyTo settles
     setTimeout(() => {
       const map = mapRef.current;
       if (!map || !clusterRef.current) return;
-      // Find and open the marker popup
       clusterRef.current.eachLayer((layer: any) => {
         const ll = layer.getLatLng?.();
         if (ll && Math.abs(ll.lat - tree.latitude) < 0.0001 && Math.abs(ll.lng - tree.longitude) < 0.0001) {
-          // Zoom to see individual markers then open popup
           clusterRef.current.zoomToShowLayer(layer, () => {
             layer.openPopup();
           });
         }
       });
-    }, 1300);
+    }, 1100);
   }, []);
 
   return (

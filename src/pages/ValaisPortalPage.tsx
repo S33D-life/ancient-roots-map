@@ -239,12 +239,12 @@ const ValaisPortalPage = () => {
         lng: tree.longitude,
         zoom: 15,
         countrySlug: "switzerland",
-        source: "atlas_card",
+        source: "tree",
       });
     }
   };
 
-  const openMapLayer = () => focusMap({ type: "area", id: "switzerland", countrySlug: "switzerland", source: "atlas_card" });
+  const openMapLayer = () => focusMap({ type: "area", id: "switzerland", countrySlug: "switzerland", source: "region" });
 
   return (
     <PageShell>
