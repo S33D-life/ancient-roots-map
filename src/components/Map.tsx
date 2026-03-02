@@ -150,15 +150,8 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     getUser();
   }, []);
 
-  // Get user location for local grove
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {}
-      );
-    }
-  }, []);
+  // User location is fetched on-demand via the Locate button (useGeolocation hook).
+  // No auto-geolocation on mount — avoids surprise permission prompts.
 
   // Sync offering counts from shared hook whenever they update
   useEffect(() => {
@@ -168,43 +161,54 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   // Fetch trees and birdsong from database (offerings handled by shared hook)
   useEffect(() => {
+    let cancelled = false;
+
     const fetchTrees = async () => {
-      const [treesResult, birdsongResult] = await Promise.all([
-        supabase.from('trees').select('*').not('latitude', 'is', null).not('longitude', 'is', null),
-        supabase.from('birdsong_offerings').select('tree_id, season'),
-      ]);
+      try {
+        const [treesResult, birdsongResult] = await Promise.all([
+          supabase.from('trees').select('*').not('latitude', 'is', null).not('longitude', 'is', null),
+          supabase.from('birdsong_offerings').select('tree_id, season'),
+        ]);
 
-      if (treesResult.error) {
-        console.error('Error fetching trees:', treesResult.error);
-        toast({ title: "Error loading trees", description: "Failed to load tree data", variant: "destructive" });
-      } else {
-        setTrees(treesResult.data || []);
-      }
+        if (cancelled) return;
 
-      const { data: seedData } = await supabase
-        .from('planted_seeds')
-        .select('id, tree_id, latitude, longitude, blooms_at, planter_id')
-        .is('collected_by', null)
-        .lte('blooms_at', new Date().toISOString());
-      setBloomedSeeds(seedData || []);
+        if (treesResult.error) {
+          console.error('Error fetching trees:', treesResult.error);
+          toast({ title: "Error loading trees", description: "Failed to load tree data", variant: "destructive" });
+        } else {
+          setTrees(treesResult.data || []);
+        }
 
-      if (!birdsongResult.error && birdsongResult.data) {
-        const bCounts: BirdsongCounts = {};
-        birdsongResult.data.forEach((b: any) => {
-          bCounts[b.tree_id] = (bCounts[b.tree_id] || 0) + 1;
-        });
-        setBirdsongCounts(bCounts);
+        const { data: seedData } = await supabase
+          .from('planted_seeds')
+          .select('id, tree_id, latitude, longitude, blooms_at, planter_id')
+          .is('collected_by', null)
+          .lte('blooms_at', new Date().toISOString());
+        if (!cancelled) setBloomedSeeds(seedData || []);
 
-        const treeMap: Record<string, any> = {};
-        (treesResult.data || []).forEach((t: any) => { treeMap[t.id] = t; });
-        const heatPts: BirdsongHeatPoint[] = [];
-        birdsongResult.data.forEach((b: any) => {
-          const tree = treeMap[b.tree_id];
-          if (tree?.latitude && tree?.longitude) {
-            heatPts.push({ tree_id: b.tree_id, season: b.season, latitude: tree.latitude, longitude: tree.longitude });
-          }
-        });
-        setBirdsongHeatPoints(heatPts);
+        if (!birdsongResult.error && birdsongResult.data && !cancelled) {
+          const bCounts: BirdsongCounts = {};
+          birdsongResult.data.forEach((b: any) => {
+            bCounts[b.tree_id] = (bCounts[b.tree_id] || 0) + 1;
+          });
+          setBirdsongCounts(bCounts);
+
+          const treeMap: Record<string, any> = {};
+          (treesResult.data || []).forEach((t: any) => { treeMap[t.id] = t; });
+          const heatPts: BirdsongHeatPoint[] = [];
+          birdsongResult.data.forEach((b: any) => {
+            const tree = treeMap[b.tree_id];
+            if (tree?.latitude && tree?.longitude) {
+              heatPts.push({ tree_id: b.tree_id, season: b.season, latitude: tree.latitude, longitude: tree.longitude });
+            }
+          });
+          setBirdsongHeatPoints(heatPts);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('[Map] fetchTrees failed:', err);
+          toast({ title: "Connection issue", description: "Some tree data may be missing", variant: "destructive" });
+        }
       }
     };
 
@@ -223,6 +227,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       .subscribe();
 
     return () => {
+      cancelled = true;
       clearTimeout(realtimeDebounce);
       supabase.removeChannel(channel);
     };
