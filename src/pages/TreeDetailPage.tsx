@@ -54,6 +54,7 @@ import PhenologyBadge from "@/components/PhenologyBadge";
 import PhenologyObservationButton from "@/components/PhenologyObservationButton";
 import PresenceRitual from "@/components/PresenceRitual";
 import { useTreePresence } from "@/hooks/use-tree-presence";
+import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -121,7 +122,10 @@ const TreeDetailPage = () => {
     treeId: id,
     treeSpecies: tree?.species || "",
     userId,
+    treeLat: tree?.latitude,
+    treeLng: tree?.longitude,
   });
+  const presenceCount = useTreePresenceCount(userId, id);
 
   // Check for available whispers at this tree
   useEffect(() => {
@@ -533,7 +537,7 @@ const TreeDetailPage = () => {
                       <p className="font-serif text-sm text-foreground">Tree Presence (333s)</p>
                       <p className="text-xs text-muted-foreground font-serif">
                         {presenceCompleted
-                          ? completedToday ? "✓ Presence completed today" : "✓ Presence completed"
+                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence completed · ${presenceCount} total`
                           : "Be still with this tree to unlock minting"}
                       </p>
                     </div>
@@ -1005,7 +1009,6 @@ const PhotoGrid = ({
     </motion.div>
   );
 };
-
 
 
 /* ---------- Book Shelf ---------- */

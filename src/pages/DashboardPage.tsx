@@ -34,6 +34,7 @@ import HearthWarmth from "@/components/dashboard/HearthWarmth";
 import EarnableToday from "@/components/dashboard/EarnableToday";
 import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
 import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
+import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 
@@ -421,6 +422,7 @@ const DashboardPage = () => {
                 <div className="space-y-8">
                   <FirstEncounterFunnel userId={user.id} />
                   <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
+                  <PresenceSpiralCard userId={user.id} />
                   <HearthWarmth userId={user.id} />
                   <EarnableToday userId={user.id} />
                   <ActiveCampaigns />
