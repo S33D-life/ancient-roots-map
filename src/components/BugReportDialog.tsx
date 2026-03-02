@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles } from "lucide-react";
+import { Loader2, ChevronDown, Upload, X, Lightbulb, Bug, Eye, Sparkles, WifiOff } from "lucide-react";
+import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -75,10 +76,12 @@ function getDeviceInfo() {
   return `${navigator.userAgent} | ${window.innerWidth}x${window.innerHeight} | ${navigator.language}`;
 }
 
-function getCapturedErrors(): string | null {
+function getCapturedErrors(): unknown[] | null {
   try {
     const raw = sessionStorage.getItem("s33d-error-log");
-    return raw || null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
   } catch { return null; }
 }
 
@@ -90,7 +93,7 @@ function buildDiagnostics() {
     build: buildId,
     url: window.location.href,
     timestamp: new Date().toISOString(),
-    recent_errors: errors ? JSON.parse(errors) : [],
+    recent_errors: errors ?? [],
   };
 }
 
@@ -194,8 +197,21 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
   };
 
   const submit = async () => {
-    // Double-submit guard
+    /**
+     * SPARK SAFETY CHECKLIST:
+     * 1. ✅ Debounce/lock — submitting || uploading guard
+     * 2. ✅ Offline check — navigator.onLine
+     * 3. ✅ Auth guard — checked before any DB call
+     * 4. ✅ try/catch — all async wrapped
+     * 5. ✅ ErrorBoundary — wraps dialog content
+     */
     if (submitting || uploading) return;
+
+    // Offline guard
+    if (!navigator.onLine) {
+      toast.error("You're offline — try again when connected", { icon: "📡" });
+      return;
+    }
 
     if (!form.title.trim() || !form.actual.trim()) {
       toast.error("Please fill in the title and description");
@@ -266,6 +282,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
         )}
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+        <SparkErrorBoundary fallbackMessage="The spark form ran into trouble — please close and try again.">
         {submitted ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -519,7 +536,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                   <div>🔧 Build: <code className="text-[10px]">{__BUILD_ID__}</code></div>
                 )}
                 {getCapturedErrors() && (
-                  <div>⚠️ <span className="text-destructive/70">{JSON.parse(getCapturedErrors()!).length} recent error(s) will be attached</span></div>
+                  <div>⚠️ <span className="text-destructive/70">{getCapturedErrors()!.length} recent error(s) will be attached</span></div>
                 )}
               </div>
 
@@ -531,6 +548,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
             </div>
           </>
         )}
+        </SparkErrorBoundary>
       </DialogContent>
     </Dialog>
   );
