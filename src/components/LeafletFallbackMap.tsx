@@ -454,7 +454,20 @@ const btnBase: React.CSSProperties = {
   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
 };
 
-/** Atlas nav button — inline in the map control row */
+/** Globe resting on an open book – compact SVG icon for Atlas */
+const GlobeOnBookIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="9" r="6" />
+    <ellipse cx="12" cy="9" rx="2.4" ry="6" />
+    <line x1="6" y1="9" x2="18" y2="9" />
+    <path d="M4 20 C4 18, 8 17.5, 12 18.5 C16 17.5, 20 18, 20 20" />
+    <line x1="12" y1="18.5" x2="12" y2="21" />
+    <path d="M4 20 C4 21, 8 21.5, 12 21" />
+    <path d="M20 20 C20 21, 16 21.5, 12 21" />
+  </svg>
+);
+
+/** Atlas nav button — inline in the map control column */
 function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
   const navigate = useNavigate();
   const guardRef = useRef(false);
@@ -472,7 +485,7 @@ function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
       title="World Atlas"
       aria-label="Open World Atlas"
     >
-      <Globe className="w-[18px] h-[18px]" />
+      <GlobeOnBookIcon className="w-[18px] h-[18px]" />
     </button>
   );
 }
@@ -2585,7 +2598,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const globeEmphasis = perspective === "collective";
         return (
           <>
-            <div className="absolute bottom-[5.5rem] left-3 z-[1000] flex gap-2">
+            <div className="absolute bottom-[5.5rem] left-3 z-[1000] flex flex-col-reverse gap-2">
               <button
                 onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
                 className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
@@ -2640,7 +2653,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   />
                 )}
               </button>
-              {/* Atlas portal */}
+              {/* Atlas portal — above layers & eye */}
               <AtlasNavButton btnBase={btnBase} />
             </div>
 
