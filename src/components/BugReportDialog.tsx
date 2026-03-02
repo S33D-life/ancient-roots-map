@@ -142,6 +142,8 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
     include_diagnostics: true,
   });
 
+  const isBug = form.report_type === "bug";
+
   const update = (key: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [key]: value }));
 
@@ -192,11 +194,14 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
   };
 
   const submit = async () => {
+    // Double-submit guard
+    if (submitting || uploading) return;
+
     if (!form.title.trim() || !form.actual.trim()) {
       toast.error("Please fill in the title and description");
       return;
     }
-    if (form.report_type === "bug" && !form.expected.trim()) {
+    if (isBug && !form.expected.trim()) {
       toast.error("Please describe what you expected");
       return;
     }
@@ -205,6 +210,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("Sign in to contribute");
+        setSubmitting(false);
         return;
       }
 
@@ -215,10 +221,10 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
         user_id: user.id,
         title: form.title.trim().slice(0, 200),
         actual: form.actual.trim().slice(0, 2000),
-        expected: form.expected.trim().slice(0, 1000) || "N/A",
+        expected: isBug ? form.expected.trim().slice(0, 1000) : "N/A",
         steps: form.steps.trim().slice(0, 2000) || "Not provided",
         suggestion: form.suggestion.trim().slice(0, 2000) || null,
-        severity: form.severity,
+        severity: isBug ? form.severity : "minor",
         frequency: form.frequency,
         feature_area: form.feature_area,
         report_type: form.report_type,
@@ -248,9 +254,6 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
       setSubmitting(false);
     }
   };
-
-  const typeIcon = form.report_type === "bug" ? Bug : form.report_type === "ux_improvement" ? Eye : Lightbulb;
-  const TypeIcon = typeIcon;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setTimeout(reset, 300); }}>
@@ -295,9 +298,6 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
               <p className="text-xs text-muted-foreground font-serif italic">
                 Help the garden flow more beautifully.
               </p>
-              <p className="text-[10px] text-muted-foreground/50 mt-1">
-                Not everything is broken. Sometimes it simply wants to evolve.
-              </p>
             </DialogHeader>
 
             <div className="space-y-4 mt-2">
@@ -325,7 +325,7 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 <Label htmlFor="spark-title">Title *</Label>
                 <Input
                   id="spark-title"
-                  placeholder={form.report_type === "bug" ? "e.g. Map markers disappear on zoom" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy insight"}
+                  placeholder={isBug ? "e.g. Map markers disappear on zoom" : form.report_type === "ux_improvement" ? "e.g. Tree card needs clearer CTA" : "e.g. Heart economy insight"}
                   value={form.title}
                   onChange={(e) => update("title", e.target.value)}
                   maxLength={200}
@@ -335,11 +335,11 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
               {/* Description */}
               <div className="space-y-1.5">
                 <Label htmlFor="spark-actual">
-                  {form.report_type === "bug" ? "What happened? *" : form.report_type === "ux_improvement" ? "What could flow better? *" : "What did you observe? *"}
+                  {isBug ? "What happened? *" : form.report_type === "ux_improvement" ? "What could flow better? *" : "Describe your idea *"}
                 </Label>
                 <Textarea
                   id="spark-actual"
-                  placeholder={form.report_type === "bug" ? "Describe what went wrong…" : "Describe your observation…"}
+                  placeholder={isBug ? "Describe what went wrong…" : form.report_type === "ux_improvement" ? "Describe the experience…" : "Share your vision…"}
                   value={form.actual}
                   onChange={(e) => update("actual", e.target.value)}
                   maxLength={2000}
@@ -347,8 +347,8 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 />
               </div>
 
-              {/* Expected (required for bugs) */}
-              {form.report_type === "bug" && (
+              {/* Expected (required for bugs only) */}
+              {isBug && (
                 <div className="space-y-1.5">
                   <Label htmlFor="spark-expected">What did you expect? *</Label>
                   <Textarea
@@ -362,16 +362,16 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 </div>
               )}
 
-              {/* Suggestion */}
+              {/* Suggestion (always optional) */}
               <div className="space-y-1.5">
                 <Label htmlFor="spark-suggestion" className="flex items-center gap-1">
                   <Lightbulb className="w-3 h-3" />
-                  Suggestion
+                  {isBug ? "Suggestion" : "How would you improve this?"}
                   <span className="text-muted-foreground/50 text-[10px]">(optional)</span>
                 </Label>
                 <Textarea
                   id="spark-suggestion"
-                  placeholder="How would you improve this?"
+                  placeholder={isBug ? "How would you fix this?" : "Share your idea for improvement…"}
                   value={form.suggestion}
                   onChange={(e) => update("suggestion", e.target.value)}
                   maxLength={2000}
@@ -379,23 +379,25 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                 />
               </div>
 
-              {/* Severity + Feature Area */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Severity (bugs only) + Feature Area (always) */}
+              <div className={`grid gap-3 ${isBug ? "grid-cols-2" : "grid-cols-1"}`}>
+                {isBug && (
+                  <div className="space-y-1.5">
+                    <Label>Severity</Label>
+                    <Select value={form.severity} onValueChange={(v) => update("severity", v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {SEVERITIES.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            <span className="text-sm">{s.label}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-1.5">
-                  <Label>Severity *</Label>
-                  <Select value={form.severity} onValueChange={(v) => update("severity", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {SEVERITIES.map((s) => (
-                        <SelectItem key={s.value} value={s.value}>
-                          <span className="text-sm">{s.label}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Feature Area *</Label>
+                  <Label>Feature Area</Label>
                   <Select value={form.feature_area} onValueChange={(v) => update("feature_area", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -464,17 +466,19 @@ const BugReportDialog = ({ trigger, defaultOpen, open: controlledOpen, onOpenCha
                     exit={{ height: 0, opacity: 0 }}
                     className="space-y-4 overflow-hidden"
                   >
-                    <div className="space-y-1.5">
-                      <Label htmlFor="spark-steps">Steps to reproduce</Label>
-                      <Textarea
-                        id="spark-steps"
-                        placeholder="1. Go to…&#10;2. Click on…&#10;3. See error"
-                        value={form.steps}
-                        onChange={(e) => update("steps", e.target.value)}
-                        maxLength={2000}
-                        className="min-h-[80px]"
-                      />
-                    </div>
+                    {isBug && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="spark-steps">Steps to reproduce</Label>
+                        <Textarea
+                          id="spark-steps"
+                          placeholder={"1. Go to…\n2. Click on…\n3. See error"}
+                          value={form.steps}
+                          onChange={(e) => update("steps", e.target.value)}
+                          maxLength={2000}
+                          className="min-h-[80px]"
+                        />
+                      </div>
+                    )}
 
                     <div className="space-y-1.5">
                       <Label>Reproducible?</Label>
