@@ -1,6 +1,6 @@
 /**
  * CrownSection — inline "yOur Golden Dream" preview for the tree scroll.
- * Links to the full /golden-dream page for deep content.
+ * Crown = brightest, most luminous section. Golden radiance.
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -15,59 +15,62 @@ const ROOMS = [
 const CrownSection = () => (
   <section
     id="golden-dream"
-    className="min-h-screen flex flex-col items-center justify-center px-4 py-24 relative overflow-hidden"
+    className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
   >
-    {/* Atmospheric background */}
+    {/* Atmospheric background — luminous golden warmth */}
     <div
-      className="absolute inset-0 pointer-events-none"
+      className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
       style={{
         background: `
-          radial-gradient(ellipse at 50% 30%, hsl(45 80% 60% / 0.08), transparent 60%),
-          radial-gradient(ellipse at 50% 80%, hsl(42 60% 30% / 0.06), transparent 50%),
-          linear-gradient(to bottom, hsl(var(--background)), hsl(42 15% 8% / 0.3) 50%, hsl(var(--background)))
+          radial-gradient(ellipse at 50% 25%, hsl(45 70% 55% / 0.07), transparent 55%),
+          radial-gradient(ellipse at 50% 85%, hsl(42 50% 25% / 0.04), transparent 45%),
+          linear-gradient(to bottom, hsl(var(--background)), hsl(45 12% 9% / 0.15) 50%, hsl(var(--background)))
         `,
       }}
     />
 
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8 }}
-      className="relative z-10 max-w-2xl text-center space-y-6"
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="relative z-10 max-w-xl text-center space-y-8"
     >
       <div
-        className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
-        style={{ background: "hsl(45 100% 60% / 0.12)" }}
+        className="w-12 h-12 rounded-full flex items-center justify-center mx-auto"
+        style={{ background: "hsl(45 80% 55% / 0.1)" }}
       >
-        <Sparkles className="w-7 h-7" style={{ color: "hsl(45 100% 60%)" }} />
+        <Sparkles className="w-6 h-6" style={{ color: "hsl(45 80% 60%)" }} />
       </div>
 
-      <p className="text-[10px] uppercase tracking-[0.3em] font-serif text-muted-foreground/50">
+      <p className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/40">
         The Crown
       </p>
 
-      <h2 className="text-3xl md:text-5xl font-serif" style={{ color: "hsl(45 80% 65%)" }}>
+      <h2
+        className="text-3xl md:text-5xl font-serif tracking-wide leading-tight"
+        style={{ color: "hsl(45 70% 62%)" }}
+      >
         yOur Golden Dream
       </h2>
 
-      <p className="text-muted-foreground/70 font-serif text-sm md:text-base max-w-md mx-auto leading-relaxed">
+      <p className="text-muted-foreground/60 font-serif text-sm md:text-base max-w-sm mx-auto leading-[1.8]">
         A living vision shaped by every wanderer who passes through the grove.
         The dream grows with the tree.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
         {ROOMS.map((room) => {
           const Icon = room.icon;
           return (
             <Link
               key={room.title}
               to={room.to}
-              className="group flex flex-col items-center gap-2 px-4 py-4 rounded-xl border border-border/20 bg-card/20 backdrop-blur-sm hover:border-primary/30 hover:bg-card/40 transition-all duration-300"
+              className="group flex flex-col items-center gap-2.5 px-4 py-5 rounded-xl border border-border/15 bg-card/15 backdrop-blur-sm hover:border-primary/25 hover:bg-card/30 transition-all duration-500"
             >
-              <Icon className="w-5 h-5 text-primary/60 group-hover:text-primary transition-colors" />
-              <p className="font-serif text-sm text-foreground/80">{room.title}</p>
-              <p className="text-[10px] text-muted-foreground/50">{room.description}</p>
+              <Icon className="w-4.5 h-4.5 text-primary/50 group-hover:text-primary/80 transition-colors duration-300" />
+              <p className="font-serif text-[13px] text-foreground/75 tracking-wide">{room.title}</p>
+              <p className="text-[9px] text-muted-foreground/40 leading-relaxed">{room.description}</p>
             </Link>
           );
         })}
@@ -75,7 +78,7 @@ const CrownSection = () => (
 
       <Link
         to="/golden-dream"
-        className="inline-flex items-center gap-2 text-xs font-serif text-primary/60 hover:text-primary transition-colors pt-2"
+        className="inline-flex items-center gap-2 text-[11px] font-serif text-primary/50 hover:text-primary/80 transition-colors duration-300 pt-2"
       >
         Enter the full Golden Dream <ArrowRight className="w-3 h-3" />
       </Link>

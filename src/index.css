@@ -375,8 +375,13 @@ All colors MUST be HSL.
   /* ── Softer section dividers ── */
   .section-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.25), transparent);
-    margin: 2rem 0;
+    background: linear-gradient(90deg, transparent, hsl(var(--border) / 0.15), transparent);
+    margin: 2.5rem 0;
+  }
+
+  /* ── Tree scroll section transitions ── */
+  .tree-section-bg {
+    transition: opacity 1s ease-in-out;
   }
 
   /* ═══════════════════════════════════════════════════

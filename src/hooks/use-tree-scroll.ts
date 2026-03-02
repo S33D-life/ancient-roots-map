@@ -30,7 +30,7 @@ export function useTreeScroll() {
   const initialScrollDone = useRef(false);
   const isManualScroll = useRef(false);
 
-  // Scroll to atlas-hero on mount (with retry for SSR/lazy render)
+  // Scroll to atlas-hero on mount (with retry for entrance animation delay)
   useEffect(() => {
     if (initialScrollDone.current) return;
     
@@ -48,12 +48,13 @@ export function useTreeScroll() {
       return false;
     };
 
-    // Try immediately, then retry with rAF chain
+    // Retry chain — entrance animation may delay DOM
     if (!tryScroll()) {
-      requestAnimationFrame(() => {
-        if (!tryScroll()) {
-          setTimeout(tryScroll, 100);
-        }
+      const retries = [50, 150, 300, 600];
+      retries.forEach((ms) => {
+        setTimeout(() => {
+          if (!initialScrollDone.current) tryScroll();
+        }, ms);
       });
     }
   }, []);
