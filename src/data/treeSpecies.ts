@@ -268,6 +268,7 @@ const TREE_SPECIES: TreeSpecies[] = [
 
   // ── Zimbabwe / African species ──
   { common: "Sycamore Fig", scientific: "Ficus sycomorus", family: "Moraceae" },
+  { common: "Wild Fig", scientific: "Ficus natalensis", family: "Moraceae", aliases: ["Natal Fig", "Arterial Fig"] },
   { common: "Fever Tree", scientific: "Acacia xanthophloea", family: "Fabaceae" },
   { common: "Mopane", scientific: "Colophospermum mopane", family: "Fabaceae" },
   { common: "Msasa", scientific: "Brachystegia spiciformis", family: "Fabaceae" },
