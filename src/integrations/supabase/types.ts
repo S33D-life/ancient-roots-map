@@ -4952,24 +4952,30 @@ export type Database = {
       }
       trees: {
         Row: {
+          archetype: string | null
           bioregion: string | null
           created_at: string
           created_by: string | null
           description: string | null
           discovery_list: string | null
+          elemental_signature: string[] | null
           estimated_age: number | null
           girth_cm: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
+          is_anchor_node: boolean | null
           is_churchyard_tree: boolean | null
           latitude: number | null
           lineage: string | null
           linked_churchyard_id: string | null
           longitude: number | null
+          lore_text: string | null
           name: string
           nation: string | null
           project_name: string | null
           project_url: string | null
+          radio_theme: string | null
+          seasonal_tone: string | null
           source_id: string | null
           source_name: string | null
           source_url: string | null
@@ -4977,26 +4983,33 @@ export type Database = {
           state: string | null
           updated_at: string
           what3words: string | null
+          wish_tags: string[] | null
         }
         Insert: {
+          archetype?: string | null
           bioregion?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           discovery_list?: string | null
+          elemental_signature?: string[] | null
           estimated_age?: number | null
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
+          is_anchor_node?: boolean | null
           is_churchyard_tree?: boolean | null
           latitude?: number | null
           lineage?: string | null
           linked_churchyard_id?: string | null
           longitude?: number | null
+          lore_text?: string | null
           name: string
           nation?: string | null
           project_name?: string | null
           project_url?: string | null
+          radio_theme?: string | null
+          seasonal_tone?: string | null
           source_id?: string | null
           source_name?: string | null
           source_url?: string | null
@@ -5004,26 +5017,33 @@ export type Database = {
           state?: string | null
           updated_at?: string
           what3words?: string | null
+          wish_tags?: string[] | null
         }
         Update: {
+          archetype?: string | null
           bioregion?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           discovery_list?: string | null
+          elemental_signature?: string[] | null
           estimated_age?: number | null
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
+          is_anchor_node?: boolean | null
           is_churchyard_tree?: boolean | null
           latitude?: number | null
           lineage?: string | null
           linked_churchyard_id?: string | null
           longitude?: number | null
+          lore_text?: string | null
           name?: string
           nation?: string | null
           project_name?: string | null
           project_url?: string | null
+          radio_theme?: string | null
+          seasonal_tone?: string | null
           source_id?: string | null
           source_name?: string | null
           source_url?: string | null
@@ -5031,6 +5051,7 @@ export type Database = {
           state?: string | null
           updated_at?: string
           what3words?: string | null
+          wish_tags?: string[] | null
         }
         Relationships: [
           {
