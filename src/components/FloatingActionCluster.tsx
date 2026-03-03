@@ -64,10 +64,10 @@ const FloatingActionCluster = () => {
   return (
     <>
       <div
-        className="fixed bottom-[5.5rem] right-3 md:hidden"
+        className="fixed right-3 md:hidden"
         style={{
           zIndex: Z.FLOATING,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
         }}
       >
         {/* Expanded items */}

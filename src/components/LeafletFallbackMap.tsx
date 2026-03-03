@@ -2747,7 +2747,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const globeEmphasis = perspective === "collective";
         return (
           <>
-            <div className="absolute bottom-[5.5rem] left-3 z-[1000] flex flex-col-reverse gap-2">
+            <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
               <button
                 onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
                 className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
@@ -2804,7 +2804,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               <AtlasNavButton btnBase={btnBase} />
             </div>
 
-            <div className="absolute bottom-[5.5rem] left-1/2 -translate-x-1/2 z-[1000] flex gap-2">
+            <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
               <button
                 onClick={handleFindMe}
                 disabled={locating}

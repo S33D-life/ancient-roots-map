@@ -36,11 +36,11 @@ const FloatingAtlasButton = () => {
     <Link
       to="/atlas"
       aria-label="Open World Atlas"
-      className="fixed bottom-[7.5rem] right-4 z-[65] md:hidden w-11 h-11 rounded-full
+      className="fixed right-4 z-[65] md:hidden w-11 h-11 rounded-full
         bg-primary text-primary-foreground shadow-lg
         flex items-center justify-center
         hover:scale-105 active:scale-95 transition-transform"
-      style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      style={{ bottom: 'calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 60px)' }}
     >
       <GlobeOnBook className="w-5 h-5" />
     </Link>

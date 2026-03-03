@@ -8,6 +8,12 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Layout safe-area constants */
+    --header-height: 3.5rem;
+    --bottom-nav-height: 3.5rem;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+
     /* Ancient forest mystical theme - deep greens and golden amber */
     --background: 80 15% 10%;
     --foreground: 45 100% 85%;

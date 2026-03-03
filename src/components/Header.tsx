@@ -113,9 +113,23 @@ const Header = () => {
   const heartBalance = useHeartBalance(user?.id ?? null);
   const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
 
-  // Realtime heart toast — listen for new heart_transactions
+  // Realtime heart toast — listen for new heart_transactions, group duplicates
   useEffect(() => {
     if (!user) return;
+
+    // Accumulator for grouping rapid heart events
+    let pendingHearts: { amount: number; count: number; type: string } = { amount: 0, count: 0, type: '' };
+    let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const flushToast = () => {
+      if (pendingHearts.count === 0) return;
+      const { amount, count, type } = pendingHearts;
+      const label = type === 'windfall' ? '🌊 Windfall' : type === 'sower' ? '🌱 Sower' : type === 'wanderer' ? '🚶 Wanderer' : '❤️ Heart';
+      const desc = count > 1 ? `${count} check-ins` : "S33D Hearts earned";
+      toast(`${label} +${amount}`, { description: desc, duration: 3000 });
+      pendingHearts = { amount: 0, count: 0, type: '' };
+    };
+
     const channel = supabase
       .channel('header-hearts')
       .on(
@@ -130,14 +144,27 @@ const Header = () => {
           const amount = payload.new?.amount || 0;
           const heartType = payload.new?.heart_type || 'heart';
           if (amount > 0) {
-            const label = heartType === 'windfall' ? '🌊 Windfall' : heartType === 'sower' ? '🌱 Sower' : heartType === 'wanderer' ? '🚶 Wanderer' : '❤️ Heart';
-            toast(`${label} +${amount}`, { description: "S33D Hearts earned", duration: 3000 });
+            // If same type, accumulate; otherwise flush previous and start new
+            if (pendingHearts.count > 0 && pendingHearts.type !== heartType) {
+              flushToast();
+            }
+            pendingHearts.amount += amount;
+            pendingHearts.count += 1;
+            pendingHearts.type = heartType;
+
+            // Debounce: flush after 3s of no new events
+            if (flushTimer) clearTimeout(flushTimer);
+            flushTimer = setTimeout(flushToast, 3000);
           }
         }
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (flushTimer) clearTimeout(flushTimer);
+      flushToast(); // flush any pending
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   const checkPendingActivity = async (userId: string) => {
@@ -166,6 +193,8 @@ const Header = () => {
         style={{
           background: 'hsl(140 30% 10%)',
           paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
         }}
       >
       {/* Moss-wood texture background */}
