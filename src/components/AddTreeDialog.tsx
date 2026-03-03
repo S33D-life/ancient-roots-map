@@ -426,32 +426,54 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   }, [handlePhotoDrop]);
 
   // Check for nearby duplicates before creating
+  // Two tiers: exact proximity (25m any tree) + wider species/name match (2km)
   const checkForDuplicates = useCallback(async (): Promise<boolean> => {
     if (lat === null || lng === null) return false;
-    const DUPLICATE_RADIUS_M = 25;
-    const degLat = DUPLICATE_RADIUS_M / 110540;
-    const degLng = DUPLICATE_RADIUS_M / (111320 * Math.cos((lat * Math.PI) / 180));
+
+    const EXACT_RADIUS_M = 25;
+    const WIDE_RADIUS_M = 2000;
+    const degLatWide = WIDE_RADIUS_M / 110540;
+    const degLngWide = WIDE_RADIUS_M / (111320 * Math.cos((lat * Math.PI) / 180));
+
     try {
       const { data } = await supabase
         .from("trees")
-        .select("id, name, latitude, longitude")
-        .gte("latitude", lat - degLat)
-        .lte("latitude", lat + degLat)
-        .gte("longitude", lng - degLng)
-        .lte("longitude", lng + degLng)
-        .limit(5);
+        .select("id, name, species, latitude, longitude")
+        .gte("latitude", lat - degLatWide)
+        .lte("latitude", lat + degLatWide)
+        .gte("longitude", lng - degLngWide)
+        .lte("longitude", lng + degLngWide)
+        .limit(20);
 
       if (data && data.length > 0) {
-        const closest = data
+        const withDist = data
           .filter((t) => t.latitude != null && t.longitude != null)
           .map((t) => ({
             ...t,
             distanceM: getDistance(lat, lng, t.latitude!, t.longitude!),
           }))
-          .sort((a, b) => a.distanceM - b.distanceM)[0];
+          .sort((a, b) => a.distanceM - b.distanceM);
 
-        if (closest && closest.distanceM <= DUPLICATE_RADIUS_M) {
-          setDuplicateTree({ id: closest.id, name: closest.name, distanceM: Math.round(closest.distanceM) });
+        // Tier 1: Any tree within 25m
+        const exactMatch = withDist.find((t) => t.distanceM <= EXACT_RADIUS_M);
+        if (exactMatch) {
+          setDuplicateTree({ id: exactMatch.id, name: exactMatch.name, distanceM: Math.round(exactMatch.distanceM) });
+          setShowDuplicateGuard(true);
+          return true;
+        }
+
+        // Tier 2: Same name or species within 2km
+        const trimName = (name.trim() || "").toLowerCase();
+        const trimSpecies = (species.trim() || "").toLowerCase();
+        const nameOrSpeciesMatch = withDist.find((t) => {
+          if (t.distanceM > WIDE_RADIUS_M) return false;
+          const sameName = trimName && t.name?.toLowerCase().includes(trimName);
+          const sameSpecies = trimSpecies && t.species?.toLowerCase() === trimSpecies;
+          return sameName || sameSpecies;
+        });
+
+        if (nameOrSpeciesMatch) {
+          setDuplicateTree({ id: nameOrSpeciesMatch.id, name: nameOrSpeciesMatch.name, distanceM: Math.round(nameOrSpeciesMatch.distanceM) });
           setShowDuplicateGuard(true);
           return true;
         }
@@ -460,7 +482,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       // ignore
     }
     return false;
-  }, [lat, lng]);
+  }, [lat, lng, name, species]);
 
   const handleSubmit = async () => {
     if (!species.trim()) {
