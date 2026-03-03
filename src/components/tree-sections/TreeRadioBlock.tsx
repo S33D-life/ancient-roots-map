@@ -86,16 +86,18 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
         style={{ background: "linear-gradient(160deg, hsl(var(--card) / 0.7), hsl(var(--secondary) / 0.3))" }}
       >
         <div className="p-4 flex items-center gap-4">
-          {/* Waveform-style visual */}
+          {/* Waveform-style visual with breathing animation */}
           <div className="flex items-end gap-0.5 h-8 shrink-0">
             {[3, 5, 7, 4, 6, 3, 5, 4, 6, 3].map((h, i) => (
               <div
                 key={i}
-                className="w-1 rounded-full transition-all duration-500"
+                className="w-1 rounded-full"
                 style={{
                   height: isPlaying ? `${h * 3}px` : `${h}px`,
                   background: `hsl(var(--primary) / ${isPlaying ? 0.5 : 0.2})`,
-                  animationDelay: `${i * 0.1}s`,
+                  transition: "height 0.5s ease, background 0.5s ease",
+                  animation: isPlaying ? `waveBreath ${1.2 + i * 0.15}s ease-in-out infinite alternate` : "none",
+                  animationDelay: `${i * 0.08}s`,
                 }}
               />
             ))}
