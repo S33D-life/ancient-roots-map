@@ -336,24 +336,55 @@ const TreeDetailPage = () => {
           </TabsList>
 
           {/* ── OVERVIEW TAB ── */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Lore & Identity */}
-            <TreeLoreSection
-              loreText={(tree as any).lore_text}
-              elementalSignature={(tree as any).elemental_signature}
-              archetype={(tree as any).archetype}
-              seasonalTone={(tree as any).seasonal_tone}
+          <TabsContent value="overview" className="space-y-8">
+            {/* Story + Structured Data (two-column) */}
+            <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
+
+            {/* Offerings Preview */}
+            <TreeOfferingsPreview
+              offerings={offerings}
+              onAddOffering={() => setAddOfferingOpen(true)}
+              treeName={tree.name}
             />
 
-            {/* Wish Tags for Anchor Nodes */}
-            {(tree as any).is_anchor_node && (tree as any).wish_tags && (
-              <div className="text-center">
-                <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-serif">Wishing Tree Anchor</span>
-                <WishTagSigils tags={(tree as any).wish_tags} />
-              </div>
-            )}
+            {/* Wishes Section */}
+            <TreeWishesSection
+              treeId={id!}
+              treeName={tree.name}
+              wishTags={(tree as any).wish_tags}
+              isAnchorNode={(tree as any).is_anchor_node}
+            />
 
-            {/* Weather at the Tree */}
+            {/* Tree Radio */}
+            <TreeRadioBlock
+              treeId={id!}
+              treeName={tree.name}
+              species={tree.species}
+              radioTheme={(tree as any).radio_theme}
+            />
+
+            {/* Map Journey Anchor */}
+            <TreeMapJourneyAnchor
+              treeId={tree.id}
+              treeName={tree.name}
+              lat={tree.latitude}
+              lng={tree.longitude}
+              w3w={tree.what3words}
+            />
+
+            {/* Hive Connections */}
+            <TreeHiveConnections
+              species={tree.species}
+              ecoBelonging={ecoBelonging}
+            />
+
+            {/* Heart Rewards */}
+            <TreeHeartRewards />
+
+            {/* Vine divider */}
+            <div className="vine-divider" />
+
+            {/* Weather */}
             <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
             {/* Photo Gallery */}
@@ -371,42 +402,6 @@ const TreeDetailPage = () => {
 
             {/* Species Attestation */}
             <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
-
-            {/* Tree Record (Stewardship offerings) */}
-            {stewardshipOfferings.length > 0 && (
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
-                  <h2 className="text-xl font-serif text-primary tracking-widest uppercase flex items-center gap-2">
-                    🌳 Tree Record
-                  </h2>
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
-                </div>
-                <p className="text-xs text-muted-foreground font-serif mb-3 text-center">
-                  Shared stewardship records contributed to this tree's public archive.
-                </p>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {stewardshipOfferings.map((off) => (
-                    <Card key={off.id} className="bg-card/60 backdrop-blur border-l-2 border-l-primary/50 border-primary/20">
-                      <CardContent className="p-3 flex items-center gap-3">
-                        {off.media_url && off.type === "photo" && (
-                          <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                          <span className="text-[10px] text-muted-foreground/60 font-mono">
-                            {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                          </span>
-                        </div>
-                        <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary gap-1">
-                          📋 {off.type}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Sources */}
             <TreeSourcesDisplay
