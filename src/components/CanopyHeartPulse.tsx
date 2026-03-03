@@ -35,7 +35,8 @@ const CanopyHeartPulse = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="fixed inset-0 z-[200] pointer-events-none flex items-end justify-center pb-28 md:pb-16"
+          className="fixed inset-0 z-[200] pointer-events-none flex items-end justify-center md:pb-16"
+          style={{ paddingBottom: "calc(5rem + max(env(safe-area-inset-bottom, 0px), 8px))" }}
         >
           <motion.div
             initial={{ y: 20, scale: 0.9 }}

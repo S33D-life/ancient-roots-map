@@ -166,6 +166,8 @@ const Header = () => {
         style={{
           background: 'hsl(140 30% 10%)',
           paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
         }}
       >
       {/* Moss-wood texture background */}
