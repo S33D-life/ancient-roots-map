@@ -9,6 +9,16 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import TreeLoreSection from "@/components/TreeLoreSection";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import WishTagSigils from "@/components/WishTagSigils";
+import {
+  TreePageHero,
+  TreeStorySection,
+  TreeOfferingsPreview,
+  TreeWishesSection,
+  TreeRadioBlock,
+  TreeMapJourneyAnchor,
+  TreeHiveConnections,
+  TreeHeartRewards,
+} from "@/components/tree-sections";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
