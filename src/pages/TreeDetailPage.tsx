@@ -9,6 +9,16 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import TreeLoreSection from "@/components/TreeLoreSection";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import WishTagSigils from "@/components/WishTagSigils";
+import {
+  TreePageHero,
+  TreeStorySection,
+  TreeOfferingsPreview,
+  TreeWishesSection,
+  TreeRadioBlock,
+  TreeMapJourneyAnchor,
+  TreeHiveConnections,
+  TreeHeartRewards,
+} from "@/components/tree-sections";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
@@ -279,172 +289,37 @@ const TreeDetailPage = () => {
           Back
         </button>
 
-        {/* Tree Info Card */}
-        <div className="relative mb-10 rounded-xl border border-border overflow-hidden bg-card/60 backdrop-blur">
-          {/* Heart Canopy Pulse — one-time glow on anchor nodes */}
-          {(tree as any).is_anchor_node && <HeartCanopyPulse treeName={tree.name} />}
-          {/* Decorative top accent */}
-          <div
-            className="h-1"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), hsl(var(--accent) / 0.4), transparent)",
+        {/* ══════ MASTER TEMPLATE: Sacred Hero ══════ */}
+        <TreePageHero
+          tree={tree}
+          photoUrl={getOfferingsByType("photo")[0]?.media_url || null}
+          onMakeOffering={() => setAddOfferingOpen(true)}
+          onAddWish={() => setSectionTab("overview")}
+          onViewMap={() => {
+            if (tree.latitude && tree.longitude) {
+              focusMap({ type: "tree", id: tree.id, lat: tree.latitude, lng: tree.longitude, source: "tree" });
+            } else if (tree.what3words) {
+              focusMap({ type: "tree", id: tree.id, w3w: tree.what3words, source: "tree" });
+            }
+          }}
+          onShare={() => setShareCardOpen(true)}
+          ecoBelonging={ecoBelonging}
+          onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
+        />
+
+        {tree && (
+          <TreeShareCard
+            open={shareCardOpen}
+            onOpenChange={setShareCardOpen}
+            tree={{
+              id: tree.id,
+              name: tree.name,
+              species: tree.species,
+              imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
+              location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
             }}
           />
-          <div className="p-6 md:p-8">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-serif text-primary tracking-wide">
-                  {tree.name}
-                </h1>
-                <p className="text-muted-foreground italic font-serif text-lg mt-1">
-                  {tree.species}
-                  {(() => {
-                    const hive = getHiveForSpecies(tree.species);
-                    if (!hive) return null;
-                    return (
-                      <button
-                        onClick={() => navigate(`/hive/${hive.slug}`)}
-                        className="ml-2 inline-flex items-center gap-1 text-xs font-serif px-2 py-0.5 rounded-full border transition-colors hover:text-primary"
-                        style={{ borderColor: `hsl(${hive.accentHsl} / 0.4)`, color: `hsl(${hive.accentHsl})` }}
-                      >
-                        {hive.icon} {hive.displayName}
-                      </button>
-                    );
-                  })()}
-                </p>
-                {/* Phenology phase badge */}
-                {tree.species && (
-                  <div className="flex items-center gap-2 flex-wrap mt-1">
-                    <PhenologyBadge
-                      speciesKey={tree.species.toLowerCase().replace(/ /g, "_")}
-                      speciesName={tree.species}
-                    />
-                    <PhenologyObservationButton
-                      treeId={id}
-                      speciesKey={tree.species.toLowerCase().replace(/ /g, "_")}
-                      userId={userId}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <TreeCheckinButton
-                  treeId={id!}
-                  treeName={tree.name}
-                  treeLat={tree.latitude}
-                  treeLng={tree.longitude}
-                  userId={userId}
-                  onCheckinComplete={() => refetchCheckins()}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 font-serif text-xs gap-1.5"
-                  onClick={() => setProposeEditOpen(true)}
-                >
-                  <FileText className="h-3.5 w-3.5" /> Propose Edit
-                </Button>
-                {(tree.latitude || tree.what3words) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 font-serif text-xs gap-1.5"
-                    onClick={() => {
-                      if (tree.latitude && tree.longitude) {
-                        focusMap({ type: "tree", id: tree.id, lat: tree.latitude, lng: tree.longitude, source: "tree" });
-                      } else if (tree.what3words) {
-                        focusMap({ type: "tree", id: tree.id, w3w: tree.what3words, source: "tree" });
-                      }
-                    }}
-                  >
-                    <Map className="h-3.5 w-3.5" /> View on Map
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => setShareCardOpen(true)}
-                  title="Share this tree"
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                {tree && (
-                  <TreeShareCard
-                    open={shareCardOpen}
-                    onOpenChange={setShareCardOpen}
-                    tree={{
-                      id: tree.id,
-                      name: tree.name,
-                      species: tree.species,
-                      imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
-                      location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
-                    }}
-                  />
-                )}
-                {tree.grove_scale && (
-                  <Badge
-                    variant="outline"
-                    className="border-primary/50 text-primary font-serif text-xs tracking-widest uppercase"
-                  >
-                    {tree.grove_scale.replace("_", " ")}
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm mt-4 mb-4">
-              <MapPin className="h-4 w-4 text-primary/70" />
-              <span className="font-mono text-muted-foreground tracking-wider">
-                {tree.what3words}
-              </span>
-            </div>
-
-            {tree.description && (
-              <div className="border-l-2 border-primary/30 pl-4 my-4">
-                <p className={`text-foreground/80 font-serif leading-relaxed ${!descExpanded ? 'line-clamp-3' : ''}`}>
-                  {tree.description}
-                </p>
-                {tree.description.length > 150 && (
-                  <button
-                    onClick={() => setDescExpanded(!descExpanded)}
-                    className="text-primary/70 hover:text-primary text-sm font-serif mt-1 transition-colors"
-                  >
-                    {descExpanded ? 'Read less' : 'Read more...'}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Collapsible metadata details */}
-            {(tree.nation || tree.state || tree.bioregion || tree.estimated_age) && (
-              <div className="mt-4">
-                <button
-                  onClick={() => setDetailsOpen(!detailsOpen)}
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground font-serif transition-colors"
-                >
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${detailsOpen ? 'rotate-180' : ''}`} />
-                  {detailsOpen ? 'Hide details' : 'Show details'}
-                </button>
-                {detailsOpen && (
-                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mt-3 font-serif animate-fade-in">
-                    {tree.nation && <span className="bg-secondary/50 px-3 py-1 rounded-full">🌍 {tree.nation}</span>}
-                    {tree.state && <span className="bg-secondary/50 px-3 py-1 rounded-full">📍 {tree.state}</span>}
-                    {tree.estimated_age && (
-                      <span className="bg-secondary/50 px-3 py-1 rounded-full">🕰️ ~{tree.estimated_age} years</span>
-                    )}
-                    {ecoBelonging.map(br => (
-                      <Link key={br.id} to={`/atlas/bio-regions/${br.id}`} className="bg-primary/10 text-primary px-3 py-1 rounded-full hover:bg-primary/20 transition-colors">
-                        🌿 {br.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
@@ -461,24 +336,55 @@ const TreeDetailPage = () => {
           </TabsList>
 
           {/* ── OVERVIEW TAB ── */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Lore & Identity */}
-            <TreeLoreSection
-              loreText={(tree as any).lore_text}
-              elementalSignature={(tree as any).elemental_signature}
-              archetype={(tree as any).archetype}
-              seasonalTone={(tree as any).seasonal_tone}
+          <TabsContent value="overview" className="space-y-8">
+            {/* Story + Structured Data (two-column) */}
+            <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
+
+            {/* Offerings Preview */}
+            <TreeOfferingsPreview
+              offerings={offerings}
+              onAddOffering={() => setAddOfferingOpen(true)}
+              treeName={tree.name}
             />
 
-            {/* Wish Tags for Anchor Nodes */}
-            {(tree as any).is_anchor_node && (tree as any).wish_tags && (
-              <div className="text-center">
-                <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-serif">Wishing Tree Anchor</span>
-                <WishTagSigils tags={(tree as any).wish_tags} />
-              </div>
-            )}
+            {/* Wishes Section */}
+            <TreeWishesSection
+              treeId={id!}
+              treeName={tree.name}
+              wishTags={(tree as any).wish_tags}
+              isAnchorNode={(tree as any).is_anchor_node}
+            />
 
-            {/* Weather at the Tree */}
+            {/* Tree Radio */}
+            <TreeRadioBlock
+              treeId={id!}
+              treeName={tree.name}
+              species={tree.species}
+              radioTheme={(tree as any).radio_theme}
+            />
+
+            {/* Map Journey Anchor */}
+            <TreeMapJourneyAnchor
+              treeId={tree.id}
+              treeName={tree.name}
+              lat={tree.latitude}
+              lng={tree.longitude}
+              w3w={tree.what3words}
+            />
+
+            {/* Hive Connections */}
+            <TreeHiveConnections
+              species={tree.species}
+              ecoBelonging={ecoBelonging}
+            />
+
+            {/* Heart Rewards */}
+            <TreeHeartRewards />
+
+            {/* Vine divider */}
+            <div className="vine-divider" />
+
+            {/* Weather */}
             <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
             {/* Photo Gallery */}
@@ -496,42 +402,6 @@ const TreeDetailPage = () => {
 
             {/* Species Attestation */}
             <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
-
-            {/* Tree Record (Stewardship offerings) */}
-            {stewardshipOfferings.length > 0 && (
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.4), transparent)" }} />
-                  <h2 className="text-xl font-serif text-primary tracking-widest uppercase flex items-center gap-2">
-                    🌳 Tree Record
-                  </h2>
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.4), transparent)" }} />
-                </div>
-                <p className="text-xs text-muted-foreground font-serif mb-3 text-center">
-                  Shared stewardship records contributed to this tree's public archive.
-                </p>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {stewardshipOfferings.map((off) => (
-                    <Card key={off.id} className="bg-card/60 backdrop-blur border-l-2 border-l-primary/50 border-primary/20">
-                      <CardContent className="p-3 flex items-center gap-3">
-                        {off.media_url && off.type === "photo" && (
-                          <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0" loading="lazy" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                          <span className="text-[10px] text-muted-foreground/60 font-mono">
-                            {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                          </span>
-                        </div>
-                        <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-primary/30 text-primary gap-1">
-                          📋 {off.type}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Sources */}
             <TreeSourcesDisplay
