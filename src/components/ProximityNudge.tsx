@@ -145,7 +145,8 @@ const ProximityNudge = () => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 left-4 right-4 mx-auto z-[90] max-w-sm"
+        className="fixed md:bottom-6 left-4 right-4 mx-auto z-[90] max-w-sm"
+        style={{ bottom: "calc(4rem + max(env(safe-area-inset-bottom, 0px), 8px))" }}
         initial={{ y: 60, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         exit={{ y: 60, opacity: 0, scale: 0.95 }}
