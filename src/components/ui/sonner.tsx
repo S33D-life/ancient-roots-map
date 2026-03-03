@@ -12,6 +12,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position="bottom-center"
       visibleToasts={2}
+      offset={80}
       toastOptions={{
         duration: 3000,
         classNames: {
@@ -21,10 +22,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
           actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
           cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
         },
-      }}
-      style={{
-        // Position above bottom nav + safe area on mobile
-        bottom: "calc(4rem + max(env(safe-area-inset-bottom, 0px), 8px))",
       }}
       {...props}
     />
