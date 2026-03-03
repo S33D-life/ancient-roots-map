@@ -6,6 +6,9 @@ import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import ContextualWhisper from "@/components/ContextualWhisper";
+import TreeLoreSection from "@/components/TreeLoreSection";
+import HeartCanopyPulse from "@/components/HeartCanopyPulse";
+import WishTagSigils from "@/components/WishTagSigils";
 import SeedPlanter from "@/components/SeedPlanter";
 import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
@@ -278,6 +281,8 @@ const TreeDetailPage = () => {
 
         {/* Tree Info Card */}
         <div className="relative mb-10 rounded-xl border border-border overflow-hidden bg-card/60 backdrop-blur">
+          {/* Heart Canopy Pulse — one-time glow on anchor nodes */}
+          {(tree as any).is_anchor_node && <HeartCanopyPulse treeName={tree.name} />}
           {/* Decorative top accent */}
           <div
             className="h-1"
@@ -457,6 +462,22 @@ const TreeDetailPage = () => {
 
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-6">
+            {/* Lore & Identity */}
+            <TreeLoreSection
+              loreText={(tree as any).lore_text}
+              elementalSignature={(tree as any).elemental_signature}
+              archetype={(tree as any).archetype}
+              seasonalTone={(tree as any).seasonal_tone}
+            />
+
+            {/* Wish Tags for Anchor Nodes */}
+            {(tree as any).is_anchor_node && (tree as any).wish_tags && (
+              <div className="text-center">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-serif">Wishing Tree Anchor</span>
+                <WishTagSigils tags={(tree as any).wish_tags} />
+              </div>
+            )}
+
             {/* Weather at the Tree */}
             <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
