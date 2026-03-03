@@ -9,6 +9,7 @@ import { MapPin, Sparkles, Heart, Share2, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
+import LeafAtmosphere from "@/components/LeafAtmosphere";
 import PhenologyBadge from "@/components/PhenologyBadge";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
@@ -115,6 +116,11 @@ const TreePageHero = ({
 
       {/* Heart Canopy Pulse for anchor nodes */}
       {isAnchor && <HeartCanopyPulse treeName={tree.name} />}
+
+      {/* Drifting leaf motes — sparse, max 2 visible */}
+      <div className="absolute inset-0 pointer-events-none z-[2] overflow-hidden">
+        <LeafAtmosphere variant="heartwood" />
+      </div>
 
       {/* Content */}
       <div className="relative z-10 px-6 md:px-10 pt-16 pb-10 md:pt-20 md:pb-14">
