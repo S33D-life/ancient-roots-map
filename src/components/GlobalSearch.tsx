@@ -1,58 +1,36 @@
+/**
+ * GlobalSearch — Unified search overlay powered by the Search Brain.
+ * All search UIs (Firefly, Map, Header) call the same service.
+ */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { Search, X, MapPin } from "lucide-react";
 import {
-  TreeDeciduous, MapPin, Sprout, BookOpen, Search, Leaf,
-  Sparkles, X, ScrollText, BarChart3,
-} from "lucide-react";
+  unifiedSearch,
+  groupResults,
+  FILTER_LABELS,
+  type SearchResult,
+  type SearchFilter,
+} from "@/services/unified-search";
 
 interface GlobalSearchProps {
   open: boolean;
   onClose: () => void;
   embedded?: boolean;
+  initialFilter?: SearchFilter;
+  /** Called when a result with mapContext is selected — lets map views handle it */
+  onMapNavigate?: (result: SearchResult) => void;
 }
 
-type SearchCategory = "all" | "trees" | "species" | "greenhouse" | "pages";
+const FILTER_ORDER: SearchFilter[] = ["all", "trees", "places", "heartwood", "staffs", "wanderers", "council", "library", "support"];
 
-interface SearchResult {
-  id: string;
-  title: string;
-  subtitle?: string;
-  category: SearchCategory;
-  icon: React.ReactNode;
-  route: string;
-}
-
-const STATIC_PAGES: SearchResult[] = [
-  { id: "page-atlas", title: "The Arboreal Atlas of Ancient Friends", subtitle: "Map of ancient trees", category: "pages", icon: <MapPin className="w-4 h-4" />, route: "/map" },
-  { id: "page-library", title: "HeARTwood Library", subtitle: "The Heartwood — rooms & scrolls", category: "pages", icon: <BookOpen className="w-4 h-4" />, route: "/library" },
-  { id: "page-council", title: "Council of Life", subtitle: "Community council", category: "pages", icon: <Leaf className="w-4 h-4" />, route: "/council-of-life" },
-  { id: "page-dream", title: "yOur Golden Dream", subtitle: "Vision & offerings", category: "pages", icon: <Sparkles className="w-4 h-4" />, route: "/golden-dream" },
-  { id: "page-dashboard", title: "My Grove (Dashboard)", subtitle: "Wishlist, seed pods, profile", category: "pages", icon: <Sprout className="w-4 h-4" />, route: "/dashboard" },
-  { id: "page-assets", title: "Staff Room & Assets", subtitle: "NFT gallery", category: "pages", icon: <ScrollText className="w-4 h-4" />, route: "/assets" },
-  { id: "page-groves", title: "Groves & Projects", subtitle: "Tree projects", category: "pages", icon: <TreeDeciduous className="w-4 h-4" />, route: "/groves" },
-  { id: "page-ledger", title: "Ledger", subtitle: "Stats, Notion strings, import/export", category: "pages", icon: <BarChart3 className="w-4 h-4" />, route: "/library" },
-];
-
-const CATEGORY_LABELS: Record<SearchCategory, string> = {
-  all: "All",
-  trees: "Ancient Trees",
-  species: "Species",
-  greenhouse: "Seed Pods",
-  pages: "Pages & Rooms",
-};
-
-const CATEGORY_FILTERS: SearchCategory[] = ["all", "trees", "species", "greenhouse", "pages"];
-
-const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
+const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }: GlobalSearchProps) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<SearchCategory>("all");
-  const [treeResults, setTreeResults] = useState<SearchResult[]>([]);
-  const [speciesResults, setSpeciesResults] = useState<SearchResult[]>([]);
-  const [greenhouseResults, setGreenhouseResults] = useState<SearchResult[]>([]);
+  const [filter, setFilter] = useState<SearchFilter>(initialFilter || "all");
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,140 +39,66 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      // Ctrl/Cmd+K opens search from anywhere
     };
     if (open) document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
-  // Search database when query changes
+  // Search when query or filter changes
   useEffect(() => {
     if (!query.trim() || query.length < 2) {
-      setTreeResults([]);
-      setSpeciesResults([]);
-      setGreenhouseResults([]);
+      setResults([]);
       return;
     }
 
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const q = query.trim();
-
-      const [treesRes, speciesRes, greenhouseRes] = await Promise.all([
-        // Trees by name
-        supabase
-          .from("trees")
-          .select("id, name, species, nation")
-          .or(`name.ilike.%${q}%,species.ilike.%${q}%,what3words.ilike.%${q}%`)
-          .limit(8),
-        // Distinct species
-        supabase
-          .from("trees")
-          .select("species")
-          .ilike("species", `%${q}%`)
-          .limit(10),
-        // Greenhouse / seed pods
-        supabase
-          .from("greenhouse_plants")
-          .select("id, name, species")
-          .or(`name.ilike.%${q}%,species.ilike.%${q}%`)
-          .limit(6),
-      ]);
-
-      if (treesRes.data) {
-        setTreeResults(
-          treesRes.data.map((t) => ({
-            id: `tree-${t.id}`,
-            title: t.name,
-            subtitle: [t.species, t.nation].filter(Boolean).join(" · "),
-            category: "trees" as const,
-            icon: <TreeDeciduous className="w-4 h-4" />,
-            route: `/tree/${t.id}`,
-          }))
-        );
+      try {
+        const res = await unifiedSearch(query, filter, 24);
+        setResults(res);
+      } catch {
+        setResults([]);
       }
-
-      if (speciesRes.data) {
-        const unique = [...new Set(speciesRes.data.map((s) => s.species))];
-        setSpeciesResults(
-          unique.map((sp) => ({
-            id: `species-${sp}`,
-            title: sp,
-            subtitle: "Species",
-            category: "species" as const,
-            icon: <Leaf className="w-4 h-4" />,
-            route: `/map?species=${encodeURIComponent(sp)}`,
-          }))
-        );
-      }
-
-      if (greenhouseRes.data) {
-        setGreenhouseResults(
-          greenhouseRes.data.map((p) => ({
-            id: `plant-${p.id}`,
-            title: p.name,
-            subtitle: p.species || "Seed Pod",
-            category: "greenhouse" as const,
-            icon: <Sprout className="w-4 h-4" />,
-            route: "/dashboard",
-          }))
-        );
-      }
-
       setLoading(false);
-    }, 250);
+    }, 220);
 
     return () => clearTimeout(debounceRef.current);
-  }, [query]);
+  }, [query, filter]);
 
   const handleSelect = useCallback(
-    (route: string) => {
-      navigate(route);
+    (result: SearchResult) => {
+      if (onMapNavigate && result.mapContext) {
+        onMapNavigate(result);
+      } else {
+        navigate(result.url);
+      }
       onClose();
       setQuery("");
       setFilter("all");
     },
-    [navigate, onClose]
+    [navigate, onClose, onMapNavigate],
   );
 
-  // Filter pages by query
-  const pageResults = STATIC_PAGES.filter(
-    (p) =>
-      !query.trim() ||
-      p.title.toLowerCase().includes(query.toLowerCase()) ||
-      p.subtitle?.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const allGroups: { key: SearchCategory; label: string; items: SearchResult[] }[] = [
-    { key: "trees", label: "Ancient Trees", items: treeResults },
-    { key: "species", label: "Species", items: speciesResults },
-    { key: "greenhouse", label: "Seed Pods", items: greenhouseResults },
-    { key: "pages", label: "Pages & Rooms", items: pageResults },
-  ];
-
-  const filteredGroups =
-    filter === "all"
-      ? allGroups.filter((g) => g.items.length > 0)
-      : allGroups.filter((g) => g.key === filter && g.items.length > 0);
+  const grouped = groupResults(results);
 
   if (!open) return null;
 
   const searchContent = (
     <>
-      {/* Filter pills */}
+      {/* Filter chips */}
       <div className="flex gap-1.5 mb-3 px-1 flex-wrap">
-        {CATEGORY_FILTERS.map((cat) => (
+        {FILTER_ORDER.map((f) => (
           <button
-            key={cat}
-            onClick={() => setFilter(cat)}
+            key={f}
+            onClick={() => setFilter(f)}
             className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-widest font-serif border transition-all duration-200 ${
-              filter === cat
+              filter === f
                 ? "bg-primary/20 border-primary/50 text-primary"
                 : "bg-secondary/40 border-border/40 text-muted-foreground hover:text-foreground hover:border-border"
             }`}
           >
-            {CATEGORY_LABELS[cat]}
+            {FILTER_LABELS[f]}
           </button>
         ))}
       </div>
@@ -205,7 +109,7 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
         shouldFilter={false}
       >
         <CommandInput
-          placeholder="Search trees, species, seed pods, pages…"
+          placeholder="Search trees, places, rooms, wanderers, support…"
           value={query}
           onValueChange={setQuery}
           className="font-serif"
@@ -217,7 +121,7 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
             </div>
           )}
 
-          {!loading && query.length >= 2 && filteredGroups.length === 0 && (
+          {!loading && query.length >= 2 && grouped.length === 0 && (
             <CommandEmpty className="font-serif text-muted-foreground">
               No echoes found for "{query}"
             </CommandEmpty>
@@ -225,19 +129,22 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
 
           {!loading && query.length < 2 && filter === "all" && (
             <CommandGroup heading="Quick Navigation">
-              {STATIC_PAGES.slice(0, 5).map((page) => (
+              {[
+                { id: "qn-map", title: "🗺 Ancient Friends Atlas", sub: "Interactive tree map", url: "/map" },
+                { id: "qn-atlas", title: "🌍 The Atlas", sub: "Country portals", url: "/atlas" },
+                { id: "qn-library", title: "📚 HeARTwood Library", sub: "Rooms & scrolls", url: "/library" },
+                { id: "qn-council", title: "🌿 Council of Life", sub: "Community governance", url: "/council-of-life" },
+                { id: "qn-support", title: "🛟 Support Hub", sub: "Help, FAQs, volunteering", url: "/support" },
+              ].map((item) => (
                 <CommandItem
-                  key={page.id}
-                  value={page.id}
-                  onSelect={() => handleSelect(page.route)}
+                  key={item.id}
+                  value={item.id}
+                  onSelect={() => { navigate(item.url); onClose(); setQuery(""); }}
                   className="gap-3 cursor-pointer font-serif"
                 >
-                  <span className="text-primary">{page.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">{page.title}</p>
-                    {page.subtitle && (
-                      <p className="text-[10px] text-muted-foreground truncate">{page.subtitle}</p>
-                    )}
+                    <p className="text-sm truncate">{item.title}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{item.sub}</p>
                   </div>
                 </CommandItem>
               ))}
@@ -245,18 +152,18 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
           )}
 
           {!loading &&
-            filteredGroups.map((group, gi) => (
-              <div key={group.key}>
+            grouped.map((group, gi) => (
+              <div key={group.type}>
                 {gi > 0 && <CommandSeparator />}
                 <CommandGroup heading={group.label}>
-                  {group.items.map((item) => (
+                  {group.items.slice(0, 6).map((item) => (
                     <CommandItem
                       key={item.id}
                       value={item.id}
-                      onSelect={() => handleSelect(item.route)}
+                      onSelect={() => handleSelect(item)}
                       className="gap-3 cursor-pointer font-serif"
                     >
-                      <span className="text-primary">{item.icon}</span>
+                      <span className="text-sm shrink-0">{item.emoji || "•"}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm truncate">{item.title}</p>
                         {item.subtitle && (
@@ -265,17 +172,27 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
                           </p>
                         )}
                       </div>
-                      <Badge variant="outline" className="text-[8px] uppercase tracking-widest shrink-0">
-                        {item.category}
-                      </Badge>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {item.mapContext && (
+                          <MapPin className="w-3 h-3 text-primary/40" />
+                        )}
+                        <Badge variant="outline" className="text-[8px] uppercase tracking-widest">
+                          {item.type.replace(/_/g, " ")}
+                        </Badge>
+                      </div>
                     </CommandItem>
                   ))}
+                  {group.items.length > 6 && (
+                    <div className="px-3 py-1.5 text-[10px] text-muted-foreground/50 font-serif">
+                      +{group.items.length - 6} more…
+                    </div>
+                  )}
                 </CommandGroup>
               </div>
             ))}
         </CommandList>
 
-        {/* Footer hint */}
+        {/* Footer */}
         <div className="border-t border-border px-3 py-2 flex items-center justify-between text-[10px] text-muted-foreground">
           <span className="font-serif">⌘K to search anytime</span>
           <span className="font-serif">ESC to close</span>
@@ -284,7 +201,7 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
     </>
   );
 
-  // Embedded mode — render inline without overlay
+  // Embedded mode
   if (embedded) {
     return (
       <div className="w-full max-w-lg mx-auto">
@@ -297,7 +214,7 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
     );
   }
 
-  // Modal overlay mode
+  // Modal overlay
   return (
     <div
       className="fixed inset-0 z-[110] flex items-start justify-center pt-[10vh] md:pt-[15vh]"
@@ -313,7 +230,6 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
         onClick={(e) => e.stopPropagation()}
         ref={containerRef}
       >
-        {/* Header */}
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-primary" />
@@ -321,14 +237,10 @@ const GlobalSearch = ({ open, onClose, embedded }: GlobalSearchProps) => {
               Search the Grove
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors p-1"
-          >
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
-
         {searchContent}
       </div>
     </div>

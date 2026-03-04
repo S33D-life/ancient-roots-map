@@ -8,22 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from "@/components/ui/command";
 import { supabase } from "@/integrations/supabase/client";
+import { unifiedSearch, groupResults, type SearchResult as UnifiedResult } from "@/services/unified-search";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 type Tab = "guide" | "search";
 
-// Static page results for search
-const STATIC_PAGES = [
-  { id: "page-atlas", title: "Ancient Friends Atlas", subtitle: "Map of ancient trees", icon: <MapPin className="w-4 h-4" />, route: "/map" },
-  { id: "page-library", title: "HeARTwood Library", subtitle: "The Heartwood — rooms & scrolls", icon: <BookOpen className="w-4 h-4" />, route: "/library" },
-  { id: "page-council", title: "Council of Life", subtitle: "Community council", icon: <Leaf className="w-4 h-4" />, route: "/council-of-life" },
-  { id: "page-dream", title: "yOur Golden Dream", subtitle: "Vision & offerings", icon: <Sparkles className="w-4 h-4" />, route: "/golden-dream" },
-  { id: "page-dashboard", title: "My Grove (Dashboard)", subtitle: "Wishlist, seed pods, profile", icon: <Sprout className="w-4 h-4" />, route: "/dashboard" },
-  { id: "page-assets", title: "Staff Room & Assets", subtitle: "NFT gallery", icon: <ScrollText className="w-4 h-4" />, route: "/assets" },
-  { id: "page-groves", title: "Groves & Projects", subtitle: "Tree projects", icon: <TreeDeciduous className="w-4 h-4" />, route: "/groves" },
-  { id: "page-ledger", title: "Ledger", subtitle: "Stats, Notion strings", icon: <BarChart3 className="w-4 h-4" />, route: "/library" },
-];
+// Static pages now handled by unified search service
 
 // Level-aware greeting
 const LEVEL_GREETINGS: Record<string, string> = {
@@ -51,7 +42,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [treeResults, setTreeResults] = useState<{ id: string; title: string; subtitle: string; route: string }[]>([]);
+  const [searchResults, setSearchResults] = useState<UnifiedResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -95,32 +86,21 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
     return () => document.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
-  // Search database
+  // Unified search
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
-      setTreeResults([]);
+      setSearchResults([]);
       return;
     }
 
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setSearchLoading(true);
-      const q = searchQuery.trim();
-      const { data } = await supabase
-        .from("trees")
-        .select("id, name, species, nation")
-        .or(`name.ilike.%${q}%,species.ilike.%${q}%,what3words.ilike.%${q}%`)
-        .limit(8);
-
-      if (data) {
-        setTreeResults(
-          data.map((t) => ({
-            id: `tree-${t.id}`,
-            title: t.name,
-            subtitle: [t.species, t.nation].filter(Boolean).join(" · "),
-            route: `/tree/${t.id}`,
-          }))
-        );
+      try {
+        const res = await unifiedSearch(searchQuery, "all", 12);
+        setSearchResults(res);
+      } catch {
+        setSearchResults([]);
       }
       setSearchLoading(false);
     }, 250);
@@ -129,8 +109,8 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   }, [searchQuery]);
 
   const handleSearchSelect = useCallback(
-    (route: string) => {
-      navigate(route);
+    (result: UnifiedResult) => {
+      navigate(result.url);
       onClose();
       setSearchQuery("");
     },
@@ -251,13 +231,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
     }
   };
 
-  const filteredPages = STATIC_PAGES.filter(
-    (p) =>
-      !searchQuery.trim() ||
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.subtitle?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+  const searchGrouped = groupResults(searchResults);
   if (!open) return null;
 
   return (
@@ -434,51 +408,35 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
                   </div>
                 )}
 
-                {!searchLoading && searchQuery.length >= 2 && treeResults.length === 0 && filteredPages.length === 0 && (
+                {!searchLoading && searchQuery.length >= 2 && searchResults.length === 0 && (
                   <CommandEmpty className="font-serif text-muted-foreground">
                     No echoes found for "{searchQuery}"
                   </CommandEmpty>
                 )}
 
-                {treeResults.length > 0 && (
-                  <CommandGroup heading="Ancient Trees">
-                    {treeResults.map((t) => (
-                      <CommandItem
-                        key={t.id}
-                        value={t.id}
-                        onSelect={() => handleSearchSelect(t.route)}
-                        className="gap-3 cursor-pointer font-serif"
-                      >
-                        <TreeDeciduous className="w-4 h-4 text-primary" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{t.title}</p>
-                          <p className="text-[10px] text-muted-foreground truncate">{t.subtitle}</p>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-
-                {treeResults.length > 0 && filteredPages.length > 0 && <CommandSeparator />}
-
-                {filteredPages.length > 0 && (
-                  <CommandGroup heading={searchQuery.length >= 2 ? "Pages & Rooms" : "Quick Navigation"}>
-                    {filteredPages.map((page) => (
-                      <CommandItem
-                        key={page.id}
-                        value={page.id}
-                        onSelect={() => handleSearchSelect(page.route)}
-                        className="gap-3 cursor-pointer font-serif"
-                      >
-                        <span className="text-primary">{page.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{page.title}</p>
-                          <p className="text-[10px] text-muted-foreground truncate">{page.subtitle}</p>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
+                {searchGrouped.map((group, gi) => (
+                  <div key={group.type}>
+                    {gi > 0 && <CommandSeparator />}
+                    <CommandGroup heading={group.label}>
+                      {group.items.slice(0, 6).map((item) => (
+                        <CommandItem
+                          key={item.id}
+                          value={item.id}
+                          onSelect={() => handleSearchSelect(item)}
+                          className="gap-3 cursor-pointer font-serif"
+                        >
+                          <span className="text-sm text-primary">{item.emoji || "•"}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate">{item.title}</p>
+                            {item.subtitle && (
+                              <p className="text-[10px] text-muted-foreground truncate">{item.subtitle}</p>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </div>
+                ))}
               </CommandList>
             </Command>
           </div>

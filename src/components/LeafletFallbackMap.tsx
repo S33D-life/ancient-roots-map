@@ -2681,7 +2681,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       <style>{LITE_CSS}</style>
 
       {/* Search */}
-      <LiteMapSearch trees={trees} onSelect={handleSearchSelect} />
+      <LiteMapSearch
+        trees={trees}
+        onSelect={handleSearchSelect}
+        onSearchResult={(result) => {
+          if (result.mapContext?.lat && result.mapContext?.lng && mapRef.current) {
+            mapRef.current.flyTo(
+              [result.mapContext.lat, result.mapContext.lng],
+              result.mapContext.zoom || 14,
+              { duration: 0.9, easeLinearity: 0.25 }
+            );
+          } else if (result.url) {
+            window.location.href = result.url;
+          }
+        }}
+      />
 
       {/* Unified Atlas Filter */}
       <AtlasFilter
