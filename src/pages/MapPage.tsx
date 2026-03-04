@@ -6,7 +6,13 @@ export default function MapPage() {
   return (
     <PageShell>
       <Header />
-      <div className="pt-14 h-screen">
+      <div
+        className="pt-14"
+        style={{
+          height: "100dvh",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
         <Map />
       </div>
     </PageShell>
