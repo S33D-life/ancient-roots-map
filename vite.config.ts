@@ -1,19 +1,65 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { readFileSync } from "node:fs";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Build-time version stamp — ISO timestamp + random suffix for uniqueness
-const BUILD_TIMESTAMP = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
-const BUILD_ID = `${BUILD_TIMESTAMP}-${Math.random().toString(36).slice(2, 6)}`;
+const DEV_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "script-src 'self' 'unsafe-eval'",
+  "connect-src 'self' ws: wss: https: http://localhost:* http://127.0.0.1:*",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+].join("; ");
+
+const PROD_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "script-src 'self'",
+  "connect-src 'self' https: wss:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+].join("; ");
+
+const resolveBuildId = () => {
+  try {
+    const versionPath = path.resolve(__dirname, "public/version.json");
+    const version = JSON.parse(readFileSync(versionPath, "utf8")) as { build?: string };
+    if (typeof version.build === "string" && version.build.length > 0) return version.build;
+  } catch {
+    // Fall through for dev without generated version file
+  }
+  return "dev";
+};
+
+const BUILD_ID = resolveBuildId();
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    headers: {
+      "Content-Security-Policy": DEV_CSP,
+    },
+  },
+  preview: {
+    headers: {
+      "Content-Security-Policy": PROD_CSP,
+    },
   },
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),
@@ -30,6 +76,11 @@ export default defineConfig(({ mode }) => ({
         // Never precache version.json — always fetch fresh
         globIgnores: ["**/version.json"],
         runtimeCaching: [
+          {
+            // Always fetch live deployment version metadata
+            urlPattern: /\/version\.json$/i,
+            handler: "NetworkOnly",
+          },
           {
             // Auth & user endpoints — never cache
             urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,

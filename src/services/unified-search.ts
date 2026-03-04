@@ -4,12 +4,14 @@
  *          Wanderer profiles, Council, Library, Support.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { ALL_ROOTSTONES } from "@/data/rootstones";
 
 /* ── Result Schema ── */
 export type SearchResultType =
   | "tree"
   | "grove"
   | "country"
+  | "rootstone"
   | "region"
   | "bioregion"
   | "heartwood_room"
@@ -70,7 +72,7 @@ export const FILTER_LABELS: Record<SearchFilter, string> = {
 const FILTER_TYPES: Record<SearchFilter, SearchResultType[]> = {
   all: [],
   trees: ["tree", "species", "grove"],
-  places: ["country", "region", "bioregion", "grove"],
+  places: ["country", "rootstone", "region", "bioregion", "grove"],
   heartwood: ["heartwood_room"],
   staffs: ["staff"],
   wanderers: ["wanderer_profile"],
@@ -108,7 +110,7 @@ const SUPPORT_PAGES: SearchResult[] = [
 const COUNTRY_PAGES: SearchResult[] = [
   { id: "atlas-main", type: "country", title: "🌍 The Atlas", subtitle: "Explore all countries", url: "/atlas", keywords: ["atlas", "countries", "explore", "world"], score: 0, emoji: "🌍" },
   // Top countries — static for speed; DB search adds more
-  ...(["switzerland", "united-kingdom", "japan", "germany", "france", "italy", "spain", "portugal", "greece", "turkey", "india", "australia", "new-zealand", "canada", "united-states", "brazil", "mexico", "ireland", "norway", "sweden"] as const).map(slug => ({
+  ...(["switzerland", "united-kingdom", "japan", "germany", "france", "italy", "spain", "portugal", "greece", "turkey", "india", "indonesia", "australia", "new-zealand", "canada", "united-states", "brazil", "mexico", "peru", "costa-rica", "ireland", "norway", "sweden"] as const).map(slug => ({
     id: `country-${slug}`,
     type: "country" as const,
     title: `🌍 ${slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" ")}`,
@@ -119,6 +121,38 @@ const COUNTRY_PAGES: SearchResult[] = [
     emoji: "🌍",
   })),
 ];
+
+const ROOTSTONE_RESULTS: SearchResult[] = ALL_ROOTSTONES.map((stone) => {
+  const params = new URLSearchParams();
+  params.set("rootstoneId", stone.id);
+  params.set("rootstones", "on");
+  params.set("rootstoneCountry", stone.country.toLowerCase().replace(/\s+/g, "-"));
+  params.set("rootstoneType", stone.type);
+  params.set("rootstoneTags", stone.tags.join(","));
+  params.set("country", stone.country.toLowerCase().replace(/\s+/g, "-"));
+
+  if (stone.bounds) {
+    params.set("bbox", `${stone.bounds.south},${stone.bounds.west},${stone.bounds.north},${stone.bounds.east}`);
+    params.set("lat", String((stone.bounds.south + stone.bounds.north) / 2));
+    params.set("lng", String((stone.bounds.west + stone.bounds.east) / 2));
+    params.set("zoom", "8");
+  } else if (stone.location.lat != null && stone.location.lng != null) {
+    params.set("lat", String(stone.location.lat));
+    params.set("lng", String(stone.location.lng));
+    params.set("zoom", stone.type === "tree" ? "12" : "9");
+  }
+
+  return {
+    id: `rootstone-${stone.id}`,
+    type: "rootstone",
+    title: `🪨 ${stone.name}`,
+    subtitle: `${stone.country} · ${stone.type === "tree" ? "Tree" : "Grove/Forest"} rootstone`,
+    url: `/map?${params.toString()}`,
+    keywords: [stone.country, stone.type, ...(stone.tags || []), stone.location.place || "", stone.region || ""],
+    score: 0,
+    emoji: stone.type === "tree" ? "🌳" : "🌲",
+  };
+});
 
 /* ── Scoring ── */
 function scoreMatch(query: string, item: { title: string; subtitle?: string; keywords?: string[] }): number {
@@ -144,6 +178,7 @@ const TYPE_BOOST: Record<SearchResultType, number> = {
   tree: 10,
   grove: 8,
   country: 7,
+  rootstone: 7,
   region: 7,
   bioregion: 6,
   heartwood_room: 5,
@@ -187,6 +222,12 @@ export async function unifiedSearch(
     for (const page of COUNTRY_PAGES) {
       const s = scoreMatch(q, page);
       if (s > 0) results.push({ ...page, score: s + TYPE_BOOST.country });
+    }
+  }
+  if (shouldInclude("rootstone")) {
+    for (const stone of ROOTSTONE_RESULTS) {
+      const s = scoreMatch(q, stone);
+      if (s > 0) results.push({ ...stone, score: s + TYPE_BOOST.rootstone });
     }
   }
 
@@ -374,6 +415,7 @@ export function groupResults(results: SearchResult[]): { type: SearchResultType;
     tree: "Ancient Trees",
     grove: "Groves",
     country: "Countries & Atlas",
+    rootstone: "Rootstones",
     region: "Regions",
     bioregion: "Bioregions",
     heartwood_room: "Heartwood Rooms",

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Banyan Elder",
+    "type": "tree",
+    "country": "Indonesia",
+    "region": "Java",
+    "species": "Ficus benjamina",
+    "lat": -6.768,
+    "lng": 105.395,
+    "place": "Ujung Kulon National Park",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Ujung+Kulon",
+    "lore": "Research marker linked to protected area records.",
+    "source_name": "UNESCO",
+    "source_url": "https://whc.unesco.org/",
+    "confidence": "medium",
+    "tags": "ancient,research"
+  },
+  {
+    "name": "Sacred Grove Network",
+    "type": "grove",
+    "country": "Indonesia",
+    "region": "Sulawesi",
+    "place": "Lore Lindu National Park",
+    "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Lore+Lindu",
+    "bounds_north": -1.2,
+    "bounds_south": -1.45,
+    "bounds_east": 120.2,
+    "bounds_west": 119.9,
+    "lore": "Cluster of culturally important forest corridors.",
+    "source_name": "KLHK",
+    "source_url": "https://www.menlhk.go.id/",
+    "confidence": "high",
+    "tags": "grove,forest,cultural"
+  }
+]

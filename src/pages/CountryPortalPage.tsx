@@ -23,6 +23,7 @@ import { getSubRegionsByCountry, getSubRegionLabel } from "@/config/subRegionReg
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 import VerificationPipeline from "@/components/VerificationPipeline";
 import ImmutableTreeCard from "@/components/ImmutableTreeCard";
+import { getRootstonesByCountrySlug, type Rootstone } from "@/data/rootstones";
 
 const CountrySpeciesSpiral = lazy(() => import("@/components/atlas/CountrySpeciesSpiral"));
 
@@ -189,6 +190,36 @@ const ResearchTreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate
   );
 };
 
+const RootstoneCard = ({ rootstone, onOpenMap }: { rootstone: Rootstone; onOpenMap: (stone: Rootstone) => void }) => (
+  <Card className="border-primary/10 hover:border-primary/30 transition-all">
+    <CardContent className="p-4 space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-serif text-foreground">{rootstone.name}</p>
+          <p className="text-xs text-muted-foreground">{rootstone.region || rootstone.location.place}</p>
+        </div>
+        <Badge variant="outline" className="text-[10px] uppercase">{rootstone.confidence}</Badge>
+      </div>
+      <p className="text-xs text-muted-foreground whitespace-pre-line">{rootstone.lore}</p>
+      <div className="flex flex-wrap gap-1">
+        {rootstone.tags.slice(0, 4).map((tag) => (
+          <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>
+        ))}
+      </div>
+      <div className="flex gap-2">
+        <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => onOpenMap(rootstone)}>
+          <MapIcon className="w-3 h-3 mr-1" /> Open on Map
+        </Button>
+        <Button variant="ghost" size="sm" className="h-7 text-xs px-2" asChild>
+          <a href={rootstone.source.url} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="w-3 h-3 mr-1" /> Source
+          </a>
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 /* ─── Main Page ─── */
 const CountryPortalPage = () => {
   const { countrySlug } = useParams<{ countrySlug: string }>();
@@ -201,7 +232,21 @@ const CountryPortalPage = () => {
     title: entry.portalTitle,
     subtitle: entry.portalSubtitle,
     sourceLabel: entry.sourceLabel,
-  } : { country: "", countryFlag: "", title: "", subtitle: "", sourceLabel: "" };
+    isoCode: entry.isoCode,
+    defaultMapFocus: entry.defaultMapFocus,
+    defaultFilters: entry.defaultFilters,
+    keySources: entry.keySources || [],
+  } : {
+    country: "",
+    countryFlag: "",
+    title: "",
+    subtitle: "",
+    sourceLabel: "",
+    isoCode: undefined,
+    defaultMapFocus: undefined,
+    defaultFilters: undefined,
+    keySources: [],
+  };
 
   const [trees, setTrees] = useState<ResearchTree[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,10 +254,21 @@ const CountryPortalPage = () => {
   const [pilgrimagePreset, setPilgrimagePreset] = useState<string>("first-steps");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
+  const [researchLayerEnabled, setResearchLayerEnabled] = useState(
+    config.defaultFilters?.researchLayer !== "off",
+  );
   const [overlappingBioRegions, setOverlappingBioRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
 
   // Species activity for the spiral
   const { data: speciesActivity, isLoading: speciesLoading } = useCountrySpeciesActivity(config.country);
+  const countryRootstones = useMemo(
+    () => getRootstonesByCountrySlug(countrySlug || ""),
+    [countrySlug],
+  );
+
+  useEffect(() => {
+    setResearchLayerEnabled(config.defaultFilters?.researchLayer !== "off");
+  }, [config.defaultFilters?.researchLayer]);
 
   useEffect(() => {
     if (!entry) return;
@@ -353,8 +409,40 @@ const CountryPortalPage = () => {
     }
   };
 
+  const openMapLayer = () =>
+    focusMap({
+      type: "area",
+      id: countrySlug || "",
+      countrySlug,
+      source: "country",
+      center: config.defaultMapFocus?.center,
+      zoom: config.defaultMapFocus?.zoom,
+      tags: config.defaultFilters?.tags,
+      researchLayer: researchLayerEnabled ? "on" : "off",
+    });
 
-  const openMapLayer = () => focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "country" });
+  const openRootstoneOnMap = (stone: Rootstone) => {
+    const params = new URLSearchParams();
+    params.set("rootstoneId", stone.id);
+    params.set("rootstoneCountry", (countrySlug || "").toLowerCase());
+    params.set("rootstoneType", stone.type);
+    params.set("rootstoneTags", stone.tags.join(","));
+    params.set("country", countrySlug || "");
+    params.set("research", researchLayerEnabled ? "on" : "off");
+
+    if (stone.bounds) {
+      params.set("bbox", `${stone.bounds.south},${stone.bounds.west},${stone.bounds.north},${stone.bounds.east}`);
+      params.set("lat", String((stone.bounds.north + stone.bounds.south) / 2));
+      params.set("lng", String((stone.bounds.east + stone.bounds.west) / 2));
+      params.set("zoom", "8");
+    } else if (stone.location.lat != null && stone.location.lng != null) {
+      params.set("lat", String(stone.location.lat));
+      params.set("lng", String(stone.location.lng));
+      params.set("zoom", stone.type === "tree" ? "12" : "9");
+    }
+
+    navigate(`/map?${params.toString()}`);
+  };
 
   return (
     <PageShell>
@@ -388,6 +476,11 @@ const CountryPortalPage = () => {
               <Badge variant="outline" className="text-xs border-primary/30">
                 <BookOpen className="w-3 h-3 mr-1" /> {config.sourceLabel}
               </Badge>
+              {config.isoCode && (
+                <Badge variant="outline" className="text-xs border-primary/30">
+                  ISO: {config.isoCode}
+                </Badge>
+              )}
               <Badge variant="outline" className="text-xs border-primary/30">
                 <Shield className="w-3 h-3 mr-1" /> Provenance preserved
               </Badge>
@@ -396,7 +489,14 @@ const CountryPortalPage = () => {
             {/* CTAs */}
             <div className="flex flex-wrap justify-center gap-3">
               <Button variant="mystical" onClick={openMapLayer}>
-                <MapIcon className="w-4 h-4 mr-1" /> Open Map Layer
+                <MapIcon className="w-4 h-4 mr-1" /> Explore the Map
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setResearchLayerEnabled((current) => !current)}
+                title="Toggle research layer visibility on map launch"
+              >
+                <Layers className="w-4 h-4 mr-1" /> Research Layer: {researchLayerEnabled ? "On" : "Off"}
               </Button>
               <Button
                 variant="sacred"
@@ -494,6 +594,66 @@ const CountryPortalPage = () => {
                 </div>
               </CardContent>
             </Card>
+          </section>
+        )}
+
+        {/* ─── Key sources ─── */}
+        {config.keySources.length > 0 && (
+          <section className="px-4 max-w-3xl mx-auto mb-8">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-primary" /> Key Sources
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {config.keySources.map((source) => (
+                  <a
+                    key={source.url}
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3 inline mr-1" />
+                    {source.label}
+                  </a>
+                ))}
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {(countryRootstones.trees.length > 0 || countryRootstones.groves.length > 0) && (
+          <section className="px-4 max-w-3xl mx-auto mb-8 space-y-4">
+            {countryRootstones.trees.length > 0 && (
+              <Card className="border-primary/15 bg-card/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-serif flex items-center gap-2">
+                    <TreeDeciduous className="w-4 h-4 text-primary" /> 33 Trees
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {countryRootstones.trees.slice(0, 3).map((stone) => (
+                    <RootstoneCard key={stone.id} rootstone={stone} onOpenMap={openRootstoneOnMap} />
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+            {countryRootstones.groves.length > 0 && (
+              <Card className="border-primary/15 bg-card/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-serif flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-primary" /> 33 Groves & Forests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {countryRootstones.groves.slice(0, 3).map((stone) => (
+                    <RootstoneCard key={stone.id} rootstone={stone} onOpenMap={openRootstoneOnMap} />
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </section>
         )}
 

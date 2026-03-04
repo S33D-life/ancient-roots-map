@@ -1,0 +1,28 @@
+{
+  "country": "Peru",
+  "rootstones": [
+    {
+      "id": "peru-tree-shihuahuaco-record",
+      "name": "Shihuahuaco Record",
+      "type": "tree",
+      "country": "Peru",
+      "region": "Madre de Dios",
+      "species": "Dipteryx micrantha",
+      "location": {
+        "place": "Tambopata National Reserve",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Tambopata"
+      },
+      "lore": "No precise coordinates yet; source-backed location.",
+      "source": {
+        "name": "SERNANP",
+        "url": "https://www.sernanp.gob.pe/"
+      },
+      "confidence": "medium",
+      "tags": [
+        "ancient",
+        "research",
+        "needs_coords"
+      ]
+    }
+  ]
+}
