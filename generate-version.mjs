@@ -1,14 +1,11 @@
-/**
- * generate-version.js — Run as part of the build to emit public/version.json.
- * Called from package.json build script: "node generate-version.js && vite build"
- */
-import { writeFileSync } from "fs";
+import { writeFileSync } from "node:fs";
 
-const buildId = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
+const generatedAt = new Date().toISOString();
+const buildId = generatedAt.replace(/[-:.TZ]/g, "").slice(0, 14);
 
 writeFileSync(
   "public/version.json",
-  JSON.stringify({ build: buildId, generated: new Date().toISOString() }, null, 2)
+  `${JSON.stringify({ build: buildId, generated: generatedAt }, null, 2)}\n`
 );
 
-console.log(`✓ version.json → build ${buildId}`);
+console.log(`version.json generated with build id: ${buildId}`);

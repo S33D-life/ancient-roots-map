@@ -1,13 +1,25 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { readFileSync } from "node:fs";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Build-time version stamp — ISO timestamp + random suffix for uniqueness
-const BUILD_TIMESTAMP = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
-const BUILD_ID = `${BUILD_TIMESTAMP}-${Math.random().toString(36).slice(2, 6)}`;
+const resolveBuildId = () => {
+  try {
+    const versionPath = path.resolve(__dirname, "public/version.json");
+    const version = JSON.parse(readFileSync(versionPath, "utf8")) as { build?: string };
+    if (typeof version.build === "string" && version.build.length > 0) {
+      return version.build;
+    }
+  } catch {
+    // Local dev before generate-version runs
+  }
+  return "dev";
+};
+
+const BUILD_ID = resolveBuildId();
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -30,6 +42,11 @@ export default defineConfig(({ mode }) => ({
         // Never precache version.json — always fetch fresh
         globIgnores: ["**/version.json"],
         runtimeCaching: [
+          {
+            // Always hit network for release metadata used by update banner logic
+            urlPattern: /\/version\.json$/i,
+            handler: "NetworkOnly",
+          },
           {
             // Auth & user endpoints — never cache
             urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
@@ -138,6 +155,14 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: "es2022",
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "map-core": ["maplibre-gl", "leaflet", "leaflet.markercluster"],
+        },
+      },
+    },
   },
   test: {
     globals: true,
