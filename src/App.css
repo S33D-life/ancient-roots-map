@@ -36,3 +36,40 @@ body.season-spring .vine-divider { --vine-hue: 120; }
 body.season-summer .vine-divider { --vine-hue: 110; }
 body.season-autumn .vine-divider { --vine-hue: 35; }
 body.season-winter .vine-divider { --vine-hue: 200; }
+
+/* ── Network Pulse animations ── */
+
+/* Arterial flow — slow upward shimmer through the trunk line */
+@keyframes arterial-flow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Mycelium breathe — underground network slow glow */
+@keyframes mycelium-breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+/* Canopy breathe — overhead glow */
+@keyframes canopy-breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Pause all pulse animations when tab is hidden */
+.tab-hidden .network-pulse-overlay,
+.tab-hidden [style*="arterial-flow"],
+.tab-hidden [style*="mycelium-breathe"],
+.tab-hidden [style*="canopy-breathe"] {
+  animation-play-state: paused !important;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  [style*="arterial-flow"],
+  [style*="mycelium-breathe"],
+  [style*="canopy-breathe"] {
+    animation: none !important;
+  }
+}
