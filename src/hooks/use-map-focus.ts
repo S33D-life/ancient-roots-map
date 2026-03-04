@@ -16,6 +16,8 @@ export type ArrivalOrigin =
   | "clock"       // Time → Place — seasonal focus
   | "search"      // Seeking Line — direct, shorter duration
   | "nearby"      // Awakening — gentle outward ripple
+  | "species"     // Species filter — show distribution
+  | "collection"  // Collection — highlight linked trees
   | "featured";   // Editorial highlight
 
 export interface FocusMapOptions {
@@ -42,6 +44,14 @@ export interface FocusMapOptions {
   journey?: boolean;
   /** Hive slug — activates hive filter on arrival */
   hiveSlug?: string;
+  /** Species key — activates species filter on arrival */
+  species?: string;
+  /** Trigger geolocation-based nearby view */
+  nearby?: boolean;
+  /** Collection of tree IDs to highlight */
+  treeIds?: string[];
+  /** Collection reference ID (council session, library entry, etc.) */
+  collectionId?: string;
 }
 
 /* ------------------------------------------------------------------ */
