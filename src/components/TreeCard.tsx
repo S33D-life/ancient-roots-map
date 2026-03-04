@@ -117,7 +117,11 @@ const TreeCard = ({
               {age > 0 && <span>🌿 ~{age}y</span>}
               {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
               {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
-            </div>
+              {whisperCount > 0 && (
+                <span className="flex items-center gap-0.5 text-muted-foreground/60" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
+                  <Wind className="w-2.5 h-2.5" /> {whisperCount}
+                </span>
+              )}
           </div>
           {/* Tier badge */}
           <Badge variant="outline" className={`self-start text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
@@ -184,7 +188,11 @@ const TreeCard = ({
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
             {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount} offering{offeringCount !== 1 ? "s" : ""}</span>}
             {birdsongCount > 0 && <span>🐦 {birdsongCount} birdsong{birdsongCount !== 1 ? "s" : ""}</span>}
-          </div>
+            {whisperCount > 0 && (
+              <span className="flex items-center gap-1 text-muted-foreground/50" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
+                <Wind className="w-3 h-3" /> {whisperCount} whisper{whisperCount !== 1 ? "s" : ""}
+              </span>
+            )}
 
           {/* Wanderer avatars */}
           {isClustered && wandererCount > 1 && (
