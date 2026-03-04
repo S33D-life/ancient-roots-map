@@ -194,7 +194,7 @@ const App = () => {
         <Sonner />
         <StarryNight />
         {ShowDevPanel && <DevQAPanel />}
-        {/* ChatPanel removed — orphan component */}
+        {ShowDevPanel && <DevDiagnosticsOverlay />}
         
         <CanopyHeartPulse />
         <AppUpdateBanner />
