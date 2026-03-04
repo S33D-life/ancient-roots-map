@@ -42,7 +42,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [treeResults, setTreeResults] = useState<{ id: string; title: string; subtitle: string; route: string }[]>([]);
+  const [searchResults, setSearchResults] = useState<UnifiedResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -86,32 +86,21 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
     return () => document.removeEventListener("keydown", handleKey);
   }, [open, onClose]);
 
-  // Search database
+  // Unified search
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
-      setTreeResults([]);
+      setSearchResults([]);
       return;
     }
 
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setSearchLoading(true);
-      const q = searchQuery.trim();
-      const { data } = await supabase
-        .from("trees")
-        .select("id, name, species, nation")
-        .or(`name.ilike.%${q}%,species.ilike.%${q}%,what3words.ilike.%${q}%`)
-        .limit(8);
-
-      if (data) {
-        setTreeResults(
-          data.map((t) => ({
-            id: `tree-${t.id}`,
-            title: t.name,
-            subtitle: [t.species, t.nation].filter(Boolean).join(" · "),
-            route: `/tree/${t.id}`,
-          }))
-        );
+      try {
+        const res = await unifiedSearch(searchQuery, "all", 12);
+        setSearchResults(res);
+      } catch {
+        setSearchResults([]);
       }
       setSearchLoading(false);
     }, 250);
@@ -120,8 +109,8 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   }, [searchQuery]);
 
   const handleSearchSelect = useCallback(
-    (route: string) => {
-      navigate(route);
+    (result: UnifiedResult) => {
+      navigate(result.url);
       onClose();
       setSearchQuery("");
     },
