@@ -5,6 +5,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOfferings, type Offering } from "@/hooks/use-offerings";
+import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Globe, User, Users, Image as ImageIcon, FileText, Music, Link as LinkIcon } from "lucide-react";
@@ -52,6 +53,7 @@ const AncientFriendsRoom = ({
   staffCodes,
   onSelectTree,
 }: AncientFriendsRoomProps) => {
+  const { counts: whisperCounts } = useWhisperCounts();
   const [showExplorer, setShowExplorer] = useState(false);
   const [galleryView, setGalleryView] = useState<"collective" | "individual" | "tribe">("collective");
   const [searchQuery, setSearchQuery] = useState("");
@@ -204,6 +206,7 @@ const AncientFriendsRoom = ({
                 cluster={cluster}
                 offeringCount={treeOfferingCount}
                 heroPhotoUrl={photoOffering?.media_url}
+                whisperCount={whisperCounts[tree.id] || 0}
                 wishlistPulseActive={wishlistPulseId === tree.id}
                 onSelect={(t) => onSelectTree(t as any)}
                 onWishlist={addToWishlist}
