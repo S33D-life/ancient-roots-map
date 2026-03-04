@@ -1398,6 +1398,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
       // Attach metadata for cluster analysis and tree focus
       (marker as any)._treeLineage = (tree as any).lineage || null;
+      (marker as any)._treeSpecies = tree.species || null;
       (marker as any)._treeId = tree.id;
       (marker as any)._treeName = tree.name;
       marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0), {
