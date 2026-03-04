@@ -66,12 +66,12 @@ const Header = () => {
     setIsDark(!isDark);
   };
 
-  // ⌘K shortcut opens TETOL menu (which now contains search)
+  // ⌘K shortcut opens global search directly
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setTetolOpen(true);
+        setGlobalSearchOpen(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);

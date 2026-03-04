@@ -32,7 +32,7 @@ export function useTreeScroll() {
   const initialScrollDone = useRef(false);
   const isManualScroll = useRef(false);
 
-  // Scroll to Ground on mount (with robust retry for entrance animation delay)
+  // Scroll to Ground on mount — robust multi-attempt approach
   useEffect(() => {
     if (initialScrollDone.current) return;
     
@@ -40,28 +40,33 @@ export function useTreeScroll() {
     const hash = window.location.hash.replace("#", "") as TreeSection;
     if (hash && SECTION_IDS.includes(hash)) return;
 
-    const tryScroll = () => {
+    const doScroll = () => {
       const el = document.getElementById("ground");
-      if (el) {
-        // Use rAF to ensure layout is settled before scrolling
-        requestAnimationFrame(() => {
-          el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
-          initialScrollDone.current = true;
-        });
-        return true;
-      }
-      return false;
+      if (!el) return false;
+      // Force instant scroll without smooth behavior interference
+      const y = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      initialScrollDone.current = true;
+      return true;
     };
 
-    // Retry chain — entrance animation (~2.8s) may delay DOM availability
-    if (!tryScroll()) {
-      const retries = [50, 150, 300, 600, 1000, 1500];
+    // Attempt immediately, then retry with increasing delays
+    // Sections may not have final heights until images/fonts load
+    if (!doScroll()) {
+      const retries = [50, 150, 400, 800, 1500];
       retries.forEach((ms) => {
         setTimeout(() => {
-          if (!initialScrollDone.current) tryScroll();
+          if (!initialScrollDone.current) doScroll();
         }, ms);
       });
     }
+
+    // Final safety net — re-scroll after fonts and images settle
+    const safetyScroll = () => {
+      if (initialScrollDone.current) doScroll(); // re-apply after layout shifts
+    };
+    const safetyTimer = setTimeout(safetyScroll, 2000);
+    return () => clearTimeout(safetyTimer);
   }, []);
 
   // Handle hash on mount — if URL has a hash, scroll there instead
