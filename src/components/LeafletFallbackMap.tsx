@@ -40,6 +40,7 @@ import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
@@ -188,7 +189,7 @@ function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number, hi
 }
 
 /* ── Popup HTML (aligned with TreeCard visual language) ── */
-function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number): string {
+function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number, whisperCount?: number): string {
   if (!tree?.name && !tree?.species) return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
   const tier = getTreeTier(age, offerings);
   const tierLabel = TIER_LABELS[tier];
@@ -202,6 +203,9 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
     : "";
   const birdsongLine = (birdsongCount ?? 0) > 0
     ? `<span>🐦 ${birdsongCount}</span>`
+    : "";
+  const whisperLine = (whisperCount ?? 0) > 0
+    ? `<span style="color:hsl(200,30%,55%);">🌬️ ${whisperCount}</span>`
     : "";
   const desc = tree.description
     ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
@@ -228,6 +232,7 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
         ${ageText ? `<span>${ageText}</span>` : ""}
         ${offeringText ? `<span>${offeringText}</span>` : ""}
         ${birdsongLine}
+        ${whisperLine}
       </div>
       ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>` : ""}
       ${desc}
@@ -876,6 +881,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const birdsongCountsRef = useRef(birdsongCounts);
   birdsongCountsRef.current = birdsongCounts;
 
+  // Whisper counts for map markers
+  const { counts: whisperCountsMap } = useWhisperCounts();
+  const whisperCountsRef = useRef(whisperCountsMap);
+  whisperCountsRef.current = whisperCountsMap;
+
   // Initialize map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -1413,6 +1423,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:9px;line-height:1;" title="${dominantLineage[0]}">🌿</span>`;
         }
 
+        // Whisper echo — count whispers in this grove cluster
+        let groveWhisperCount = 0;
+        childMarkers.forEach((m: any) => {
+          groveWhisperCount += (m._whisperCount || 0);
+        });
+
         // Mycelium thread ring for established+ groves
         const myceliumRing = count >= 6
           ? `<span class="grove-mycelium" style="border:1px dashed hsla(${isMonoSpecies && ringStyle.includes('--grove-accent') ? 'var(--grove-accent)' : '120,50%,40%'},0.25);"></span>`
@@ -1427,16 +1443,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             : ""
           : "";
 
+        const whisperEcho = groveWhisperCount > 0
+          ? `<span style="position:absolute;bottom:${groveLabel ? -2 : -12}px;left:50%;transform:translateX(-50%);font-size:8px;color:hsla(200,40%,65%,0.7);white-space:nowrap;pointer-events:none;">🌬️ ${groveWhisperCount}</span>`
+          : "";
+
+        const groveGlowClass = groveWhisperCount > 0 ? ' whisper-glow' : '';
+
         return L.divIcon({
-          html: `<div class="tree-cluster ${groveTier}" style="${ringStyle};position:relative;">${count}${badge}${myceliumRing}${groveLabel}</div>`,
+          html: `<div class="tree-cluster ${groveTier}${groveGlowClass}" style="${ringStyle};position:relative;">${count}${badge}${myceliumRing}${groveLabel}${whisperEcho}</div>`,
           className: "leaflet-tree-marker",
-          iconSize: L.point(dim, dim + (groveLabel ? 14 : 0)),
+          iconSize: L.point(dim, dim + (groveLabel || whisperEcho ? 14 : 0)),
         });
       },
     });
 
     const currentOfferings = offeringCountsRef.current;
     const currentBirdsong = birdsongCountsRef.current;
+    const currentWhispers = whisperCountsRef.current;
 
     filteredTrees.forEach((tree) => {
       const offerings = currentOfferings[tree.id] || 0;
@@ -1448,14 +1471,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         return h ? hslStringToHue(h.accentHsl) : undefined;
       })() : undefined;
       const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue);
+      const wCount = currentWhispers[tree.id] || 0;
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
+      // If tree has whispers, add a subtle glow class to marker element after add
+      if (wCount > 0) {
+        marker.on('add', () => {
+          const el = (marker as any)._icon;
+          if (el) el.classList.add('whisper-glow');
+        });
+      }
       // Attach metadata for cluster analysis and tree focus
       (marker as any)._treeLineage = (tree as any).lineage || null;
       (marker as any)._treeSpecies = tree.species || null;
       (marker as any)._treeId = tree.id;
       (marker as any)._treeName = tree.name;
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0), {
+      (marker as any)._whisperCount = wCount;
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
