@@ -39,11 +39,12 @@ export function useAppUpdate() {
   const [update, setUpdate] = useState<UpdateState>({ available: false, source: null, remoteBuild: null });
   const waitingWorkerRef = useRef<ServiceWorker | null>(null);
 
-  // Helper: only surface update if this build wasn't already dismissed
+  // Helper: only surface update if this build wasn't already dismissed or installed
   const surfaceIfNew = useCallback((source: "sw" | "version", remoteBuild?: string) => {
     const build = remoteBuild ?? "sw-update";
     const dismissed = getDismissedBuild();
-    if (dismissed === build) return; // user already dismissed this version
+    const installed = getInstalledBuild();
+    if (dismissed === build || installed === build) return; // already handled
     setUpdate(prev => prev.available ? prev : { available: true, source, remoteBuild: build });
   }, []);
 
