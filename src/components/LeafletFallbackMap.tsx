@@ -399,23 +399,25 @@ const LITE_CSS = `
 @keyframes markerBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 .marker-seedling .marker-wrap{animation:markerBreathe 4s ease-in-out infinite}
 .marker-notable .marker-wrap{animation:markerBreathe 3.5s ease-in-out infinite}
-.tree-cluster{display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:'Cinzel',serif;font-weight:700;color:hsl(45,80%,60%);text-shadow:0 1px 2px rgba(0,0,0,0.5);border:2px solid hsla(42,70%,50%,0.55);transition:transform .15s ease-out,box-shadow .15s ease-out;position:relative}
-.tree-cluster:active{transform:scale(0.95)}
-.tree-cluster::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid transparent;pointer-events:none;transition:border-color .3s}
-/* Grove tiers — organic sizing + mycelium glow */
-.grove-seedling{width:32px;height:32px;font-size:10px;background:hsla(120,35%,22%,0.85);box-shadow:0 0 6px hsla(120,50%,40%,0.15)}
-.grove-small{width:38px;height:38px;font-size:11px;background:hsla(120,40%,20%,0.88);box-shadow:0 0 8px hsla(120,50%,35%,0.2),0 0 16px hsla(120,40%,30%,0.08)}
-.grove-small::before{border-color:hsla(120,50%,40%,0.15)}
-.grove-established{width:46px;height:46px;font-size:13px;background:hsla(120,45%,17%,0.9);box-shadow:0 0 10px hsla(120,50%,40%,0.25),0 0 24px hsla(120,40%,30%,0.12);animation:groveBreathe 6s ease-in-out infinite}
-.grove-established::before{border-color:hsla(120,50%,40%,0.2);animation:groveRingPulse 6s ease-in-out infinite}
-.grove-flourishing{width:54px;height:54px;font-size:14px;background:hsla(120,50%,15%,0.92);box-shadow:0 0 14px hsla(120,55%,40%,0.3),0 0 32px hsla(120,40%,30%,0.15),inset 0 0 8px hsla(120,40%,40%,0.1);animation:groveBreathe 5s ease-in-out infinite}
-.grove-flourishing::before{border-color:hsla(120,50%,40%,0.25);animation:groveRingPulse 5s ease-in-out infinite}
-.grove-ancient{width:60px;height:60px;font-size:15px;background:hsla(120,55%,13%,0.94);box-shadow:0 0 18px hsla(42,70%,50%,0.3),0 0 40px hsla(120,40%,30%,0.2),inset 0 0 12px hsla(42,50%,40%,0.08);animation:groveBreathe 4.5s ease-in-out infinite}
-.grove-ancient::before{border-color:hsla(42,70%,50%,0.3);animation:groveRingPulse 4.5s ease-in-out infinite}
-/* Mycelium thread ring — appears on established+ groves */
-.grove-mycelium{position:absolute;inset:-6px;border-radius:50%;pointer-events:none;opacity:0.4}
-@keyframes groveBreathe{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.04);filter:brightness(1.06)}}
-@keyframes groveRingPulse{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:0.6;transform:scale(1.08)}}
+/* Living Groves — calm, organic cluster styling */
+.tree-cluster{display:flex;align-items:center;justify-content:center;border-radius:50%;font-family:'Cinzel',serif;font-weight:600;color:hsla(45,60%,60%,0.9);text-shadow:0 1px 3px rgba(0,0,0,0.4);border:1.5px solid hsla(42,50%,45%,0.35);transition:transform .2s ease-out,box-shadow .3s ease-out;position:relative}
+.tree-cluster:active{transform:scale(0.96)}
+.tree-cluster::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid transparent;pointer-events:none;transition:border-color .6s}
+/* Grove tiers — restrained earth palette, generous breathing cycles */
+.grove-seedling{width:30px;height:30px;font-size:10px;background:hsla(130,25%,22%,0.8);box-shadow:0 0 4px hsla(120,30%,35%,0.1)}
+.grove-small{width:36px;height:36px;font-size:11px;background:hsla(128,30%,20%,0.82);box-shadow:0 0 6px hsla(120,30%,35%,0.12)}
+.grove-small::before{border-color:hsla(120,30%,40%,0.08)}
+.grove-established{width:44px;height:44px;font-size:12px;background:hsla(125,32%,18%,0.85);box-shadow:0 0 8px hsla(120,30%,35%,0.15);animation:groveBreathe 14s ease-in-out infinite}
+.grove-established::before{border-color:hsla(120,30%,40%,0.12);animation:groveRingPulse 14s ease-in-out infinite}
+.grove-flourishing{width:50px;height:50px;font-size:13px;background:hsla(122,35%,16%,0.88);box-shadow:0 0 10px hsla(120,30%,35%,0.18),inset 0 0 6px hsla(120,25%,35%,0.06);animation:groveBreathe 18s ease-in-out infinite}
+.grove-flourishing::before{border-color:hsla(120,30%,40%,0.15);animation:groveRingPulse 18s ease-in-out infinite}
+.grove-ancient{width:56px;height:56px;font-size:14px;background:hsla(120,38%,14%,0.9);box-shadow:0 0 12px hsla(42,40%,45%,0.15),0 0 24px hsla(120,25%,30%,0.1),inset 0 0 8px hsla(42,30%,35%,0.05);animation:groveBreathe 22s ease-in-out infinite}
+.grove-ancient::before{border-color:hsla(42,40%,45%,0.18);animation:groveRingPulse 22s ease-in-out infinite}
+/* Mycelium thread ring — faint dashed aura on established+ groves */
+.grove-mycelium{position:absolute;inset:-6px;border-radius:50%;pointer-events:none;opacity:0.25}
+/* Breathing: barely perceptible scale + brightness shifts */
+@keyframes groveBreathe{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.02);filter:brightness(1.03)}}
+@keyframes groveRingPulse{0%,100%{opacity:0.15;transform:scale(1)}50%{opacity:0.35;transform:scale(1.04)}}
 @media(prefers-reduced-motion:reduce){.grove-established,.grove-flourishing,.grove-ancient,.grove-established::before,.grove-flourishing::before,.grove-ancient::before{animation:none}}
 @keyframes ancientGlow{0%,100%{filter:drop-shadow(0 0 3px hsla(42,90%,55%,0.25))}50%{filter:drop-shadow(0 0 8px hsla(42,90%,55%,0.6))}}
 @keyframes popIn{0%{opacity:0;transform:scale(0.88) translateY(8px)}60%{transform:scale(1.02) translateY(-2px)}100%{opacity:1;transform:scale(1) translateY(0)}}
@@ -433,11 +435,11 @@ const LITE_CSS = `
 .grove-view-active .leaflet-tile-pane{filter:sepia(0.35) saturate(0.7) brightness(0.65) hue-rotate(-10deg)}
 @media(max-width:768px){.leaflet-tile-pane{filter:sepia(0.1) brightness(0.95)}}
 @media(max-width:768px){.grove-view-active .leaflet-tile-pane{filter:sepia(0.3) saturate(0.7) brightness(0.7) hue-rotate(-10deg)}}
-@keyframes groveBreath{0%,100%{filter:drop-shadow(0 0 4px hsla(120,60%,45%,0.2)) brightness(1)}50%{filter:drop-shadow(0 0 10px hsla(120,60%,45%,0.5)) brightness(1.08)}}
-.grove-view-active .marker-wrap{animation:groveBreath 4s ease-in-out infinite!important}
-.grove-view-active .marker-ancient{animation:groveBreath 3s ease-in-out infinite,ancientGlow 3.5s ease-in-out infinite!important}
-.grove-view-active .tree-cluster{box-shadow:0 0 16px hsla(120,50%,40%,0.4),0 0 6px hsla(42,60%,45%,0.25)!important;transition:box-shadow 1s ease-in-out}
-.grove-view-active .grove-mycelium{opacity:0.7!important;border-color:hsla(120,50%,40%,0.4)!important}
+@keyframes groveBreath{0%,100%{filter:drop-shadow(0 0 3px hsla(120,40%,40%,0.15)) brightness(1)}50%{filter:drop-shadow(0 0 6px hsla(120,40%,40%,0.3)) brightness(1.03)}}
+.grove-view-active .marker-wrap{animation:groveBreath 8s ease-in-out infinite!important}
+.grove-view-active .marker-ancient{animation:groveBreath 6s ease-in-out infinite,ancientGlow 8s ease-in-out infinite!important}
+.grove-view-active .tree-cluster{box-shadow:0 0 10px hsla(120,35%,40%,0.2),0 0 4px hsla(42,40%,45%,0.12)!important;transition:box-shadow 1.5s ease-in-out}
+.grove-view-active .grove-mycelium{opacity:0.4!important;border-color:hsla(120,35%,40%,0.2)!important}
 @keyframes eventPulseGold{0%{transform:scale(0.3);opacity:0.9}100%{transform:scale(3);opacity:0}}
 @keyframes eventPulseHeart{0%{transform:scale(0.3);opacity:0.8}100%{transform:scale(2.5);opacity:0}}
 .event-pulse-marker{background:transparent!important;border:none!important;pointer-events:none}
@@ -1382,23 +1384,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         if (isMonoSpecies && dominantSpecies) {
           const spLower = dominantSpecies[0].toLowerCase();
           if (spLower.includes("yew") || spLower.includes("taxus")) {
-            ringStyle = "border-color:hsla(280,45%,45%,0.7);--grove-accent:280,45%,45%";
+            ringStyle = "border-color:hsla(280,30%,40%,0.35);--grove-accent:280,30%,40%";
           } else if (spLower.includes("oak") || spLower.includes("quercus")) {
-            ringStyle = "border-color:hsla(90,50%,35%,0.7);--grove-accent:90,50%,35%";
+            ringStyle = "border-color:hsla(90,35%,35%,0.35);--grove-accent:90,35%,35%";
           } else if (spLower.includes("beech") || spLower.includes("fagus")) {
-            ringStyle = "border-color:hsla(35,55%,40%,0.7);--grove-accent:35,55%,40%";
+            ringStyle = "border-color:hsla(35,40%,38%,0.35);--grove-accent:35,40%,38%";
           } else if (spLower.includes("pine") || spLower.includes("pinus")) {
-            ringStyle = "border-color:hsla(150,50%,30%,0.7);--grove-accent:150,50%,30%";
+            ringStyle = "border-color:hsla(150,35%,30%,0.35);--grove-accent:150,35%,30%";
           } else if (spLower.includes("lime") || spLower.includes("tilia") || spLower.includes("linden")) {
-            ringStyle = "border-color:hsla(80,60%,45%,0.7);--grove-accent:80,60%,45%";
+            ringStyle = "border-color:hsla(80,40%,40%,0.35);--grove-accent:80,40%,40%";
           }
         }
         if (isLineageFocused && isMonoLineage) {
-          ringStyle = "border-color:hsla(120,55%,45%,0.7);box-shadow:0 0 10px hsla(120,55%,45%,0.35)";
+          ringStyle = "border-color:hsla(120,35%,40%,0.4);box-shadow:0 0 6px hsla(120,35%,40%,0.15)";
         } else if (hasAncient) {
-          ringStyle += ";border-color:hsla(42,90%,55%,0.7);box-shadow:0 0 12px hsla(42,90%,55%,0.4)";
+          ringStyle += ";border-color:hsla(42,60%,50%,0.4);box-shadow:0 0 8px hsla(42,60%,50%,0.15)";
         } else if (hasMajorStory) {
-          ringStyle += ";border-color:hsla(42,70%,48%,0.6);box-shadow:0 0 8px hsla(42,70%,48%,0.25)";
+          ringStyle += ";border-color:hsla(42,45%,45%,0.3);box-shadow:0 0 5px hsla(42,45%,45%,0.1)";
         }
 
         // Badge: ancient golden dot, species count, or lineage indicator
