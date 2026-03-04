@@ -3,8 +3,8 @@
  * Refined: softer borders, gentler hover states, breathable spacing.
  */
 import { useCallback } from "react";
-import { Link } from "react-router-dom";
-import { Bug, Sparkles, Lightbulb, ExternalLink } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Bug, Sparkles, Lightbulb, ExternalLink, Wind } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ const ACTIONS = [
   { type: "bug", icon: Bug, emoji: "🐞", label: "Report a Bug", desc: "Something isn't working", reward: "3–20" },
   { type: "ux_improvement", icon: Sparkles, emoji: "✨", label: "Improve the Flow", desc: "UX refinement idea", reward: "5–15" },
   { type: "insight", icon: Lightbulb, emoji: "💡", label: "Share an Insight", desc: "Propose an evolution", reward: "variable" },
+  { type: "whisper", icon: Wind, emoji: "🌬️", label: "Send a Whisper", desc: "Message through the trees", reward: null, isNav: true },
 ] as const;
 
 interface FireflyPanelProps {
@@ -25,11 +26,17 @@ interface FireflyPanelProps {
 }
 
 const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps) => {
-  const handleAction = useCallback((type: string) => {
+  const navigate = useNavigate();
+  const handleAction = useCallback((type: string, isNav?: boolean) => {
     console.info("[Firefly] firefly_action_selected", { type });
     onOpenChange(false);
-    setTimeout(() => onSelectAction(type), 150);
-  }, [onOpenChange, onSelectAction]);
+    if (isNav && type === "whisper") {
+      // Navigate to map where user can select a tree to whisper to
+      setTimeout(() => navigate("/map"), 150);
+    } else {
+      setTimeout(() => onSelectAction(type), 150);
+    }
+  }, [onOpenChange, onSelectAction, navigate]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -50,7 +57,7 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
               <button
                 key={a.type}
                 type="button"
-                onClick={() => handleAction(a.type)}
+                onClick={() => handleAction(a.type, 'isNav' in a ? a.isNav : false)}
                 className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-border/15 bg-secondary/10
                   hover:border-primary/25 hover:bg-primary/5 active:scale-[0.97] transition-all duration-300 text-left group"
               >
@@ -61,9 +68,11 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
                 <span className="text-[9px] text-muted-foreground/40 font-serif leading-snug">
                   {a.desc}
                 </span>
-                <span className="text-[9px] text-primary/40 font-serif">
-                  {a.reward} ❤️
-                </span>
+                {a.reward && (
+                  <span className="text-[9px] text-primary/40 font-serif">
+                    {a.reward} ❤️
+                  </span>
+                )}
               </button>
             ))}
           </div>
