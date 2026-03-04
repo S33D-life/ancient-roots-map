@@ -129,6 +129,24 @@ export function useMapFocus() {
         params.set("hive", opts.hiveSlug);
       }
 
+      // Species filter — map will auto-select species
+      if (opts.species) {
+        params.set("species", opts.species);
+      }
+
+      // Nearby — trigger geolocation on arrival
+      if (opts.nearby) {
+        params.set("nearby", "1");
+      }
+
+      // Collection — highlight specific tree IDs
+      if (opts.treeIds && opts.treeIds.length > 0) {
+        params.set("treeIds", opts.treeIds.join(","));
+      }
+      if (opts.collectionId) {
+        params.set("collection", opts.collectionId);
+      }
+
       const target = `/map?${params.toString()}`;
 
       if (location.pathname === "/map") {
