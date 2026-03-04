@@ -2692,7 +2692,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               { duration: 0.9, easeLinearity: 0.25 }
             );
           } else if (result.url) {
-            navigate(result.url);
+            window.location.href = result.url;
           }
         }}
       />
