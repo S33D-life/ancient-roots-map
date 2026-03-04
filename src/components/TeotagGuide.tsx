@@ -14,17 +14,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 type Tab = "guide" | "search";
 
-// Static page results for search
-const STATIC_PAGES = [
-  { id: "page-atlas", title: "Ancient Friends Atlas", subtitle: "Map of ancient trees", icon: <MapPin className="w-4 h-4" />, route: "/map" },
-  { id: "page-library", title: "HeARTwood Library", subtitle: "The Heartwood — rooms & scrolls", icon: <BookOpen className="w-4 h-4" />, route: "/library" },
-  { id: "page-council", title: "Council of Life", subtitle: "Community council", icon: <Leaf className="w-4 h-4" />, route: "/council-of-life" },
-  { id: "page-dream", title: "yOur Golden Dream", subtitle: "Vision & offerings", icon: <Sparkles className="w-4 h-4" />, route: "/golden-dream" },
-  { id: "page-dashboard", title: "My Grove (Dashboard)", subtitle: "Wishlist, seed pods, profile", icon: <Sprout className="w-4 h-4" />, route: "/dashboard" },
-  { id: "page-assets", title: "Staff Room & Assets", subtitle: "NFT gallery", icon: <ScrollText className="w-4 h-4" />, route: "/assets" },
-  { id: "page-groves", title: "Groves & Projects", subtitle: "Tree projects", icon: <TreeDeciduous className="w-4 h-4" />, route: "/groves" },
-  { id: "page-ledger", title: "Ledger", subtitle: "Stats, Notion strings", icon: <BarChart3 className="w-4 h-4" />, route: "/library" },
-];
+// Static pages now handled by unified search service
 
 // Level-aware greeting
 const LEVEL_GREETINGS: Record<string, string> = {
