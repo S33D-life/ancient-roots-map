@@ -30,6 +30,15 @@ export interface WhisperCollection {
   collected_tree_id: string | null;
 }
 
+export interface RecentWhisperConnection {
+  id: string;
+  created_at: string;
+  sender_user_id: string;
+  target_tree_id: string;
+  from: { lat: number; lng: number } | null;
+  to: { lat: number; lng: number } | null;
+}
+
 /** Send a whisper through a tree */
 export async function sendWhisper(params: {
   senderUserId: string;
@@ -249,4 +258,59 @@ export async function checkWhispersAtTree(
     }
     return false;
   });
+}
+
+/** Best-effort recent whisper links for map overlays (event-driven visualization). */
+export async function fetchRecentWhisperConnections(limit = 200): Promise<RecentWhisperConnection[]> {
+  const safeLimit = Math.max(1, Math.min(limit, 300));
+  const { data, error } = await supabase
+    .from("tree_whispers" as any)
+    .select("id, created_at, sender_user_id, tree_anchor_id, delivery_tree_id, collected_tree_id")
+    .order("created_at", { ascending: false })
+    .limit(safeLimit);
+
+  if (error || !data?.length) return [];
+
+  const rows = data as Array<{
+    id: string;
+    created_at: string;
+    sender_user_id: string;
+    tree_anchor_id: string;
+    delivery_tree_id: string | null;
+    collected_tree_id: string | null;
+  }>;
+
+  const treeIds = new Set<string>();
+  rows.forEach((row) => {
+    treeIds.add(row.tree_anchor_id);
+    if (row.collected_tree_id) treeIds.add(row.collected_tree_id);
+    if (row.delivery_tree_id) treeIds.add(row.delivery_tree_id);
+  });
+
+  const { data: trees } = await supabase
+    .from("trees")
+    .select("id, latitude, longitude")
+    .in("id", Array.from(treeIds));
+
+  const treeMap = new Map<string, { lat: number; lng: number }>();
+  (trees || []).forEach((tree: { id: string; latitude: number | null; longitude: number | null }) => {
+    if (tree.latitude == null || tree.longitude == null) return;
+    treeMap.set(tree.id, { lat: tree.latitude, lng: tree.longitude });
+  });
+
+  return rows
+    .map((row) => {
+      const target = treeMap.get(row.tree_anchor_id) || null;
+      const sourceTreeId = row.collected_tree_id || row.delivery_tree_id || null;
+      const from = sourceTreeId ? treeMap.get(sourceTreeId) || null : null;
+      return {
+        id: row.id,
+        created_at: row.created_at,
+        sender_user_id: row.sender_user_id,
+        target_tree_id: row.tree_anchor_id,
+        from,
+        to: target,
+      };
+    })
+    .filter((row) => row.to !== null);
 }
