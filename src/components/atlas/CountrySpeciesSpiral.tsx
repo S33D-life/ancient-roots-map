@@ -79,7 +79,7 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
   }, []);
 
   const handleFilterMap = useCallback((sp: SpeciesActivity) => {
-    focusMap({ type: "area", id: sp.species, countrySlug, source: "country" });
+    focusMap({ type: "area", id: sp.species, countrySlug, source: "species", species: sp.species });
   }, [focusMap, countrySlug]);
 
   const handleMapNew = useCallback((sp: SpeciesActivity) => {
