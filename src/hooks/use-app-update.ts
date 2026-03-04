@@ -21,6 +21,14 @@ const setDismissedBuild = (build: string) => {
   try { sessionStorage.setItem(DISMISSED_KEY, build); } catch {}
 };
 
+/** Persist the currently-running build so post-refresh we know we're up-to-date */
+const getInstalledBuild = (): string | null => {
+  try { return localStorage.getItem(INSTALLED_KEY); } catch { return null; }
+};
+const setInstalledBuild = (build: string) => {
+  try { localStorage.setItem(INSTALLED_KEY, build); } catch {}
+};
+
 interface UpdateState {
   available: boolean;
   source: "sw" | "version" | null;
