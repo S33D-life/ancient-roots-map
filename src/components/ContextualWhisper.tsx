@@ -32,9 +32,9 @@ function markSeen(id: string) {
 }
 
 const positionClasses: Record<string, string> = {
-  "bottom-center": "bottom-20 md:bottom-6 left-1/2 -translate-x-1/2",
-  "bottom-left": "bottom-20 md:bottom-6 left-4",
-  "bottom-right": "bottom-20 md:bottom-6 right-4",
+  "bottom-center": "left-1/2 -translate-x-1/2",
+  "bottom-left": "left-4",
+  "bottom-right": "right-4",
   "top-center": "top-20 left-1/2 -translate-x-1/2",
 };
 
@@ -64,6 +64,11 @@ const ContextualWhisper = ({ id, message, cta, delay = 2000, position = "bottom-
           exit={{ opacity: 0, y: 8, scale: 0.96 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           className={`fixed z-[60] max-w-xs w-auto ${positionClasses[position]}`}
+          style={
+            position !== "top-center"
+              ? { bottom: "calc(4rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }
+              : undefined
+          }
         >
           <div
             className="rounded-xl px-4 py-3 border backdrop-blur-md shadow-lg flex items-start gap-3"

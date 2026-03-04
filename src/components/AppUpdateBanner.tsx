@@ -1,10 +1,11 @@
 /**
  * AppUpdateBanner — persistent banner shown when a new version is detected.
- * Non-blocking; user can dismiss or refresh immediately.
+ * Renders BELOW the fixed header to avoid overlapping navigation.
  */
 import { RefreshCw, X } from "lucide-react";
 import { useAppUpdate } from "@/hooks/use-app-update";
 import { motion, AnimatePresence } from "framer-motion";
+import { Z } from "@/lib/z-index";
 
 const AppUpdateBanner = () => {
   const { updateAvailable, applyUpdate, dismissUpdate } = useAppUpdate();
@@ -13,11 +14,17 @@ const AppUpdateBanner = () => {
     <AnimatePresence>
       {updateAvailable && (
         <motion.div
-          initial={{ y: -48, opacity: 0 }}
+          initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -48, opacity: 0 }}
+          exit={{ y: -40, opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed top-0 left-0 right-0 z-[9999] flex items-center justify-center gap-3 px-4 py-2.5 bg-primary text-primary-foreground text-xs font-serif shadow-lg"
+          className="fixed left-0 right-0 flex items-center justify-center gap-3 px-4 py-2 text-xs font-serif shadow-lg"
+          style={{
+            top: "calc(env(safe-area-inset-top, 0px) + 48px)",
+            zIndex: Z.UPDATE_BANNER,
+            background: "hsl(var(--primary))",
+            color: "hsl(var(--primary-foreground))",
+          }}
         >
           <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
           <span>A new version is available.</span>
