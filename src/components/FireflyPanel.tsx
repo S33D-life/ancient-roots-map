@@ -37,7 +37,7 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
     if (flags?.isSearch) {
       setTimeout(() => setSearchOpen(true), 150);
     } else if (flags?.isNav && type === "whisper") {
-      setTimeout(() => navigate("/map"), 150);
+      setTimeout(() => navigate("/whispers"), 150);
     } else {
       setTimeout(() => onSelectAction(type), 150);
     }
