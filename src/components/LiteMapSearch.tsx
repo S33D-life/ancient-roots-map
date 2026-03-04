@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, X, MapPin } from "lucide-react";
 import {
   unifiedSearch,
@@ -22,6 +23,7 @@ interface LiteMapSearchProps {
 }
 
 const LiteMapSearch = ({ trees, onSelect, onSearchResult }: LiteMapSearchProps) => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [unifiedResults, setUnifiedResults] = useState<SearchResult[]>([]);
@@ -75,13 +77,16 @@ const LiteMapSearch = ({ trees, onSelect, onSearchResult }: LiteMapSearchProps) 
 
   const handleUnifiedSelect = useCallback(
     (result: SearchResult) => {
-      if (onSearchResult) {
+      if (onSearchResult && result.mapContext) {
         onSearchResult(result);
+      } else {
+        // Navigate to the result's URL for non-map results
+        navigate(result.url);
       }
       setQuery("");
       setOpen(false);
     },
-    [onSearchResult]
+    [onSearchResult, navigate]
   );
 
   // Close on outside click

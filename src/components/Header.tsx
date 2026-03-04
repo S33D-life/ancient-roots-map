@@ -9,6 +9,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import TetolMenu from "./TetolMenu";
+import GlobalSearch from "./GlobalSearch";
 import TeotagGuide from "./TeotagGuide";
 import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
@@ -27,6 +28,7 @@ const Header = () => {
   const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hasPendingActivity, setHasPendingActivity] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
 
   const handleTeotagClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -66,12 +68,12 @@ const Header = () => {
     setIsDark(!isDark);
   };
 
-  // ⌘K shortcut opens TETOL menu (which now contains search)
+  // ⌘K shortcut opens global search directly
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setTetolOpen(true);
+        setGlobalSearchOpen(true);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -427,7 +429,7 @@ const Header = () => {
       </header>
       <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
       <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />
-      
+      <GlobalSearch open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
     </>
   );
 };

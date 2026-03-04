@@ -99,7 +99,7 @@ const Index = () => {
         id="home-explore"
         message="Every ancient tree has a story. Tap the Atlas to discover one near you."
         cta={{ label: "Open Atlas", to: "/map" }}
-        delay={4000}
+        delay={8000}
         position="bottom-center"
       />
       <Footer />
