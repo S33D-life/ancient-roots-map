@@ -14,7 +14,7 @@ const DEV_CSP = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "script-src 'self' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "connect-src 'self' ws: wss: https: http://localhost:* http://127.0.0.1:*",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
