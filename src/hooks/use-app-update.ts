@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 declare const __BUILD_ID__: string;
 
 const VERSION_CHECK_INTERVAL = 60 * 60 * 1000; // 60 min
+const INSTALLED_KEY = "app-update-installed-build";
 const VERSION_URL = "/version.json";
 const DISMISSED_KEY = "app-update-dismissed";
 
