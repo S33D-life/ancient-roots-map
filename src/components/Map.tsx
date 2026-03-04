@@ -927,7 +927,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
       </Suspense>
 
       {/* Mobile: compact bottom bar */}
-      <div className="absolute bottom-14 left-2 right-2 z-10 flex md:hidden items-center gap-2">
+      <div className="absolute z-10 flex md:hidden items-center gap-2" style={{ bottom: "calc(var(--bottom-nav-height, 3.5rem) + var(--safe-bottom, 8px) + 8px)", left: "0.5rem", right: "0.5rem" }}>
         <div className="shrink-0">
           <Suspense fallback={null}>
             <FindMeButton
