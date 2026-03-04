@@ -231,13 +231,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
     }
   };
 
-  const filteredPages = STATIC_PAGES.filter(
-    (p) =>
-      !searchQuery.trim() ||
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.subtitle?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+  const searchGrouped = groupResults(searchResults);
   if (!open) return null;
 
   return (
