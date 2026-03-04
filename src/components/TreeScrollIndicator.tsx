@@ -10,6 +10,7 @@ const INDICATOR_SECTIONS: { id: TreeSection; label: string }[] = [
   { id: "council", label: "CANOPY" },
   { id: "heartwood", label: "TRUNK" },
   { id: "atlas-hero", label: "─ ─ ─" },
+  { id: "ground", label: "GROUND" },
   { id: "atlas-content", label: "ROOTS" },
 ];
 
@@ -18,6 +19,7 @@ const SECTION_HUES: Record<TreeSection, string> = {
   council: "150 35% 48%",
   heartwood: "28 50% 52%",
   "atlas-hero": "42 80% 55%",
+  ground: "120 40% 45%",
   "atlas-content": "42 80% 55%",
 };
 

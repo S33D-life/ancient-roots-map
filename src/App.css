@@ -22,3 +22,17 @@ html {
   background: transparent !important;
   border: none !important;
 }
+
+/* ── Seasonal + Day/Night ambient overlays ── */
+
+/* Day/night ambient tinting via time-phase body classes */
+body.time-dawn { --ambient-tint: hsl(30 70% 65% / 0.04); }
+body.time-day { --ambient-tint: hsl(45 50% 70% / 0.02); }
+body.time-evening { --ambient-tint: hsl(30 55% 50% / 0.05); }
+body.time-night { --ambient-tint: hsl(230 30% 25% / 0.08); }
+
+/* Seasonal accent shifts — applied to tree scroll sections */
+body.season-spring .vine-divider { --vine-hue: 120; }
+body.season-summer .vine-divider { --vine-hue: 110; }
+body.season-autumn .vine-divider { --vine-hue: 35; }
+body.season-winter .vine-divider { --vine-hue: 200; }

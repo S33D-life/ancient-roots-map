@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import TetolBridge from "@/components/TetolBridge";
@@ -20,12 +19,17 @@ import TreeScrollIndicator from "@/components/TreeScrollIndicator";
 import CrownSection from "@/components/tree-sections/CrownSection";
 import CanopySection from "@/components/tree-sections/CanopySection";
 import TrunkSection from "@/components/tree-sections/TrunkSection";
+import GroundSection from "@/components/tree-sections/GroundSection";
+import { useTimeOfDay } from "@/hooks/use-time-of-day";
+import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
 
 const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
   useVineFade();
+  useTimeOfDay();
+  useSeasonalTheme();
 
   if (showEntrance) {
     return <S33dEntrance onComplete={handleEntranceComplete} />;
@@ -51,12 +55,24 @@ const Index = () => {
         {/* ── TRUNK — HeARTwood Library ── */}
         <TrunkSection />
 
-        {/* ── THRESHOLD — Atlas Hero (scroll starts here) ── */}
+        {/* ── THRESHOLD — Gateway / Navigation Hub ── */}
         <div id="atlas-hero">
-          <Hero />
+          <div className="min-h-[40vh] flex flex-col items-center justify-center px-6 py-16 relative">
+            <div className="vine-divider mb-8" />
+            <p className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/40 mb-3">
+              The Threshold
+            </p>
+            <p className="text-muted-foreground/50 font-serif text-xs text-center max-w-xs leading-relaxed">
+              The door between earth and sky. Step down into the roots, or climb into the canopy.
+            </p>
+            <div className="vine-divider mt-8" />
+          </div>
         </div>
 
-        {/* ── ROOTS — Atlas Content ── */}
+        {/* ── GROUND — Ancient Friend Landing (scroll anchor) ── */}
+        <GroundSection />
+
+        {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
         <div id="atlas-content">
           <IdentitySection />
           <DiscoveryRow />
