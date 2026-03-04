@@ -5,6 +5,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useOfferings, type Offering } from "@/hooks/use-offerings";
+import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Globe, User, Users, Image as ImageIcon, FileText, Music, Link as LinkIcon } from "lucide-react";
