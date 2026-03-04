@@ -123,7 +123,10 @@ export function useAppUpdate() {
   // ── Actions ──
   const applyUpdate = useCallback(() => {
     // Mark as handled so it won't flash on reload
-    if (update.remoteBuild) setDismissedBuild(update.remoteBuild);
+    if (update.remoteBuild) {
+      setDismissedBuild(update.remoteBuild);
+      setInstalledBuild(update.remoteBuild);
+    }
 
     const worker = waitingWorkerRef.current;
     if (worker) {
