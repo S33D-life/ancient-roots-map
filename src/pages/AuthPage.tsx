@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -28,10 +28,52 @@ const AuthPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; confirm?: string; newPassword?: string; confirmNew?: string }>({});
+  const [oauthError, setOauthError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const resolvePostAuthPath = useCallback(() => {
+    const rawReturnTo = searchParams.get("returnTo");
+    if (!rawReturnTo) return "/atlas";
+
+    try {
+      const decoded = decodeURIComponent(rawReturnTo);
+      const targetUrl = new URL(decoded, window.location.origin);
+      const path = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+      const isSameOrigin = targetUrl.origin === window.location.origin;
+      const isInternalPath = path.startsWith("/") && !path.startsWith("//");
+      const isBlockedPath = targetUrl.pathname.startsWith("/auth") || targetUrl.pathname.startsWith("/~oauth");
+
+      if (isSameOrigin && isInternalPath && !isBlockedPath) {
+        return path;
+      }
+    } catch {
+      const isInternalPath = rawReturnTo.startsWith("/") && !rawReturnTo.startsWith("//");
+      const isBlockedPath = rawReturnTo.startsWith("/auth") || rawReturnTo.startsWith("/~oauth");
+      if (isInternalPath && !isBlockedPath) return rawReturnTo;
+    }
+
+    return "/atlas";
+  }, [searchParams]);
+
+  const getGoogleErrorMessage = (message?: string) => {
+    const raw = message ?? "";
+    const lower = raw.toLowerCase();
+
+    if (lower.includes("redirect_uri_mismatch")) {
+      return "Google redirect URL mismatch. Add https://www.s33d.life/** and https://s33d.life/** to redirect URLs and whitelist this app callback in Google OAuth.";
+    }
+    if (lower.includes("unauthorized_client") || lower.includes("invalid_client")) {
+      return "Google OAuth client is not authorized for this app. Re-check client ID/secret and allowed redirect URIs.";
+    }
+    if (lower.includes("pkce")) {
+      return "Secure login handshake failed (PKCE). Try again in a fresh tab; if it persists, clear site data and retry.";
+    }
+
+    return raw || "Google sign-in could not complete. Check OAuth redirect settings and try again.";
+  };
 
   // Pre-fill invite code from URL, also capture gift param
   useEffect(() => {
@@ -115,20 +157,18 @@ const AuthPage = () => {
           }
         }
 
-        const returnTo = searchParams.get("returnTo");
-        navigate(returnTo || "/dashboard");
+        navigate(resolvePostAuthPath(), { replace: true });
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        const returnTo = searchParams.get("returnTo");
-        navigate(returnTo || "/dashboard");
+        navigate(resolvePostAuthPath(), { replace: true });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, searchParams, toast]);
+  }, [navigate, toast, resolvePostAuthPath]);
 
   const clearErrors = () => setFieldErrors({});
 
@@ -246,21 +286,29 @@ const AuthPage = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setOauthError(null);
+
     try {
+      const redirectPath = resolvePostAuthPath();
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}${redirectPath}`,
       });
+
       // If redirected, the page will navigate away — don't reset loading
       if (result?.redirected) return;
+
       if (result?.error) {
-        const msg = result.error.message || "Could not connect to Google";
+        const msg = getGoogleErrorMessage(result.error.message);
+        setOauthError(msg);
         toast({ title: "Google login failed", description: msg, variant: "destructive" });
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Google sign-in unavailable";
+      const msg = getGoogleErrorMessage(err instanceof Error ? err.message : "Google sign-in unavailable");
+      setOauthError(msg);
       toast({ title: "Google login failed", description: msg, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -592,6 +640,10 @@ const AuthPage = () => {
                   </svg>
                   Continue with Google
                 </Button>
+
+                {oauthError && (
+                  <p className="text-xs text-destructive" role="alert">{oauthError}</p>
+                )}
 
                 <Button variant="outline" className="w-full gap-2" onClick={handleMagicLink} disabled={isLoading}>
                   <Wand2 className="h-4 w-4" />
