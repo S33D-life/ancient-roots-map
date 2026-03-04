@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf, Search, MapPin, BookOpen, BarChart3, Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { unifiedSearch, type SearchResult } from "@/services/unified-search";
 
 interface TetolMenuProps {
   open: boolean;
@@ -39,14 +39,7 @@ const treeItems = [
   },
 ];
 
-const STATIC_PAGES = [
-  { id: "page-atlas", title: "Ancient Friends Atlas", subtitle: "Map of ancient trees", icon: MapPin, route: "/map" },
-  { id: "page-library", title: "HeARTwood Library", subtitle: "Rooms & scrolls", icon: BookOpen, route: "/library" },
-  { id: "page-council", title: "Council of Life", subtitle: "Community council", icon: Leaf, route: "/council-of-life" },
-  { id: "page-dream", title: "yOur Golden Dream", subtitle: "Vision & offerings", icon: Sparkles, route: "/golden-dream" },
-  { id: "page-dashboard", title: "My Grove (Hearth)", subtitle: "Dashboard & profile", icon: Sprout, route: "/dashboard" },
-  { id: "page-groves", title: "Groves & Projects", subtitle: "Tree projects", icon: TreeDeciduous, route: "/groves" },
-];
+// Static pages removed — now handled by unified search
 
 const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
   const navigate = useNavigate();
