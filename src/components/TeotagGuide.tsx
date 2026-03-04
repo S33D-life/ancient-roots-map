@@ -408,51 +408,35 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
                   </div>
                 )}
 
-                {!searchLoading && searchQuery.length >= 2 && treeResults.length === 0 && filteredPages.length === 0 && (
+                {!searchLoading && searchQuery.length >= 2 && searchResults.length === 0 && (
                   <CommandEmpty className="font-serif text-muted-foreground">
                     No echoes found for "{searchQuery}"
                   </CommandEmpty>
                 )}
 
-                {treeResults.length > 0 && (
-                  <CommandGroup heading="Ancient Trees">
-                    {treeResults.map((t) => (
-                      <CommandItem
-                        key={t.id}
-                        value={t.id}
-                        onSelect={() => handleSearchSelect(t.route)}
-                        className="gap-3 cursor-pointer font-serif"
-                      >
-                        <TreeDeciduous className="w-4 h-4 text-primary" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{t.title}</p>
-                          <p className="text-[10px] text-muted-foreground truncate">{t.subtitle}</p>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-
-                {treeResults.length > 0 && filteredPages.length > 0 && <CommandSeparator />}
-
-                {filteredPages.length > 0 && (
-                  <CommandGroup heading={searchQuery.length >= 2 ? "Pages & Rooms" : "Quick Navigation"}>
-                    {filteredPages.map((page) => (
-                      <CommandItem
-                        key={page.id}
-                        value={page.id}
-                        onSelect={() => handleSearchSelect(page.route)}
-                        className="gap-3 cursor-pointer font-serif"
-                      >
-                        <span className="text-primary">{page.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{page.title}</p>
-                          <p className="text-[10px] text-muted-foreground truncate">{page.subtitle}</p>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
+                {searchGrouped.map((group, gi) => (
+                  <div key={group.type}>
+                    {gi > 0 && <CommandSeparator />}
+                    <CommandGroup heading={group.label}>
+                      {group.items.slice(0, 6).map((item) => (
+                        <CommandItem
+                          key={item.id}
+                          value={item.id}
+                          onSelect={() => handleSearchSelect(item)}
+                          className="gap-3 cursor-pointer font-serif"
+                        >
+                          <span className="text-sm text-primary">{item.emoji || "•"}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate">{item.title}</p>
+                            {item.subtitle && (
+                              <p className="text-[10px] text-muted-foreground truncate">{item.subtitle}</p>
+                            )}
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </div>
+                ))}
               </CommandList>
             </Command>
           </div>
