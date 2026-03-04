@@ -127,19 +127,17 @@ const queryClient = new QueryClient({
 const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
-  const [supabaseAuthed, setSupabaseAuthed] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [authInitError, setAuthInitError] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSupabaseAuthed(!!session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      // Listener kept active so auth SDK can process token refresh/sign-out updates.
     });
 
     supabase.auth
       .getSession()
-      .then(({ data: { session } }) => {
-        setSupabaseAuthed(!!session);
+      .then(() => {
         setAuthReady(true);
       })
       .catch((error) => {
