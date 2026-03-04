@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
-export type TreeSection = "golden-dream" | "council" | "heartwood" | "atlas-hero" | "atlas-content";
+export type TreeSection = "golden-dream" | "council" | "heartwood" | "atlas-hero" | "ground" | "atlas-content";
 
 const SECTION_IDS: TreeSection[] = [
   "golden-dream",
   "council",
   "heartwood",
   "atlas-hero",
+  "ground",
   "atlas-content",
 ];
 
@@ -15,6 +16,7 @@ const SECTION_LABELS: Record<TreeSection, string> = {
   council: "Canopy",
   heartwood: "Trunk",
   "atlas-hero": "Threshold",
+  ground: "Ground",
   "atlas-content": "Roots",
 };
 
@@ -25,7 +27,7 @@ const SECTION_LABELS: Record<TreeSection, string> = {
  * - Scrolls to atlas-hero on initial load
  */
 export function useTreeScroll() {
-  const [activeSection, setActiveSection] = useState<TreeSection>("atlas-hero");
+  const [activeSection, setActiveSection] = useState<TreeSection>("ground");
   const containerRef = useRef<HTMLDivElement>(null);
   const initialScrollDone = useRef(false);
   const isManualScroll = useRef(false);
@@ -39,7 +41,7 @@ export function useTreeScroll() {
     if (hash && SECTION_IDS.includes(hash)) return;
 
     const tryScroll = () => {
-      const el = document.getElementById("atlas-hero");
+      const el = document.getElementById("ground");
       if (el) {
         el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
         initialScrollDone.current = true;
@@ -101,7 +103,7 @@ export function useTreeScroll() {
             setActiveSection(id);
             // Update hash without triggering scroll
             if (!isManualScroll.current) {
-              const newHash = id === "atlas-hero" ? "" : `#${id}`;
+              const newHash = id === "ground" ? "" : `#${id}`;
               const currentHash = window.location.hash;
               if (currentHash !== newHash) {
                 window.history.replaceState(null, "", newHash || window.location.pathname);
@@ -133,7 +135,7 @@ export function useTreeScroll() {
         setTimeout(() => { isManualScroll.current = false; }, 1000);
       } else {
         isManualScroll.current = true;
-        const el = document.getElementById("atlas-hero");
+        const el = document.getElementById("ground");
         el?.scrollIntoView({ behavior: "smooth", block: "start" });
         setTimeout(() => { isManualScroll.current = false; }, 1000);
       }
@@ -151,7 +153,7 @@ export function useTreeScroll() {
       const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
       window.scrollTo({ top, behavior: "smooth" });
       
-      const newHash = section === "atlas-hero" ? "" : `#${section}`;
+      const newHash = section === "ground" ? "" : `#${section}`;
       window.history.pushState(null, "", newHash || window.location.pathname);
       setActiveSection(section);
     }
