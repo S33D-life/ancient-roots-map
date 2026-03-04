@@ -128,6 +128,7 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
   const [supabaseAuthed, setSupabaseAuthed] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -135,6 +136,7 @@ const App = () => {
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSupabaseAuthed(!!session);
+      setAuthReady(true);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -147,6 +149,12 @@ const App = () => {
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
+
+  // Show loading skeleton while auth state resolves — prevents premature
+  // redirects and white-screen flashes on page refresh
+  if (!authReady) {
+    return <PageSkeleton variant="default" />;
+  }
 
   return (
     <GlobalErrorBoundary>
