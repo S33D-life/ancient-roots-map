@@ -1447,6 +1447,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const currentOfferings = offeringCountsRef.current;
     const currentBirdsong = birdsongCountsRef.current;
+    const currentWhispers = whisperCountsRef.current;
 
     filteredTrees.forEach((tree) => {
       const offerings = currentOfferings[tree.id] || 0;
@@ -1458,6 +1459,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         return h ? hslStringToHue(h.accentHsl) : undefined;
       })() : undefined;
       const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue);
+      const wCount = currentWhispers[tree.id] || 0;
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
       // Attach metadata for cluster analysis and tree focus
@@ -1465,7 +1467,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       (marker as any)._treeSpecies = tree.species || null;
       (marker as any)._treeId = tree.id;
       (marker as any)._treeName = tree.name;
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0), {
+      (marker as any)._whisperCount = wCount;
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
