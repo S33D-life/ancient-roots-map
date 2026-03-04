@@ -1,6 +1,6 @@
 import { useState, useCallback, lazy, Suspense } from "react";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
 import LevelEntrance from "@/components/LevelEntrance";
@@ -10,6 +10,8 @@ import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTe
 import MapJourneyOverlay from "@/components/MapJourneyOverlay";
 import MapArrivalBanner from "@/components/MapArrivalBanner";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
+import { getEntryBySlug } from "@/config/countryRegistry";
+import { ArrowLeft } from "lucide-react";
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -19,6 +21,7 @@ const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapContr
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
 const MapPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const paramW3w = searchParams.get("w3w") || undefined;
   const paramLat = searchParams.get("lat") ? parseFloat(searchParams.get("lat")!) : undefined;
@@ -28,6 +31,7 @@ const MapPage = () => {
   const paramTreeId = searchParams.get("treeId") || undefined;
   const paramCountry = searchParams.get("country") || undefined;
   const paramHive = searchParams.get("hive") || undefined;
+  const paramContextLabel = searchParams.get("context") || undefined;
   // Support both "arrival" (new) and "origin" (legacy) params
   const rawArrival = searchParams.get("arrival") || searchParams.get("origin") || undefined;
   const paramArrival: ArrivalOrigin | null = rawArrival && VALID_ARRIVALS.has(rawArrival) ? (rawArrival as ArrivalOrigin) : null;
@@ -40,6 +44,8 @@ const MapPage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
   const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
+  const countryEntry = paramCountry ? getEntryBySlug(paramCountry) : undefined;
+  const countryLabel = countryEntry?.country || (paramCountry ? paramCountry.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase()) : "");
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
@@ -55,7 +61,21 @@ const MapPage = () => {
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
       {!showBlessing && !isFullscreen && paramArrival && (
-        <MapArrivalBanner arrival={paramArrival} countrySlug={paramCountry} hiveSlug={paramHive} />
+        <MapArrivalBanner arrival={paramArrival} contextLabel={paramContextLabel} countrySlug={paramCountry} hiveSlug={paramHive} />
+      )}
+
+      {/* Persistent return path for country-focused map journeys */}
+      {!showBlessing && !isFullscreen && paramCountry && (
+        <button
+          type="button"
+          onClick={() => navigate(`/atlas/${paramCountry}`)}
+          className="absolute left-1/2 -translate-x-1/2 z-[24] inline-flex items-center gap-2 rounded-full border bg-background/90 px-3 py-1.5 text-[11px] font-serif tracking-wide text-foreground shadow-sm backdrop-blur-sm transition hover:bg-background"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6.25rem)" }}
+          aria-label={`Return to ${countryLabel}`}
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Return to {countryLabel}
+        </button>
       )}
 
       {/* Public Tester Blessing — overlays map, shown once */}
