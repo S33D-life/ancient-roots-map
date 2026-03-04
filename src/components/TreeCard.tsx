@@ -122,7 +122,7 @@ const TreeCard = ({
                   <Wind className="w-2.5 h-2.5" /> {whisperCount}
                 </span>
               )}
-          </div>
+            </div>
           {/* Tier badge */}
           <Badge variant="outline" className={`self-start text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
             {TIER_LABELS[tier]}
