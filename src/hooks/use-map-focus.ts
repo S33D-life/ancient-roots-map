@@ -16,6 +16,8 @@ export type ArrivalOrigin =
   | "clock"       // Time → Place — seasonal focus
   | "search"      // Seeking Line — direct, shorter duration
   | "nearby"      // Awakening — gentle outward ripple
+  | "species"     // Species filter — show distribution
+  | "collection"  // Collection — highlight linked trees
   | "featured";   // Editorial highlight
 
 export interface FocusMapOptions {
@@ -42,6 +44,14 @@ export interface FocusMapOptions {
   journey?: boolean;
   /** Hive slug — activates hive filter on arrival */
   hiveSlug?: string;
+  /** Species key — activates species filter on arrival */
+  species?: string;
+  /** Trigger geolocation-based nearby view */
+  nearby?: boolean;
+  /** Collection of tree IDs to highlight */
+  treeIds?: string[];
+  /** Collection reference ID (council session, library entry, etc.) */
+  collectionId?: string;
 }
 
 /* ------------------------------------------------------------------ */
@@ -117,6 +127,24 @@ export function useMapFocus() {
       // Hive context — map will auto-activate hive species filter
       if (opts.hiveSlug) {
         params.set("hive", opts.hiveSlug);
+      }
+
+      // Species filter — map will auto-select species
+      if (opts.species) {
+        params.set("species", opts.species);
+      }
+
+      // Nearby — trigger geolocation on arrival
+      if (opts.nearby) {
+        params.set("nearby", "1");
+      }
+
+      // Collection — highlight specific tree IDs
+      if (opts.treeIds && opts.treeIds.length > 0) {
+        params.set("treeIds", opts.treeIds.join(","));
+      }
+      if (opts.collectionId) {
+        params.set("collection", opts.collectionId);
       }
 
       const target = `/map?${params.toString()}`;

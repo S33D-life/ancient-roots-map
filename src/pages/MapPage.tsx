@@ -16,7 +16,7 @@ const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
 
-const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured"]);
+const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
 const MapPage = () => {
   const [searchParams] = useSearchParams();

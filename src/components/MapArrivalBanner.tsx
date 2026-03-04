@@ -85,6 +85,20 @@ const ARRIVAL_PROFILES: Record<ArrivalOrigin, ArrivalMeta> = {
     accentHsl: "42 80% 55%",
     feeling: "Editorial highlight",
   },
+  species: {
+    icon: <Flower2 className="w-3.5 h-3.5" />,
+    label: "Species Distribution",
+    accentHsl: "80 50% 45%",
+    feeling: "Following a species thread",
+  },
+  collection: {
+    icon: <Layers className="w-3.5 h-3.5" />,
+    label: "Linked Trees",
+    accentHsl: "30 50% 50%",
+    feeling: "Connected records",
+    returnTo: "/library",
+    returnLabel: "Library",
+  },
 };
 
 interface MapArrivalBannerProps {
