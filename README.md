@@ -36,8 +36,6 @@ npm i
 npm run dev
 ```
 
-Package manager: this repo uses npm with `package-lock.json` (use `npm ci` in CI).
-
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).

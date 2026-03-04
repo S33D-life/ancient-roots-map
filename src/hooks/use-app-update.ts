@@ -12,16 +12,6 @@ const INSTALLED_KEY = "app-update-installed-build";
 const VERSION_URL = "/version.json";
 const DISMISSED_KEY = "app-update-dismissed";
 
-const fetchVersion = () =>
-  fetch(`${VERSION_URL}?t=${Date.now()}`, {
-    cache: "no-store",
-    headers: {
-      "Cache-Control": "no-cache, no-store, must-revalidate",
-      Pragma: "no-cache",
-      Expires: "0",
-    },
-  });
-
 /** Returns the build id that was dismissed this session, if any */
 const getDismissedBuild = (): string | null => {
   try { return sessionStorage.getItem(DISMISSED_KEY); } catch { return null; }
@@ -110,7 +100,7 @@ export function useAppUpdate() {
 
     const checkVersion = async () => {
       try {
-        const res = await fetchVersion();
+        const res = await fetch(VERSION_URL, { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
         if (data.build && data.build !== __BUILD_ID__) {
@@ -174,7 +164,7 @@ export function useAppUpdate() {
       }
     }
     try {
-      const res = await fetchVersion();
+      const res = await fetch(VERSION_URL, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data.build && data.build !== __BUILD_ID__) {
