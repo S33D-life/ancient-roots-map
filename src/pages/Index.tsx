@@ -21,6 +21,7 @@ import CanopySection from "@/components/tree-sections/CanopySection";
 import TrunkSection from "@/components/tree-sections/TrunkSection";
 import GroundSection from "@/components/tree-sections/GroundSection";
 import NetworkPulseOverlay from "@/components/tree-sections/NetworkPulseOverlay";
+import SectionAtmosphere from "@/components/tree-sections/SectionAtmosphere";
 import { useTimeOfDay } from "@/hooks/use-time-of-day";
 import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
 import { useNetworkPulse } from "@/hooks/use-network-pulse";
