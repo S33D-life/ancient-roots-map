@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
 import MapContextIndicator from "./MapContextIndicator";
 import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
 import { getHiveBySlug } from "@/utils/hiveUtils";
@@ -929,8 +930,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       });
     }
 
-    // Auto-locate on first load (skip if deep-linked)
-    if (!deepLinked && navigator.geolocation) {
+    // Restore MapMemory when no deep-link params — return to where user left off
+    if (!deepLinked) {
+      const memory = restoreMapMemory();
+      if (memory) {
+        setTimeout(() => map.setView([memory.lat, memory.lng], memory.zoom, { animate: true }), 300);
+      }
+    }
+
+    // Save MapMemory on every moveend (debounced)
+    let saveTimer: ReturnType<typeof setTimeout>;
+    const onMoveEndSave = () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        const c = map.getCenter();
+        const z = map.getZoom();
+        saveMapMemory({ lat: c.lat, lng: c.lng, zoom: z });
+      }, 500);
+    };
+    map.on("moveend", onMoveEndSave);
+
+    // Auto-locate on first load (skip if deep-linked or memory-restored)
+    if (!deepLinked && !restoreMapMemory() && navigator.geolocation) {
       geo.locate("map-auto-init").then((result) => {
         if (result && mapRef.current) {
           const latlng: [number, number] = [result.lat, result.lng];
@@ -942,6 +963,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
 
     return () => {
+      clearTimeout(saveTimer);
+      map.off("moveend", onMoveEndSave);
       originalCleanup();
       map.remove();
       mapRef.current = null;
@@ -2647,6 +2670,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onClear={() => {
           setContextLabel(null);
           setSpecies([]);
+          clearMapMemory();
           const map = mapRef.current;
           if (map) map.setView([25, 10], 3, { animate: true });
           window.history.replaceState(null, "", "/map");
