@@ -194,6 +194,7 @@ const TreeCard = ({
                 <Wind className="w-3 h-3" /> {whisperCount} whisper{whisperCount !== 1 ? "s" : ""}
               </span>
             )}
+          </div>
 
           {/* Wanderer avatars */}
           {isClustered && wandererCount > 1 && (
