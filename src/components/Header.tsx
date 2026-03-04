@@ -88,14 +88,7 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchAvatar(session.user.id);
-        checkPendingActivity(session.user.id);
-      }
-    });
-
+    // Set up listener BEFORE getSession to avoid race conditions
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
@@ -107,6 +100,14 @@ const Header = () => {
         }
       }
     );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchAvatar(session.user.id);
+        checkPendingActivity(session.user.id);
+      }
+    });
 
     return () => subscription.unsubscribe();
   }, []);
