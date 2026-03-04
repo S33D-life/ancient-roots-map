@@ -1423,6 +1423,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:9px;line-height:1;" title="${dominantLineage[0]}">🌿</span>`;
         }
 
+        // Whisper echo — count whispers in this grove cluster
+        let groveWhisperCount = 0;
+        childMarkers.forEach((m: any) => {
+          groveWhisperCount += (m._whisperCount || 0);
+        });
+        const whisperEcho = groveWhisperCount > 0
+          ? `<span style="position:absolute;bottom:${groveLabel ? -2 : -12}px;left:50%;transform:translateX(-50%);font-size:8px;color:hsla(200,40%,65%,0.7);white-space:nowrap;pointer-events:none;">🌬️ ${groveWhisperCount}</span>`
+          : "";
+
         // Mycelium thread ring for established+ groves
         const myceliumRing = count >= 6
           ? `<span class="grove-mycelium" style="border:1px dashed hsla(${isMonoSpecies && ringStyle.includes('--grove-accent') ? 'var(--grove-accent)' : '120,50%,40%'},0.25);"></span>`
@@ -1437,10 +1446,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             : ""
           : "";
 
+        const groveGlowClass = groveWhisperCount > 0 ? ' whisper-glow' : '';
+
         return L.divIcon({
-          html: `<div class="tree-cluster ${groveTier}" style="${ringStyle};position:relative;">${count}${badge}${myceliumRing}${groveLabel}</div>`,
+          html: `<div class="tree-cluster ${groveTier}${groveGlowClass}" style="${ringStyle};position:relative;">${count}${badge}${myceliumRing}${groveLabel}${whisperEcho}</div>`,
           className: "leaflet-tree-marker",
-          iconSize: L.point(dim, dim + (groveLabel ? 14 : 0)),
+          iconSize: L.point(dim, dim + (groveLabel || whisperEcho ? 14 : 0)),
         });
       },
     });
