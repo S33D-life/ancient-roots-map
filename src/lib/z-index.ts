@@ -25,6 +25,21 @@ export const Z = {
   DROPDOWN: 100,
   /** TETOL overlay menu */
   OVERLAY: 110,
+  /** App update banner — sits above header */
+  UPDATE_BANNER: 120,
+} as const;
+
+/**
+ * Shared safe-zone dimensions (px).
+ * Use these to offset content from fixed UI elements.
+ */
+export const SAFE_ZONES = {
+  /** Height of header bar */
+  HEADER_HEIGHT: 56,
+  /** Height of mobile bottom nav (excluding safe-area) */
+  BOTTOM_NAV_HEIGHT: 56,
+  /** Clearance above bottom nav for floating elements */
+  BOTTOM_NAV_CLEARANCE: 72,
 } as const;
 
 export type ZLayer = typeof Z[keyof typeof Z];

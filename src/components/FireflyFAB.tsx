@@ -36,7 +36,7 @@ function loadPos(): StoredPos {
       if (typeof p.y === "number" && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  return { y: Math.round(window.innerHeight * 0.72), edge: "right" };
+  return { y: Math.round(window.innerHeight * 0.58), edge: "right" };
 }
 
 function savePos(p: StoredPos) {
@@ -47,7 +47,8 @@ function posToXY(p: StoredPos): { x: number; y: number } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const x = p.edge === "right" ? vw - FAB_SIZE - EDGE_PAD : EDGE_PAD;
-  const maxY = vh - FAB_SIZE - EDGE_PAD - 80;
+  // Reserve space: bottom nav (56px) + safe-area + 16px breathing room
+  const maxY = vh - FAB_SIZE - 56 - 24;
   const minY = EDGE_PAD + 56;
   const y = Math.max(minY, Math.min(maxY, p.y));
   return { x, y };
@@ -91,7 +92,7 @@ const FireflyFAB = () => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const edge: "left" | "right" = cx + FAB_SIZE / 2 < vw / 2 ? "left" : "right";
-    const maxY = vh - FAB_SIZE - EDGE_PAD - 80;
+    const maxY = vh - FAB_SIZE - 56 - 24;
     const minY = EDGE_PAD + 56;
     const clampedY = Math.max(minY, Math.min(maxY, cy));
     const newPos: StoredPos = { y: clampedY, edge };

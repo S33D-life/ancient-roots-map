@@ -52,7 +52,7 @@ const GroundSection = () => (
 
     {/* DOWN cue — "Explore the Roots" */}
     <motion.div
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-none"
+      className="absolute bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-none"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 2.5, duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
