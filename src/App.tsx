@@ -12,6 +12,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import StarryNight from "@/components/StarryNight";
 
 import DevQAPanel from "@/components/DevQAPanel";
+import DevDiagnosticsOverlay from "@/components/DevDiagnosticsOverlay";
 const ShowDevPanel = import.meta.env.DEV;
 
 import { supabase } from "@/integrations/supabase/client";
@@ -193,7 +194,7 @@ const App = () => {
         <Sonner />
         <StarryNight />
         {ShowDevPanel && <DevQAPanel />}
-        {/* ChatPanel removed — orphan component */}
+        {ShowDevPanel && <DevDiagnosticsOverlay />}
         
         <CanopyHeartPulse />
         <AppUpdateBanner />
