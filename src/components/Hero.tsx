@@ -274,7 +274,7 @@ const Hero = () => {
       {isDark ? <FairyDust /> : <FallingLeaves />}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 pt-24 pb-8 text-center flex flex-col min-h-screen">
+      <div className="relative z-10 container mx-auto px-4 pt-24 pb-24 md:pb-8 text-center flex flex-col min-h-screen">
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Branding title */}
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
