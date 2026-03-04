@@ -191,7 +191,7 @@ export async function unifiedSearch(
   }
 
   // 2. Database queries (parallel)
-  const dbPromises: Promise<void>[] = [];
+  const dbPromises: PromiseLike<void>[] = [];
 
   // Trees
   if (shouldInclude("tree")) {
