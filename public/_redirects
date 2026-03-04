@@ -1,0 +1,10 @@
+/version.json /version.json 200
+/assets/* /assets/:splat 200
+/api/* /api/:splat 200
+/favicon.ico /favicon.ico 200
+/robots.txt /robots.txt 200
+/manifest.webmanifest /manifest.webmanifest 200
+/registerSW.js /registerSW.js 200
+/sw.js /sw.js 200
+
+/* /index.html 200

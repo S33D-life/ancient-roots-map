@@ -1059,7 +1059,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       // Country deep-link: zoom to bounding box with optional area highlight
       if (initialCountry) {
         const entry = getEntryBySlug(initialCountry);
-        if (entry?.bbox) {
+        if (initialLat != null && initialLng != null) {
+          map.flyTo(
+            [initialLat, initialLng],
+            initialZoom ?? 7,
+            { animate: true, duration: initialJourney ? 1.8 : 1.2 },
+          );
+          label = `${entry?.flag || "🌍"} ${entry?.country || initialCountry}`;
+          if (initialJourney) {
+            setTimeout(() => onJourneyEnd?.(), 1800);
+          } else {
+            onJourneyEnd?.();
+          }
+        } else if (entry?.bbox) {
           const [south, west, north, east] = entry.bbox;
           const bounds: L.LatLngBoundsExpression = [[south, west], [north, east]];
           map.fitBounds(bounds, { padding: [20, 20], animate: true, duration: initialJourney ? 1.8 : 1.5 });
@@ -1162,7 +1174,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [initialCountry, initialHive, trees.length]);
+  }, [initialCountry, initialHive, trees.length, initialLat, initialLng, initialZoom, initialJourney, onJourneyEnd]);
 
   // ── Event pulse rendering on map (gold shimmers at tree coords) ──
   useEffect(() => {
@@ -2332,12 +2344,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     setResearchLoading(true);
 
     (async () => {
-      const { data, error } = await supabase
+      const countryName = initialCountry ? getEntryBySlug(initialCountry)?.country : null;
+      let query = supabase
         .from('research_trees')
-        .select('id,species_scientific,species_common,tree_name,locality_text,province,latitude,longitude,geo_precision,description,height_m,girth_or_stem,crown_spread,designation_type,source_doc_title,source_doc_url,source_doc_year,source_program,status')
+        .select('id,species_scientific,species_common,tree_name,locality_text,province,latitude,longitude,geo_precision,description,height_m,girth_or_stem,crown_spread,designation_type,source_doc_title,source_doc_url,source_doc_year,source_program,status,country')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .limit(5000);
+
+      if (countryName) {
+        query = query.eq('country', countryName);
+      }
+
+      const { data, error } = await query;
 
       setResearchLoading(false);
 
@@ -2376,7 +2395,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return () => {
       if (map.hasLayer(researchCluster)) map.removeLayer(researchCluster);
     };
-  }, [showResearchLayer]);
+  }, [showResearchLayer, initialCountry]);
 
   // Rootstones layer — notable trees + groves by country
   useEffect(() => {

@@ -5,8 +5,10 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
-  TreeDeciduous, ChevronDown, Heart, MapPin, Leaf, Calendar, Flame,
+  TreeDeciduous, ChevronDown, MapPin, Leaf, Flame, Loader2,
 } from "lucide-react";
 import type { TreeCheckin } from "@/hooks/use-tree-checkins";
 import type { CheckinStats } from "@/hooks/use-tree-checkins";
@@ -25,11 +27,54 @@ interface Props {
   loading: boolean;
   onCheckin: () => void;
   showCheckinButton?: boolean;
+  userId?: string | null;
+  onRefresh?: () => void;
 }
 
-export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheckin, showCheckinButton = true }: Props) {
+export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheckin, showCheckinButton = true, userId, onRefresh }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [witnessingId, setWitnessingId] = useState<string | null>(null);
   const displayCheckins = expanded ? checkins : checkins.slice(0, 3);
+
+  const handleWitness = async (checkinId: string) => {
+    if (!userId) {
+      toast.error("Please sign in to witness a check-in.");
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      toast.error("Geolocation is unavailable on this device.");
+      return;
+    }
+
+    setWitnessingId(checkinId);
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
+      );
+
+      const { data, error } = await supabase.functions.invoke("canopy-checkin", {
+        body: {
+          action: "witness",
+          checkin_id: checkinId,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy_m: pos.coords.accuracy,
+        },
+      });
+
+      if (error) {
+        toast.error(error.message || "Witness confirmation failed.");
+      } else {
+        const payload = (data || {}) as { confidence_score?: number };
+        toast.success(`Witness confirmed. Confidence now ${payload.confidence_score ?? "updated"}.`);
+        onRefresh?.();
+      }
+    } catch {
+      toast.error("Unable to get your location for witness confirmation.");
+    } finally {
+      setWitnessingId(null);
+    }
+  };
 
   if (loading) return null;
   if (checkins.length === 0 && !showCheckinButton) return null;
@@ -128,6 +173,11 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
                       <MapPin className="w-2.5 h-2.5 mr-0.5" /> GPS
                     </Badge>
                   )}
+                  {(c.confidence_score ?? 0) > 0 && (
+                    <Badge variant="outline" className="text-[8px] px-1 py-0 border-primary/20">
+                      Confidence {c.confidence_score}
+                    </Badge>
+                  )}
                   {c.mood_score && (
                     <span className="text-[10px] text-muted-foreground/60 font-serif">
                       {MOOD_LABELS[c.mood_score - 1]}
@@ -144,6 +194,18 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
                   {c.fungi_present && <span>🍄 Fungi</span>}
                   {c.health_notes && <span>📋 Health note</span>}
                 </div>
+                {userId && c.user_id !== userId && Date.now() - new Date(c.checked_in_at).getTime() <= 10 * 60 * 1000 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 text-[10px] h-7 px-2"
+                    onClick={() => handleWitness(c.id)}
+                    disabled={witnessingId === c.id}
+                  >
+                    {witnessingId === c.id ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                    Witness
+                  </Button>
+                )}
               </div>
             </div>
           ))}

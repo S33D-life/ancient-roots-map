@@ -52,6 +52,12 @@ export interface FocusMapOptions {
   treeIds?: string[];
   /** Collection reference ID (council session, library entry, etc.) */
   collectionId?: string;
+  /** Explicit center for area focus (overrides bbox center) */
+  center?: { lat: number; lng: number };
+  /** Lightweight default semantic tags (URL context) */
+  tags?: string[];
+  /** Research layer preference on arrival */
+  researchLayer?: "on" | "off";
 }
 
 /* ------------------------------------------------------------------ */
@@ -112,6 +118,9 @@ export function useMapFocus() {
             if (entry?.bbox) {
               opts.bbox = entry.bbox;
             }
+            if (entry?.country) {
+              params.set("context", entry.country);
+            }
           }
         }
         if (opts.bbox) {
@@ -121,6 +130,15 @@ export function useMapFocus() {
           params.set("lat", String(centerLat));
           params.set("lng", String(centerLng));
           params.set("bbox", opts.bbox.join(","));
+        }
+
+        if (opts.center) {
+          params.set("lat", String(opts.center.lat));
+          params.set("lng", String(opts.center.lng));
+        }
+
+        if (opts.zoom != null) {
+          params.set("zoom", String(opts.zoom));
         }
       }
 
@@ -145,6 +163,14 @@ export function useMapFocus() {
       }
       if (opts.collectionId) {
         params.set("collection", opts.collectionId);
+      }
+
+      if (opts.tags && opts.tags.length > 0) {
+        params.set("tags", opts.tags.join(","));
+      }
+
+      if (opts.researchLayer) {
+        params.set("research", opts.researchLayer);
       }
 
       const target = `/map?${params.toString()}`;

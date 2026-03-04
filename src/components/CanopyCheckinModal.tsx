@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/utils/mapGeometry";
-import { issueRewards } from "@/utils/issueRewards";
 import type { RewardResult } from "@/utils/issueRewards";
 import RewardReceipt from "@/components/RewardReceipt";
 import PostEncounterShare from "@/components/PostEncounterShare";
@@ -27,8 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
-  Loader2, MapPin, Leaf, Sun, Cloud, CloudRain,
-  Snowflake, Wind, Camera, Heart, TreeDeciduous, CheckCircle2, Share2,
+  Loader2, MapPin, Leaf, Heart, TreeDeciduous, Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -72,7 +70,9 @@ export default function CanopyCheckinModal({
   const [geoStatus, setGeoStatus] = useState<"checking" | "under_canopy" | "outside" | "unavailable">("checking");
   const [userLat, setUserLat] = useState<number | null>(null);
   const [userLng, setUserLng] = useState<number | null>(null);
+  const [accuracyM, setAccuracyM] = useState<number | null>(null);
   const [softMode, setSoftMode] = useState(false);
+  const [hasOffering, setHasOffering] = useState(false);
 
   // Form
   const [seasonStage, setSeasonStage] = useState("other");
@@ -107,6 +107,8 @@ export default function CanopyCheckinModal({
       setSubmitted(false);
       setRewardResult(null);
       setSoftMode(false);
+      setHasOffering(false);
+      setAccuracyM(null);
       setShowShareOverlay(false);
       checkGeo();
     }
@@ -126,6 +128,7 @@ export default function CanopyCheckinModal({
       (pos) => {
         setUserLat(pos.coords.latitude);
         setUserLng(pos.coords.longitude);
+        setAccuracyM(pos.coords.accuracy);
         const dist = haversineKm(pos.coords.latitude, pos.coords.longitude, treeLat, treeLng);
         setGeoStatus(dist <= CANOPY_RADIUS_KM ? "under_canopy" : "outside");
       },
@@ -140,66 +143,55 @@ export default function CanopyCheckinModal({
     if (!userId) { toast.error("Please sign in to check in."); return; }
     setSubmitting(true);
 
-    const { error } = await supabase.from("tree_checkins").insert({
-      tree_id: treeId,
-      user_id: userId,
-      latitude: userLat,
-      longitude: userLng,
-      season_stage: seasonStage,
-      weather: weather || null,
-      reflection: reflection.trim() || null,
-      mood_score: moodScore[0],
-      canopy_proof: geoStatus === "under_canopy",
-      birdsong_heard: birdsongHeard,
-      fungi_present: fungiPresent,
-      health_notes: healthNotes.trim() || null,
-    } as any);
+    const { data, error } = await supabase.functions.invoke("canopy-checkin", {
+      body: {
+        action: "checkin",
+        tree_id: treeId,
+        season_stage: seasonStage,
+        weather: weather || null,
+        reflection: reflection.trim() || null,
+        mood_score: moodScore[0],
+        birdsong_heard: birdsongHeard,
+        fungi_present: fungiPresent,
+        health_notes: healthNotes.trim() || null,
+        soft_mode: softMode,
+        has_offering: hasOffering,
+        latitude: userLat,
+        longitude: userLng,
+        accuracy_m: accuracyM,
+      },
+    });
 
     if (error) {
-      toast.error("Failed to record check-in.");
-      console.error("Checkin error:", error);
+      toast.error(error.message || "Failed to record check-in.");
       setSubmitting(false);
       return;
     }
 
-    // Check for seasonal bloom sync bonus
-    let seasonalBonusAmount = 0;
-    const currentMonth = new Date().getMonth() + 1;
-    const { data: phenoData } = await supabase
-      .from("species_phenology")
-      .select("season_stage")
-      .eq("species", treeSpecies)
-      .eq("month", currentMonth)
-      .order("observation_count", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (phenoData && phenoData.season_stage === seasonStage) {
-      seasonalBonusAmount = 1; // Bloom sync bonus
+    const result = (data || {}) as {
+      accepted?: boolean;
+      message?: string;
+      reason?: string;
+      canopy_proof?: boolean;
+      confidence_score?: number;
+      hearts_awarded?: number;
+    };
+
+    if (!result.accepted) {
+      toast.error(result.message || "Check-in was rejected.");
+      setSubmitting(false);
+      return;
     }
 
-    // Issue rewards (with optional seasonal bonus)
-    const reward = await issueRewards({
-      userId,
-      treeId,
-      treeSpecies,
-      actionType: "checkin",
-      s33dAmount: 1 + seasonalBonusAmount,
+    const heartsAwarded = Math.max(0, Number(result.hearts_awarded || 0));
+    setRewardResult({
+      s33dHearts: heartsAwarded,
+      speciesHearts: 0,
+      influence: 0,
+      speciesFamily: treeSpecies || "Unknown",
+      hiveName: "Canopy",
+      capped: heartsAwarded === 0,
     });
-    setRewardResult(reward);
-
-    // Try to claim any pending windfall hearts for this tree
-    if (reward && !reward.capped) {
-      const { data: windfallAmount } = await supabase.rpc("claim_windfall_hearts", {
-        p_tree_id: treeId,
-        p_user_id: userId,
-      });
-      if (windfallAmount && windfallAmount > 0) {
-        setRewardResult(prev => prev ? {
-          ...prev,
-          s33dHearts: prev.s33dHearts + windfallAmount,
-        } : prev);
-      }
-    }
 
     // Check for whispers at this tree
     if (userId) {
@@ -333,7 +325,7 @@ export default function CanopyCheckinModal({
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7 }}
                 >
-                  Daily heart cap reached for this tree (3 per day).
+                  Presence recorded. Hearts were not awarded for this check-in.
                 </motion.p>
               )}
 
@@ -424,6 +416,11 @@ export default function CanopyCheckinModal({
               <span>You are beneath this canopy.</span>
               <Badge variant="outline" className="text-[9px] ml-auto border-primary/30">GPS Verified</Badge>
             </div>
+          )}
+          {accuracyM != null && (
+            <p className="text-[11px] text-muted-foreground font-serif mt-2">
+              Accuracy: {Math.round(accuracyM)}m
+            </p>
           )}
           {geoStatus === "outside" && (
             <div className="space-y-2">
@@ -561,6 +558,17 @@ export default function CanopyCheckinModal({
                 🍄 Fungi present
               </Label>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="has-offering"
+              checked={hasOffering}
+              onCheckedChange={(v) => setHasOffering(v === true)}
+            />
+            <Label htmlFor="has-offering" className="text-xs font-serif text-muted-foreground cursor-pointer">
+              I left an offering with this visit (adds confidence)
+            </Label>
           </div>
 
           {/* Health Notes */}

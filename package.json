@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "import:rootstones": "node scripts/import-rootstones.mjs"
+    "import:rootstones": "node scripts/import-rootstones.mjs",
+    "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

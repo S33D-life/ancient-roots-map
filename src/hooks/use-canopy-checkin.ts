@@ -2,16 +2,16 @@
  * Canopy Check-In — automatic proximity-based recognition.
  * 
  * Watches the user's geolocation and triggers a silent check-in
- * when they enter the canopy radius (~40m) of a tree they created
- * that has an NFTree offering. Enforces a 12-hour cooldown per tree.
+ * when they enter the canopy radius (~40m) of a tree they created.
+ * Local event cooldown mirrors server cooldown intent.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/utils/mapGeometry";
-import { issueRewards, type RewardResult } from "@/utils/issueRewards";
+import type { RewardResult } from "@/utils/issueRewards";
 
 const CANOPY_RADIUS_KM = 0.04; // ~40 metres
-const COOLDOWN_MS = 12 * 60 * 60 * 1000; // 12 hours
+const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
 const WATCH_INTERVAL_MS = 15_000; // poll every 15s
 const MIN_ACCURACY_M = 80; // ignore inaccurate readings
 
@@ -73,17 +73,37 @@ export function useCanopyCheckIn() {
       const lastCheckin = cooldownMapRef.current.get(tree.id) || 0;
       if (now - lastCheckin < COOLDOWN_MS) continue;
 
-      // Issue rewards silently
-      const reward = await issueRewards({
-        userId: userIdRef.current,
-        treeId: tree.id,
-        treeSpecies: tree.species,
-        actionType: "checkin",
+      const { data, error } = await supabase.functions.invoke("canopy-checkin", {
+        body: {
+          action: "checkin",
+          tree_id: tree.id,
+          season_stage: "other",
+          soft_mode: false,
+          has_offering: false,
+          latitude,
+          longitude,
+          accuracy_m: pos.coords.accuracy,
+        },
       });
 
-      if (reward && !reward.capped) {
+      if (error) continue;
+
+      const result = (data || {}) as { accepted?: boolean; hearts_awarded?: number };
+      if (result.accepted && Number(result.hearts_awarded || 0) > 0) {
         cooldownMapRef.current.set(tree.id, now);
-        setLastEvent({ tree, reward, timestamp: now });
+        const hearts = Math.max(0, Number(result.hearts_awarded || 0));
+        setLastEvent({
+          tree,
+          reward: {
+            s33dHearts: hearts,
+            speciesHearts: 0,
+            influence: 0,
+            speciesFamily: tree.species || "Unknown",
+            hiveName: "Canopy",
+            capped: hearts === 0,
+          } as RewardResult,
+          timestamp: now,
+        });
       }
     }
   }, []);

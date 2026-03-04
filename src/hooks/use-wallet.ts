@@ -40,6 +40,15 @@ const CHAIN_NAMES: Record<number, string> = {
   42161: "Arbitrum",
 };
 
+const CHAIN_PARAMS: Record<number, { chainName: string; rpcUrls: string[]; blockExplorerUrls: string[]; nativeCurrency: { name: string; symbol: string; decimals: number } }> = {
+  84532: {
+    chainName: "Base Sepolia",
+    rpcUrls: ["https://sepolia.base.org"],
+    blockExplorerUrls: ["https://sepolia.basescan.org"],
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  },
+};
+
 const shorten = (addr: string) => `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 
 export function useWallet(userId?: string) {
@@ -271,6 +280,36 @@ export function useWallet(userId?: string) {
     }
   }, [userId]);
 
+  const switchToActiveNetwork = useCallback(async () => {
+    const eth = (window as any).ethereum;
+    if (!eth) return false;
+    const chainHex = `0x${ACTIVE_CHAIN_ID.toString(16)}`;
+
+    try {
+      await eth.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: chainHex }],
+      });
+      return true;
+    } catch (err: any) {
+      // 4902: unknown chain in wallet
+      if (err?.code === 4902 && CHAIN_PARAMS[ACTIVE_CHAIN_ID]) {
+        const params = CHAIN_PARAMS[ACTIVE_CHAIN_ID];
+        await eth.request({
+          method: "wallet_addEthereumChain",
+          params: [{ chainId: chainHex, ...params }],
+        });
+        return true;
+      }
+
+      setState(prev => ({
+        ...prev,
+        error: "Could not switch network automatically. Please select Base Sepolia (84532) in MetaMask.",
+      }));
+      return false;
+    }
+  }, []);
+
   const disconnect = useCallback(async () => {
     setState({
       status: "disconnected",
@@ -303,6 +342,7 @@ export function useWallet(userId?: string) {
     ...state,
     connect,
     disconnect,
+    switchToActiveNetwork,
     selectStaff,
     clearActiveStaff,
     hasMetaMask,
