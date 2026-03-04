@@ -92,7 +92,7 @@ const FireflyFAB = () => {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const edge: "left" | "right" = cx + FAB_SIZE / 2 < vw / 2 ? "left" : "right";
-    const maxY = vh - FAB_SIZE - EDGE_PAD - 80;
+    const maxY = vh - FAB_SIZE - 56 - 24;
     const minY = EDGE_PAD + 56;
     const clampedY = Math.max(minY, Math.min(maxY, cy));
     const newPos: StoredPos = { y: clampedY, edge };
