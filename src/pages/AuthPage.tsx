@@ -157,20 +157,18 @@ const AuthPage = () => {
           }
         }
 
-        const returnTo = searchParams.get("returnTo");
-        navigate(returnTo || "/dashboard");
+        navigate(resolvePostAuthPath(), { replace: true });
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        const returnTo = searchParams.get("returnTo");
-        navigate(returnTo || "/dashboard");
+        navigate(resolvePostAuthPath(), { replace: true });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, searchParams, toast]);
+  }, [navigate, toast, resolvePostAuthPath]);
 
   const clearErrors = () => setFieldErrors({});
 

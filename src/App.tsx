@@ -160,6 +160,27 @@ const App = () => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
+  if (authInitError) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-6 bg-background text-foreground">
+        <section className="w-full max-w-lg rounded-xl border border-border bg-card p-6 space-y-3">
+          <h1 className="text-xl font-semibold">Authentication unavailable</h1>
+          <p className="text-sm text-muted-foreground">
+            We couldn’t restore your session. Refresh the page. If this continues, verify backend URL/key settings and Google redirect URLs.
+          </p>
+          <p className="text-xs text-destructive break-words" role="alert">{authInitError}</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center justify-center rounded-md border border-border bg-secondary px-4 py-2 text-sm text-secondary-foreground"
+          >
+            Reload
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   // Show loading skeleton while auth state resolves — prevents premature
   // redirects and white-screen flashes on page refresh
   if (!authReady) {
