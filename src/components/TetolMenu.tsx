@@ -148,48 +148,29 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
             )}
           </div>
 
-          {/* Search results */}
-          {searchQuery.trim() && (filteredPages.length > 0 || treeResults.length > 0) && (
-            <div className="absolute top-full mt-2 w-full rounded-xl border shadow-xl overflow-hidden z-50" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border) / 0.4)" }}>
-              {filteredPages.length > 0 && (
-                <div className="p-2">
-                  <p className="text-[10px] font-serif tracking-widest uppercase px-2 py-1" style={{ color: "hsl(var(--muted-foreground))" }}>Pages</p>
-                  {filteredPages.map((page) => {
-                    const Icon = page.icon;
-                    return (
-                      <button
-                        key={page.id}
-                        onClick={(e) => handleItemClick(page.route, e)}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-primary/10 transition-colors"
-                      >
-                        <Icon className="w-4 h-4 shrink-0" style={{ color: "hsl(var(--primary))" }} />
-                        <div>
-                          <p className="text-sm font-serif" style={{ color: "hsl(var(--foreground))" }}>{page.title}</p>
-                          <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>{page.subtitle}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              {treeResults.length > 0 && (
-                <div className="p-2 border-t" style={{ borderColor: "hsl(var(--border) / 0.3)" }}>
-                  <p className="text-[10px] font-serif tracking-widest uppercase px-2 py-1" style={{ color: "hsl(var(--muted-foreground))" }}>Trees</p>
-                  {treeResults.map((tree) => (
-                    <button
-                      key={tree.id}
-                      onClick={(e) => handleItemClick(`/tree/${tree.id}`, e)}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-primary/10 transition-colors"
-                    >
-                      <TreeDeciduous className="w-4 h-4 shrink-0" style={{ color: "hsl(80 35% 50%)" }} />
-                      <div>
-                        <p className="text-sm font-serif" style={{ color: "hsl(var(--foreground))" }}>{tree.name}</p>
-                        <p className="text-[10px]" style={{ color: "hsl(var(--muted-foreground))" }}>{tree.species}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+          {/* Unified search results */}
+          {searchQuery.trim().length >= 2 && searchResults.length > 0 && (
+            <div className="absolute top-full mt-2 w-full rounded-xl border shadow-xl overflow-hidden z-50 max-h-[40vh] overflow-y-auto" style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border) / 0.4)" }}>
+              <div className="p-2">
+                {searchResults.map((result) => (
+                  <button
+                    key={result.id}
+                    onClick={(e) => handleItemClick(result.url, e)}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left hover:bg-primary/10 transition-colors"
+                  >
+                    <span className="text-sm shrink-0">{result.emoji || "•"}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-serif truncate" style={{ color: "hsl(var(--foreground))" }}>{result.title}</p>
+                      {result.subtitle && (
+                        <p className="text-[10px] truncate" style={{ color: "hsl(var(--muted-foreground))" }}>{result.subtitle}</p>
+                      )}
+                    </div>
+                    {result.mapContext && (
+                      <MapPin className="w-3 h-3 shrink-0" style={{ color: "hsl(var(--primary) / 0.5)" }} />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
