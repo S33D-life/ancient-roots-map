@@ -147,6 +147,23 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Strict protocol + structure validation
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return new Response(JSON.stringify({ error: "Invalid protocol — only http/https allowed" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } catch {
+      return new Response(JSON.stringify({ error: "Malformed URL" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Rate limit by IP
     const ip = req.headers.get("x-forwarded-for") || "unknown";
     if (!checkRateLimit(ip, 20, 60_000)) {
