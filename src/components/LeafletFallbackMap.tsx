@@ -1462,6 +1462,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const wCount = currentWhispers[tree.id] || 0;
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
+      // If tree has whispers, add a subtle glow class to marker element after add
+      if (wCount > 0) {
+        marker.on('add', () => {
+          const el = (marker as any)._icon;
+          if (el) el.classList.add('whisper-glow');
+        });
+      }
       // Attach metadata for cluster analysis and tree focus
       (marker as any)._treeLineage = (tree as any).lineage || null;
       (marker as any)._treeSpecies = tree.species || null;
