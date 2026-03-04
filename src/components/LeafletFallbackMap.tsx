@@ -2668,6 +2668,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onClear={() => {
           setContextLabel(null);
           setSpecies([]);
+          clearMapMemory();
           const map = mapRef.current;
           if (map) map.setView([25, 10], 3, { animate: true });
           window.history.replaceState(null, "", "/map");
