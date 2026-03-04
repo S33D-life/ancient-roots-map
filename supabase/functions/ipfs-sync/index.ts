@@ -22,7 +22,7 @@ function checkRateLimit(userId: string, maxRequests = 10, windowMs = 60000): boo
 }
 
 async function verifyAssetOwnership(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   assetId: string,
   userId: string
 ): Promise<boolean> {
