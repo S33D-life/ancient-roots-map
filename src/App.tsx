@@ -24,6 +24,7 @@ import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 import AppUpdateBanner from "@/components/AppUpdateBanner";
 import FireflyFAB from "@/components/FireflyFAB";
+import MissingEnvBanner from "@/components/MissingEnvBanner";
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
@@ -155,6 +156,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <StarryNight />
+        <MissingEnvBanner />
         {ShowDevPanel && <DevQAPanel />}
         {/* ChatPanel removed — orphan component */}
         

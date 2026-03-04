@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "node generate-version.mjs && vite build",
     "build:dev": "node generate-version.mjs && vite build --mode development",
-    "lint": "eslint .",
+    "lint": "./node_modules/.bin/eslint src scripts vite.config.ts tailwind.config.ts eslint.config.js",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
+    "release-check": "npm run test && npm run build && npm run typecheck",
     "import:rootstones": "node scripts/import-rootstones.mjs",
     "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs"
   },
