@@ -64,7 +64,11 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
 
   useEffect(() => {
     if (!audioRef.current) return;
-    isPlaying ? audioRef.current.play().catch(() => {}) : audioRef.current.pause();
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
   }, [isPlaying]);
 
   useEffect(() => {
