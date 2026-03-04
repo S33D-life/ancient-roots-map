@@ -232,6 +232,9 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <div className="pointer-events-none fixed bottom-2 right-2 z-50 rounded bg-black/30 px-2 py-1 text-[10px] text-white/70 backdrop-blur-sm">
+              Build: {__BUILD_ID__}
+            </div>
           </UIFlowProvider>
           </MapFilterProvider>
           </HiveSeasonProvider>
