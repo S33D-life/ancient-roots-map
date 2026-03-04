@@ -963,6 +963,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
 
     return () => {
+      clearTimeout(saveTimer);
+      map.off("moveend", onMoveEndSave);
       originalCleanup();
       map.remove();
       mapRef.current = null;
