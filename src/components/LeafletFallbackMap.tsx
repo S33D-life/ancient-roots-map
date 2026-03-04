@@ -1428,9 +1428,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         childMarkers.forEach((m: any) => {
           groveWhisperCount += (m._whisperCount || 0);
         });
-        const whisperEcho = groveWhisperCount > 0
-          ? `<span style="position:absolute;bottom:${groveLabel ? -2 : -12}px;left:50%;transform:translateX(-50%);font-size:8px;color:hsla(200,40%,65%,0.7);white-space:nowrap;pointer-events:none;">🌬️ ${groveWhisperCount}</span>`
-          : "";
 
         // Mycelium thread ring for established+ groves
         const myceliumRing = count >= 6
@@ -1444,6 +1441,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             : isMonoLineage && dominantLineage && count >= 8
             ? `<span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;font-family:'Cinzel',serif;color:hsl(42,50%,60%);text-shadow:0 1px 3px rgba(0,0,0,0.7);letter-spacing:0.04em;opacity:0.8;">${dominantLineage[0].length > 14 ? dominantLineage[0].slice(0, 12) + "…" : dominantLineage[0]}</span>`
             : ""
+          : "";
+
+        const whisperEcho = groveWhisperCount > 0
+          ? `<span style="position:absolute;bottom:${groveLabel ? -2 : -12}px;left:50%;transform:translateX(-50%);font-size:8px;color:hsla(200,40%,65%,0.7);white-space:nowrap;pointer-events:none;">🌬️ ${groveWhisperCount}</span>`
           : "";
 
         const groveGlowClass = groveWhisperCount > 0 ? ' whisper-glow' : '';
