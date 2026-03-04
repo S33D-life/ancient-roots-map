@@ -129,15 +129,25 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 const App = () => {
   const [supabaseAuthed, setSupabaseAuthed] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const [authInitError, setAuthInitError] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSupabaseAuthed(!!session);
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSupabaseAuthed(!!session);
-      setAuthReady(true);
-    });
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSupabaseAuthed(!!session);
+        setAuthReady(true);
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : "Failed to restore your session";
+        setAuthInitError(message);
+        setAuthReady(true);
+      });
+
     return () => subscription.unsubscribe();
   }, []);
 
