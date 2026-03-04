@@ -560,7 +560,16 @@ All colors MUST be HSL.
     animation: fruitAura 4s var(--pulse-ease) infinite;
   }
 
-  /* Sectional energy — classes applied via body.tree-zone-* */
+  /* Whisper glow — subtle breathing ring for trees with whispers on the map */
+  @keyframes whisperBreath {
+    0%, 100% { box-shadow: 0 0 0 0 hsla(200, 40%, 60%, 0); }
+    50%      { box-shadow: 0 0 12px 4px hsla(200, 40%, 60%, 0.15); }
+  }
+  .whisper-glow {
+    animation: whisperBreath 12s ease-in-out infinite;
+    border-radius: 50%;
+  }
+
   body.tree-zone-atlas-content .pulse-heart { animation-duration: 4.2s; }
   body.tree-zone-heartwood .pulse-heart    { animation-duration: 3.6s; }
   body.tree-zone-council .pulse-heart      { animation-duration: 3.2s; }
