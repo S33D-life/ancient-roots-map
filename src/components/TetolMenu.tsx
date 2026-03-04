@@ -79,13 +79,7 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
     }, 300);
   }, [searchQuery]);
 
-  const filteredPages = searchQuery.trim()
-    ? STATIC_PAGES.filter(
-        (p) =>
-          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : [];
+  // filteredPages replaced by unified searchResults above
 
   if (!open) return null;
 
