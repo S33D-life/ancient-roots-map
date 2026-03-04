@@ -40,6 +40,7 @@ import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
@@ -879,6 +880,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   treePhotosRef.current = treePhotos;
   const birdsongCountsRef = useRef(birdsongCounts);
   birdsongCountsRef.current = birdsongCounts;
+
+  // Whisper counts for map markers
+  const { counts: whisperCountsMap } = useWhisperCounts();
+  const whisperCountsRef = useRef(whisperCountsMap);
+  whisperCountsRef.current = whisperCountsMap;
 
   // Initialize map once
   useEffect(() => {
