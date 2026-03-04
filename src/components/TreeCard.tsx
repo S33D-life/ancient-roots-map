@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine } from "lucide-react";
+import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind } from "lucide-react";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import { type TreeCardData, type OfferingSummary, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
@@ -20,6 +20,8 @@ interface TreeCardProps {
   heroPhotoUrl?: string | null;
   /** Birdsong count */
   birdsongCount?: number;
+  /** Whisper count */
+  whisperCount?: number;
   /** Whether a wishlist animation is playing */
   wishlistPulseActive?: boolean;
   /** Callbacks */
@@ -36,6 +38,7 @@ const TreeCard = ({
   offeringCount = 0,
   heroPhotoUrl,
   birdsongCount = 0,
+  whisperCount = 0,
   wishlistPulseActive = false,
   onSelect,
   onWishlist,
