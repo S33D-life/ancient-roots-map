@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from "@/components/ui/command";
 import { supabase } from "@/integrations/supabase/client";
+import { unifiedSearch, groupResults, type SearchResult as UnifiedResult } from "@/services/unified-search";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
