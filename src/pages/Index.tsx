@@ -63,8 +63,9 @@ const Index = () => {
         <TrunkSection />
 
         {/* ── THRESHOLD — Gateway / Navigation Hub ── */}
-        <div id="atlas-hero">
-          <div className="min-h-[40vh] flex flex-col items-center justify-center px-6 py-16 relative">
+        <div id="atlas-hero" className="relative overflow-hidden">
+          <SectionAtmosphere theme="threshold" />
+          <div className="min-h-[40vh] flex flex-col items-center justify-center px-6 py-16 relative z-10">
             <div className="vine-divider mb-8" />
             <p className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/40 mb-3">
               The Threshold
@@ -80,7 +81,8 @@ const Index = () => {
         <GroundSection />
 
         {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
-        <div id="atlas-content">
+        <div id="atlas-content" className="relative overflow-hidden">
+          <SectionAtmosphere theme="roots" />
           <IdentitySection />
           <DiscoveryRow />
           <div className="section-divider max-w-xl mx-auto" />

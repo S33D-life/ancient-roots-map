@@ -1,13 +1,12 @@
 /**
  * CanopySection — inline Council of Life preview for the tree scroll.
- * Canopy = green-toned, communal, gathering energy.
- *
- * Sprinkles: staggered cards, floating icon, vine divider, leaf atmosphere
+ * Canopy = green-toned, communal, gathering energy + branch silhouettes.
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Leaf, Users, ScrollText, Podcast, CalendarDays, ArrowRight } from "lucide-react";
 import LeafAtmosphere from "../LeafAtmosphere";
+import SectionAtmosphere from "./SectionAtmosphere";
 
 const COUNCIL_LINKS = [
   { icon: ScrollText, title: "Council Records", description: "Past councils & decisions", to: "/council-of-life" },
@@ -32,21 +31,11 @@ const CanopySection = () => (
     id="council"
     className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
   >
-    {/* Green canopy atmosphere */}
-    <div
-      className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
-      style={{
-        background: `
-          radial-gradient(ellipse at 50% 35%, hsl(150 30% 22% / 0.06), transparent 55%),
-          radial-gradient(ellipse at 35% 65%, hsl(160 25% 18% / 0.04), transparent 45%),
-          linear-gradient(to bottom, hsl(var(--background)), hsl(150 15% 9% / 0.12) 50%, hsl(var(--background)))
-        `,
-      }}
-    />
+    {/* Full atmospheric stack */}
+    <SectionAtmosphere theme="canopy" />
 
     {/* Leaf atmosphere — green-dominant canopy */}
     <LeafAtmosphere variant="canopy" />
-    <div className="portal-vignette" />
 
     <motion.div
       initial={{ opacity: 0, y: 16 }}
