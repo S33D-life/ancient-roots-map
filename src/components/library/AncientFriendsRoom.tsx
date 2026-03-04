@@ -53,6 +53,7 @@ const AncientFriendsRoom = ({
   staffCodes,
   onSelectTree,
 }: AncientFriendsRoomProps) => {
+  const { counts: whisperCounts } = useWhisperCounts();
   const [showExplorer, setShowExplorer] = useState(false);
   const [galleryView, setGalleryView] = useState<"collective" | "individual" | "tribe">("collective");
   const [searchQuery, setSearchQuery] = useState("");
@@ -205,6 +206,7 @@ const AncientFriendsRoom = ({
                 cluster={cluster}
                 offeringCount={treeOfferingCount}
                 heroPhotoUrl={photoOffering?.media_url}
+                whisperCount={whisperCounts[tree.id] || 0}
                 wishlistPulseActive={wishlistPulseId === tree.id}
                 onSelect={(t) => onSelectTree(t as any)}
                 onWishlist={addToWishlist}
