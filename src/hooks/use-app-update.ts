@@ -127,6 +127,11 @@ export function useAppUpdate() {
       setDismissedBuild(update.remoteBuild);
       setInstalledBuild(update.remoteBuild);
     }
+    // Also mark the generic "sw-update" key so SW-based updates don't re-trigger
+    setDismissedBuild("sw-update");
+    setInstalledBuild("sw-update");
+
+    setUpdate({ available: false, source: null, remoteBuild: null });
 
     const worker = waitingWorkerRef.current;
     if (worker) {

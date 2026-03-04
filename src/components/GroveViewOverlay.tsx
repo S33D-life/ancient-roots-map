@@ -100,7 +100,7 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute left-1/2 -translate-x-1/2 z-[70] w-[min(260px,calc(100vw-2rem))]"
+            className="absolute left-1/2 -translate-x-1/2 z-[1001] w-[min(260px,calc(100vw-2rem))]"
             style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px + 3.5rem)" }}
           >
             {/* Collapse toggle */}
