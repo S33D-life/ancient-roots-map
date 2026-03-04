@@ -1384,23 +1384,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         if (isMonoSpecies && dominantSpecies) {
           const spLower = dominantSpecies[0].toLowerCase();
           if (spLower.includes("yew") || spLower.includes("taxus")) {
-            ringStyle = "border-color:hsla(280,45%,45%,0.7);--grove-accent:280,45%,45%";
+            ringStyle = "border-color:hsla(280,30%,40%,0.35);--grove-accent:280,30%,40%";
           } else if (spLower.includes("oak") || spLower.includes("quercus")) {
-            ringStyle = "border-color:hsla(90,50%,35%,0.7);--grove-accent:90,50%,35%";
+            ringStyle = "border-color:hsla(90,35%,35%,0.35);--grove-accent:90,35%,35%";
           } else if (spLower.includes("beech") || spLower.includes("fagus")) {
-            ringStyle = "border-color:hsla(35,55%,40%,0.7);--grove-accent:35,55%,40%";
+            ringStyle = "border-color:hsla(35,40%,38%,0.35);--grove-accent:35,40%,38%";
           } else if (spLower.includes("pine") || spLower.includes("pinus")) {
-            ringStyle = "border-color:hsla(150,50%,30%,0.7);--grove-accent:150,50%,30%";
+            ringStyle = "border-color:hsla(150,35%,30%,0.35);--grove-accent:150,35%,30%";
           } else if (spLower.includes("lime") || spLower.includes("tilia") || spLower.includes("linden")) {
-            ringStyle = "border-color:hsla(80,60%,45%,0.7);--grove-accent:80,60%,45%";
+            ringStyle = "border-color:hsla(80,40%,40%,0.35);--grove-accent:80,40%,40%";
           }
         }
         if (isLineageFocused && isMonoLineage) {
-          ringStyle = "border-color:hsla(120,55%,45%,0.7);box-shadow:0 0 10px hsla(120,55%,45%,0.35)";
+          ringStyle = "border-color:hsla(120,35%,40%,0.4);box-shadow:0 0 6px hsla(120,35%,40%,0.15)";
         } else if (hasAncient) {
-          ringStyle += ";border-color:hsla(42,90%,55%,0.7);box-shadow:0 0 12px hsla(42,90%,55%,0.4)";
+          ringStyle += ";border-color:hsla(42,60%,50%,0.4);box-shadow:0 0 8px hsla(42,60%,50%,0.15)";
         } else if (hasMajorStory) {
-          ringStyle += ";border-color:hsla(42,70%,48%,0.6);box-shadow:0 0 8px hsla(42,70%,48%,0.25)";
+          ringStyle += ";border-color:hsla(42,45%,45%,0.3);box-shadow:0 0 5px hsla(42,45%,45%,0.1)";
         }
 
         // Badge: ancient golden dot, species count, or lineage indicator
