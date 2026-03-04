@@ -45,7 +45,7 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [treeResults, setTreeResults] = useState<{ id: string; name: string; species: string }[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
@@ -56,25 +56,25 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
     } else {
       setVisible(false);
       setSearchQuery("");
-      setTreeResults([]);
+      setSearchResults([]);
     }
   }, [open]);
 
-  // Search trees from DB
+  // Unified search
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setTreeResults([]);
+    if (!searchQuery.trim() || searchQuery.length < 2) {
+      setSearchResults([]);
       return;
     }
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setSearchLoading(true);
-      const { data } = await supabase
-        .from("trees")
-        .select("id, name, species")
-        .or(`name.ilike.%${searchQuery}%,species.ilike.%${searchQuery}%`)
-        .limit(5);
-      setTreeResults(data || []);
+      try {
+        const res = await unifiedSearch(searchQuery, "all", 8);
+        setSearchResults(res);
+      } catch {
+        setSearchResults([]);
+      }
       setSearchLoading(false);
     }, 300);
   }, [searchQuery]);
