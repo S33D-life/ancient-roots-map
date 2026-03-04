@@ -1,0 +1,60 @@
+{
+  "country": "Costa Rica",
+  "rootstones": [
+    {
+      "id": "costa-rica-tree-ceiba-sentinel",
+      "name": "Ceiba Sentinel",
+      "type": "tree",
+      "country": "Costa Rica",
+      "region": "Osa",
+      "species": "Ceiba pentandra",
+      "location": {
+        "lat": 8.5406,
+        "lng": -83.5796,
+        "place": "Corcovado National Park",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Corcovado"
+      },
+      "lore": "Research marker for field verification.",
+      "source": {
+        "name": "SINAC",
+        "url": "https://www.sinac.go.cr/"
+      },
+      "confidence": "high",
+      "tags": [
+        "ancient",
+        "research",
+        "champion"
+      ]
+    },
+    {
+      "id": "costa-rica-grove-cloud-forest-core",
+      "name": "Cloud Forest Core",
+      "type": "grove",
+      "country": "Costa Rica",
+      "region": "Puntarenas",
+      "location": {
+        "lat": 10.3007,
+        "lng": -84.8125,
+        "place": "Monteverde Cloud Forest",
+        "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Monteverde"
+      },
+      "bounds": {
+        "north": 10.42,
+        "south": 10.18,
+        "east": -84.69,
+        "west": -84.93
+      },
+      "lore": "Core grove system and watershed canopy.",
+      "source": {
+        "name": "Monteverde Conservation League",
+        "url": "https://www.cloudforestmonteverde.com/"
+      },
+      "confidence": "medium",
+      "tags": [
+        "grove",
+        "forest",
+        "research"
+      ]
+    }
+  ]
+}

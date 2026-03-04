@@ -46,6 +46,8 @@ import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
+import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
+import type { Rootstone } from "@/data/rootstones";
 
 interface Tree {
   id: string;
@@ -364,6 +366,31 @@ function buildResearchPopupHtml(rt: ResearchTree): string {
   </div>`;
 }
 
+function buildRootstonePopupHtml(stone: Rootstone): string {
+  const title = escapeHtml(stone.name);
+  const lore = escapeHtml(stone.lore);
+  const place = escapeHtml(stone.location.place || stone.country);
+  const sourceName = escapeHtml(stone.source.name);
+  const sourceUrl = escapeHtml(stone.source.url);
+  const mapsUrl = stone.location.mapsUrl ? escapeHtml(stone.location.mapsUrl) : "";
+  const tags = stone.tags.slice(0, 5).map((tag) => `#${escapeHtml(tag)}`).join(" ");
+  const badge = stone.type === "tree" ? "🌳 Rootstone Tree" : "🌲 Rootstone Grove";
+
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(28,16%,10%);border-radius:12px;border:1.5px solid hsla(42,70%,45%,0.45);overflow:hidden;">
+    <div style="padding:10px 14px 6px;background:linear-gradient(135deg,hsla(42,45%,24%,0.18),hsla(42,55%,16%,0.06));">
+      <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,60%);border:1px solid hsla(42,80%,50%,0.3);">${badge}</span>
+      <h3 style="margin:6px 0 2px;font-size:14px;color:hsl(42,80%,60%);line-height:1.35;">${title}</h3>
+      <p style="margin:0;font-size:11px;color:hsl(42,45%,52%);font-family:sans-serif;">${place}</p>
+    </div>
+    <div style="padding:8px 14px 10px;display:flex;flex-direction:column;gap:6px;">
+      <p style="margin:0;font-size:11px;color:hsl(0,0%,75%);font-family:sans-serif;line-height:1.45;white-space:pre-line;">${lore}</p>
+      <p style="margin:0;font-size:10px;color:hsl(42,45%,52%);font-family:sans-serif;">${tags}</p>
+      <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:hsl(190,60%,65%);text-decoration:none;font-family:sans-serif;">Source: ${sourceName}</a>
+      ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:hsl(145,55%,60%);text-decoration:none;font-family:sans-serif;">Open maps ↗</a>` : ""}
+    </div>
+  </div>`;
+}
+
 /* ── Haversine (km) ── */
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -532,6 +559,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const birdsongHeatLayerRef = useRef<L.LayerGroup | null>(null);
   const externalLayerRef = useRef<L.LayerGroup | null>(null);
   const researchLayerRef = useRef<L.LayerGroup | null>(null);
+  const rootstoneLayerRef = useRef<L.LayerGroup | null>(null);
   const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
@@ -566,6 +594,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       return true; // On by default so all country data is visible
     } catch { return true; }
   });
+  const [showRootstones, setShowRootstones] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("rootstones") === "on" || Boolean(params.get("rootstoneId"));
+    } catch { return false; }
+  });
+  const [showRootstoneTrees, setShowRootstoneTrees] = useState(true);
+  const [showRootstoneGroves, setShowRootstoneGroves] = useState(true);
+  const [rootstoneCountryFilter, setRootstoneCountryFilter] = useState<string | null>(null);
+  const [rootstoneTagFilter, setRootstoneTagFilter] = useState<string[]>([]);
+  const [rootstoneCount, setRootstoneCount] = useState(0);
   const [researchTreeCount, setResearchTreeCount] = useState(0);
   const [researchLoading, setResearchLoading] = useState(false);
   const [showImmutableLayer, setShowImmutableLayer] = useState(() => {
@@ -808,6 +847,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => setShowRootThreads(v => !v) },
         { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
         { key: "champion", label: "🏆 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => setShowResearchLayer(v => !v), extra: "DFFE" },
+        { key: "rootstones", label: "🪨 Rootstones", active: showRootstones, toggle: () => setShowRootstones(v => !v), extra: showRootstones ? `${rootstoneCount}` : "198" },
+        { key: "rootstones-trees", label: "🌳 Rootstone Trees", active: showRootstoneTrees, toggle: () => setShowRootstoneTrees(v => !v), extra: "33x3" },
+        { key: "rootstones-groves", label: "🌲 Rootstone Groves", active: showRootstoneGroves, toggle: () => setShowRootstoneGroves(v => !v), extra: "33x3" },
         { key: "immutable", label: "🔱 Minted Sigils", active: showImmutableLayer, toggle: () => setShowImmutableLayer(v => !v), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
         { key: "external", label: "🗺️ Distant Groves", active: showExternalTrees, toggle: () => setShowExternalTrees(v => !v), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
       ],
@@ -868,6 +910,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     },
   ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
+      showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
       externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
@@ -1075,12 +1118,42 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
 
       // Species deep-link (from URL param, single species)
+      const params = new URLSearchParams(window.location.search);
       if (!initialHive && trees.length > 0) {
-        const params = new URLSearchParams(window.location.search);
         const speciesParam = params.get("species");
         if (speciesParam) {
           setSpecies([speciesParam]);
           label = label || `🌿 ${speciesParam}`;
+        }
+      }
+
+      const rootstoneId = params.get("rootstoneId");
+      const rootstoneCountry = params.get("rootstoneCountry");
+      const rootstoneType = params.get("rootstoneType");
+      const rootstoneTags = params.get("rootstoneTags");
+
+      if (rootstoneId || rootstoneCountry || rootstoneType || rootstoneTags) {
+        setShowRootstones(true);
+        if (rootstoneCountry) setRootstoneCountryFilter(rootstoneCountry);
+        if (rootstoneTags) setRootstoneTagFilter(rootstoneTags.split(",").filter(Boolean));
+        if (rootstoneType === "tree") {
+          setShowRootstoneTrees(true);
+          setShowRootstoneGroves(false);
+        } else if (rootstoneType === "grove") {
+          setShowRootstoneTrees(false);
+          setShowRootstoneGroves(true);
+        }
+      }
+
+      if (rootstoneId) {
+        const stone = getRootstoneById(rootstoneId);
+        if (stone?.bounds) {
+          map.fitBounds(
+            [[stone.bounds.south, stone.bounds.west], [stone.bounds.north, stone.bounds.east]],
+            { padding: [24, 24], animate: true, duration: 1.4 }
+          );
+        } else if (stone?.location.lat != null && stone.location.lng != null) {
+          map.flyTo([stone.location.lat, stone.location.lng], 10, { duration: 1.2 });
         }
       }
 
@@ -2305,6 +2378,78 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [showResearchLayer]);
 
+  // Rootstones layer — notable trees + groves by country
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (rootstoneLayerRef.current) {
+      map.removeLayer(rootstoneLayerRef.current);
+      rootstoneLayerRef.current = null;
+    }
+
+    if (!showRootstones) {
+      setRootstoneCount(0);
+      return;
+    }
+
+    const layer = L.layerGroup().addTo(map);
+    rootstoneLayerRef.current = layer;
+
+    const normalizedCountry = rootstoneCountryFilter?.toLowerCase();
+    const visible = ALL_ROOTSTONES.filter((stone) => {
+      if (normalizedCountry && !stone.country.toLowerCase().includes(normalizedCountry.replace("-", " "))) return false;
+      if (rootstoneTagFilter.length > 0 && !rootstoneTagFilter.every((tag) => stone.tags.includes(tag))) return false;
+      if (stone.type === "tree" && !showRootstoneTrees) return false;
+      if (stone.type === "grove" && !showRootstoneGroves) return false;
+      return true;
+    });
+
+    setRootstoneCount(visible.length);
+
+    visible.forEach((stone) => {
+      if (stone.location.lat == null || stone.location.lng == null) return;
+
+      const isTree = stone.type === "tree";
+      const size = isTree ? 15 : 18;
+      const color = isTree ? "hsl(145,65%,45%)" : "hsl(210,70%,55%)";
+      const border = isTree ? "hsl(145,55%,30%)" : "hsl(210,60%,35%)";
+      const glyph = isTree ? "T" : "G";
+      const icon = L.divIcon({
+        className: "rootstone-marker",
+        html: `<div style="width:${size}px;height:${size}px;border-radius:${isTree ? "50%" : "4px"};background:${color};border:2px solid ${border};box-shadow:0 0 10px ${color}66;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;font-family:sans-serif;">${glyph}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+
+      const marker = L.marker([stone.location.lat, stone.location.lng], { icon });
+      marker.bindPopup(() => buildRootstonePopupHtml(stone), {
+        className: "atlas-leaflet-popup",
+        closeButton: true,
+        maxWidth: 280,
+        offset: L.point(0, -4),
+      });
+      layer.addLayer(marker);
+
+      if (stone.bounds) {
+        const rect = L.rectangle(
+          [[stone.bounds.south, stone.bounds.west], [stone.bounds.north, stone.bounds.east]],
+          {
+            color: isTree ? "hsl(145,55%,40%)" : "hsl(210,70%,55%)",
+            weight: 1,
+            fillOpacity: 0.04,
+            opacity: 0.5,
+          },
+        );
+        layer.addLayer(rect);
+      }
+    });
+
+    return () => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    };
+  }, [showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCountryFilter, rootstoneTagFilter]);
+
   // ── Immutable Ancient Friends layer ──
   useEffect(() => {
     const map = mapRef.current;
@@ -2685,7 +2830,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         trees={trees}
         onSelect={handleSearchSelect}
         onSearchResult={(result) => {
-          if (result.mapContext?.lat && result.mapContext?.lng && mapRef.current) {
+          if (result.type === "rootstone" && result.url) {
+            window.location.href = result.url;
+          } else if (result.mapContext?.lat && result.mapContext?.lng && mapRef.current) {
             mapRef.current.flyTo(
               [result.mapContext.lat, result.mapContext.lng],
               result.mapContext.zoom || 14,

@@ -110,6 +110,7 @@ const HowHeartsWorkPage = lazyImportWithRetry(() => import("./pages/HowHeartsWor
 const CosmicCalendarPage = lazyImportWithRetry(() => import("./pages/CosmicCalendarPage"), "cosmic-calendar");
 const TreeLedgerPage = lazyImportWithRetry(() => import("./pages/TreeLedgerPage"), "tree-ledger");
 const CalendarSettingsPage = lazyImportWithRetry(() => import("./pages/CalendarSettingsPage"), "calendar-settings");
+const RootstoneImporterPage = lazyImportWithRetry(() => import("./pages/RootstoneImporterPage"), "rootstone-importer");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -198,6 +199,7 @@ const App = () => {
                 {ShowDevPanel && <Route path="/test-lab" element={<TestLabPage />} />}
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/curator" element={<CuratorPage />} />
+                <Route path="/curator/rootstones-import" element={<RootstoneImporterPage />} />
                 <Route path="/sync" element={<SyncDashboardPage />} />
                 <Route path="/edit-review" element={<EditReviewPage />} />
                 <Route path="/hives" element={<HivesIndexPage />} />
