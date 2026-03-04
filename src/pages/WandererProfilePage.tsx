@@ -22,7 +22,7 @@ const WandererProfilePage = () => {
       if (!id) return null;
       const { data: profile, error } = await supabase
         .from("profiles")
-        .select("id, full_name, avatar_url, bio, location")
+        .select("id, full_name, avatar_url, bio, home_place")
         .eq("id", id)
         .maybeSingle();
 
@@ -73,9 +73,9 @@ const WandererProfilePage = () => {
                     </div>
                   </div>
 
-                  {data.location && (
+                  {data.home_place && (
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> {data.location}
+                      <MapPin className="w-3.5 h-3.5" /> {data.home_place}
                     </p>
                   )}
 

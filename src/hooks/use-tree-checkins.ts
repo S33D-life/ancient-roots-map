@@ -51,7 +51,7 @@ export function useTreeCheckins(treeId?: string) {
       .eq("tree_id", treeId)
       .order("checked_in_at", { ascending: false })
       .limit(200);
-    setCheckins((data as TreeCheckin[]) || []);
+    setCheckins((data as unknown as TreeCheckin[]) || []);
     setLoading(false);
   }, [treeId]);
 
