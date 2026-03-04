@@ -21,7 +21,7 @@ const BottomNav = () => {
       style={{
         background: isMap ? "hsl(var(--card) / 0.8)" : "hsl(var(--card) / 0.92)",
         borderColor: "hsl(var(--border) / 0.2)",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
       }}

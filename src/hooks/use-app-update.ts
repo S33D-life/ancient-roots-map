@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 declare const __BUILD_ID__: string;
 
 const VERSION_CHECK_INTERVAL = 60 * 60 * 1000; // 60 min
+const INSTALLED_KEY = "app-update-installed-build";
 const VERSION_URL = "/version.json";
 const DISMISSED_KEY = "app-update-dismissed";
 
@@ -20,6 +21,14 @@ const setDismissedBuild = (build: string) => {
   try { sessionStorage.setItem(DISMISSED_KEY, build); } catch {}
 };
 
+/** Persist the currently-running build so post-refresh we know we're up-to-date */
+const getInstalledBuild = (): string | null => {
+  try { return localStorage.getItem(INSTALLED_KEY); } catch { return null; }
+};
+const setInstalledBuild = (build: string) => {
+  try { localStorage.setItem(INSTALLED_KEY, build); } catch {}
+};
+
 interface UpdateState {
   available: boolean;
   source: "sw" | "version" | null;
@@ -30,11 +39,12 @@ export function useAppUpdate() {
   const [update, setUpdate] = useState<UpdateState>({ available: false, source: null, remoteBuild: null });
   const waitingWorkerRef = useRef<ServiceWorker | null>(null);
 
-  // Helper: only surface update if this build wasn't already dismissed
+  // Helper: only surface update if this build wasn't already dismissed or installed
   const surfaceIfNew = useCallback((source: "sw" | "version", remoteBuild?: string) => {
     const build = remoteBuild ?? "sw-update";
     const dismissed = getDismissedBuild();
-    if (dismissed === build) return; // user already dismissed this version
+    const installed = getInstalledBuild();
+    if (dismissed === build || installed === build) return; // already handled
     setUpdate(prev => prev.available ? prev : { available: true, source, remoteBuild: build });
   }, []);
 
@@ -113,7 +123,10 @@ export function useAppUpdate() {
   // ── Actions ──
   const applyUpdate = useCallback(() => {
     // Mark as handled so it won't flash on reload
-    if (update.remoteBuild) setDismissedBuild(update.remoteBuild);
+    if (update.remoteBuild) {
+      setDismissedBuild(update.remoteBuild);
+      setInstalledBuild(update.remoteBuild);
+    }
 
     const worker = waitingWorkerRef.current;
     if (worker) {
