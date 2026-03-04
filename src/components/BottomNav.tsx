@@ -1,9 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Leaf, Globe, Home } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Globe } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/", icon: Home, label: "Home", matchPrefixes: ["/"], exactOnly: true },
   { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/"] },
   { to: "/atlas", icon: Globe, label: "Atlas", matchPrefixes: ["/atlas"] },
   { to: "/library", icon: BookOpen, label: "Library", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard"] },
@@ -30,10 +29,7 @@ const BottomNav = () => {
       <div className="flex items-center justify-around py-1.5">
         {NAV_ITEMS.map((item) => {
           const { to, icon: Icon, label } = item;
-          const exactOnly = 'exactOnly' in item && item.exactOnly;
-          const active = exactOnly
-            ? pathname === to
-            : item.matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
+          const active = item.matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
           return (
             <Link

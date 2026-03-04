@@ -11,6 +11,7 @@
  * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import FireflyPanel from "@/components/FireflyPanel";
@@ -54,7 +55,10 @@ function posToXY(p: StoredPos): { x: number; y: number } {
   return { x, y };
 }
 
+const DOUBLE_TAP_MS = 350;
+
 const FireflyFAB = () => {
+  const navigate = useNavigate();
   const [panelOpen, setPanelOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
@@ -67,6 +71,7 @@ const FireflyFAB = () => {
   const dragStart = useRef({ px: 0, py: 0, ox: 0, oy: 0 });
   const totalMoved = useRef(0);
   const debounceRef = useRef(false);
+  const lastTapTime = useRef(0);
   const xyRef = useRef(xy);
   const posRef = useRef(pos);
   const anyOpenRef = useRef(false);
@@ -104,11 +109,22 @@ const FireflyFAB = () => {
 
   const handleTap = useCallback(() => {
     if (debounceRef.current) return;
+    const now = Date.now();
+    if (now - lastTapTime.current < DOUBLE_TAP_MS) {
+      // Double-tap → navigate home
+      lastTapTime.current = 0;
+      debounceRef.current = true;
+      navigate("/");
+      window.scrollTo({ top: 0, behavior: "instant" });
+      setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
+      return;
+    }
+    lastTapTime.current = now;
     debounceRef.current = true;
-    // open panel
+    // Single tap → open panel
     setPanelOpen(true);
     setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
-  }, []);
+  }, [navigate]);
 
   // onClick fallback for accessibility and automation (keyboard Enter, assistive tech)
   const handleClick = useCallback((e: React.MouseEvent) => {
