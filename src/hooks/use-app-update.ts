@@ -49,6 +49,13 @@ export function useAppUpdate() {
   const [update, setUpdate] = useState<UpdateState>({ available: false, source: null, remoteBuild: null });
   const waitingWorkerRef = useRef<ServiceWorker | null>(null);
 
+  // On mount: stamp current build as installed so banner won't re-show for it
+  useEffect(() => {
+    if (typeof __BUILD_ID__ !== "undefined" && __BUILD_ID__ !== "dev") {
+      setInstalledBuild(__BUILD_ID__);
+    }
+  }, []);
+
   // Helper: only surface update if this build wasn't already dismissed or installed
   const surfaceIfNew = useCallback((source: "sw" | "version", remoteBuild?: string) => {
     const build = remoteBuild ?? "sw-update";
