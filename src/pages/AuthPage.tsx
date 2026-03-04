@@ -47,6 +47,10 @@ const AuthPage = () => {
     }
   }, [searchParams]);
 
+  // Use a ref for view to avoid re-subscribing on every view change
+  const viewRef = useRef(view);
+  useEffect(() => { viewRef.current = view; }, [view]);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Handle password recovery redirect — show reset form instead of navigating away
@@ -61,7 +65,7 @@ const AuthPage = () => {
         return;
       }
 
-      if (session && view !== "reset-password") {
+      if (session && viewRef.current !== "reset-password") {
         // Record referral on first sign-in if invite code was stored
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
@@ -73,7 +77,6 @@ const AuthPage = () => {
         const giftCode = localStorage.getItem("s33d_gift_code");
         if (giftCode && session.user) {
           try {
-            // Find the gift seed by invite_code and assign recipient
             const { data: gift } = await supabase
               .from("gift_seeds")
               .select("id, seeds_count, sender_id")
@@ -83,7 +86,6 @@ const AuthPage = () => {
               .maybeSingle();
 
             if (gift) {
-              // Use atomic server-side claim function
               await supabase.rpc("claim_gift_seed", {
                 p_invite_code: giftCode,
                 p_user_id: session.user.id,
@@ -244,11 +246,19 @@ const AuthPage = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (error) {
-      toast({ title: "Google login failed", description: error.message, variant: "destructive" });
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      // If redirected, the page will navigate away — don't reset loading
+      if (result?.redirected) return;
+      if (result?.error) {
+        const msg = result.error.message || "Could not connect to Google";
+        toast({ title: "Google login failed", description: msg, variant: "destructive" });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Google sign-in unavailable";
+      toast({ title: "Google login failed", description: msg, variant: "destructive" });
     }
     setIsLoading(false);
   };
