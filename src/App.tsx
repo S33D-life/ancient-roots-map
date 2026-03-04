@@ -150,6 +150,12 @@ const App = () => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
+  // Show loading skeleton while auth state resolves — prevents premature
+  // redirects and white-screen flashes on page refresh
+  if (!authReady) {
+    return <PageSkeleton variant="default" />;
+  }
+
   return (
     <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
