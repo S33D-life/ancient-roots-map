@@ -1,13 +1,12 @@
 /**
  * CrownSection — inline "yOur Golden Dream" preview for the tree scroll.
- * Crown = brightest, most luminous section. Golden radiance.
- *
- * Sprinkles: staggered cards, floating icon, vine divider, leaf atmosphere
+ * Crown = brightest, most luminous section. Golden radiance + solarpunk sky.
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, BookOpen, Cherry, Archive, ArrowRight } from "lucide-react";
 import LeafAtmosphere from "../LeafAtmosphere";
+import SectionAtmosphere from "./SectionAtmosphere";
 
 const ROOMS = [
   { icon: BookOpen, title: "Current Vision", description: "The living S33D blueprint", to: "/golden-dream" },
@@ -31,21 +30,11 @@ const CrownSection = () => (
     id="golden-dream"
     className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
   >
-    {/* Atmospheric background — luminous golden warmth */}
-    <div
-      className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
-      style={{
-        background: `
-          radial-gradient(ellipse at 50% 25%, hsl(45 70% 55% / 0.07), transparent 55%),
-          radial-gradient(ellipse at 50% 85%, hsl(42 50% 25% / 0.04), transparent 45%),
-          linear-gradient(to bottom, hsl(var(--background)), hsl(45 12% 9% / 0.15) 50%, hsl(var(--background)))
-        `,
-      }}
-    />
+    {/* Full atmospheric stack */}
+    <SectionAtmosphere theme="crown" />
 
     {/* Leaf atmosphere — airy gold, upward drift */}
     <LeafAtmosphere variant="crown" />
-    <div className="portal-vignette" />
 
     <motion.div
       initial={{ opacity: 0, y: 16 }}

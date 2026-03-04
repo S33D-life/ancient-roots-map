@@ -1,20 +1,37 @@
 /**
  * GroundSection — the landing anchor of the Living Tree scroll.
  * Ground = the surface, where the Ancient Friend greets you.
- * The S33D seed sits at the threshold between roots below and tree above.
- *
- * Scroll cues invite exploration in both directions.
+ * Enhanced with earth-surface atmosphere and S33D seed halo.
  */
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Hero from "../Hero";
+import SectionAtmosphere from "./SectionAtmosphere";
 
 const GroundSection = () => (
   <section id="ground" className="relative">
+    {/* Atmospheric ground skin — subtle earth framing behind Hero */}
+    <SectionAtmosphere theme="ground" />
+
     {/* The existing Ancient Friend hero landing */}
     <Hero />
 
-    {/* Scroll direction indicators — overlaid at top and bottom */}
+    {/* S33D seed halo — center anchor point */}
+    <div
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[1]"
+      aria-hidden="true"
+    >
+      <motion.div
+        className="w-32 h-32 md:w-48 md:h-48 rounded-full"
+        style={{
+          background: "radial-gradient(circle, hsl(42 80% 55% / 0.06), transparent 70%)",
+        }}
+        animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
+
+    {/* Scroll direction indicators */}
     {/* UP cue — "Climb the Tree" */}
     <motion.div
       className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 pointer-events-none"

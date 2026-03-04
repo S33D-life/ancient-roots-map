@@ -190,7 +190,7 @@ const NetworkPulseOverlay = ({ latestEvent, vitality }: Props) => {
       <MyceliumGlow vitality={v} stage={stage} />
 
       {/* Event ripples */}
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="sync">
         {activeRipples.map((evt) => (
           <PulseRipple key={evt.id} event={evt} />
         ))}

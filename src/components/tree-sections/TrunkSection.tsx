@@ -1,13 +1,12 @@
 /**
  * TrunkSection — inline Heartwood Library preview for the tree scroll.
- * Trunk = warm ember tones, grounded, intimate.
- *
- * Sprinkles: staggered cards, floating icon, vine divider, leaf atmosphere
+ * Trunk = warm ember tones, bark texture, lantern warmth.
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BookOpen, Music, Wand2, ScrollText, Lock, ArrowRight } from "lucide-react";
 import LeafAtmosphere from "../LeafAtmosphere";
+import SectionAtmosphere from "./SectionAtmosphere";
 
 const LIBRARY_ROOMS = [
   { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
@@ -32,21 +31,11 @@ const TrunkSection = () => (
     id="heartwood"
     className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
   >
-    {/* Warm ember tones */}
-    <div
-      className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
-      style={{
-        background: `
-          radial-gradient(ellipse at 50% 45%, hsl(28 40% 22% / 0.06), transparent 55%),
-          radial-gradient(ellipse at 55% 25%, hsl(35 30% 18% / 0.04), transparent 45%),
-          linear-gradient(to bottom, hsl(var(--background)), hsl(28 15% 9% / 0.15) 50%, hsl(var(--background)))
-        `,
-      }}
-    />
+    {/* Full atmospheric stack — bark + moss + lantern */}
+    <SectionAtmosphere theme="trunk" />
 
     {/* Leaf atmosphere — warm ember gold */}
     <LeafAtmosphere variant="heartwood" />
-    <div className="portal-vignette" />
 
     <motion.div
       initial={{ opacity: 0, y: 16 }}

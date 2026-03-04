@@ -69,7 +69,80 @@ body.season-winter .vine-divider { --vine-hue: 200; }
 @media (prefers-reduced-motion: reduce) {
   [style*="arterial-flow"],
   [style*="mycelium-breathe"],
-  [style*="canopy-breathe"] {
+  [style*="canopy-breathe"],
+  .atmo-roots-drift,
+  .atmo-ground-dapple,
+  .atmo-threshold-glow,
+  .atmo-trunk-flicker,
+  .atmo-canopy-sway,
+  .atmo-crown-shimmer {
     animation: none !important;
   }
+}
+
+/* ── Section Atmosphere micro-motion layers ── */
+
+/* Roots — slow spore drift (opacity only) */
+.atmo-roots-drift {
+  background: radial-gradient(circle at 30% 70%, hsl(120 30% 35% / 0.03), transparent 50%),
+              radial-gradient(circle at 70% 40%, hsl(90 25% 30% / 0.02), transparent 40%);
+  animation: roots-drift 12s ease-in-out infinite;
+}
+@keyframes roots-drift {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Ground — sun dapple (gentle light bloom) */
+.atmo-ground-dapple {
+  background: radial-gradient(circle at 40% 30%, hsl(45 60% 60% / 0.03), transparent 40%),
+              radial-gradient(circle at 65% 55%, hsl(42 50% 55% / 0.02), transparent 35%);
+  animation: ground-dapple 8s ease-in-out infinite;
+}
+@keyframes ground-dapple {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 0.7; transform: translateY(-2px); }
+}
+
+/* Threshold — warm doorway glow */
+.atmo-threshold-glow {
+  background: radial-gradient(ellipse at 50% 60%, hsl(28 45% 40% / 0.04), transparent 50%);
+  animation: threshold-glow 6s ease-in-out infinite;
+}
+@keyframes threshold-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/* Trunk — lantern flicker (warm oscillation) */
+.atmo-trunk-flicker {
+  background: radial-gradient(ellipse at 50% 50%, hsl(30 50% 45% / 0.04), transparent 45%);
+  animation: trunk-flicker 4s ease-in-out infinite;
+}
+@keyframes trunk-flicker {
+  0%, 100% { opacity: 0.4; }
+  25% { opacity: 0.55; }
+  50% { opacity: 0.35; }
+  75% { opacity: 0.6; }
+}
+
+/* Canopy — gentle leaf sway (subtle horizontal drift) */
+.atmo-canopy-sway {
+  background: radial-gradient(ellipse at 40% 30%, hsl(140 30% 40% / 0.03), transparent 40%),
+              radial-gradient(ellipse at 60% 60%, hsl(150 25% 35% / 0.02), transparent 35%);
+  animation: canopy-sway 10s ease-in-out infinite;
+}
+@keyframes canopy-sway {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 0.65; transform: translateX(3px); }
+}
+
+/* Crown — radiant shimmer (barely perceptible) */
+.atmo-crown-shimmer {
+  background: radial-gradient(ellipse at 50% 25%, hsl(45 80% 65% / 0.04), transparent 50%);
+  animation: crown-shimmer 7s ease-in-out infinite;
+}
+@keyframes crown-shimmer {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.01); }
 }
