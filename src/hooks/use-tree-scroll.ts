@@ -32,27 +32,30 @@ export function useTreeScroll() {
   const initialScrollDone = useRef(false);
   const isManualScroll = useRef(false);
 
-  // Scroll to atlas-hero on mount (with retry for entrance animation delay)
+  // Scroll to Ground on mount (with robust retry for entrance animation delay)
   useEffect(() => {
     if (initialScrollDone.current) return;
     
-    // Check if URL has a hash — if so, skip auto-scroll to hero
+    // Check if URL has a hash — if so, skip auto-scroll to ground
     const hash = window.location.hash.replace("#", "") as TreeSection;
     if (hash && SECTION_IDS.includes(hash)) return;
 
     const tryScroll = () => {
       const el = document.getElementById("ground");
       if (el) {
-        el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
-        initialScrollDone.current = true;
+        // Use rAF to ensure layout is settled before scrolling
+        requestAnimationFrame(() => {
+          el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+          initialScrollDone.current = true;
+        });
         return true;
       }
       return false;
     };
 
-    // Retry chain — entrance animation may delay DOM
+    // Retry chain — entrance animation (~2.8s) may delay DOM availability
     if (!tryScroll()) {
-      const retries = [50, 150, 300, 600];
+      const retries = [50, 150, 300, 600, 1000, 1500];
       retries.forEach((ms) => {
         setTimeout(() => {
           if (!initialScrollDone.current) tryScroll();

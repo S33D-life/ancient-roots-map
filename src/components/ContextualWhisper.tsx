@@ -66,7 +66,7 @@ const ContextualWhisper = ({ id, message, cta, delay = 2000, position = "bottom-
           className={`fixed z-[60] max-w-xs w-auto ${positionClasses[position]}`}
           style={
             position !== "top-center"
-              ? { bottom: "calc(4rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }
+              ? { bottom: "calc(5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 16px)" }
               : undefined
           }
         >
