@@ -436,7 +436,8 @@ const LITE_CSS = `
 @keyframes groveBreath{0%,100%{filter:drop-shadow(0 0 4px hsla(120,60%,45%,0.2)) brightness(1)}50%{filter:drop-shadow(0 0 10px hsla(120,60%,45%,0.5)) brightness(1.08)}}
 .grove-view-active .marker-wrap{animation:groveBreath 4s ease-in-out infinite!important}
 .grove-view-active .marker-ancient{animation:groveBreath 3s ease-in-out infinite,ancientGlow 3.5s ease-in-out infinite!important}
-.grove-view-active .tree-cluster{box-shadow:0 0 12px hsla(120,50%,40%,0.3),0 0 4px hsla(42,60%,45%,0.2)!important;transition:box-shadow 1s ease-in-out}
+.grove-view-active .tree-cluster{box-shadow:0 0 16px hsla(120,50%,40%,0.4),0 0 6px hsla(42,60%,45%,0.25)!important;transition:box-shadow 1s ease-in-out}
+.grove-view-active .grove-mycelium{opacity:0.7!important;border-color:hsla(120,50%,40%,0.4)!important}
 @keyframes eventPulseGold{0%{transform:scale(0.3);opacity:0.9}100%{transform:scale(3);opacity:0}}
 @keyframes eventPulseHeart{0%{transform:scale(0.3);opacity:0.8}100%{transform:scale(2.5);opacity:0}}
 .event-pulse-marker{background:transparent!important;border:none!important;pointer-events:none}
