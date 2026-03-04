@@ -188,7 +188,7 @@ function getOrCreateIcon(tier: Tier, species: string, birdsongCount?: number, hi
 }
 
 /* ── Popup HTML (aligned with TreeCard visual language) ── */
-function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number): string {
+function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: string, birdsongCount?: number, whisperCount?: number): string {
   if (!tree?.name && !tree?.species) return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
   const tier = getTreeTier(age, offerings);
   const tierLabel = TIER_LABELS[tier];
@@ -202,6 +202,9 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
     : "";
   const birdsongLine = (birdsongCount ?? 0) > 0
     ? `<span>🐦 ${birdsongCount}</span>`
+    : "";
+  const whisperLine = (whisperCount ?? 0) > 0
+    ? `<span style="color:hsl(200,30%,55%);">🌬️ ${whisperCount}</span>`
     : "";
   const desc = tree.description
     ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
@@ -228,6 +231,7 @@ function buildPopupHtml(tree: Tree, offerings: number, age: number, photoUrl?: s
         ${ageText ? `<span>${ageText}</span>` : ""}
         ${offeringText ? `<span>${offeringText}</span>` : ""}
         ${birdsongLine}
+        ${whisperLine}
       </div>
       ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>` : ""}
       ${desc}
