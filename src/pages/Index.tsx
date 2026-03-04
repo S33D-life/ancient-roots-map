@@ -20,8 +20,11 @@ import CrownSection from "@/components/tree-sections/CrownSection";
 import CanopySection from "@/components/tree-sections/CanopySection";
 import TrunkSection from "@/components/tree-sections/TrunkSection";
 import GroundSection from "@/components/tree-sections/GroundSection";
+import NetworkPulseOverlay from "@/components/tree-sections/NetworkPulseOverlay";
 import { useTimeOfDay } from "@/hooks/use-time-of-day";
 import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
+import { useNetworkPulse } from "@/hooks/use-network-pulse";
+import { useTreeVitality } from "@/hooks/use-tree-vitality";
 
 const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
@@ -30,13 +33,17 @@ const Index = () => {
   useVineFade();
   useTimeOfDay();
   useSeasonalTheme();
+  const { latestEvent } = useNetworkPulse();
+  const { data: vitality } = useTreeVitality();
 
   if (showEntrance) {
     return <S33dEntrance onComplete={handleEntranceComplete} />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Network Pulse — the tree's nervous system */}
+      <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
       <Header />
 
       {/* Tree Scroll Indicator — desktop only */}
