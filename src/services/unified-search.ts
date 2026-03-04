@@ -5,6 +5,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_ROOTSTONES } from "@/data/rootstones";
+import { getGridStaffs } from "@/utils/staffRoomData";
 
 /* ── Result Schema ── */
 export type SearchResultType =
@@ -122,6 +123,19 @@ const COUNTRY_PAGES: SearchResult[] = [
   })),
 ];
 
+const STAFF_ENTRIES: SearchResult[] = getGridStaffs()
+  .slice(0, 18)
+  .map((staff) => ({
+    id: `staff-${staff.code.toLowerCase()}-${staff.tokenId}`,
+    type: "staff" as const,
+    title: `🪵 ${staff.speciesName} Staff`,
+    subtitle: `${staff.code} · #${String(staff.tokenId).padStart(3, "0")}`,
+    url: `/staff/${encodeURIComponent(staff.code)}`,
+    keywords: ["staff", "staff room", staff.code, staff.speciesName.toLowerCase()],
+    score: 0,
+    emoji: "🪵",
+  }));
+
 const ROOTSTONE_RESULTS: SearchResult[] = ALL_ROOTSTONES.map((stone) => {
   const params = new URLSearchParams();
   params.set("rootstoneId", stone.id);
@@ -224,6 +238,12 @@ export async function unifiedSearch(
       if (s > 0) results.push({ ...page, score: s + TYPE_BOOST.country });
     }
   }
+  if (shouldInclude("staff")) {
+    for (const staff of STAFF_ENTRIES) {
+      const s = scoreMatch(q, staff);
+      if (s > 0) results.push({ ...staff, score: s + TYPE_BOOST.staff });
+    }
+  }
   if (shouldInclude("rootstone")) {
     for (const stone of ROOTSTONE_RESULTS) {
       const s = scoreMatch(q, stone);
@@ -306,7 +326,7 @@ export async function unifiedSearch(
                 type: "bioregion",
                 title: `🏔 ${r.name}`,
                 subtitle: [r.type, ...(r.countries || [])].filter(Boolean).join(" · "),
-                url: `/atlas/bioregion/${r.id}`,
+                url: `/atlas/bio-regions/${r.id}`,
                 mapContext: r.center_lat && r.center_lon ? { lat: r.center_lat, lng: r.center_lon, zoom: 8 } : undefined,
                 score: scoreMatch(q, { title: r.name }) + TYPE_BOOST.bioregion,
                 emoji: "🏔",

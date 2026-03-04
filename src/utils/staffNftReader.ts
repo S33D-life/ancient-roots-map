@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import {
   STAFF_CONTRACT_ADDRESS,
-  ACTIVE_RPC_URL,
+  ACTIVE_RPC_URLS,
   STAFF_NFT_ABI,
   SPECIES_CODES,
   SPECIES_MAP,
@@ -33,8 +33,19 @@ export async function getOwnedStaffs(ownerAddress: string): Promise<OwnedStaff[]
   }
 
   try {
-    const provider = new ethers.JsonRpcProvider(ACTIVE_RPC_URL);
-    const contract = new ethers.Contract(STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, provider);
+    let contract: ethers.Contract | null = null;
+    let lastError: unknown = null;
+    for (const rpcUrl of ACTIVE_RPC_URLS) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        await provider.getBlockNumber();
+        contract = new ethers.Contract(STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, provider);
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (!contract) throw lastError || new Error("No RPC endpoint available");
 
     const balance = await contract.balanceOf(ownerAddress);
     const count = Number(balance);
@@ -108,8 +119,19 @@ export async function getMintingStatus() {
   if (!STAFF_CONTRACT_ADDRESS) return null;
 
   try {
-    const provider = new ethers.JsonRpcProvider(ACTIVE_RPC_URL);
-    const contract = new ethers.Contract(STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, provider);
+    let contract: ethers.Contract | null = null;
+    let lastError: unknown = null;
+    for (const rpcUrl of ACTIVE_RPC_URLS) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        await provider.getBlockNumber();
+        contract = new ethers.Contract(STAFF_CONTRACT_ADDRESS, STAFF_NFT_ABI, provider);
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (!contract) throw lastError || new Error("No RPC endpoint available");
     const [originMinted, circlesMinted, totalMinted, remaining] = await contract.getMintingStatus();
     return {
       originMinted,

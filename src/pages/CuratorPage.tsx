@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHasRole } from "@/hooks/use-role";
 import Header from "@/components/Header";
@@ -44,6 +44,26 @@ interface StaffRow {
   staff_number: number;
 }
 
+type StagingStatus = "new" | "reviewed" | "approved" | "rejected";
+
+interface RootstoneStagingRow {
+  id: string;
+  country: string;
+  payload_json: {
+    id?: string;
+    name?: string;
+    type?: "tree" | "grove";
+    location?: { lat?: number; lng?: number; place?: string };
+    confidence?: "high" | "medium" | "low";
+    tags?: string[];
+    source?: { name?: string; url?: string };
+  } | null;
+  status: StagingStatus;
+  created_at: string;
+  source_url: string;
+  fetched_at: string;
+}
+
 export default function CuratorPage() {
   const { hasRole, loading: roleLoading } = useHasRole("curator");
   const [staffRows, setStaffRows] = useState<StaffRow[]>([]);
@@ -59,6 +79,14 @@ export default function CuratorPage() {
   const [wandererSearch, setWandererSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [showSourceReview, setShowSourceReview] = useState(false);
+  const [showResearchIngest, setShowResearchIngest] = useState(false);
+  const [ingestSourceUrl, setIngestSourceUrl] = useState("");
+  const [ingestFetchedAt, setIngestFetchedAt] = useState(() => new Date().toISOString());
+  const [ingestRawText, setIngestRawText] = useState("");
+  const [ingestBusy, setIngestBusy] = useState(false);
+  const [queueBusy, setQueueBusy] = useState(false);
+  const [queueStatusFilter, setQueueStatusFilter] = useState<StagingStatus | "all">("new");
+  const [queueRows, setQueueRows] = useState<RootstoneStagingRow[]>([]);
 
   const allGrid = useMemo(() => getGridStaffs(), []);
 
@@ -187,6 +215,91 @@ export default function CuratorPage() {
     return wanderers.filter((w) => w.full_name?.toLowerCase().includes(q) || w.id.includes(q));
   }, [wanderers, wandererSearch]);
 
+  const approvedCountries = useMemo(
+    () =>
+      Array.from(
+        new Set(queueRows.filter((row) => row.status === "approved").map((row) => row.country))
+      ).sort((a, b) => a.localeCompare(b)),
+    [queueRows]
+  );
+
+  const loadIngestQueue = useCallback(async () => {
+    if (!hasRole) return;
+    setQueueBusy(true);
+    const { data, error } = await supabase.functions.invoke("rootstone-research-ingest", {
+      body: {
+        action: "list",
+        status: queueStatusFilter === "all" ? undefined : queueStatusFilter,
+        limit: 150,
+      },
+    });
+    if (error) {
+      toast.error(`Failed to load ingest queue: ${error.message}`);
+    } else {
+      setQueueRows(((data as { items?: RootstoneStagingRow[] })?.items || []) as RootstoneStagingRow[]);
+    }
+    setQueueBusy(false);
+  }, [hasRole, queueStatusFilter]);
+
+  const ingestSnapshot = async () => {
+    if (!ingestSourceUrl.trim() || !ingestFetchedAt.trim() || !ingestRawText.trim()) {
+      toast.error("Source URL, fetched_at, and raw text are required");
+      return;
+    }
+    setIngestBusy(true);
+    const { data, error } = await supabase.functions.invoke("rootstone-research-ingest", {
+      body: {
+        action: "ingest",
+        source_url: ingestSourceUrl.trim(),
+        fetched_at: ingestFetchedAt.trim(),
+        raw_text: ingestRawText,
+      },
+    });
+    if (error) {
+      toast.error(`Ingest failed: ${error.message}`);
+    } else {
+      const imported = (data as { imported?: number })?.imported || 0;
+      toast.success(`Ingested ${imported} candidate rootstones`);
+      await loadIngestQueue();
+    }
+    setIngestBusy(false);
+  };
+
+  const updateQueueStatus = async (id: string, status: StagingStatus) => {
+    const { error } = await supabase.functions.invoke("rootstone-research-ingest", {
+      body: { action: "review", id, status },
+    });
+    if (error) {
+      toast.error(`Status update failed: ${error.message}`);
+      return;
+    }
+    setQueueRows((prev) => prev.map((row) => (row.id === id ? { ...row, status } : row)));
+  };
+
+  const exportApprovedForCountry = async (country: string) => {
+    const { data, error } = await supabase.functions.invoke("rootstone-research-ingest", {
+      body: { action: "export", country },
+    });
+    if (error) {
+      toast.error(`Export failed: ${error.message}`);
+      return;
+    }
+    const payload = (data as { rootstones?: unknown[] })?.rootstones || [];
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${country.toLowerCase().replace(/\s+/g, "-")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${payload.length} approved records for ${country}`);
+  };
+
+  useEffect(() => {
+    if (!hasRole || !showResearchIngest) return;
+    void loadIngestQueue();
+  }, [hasRole, showResearchIngest, loadIngestQueue]);
+
   if (roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -242,12 +355,122 @@ export default function CuratorPage() {
             <BookOpen className="w-4 h-4" />
             Source Review {showSourceReview ? "▾" : "→"}
           </button>
+          <button
+            onClick={() => setShowResearchIngest((prev) => !prev)}
+            className="inline-flex items-center gap-2 text-sm font-serif text-primary hover:text-primary/80 transition-colors border border-primary/30 rounded-lg px-4 py-2"
+          >
+            <Wand2 className="w-4 h-4" />
+            Research Ingest {showResearchIngest ? "▾" : "→"}
+          </button>
         </div>
 
         {/* Source Review Panel */}
         {showSourceReview && (
           <div className="mb-8 p-4 rounded-xl border border-border/40 bg-card/40">
             <SourceReviewPanel />
+          </div>
+        )}
+
+        {showResearchIngest && (
+          <div className="mb-8 p-4 rounded-xl border border-border/40 bg-card/40 space-y-4">
+            <div className="space-y-2">
+              <h2 className="font-serif text-lg text-foreground">Rootstone Research Ingest</h2>
+              <p className="text-xs text-muted-foreground">
+                Paste text snapshots from trusted allowlisted sources. Records enter staging as <code>new</code>,
+                then move through <code>reviewed</code> and <code>approved/rejected</code>.
+              </p>
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-2">
+              <Input
+                value={ingestSourceUrl}
+                onChange={(e) => setIngestSourceUrl(e.target.value)}
+                placeholder="https://example.gov/notable-trees"
+                className="font-serif text-sm"
+              />
+              <Input
+                value={ingestFetchedAt}
+                onChange={(e) => setIngestFetchedAt(e.target.value)}
+                placeholder="2026-03-04T17:00:00.000Z"
+                className="font-mono text-xs"
+              />
+            </div>
+
+            <textarea
+              value={ingestRawText}
+              onChange={(e) => setIngestRawText(e.target.value)}
+              placeholder="Paste raw text snapshot here..."
+              className="min-h-36 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-serif"
+            />
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button onClick={ingestSnapshot} disabled={ingestBusy} className="font-serif">
+                {ingestBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Ingest Snapshot
+              </Button>
+              <Button variant="outline" onClick={loadIngestQueue} disabled={queueBusy} className="font-serif">
+                {queueBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Refresh Queue
+              </Button>
+              <Select value={queueStatusFilter} onValueChange={(value) => setQueueStatusFilter(value as typeof queueStatusFilter)}>
+                <SelectTrigger className="w-[160px] font-serif text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="reviewed">Reviewed</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {approvedCountries.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 border border-border/30 rounded-lg p-3">
+                <span className="text-xs font-serif text-muted-foreground">Export approved JSON:</span>
+                {approvedCountries.map((country) => (
+                  <Button key={country} size="sm" variant="outline" className="font-serif" onClick={() => exportApprovedForCountry(country)}>
+                    {country}
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {queueRows.length === 0 ? (
+                <p className="text-xs text-muted-foreground font-serif">No staging rows for this filter.</p>
+              ) : (
+                queueRows.map((row) => {
+                  const payload = row.payload_json || {};
+                  const coords = payload.location?.lat != null && payload.location?.lng != null
+                    ? `${payload.location.lat}, ${payload.location.lng}`
+                    : payload.location?.place || "No coordinates";
+                  return (
+                    <Card key={row.id} className="border-border/30">
+                      <CardContent className="p-3 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline">{row.status}</Badge>
+                          <Badge variant="outline">{row.country}</Badge>
+                          <Badge variant="outline">{payload.type || "tree"}</Badge>
+                          <span className="text-xs text-muted-foreground">{new Date(row.created_at).toLocaleString()}</span>
+                        </div>
+                        <p className="font-serif text-sm text-foreground">{payload.name || "Unnamed candidate"}</p>
+                        <p className="text-xs text-muted-foreground">{coords}</p>
+                        <p className="text-xs text-muted-foreground break-all">
+                          Citation: {payload.source?.name || "source"} · {payload.source?.url || row.source_url}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <Button size="sm" variant="outline" onClick={() => updateQueueStatus(row.id, "reviewed")}>Mark reviewed</Button>
+                          <Button size="sm" variant="default" onClick={() => updateQueueStatus(row.id, "approved")}>Approve</Button>
+                          <Button size="sm" variant="destructive" onClick={() => updateQueueStatus(row.id, "rejected")}>Reject</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
           </div>
         )}
 

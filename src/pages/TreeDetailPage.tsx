@@ -464,6 +464,8 @@ const TreeDetailPage = () => {
               stats={checkinStats}
               loading={checkinsLoading}
               onCheckin={() => setCanopyCheckinOpen(true)}
+              userId={userId}
+              onRefresh={refetchCheckins}
             />
 
             {/* Seed Economy */}

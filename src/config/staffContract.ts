@@ -5,8 +5,7 @@
  */
 
 // ── Contract address ──────────────────────────────────────────────
-// TODO: Replace with deployed address once available
-export const STAFF_CONTRACT_ADDRESS = "";
+export const STAFF_CONTRACT_ADDRESS = (import.meta.env.VITE_STAFF_CONTRACT_ADDRESS as string | undefined) || "";
 
 // ── Chain config ──────────────────────────────────────────────────
 export const BASE_CHAIN_ID = 8453;
@@ -15,9 +14,18 @@ export const BASE_SEPOLIA_CHAIN_ID = 84532;
 export const BASE_RPC_URL = "https://mainnet.base.org";
 export const BASE_SEPOLIA_RPC_URL = "https://sepolia.base.org";
 
-// Use testnet until mainnet deploy is confirmed
-export const ACTIVE_CHAIN_ID: number = BASE_SEPOLIA_CHAIN_ID;
-export const ACTIVE_RPC_URL = BASE_SEPOLIA_RPC_URL;
+// Use env override first, fallback to Base Sepolia testnet.
+export const ACTIVE_CHAIN_ID: number = Number(import.meta.env.VITE_CHAIN_ID || BASE_SEPOLIA_CHAIN_ID);
+export const ACTIVE_RPC_URL =
+  (import.meta.env.VITE_RPC_URL as string | undefined) ||
+  (ACTIVE_CHAIN_ID === BASE_CHAIN_ID ? BASE_RPC_URL : BASE_SEPOLIA_RPC_URL);
+
+export const ACTIVE_RPC_URLS = [
+  ACTIVE_RPC_URL,
+  ...(ACTIVE_CHAIN_ID === BASE_SEPOLIA_CHAIN_ID
+    ? ["https://base-sepolia-rpc.publicnode.com", "https://sepolia.base.org"]
+    : ["https://base.publicnode.com", "https://mainnet.base.org"]),
+].filter((url, index, all) => Boolean(url) && all.indexOf(url) === index);
 
 // ── Explorer & marketplace links ──────────────────────────────────
 export const getBaseScanUrl = (tokenId: number) =>

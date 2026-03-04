@@ -235,6 +235,7 @@ const WorldAtlasPage = () => {
         "japan", "india", "united-states", "brazil", "zimbabwe", "italy",
         "colombia", "greece", "canada", "china", "russia", "france",
         "nigeria", "kenya", "ethiopia", "tanzania", "dr-congo",
+        "costa-rica", "peru", "indonesia",
       ]);
 
       // Proposed countries (in registry but no data yet)

@@ -23,6 +23,20 @@ export interface CountryRegistryEntry {
   sourceLabel: string;
   /** Bounding box for map auto-zoom [south, west, north, east] */
   bbox?: [number, number, number, number];
+  /** ISO-3166 alpha-2 country code */
+  isoCode?: string;
+  /** Preferred camera focus when entering map from portal */
+  defaultMapFocus?: {
+    center: { lat: number; lng: number };
+    zoom: number;
+  };
+  /** Default semantic filters for map context */
+  defaultFilters?: {
+    tags?: string[];
+    researchLayer?: "on" | "off";
+  };
+  /** Curated external research sources for the country portal */
+  keySources?: Array<{ label: string; url: string }>;
   /** True if data is community-seeded rather than from official registers */
   isCommunitySeeded?: boolean;
   /** Custom provenance description (overrides default DFFE text) */
@@ -30,6 +44,52 @@ export interface CountryRegistryEntry {
 }
 
 const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
+  {
+    country: "Costa Rica",
+    slug: "costa-rica",
+    flag: "🇨🇷",
+    descriptor: "Ancient & Research Trees",
+    portalTitle: "Costa Rica — Ancient & Research Trees",
+    portalSubtitle: "Cloud-forest giants, ceiba guardians, and living research records across Costa Rica.",
+    sourceLabel: "Research & heritage sources",
+    isoCode: "CR",
+    bbox: [8.0, -85.95, 11.35, -82.55],
+    defaultMapFocus: {
+      center: { lat: 9.7489, lng: -83.7534 },
+      zoom: 7,
+    },
+    defaultFilters: {
+      tags: ["ancient", "champion", "research"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "SINAC / protected areas dataset (placeholder)", url: "https://www.sinac.go.cr/" },
+      { label: "National biodiversity research sources (placeholder)", url: "https://www.inbio.ac.cr/" },
+    ],
+  },
+  {
+    country: "Peru",
+    slug: "peru",
+    flag: "🇵🇪",
+    descriptor: "Ancient & Research Trees",
+    portalTitle: "Peru — Ancient & Research Trees",
+    portalSubtitle: "Andean relicts, Amazonian elders, and documentary records across Peru's living biomes.",
+    sourceLabel: "Research & heritage sources",
+    isoCode: "PE",
+    bbox: [-18.5, -81.5, 0.2, -68.6],
+    defaultMapFocus: {
+      center: { lat: -9.19, lng: -75.0152 },
+      zoom: 5,
+    },
+    defaultFilters: {
+      tags: ["ancient", "champion", "research"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "SERFOR forest information (placeholder)", url: "https://www.gob.pe/serfor" },
+      { label: "Peru biodiversity institute sources (placeholder)", url: "https://www.iiap.gob.pe/" },
+    ],
+  },
   {
     country: "South Africa",
     slug: "south-africa",
@@ -268,7 +328,20 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     portalTitle: "Indonesia — Heritage & Sacred Trees",
     portalSubtitle: "Banyan guardians, rainforest giants & sacred grove elders — a living map of the archipelago's arboreal heritage.",
     sourceLabel: "Heritage & community sources",
+    isoCode: "ID",
     bbox: [-11, 95, 6, 141],
+    defaultMapFocus: {
+      center: { lat: -2.5489, lng: 118.0149 },
+      zoom: 5,
+    },
+    defaultFilters: {
+      tags: ["ancient", "champion", "research"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "Indonesia KLHK forestry data (placeholder)", url: "https://www.menlhk.go.id/" },
+      { label: "BRIN biodiversity research index (placeholder)", url: "https://www.brin.go.id/" },
+    ],
     isCommunitySeeded: true,
     provenanceText: "These seeds were planted by the S33D community. Walk among them and help them grow.",
   },

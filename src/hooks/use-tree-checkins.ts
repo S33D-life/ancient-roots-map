@@ -21,6 +21,9 @@ export interface TreeCheckin {
   fungi_present: boolean | null;
   health_notes: string | null;
   minted_status: string;
+  accuracy_m: number | null;
+  proof_types: string[] | null;
+  confidence_score: number | null;
 }
 
 export interface CheckinStats {

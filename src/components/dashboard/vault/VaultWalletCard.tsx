@@ -2,6 +2,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, Link2, Unlink, AlertCircle, Shield, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import StaffQRCode from "@/components/StaffQRCode";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useStaff } from "@/hooks/use-staff";
+import { useWalletSignin } from "@/hooks/use-wallet-signin";
 import { useState } from "react";
 import type { useWallet } from "@/hooks/use-wallet";
 import { getOpenSeaUrl, STAFF_CONTRACT_ADDRESS } from "@/config/staffContract";
@@ -15,6 +18,9 @@ interface VaultWalletCardProps {
 const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [tokenIdInput, setTokenIdInput] = useState("");
+  const staffGate = useStaff(wallet.address);
+  const walletSignin = useWalletSignin(wallet.address);
 
   const isDisconnected = wallet.status === "disconnected" || wallet.status === "error";
   const isConnecting = wallet.status === "connecting";
@@ -143,6 +149,11 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                     Wrong network
                   </span>
                 )}
+                {wallet.isCorrectNetwork && staffGate.isStaffHolder && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-serif">
+                    Staff Holder
+                  </span>
+                )}
               </div>
             </div>
             <button
@@ -166,6 +177,24 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                 className="overflow-hidden"
               >
                 <div className="px-5 pb-4 space-y-3 border-t border-border/30 pt-3">
+                  {!wallet.isCorrectNetwork && (
+                    <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 space-y-2">
+                      <p className="text-[11px] text-destructive font-serif">
+                        This wallet is connected, but not on Base Sepolia (84532).
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          void wallet.switchToActiveNetwork?.();
+                        }}
+                      >
+                        Switch to Base Sepolia
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Staff NFTs */}
                   {wallet.staffs.length > 0 && (
                     <div>
@@ -230,11 +259,112 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                     </div>
                   </div>
 
+                  {/* Staff-only action gate */}
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-serif">
+                      Key Actions
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={walletSignin.signedIn ? "outline" : "sacred"}
+                        size="sm"
+                        className="h-8 text-xs"
+                        disabled={walletSignin.loading}
+                        onClick={() => {
+                          if (walletSignin.signedIn) {
+                            walletSignin.signOut();
+                            return;
+                          }
+                          void walletSignin.signIn();
+                        }}
+                      >
+                        {walletSignin.signedIn ? "Signed In" : walletSignin.loading ? "Signing..." : "Sign in"}
+                      </Button>
+                      {walletSignin.signedIn && (
+                        <span className="text-[10px] text-muted-foreground font-serif">Wallet session active</span>
+                      )}
+                    </div>
+                    {walletSignin.error && (
+                      <p className="text-[11px] text-destructive font-serif">{walletSignin.error}</p>
+                    )}
+                    <Button
+                      variant="sacred"
+                      size="sm"
+                      className="h-8 text-xs"
+                      disabled={!walletSignin.signedIn || !staffGate.isStaffHolder || staffGate.isLoading}
+                      title={
+                        !walletSignin.signedIn
+                          ? "Sign in required"
+                          : staffGate.isStaffHolder
+                            ? "Staff holder verified"
+                            : "Staff holder required"
+                      }
+                    >
+                      Mint NFTree (Staff-only)
+                    </Button>
+                    {walletSignin.signedIn && !staffGate.isStaffHolder && (
+                      <p className="text-[10px] text-muted-foreground font-serif">
+                        Connect a wallet holding a Staff NFT to unlock this action.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Optional token verification */}
+                  {wallet.isCorrectNetwork && wallet.address && (
+                    <div className="rounded-lg border border-border/40 p-3 space-y-2">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-serif">
+                        Verify Staff Token ID
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={tokenIdInput}
+                          onChange={(e) => setTokenIdInput(e.target.value)}
+                          placeholder="e.g. 12"
+                          className="h-8 text-xs"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs"
+                          disabled={staffGate.verifyLoading}
+                          onClick={() => {
+                            void staffGate.verifyTokenId(tokenIdInput);
+                          }}
+                        >
+                          Verify
+                        </Button>
+                      </div>
+                      {staffGate.verifyError && (
+                        <p className="text-[11px] text-destructive font-serif">{staffGate.verifyError}</p>
+                      )}
+                      {staffGate.verifiedToken && (
+                        <div className="text-[11px] font-serif text-muted-foreground space-y-1">
+                          <p>
+                            Verified token #{staffGate.verifiedToken.tokenId}
+                          </p>
+                          {staffGate.verifiedToken.tokenURI && (
+                            <a
+                              href={staffGate.verifiedToken.tokenURI}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                            >
+                              tokenURI ↗
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Disconnect */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={wallet.disconnect}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                    onClick={() => {
+                      walletSignin.signOut();
+                      void wallet.disconnect();
+                    }}
                     className="gap-1.5 text-[10px] font-serif text-muted-foreground hover:text-destructive w-full justify-start"
                   >
                     <Unlink className="w-3 h-3" />

@@ -71,3 +71,21 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Version Metadata Check
+
+`public/version.json` is generated during build and must be reachable as a static file at `/version.json`.
+
+Quick verification:
+
+```sh
+# Local
+npm run build
+npm run preview
+curl -i http://localhost:4173/version.json
+
+# Live
+curl -i https://www.s33d.life/version.json
+```
+
+Expected result: `HTTP 200` and JSON with `build` and `generated`.

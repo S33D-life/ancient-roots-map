@@ -1,14 +1,29 @@
-/**
- * generate-version.js — Run as part of the build to emit public/version.json.
- * Called from package.json build script: "node generate-version.js && vite build"
- */
-import { writeFileSync } from "fs";
+import { execSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
 
-const buildId = new Date().toISOString().slice(0, 16).replace("T", ".").replace(":", "");
+const generated = new Date().toISOString();
 
-writeFileSync(
-  "public/version.json",
-  JSON.stringify({ build: buildId, generated: new Date().toISOString() }, null, 2)
-);
+function resolveBuildId() {
+  const envBuildId =
+    process.env.CI_BUILD_ID ||
+    process.env.GITHUB_SHA ||
+    process.env.CF_PAGES_COMMIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.BUILD_ID;
 
-console.log(`✓ version.json → build ${buildId}`);
+  if (envBuildId) return envBuildId.slice(0, 40);
+
+  try {
+    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+  } catch {
+    return "dev";
+  }
+}
+
+const build = resolveBuildId();
+const payload = { build, generated };
+
+writeFileSync("public/version.json", `${JSON.stringify(payload, null, 2)}\n`);
+console.log(`version.json generated: build=${build} generated=${generated}`);
