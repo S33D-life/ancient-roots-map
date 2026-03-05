@@ -4980,11 +4980,6 @@ export type Database = {
           source_name: string | null
           source_url: string | null
           species: string
-          species_ai_confidence: number | null
-          species_ai_confirmed: boolean
-          species_ai_predictions: Json | null
-          species_ai_provider: string | null
-          species_ai_selected: Json | null
           state: string | null
           updated_at: string
           what3words: string | null
@@ -5019,11 +5014,6 @@ export type Database = {
           source_name?: string | null
           source_url?: string | null
           species: string
-          species_ai_confidence?: number | null
-          species_ai_confirmed?: boolean
-          species_ai_predictions?: Json | null
-          species_ai_provider?: string | null
-          species_ai_selected?: Json | null
           state?: string | null
           updated_at?: string
           what3words?: string | null
@@ -5058,11 +5048,6 @@ export type Database = {
           source_name?: string | null
           source_url?: string | null
           species?: string
-          species_ai_confidence?: number | null
-          species_ai_confirmed?: boolean
-          species_ai_predictions?: Json | null
-          species_ai_provider?: string | null
-          species_ai_selected?: Json | null
           state?: string | null
           updated_at?: string
           what3words?: string | null
