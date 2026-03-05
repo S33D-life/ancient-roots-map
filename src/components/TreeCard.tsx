@@ -1,11 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind } from "lucide-react";
-import { useMapFocus } from "@/hooks/use-map-focus";
-import { type TreeCardData, type OfferingSummary, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
+import { type TreeCardData, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
+import SendWhisperModal from "@/components/SendWhisperModal";
+import TreeWhisperButton from "@/components/TreeWhisperButton";
+import { goToTreeOnMap } from "@/utils/mapNavigation";
 
 export type TreeCardVariant = "gallery" | "compact";
 
@@ -45,7 +48,8 @@ const TreeCard = ({
   onShare,
   onNFTree,
 }: TreeCardProps) => {
-  const { focusMap } = useMapFocus();
+  const navigate = useNavigate();
+  const [whisperOpen, setWhisperOpen] = useState(false);
   const age = tree.estimated_age ?? 0;
   const tier = useMemo(() => getTreeTier(age, offeringCount), [age, offeringCount]);
   const tierStyle = TIER_COLORS[tier];
@@ -59,9 +63,8 @@ const TreeCard = ({
 
   const handleMapNav = (e: React.MouseEvent) => {
     e.stopPropagation();
-    focusMap({
-      type: "tree",
-      id: tree.id,
+    goToTreeOnMap(navigate, {
+      treeId: tree.id,
       lat: tree.latitude ?? undefined,
       lng: tree.longitude ?? undefined,
       w3w: tree.what3words ?? undefined,
@@ -89,14 +92,20 @@ const TreeCard = ({
     onNFTree?.({ id: tree.id, name: tree.name, species: tree.species, photoUrl: heroPhotoUrl });
   };
 
+  const openWhisper = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    setWhisperOpen(true);
+  };
+
   /* ── Compact variant (map sidebar, search results) ── */
   if (variant === "compact") {
     return (
+      <>
       <Card
         className="border-border/40 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
         onClick={handleClick}
       >
-        <div className="flex gap-3 p-3">
+        <div className="flex gap-3 p-3 relative">
           {/* Thumbnail */}
           <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-muted/30">
             {heroPhotoUrl ? (
@@ -125,16 +134,29 @@ const TreeCard = ({
             </div>
           </div>
           {/* Tier badge */}
-          <Badge variant="outline" className={`self-start text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
+          <div className="self-start flex items-center gap-1.5">
+            <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />
+            <Badge variant="outline" className={`text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
             {TIER_LABELS[tier]}
-          </Badge>
+            </Badge>
+          </div>
         </div>
       </Card>
+      <SendWhisperModal
+        open={whisperOpen}
+        onOpenChange={setWhisperOpen}
+        treeId={tree.id}
+        treeName={tree.name}
+        treeSpecies={tree.species}
+        contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+      />
+      </>
     );
   }
 
   /* ── Gallery variant (full card) ── */
   return (
+    <>
     <Card className="border-border/40 hover:border-primary/25 transition-all duration-400 relative group">
       {/* Hero image */}
       {heroPhotoUrl && (
@@ -151,15 +173,21 @@ const TreeCard = ({
         </Badge>
       </div>
       {isClustered && (
-        <div className="absolute top-2 right-2 z-10">
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+          <TreeWhisperButton onClick={openWhisper} />
           <Badge variant="secondary" className="font-serif text-[10px] gap-1 bg-accent/20 text-accent border-accent/30 backdrop-blur-sm">
             <Users className="h-3 w-3" />
             {encounterCount} encounters
           </Badge>
         </div>
       )}
+      {!isClustered && (
+        <div className="absolute top-2 right-2 z-10">
+          <TreeWhisperButton onClick={openWhisper} />
+        </div>
+      )}
 
-      <CardHeader className="cursor-pointer pt-3 pb-2" onClick={handleClick}>
+      <CardHeader className="cursor-pointer pt-3 pb-2 pr-12" onClick={handleClick}>
         <CardTitle className="font-serif text-primary line-clamp-1 text-base leading-tight tracking-wide">
           {tree.name}
         </CardTitle>
@@ -237,6 +265,15 @@ const TreeCard = ({
         </div>
       </CardContent>
     </Card>
+    <SendWhisperModal
+      open={whisperOpen}
+      onOpenChange={setWhisperOpen}
+      treeId={tree.id}
+      treeName={tree.name}
+      treeSpecies={tree.species}
+      contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+    />
+    </>
   );
 };
 

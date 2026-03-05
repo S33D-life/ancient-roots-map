@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Sparkles, Heart, Share2, Map } from "lucide-react";
+import { MapPin, Sparkles, Heart, Share2, Map, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
@@ -23,6 +23,7 @@ interface TreePageHeroProps {
   onAddWish: () => void;
   onViewMap: () => void;
   onShare: () => void;
+  onWhisper?: () => void;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
 }
@@ -34,6 +35,7 @@ const TreePageHero = ({
   onAddWish,
   onViewMap,
   onShare,
+  onWhisper,
   ecoBelonging,
   onNavigateHive,
 }: TreePageHeroProps) => {
@@ -209,6 +211,11 @@ const TreePageHero = ({
             <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onViewMap}>
               <Map className="h-3.5 w-3.5" /> View on Atlas
             </Button>
+            {onWhisper && (
+              <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onWhisper}>
+                <Wind className="h-3.5 w-3.5" /> Whisper
+              </Button>
+            )}
             <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onShare}>
               <Share2 className="h-3.5 w-3.5" /> Share
             </Button>

@@ -1,0 +1,80 @@
+[
+  {
+    "country_code": "CR",
+    "name": "Costa Rica",
+    "slug": "costa-rica",
+    "center": [
+      9.7489,
+      -83.7534
+    ],
+    "bbox": [
+      8,
+      -85.95,
+      11.35,
+      -82.55
+    ],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": [
+      "natural-earth",
+      "overpass",
+      "wikidata",
+      "wdpa",
+      "gbif",
+      "inat"
+    ],
+    "wikidata_qid": "Q800"
+  },
+  {
+    "country_code": "ID",
+    "name": "Indonesia",
+    "slug": "indonesia",
+    "center": [
+      -2.5489,
+      118.0149
+    ],
+    "bbox": [
+      -11,
+      95,
+      6.2,
+      141.1
+    ],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": [
+      "natural-earth",
+      "overpass",
+      "wikidata",
+      "wdpa",
+      "gbif",
+      "inat"
+    ],
+    "wikidata_qid": "Q252"
+  },
+  {
+    "country_code": "PE",
+    "name": "Peru",
+    "slug": "peru",
+    "center": [
+      -9.19,
+      -75.0152
+    ],
+    "bbox": [
+      -18.5,
+      -81.5,
+      0.2,
+      -68.6
+    ],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": [
+      "natural-earth",
+      "overpass",
+      "wikidata",
+      "wdpa",
+      "gbif",
+      "inat"
+    ],
+    "wikidata_qid": "Q419"
+  }
+]

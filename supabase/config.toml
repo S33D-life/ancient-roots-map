@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.birdsong-identify]
 verify_jwt = false
 
+[functions.identify-tree]
+verify_jwt = false
+
 [functions.api-gateway]
 verify_jwt = false
 

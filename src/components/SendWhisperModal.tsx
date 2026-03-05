@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhisper } from "@/hooks/use-whispers";
+import { emitMycelialThread } from "@/lib/mycelial-network";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -26,10 +27,12 @@ interface Props {
   treeId: string;
   treeName: string;
   treeSpecies: string;
+  contextLabel?: string;
 }
 
 export default function SendWhisperModal({
   open, onOpenChange, treeId, treeName, treeSpecies,
+  contextLabel,
 }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
@@ -59,6 +62,13 @@ export default function SendWhisperModal({
       setSent(false);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!sent) return;
+    toast.success("Whisper sent.");
+    const timer = setTimeout(() => onOpenChange(false), 900);
+    return () => clearTimeout(timer);
+  }, [sent, onOpenChange]);
 
   // Search wanderers for private whispers
   useEffect(() => {
@@ -102,6 +112,26 @@ export default function SendWhisperModal({
       toast.error("Failed to send whisper.");
       console.error(error);
     } else {
+      let senderLocation: { lat: number; lng: number } | null = null;
+      if (typeof navigator !== "undefined" && "geolocation" in navigator) {
+        try {
+          senderLocation = await new Promise<{ lat: number; lng: number } | null>((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+              () => resolve(null),
+              { enableHighAccuracy: false, timeout: 2200, maximumAge: 120000 },
+            );
+          });
+        } catch {
+          senderLocation = null;
+        }
+      }
+      emitMycelialThread({
+        source: "whisper",
+        targetTreeId: treeId,
+        targetTreeName: treeName,
+        from: senderLocation,
+      });
       setSent(true);
     }
     setSending(false);
@@ -174,6 +204,11 @@ export default function SendWhisperModal({
           <p className="text-sm text-muted-foreground font-serif mt-1">
             Leave a message within <strong>{treeName}</strong>.
           </p>
+          {contextLabel && (
+            <p className="text-xs text-muted-foreground/80 font-serif mt-1">
+              Context: {contextLabel}
+            </p>
+          )}
         </DialogHeader>
 
         <div className="space-y-5 py-2">
@@ -275,12 +310,18 @@ export default function SendWhisperModal({
               ))}
             </div>
           </div>
+
+          {!userId && (
+            <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-serif text-muted-foreground">
+              You can compose freely. Sign in is required to send.
+            </div>
+          )}
         </div>
 
         <DialogFooter>
           <Button
             onClick={handleSend}
-            disabled={sending || !message.trim() || (recipientScope === "PRIVATE" && !recipientUserId)}
+            disabled={sending || !userId || !message.trim() || (recipientScope === "PRIVATE" && !recipientUserId)}
             className="font-serif tracking-wider gap-2 w-full sm:w-auto"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

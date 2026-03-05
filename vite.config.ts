@@ -3,8 +3,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { readFileSync } from "node:fs";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
-import { VitePWA } from "vite-plugin-pwa";
 
 const DEV_CSP = [
   "default-src 'self'",
@@ -14,7 +12,7 @@ const DEV_CSP = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "script-src 'self' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "connect-src 'self' ws: wss: https: http://localhost:* http://127.0.0.1:*",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
@@ -25,6 +23,20 @@ const PROD_CSP = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self' https://lovable.dev https://*.lovable.dev https://lovable.app https://*.lovable.app https://*.lovableproject.com",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "script-src 'self'",
+  "connect-src 'self' https: wss:",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+].join("; ");
+
+const PREVIEW_CSP = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self' https://*.lovable.app https://lovable.app",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -46,28 +58,14 @@ const resolveBuildId = () => {
 };
 
 const BUILD_ID = resolveBuildId();
+const SUPABASE_FUNCTIONS_BASE =
+  (process.env.VITE_SUPABASE_URL ? `${process.env.VITE_SUPABASE_URL}/functions/v1` : null) ||
+  "https://mwzcuczfedrjplndggiv.supabase.co/functions/v1";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    headers: {
-      "Content-Security-Policy": DEV_CSP,
-    },
-  },
-  preview: {
-    headers: {
-      "Content-Security-Policy": PROD_CSP,
-    },
-  },
-  define: {
-    __BUILD_ID__: JSON.stringify(BUILD_ID),
-  },
-  plugins: [
-    react(),
-    mode === "development" && componentTagger(),
-    VitePWA({
+async function loadPwaPlugin() {
+  try {
+    const { VitePWA } = await import("vite-plugin-pwa");
+    return VitePWA({
       // "prompt" mode gives us control — we show the banner ourselves
       registerType: "prompt",
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
@@ -173,7 +171,43 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-    }),
+    });
+  } catch (error) {
+    console.warn("[vite] vite-plugin-pwa unavailable; continuing without PWA plugin.", error);
+    return null;
+  }
+}
+
+// https://vitejs.dev/config/
+export default defineConfig(async () => {
+  const pwaPlugin = await loadPwaPlugin();
+  return ({
+  server: {
+    host: "::",
+    port: 8080,
+    headers: {
+      "Content-Security-Policy": DEV_CSP,
+    },
+    proxy: {
+      "/api/identify-tree": {
+        target: SUPABASE_FUNCTIONS_BASE,
+        changeOrigin: true,
+        rewrite: () => "/identify-tree",
+      },
+    },
+  },
+  preview: {
+    headers: {
+      // Preview builds may be framed by Lovable.
+      "Content-Security-Policy": PREVIEW_CSP,
+    },
+  },
+  define: {
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
+  },
+  plugins: [
+    react(),
+    pwaPlugin,
   ].filter(Boolean),
   resolve: {
     dedupe: ["react", "react-dom", "react/jsx-runtime", "framer-motion"],
@@ -196,4 +230,5 @@ export default defineConfig(({ mode }) => ({
     setupFiles: ["./src/tests/setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
   },
-}));
+  });
+});

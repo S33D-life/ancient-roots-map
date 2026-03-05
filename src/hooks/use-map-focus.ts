@@ -100,6 +100,7 @@ export function useMapFocus() {
       }
 
       if (opts.type === "tree") {
+        params.set("tree", opts.id);
         params.set("treeId", opts.id);
         if (opts.lat != null && opts.lng != null) {
           params.set("lat", String(opts.lat));

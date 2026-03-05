@@ -27,6 +27,7 @@ export default tseslint.config(
       "no-empty": ["warn", { allowEmptyCatch: true }],
       "no-irregular-whitespace": "warn",
       "no-useless-escape": "warn",
+      "prefer-const": "warn",
     },
   },
 );

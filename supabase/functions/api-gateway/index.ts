@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { identifyTreeSpecies } from "./services/speciesVision.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -390,6 +391,37 @@ route("GET", "/api/v1/search", async (_req, _auth, _params, url) => {
   return json({ data: results, query: q }, 200, { "Cache-Control": "public, max-age=30" });
 });
 
+// ── Species Vision ──
+route("POST", "/api/identify-tree", async (req) => {
+  const MAX_IMAGE_DATA_CHARS = 14_000_000;
+  let body: { imageData?: string; topK?: number; threshold?: number } | null = null;
+  try {
+    body = await req.json();
+  } catch {
+    return err("INVALID_REQUEST", "Body must be valid JSON", 400);
+  }
+
+  const imageData = typeof body?.imageData === "string" ? body.imageData : "";
+  if (!imageData) {
+    return err("INVALID_REQUEST", "imageData is required", 400);
+  }
+  if (imageData.length > MAX_IMAGE_DATA_CHARS) {
+    return err("PAYLOAD_TOO_LARGE", "imageData payload too large", 413);
+  }
+
+  try {
+    const result = await identifyTreeSpecies({
+      imageData,
+      topK: body?.topK,
+      threshold: body?.threshold,
+    });
+    return json(result);
+  } catch (error) {
+    console.error("species vision error:", error);
+    return err("VISION_ERROR", "Tree species identification failed", 500);
+  }
+});
+
 // ── OpenAPI Spec ──
 route("GET", "/api/v1/openapi.json", async () => {
   const spec = buildOpenAPISpec();
@@ -445,6 +477,36 @@ function buildOpenAPISpec() {
     ],
     security: [{ BearerAuth: [] }, { ApiKeyAuth: [] }],
     paths: {
+      "/api/identify-tree": {
+        post: {
+          summary: "Identify tree species from a photo",
+          operationId: "identifyTreeSpecies",
+          tags: ["AI", "Trees"],
+          description: "Runs iNaturalist Vision first, then falls back to PlantNet if confidence is below threshold.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["imageData"],
+                  properties: {
+                    imageData: { type: "string", description: "Base64 data URL image payload" },
+                    topK: { type: "integer", minimum: 1, maximum: 3, default: 3 },
+                    threshold: { type: "number", minimum: 0, maximum: 1, default: 0.6 },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "Top species predictions with confidence" },
+            "400": { description: "Invalid request body" },
+            "500": { description: "Identification service failed" },
+          },
+          security: [],
+        },
+      },
       "/api/v1/health": {
         get: { summary: "Health check", operationId: "getHealth", tags: ["Meta"], responses: { "200": { description: "API health status" } }, security: [] },
       },
