@@ -2,10 +2,11 @@ import { normalizeName, nowIso, parseWktPoint } from "../utils.mjs";
 
 const WIKIDATA_ENDPOINT = "https://query.wikidata.org/sparql";
 
-const treeQuery = (wikidataQid, limit) => `
+// Template A: tree entities in a country.
+export const wikidataNotableTreesTemplateA = (wikidataQid, limit) => `
 SELECT ?item ?itemLabel ?coord ?article WHERE {
   VALUES ?country { wd:${wikidataQid} }
-  VALUES ?treeClass { wd:Q811979 wd:Q10884 wd:Q23790 }
+  VALUES ?treeClass { wd:Q10884 wd:Q811979 wd:Q23790 wd:Q757163 }
   ?item wdt:P31/wdt:P279* ?treeClass .
   ?item wdt:P17 ?country .
   ?item wdt:P625 ?coord .
@@ -18,7 +19,7 @@ SELECT ?item ?itemLabel ?coord ?article WHERE {
 LIMIT ${Math.max(1, limit)}
 `.trim();
 
-const candidateFromBinding = (binding, countryCode, fetchedAt) => {
+const candidateFromBinding = (binding, countryCode, fetchedAt, query) => {
   const name = binding?.itemLabel?.value;
   const coord = parseWktPoint(binding?.coord?.value);
   if (!name || !coord) return null;
@@ -40,7 +41,9 @@ const candidateFromBinding = (binding, countryCode, fetchedAt) => {
     tags: ["research", "wikidata", "notable_tree"],
     sources: [
       {
+        source: "wikidata",
         name: "Wikidata",
+        query,
         url: sourceUrl,
         retrieved_at: fetchedAt,
         license_note: "CC0 1.0 (Wikidata data)",
@@ -53,7 +56,7 @@ const candidateFromBinding = (binding, countryCode, fetchedAt) => {
 export async function fetchWikidataNotableTrees({ countryCode, wikidataQid, limit = 120 }) {
   if (!wikidataQid) return { candidates: [], source: "wikidata_trees", error: "missing_wikidata_qid" };
   const fetchedAt = nowIso();
-  const query = treeQuery(wikidataQid, Math.max(limit, 33));
+  const query = wikidataNotableTreesTemplateA(wikidataQid, Math.max(limit, 33));
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort("timeout"), 20_000);
 
@@ -78,7 +81,7 @@ export async function fetchWikidataNotableTrees({ countryCode, wikidataQid, limi
     const candidates = [];
     const seen = new Set();
     for (const binding of bindings) {
-      const candidate = candidateFromBinding(binding, countryCode, fetchedAt);
+      const candidate = candidateFromBinding(binding, countryCode, fetchedAt, query);
       if (!candidate) continue;
       const key = `${candidate.normalized_name}:${candidate.lat.toFixed(4)}:${candidate.lng.toFixed(4)}`;
       if (seen.has(key)) continue;

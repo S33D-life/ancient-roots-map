@@ -6,6 +6,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ALL_ROOTSTONES } from "@/data/rootstones";
 import { getGridStaffs } from "@/utils/staffRoomData";
+import { buildRootstoneMapUrl } from "@/utils/map-link";
 
 /* ── Result Schema ── */
 export type SearchResultType =
@@ -137,31 +138,12 @@ const STAFF_ENTRIES: SearchResult[] = getGridStaffs()
   }));
 
 const ROOTSTONE_RESULTS: SearchResult[] = ALL_ROOTSTONES.map((stone) => {
-  const params = new URLSearchParams();
-  params.set("rootstoneId", stone.id);
-  params.set("rootstones", "on");
-  params.set("rootstoneCountry", stone.country.toLowerCase().replace(/\s+/g, "-"));
-  params.set("rootstoneType", stone.type);
-  params.set("rootstoneTags", stone.tags.join(","));
-  params.set("country", stone.country.toLowerCase().replace(/\s+/g, "-"));
-
-  if (stone.bounds) {
-    params.set("bbox", `${stone.bounds.south},${stone.bounds.west},${stone.bounds.north},${stone.bounds.east}`);
-    params.set("lat", String((stone.bounds.south + stone.bounds.north) / 2));
-    params.set("lng", String((stone.bounds.west + stone.bounds.east) / 2));
-    params.set("zoom", "8");
-  } else if (stone.location.lat != null && stone.location.lng != null) {
-    params.set("lat", String(stone.location.lat));
-    params.set("lng", String(stone.location.lng));
-    params.set("zoom", stone.type === "tree" ? "12" : "9");
-  }
-
   return {
     id: `rootstone-${stone.id}`,
     type: "rootstone",
     title: `🪨 ${stone.name}`,
     subtitle: `${stone.country} · ${stone.type === "tree" ? "Tree" : "Grove/Forest"} rootstone`,
-    url: `/map?${params.toString()}`,
+    url: buildRootstoneMapUrl(stone),
     keywords: [stone.country, stone.type, ...(stone.tags || []), stone.location.place || "", stone.region || ""],
     score: 0,
     emoji: stone.type === "tree" ? "🌳" : "🌲",

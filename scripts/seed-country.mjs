@@ -14,13 +14,27 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY_PATH = path.resolve(__dirname, "../src/data/countries/registry.json");
 
-const parseArgs = () =>
-  Object.fromEntries(
-    process.argv.slice(2).map((arg) => {
-      const [key, value = "true"] = arg.split("=");
-      return [key.replace(/^--/, ""), value];
-    }),
-  );
+const parseArgs = () => {
+  const args = {};
+  const raw = process.argv.slice(2);
+  for (let i = 0; i < raw.length; i += 1) {
+    const token = raw[i];
+    if (!token.startsWith("--")) continue;
+    if (token.includes("=")) {
+      const [key, value = "true"] = token.split("=");
+      args[key.replace(/^--/, "")] = value;
+      continue;
+    }
+    const next = raw[i + 1];
+    if (next && !next.startsWith("--")) {
+      args[token.replace(/^--/, "")] = next;
+      i += 1;
+    } else {
+      args[token.replace(/^--/, "")] = "true";
+    }
+  }
+  return args;
+};
 
 const toInt = (value, fallback) => {
   const parsed = Number(value);
@@ -29,7 +43,12 @@ const toInt = (value, fallback) => {
 
 const printSummary = (summary) => {
   console.log(`Country: ${summary.country.country_code} (${summary.country.name})`);
-  console.log(`Selected: groves=${summary.selected.groves}, trees=${summary.selected.trees}, fallbackGroves=${summary.selected.fallback_groves_used}, fallbackTrees=${summary.selected.fallback_trees_used}, total=${summary.selected.total}`);
+  console.log(`Selected: groves=${summary.selected.groves}/${summary.selected.target_groves}, trees=${summary.selected.trees}/${summary.selected.target_trees}, fallbackGroves=${summary.selected.fallback_groves_used}, fallbackTrees=${summary.selected.fallback_trees_used}, total=${summary.selected.total}`);
+  if (summary.selected.groves < summary.selected.target_groves || summary.selected.trees < summary.selected.target_trees) {
+    console.log("⚠ Shortfall detected: one or more adapters returned fewer than target candidates.");
+  } else {
+    console.log("✅ Target met: 33 groves + 33 trees selected (or configured limits).");
+  }
   console.log("Adapter results:");
   summary.adapter_results.forEach((result) => {
     console.log(`- ${result.adapter}: count=${result.count}${result.error ? ` error=${result.error}` : ""}`);
@@ -53,7 +72,7 @@ const main = async () => {
 
   const limitGroves = toInt(args.limitGroves, 33);
   const limitTrees = toInt(args.limitTrees, 33);
-  const dryRun = String(args.dryRun || "false") === "true";
+  const dryRun = String(args.dryRun || "false").toLowerCase() === "true";
   const batchId = makeBatchId(country);
 
   const plan = await generateCountrySeedPlan({

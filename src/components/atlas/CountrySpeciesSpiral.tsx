@@ -22,6 +22,7 @@ interface Props {
   country: string;
   countrySlug: string;
   loading?: boolean;
+  onSpeciesSelect?: (species: string | null) => void;
 }
 
 const GOLDEN_ANGLE = 137.508;
@@ -46,7 +47,7 @@ function seedOffset(species: string): number {
   return Math.abs(h) % 2000; // 0–2s offset
 }
 
-const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: Props) => {
+const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading, onSpeciesSelect }: Props) => {
   const navigate = useNavigate();
   const { focusMap } = useMapFocus();
   const [selected, setSelected] = useState<SpeciesActivity | null>(null);
@@ -75,8 +76,12 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
 
   const handleDotClick = useCallback((sp: SpeciesActivity | null) => {
     if (!sp) return;
-    setSelected(prev => prev?.species === sp.species ? null : sp);
-  }, []);
+    setSelected(prev => {
+      const next = prev?.species === sp.species ? null : sp;
+      onSpeciesSelect?.(next?.species || null);
+      return next;
+    });
+  }, [onSpeciesSelect]);
 
   const handleFilterMap = useCallback((sp: SpeciesActivity) => {
     focusMap({ type: "area", id: sp.species, countrySlug, source: "species", species: sp.species });
@@ -317,7 +322,7 @@ const CountrySpeciesSpiral = memo(({ species, country, countrySlug, loading }: P
                       )}
                     </p>
                   </div>
-                  <button onClick={() => setSelected(null)}
+                  <button onClick={() => { setSelected(null); onSpeciesSelect?.(null); }}
                     className="p-1 rounded-full hover:bg-muted/50 transition-colors">
                     <X className="w-3.5 h-3.5 text-muted-foreground" />
                   </button>
