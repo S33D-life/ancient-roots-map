@@ -163,89 +163,95 @@ const NearbyTreesSheet = ({ open, onOpenChange, userLat, userLng, onSelectTree }
               </p>
             </div>
           ) : (
-            filtered.map((tree) => (
-              <div
-                key={tree.id}
-                className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-accent/10 relative"
-                style={{
-                  border: "1px solid hsla(0, 0%, 100%, 0.05)",
-                }}
-              >
-                <div className="absolute top-2 right-2 z-10">
-                  <TreeWhisperButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setWhisperTree(tree);
-                      setWhisperOpen(true);
-                    }}
-                    className="h-7 w-7"
-                  />
-                </div>
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                  style={{
-                    background: "radial-gradient(circle, hsla(120, 40%, 25%, 0.4), hsla(120, 30%, 15%, 0.3))",
-                    border: "1px solid hsla(120, 40%, 35%, 0.3)",
-                  }}
-                >
-                  <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(120, 45%, 50%)" }} />
-                </div>
+              filtered.map((tree) => {
+                const displayName = tree.name || tree.species || "Unnamed Tree";
+                const distLabel = tree.distanceM < 1000
+                  ? `${Math.round(tree.distanceM)}m`
+                  : `${(tree.distanceM / 1000).toFixed(1)}km`;
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-serif text-sm truncate" style={{ color: "hsl(42, 70%, 65%)" }}>
-                    {tree.name || "Unnamed Tree"}
-                  </p>
-                  <p className="text-xs text-muted-foreground font-serif truncate">
-                    {tree.species} ·{" "}
-                    {tree.distanceM < 1000
-                      ? `${Math.round(tree.distanceM)}m`
-                      : `${(tree.distanceM / 1000).toFixed(1)}km`}
-                  </p>
-                </div>
+                return (
+                  <div
+                    key={tree.id}
+                    className="flex flex-col gap-2 p-3 rounded-xl transition-colors hover:bg-accent/10 relative"
+                    style={{ border: "1px solid hsla(0, 0%, 100%, 0.05)" }}
+                  >
+                    {/* Row 1: Icon + Name + Whisper */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                        style={{
+                          background: "radial-gradient(circle, hsla(120, 40%, 25%, 0.4), hsla(120, 30%, 15%, 0.3))",
+                          border: "1px solid hsla(120, 40%, 35%, 0.3)",
+                        }}
+                      >
+                        <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(120, 45%, 50%)" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="font-serif text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis"
+                          style={{ color: "hsl(42, 70%, 65%)", minWidth: 0 }}
+                        >
+                          {displayName}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-serif whitespace-nowrap overflow-hidden text-ellipsis">
+                          {tree.species} · {distLabel}
+                        </p>
+                      </div>
+                      <TreeWhisperButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setWhisperTree(tree);
+                          setWhisperOpen(true);
+                        }}
+                        className="h-7 w-7 shrink-0"
+                      />
+                    </div>
 
-                <div className="flex gap-1.5 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-xs font-serif"
-                    onClick={() => navigate(`/tree/${encodeURIComponent(tree.id)}`)}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    View
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-xs font-serif"
-                    onClick={() =>
-                      goToTreeOnMap(navigate, {
-                        treeId: tree.id,
-                        lat: tree.latitude,
-                        lng: tree.longitude,
-                        zoom: 16,
-                        source: "nearby",
-                      })
-                    }
-                  >
-                    <MapIcon className="w-3 h-3 mr-1" />
-                    Map
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-8 px-3 text-xs font-serif mr-8 sm:mr-0"
-                    style={{
-                      background: "linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))",
-                      color: "hsl(120, 50%, 65%)",
-                      border: "1px solid hsla(120, 40%, 35%, 0.4)",
-                    }}
-                    onClick={() => onSelectTree(tree)}
-                  >
-                    <MapPin className="w-3 h-3 mr-1" />
-                    Check In
-                  </Button>
-                </div>
-              </div>
-            ))
+                    {/* Row 2: Actions */}
+                    <div className="flex items-center gap-1.5 pl-12">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs font-serif"
+                        onClick={() => navigate(`/tree/${encodeURIComponent(tree.id)}`)}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs font-serif"
+                        onClick={() =>
+                          goToTreeOnMap(navigate, {
+                            treeId: tree.id,
+                            lat: tree.latitude,
+                            lng: tree.longitude,
+                            zoom: 16,
+                            source: "nearby",
+                          })
+                        }
+                      >
+                        <MapIcon className="w-3 h-3 mr-1" />
+                        Map
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="h-7 px-3 text-xs font-serif ml-auto"
+                        style={{
+                          background: "linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))",
+                          color: "hsl(120, 50%, 65%)",
+                          border: "1px solid hsla(120, 40%, 35%, 0.4)",
+                        }}
+                        onClick={() => onSelectTree(tree)}
+                      >
+                        <MapPin className="w-3 h-3 mr-1" />
+                        Check In
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
           )}
         </div>
         {whisperTree && (
