@@ -596,6 +596,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const hasFittedRef = useRef(false);
   const focusHandledRef = useRef<string | null>(null);
   const focusHaloRef = useRef<L.Marker | null>(null);
+  const focusFetchAttemptRef = useRef<string | null>(null);
+  const focusFallbackMarkerRef = useRef<L.Marker | null>(null);
   const geo = useGeolocation();
   const locating = geo.isLocating;
   const [located, setLocated] = useState(false);
@@ -1203,6 +1205,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       clusterRef.current = null;
       userMarkerRef.current = null;
       userAccuracyRef.current = null;
+      focusHaloRef.current = null;
+      focusFallbackMarkerRef.current = null;
       groveLayerRef.current = null;
       seedLayerRef.current = null;
       mycelialNetworkLayerRef.current = null;
@@ -2075,33 +2079,86 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     if (!map || !cluster || !initialTreeId) return;
     const focusKey = `${initialTreeId}:${initialZoom ?? ""}:${initialJourney ? "1" : "0"}`;
     if (focusHandledRef.current === focusKey) return;
-    // Wait until trees are loaded and markers exist
-    if (filteredTrees.length === 0) return;
+    if (trees.length === 0) return;
 
-    // Find the target tree
-    const targetTree = filteredTrees.find(t => t.id === initialTreeId);
+    const clearFallbackMarker = () => {
+      if (focusFallbackMarkerRef.current) {
+        map.removeLayer(focusFallbackMarkerRef.current);
+        focusFallbackMarkerRef.current = null;
+      }
+    };
+
+    const showDetachedFocus = (
+      lat: number,
+      lng: number,
+      treeName: string,
+      treeSpecies?: string | null,
+    ) => {
+      clearFallbackMarker();
+
+      const targetLatLng = L.latLng(lat, lng);
+      map.flyTo(targetLatLng, Math.max(initialZoom ?? 17, 16), {
+        duration: initialJourney ? 1.2 : 0.9,
+        easeLinearity: 0.35,
+      });
+
+      const popupHtml = `<div style="font-family:'Cinzel',serif;min-width:190px;padding:10px 12px;text-align:center">
+        <div style="font-size:13px;color:hsl(42,80%,60%);margin-bottom:3px">${escapeHtml(treeName || "Tree")}</div>
+        ${treeSpecies ? `<div style="font-size:11px;color:hsl(120,30%,60%);margin-bottom:6px">${escapeHtml(treeSpecies)}</div>` : ""}
+        <div style="font-size:10px;color:hsl(42,18%,72%)">Focused from deep link</div>
+      </div>`;
+
+      const marker = L.marker(targetLatLng, { zIndexOffset: 900 }).addTo(map);
+      marker.bindPopup(popupHtml, { className: "atlas-leaflet-popup", maxWidth: 250 }).openPopup();
+      focusFallbackMarkerRef.current = marker;
+
+      setTimeout(() => {
+        if (focusFallbackMarkerRef.current === marker) {
+          map.removeLayer(marker);
+          focusFallbackMarkerRef.current = null;
+        }
+      }, 8000);
+
+      onJourneyEnd?.();
+    };
+
+    // Find target tree from loaded in-memory dataset first.
+    const targetTree = trees.find((tree) => tree.id === initialTreeId);
     if (!targetTree) {
-      // Tree might be hidden by filters — check ALL trees
-      const allTree = trees.find(t => t.id === initialTreeId);
-      if (!allTree) return;
-      // Tree exists but is filtered out — it will still show on map since
-      // the deep-link already set the view position. Mark as handled.
-      focusHandledRef.current = focusKey;
+      // Fallback: fetch by tree ID so deep links still work even if current dataset is partial.
+      if (focusFetchAttemptRef.current === focusKey) return;
+      focusFetchAttemptRef.current = focusKey;
+
+      void (async () => {
+        const { data, error } = await supabase
+          .from("trees")
+          .select("id,name,species,latitude,longitude")
+          .eq("id", initialTreeId)
+          .maybeSingle();
+        if (error || !data || data.latitude == null || data.longitude == null) return;
+        if (focusHandledRef.current === focusKey) return;
+        focusHandledRef.current = focusKey;
+        showDetachedFocus(data.latitude, data.longitude, data.name, data.species);
+      })();
       return;
     }
 
     focusHandledRef.current = focusKey;
     const targetLatLng = L.latLng(targetTree.latitude, targetTree.longitude);
 
-    // Find the marker in the cluster group
+    // Find the rendered marker in the cluster group.
     let targetMarker: L.Marker | null = null;
     cluster.eachLayer((layer: any) => {
-      if (layer._treeId === initialTreeId) {
-        targetMarker = layer;
+      if (layer?._treeId === initialTreeId) {
+        targetMarker = layer as L.Marker;
       }
     });
 
-    if (!targetMarker) return;
+    // Marker may be filtered out. Keep focus behavior by dropping a temporary marker.
+    if (!targetMarker) {
+      showDetachedFocus(targetTree.latitude, targetTree.longitude, targetTree.name, targetTree.species);
+      return;
+    }
 
     // --- Multi-stage ceremonial journey ---
     const targetZoom = Math.max(initialZoom ?? 17, 17);
@@ -2200,6 +2257,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (focusHaloRef.current) {
         map.removeLayer(focusHaloRef.current);
       }
+      clearFallbackMarker();
 
       const haloMarker = L.marker(marker.getLatLng(), {
         icon: haloIcon,
@@ -2221,7 +2279,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }
       }, 3000);
     }
-  }, [filteredTrees, trees, initialTreeId, initialZoom]);
+  }, [filteredTrees, trees, initialTreeId, initialZoom, initialJourney, onJourneyEnd]);
 
   // Render bloomed seed heart markers
   useEffect(() => {

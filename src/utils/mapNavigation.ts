@@ -13,8 +13,36 @@ export interface GoToTreeOnMapOptions {
   journey?: boolean;
 }
 
+export interface ParsedMapFocusParams {
+  treeId: string | null;
+  lat: number | undefined;
+  lng: number | undefined;
+  zoom: number | undefined;
+  bbox: [number, number, number, number] | undefined;
+  arrival: string | undefined;
+  country: string | undefined;
+  hive: string | undefined;
+  journey: boolean;
+}
+
 const isFiniteNumber = (value: number | null | undefined): value is number =>
   typeof value === "number" && Number.isFinite(value);
+
+const parseFiniteNumber = (value: string | null): number | undefined => {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const parseBbox = (value: string | null): [number, number, number, number] | undefined => {
+  if (!value) return undefined;
+  const parts = value
+    .split(",")
+    .map((part) => Number(part.trim()))
+    .filter((part) => Number.isFinite(part));
+  if (parts.length !== 4) return undefined;
+  return [parts[0], parts[1], parts[2], parts[3]];
+};
 
 export function buildTreeMapUrl(options: GoToTreeOnMapOptions): string {
   const params = new URLSearchParams();
@@ -56,4 +84,18 @@ export function goToTreeOnMap(
 
 export function getTreeIdFromMapParams(params: URLSearchParams): string | null {
   return params.get("tree") || params.get("treeId");
+}
+
+export function parseMapFocusParams(params: URLSearchParams): ParsedMapFocusParams {
+  return {
+    treeId: getTreeIdFromMapParams(params),
+    lat: parseFiniteNumber(params.get("lat")),
+    lng: parseFiniteNumber(params.get("lng")),
+    zoom: parseFiniteNumber(params.get("zoom")),
+    bbox: parseBbox(params.get("bbox")),
+    arrival: params.get("arrival") || params.get("origin") || undefined,
+    country: params.get("country") || undefined,
+    hive: params.get("hive") || undefined,
+    journey: params.get("journey") === "1",
+  };
 }
