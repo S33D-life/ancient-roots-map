@@ -141,6 +141,19 @@ const TreeDetailPage = () => {
   });
   const presenceCount = useTreePresenceCount(userId, id);
 
+  // Refetch offerings when a new offering is created
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.treeId === id) {
+        console.log("[TreeDetail] offering-created event, refetching");
+        refetchOfferings();
+      }
+    };
+    window.addEventListener("offering-created", handler);
+    return () => window.removeEventListener("offering-created", handler);
+  }, [id, refetchOfferings]);
+
   useEffect(() => {
     if (!userId || !tree) return;
     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
