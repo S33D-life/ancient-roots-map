@@ -101,7 +101,7 @@ const TreeDetailPage = () => {
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
-  const [sectionTab, setSectionTab] = useState<string>("tree");
+  const [sectionTab, setSectionTab] = useState<string>("overview");
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
@@ -110,7 +110,6 @@ const TreeDetailPage = () => {
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
-  const [showAnchored, setShowAnchored] = useState(false);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -125,9 +124,11 @@ const TreeDetailPage = () => {
     }
   }, [searchParams, id]);
 
+  // Centralized offerings via shared hook (with realtime)
   const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType, getByRole } = useOfferings({ treeId: id, realtime: true });
   const stewardshipOfferings = useMemo(() => getByRole("stewardship"), [getByRole]);
   const anchoredOfferings = useMemo(() => getByRole("anchored"), [getByRole]);
+  const [showAnchored, setShowAnchored] = useState(false);
   const { verified: verifiedSources, pending: pendingSources, loading: sourcesLoading, refetch: refetchSources } = useTreeSources(id);
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
@@ -141,19 +142,7 @@ const TreeDetailPage = () => {
   });
   const presenceCount = useTreePresenceCount(userId, id);
 
-  // Refetch offerings when a new offering is created
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (detail?.treeId === id) {
-        console.log("[TreeDetail] offering-created event, refetching");
-        refetchOfferings();
-      }
-    };
-    window.addEventListener("offering-created", handler);
-    return () => window.removeEventListener("offering-created", handler);
-  }, [id, refetchOfferings]);
-
+  // Check for available whispers at this tree
   useEffect(() => {
     if (!userId || !tree) return;
     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
@@ -163,27 +152,26 @@ const TreeDetailPage = () => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
 
+  // Handle ?add=type query param
   useEffect(() => {
     const addType = searchParams.get("add");
     if (addType === "birdsong") {
-      setSectionTab("offerings");
       setActiveTab("birdsong");
       setBirdsongOpen(true);
       setSearchParams({}, { replace: true });
     } else if (addType && ["photo", "song", "poem", "story", "nft"].includes(addType)) {
-      setSectionTab("offerings");
       setSelectedType(addType as OfferingType);
       setAddOfferingOpen(true);
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
+  // Handle whisper deep-link from map popup/tree cards
   useEffect(() => {
     if (!tree) return;
     if (searchParams.get("whisper") !== "1") return;
     if (searchParams.get("context") === "map") setWhisperContextLabel("Opened from map popup");
     setWhisperModalOpen(true);
-    setSectionTab("whispers");
     const next = new URLSearchParams(searchParams);
     next.delete("whisper");
     next.delete("context");
@@ -262,6 +250,8 @@ const TreeDetailPage = () => {
     );
   }
 
+  // getOfferingsByType provided by useOfferings hook
+
   const handleAddOffering = (type: OfferingType) => {
     setSelectedType(type);
     setAddOfferingOpen(true);
@@ -269,6 +259,7 @@ const TreeDetailPage = () => {
 
   const photoOfferings = getOfferingsByType("photo").filter((o) => o.media_url);
 
+  /** Sort offerings by selected mode */
   const sortOfferings = (items: Offering[]) => {
     const now = Date.now();
     const sorted = [...items];
@@ -285,7 +276,7 @@ const TreeDetailPage = () => {
           .sort((a, b) => ((b as any).influence_score || 0) - ((a as any).influence_score || 0));
       case "top_all":
         return sorted.sort((a, b) => ((b as any).influence_score || 0) - ((a as any).influence_score || 0));
-      default:
+      default: // "new"
         return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   };
@@ -298,8 +289,11 @@ const TreeDetailPage = () => {
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
         <button
           onClick={() => {
-            if (window.history.length > 1) navigate(-1);
-            else navigate("/map");
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else {
+              navigate("/map");
+            }
           }}
           className="inline-flex items-center text-muted-foreground hover:text-primary mb-6 font-serif text-sm tracking-wide transition-colors bg-transparent border-none cursor-pointer p-0"
         >
@@ -307,12 +301,12 @@ const TreeDetailPage = () => {
           Back
         </button>
 
-        {/* ══════ Sacred Hero ══════ */}
+        {/* ══════ MASTER TEMPLATE: Sacred Hero ══════ */}
         <TreePageHero
           tree={tree}
           photoUrl={getOfferingsByType("photo")[0]?.media_url || null}
-          onMakeOffering={() => { setSectionTab("offerings"); setAddOfferingOpen(true); }}
-          onAddWish={() => setSectionTab("tree")}
+          onMakeOffering={() => setAddOfferingOpen(true)}
+          onAddWish={() => setSectionTab("overview")}
           onViewMap={() => {
             goToTreeOnMap(navigate, {
               treeId: tree.id,
@@ -324,7 +318,6 @@ const TreeDetailPage = () => {
           }}
           onWhisper={() => {
             setWhisperContextLabel("Opened from tree profile hero");
-            setSectionTab("whispers");
             setWhisperModalOpen(true);
           }}
           onShare={() => setShareCardOpen(true)}
@@ -346,37 +339,33 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ 5-Tab Section Layout ══════ */}
+        {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
-          <TabsList className="w-full grid grid-cols-5 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
-            <TabsTrigger value="tree" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-              <TreeDeciduous className="w-3.5 h-3.5 hidden sm:inline" /> Tree
+          <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
+            <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Overview
             </TabsTrigger>
-            <TabsTrigger value="lore" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-              <BookOpen className="w-3.5 h-3.5 hidden sm:inline" /> Lore
+            <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Encounters
             </TabsTrigger>
-            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-              <Camera className="w-3.5 h-3.5 hidden sm:inline" /> Offerings
-            </TabsTrigger>
-            <TabsTrigger value="whispers" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-              <MessageSquare className="w-3.5 h-3.5 hidden sm:inline" /> Whispers
-            </TabsTrigger>
-            <TabsTrigger value="map" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-              <Map className="w-3.5 h-3.5 hidden sm:inline" /> Map
+            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+              Offerings
             </TabsTrigger>
           </TabsList>
 
-          {/* ── TREE TAB ── */}
-          <TabsContent value="tree" className="space-y-8">
-            {/* Story + Structured Data */}
+          {/* ── OVERVIEW TAB ── */}
+          <TabsContent value="overview" className="space-y-8">
+            {/* Story + Structured Data (two-column) */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
 
-            {/* Photo Gallery preview */}
-            {photoOfferings.length > 0 && (
-              <PhotoGrid offerings={photoOfferings.slice(0, 6)} onImageClick={(i) => setLightboxIndex(i)} />
-            )}
+            {/* Offerings Preview */}
+            <TreeOfferingsPreview
+              offerings={offerings}
+              onAddOffering={() => setAddOfferingOpen(true)}
+              treeName={tree.name}
+            />
 
-            {/* Wishes */}
+            {/* Wishes Section */}
             <TreeWishesSection
               treeId={id!}
               treeName={tree.name}
@@ -384,8 +373,45 @@ const TreeDetailPage = () => {
               isAnchorNode={(tree as any).is_anchor_node}
             />
 
+            {/* Tree Radio */}
+            <TreeRadioBlock
+              treeId={id!}
+              treeName={tree.name}
+              species={tree.species}
+              radioTheme={(tree as any).radio_theme}
+            />
+
+            {/* Map Journey Anchor */}
+            <TreeMapJourneyAnchor
+              treeId={tree.id}
+              treeName={tree.name}
+              lat={tree.latitude}
+              lng={tree.longitude}
+              w3w={tree.what3words}
+            />
+
+            {/* Hive Connections */}
+            <TreeHiveConnections
+              species={tree.species}
+              ecoBelonging={ecoBelonging}
+            />
+
+            {/* Heart Rewards */}
+            <TreeHeartRewards />
+
+            {/* Vine divider */}
+            <div className="vine-divider" />
+
             {/* Weather */}
             <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
+
+            {/* Photo Gallery */}
+            {photoOfferings.length > 0 && (
+              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
+            )}
+
+            {/* Tree Heart Pool */}
+            <TreeHeartPool treeId={id!} userId={userId} />
 
             {/* Blooming Clock */}
             {tree?.species && (
@@ -407,45 +433,142 @@ const TreeDetailPage = () => {
             <StewardshipLeaderboard treeId={id!} />
           </TabsContent>
 
-          {/* ── LORE TAB ── */}
-          <TabsContent value="lore" className="space-y-8">
-            {/* Lore / Story section */}
-            <TreeLoreSection
-              loreText={tree.description}
-              elementalSignature={(tree as any).elemental_signature}
-              archetype={(tree as any).archetype}
-              seasonalTone={(tree as any).seasonal_tone}
-            />
+          {/* ── ENCOUNTERS TAB ── */}
+          <TabsContent value="encounters" className="space-y-6">
+            {/* Encounter Cluster */}
+            <EncounterClusterPanel tree={tree} />
 
-            {/* Offerings Preview (taste of offerings) */}
-            <TreeOfferingsPreview
-              offerings={offerings}
-              onAddOffering={() => { setSectionTab("offerings"); setAddOfferingOpen(true); }}
-              treeName={tree.name}
-            />
+            {/* 333s Presence Ritual */}
+            {userId && (
+              <Card className="bg-card/60 backdrop-blur border-primary/20">
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <TreeDeciduous className="w-5 h-5 text-primary/60" />
+                    <div>
+                      <p className="font-serif text-sm text-foreground">Tree Presence (333s)</p>
+                      <p className="text-xs text-muted-foreground font-serif">
+                        {presenceCompleted
+                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence completed · ${presenceCount} total`
+                          : "Be still with this tree to unlock minting"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant={presenceCompleted ? "outline" : "mystical"}
+                    size="sm"
+                    className="font-serif text-xs shrink-0"
+                    onClick={() => setPresenceOpen(true)}
+                    disabled={completedToday}
+                  >
+                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin Presence"}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Tree Radio */}
-            <TreeRadioBlock
+            {/* Meeting Timer */}
+            <MeetingTimer
               treeId={id!}
               treeName={tree.name}
-              species={tree.species}
-              radioTheme={(tree as any).radio_theme}
+              treeSpecies={tree.species}
+              userId={userId}
+              onMeetingChange={setActiveMeeting}
+              onStatusChange={setMeetingStatus}
             />
 
-            {/* Hive Connections */}
-            <TreeHiveConnections
-              species={tree.species}
-              ecoBelonging={ecoBelonging}
+            {/* Canopy Visits Timeline */}
+            <CanopyVisitsTimeline
+              checkins={checkins}
+              stats={checkinStats}
+              loading={checkinsLoading}
+              onCheckin={() => setCanopyCheckinOpen(true)}
+              userId={userId}
+              onRefresh={refetchCheckins}
             />
 
-            {/* Heart Rewards */}
-            <TreeHeartRewards />
+            {/* Seed Economy */}
+            <SeedPlanter
+              treeId={id!}
+              treeLat={tree.latitude}
+              treeLng={tree.longitude}
+              userId={userId}
+              treeSpecies={tree.species}
+            />
 
-            {/* Tree Heart Pool */}
-            <TreeHeartPool treeId={id!} userId={userId} />
+            {/* Whispers */}
+            {userId && tree && (
+              <Button
+                onClick={() => setWhisperModalOpen(true)}
+                variant="outline"
+                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Send a Whisper Through This Tree
+              </Button>
+            )}
 
-            {/* Linked Volumes */}
-            <LinkedVolumesPanel treeId={id!} />
+            {availableWhispers.length > 0 && userId && tree && (
+              <WhisperCollector
+                whispers={availableWhispers}
+                userId={userId}
+                treeId={tree.id}
+                treeName={tree.name}
+                onCollected={() => {
+                  if (userId && tree) {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }
+                }}
+              />
+            )}
+
+            {/* Anchored Memories */}
+            {anchoredOfferings.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowAnchored(!showAnchored)}
+                  className="w-full flex items-center gap-3 mb-4"
+                >
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
+                  <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
+                    🏡 Anchored Memories
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
+                    <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
+                  </span>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
+                </button>
+                <AnimatePresence>
+                  {showAnchored && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {anchoredOfferings.map((off) => (
+                          <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
+                            <CardContent className="p-3 flex items-center gap-3">
+                              {off.media_url && off.type === "photo" && (
+                                <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
+                                <span className="text-[10px] text-muted-foreground/60 font-mono">
+                                  {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                                </span>
+                              </div>
+                              <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
+                                🌿 {off.type}
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </TabsContent>
 
           {/* ── OFFERINGS TAB ── */}
@@ -565,179 +688,9 @@ const TreeDetailPage = () => {
               </div>
             )}
 
-            {/* Markets */}
+            {/* Linked Volumes & Markets (secondary context) */}
+            <LinkedVolumesPanel treeId={id!} />
             <TreeMarkets treeId={id!} treeSpecies={tree.species} />
-          </TabsContent>
-
-          {/* ── WHISPERS TAB ── */}
-          <TabsContent value="whispers" className="space-y-6">
-            {/* Encounter Cluster */}
-            <EncounterClusterPanel tree={tree} />
-
-            {/* 333s Presence Ritual */}
-            {userId && (
-              <Card className="bg-card/60 backdrop-blur border-primary/20">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <TreeDeciduous className="w-5 h-5 text-primary/60" />
-                    <div>
-                      <p className="font-serif text-sm text-foreground">Tree Presence (333s)</p>
-                      <p className="text-xs text-muted-foreground font-serif">
-                        {presenceCompleted
-                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence completed · ${presenceCount} total`
-                          : "Be still with this tree to unlock minting"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant={presenceCompleted ? "outline" : "mystical"}
-                    size="sm"
-                    className="font-serif text-xs shrink-0"
-                    onClick={() => setPresenceOpen(true)}
-                    disabled={completedToday}
-                  >
-                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin Presence"}
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Meeting Timer */}
-            <MeetingTimer
-              treeId={id!}
-              treeName={tree.name}
-              treeSpecies={tree.species}
-              userId={userId}
-              onMeetingChange={setActiveMeeting}
-              onStatusChange={setMeetingStatus}
-            />
-
-            {/* Canopy Visits Timeline */}
-            <CanopyVisitsTimeline
-              checkins={checkins}
-              stats={checkinStats}
-              loading={checkinsLoading}
-              onCheckin={() => setCanopyCheckinOpen(true)}
-              userId={userId}
-              onRefresh={refetchCheckins}
-            />
-
-            {/* Seed Economy */}
-            <SeedPlanter
-              treeId={id!}
-              treeLat={tree.latitude}
-              treeLng={tree.longitude}
-              userId={userId}
-              treeSpecies={tree.species}
-            />
-
-            {/* Send Whisper */}
-            {userId && tree && (
-              <Button
-                onClick={() => setWhisperModalOpen(true)}
-                variant="outline"
-                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Send a Whisper Through This Tree
-              </Button>
-            )}
-
-            {availableWhispers.length > 0 && userId && tree && (
-              <WhisperCollector
-                whispers={availableWhispers}
-                userId={userId}
-                treeId={tree.id}
-                treeName={tree.name}
-                onCollected={() => {
-                  if (userId && tree) {
-                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
-                  }
-                }}
-              />
-            )}
-
-            {/* Anchored Memories */}
-            {anchoredOfferings.length > 0 && (
-              <div>
-                <button
-                  onClick={() => setShowAnchored(!showAnchored)}
-                  className="w-full flex items-center gap-3 mb-4"
-                >
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
-                  <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
-                    🏡 Anchored Memories
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
-                    <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
-                  </span>
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
-                </button>
-                <AnimatePresence>
-                  {showAnchored && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2 overflow-hidden"
-                    >
-                      <div className="grid gap-3 md:grid-cols-2">
-                        {anchoredOfferings.map((off) => (
-                          <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
-                            <CardContent className="p-3 flex items-center gap-3">
-                              {off.media_url && off.type === "photo" && (
-                                <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
-                                <span className="text-[10px] text-muted-foreground/60 font-mono">
-                                  {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                                </span>
-                              </div>
-                              <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
-                                🌿 {off.type}
-                              </Badge>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-          </TabsContent>
-
-          {/* ── MAP TAB ── */}
-          <TabsContent value="map" className="space-y-6">
-            {/* Map Journey Anchor */}
-            <TreeMapJourneyAnchor
-              treeId={tree.id}
-              treeName={tree.name}
-              lat={tree.latitude}
-              lng={tree.longitude}
-              w3w={tree.what3words}
-            />
-
-            {/* Full-width map focus button */}
-            <Button
-              variant="mystical"
-              className="w-full font-serif tracking-wider gap-2"
-              onClick={() => {
-                goToTreeOnMap(navigate, {
-                  treeId: tree.id,
-                  lat: tree.latitude,
-                  lng: tree.longitude,
-                  w3w: tree.what3words,
-                  source: "tree",
-                });
-              }}
-            >
-              <Map className="h-4 w-4" />
-              Focus Global Map on This Tree
-            </Button>
-
-            {/* Weather in map context */}
-            <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
           </TabsContent>
         </Tabs>
 
@@ -801,6 +754,7 @@ const TreeDetailPage = () => {
         />
       )}
 
+      {/* Edit proposal nudge — appears once per tree */}
       <ContextualWhisper
         id={`edit-nudge-${id}`}
         message="🔍 Spot something that needs updating? Help keep the record accurate."
@@ -809,6 +763,7 @@ const TreeDetailPage = () => {
         position="bottom-right"
       />
 
+      {/* 333s Presence Ritual Overlay */}
       <PresenceRitual
         open={presenceOpen}
         treeName={tree?.name || "Tree"}
@@ -1008,6 +963,7 @@ const parseBookContent = (content: string | null) => {
   const quoteStart = content.indexOf('"');
   const quoteEnd = content.lastIndexOf('"');
   const quote = quoteStart >= 0 && quoteEnd > quoteStart ? content.slice(quoteStart + 1, quoteEnd) : null;
+  // Reflection is remaining text after genre/quote lines
   const nonMeta = lines.filter(l => l && l !== author && !l.startsWith("Genre: ") && !(l.startsWith('"') && l.endsWith('"')));
   const reflection = nonMeta.length > 0 ? nonMeta.join("\n").trim() : null;
   return { author, genre, quote, reflection };
@@ -1018,12 +974,14 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
 
   return (
     <div className="space-y-6">
+      {/* Shelf view — spines */}
       <div
         className="relative rounded-xl border border-border/30 overflow-hidden"
         style={{
           background: "linear-gradient(180deg, hsl(var(--card) / 0.6) 0%, hsl(var(--secondary) / 0.3) 100%)",
         }}
       >
+        {/* Shelf surface */}
         <div className="px-4 pt-6 pb-3">
           <motion.div
             className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
@@ -1051,10 +1009,15 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
                   style={{ width: isExpanded ? 100 : 44, height: 160 }}
                   title={`${offering.title} — ${author}`}
                 >
+                  {/* Spine gradient */}
                   <div className={`absolute inset-0 bg-gradient-to-b ${spineColors[colorIdx]}`} />
+
+                  {/* Spine texture lines */}
                   <div className="absolute inset-x-0 top-2 h-px bg-white/10" />
                   <div className="absolute inset-x-0 bottom-2 h-px bg-white/10" />
                   <div className="absolute left-1 inset-y-0 w-px bg-white/5" />
+
+                  {/* Title on spine (rotated) */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span
                       className="text-white/90 font-serif text-[10px] leading-tight tracking-wider whitespace-nowrap max-w-[140px] truncate"
@@ -1067,6 +1030,8 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
                       {offering.title}
                     </span>
                   </div>
+
+                  {/* Front cover (when expanded) */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
@@ -1089,6 +1054,7 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
           </motion.div>
         </div>
 
+        {/* Shelf edge */}
         <div
           className="h-3 border-t border-border/20"
           style={{
@@ -1098,6 +1064,7 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
         />
       </div>
 
+      {/* Expanded book detail */}
       <AnimatePresence>
         {expandedId && (
           <motion.div
@@ -1121,6 +1088,7 @@ const BookShelf = ({ offerings }: { offerings: Offering[] }) => {
                   />
                   <CardContent className="p-5 md:p-6">
                     <div className="flex gap-4">
+                      {/* Mini book cover */}
                       <div
                         className={`w-16 h-24 rounded-sm bg-gradient-to-b ${spineColors[colorIdx]} flex items-center justify-center shrink-0 shadow-lg`}
                       >

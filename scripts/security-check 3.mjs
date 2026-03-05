@@ -59,9 +59,7 @@ try {
 const forbiddenEnv = tracked.filter((file) => {
   const base = path.basename(file);
   if (!existsSync(file)) return false;
-  // .env.example and .env.production (publishable keys only) are safe to commit
-  if (base === ".env.example" || base === ".env.production") return false;
-  return /^\.env(\..+)?$/.test(base);
+  return /^\.env(\..+)?$/.test(base) && base !== ".env.example";
 });
 
 if (forbiddenEnv.length > 0) {
@@ -85,7 +83,7 @@ const secretPatterns = [
   },
 ];
 
-const allowList = new Set([".env.example", ".env.production"]);
+const allowList = new Set([".env.example"]);
 const findings = [];
 
 for (const file of tracked) {

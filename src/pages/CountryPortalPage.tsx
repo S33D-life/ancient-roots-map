@@ -11,7 +11,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import {
   MapPin, ExternalLink, Scroll, TreeDeciduous, Eye, Compass, Heart,
   BookOpen, ChevronRight, Map as MapIcon, Footprints, Shield, BarChart3, Lock, Sparkles,
-  Layers, ArrowRight, Leaf, Globe,
+  Layers, ArrowRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
@@ -211,7 +211,7 @@ const RootstoneCard = ({ rootstone, onOpenMap }: { rootstone: Rootstone; onOpenM
         </div>
         <Badge variant="outline" className="text-[10px] uppercase">{rootstone.confidence}</Badge>
       </div>
-      <p className="text-xs text-muted-foreground whitespace-pre-line line-clamp-3">{rootstone.lore}</p>
+      <p className="text-xs text-muted-foreground whitespace-pre-line">{rootstone.lore}</p>
       <div className="flex flex-wrap gap-1">
         {rootstone.tags.slice(0, 4).map((tag) => (
           <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>
@@ -271,6 +271,7 @@ const CountryPortalPage = () => {
   );
   const [overlappingBioRegions, setOverlappingBioRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
 
+  // Species activity for the spiral
   const { data: speciesActivity, isLoading: speciesLoading } = useCountrySpeciesActivity(config.country);
   const countryRootstones = useMemo(
     () => getRootstonesByCountrySlug(countrySlug || ""),
@@ -295,6 +296,7 @@ const CountryPortalPage = () => {
     };
     fetchTrees();
 
+    // Fetch overlapping bio-regions for this country
     const fetchBioRegions = async () => {
       const { data } = await supabase
         .from("bio_regions")
@@ -311,17 +313,21 @@ const CountryPortalPage = () => {
 
   /* ─── Computed stats ─── */
   const filteredTrees = useMemo(() => {
-    let pool = trees;
-    if (selectedProvince) pool = pool.filter(t => t.province === selectedProvince);
-    if (selectedSpiralSpecies) pool = pool.filter(t => t.species_scientific === selectedSpiralSpecies || t.species_common === selectedSpiralSpecies);
-    return pool;
-  }, [trees, selectedProvince, selectedSpiralSpecies]);
+    if (!selectedProvince) return trees;
+    return trees.filter(t => t.province === selectedProvince);
+  }, [trees, selectedProvince]);
 
   const totalCount = trees.length;
   const speciesCount = new Set(trees.map(t => t.species_scientific)).size;
   const withCoords = trees.filter(t => t.latitude != null).length;
   const verifiedCount = trees.filter(t => t.status === "verified_linked").length;
+  const precisionCounts = useMemo(() => {
+    const c = { exact: 0, approx: 0, unknown: 0 };
+    trees.forEach(t => { c[t.geo_precision as keyof typeof c] = (c[t.geo_precision as keyof typeof c] || 0) + 1; });
+    return c;
+  }, [trees]);
 
+  /* Species ranking */
   const speciesRanking = useMemo(() => {
     const map = new Map<string, { scientific: string; common: string | null; count: number }>();
     filteredTrees.forEach(t => {
@@ -333,6 +339,7 @@ const CountryPortalPage = () => {
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
   }, [filteredTrees]);
 
+  /* Province counts */
   const provinceCounts = useMemo(() => {
     const map = new Map<string, number>();
     trees.forEach(t => {
@@ -342,6 +349,7 @@ const CountryPortalPage = () => {
     return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
   }, [trees]);
 
+  /* Pilgrimage generator */
   const pilgrimageList = useMemo(() => {
     let pool = [...filteredTrees];
     switch (pilgrimagePreset) {
@@ -369,6 +377,7 @@ const CountryPortalPage = () => {
     return pool;
   }, [filteredTrees, pilgrimagePreset, selectedProvince]);
 
+  /* Citations */
   const citations = useMemo(() => {
     const map = new Map<string, { title: string; url: string; year: number }>();
     trees.forEach(t => {
@@ -381,6 +390,7 @@ const CountryPortalPage = () => {
 
   const { focusMap } = useMapFocus();
 
+  // Not-found guard — placed after all hooks
   if (!entry) {
     return (
       <PageShell>
@@ -445,18 +455,14 @@ const CountryPortalPage = () => {
     );
   };
 
-  const subRegions = getSubRegionsByCountry(countrySlug || "");
-  const subRegionLabel = getSubRegionLabel(countrySlug || "");
-  const cities = getCitiesByCountry(countrySlug || "");
-  const hasGroves = countryRootstones.trees.length > 0 || countryRootstones.groves.length > 0;
-
   return (
     <PageShell>
       <Header />
       <div className="min-h-screen pb-24 pt-16">
-        {/* ─── Hero (compact) ─── */}
-        <section className="relative px-4 pt-10 pb-4 text-center">
-          <div className="max-w-3xl mx-auto mb-3 flex justify-center">
+        {/* ─── A) Hero ─── */}
+        <section className="relative px-4 pt-12 pb-8 text-center">
+          {/* Breadcrumb */}
+          <div className="max-w-3xl mx-auto mb-4 flex justify-center">
             <AtlasBreadcrumb segments={[{ label: `${config.countryFlag} ${config.country}` }]} />
           </div>
           <motion.div
@@ -465,196 +471,348 @@ const CountryPortalPage = () => {
             transition={{ duration: 0.6 }}
             className="max-w-2xl mx-auto"
           >
-            <p className="text-3xl mb-1">{config.countryFlag}</p>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-1">
+            <p className="text-3xl mb-2">{config.countryFlag}</p>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-2">
               {config.title}
             </h1>
-            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-4 italic font-serif">
+            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-4 italic">
               {config.subtitle}
             </p>
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              <Button variant="mystical" size="sm" onClick={openMapLayer}>
-                <MapIcon className="w-4 h-4 mr-1" /> Explore Map
+
+            {/* Badge row */}
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              <Badge variant="outline" className="text-xs border-primary/30">
+                <Scroll className="w-3 h-3 mr-1" /> Research Layer
+              </Badge>
+              <Badge variant="outline" className="text-xs border-primary/30">
+                <BookOpen className="w-3 h-3 mr-1" /> {config.sourceLabel}
+              </Badge>
+              {config.isoCode && (
+                <Badge variant="outline" className="text-xs border-primary/30">
+                  ISO: {config.isoCode}
+                </Badge>
+              )}
+              <Badge variant="outline" className="text-xs border-primary/30">
+                <Shield className="w-3 h-3 mr-1" /> Provenance preserved
+              </Badge>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button variant="mystical" onClick={openMapLayer}>
+                <MapIcon className="w-4 h-4 mr-1" /> Explore the Map
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => setResearchLayerEnabled((c) => !c)}
+                onClick={() => setResearchLayerEnabled((current) => !current)}
+                title="Toggle research layer visibility on map launch"
               >
-                <Layers className="w-4 h-4 mr-1" /> Research: {researchLayerEnabled ? "On" : "Off"}
+                <Layers className="w-4 h-4 mr-1" /> Research Layer: {researchLayerEnabled ? "On" : "Off"}
+              </Button>
+              <Button
+                variant="sacred"
+                onClick={() => { setActiveTab("pilgrimages"); window.scrollTo({ top: 400, behavior: "smooth" }); }}
+              >
+                <Footprints className="w-4 h-4 mr-1" /> Start a Pilgrimage
               </Button>
             </div>
           </motion.div>
         </section>
 
-        {/* ─── Top-level Tabs ─── */}
-        <section className="px-4 max-w-5xl mx-auto">
+        {/* ─── Sub-region Portals (registry-driven) — moved up ─── */}
+        {(() => {
+          const regions = getSubRegionsByCountry(countrySlug || "");
+          if (!regions.length) return null;
+          const label = getSubRegionLabel(countrySlug || "");
+          return (
+            <section className="px-4 max-w-3xl mx-auto mb-8">
+              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" /> Explore {label}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {regions.map(region => (
+                  <Card key={region.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${region.slug}`)}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-serif font-bold text-foreground">{region.icon} {region.name}</p>
+                        <p className="text-xs text-muted-foreground italic">{region.tagline}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ─── City Portals — moved up ─── */}
+        {(() => {
+          const cities = getCitiesByCountry(countrySlug || "");
+          if (!cities.length) return null;
+          return (
+            <section className="px-4 max-w-3xl mx-auto mb-8">
+              <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" /> Explore Cities
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {cities.map(city => (
+                  <Card key={city.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${city.slug}`)}>
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-serif font-bold text-foreground">{city.name}</p>
+                        <p className="text-xs text-muted-foreground italic">{city.tagline}</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ─── Bio-Regions overlapping this Country ─── */}
+        {overlappingBioRegions.length > 0 && (
+          <section className="px-4 max-w-3xl mx-auto mb-8">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-primary" /> Bio-Regions in {config.country}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Ecological systems overlapping this country — mountains, watersheds, and forest biomes.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {overlappingBioRegions.map(br => (
+                    <Link key={br.id} to={`/atlas/bio-regions/${br.id}`}>
+                      <Card className="border-primary/10 hover:border-primary/30 transition-all cursor-pointer">
+                        <CardContent className="p-3 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-primary" />
+                            <div>
+                              <p className="text-xs font-serif font-bold text-foreground">{br.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{br.type}</p>
+                            </div>
+                          </div>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* ─── Key sources ─── */}
+        {config.keySources.length > 0 && (
+          <section className="px-4 max-w-3xl mx-auto mb-8">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-primary" /> Key Sources
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {config.keySources.map((source) => (
+                  <a
+                    key={source.url}
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3 inline mr-1" />
+                    {source.label}
+                  </a>
+                ))}
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {(countryRootstones.trees.length > 0 || countryRootstones.groves.length > 0) && (
+          <section className="px-4 max-w-3xl mx-auto mb-8 space-y-4">
+            {countryRootstones.trees.length > 0 && (
+              <Card className="border-primary/15 bg-card/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-serif flex items-center gap-2">
+                    <TreeDeciduous className="w-4 h-4 text-primary" /> 33 Trees
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {countryRootstones.trees.slice(0, 3).map((stone) => (
+                    <RootstoneCard key={stone.id} rootstone={stone} onOpenMap={openRootstoneOnMap} />
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+            {countryRootstones.groves.length > 0 && (
+              <Card className="border-primary/15 bg-card/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-serif flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-primary" /> 33 Groves & Forests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {countryRootstones.groves.slice(0, 3).map((stone) => (
+                    <RootstoneCard key={stone.id} rootstone={stone} onOpenMap={openRootstoneOnMap} />
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </section>
+        )}
+
+        <section className="px-4 max-w-3xl mx-auto mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <StatTile label="Records" value={totalCount} icon={TreeDeciduous} />
+            <StatTile label="Distinct Species" value={speciesCount} icon={BarChart3} />
+            <StatTile label="With Coordinates" value={withCoords} icon={MapPin} />
+            <StatTile label="Exact Precision" value={precisionCounts.exact} icon={Compass} />
+            <StatTile label="Approx Precision" value={precisionCounts.approx} icon={Eye} />
+            <StatTile label="Verified Linked" value={verifiedCount} icon={Heart} />
+          </div>
+        </section>
+
+        {/* ─── Species Spiral + Map Preview ─── */}
+        <section className="px-4 max-w-5xl mx-auto mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardContent className="py-6">
+                <Suspense fallback={
+                  <div className="py-12 text-center">
+                    <p className="text-sm text-muted-foreground">Loading species spiral…</p>
+                  </div>
+                }>
+                  <CountrySpeciesSpiral
+                    species={speciesActivity || []}
+                    country={config.country}
+                    countrySlug={countrySlug || ""}
+                    loading={speciesLoading}
+                    onSpeciesSelect={setSelectedSpiralSpecies}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+
+            <PlaceMapPreview
+              placeType="country"
+              placeCode={countrySlug || ""}
+              countrySlug={countrySlug || ""}
+              bbox={entry.bbox}
+              center={config.defaultMapFocus?.center}
+              defaultFilters={config.defaultFilters}
+              highlightedSpecies={selectedSpiralSpecies}
+            />
+          </div>
+        </section>
+
+        {/* ─── Province filter chips ─── */}
+        <section className="px-4 max-w-3xl mx-auto mb-6">
+          <ScrollArea className="w-full">
+            <div className="flex gap-2 pb-2">
+              <ProvinceChip
+                name={`All ${getSubRegionLabel(countrySlug || "")}`}
+                count={totalCount}
+                active={!selectedProvince}
+                onClick={() => setSelectedProvince(null)}
+              />
+              {provinceCounts.map(([prov, cnt]) => (
+                <ProvinceChip
+                  key={prov}
+                  name={prov}
+                  count={cnt}
+                  active={selectedProvince === prov}
+                  onClick={() => setSelectedProvince(selectedProvince === prov ? null : prov)}
+                />
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </section>
+
+        {/* ─── Tabs: Overview / Species / Pilgrimages ─── */}
+        <section className="px-4 max-w-3xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-5 bg-card/50 border border-primary/20 mb-6 h-10 rounded-lg">
-              <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-                <Globe className="w-3.5 h-3.5 hidden sm:inline" /> Overview
+            <TabsList className="bg-card/50 border border-primary/20 mb-4">
+              <TabsTrigger value="overview">All Trees</TabsTrigger>
+              <TabsTrigger value="immutable" className="gap-1">
+                <Lock className="w-3 h-3" /> Immutable
               </TabsTrigger>
-              <TabsTrigger value="species" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-                <Leaf className="w-3.5 h-3.5 hidden sm:inline" /> Species
-              </TabsTrigger>
-              <TabsTrigger value="trees" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-                <TreeDeciduous className="w-3.5 h-3.5 hidden sm:inline" /> Trees
-              </TabsTrigger>
-              <TabsTrigger value="groves" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-                <Layers className="w-3.5 h-3.5 hidden sm:inline" /> Groves
-              </TabsTrigger>
-              <TabsTrigger value="research" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1">
-                <BookOpen className="w-3.5 h-3.5 hidden sm:inline" /> Research
-              </TabsTrigger>
+              <TabsTrigger value="species">Species</TabsTrigger>
+              <TabsTrigger value="pilgrimages">Pilgrimages</TabsTrigger>
             </TabsList>
 
-            {/* ══════ OVERVIEW TAB ══════ */}
-            <TabsContent value="overview" className="space-y-6">
-              {/* Stats grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                <StatTile label="Records" value={loading ? "…" : totalCount} icon={TreeDeciduous} />
-                <StatTile label="Species" value={loading ? "…" : speciesCount} icon={BarChart3} />
-                <StatTile label="With Coordinates" value={loading ? "…" : withCoords} icon={MapPin} />
-                <StatTile label="Exact Precision" value={loading ? "…" : trees.filter(t => t.geo_precision === "exact").length} icon={Compass} />
-                <StatTile label="Verified" value={loading ? "…" : verifiedCount} icon={Heart} />
-                <StatTile label="Groves" value={countryRootstones.groves.length} icon={Layers} />
-              </div>
-
-              {/* Map Preview + Spiral side-by-side */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <PlaceMapPreview
-                  placeType="country"
-                  placeCode={countrySlug || ""}
-                  countrySlug={countrySlug || ""}
-                  bbox={entry.bbox}
-                  center={config.defaultMapFocus?.center}
-                  defaultFilters={config.defaultFilters}
-                  highlightedSpecies={selectedSpiralSpecies}
-                />
-                <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-                  <CardContent className="py-6">
-                    <Suspense fallback={<div className="py-12 text-center"><p className="text-sm text-muted-foreground">Loading spiral…</p></div>}>
-                      <CountrySpeciesSpiral
-                        species={speciesActivity || []}
-                        country={config.country}
-                        countrySlug={countrySlug || ""}
-                        loading={speciesLoading}
-                        onSpeciesSelect={setSelectedSpiralSpecies}
-                      />
-                    </Suspense>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Sub-regions */}
-              {subRegions.length > 0 && (
-                <div>
-                  <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-primary" /> Explore {subRegionLabel}
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {subRegions.map(region => (
-                      <Card key={region.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${region.slug}`)}>
-                        <CardContent className="p-4 flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-serif font-bold text-foreground">{region.icon} {region.name}</p>
-                            <p className="text-xs text-muted-foreground italic">{region.tagline}</p>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Cities */}
-              {cities.length > 0 && (
-                <div>
-                  <h2 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-primary" /> Explore Cities
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {cities.map(city => (
-                      <Card key={city.slug} className="border-primary/15 hover:border-primary/30 transition-all cursor-pointer" onClick={() => navigate(`/atlas/${countrySlug}/${city.slug}`)}>
-                        <CardContent className="p-4 flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-serif font-bold text-foreground">{city.name}</p>
-                            <p className="text-xs text-muted-foreground italic">{city.tagline}</p>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Bio-Regions */}
-              {overlappingBioRegions.length > 0 && (
-                <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-serif flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-primary" /> Bio-Regions in {config.country}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Ecological systems overlapping this country — mountains, watersheds, and forest biomes.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {overlappingBioRegions.map(br => (
-                        <Link key={br.id} to={`/atlas/bio-regions/${br.id}`}>
-                          <Card className="border-primary/10 hover:border-primary/30 transition-all cursor-pointer">
-                            <CardContent className="p-3 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Layers className="w-4 h-4 text-primary" />
-                                <div>
-                                  <p className="text-xs font-serif font-bold text-foreground">{br.name}</p>
-                                  <p className="text-[10px] text-muted-foreground">{br.type}</p>
-                                </div>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      ))}
+            {/* ─── All Trees ─── */}
+            <TabsContent value="overview">
+              {loading ? (
+                <p className="text-center py-12 text-muted-foreground">Loading research records…</p>
+              ) : filteredTrees.length === 0 ? (
+                <p className="text-center py-12 text-muted-foreground">No records found for this filter.</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {filteredTrees.map(tree => (
+                    <div key={tree.id} onClick={() => setSelectedTreeId(selectedTreeId === tree.id ? null : tree.id)} className="cursor-pointer">
+                      <ResearchTreeCard tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
+                      {selectedTreeId === tree.id && (
+                        <div className="mt-2">
+                          <VerificationPipeline
+                            tree={{ ...tree, record_status: (tree as any).record_status || "research", verification_score: (tree as any).verification_score || 0 }}
+                            onStatusChange={(newStatus) => {
+                              setTrees(prev => prev.map(t => t.id === tree.id ? { ...t, record_status: newStatus } as any : t));
+                              setSelectedTreeId(null);
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                </div>
               )}
             </TabsContent>
 
-            {/* ══════ SPECIES TAB ══════ */}
-            <TabsContent value="species" className="space-y-6">
-              {/* Full-width spiral */}
-              <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-                <CardContent className="py-6">
-                  <Suspense fallback={<div className="py-12 text-center"><p className="text-sm text-muted-foreground">Loading spiral…</p></div>}>
-                    <CountrySpeciesSpiral
-                      species={speciesActivity || []}
-                      country={config.country}
-                      countrySlug={countrySlug || ""}
-                      loading={speciesLoading}
-                      onSpeciesSelect={(s) => {
-                        setSelectedSpiralSpecies(s);
-                        if (s) setActiveTab("trees");
-                      }}
-                    />
-                  </Suspense>
-                </CardContent>
-              </Card>
+            {/* ─── Immutable Ancient Friends ─── */}
+            <TabsContent value="immutable">
+              {(() => {
+                const immutableTrees = trees.filter(t => (t as any).record_status === "immutable");
+                if (loading) return <p className="text-center py-12 text-muted-foreground">Loading…</p>;
+                if (immutableTrees.length === 0) return (
+                  <Card className="border-[hsl(42_80%_50%/0.2)] bg-[hsl(42_30%_12%/0.3)]">
+                    <CardContent className="py-12 text-center space-y-3">
+                      <Sparkles className="w-8 h-8 text-[hsl(42_80%_55%)] mx-auto opacity-60" />
+                      <p className="text-sm font-serif text-[hsl(42_80%_55%)]">No Immutable Ancient Friends yet</p>
+                      <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                        Research trees become Immutable after verification and anchoring. Browse the "All Trees" tab to begin the pipeline.
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {immutableTrees.map(tree => (
+                      <ImmutableTreeCard key={tree.id} tree={tree as any} onMapNavigate={() => handleMapNavigate(tree)} />
+                    ))}
+                  </div>
+                );
+              })()}
+            </TabsContent>
 
-              {/* Species ranking table */}
+            {/* ─── D) Species Index ─── */}
+            <TabsContent value="species">
               <Card className="border-primary/10">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-serif">Species Distribution</CardTitle>
+                  <CardTitle className="text-sm font-serif">Top Species by Count</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {speciesRanking.length === 0 ? (
                     <p className="text-sm text-muted-foreground py-4">No species data available.</p>
                   ) : (
-                    speciesRanking.slice(0, 20).map(s => (
+                    speciesRanking.slice(0, 12).map(s => (
                       <SpeciesRow
                         key={s.scientific}
                         species={s.scientific}
@@ -669,286 +827,105 @@ const CountryPortalPage = () => {
               </Card>
             </TabsContent>
 
-            {/* ══════ TREES TAB ══════ */}
-            <TabsContent value="trees" className="space-y-4">
-              {/* Province filter chips */}
-              <ScrollArea className="w-full">
-                <div className="flex gap-2 pb-2">
-                  <ProvinceChip
-                    name={`All ${subRegionLabel}`}
-                    count={totalCount}
-                    active={!selectedProvince}
-                    onClick={() => { setSelectedProvince(null); setSelectedSpiralSpecies(null); }}
-                  />
-                  {provinceCounts.map(([prov, cnt]) => (
-                    <ProvinceChip
-                      key={prov}
-                      name={prov}
-                      count={cnt}
-                      active={selectedProvince === prov}
-                      onClick={() => setSelectedProvince(selectedProvince === prov ? null : prov)}
-                    />
-                  ))}
-                </div>
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-
-              {selectedSpiralSpecies && (
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs border-primary/40 gap-1">
-                    <Leaf className="w-3 h-3" /> {selectedSpiralSpecies}
-                  </Badge>
-                  <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => setSelectedSpiralSpecies(null)}>
-                    Clear filter
-                  </Button>
-                </div>
-              )}
-
-              {/* Inner tabs: All / Immutable / Pilgrimages */}
-              <Tabs defaultValue="all">
-                <TabsList className="bg-card/40 border border-border/30 mb-3">
-                  <TabsTrigger value="all" className="text-xs">All Trees</TabsTrigger>
-                  <TabsTrigger value="immutable" className="text-xs gap-1"><Lock className="w-3 h-3" /> Immutable</TabsTrigger>
-                  <TabsTrigger value="pilgrimages" className="text-xs gap-1"><Footprints className="w-3 h-3" /> Pilgrimages</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="all">
-                  {loading ? (
-                    <p className="text-center py-12 text-muted-foreground">Loading research records…</p>
-                  ) : filteredTrees.length === 0 ? (
-                    <p className="text-center py-12 text-muted-foreground">No records found for this filter.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {filteredTrees.map(tree => (
-                        <div key={tree.id} onClick={() => setSelectedTreeId(selectedTreeId === tree.id ? null : tree.id)} className="cursor-pointer">
-                          <ResearchTreeCard tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
-                          {selectedTreeId === tree.id && (
-                            <div className="mt-2">
-                              <VerificationPipeline
-                                tree={{ ...tree, record_status: (tree as any).record_status || "research", verification_score: (tree as any).verification_score || 0 }}
-                                onStatusChange={(newStatus) => {
-                                  setTrees(prev => prev.map(t => t.id === tree.id ? { ...t, record_status: newStatus } as any : t));
-                                  setSelectedTreeId(null);
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="immutable">
-                  {(() => {
-                    const immutableTrees = trees.filter(t => (t as any).record_status === "immutable");
-                    if (loading) return <p className="text-center py-12 text-muted-foreground">Loading…</p>;
-                    if (immutableTrees.length === 0) return (
-                      <Card className="border-[hsl(42_80%_50%/0.2)] bg-[hsl(42_30%_12%/0.3)]">
-                        <CardContent className="py-12 text-center space-y-3">
-                          <Sparkles className="w-8 h-8 text-[hsl(42_80%_55%)] mx-auto opacity-60" />
-                          <p className="text-sm font-serif text-[hsl(42_80%_55%)]">No Immutable Ancient Friends yet</p>
-                          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Research trees become Immutable after verification and anchoring.
-                          </p>
-                        </CardContent>
-                      </Card>
-                    );
-                    return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {immutableTrees.map(tree => (
-                          <ImmutableTreeCard key={tree.id} tree={tree as any} onMapNavigate={() => handleMapNavigate(tree)} />
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </TabsContent>
-
-                <TabsContent value="pilgrimages">
-                  <div className="space-y-4">
-                    <ScrollArea className="w-full">
-                      <div className="flex gap-2 pb-2">
-                        {PILGRIMAGE_PRESETS.map(p => (
-                          <button
-                            key={p.key}
-                            onClick={() => setPilgrimagePreset(p.key)}
-                            className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-all ${
-                              pilgrimagePreset === p.key
-                                ? "bg-primary/15 border-primary/40 text-foreground"
-                                : "bg-card/50 border-border/30 text-muted-foreground hover:border-primary/30"
-                            }`}
-                          >
-                            <p.icon className="w-3.5 h-3.5" />
-                            {p.label}
-                          </button>
-                        ))}
-                      </div>
-                      <ScrollBar orientation="horizontal" />
-                    </ScrollArea>
-
-                    <p className="text-xs text-muted-foreground italic">
-                      {PILGRIMAGE_PRESETS.find(p => p.key === pilgrimagePreset)?.desc}
-                    </p>
-
-                    {pilgrimageList.length === 0 ? (
-                      <Card className="border-primary/10">
-                        <CardContent className="py-8 text-center text-muted-foreground text-sm">
-                          {pilgrimagePreset === "verified"
-                            ? "No verified trees yet. Be the first wanderer to verify one!"
-                            : "No trees match this quest. Try a different province or preset."}
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {pilgrimageList.map(tree => (
-                          <ResearchTreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </TabsContent>
-
-            {/* ══════ GROVES TAB ══════ */}
-            <TabsContent value="groves" className="space-y-6">
-              {!hasGroves ? (
-                <Card className="border-primary/10">
-                  <CardContent className="py-12 text-center space-y-3">
-                    <Layers className="w-8 h-8 text-primary mx-auto opacity-40" />
-                    <p className="text-sm font-serif text-foreground">No groves or forests recorded yet</p>
-                    <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                      Notable forests and sacred groves will appear here as they are documented.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <>
-                  {countryRootstones.trees.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-                        <TreeDeciduous className="w-4 h-4 text-primary" /> Notable Trees
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {countryRootstones.trees.map(stone => (
-                          <RootstoneCard key={stone.id} rootstone={stone} onOpenMap={openRootstoneOnMap} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {countryRootstones.groves.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-serif font-bold text-foreground mb-3 flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-primary" /> Sacred Groves & Forests
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {countryRootstones.groves.map(stone => (
-                          <RootstoneCard key={stone.id} rootstone={stone} onOpenMap={openRootstoneOnMap} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-            </TabsContent>
-
-            {/* ══════ RESEARCH TAB ══════ */}
-            <TabsContent value="research" className="space-y-6">
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="text-xs border-primary/30">
-                  <Scroll className="w-3 h-3 mr-1" /> Research Layer
-                </Badge>
-                <Badge variant="outline" className="text-xs border-primary/30">
-                  <BookOpen className="w-3 h-3 mr-1" /> {config.sourceLabel}
-                </Badge>
-                {config.isoCode && (
-                  <Badge variant="outline" className="text-xs border-primary/30">
-                    ISO: {config.isoCode}
-                  </Badge>
-                )}
-                <Badge variant="outline" className="text-xs border-primary/30">
-                  <Shield className="w-3 h-3 mr-1" /> Provenance preserved
-                </Badge>
-              </div>
-
-              {/* Key Sources */}
-              {config.keySources.length > 0 && (
-                <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-serif flex items-center gap-2">
-                      <BookOpen className="w-4 h-4 text-primary" /> Key Sources
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {config.keySources.map((source) => (
-                      <a
-                        key={source.url}
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-xs text-muted-foreground hover:text-primary transition-colors"
+            {/* ─── F) Pilgrimages ─── */}
+            <TabsContent value="pilgrimages">
+              <div className="space-y-4">
+                {/* Preset selector */}
+                <ScrollArea className="w-full">
+                  <div className="flex gap-2 pb-2">
+                    {PILGRIMAGE_PRESETS.map(p => (
+                      <button
+                        key={p.key}
+                        onClick={() => setPilgrimagePreset(p.key)}
+                        className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-all ${
+                          pilgrimagePreset === p.key
+                            ? "bg-primary/15 border-primary/40 text-foreground"
+                            : "bg-card/50 border-border/30 text-muted-foreground hover:border-primary/30"
+                        }`}
                       >
-                        <ExternalLink className="w-3 h-3 inline mr-1" />
-                        {source.label}
-                      </a>
+                        <p.icon className="w-3.5 h-3.5" />
+                        {p.label}
+                      </button>
                     ))}
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
 
-              {/* Citations */}
-              {citations.length > 0 && (
-                <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-serif flex items-center gap-2">
-                      <Scroll className="w-4 h-4 text-primary" /> Lineage & Provenance
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      These entries are sourced from {config.sourceLabel.toLowerCase()}. Locations may be approximate until verified
-                      by a wanderer in person. Source data is immutable — your notes and verifications live separately.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {citations.map((c, i) => (
-                        <a
-                          key={i}
-                          href={c.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted/60 text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          {c.title.length > 40 ? c.title.slice(0, 37) + "…" : c.title} ({c.year})
-                        </a>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                <p className="text-xs text-muted-foreground italic">
+                  {PILGRIMAGE_PRESETS.find(p => p.key === pilgrimagePreset)?.desc}
+                </p>
 
-              {/* Community Grove note */}
-              {entry.isCommunitySeeded && (
-                <Card className="border-primary/15 bg-primary/5 backdrop-blur-sm">
-                  <CardContent className="py-5 px-5 flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-serif text-foreground mb-1">Community Grove</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {entry.provenanceText || "These seeds were planted by the S33D community. Walk among them and help them grow."}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                {pilgrimageList.length === 0 ? (
+                  <Card className="border-primary/10">
+                    <CardContent className="py-8 text-center text-muted-foreground text-sm">
+                      {pilgrimagePreset === "verified"
+                        ? "No verified trees yet. Be the first wanderer to verify one!"
+                        : "No trees match this quest. Try a different province or preset."
+                      }
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {pilgrimageList.map(tree => (
+                      <ResearchTreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
+                    ))}
+                  </div>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </section>
 
-        {/* Footer Bridge */}
+        {/* ─── Lineage & Provenance — moved to bottom ─── */}
+        {entry.isCommunitySeeded ? (
+          <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+            <Card className="border-primary/15 bg-primary/5 backdrop-blur-sm">
+              <CardContent className="py-5 px-5 flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-serif text-foreground mb-1">Community Grove</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {entry.provenanceText || "These seeds were planted by the S33D community. Walk among them and help them grow."}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : citations.length > 0 ? (
+          <section className="px-4 max-w-3xl mx-auto mt-10 mb-6">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <Scroll className="w-4 h-4 text-primary" /> Lineage & Provenance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  These entries are sourced from {config.sourceLabel.toLowerCase()}. Locations may be approximate until verified
+                  by a wanderer in person. Source data is immutable — your notes and verifications live separately.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {citations.map((c, i) => (
+                    <a
+                      key={i}
+                      href={c.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted/60 text-xs text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      {c.title.length > 40 ? c.title.slice(0, 37) + "…" : c.title} ({c.year})
+                    </a>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        ) : null}
+
+        {/* ─── H) Footer Bridge ─── */}
         <section className="px-4 max-w-3xl mx-auto mt-12">
           <div className="flex flex-wrap justify-center gap-3">
             <Button variant="ghost" size="sm" asChild>

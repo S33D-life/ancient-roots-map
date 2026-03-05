@@ -1,8 +1,6 @@
 /* Reset — all layout is handled by page components and Tailwind */
 #root {
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
 }
