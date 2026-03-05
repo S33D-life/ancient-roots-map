@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind } from "lucide-react";
+import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind, Eye, Scroll, ExternalLink } from "lucide-react";
 import { type TreeCardData, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 import SendWhisperModal from "@/components/SendWhisperModal";
@@ -15,24 +15,53 @@ export type TreeCardVariant = "gallery" | "compact";
 interface TreeCardProps {
   tree: TreeCardData;
   variant?: TreeCardVariant;
-  /** Encounter cluster when in gallery mode */
   cluster?: EncounterCluster;
-  /** Offering count for this tree */
   offeringCount?: number;
-  /** First photo URL for hero image */
   heroPhotoUrl?: string | null;
-  /** Birdsong count */
   birdsongCount?: number;
-  /** Whisper count */
   whisperCount?: number;
-  /** Whether a wishlist animation is playing */
   wishlistPulseActive?: boolean;
-  /** Callbacks */
   onSelect?: (tree: TreeCardData) => void;
   onWishlist?: (treeId: string) => void;
   onShare?: (name: string, description: string, url: string) => void;
   onNFTree?: (data: { id: string; name: string; species: string; photoUrl?: string | null }) => void;
+  /** Called when user clicks "Claim / Visit" on a research tree */
+  onVerify?: (tree: TreeCardData) => void;
 }
+
+/* ── Research badge strip (shared) ── */
+const ResearchBadges = ({ tree }: { tree: TreeCardData }) => {
+  const r = tree.research;
+  if (!r) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-serif border-amber-500/30 bg-amber-500/10 text-amber-400">
+        {r.verified ? "Verified" : "Seed Tree"}
+      </Badge>
+      {r.recordKind === "grove" && (
+        <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-serif border-primary/20 bg-primary/5 text-primary">
+          Grove
+        </Badge>
+      )}
+      {r.sources?.map((s, i) => (
+        <a
+          key={i}
+          href={s.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-0.5 text-[9px] text-muted-foreground hover:text-primary transition-colors"
+          title={s.title}
+        >
+          <Scroll className="w-2.5 h-2.5" />
+          {s.program || (s.title.length > 18 ? s.title.slice(0, 16) + "…" : s.title)}
+          {s.year ? ` (${s.year})` : ""}
+          <ExternalLink className="w-2 h-2" />
+        </a>
+      ))}
+    </div>
+  );
+};
 
 const TreeCard = ({
   tree,
@@ -47,6 +76,7 @@ const TreeCard = ({
   onWishlist,
   onShare,
   onNFTree,
+  onVerify,
 }: TreeCardProps) => {
   const navigate = useNavigate();
   const [whisperOpen, setWhisperOpen] = useState(false);
@@ -54,6 +84,7 @@ const TreeCard = ({
   const tier = useMemo(() => getTreeTier(age, offeringCount), [age, offeringCount]);
   const tierStyle = TIER_COLORS[tier];
   const speciesHue = getSpeciesHue(tree.species);
+  const isResearch = !!tree.research?.isResearch;
 
   const isClustered = cluster?.isClustered ?? false;
   const encounterCount = cluster?.encounters?.length ?? 0;
@@ -90,6 +121,11 @@ const TreeCard = ({
   const handleNFTree = (e: React.MouseEvent) => {
     e.stopPropagation();
     onNFTree?.({ id: tree.id, name: tree.name, species: tree.species, photoUrl: heroPhotoUrl });
+  };
+
+  const handleVerify = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onVerify?.(tree);
   };
 
   const openWhisper = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -132,24 +168,27 @@ const TreeCard = ({
                 </span>
               )}
             </div>
+            {isResearch && <ResearchBadges tree={tree} />}
           </div>
           {/* Tier badge */}
           <div className="self-start flex items-center gap-1.5">
-            <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />
+            {!isResearch && <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />}
             <Badge variant="outline" className={`text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
-            {TIER_LABELS[tier]}
+            {isResearch ? "Seed" : TIER_LABELS[tier]}
             </Badge>
           </div>
         </div>
       </Card>
-      <SendWhisperModal
-        open={whisperOpen}
-        onOpenChange={setWhisperOpen}
-        treeId={tree.id}
-        treeName={tree.name}
-        treeSpecies={tree.species}
-        contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
-      />
+      {!isResearch && (
+        <SendWhisperModal
+          open={whisperOpen}
+          onOpenChange={setWhisperOpen}
+          treeId={tree.id}
+          treeName={tree.name}
+          treeSpecies={tree.species}
+          contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+        />
+      )}
       </>
     );
   }
@@ -168,20 +207,25 @@ const TreeCard = ({
 
       {/* Tier + encounter badges */}
       <div className="absolute top-2 left-2 z-10 flex gap-1.5">
-        <Badge variant="outline" className={`text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif backdrop-blur-sm`}>
-          {TIER_LABELS[tier]}
+        <Badge variant="outline" className={`text-[9px] h-5 ${isResearch ? "bg-amber-500/10 text-amber-400 border-amber-500/30" : `${tierStyle.bg} ${tierStyle.text} ${tierStyle.border}`} font-serif backdrop-blur-sm`}>
+          {isResearch ? (tree.research?.verified ? "Verified" : "Seed Tree") : TIER_LABELS[tier]}
         </Badge>
+        {isResearch && tree.research?.recordKind === "grove" && (
+          <Badge variant="outline" className="text-[9px] h-5 font-serif border-primary/20 bg-primary/5 text-primary backdrop-blur-sm">
+            Grove
+          </Badge>
+        )}
       </div>
       {isClustered && (
         <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
-          <TreeWhisperButton onClick={openWhisper} />
+          {!isResearch && <TreeWhisperButton onClick={openWhisper} />}
           <Badge variant="secondary" className="font-serif text-[10px] gap-1 bg-accent/20 text-accent border-accent/30 backdrop-blur-sm">
             <Users className="h-3 w-3" />
             {encounterCount} encounters
           </Badge>
         </div>
       )}
-      {!isClustered && (
+      {!isClustered && !isResearch && (
         <div className="absolute top-2 right-2 z-10">
           <TreeWhisperButton onClick={openWhisper} />
         </div>
@@ -213,16 +257,21 @@ const TreeCard = ({
             <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed">{tree.description}</p>
           )}
 
-          {/* Offering + birdsong summary */}
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
-            {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount} offering{offeringCount !== 1 ? "s" : ""}</span>}
-            {birdsongCount > 0 && <span>🐦 {birdsongCount} birdsong{birdsongCount !== 1 ? "s" : ""}</span>}
-            {whisperCount > 0 && (
-              <span className="flex items-center gap-1 text-muted-foreground/50" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
-                <Wind className="w-3 h-3" /> {whisperCount} whisper{whisperCount !== 1 ? "s" : ""}
-              </span>
-            )}
-          </div>
+          {/* Research source badges */}
+          {isResearch && <ResearchBadges tree={tree} />}
+
+          {/* Offering + birdsong summary (hidden for unverified research) */}
+          {(!isResearch || tree.research?.verified) && (
+            <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
+              {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount} offering{offeringCount !== 1 ? "s" : ""}</span>}
+              {birdsongCount > 0 && <span>🐦 {birdsongCount} birdsong{birdsongCount !== 1 ? "s" : ""}</span>}
+              {whisperCount > 0 && (
+                <span className="flex items-center gap-1 text-muted-foreground/50" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
+                  <Wind className="w-3 h-3" /> {whisperCount} whisper{whisperCount !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Wanderer avatars */}
           {isClustered && wandererCount > 1 && (
@@ -241,38 +290,62 @@ const TreeCard = ({
           )}
         </div>
 
-        {/* Action bar — simplified */}
+        {/* Action bar */}
         <div className="mt-3 pt-3 border-t border-border/20 flex gap-1.5">
-          <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
-            <Heart
-              className="w-3.5 h-3.5 transition-all duration-300"
-              style={wishlistPulseActive ? {
-                transform: "scale(1.3)",
-                color: "hsl(var(--primary))",
-                filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))",
-              } : undefined}
-            />
-            Wish
-          </Button>
-          {(tree.latitude || tree.what3words) && (
-            <Button variant="ghost" size="sm" onClick={handleMapNav} title="View on Map" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
-              <Map className="w-3.5 h-3.5" />
-            </Button>
+          {isResearch ? (
+            /* Research tree actions: Map + Verify */
+            <>
+              {(tree.latitude || tree.longitude) && (
+                <Button variant="outline" size="sm" onClick={handleMapNav} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
+                  <Map className="w-3.5 h-3.5" /> View on Map
+                </Button>
+              )}
+              {(tree.latitude || tree.longitude) && onVerify && (
+                <Button variant="outline" size="sm" onClick={handleVerify} className="flex-1 text-xs gap-1.5 font-serif h-8 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300">
+                  <Eye className="w-3.5 h-3.5" /> Claim / Visit
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={handleShare} title="Share" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
+                <Share2 className="w-3.5 h-3.5" />
+              </Button>
+            </>
+          ) : (
+            /* Mapped tree actions (unchanged) */
+            <>
+              <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
+                <Heart
+                  className="w-3.5 h-3.5 transition-all duration-300"
+                  style={wishlistPulseActive ? {
+                    transform: "scale(1.3)",
+                    color: "hsl(var(--primary))",
+                    filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.4))",
+                  } : undefined}
+                />
+                Wish
+              </Button>
+              {(tree.latitude || tree.what3words) && (
+                <Button variant="ghost" size="sm" onClick={handleMapNav} title="View on Map" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
+                  <Map className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={handleShare} title="Share" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
+                <Share2 className="w-3.5 h-3.5" />
+              </Button>
+            </>
           )}
-          <Button variant="ghost" size="sm" onClick={handleShare} title="Share" className="h-8 w-8 p-0 text-muted-foreground/50 hover:text-primary">
-            <Share2 className="w-3.5 h-3.5" />
-          </Button>
         </div>
       </CardContent>
     </Card>
-    <SendWhisperModal
-      open={whisperOpen}
-      onOpenChange={setWhisperOpen}
-      treeId={tree.id}
-      treeName={tree.name}
-      treeSpecies={tree.species}
-      contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
-    />
+    {!isResearch && (
+      <SendWhisperModal
+        open={whisperOpen}
+        onOpenChange={setWhisperOpen}
+        treeId={tree.id}
+        treeName={tree.name}
+        treeSpecies={tree.species}
+        contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+      />
+    )}
     </>
   );
 };
