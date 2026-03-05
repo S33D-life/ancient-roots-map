@@ -271,7 +271,7 @@ export async function fetchRecentWhisperConnections(limit = 200): Promise<Recent
 
   if (error || !data?.length) return [];
 
-  const rows = data as Array<{
+  const rows = data as unknown as Array<{
     id: string;
     created_at: string;
     sender_user_id: string;
