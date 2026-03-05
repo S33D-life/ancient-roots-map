@@ -397,7 +397,12 @@ const TreeDetailPage = () => {
           {/* ── LORE TAB ── */}
           <TabsContent value="lore" className="space-y-8">
             {/* Lore / Story section */}
-            <TreeLoreSection tree={tree} />
+            <TreeLoreSection
+              loreText={tree.description}
+              elementalSignature={(tree as any).elemental_signature}
+              archetype={(tree as any).archetype}
+              seasonalTone={(tree as any).seasonal_tone}
+            />
 
             {/* Offerings Preview (taste of offerings) */}
             <TreeOfferingsPreview
