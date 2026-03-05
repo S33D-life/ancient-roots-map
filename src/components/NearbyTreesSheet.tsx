@@ -4,7 +4,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { TreeDeciduous, Search, MapPin, Loader2, Eye } from "lucide-react";
+import { TreeDeciduous, Search, MapPin, Loader2, Eye, Map as MapIcon } from "lucide-react";
+import TreeWhisperButton from "@/components/TreeWhisperButton";
+import SendWhisperModal from "@/components/SendWhisperModal";
+import { goToTreeOnMap } from "@/utils/mapNavigation";
 
 interface NearbyTree {
   id: string;
@@ -43,6 +46,8 @@ const NearbyTreesSheet = ({ open, onOpenChange, userLat, userLng, onSelectTree }
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [radius, setRadius] = useState<number>(500);
+  const [whisperTree, setWhisperTree] = useState<NearbyTree | null>(null);
+  const [whisperOpen, setWhisperOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -161,11 +166,21 @@ const NearbyTreesSheet = ({ open, onOpenChange, userLat, userLng, onSelectTree }
             filtered.map((tree) => (
               <div
                 key={tree.id}
-                className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-accent/10"
+                className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-accent/10 relative"
                 style={{
                   border: "1px solid hsla(0, 0%, 100%, 0.05)",
                 }}
               >
+                <div className="absolute top-2 right-2 z-10">
+                  <TreeWhisperButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setWhisperTree(tree);
+                      setWhisperOpen(true);
+                    }}
+                    className="h-7 w-7"
+                  />
+                </div>
                 <div
                   className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                   style={{
@@ -199,8 +214,25 @@ const NearbyTreesSheet = ({ open, onOpenChange, userLat, userLng, onSelectTree }
                     View
                   </Button>
                   <Button
+                    variant="ghost"
                     size="sm"
-                    className="h-8 px-3 text-xs font-serif"
+                    className="h-8 px-2 text-xs font-serif"
+                    onClick={() =>
+                      goToTreeOnMap(navigate, {
+                        treeId: tree.id,
+                        lat: tree.latitude,
+                        lng: tree.longitude,
+                        zoom: 16,
+                        source: "nearby",
+                      })
+                    }
+                  >
+                    <MapIcon className="w-3 h-3 mr-1" />
+                    Map
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-8 px-3 text-xs font-serif mr-8 sm:mr-0"
                     style={{
                       background: "linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))",
                       color: "hsl(120, 50%, 65%)",
@@ -216,6 +248,16 @@ const NearbyTreesSheet = ({ open, onOpenChange, userLat, userLng, onSelectTree }
             ))
           )}
         </div>
+        {whisperTree && (
+          <SendWhisperModal
+            open={whisperOpen}
+            onOpenChange={setWhisperOpen}
+            treeId={whisperTree.id}
+            treeName={whisperTree.name}
+            treeSpecies={whisperTree.species}
+            contextLabel={`Nearby (${Math.round(whisperTree.distanceM)}m)`}
+          />
+        )}
       </SheetContent>
     </Sheet>
   );

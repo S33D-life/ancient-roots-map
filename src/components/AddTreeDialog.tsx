@@ -16,6 +16,11 @@ import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
 import OfferingCelebration from "@/components/OfferingCelebration";
 import NearbyTreesSheet from "@/components/NearbyTreesSheet";
 import CanopyCheckinModal from "@/components/CanopyCheckinModal";
+import {
+  identifyTreeSpeciesFromPhoto,
+  type SpeciesVisionPrediction,
+  type SpeciesVisionResult,
+} from "@/services/speciesVision";
 
 interface AddTreeDialogProps {
   open: boolean;
@@ -26,6 +31,7 @@ interface AddTreeDialogProps {
 }
 
 type RitualStep = "encounter" | "reflection" | "offering";
+type SpeciesDecision = "none" | "pending" | "confirmed" | "overridden";
 
 const STEPS: { key: RitualStep; label: string; icon: React.ElementType; desc: string }[] = [
   { key: "encounter", label: "Encounter", icon: MapPin, desc: "Where did you find this ancient friend?" },
@@ -69,6 +75,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [checkinTreeData, setCheckinTreeData] = useState<{ id: string; name: string; species: string; latitude: number; longitude: number } | null>(null);
   const [showDuplicateGuard, setShowDuplicateGuard] = useState(false);
   const [duplicateTree, setDuplicateTree] = useState<{ id: string; name: string; distanceM: number } | null>(null);
+  const [isIdentifyingSpecies, setIsIdentifyingSpecies] = useState(false);
+  const [speciesVisionResult, setSpeciesVisionResult] = useState<SpeciesVisionResult | null>(null);
+  const [speciesDecision, setSpeciesDecision] = useState<SpeciesDecision>("none");
+  const [selectedSpeciesPrediction, setSelectedSpeciesPrediction] = useState<SpeciesVisionPrediction | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const dragCounter = useRef(0);
@@ -96,6 +106,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setPhotoDate(null);
       setDroppedPhotoFile(null);
       setUploadingOffering(false);
+      setIsIdentifyingSpecies(false);
+      setSpeciesVisionResult(null);
+      setSpeciesDecision("none");
+      setSelectedSpeciesPrediction(null);
     }
   }, [open]);
 
@@ -309,7 +323,11 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       return;
     }
     setExtractingPhoto(true);
+    setIsIdentifyingSpecies(true);
     setDroppedPhotoFile(file);
+    setSpeciesVisionResult(null);
+    setSpeciesDecision("none");
+    setSelectedSpeciesPrediction(null);
     try {
       // Extract EXIF date from photo
       const exifDate = await extractExifDate(file);
@@ -348,10 +366,27 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       } catch {
         // w3w extraction is optional
       }
+
+      const identifyResult = await identifyTreeSpeciesFromPhoto(file);
+      setSpeciesVisionResult(identifyResult);
+
+      if (identifyResult.predictions.length > 0) {
+        setSpeciesDecision("pending");
+        toast({
+          title: "AI species suggestions ready",
+          description: "Choose one suggestion or type your own species before saving.",
+        });
+      } else if (identifyResult.error) {
+        toast({
+          title: "AI suggestions unavailable",
+          description: "You can continue with manual species entry.",
+        });
+      }
     } catch (err) {
       console.error('Photo processing error:', err);
     } finally {
       setExtractingPhoto(false);
+      setIsIdentifyingSpecies(false);
     }
   }, [toast]);
 
@@ -425,6 +460,13 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     if (file) handlePhotoDrop(file);
   }, [handlePhotoDrop]);
 
+  const handleConfirmSpeciesSuggestion = useCallback((prediction: SpeciesVisionPrediction) => {
+    setSelectedSpeciesPrediction(prediction);
+    setSpecies(prediction.commonName || prediction.scientificName);
+    setSpeciesDecision("confirmed");
+    setShowSpeciesSuggestions(false);
+  }, []);
+
   // Check for nearby duplicates before creating
   // Two tiers: exact proximity (25m any tree) + wider species/name match (2km)
   const checkForDuplicates = useCallback(async (): Promise<boolean> => {
@@ -489,6 +531,38 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       toast({ title: "Missing fields", description: "Please fill in species", variant: "destructive" });
       return;
     }
+
+    const aiPredictions = speciesVisionResult?.predictions ?? [];
+    if (aiPredictions.length > 0 && speciesDecision === "pending") {
+      toast({
+        title: "Confirm species first",
+        description: "Choose an AI suggestion or edit the species manually before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const normalizedAiPredictions = aiPredictions.map((prediction) => ({
+      scientificName: prediction.scientificName,
+      commonName: prediction.commonName,
+      confidence: prediction.confidence,
+      source: prediction.source,
+      sourceUrl: prediction.sourceUrl,
+      identifiedAt: speciesVisionResult?.identifiedAt || null,
+      rawSnapshot: speciesVisionResult?.rawSnapshot || null,
+    }));
+    const resolvedProvider =
+      speciesVisionResult?.provider && speciesVisionResult.provider !== "none"
+        ? speciesVisionResult.provider
+        : null;
+    const resolvedAiConfidence =
+      selectedSpeciesPrediction?.confidence ??
+      normalizedAiPredictions[0]?.confidence ??
+      null;
+    const aiConfirmed =
+      normalizedAiPredictions.length > 0 &&
+      (speciesDecision === "confirmed" || speciesDecision === "overridden");
+
     setLoading(true);
     try {
       // Duplicate guard
@@ -512,6 +586,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           latitude: lat,
           longitude: lng,
           estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
+          species_ai_predictions: normalizedAiPredictions.length > 0 ? normalizedAiPredictions : null,
+          species_ai_selected: selectedSpeciesPrediction
+            ? {
+                scientificName: selectedSpeciesPrediction.scientificName,
+                commonName: selectedSpeciesPrediction.commonName,
+                confidence: selectedSpeciesPrediction.confidence,
+                source: selectedSpeciesPrediction.source,
+                sourceUrl: selectedSpeciesPrediction.sourceUrl,
+                identifiedAt: speciesVisionResult?.identifiedAt || null,
+                rawSnapshot: speciesVisionResult?.rawSnapshot || null,
+              }
+            : null,
+          species_ai_provider: resolvedProvider,
+          species_ai_confidence: resolvedAiConfidence,
+          species_ai_confirmed: aiConfirmed,
           ...(photoDate ? { created_at: photoDate } : {}),
         };
         localStorage.setItem("s33d_pending_tree", JSON.stringify(pendingTree));
@@ -529,6 +618,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         latitude: lat,
         longitude: lng,
         estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
+        species_ai_predictions: normalizedAiPredictions.length > 0 ? normalizedAiPredictions : null,
+        species_ai_selected: selectedSpeciesPrediction
+          ? {
+              scientificName: selectedSpeciesPrediction.scientificName,
+              commonName: selectedSpeciesPrediction.commonName,
+              confidence: selectedSpeciesPrediction.confidence,
+              source: selectedSpeciesPrediction.source,
+              sourceUrl: selectedSpeciesPrediction.sourceUrl,
+              identifiedAt: speciesVisionResult?.identifiedAt || null,
+              rawSnapshot: speciesVisionResult?.rawSnapshot || null,
+            }
+          : null,
+        species_ai_provider: resolvedProvider,
+        species_ai_confidence: resolvedAiConfidence,
+        species_ai_confirmed: aiConfirmed,
         created_by: user.id,
         ...(photoDate ? { created_at: photoDate } : {}),
       }).select('id').single();
@@ -582,6 +686,14 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     if (step === "encounter") {
       if (!species.trim()) {
         toast({ title: "Species required", description: "Please enter the species before continuing", variant: "destructive" });
+        return;
+      }
+      if ((speciesVisionResult?.predictions?.length || 0) > 0 && speciesDecision === "pending") {
+        toast({
+          title: "Confirm your species",
+          description: "Choose an AI suggestion or type your own species before continuing.",
+          variant: "destructive",
+        });
         return;
       }
       setStep("reflection");
@@ -818,6 +930,105 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   )}
                 </div>
 
+                {isIdentifyingSpecies && (
+                  <div
+                    className="rounded-lg border px-3 py-2 text-xs font-serif flex items-center gap-2"
+                    style={{
+                      borderColor: "hsla(42, 45%, 35%, 0.4)",
+                      background: "hsla(42, 35%, 12%, 0.5)",
+                      color: "hsl(42, 70%, 65%)",
+                    }}
+                  >
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    AI is identifying likely species from this photo…
+                  </div>
+                )}
+
+                {!isIdentifyingSpecies && (speciesVisionResult?.predictions?.length || 0) > 0 && (
+                  <div
+                    className="rounded-lg border p-3 space-y-2"
+                    style={{
+                      borderColor: "hsla(160, 35%, 35%, 0.45)",
+                      background: "hsla(160, 35%, 10%, 0.35)",
+                    }}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-serif" style={{ color: "hsl(160, 60%, 65%)" }}>
+                        AI suggestions ({speciesVisionResult?.provider === "plantnet" ? "PlantNet fallback" : "iNaturalist Vision"})
+                      </p>
+                      {speciesDecision === "confirmed" && (
+                        <span className="text-[10px] font-serif" style={{ color: "hsl(120, 55%, 62%)" }}>
+                          Confirmed
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {(speciesVisionResult?.predictions || []).slice(0, 3).map((prediction, index) => {
+                        const isSelected =
+                          selectedSpeciesPrediction?.scientificName === prediction.scientificName &&
+                          selectedSpeciesPrediction?.source === prediction.source;
+                        return (
+                          <button
+                            key={`${prediction.source}-${prediction.scientificName}-${index}`}
+                            type="button"
+                            className="w-full text-left rounded-md border px-2.5 py-2 transition-colors hover:bg-white/5"
+                            style={{
+                              borderColor: isSelected ? "hsla(120, 45%, 45%, 0.6)" : "hsla(160, 20%, 40%, 0.35)",
+                              background: isSelected ? "hsla(120, 35%, 18%, 0.45)" : "transparent",
+                            }}
+                            onClick={() => handleConfirmSpeciesSuggestion(prediction)}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="text-sm font-serif truncate" style={{ color: "hsl(42, 76%, 65%)" }}>
+                                  {prediction.commonName || prediction.scientificName}
+                                </p>
+                                {prediction.commonName && (
+                                  <p className="text-[11px] italic truncate text-muted-foreground">
+                                    {prediction.scientificName}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: "hsl(42, 80%, 68%)" }}>
+                                {Math.round(prediction.confidence * 100)}%
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {speciesDecision === "pending" && (
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-[11px] text-muted-foreground font-serif">
+                          Select one suggestion above, or type your own species name below.
+                        </p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-[11px] font-serif"
+                          onClick={() => {
+                            setSpeciesDecision("overridden");
+                            setSelectedSpeciesPrediction(null);
+                          }}
+                        >
+                          Not sure · enter manually
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!isIdentifyingSpecies &&
+                  speciesVisionResult?.predictions?.length === 0 &&
+                  speciesVisionResult?.error && (
+                    <p className="text-[11px] font-serif text-muted-foreground">
+                      AI species suggestion unavailable right now. You can still save this tree with a manual species.
+                    </p>
+                  )}
+
                 <div className="space-y-2 relative">
                   <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
                   <Input
@@ -825,6 +1036,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     value={species}
                     onChange={(e) => {
                       setSpecies(e.target.value.slice(0, 200));
+                      if ((speciesVisionResult?.predictions?.length || 0) > 0) {
+                        setSpeciesDecision("overridden");
+                        setSelectedSpeciesPrediction(null);
+                      }
                       setShowSpeciesSuggestions(true);
                     }}
                     onFocus={() => setShowSpeciesSuggestions(true)}
@@ -849,6 +1064,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                           className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/5 flex flex-col gap-0.5"
                           onClick={() => {
                             setSpecies(sp.common);
+                            if ((speciesVisionResult?.predictions?.length || 0) > 0) {
+                              setSpeciesDecision("overridden");
+                              setSelectedSpeciesPrediction(null);
+                            }
                             setShowSpeciesSuggestions(false);
                           }}
                         >

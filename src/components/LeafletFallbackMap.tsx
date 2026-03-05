@@ -303,7 +303,7 @@ function buildExternalPopupHtml(tree: ExternalTreeCandidate): string {
       </p>
     </div>
     <div style="padding:0 14px 12px;">
-      <a href="/map?lat=${tree.lat}&lng=${tree.lng}&zoom=18" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(200,15%,12%);background:linear-gradient(135deg,hsl(180,60%,45%),hsl(180,70%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌱 Bloom Hearts Here</a>
+      <a href="/map?tree=${encodeURIComponent(tree.id)}&treeId=${encodeURIComponent(tree.id)}&lat=${tree.lat}&lng=${tree.lng}&zoom=18&arrival=tree&journey=1" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(200,15%,12%);background:linear-gradient(135deg,hsl(180,60%,45%),hsl(180,70%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌱 Bloom Hearts Here</a>
     </div>
   </div>`;
 }
@@ -375,7 +375,7 @@ function buildResearchPopupHtml(rt: ResearchTree): string {
       </div>
     </div>
     <div style="padding:0 14px 12px;">
-      <a href="/map?lat=${rt.latitude}&lng=${rt.longitude}&zoom=18" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(25,15%,8%);background:linear-gradient(135deg,hsl(35,70%,45%),hsl(40,80%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🔍 Verify This Tree In Person</a>
+      <a href="/map?tree=${encodeURIComponent(rt.id)}&treeId=${encodeURIComponent(rt.id)}&lat=${rt.latitude}&lng=${rt.longitude}&zoom=18&arrival=tree&journey=1&research=on" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(25,15%,8%);background:linear-gradient(135deg,hsl(35,70%,45%),hsl(40,80%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🔍 Verify This Tree In Person</a>
     </div>
   </div>`;
 }
@@ -583,7 +583,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
-  const focusHandledRef = useRef(false);
+  const focusHandledRef = useRef<string | null>(null);
   const focusHaloRef = useRef<L.Marker | null>(null);
   const geo = useGeolocation();
   const locating = geo.isLocating;
@@ -708,7 +708,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   // Deep-link context state
   const [contextLabel, setContextLabel] = useState<string | null>(null);
-  const deepLinkAppliedRef = useRef(false);
+  const deepLinkAppliedRef = useRef<string | null>(null);
+  const deepLinkSignature = useMemo(
+    () =>
+      [
+        initialCountry || "",
+        initialHive || "",
+        initialOrigin || "",
+        initialLat ?? "",
+        initialLng ?? "",
+        initialZoom ?? "",
+        initialBbox || "",
+        initialJourney ? "1" : "0",
+        typeof window !== "undefined" ? window.location.search : "",
+      ].join("|"),
+    [initialCountry, initialHive, initialOrigin, initialLat, initialLng, initialZoom, initialBbox, initialJourney],
+  );
 
   // hiveMap moved after filteredTrees declaration
 
@@ -1080,13 +1095,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   // Deep-link: auto-apply country/hive/species filters and zoom
   useEffect(() => {
-    if (deepLinkAppliedRef.current) return;
+    if (deepLinkAppliedRef.current === deepLinkSignature) return;
     const map = mapRef.current;
     if (!map) return;
     // Wait a tick for map to be ready
     const timer = setTimeout(() => {
-      if (deepLinkAppliedRef.current) return;
-      deepLinkAppliedRef.current = true;
+      if (deepLinkAppliedRef.current === deepLinkSignature) return;
+      deepLinkAppliedRef.current = deepLinkSignature;
 
       let label: string | null = null;
 
@@ -1208,7 +1223,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
     }, 400);
     return () => clearTimeout(timer);
-  }, [initialCountry, initialHive, trees.length, initialLat, initialLng, initialZoom, initialJourney, onJourneyEnd]);
+  }, [deepLinkSignature, initialCountry, initialHive, initialOrigin, trees.length, initialLat, initialLng, initialZoom, initialJourney, initialBbox, onJourneyEnd]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1905,7 +1920,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   useEffect(() => {
     const map = mapRef.current;
     const cluster = clusterRef.current;
-    if (!map || !cluster || !initialTreeId || focusHandledRef.current) return;
+    if (!map || !cluster || !initialTreeId) return;
+    const focusKey = `${initialTreeId}:${initialZoom ?? ""}:${initialJourney ? "1" : "0"}`;
+    if (focusHandledRef.current === focusKey) return;
     // Wait until trees are loaded and markers exist
     if (filteredTrees.length === 0) return;
 
@@ -1917,11 +1934,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (!allTree) return;
       // Tree exists but is filtered out — it will still show on map since
       // the deep-link already set the view position. Mark as handled.
-      focusHandledRef.current = true;
+      focusHandledRef.current = focusKey;
       return;
     }
 
-    focusHandledRef.current = true;
+    focusHandledRef.current = focusKey;
     const targetLatLng = L.latLng(targetTree.latitude, targetTree.longitude);
 
     // Find the marker in the cluster group

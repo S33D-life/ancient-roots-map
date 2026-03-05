@@ -16,6 +16,8 @@ import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
+import PlaceMapPreview from "@/components/atlas/PlaceMapPreview";
+import { goToTreeOnMap } from "@/utils/mapNavigation";
 
 /* ─── Stat Tile ─── */
 const StatTile = ({ label, value, icon: Icon }: { label: string; value: number | string; icon: React.ElementType }) => (
@@ -222,6 +224,22 @@ const CityTemplatePage = () => {
           </motion.div>
         </section>
 
+        <section className="px-4 max-w-3xl mx-auto mb-8">
+          <PlaceMapPreview
+            placeType="city"
+            placeCode={city.slug}
+            countrySlug={countrySlug || city.countrySlug}
+            bbox={{
+              south: city.bbox[0],
+              west: city.bbox[1],
+              north: city.bbox[2],
+              east: city.bbox[3],
+            }}
+            center={{ lat: city.center[0], lng: city.center[1] }}
+            defaultFilters={{ researchLayer: "on" }}
+          />
+        </section>
+
         {/* ═══ 3️⃣ GROVE PULSE METRICS ═══ */}
         <section className="px-4 max-w-3xl mx-auto mb-8">
           <h2 className="text-lg font-serif text-foreground mb-4 flex items-center gap-2">
@@ -282,7 +300,17 @@ const CityTemplatePage = () => {
                           </div>
                           <div className="flex gap-2 pt-2">
                             <Button variant="ghost" size="sm" className="h-7 text-xs px-2"
-                              onClick={(e) => { e.stopPropagation(); focusMap({ type: "tree", id: tree.id, lat: tree.latitude, lng: tree.longitude, zoom: 16, source: "search" }); }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                goToTreeOnMap(navigate, {
+                                  treeId: tree.id,
+                                  lat: tree.latitude,
+                                  lng: tree.longitude,
+                                  zoom: 16,
+                                  source: "search",
+                                  countrySlug,
+                                });
+                              }}
                             >
                               <Eye className="w-3 h-3 mr-1" /> Map
                             </Button>

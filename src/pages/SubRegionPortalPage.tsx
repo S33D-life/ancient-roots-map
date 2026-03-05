@@ -18,6 +18,8 @@ import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
+import PlaceMapPreview from "@/components/atlas/PlaceMapPreview";
+import { goToTreeOnMap } from "@/utils/mapNavigation";
 
 /* ─── Types ─── */
 interface ResearchTree {
@@ -60,7 +62,15 @@ const StatTile = ({ label, value, icon: Icon }: { label: string; value: number |
 );
 
 /* ─── Tree Card ─── */
-const TreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate: (t: ResearchTree) => void }) => {
+const TreeCard = ({
+  tree,
+  onNavigate,
+  onVerify,
+}: {
+  tree: ResearchTree;
+  onNavigate: (t: ResearchTree) => void;
+  onVerify: (t: ResearchTree) => void;
+}) => {
   const precColor = tree.geo_precision === "exact"
     ? "hsl(120 45% 45%)"
     : tree.geo_precision === "approx"
@@ -108,16 +118,16 @@ const TreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate: (t: Re
             <ExternalLink className="w-2.5 h-2.5" />
           </a>
           <div className="flex gap-1.5">
-            {tree.latitude && (
+            {tree.latitude != null && tree.longitude != null && (
               <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => onNavigate(tree)}>
                 <MapIcon className="w-3 h-3 mr-1" /> Map
               </Button>
             )}
-            <Button variant="sacred" size="sm" className="h-7 text-xs px-2" asChild>
-              <Link to={`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&research=on`}>
+            {tree.latitude != null && tree.longitude != null && (
+              <Button variant="sacred" size="sm" className="h-7 text-xs px-2" onClick={() => onVerify(tree)}>
                 <Eye className="w-3 h-3 mr-1" /> Verify
-              </Link>
-            </Button>
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -159,22 +169,58 @@ const SubRegionPortalPage = () => {
 
   const speciesCount = useMemo(() => new Set(trees.map(t => t.species_scientific)).size, [trees]);
   const withCoords = useMemo(() => trees.filter(t => t.latitude != null).length, [trees]);
+  const regionBbox = useMemo(() => {
+    const points = trees.filter((t) => t.latitude != null && t.longitude != null);
+    if (points.length === 0) {
+      const b = country?.bbox;
+      return b ? { south: b[0], west: b[1], north: b[2], east: b[3] } : undefined;
+    }
+    const lats = points.map((t) => t.latitude as number);
+    const lngs = points.map((t) => t.longitude as number);
+    const pad = 0.25;
+    return {
+      south: Math.min(...lats) - pad,
+      west: Math.min(...lngs) - pad,
+      north: Math.max(...lats) + pad,
+      east: Math.max(...lngs) + pad,
+    };
+  }, [country?.bbox, trees]);
+  const regionCenter = useMemo(() => {
+    if (!regionBbox) return undefined;
+    return {
+      lat: (regionBbox.north + regionBbox.south) / 2,
+      lng: (regionBbox.east + regionBbox.west) / 2,
+    };
+  }, [regionBbox]);
 
   const { focusMap } = useMapFocus();
 
   const handleMapNavigate = useCallback((tree: ResearchTree) => {
-    if (tree.latitude && tree.longitude) {
-      focusMap({
-        type: "tree",
-        id: tree.id || `${tree.latitude}-${tree.longitude}`,
+    if (tree.latitude != null && tree.longitude != null) {
+      goToTreeOnMap(navigate, {
+        treeId: tree.id || `${tree.latitude}-${tree.longitude}`,
         lat: tree.latitude,
         lng: tree.longitude,
         zoom: 15,
-        countrySlug,
+        countrySlug: countrySlug || undefined,
         source: "tree",
+        researchLayer: "on",
       });
     }
-  }, [focusMap, countrySlug]);
+  }, [navigate, countrySlug]);
+
+  const handleVerifyTree = useCallback((tree: ResearchTree) => {
+    if (tree.latitude == null || tree.longitude == null) return;
+    goToTreeOnMap(navigate, {
+      treeId: tree.id || `${tree.latitude}-${tree.longitude}`,
+      lat: tree.latitude,
+      lng: tree.longitude,
+      zoom: 16,
+      countrySlug: countrySlug || undefined,
+      source: "tree",
+      researchLayer: "on",
+    });
+  }, [navigate, countrySlug]);
 
   const openMapLayer = useCallback(() => {
     focusMap({ type: "area", id: countrySlug || "", countrySlug, source: "region" });
@@ -249,6 +295,17 @@ const SubRegionPortalPage = () => {
           </motion.div>
         </section>
 
+        <section className="px-4 max-w-3xl mx-auto mb-8">
+          <PlaceMapPreview
+            placeType="region"
+            placeCode={`${countrySlug || ""}/${subRegionSlug || ""}`}
+            countrySlug={countrySlug || ""}
+            bbox={regionBbox}
+            center={regionCenter}
+            defaultFilters={{ researchLayer: "on" }}
+          />
+        </section>
+
         {/* ─── Stats ─── */}
         <section className="px-4 max-w-3xl mx-auto mb-8">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -282,7 +339,7 @@ const SubRegionPortalPage = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {trees.map(tree => (
-                    <TreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} />
+                    <TreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
                   ))}
                 </div>
               )}

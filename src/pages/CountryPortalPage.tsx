@@ -23,7 +23,10 @@ import { getSubRegionsByCountry, getSubRegionLabel } from "@/config/subRegionReg
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 import VerificationPipeline from "@/components/VerificationPipeline";
 import ImmutableTreeCard from "@/components/ImmutableTreeCard";
+import PlaceMapPreview from "@/components/atlas/PlaceMapPreview";
 import { getRootstonesByCountrySlug, type Rootstone } from "@/data/rootstones";
+import { buildRootstoneMapUrl } from "@/utils/map-link";
+import { goToTreeOnMap } from "@/utils/mapNavigation";
 
 const CountrySpeciesSpiral = lazy(() => import("@/components/atlas/CountrySpeciesSpiral"));
 
@@ -119,7 +122,15 @@ const PILGRIMAGE_PRESETS = [
 ] as const;
 
 /* ─── Research Card ─── */
-const ResearchTreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate: (t: ResearchTree) => void }) => {
+const ResearchTreeCard = ({
+  tree,
+  onNavigate,
+  onVerify,
+}: {
+  tree: ResearchTree;
+  onNavigate: (t: ResearchTree) => void;
+  onVerify: (t: ResearchTree) => void;
+}) => {
   const precColor = tree.geo_precision === "exact"
     ? "hsl(120 45% 45%)"
     : tree.geo_precision === "approx"
@@ -173,16 +184,16 @@ const ResearchTreeCard = ({ tree, onNavigate }: { tree: ResearchTree; onNavigate
             <ExternalLink className="w-2.5 h-2.5" />
           </a>
           <div className="flex gap-1.5">
-            {tree.latitude && (
+            {tree.latitude != null && tree.longitude != null && (
               <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={() => onNavigate(tree)}>
                 <MapIcon className="w-3 h-3 mr-1" /> Map
               </Button>
             )}
-            <Button variant="sacred" size="sm" className="h-7 text-xs px-2" asChild>
-              <Link to={`/map?lat=${tree.latitude}&lng=${tree.longitude}&zoom=15&research=on`}>
+            {tree.latitude != null && tree.longitude != null && (
+              <Button variant="sacred" size="sm" className="h-7 text-xs px-2" onClick={() => onVerify(tree)}>
                 <Eye className="w-3 h-3 mr-1" /> Verify
-              </Link>
-            </Button>
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
@@ -254,6 +265,7 @@ const CountryPortalPage = () => {
   const [pilgrimagePreset, setPilgrimagePreset] = useState<string>("first-steps");
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTreeId, setSelectedTreeId] = useState<string | null>(null);
+  const [selectedSpiralSpecies, setSelectedSpiralSpecies] = useState<string | null>(null);
   const [researchLayerEnabled, setResearchLayerEnabled] = useState(
     config.defaultFilters?.researchLayer !== "off",
   );
@@ -376,6 +388,8 @@ const CountryPortalPage = () => {
     return Array.from(map.values()).sort((a, b) => a.year - b.year);
   }, [trees]);
 
+  const { focusMap } = useMapFocus();
+
   // Not-found guard — placed after all hooks
   if (!entry) {
     return (
@@ -393,20 +407,31 @@ const CountryPortalPage = () => {
     );
   }
 
-  const { focusMap } = useMapFocus();
-
   const handleMapNavigate = (tree: ResearchTree) => {
-    if (tree.latitude && tree.longitude) {
-      focusMap({
-        type: "tree",
-        id: tree.id || `${tree.latitude}-${tree.longitude}`,
+    if (tree.latitude != null && tree.longitude != null) {
+      goToTreeOnMap(navigate, {
+        treeId: tree.id || `${tree.latitude}-${tree.longitude}`,
         lat: tree.latitude,
         lng: tree.longitude,
         zoom: 15,
-        countrySlug,
+        countrySlug: countrySlug || undefined,
         source: "tree",
+        researchLayer: researchLayerEnabled ? "on" : "off",
       });
     }
+  };
+
+  const handleVerifyTree = (tree: ResearchTree) => {
+    if (tree.latitude == null || tree.longitude == null) return;
+    goToTreeOnMap(navigate, {
+      treeId: tree.id || `${tree.latitude}-${tree.longitude}`,
+      lat: tree.latitude,
+      lng: tree.longitude,
+      zoom: 16,
+      countrySlug: countrySlug || undefined,
+      source: "tree",
+      researchLayer: researchLayerEnabled ? "on" : "off",
+    });
   };
 
   const openMapLayer = () =>
@@ -422,26 +447,12 @@ const CountryPortalPage = () => {
     });
 
   const openRootstoneOnMap = (stone: Rootstone) => {
-    const params = new URLSearchParams();
-    params.set("rootstoneId", stone.id);
-    params.set("rootstoneCountry", (countrySlug || "").toLowerCase());
-    params.set("rootstoneType", stone.type);
-    params.set("rootstoneTags", stone.tags.join(","));
-    params.set("country", countrySlug || "");
-    params.set("research", researchLayerEnabled ? "on" : "off");
-
-    if (stone.bounds) {
-      params.set("bbox", `${stone.bounds.south},${stone.bounds.west},${stone.bounds.north},${stone.bounds.east}`);
-      params.set("lat", String((stone.bounds.north + stone.bounds.south) / 2));
-      params.set("lng", String((stone.bounds.east + stone.bounds.west) / 2));
-      params.set("zoom", "8");
-    } else if (stone.location.lat != null && stone.location.lng != null) {
-      params.set("lat", String(stone.location.lat));
-      params.set("lng", String(stone.location.lng));
-      params.set("zoom", stone.type === "tree" ? "12" : "9");
-    }
-
-    navigate(`/map?${params.toString()}`);
+    navigate(
+      buildRootstoneMapUrl(stone, {
+        countrySlug: (countrySlug || "").toLowerCase(),
+        researchLayer: researchLayerEnabled ? "on" : "off",
+      }),
+    );
   };
 
   return (
@@ -668,24 +679,37 @@ const CountryPortalPage = () => {
           </div>
         </section>
 
-        {/* ─── Species Spiral ─── */}
-        <section className="px-4 max-w-3xl mx-auto mb-8">
-          <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
-            <CardContent className="py-6">
-              <Suspense fallback={
-                <div className="py-12 text-center">
-                  <p className="text-sm text-muted-foreground">Loading species spiral…</p>
-                </div>
-              }>
-                <CountrySpeciesSpiral
-                  species={speciesActivity || []}
-                  country={config.country}
-                  countrySlug={countrySlug || ""}
-                  loading={speciesLoading}
-                />
-              </Suspense>
-            </CardContent>
-          </Card>
+        {/* ─── Species Spiral + Map Preview ─── */}
+        <section className="px-4 max-w-5xl mx-auto mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="border-primary/15 bg-card/50 backdrop-blur-sm">
+              <CardContent className="py-6">
+                <Suspense fallback={
+                  <div className="py-12 text-center">
+                    <p className="text-sm text-muted-foreground">Loading species spiral…</p>
+                  </div>
+                }>
+                  <CountrySpeciesSpiral
+                    species={speciesActivity || []}
+                    country={config.country}
+                    countrySlug={countrySlug || ""}
+                    loading={speciesLoading}
+                    onSpeciesSelect={setSelectedSpiralSpecies}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+
+            <PlaceMapPreview
+              placeType="country"
+              placeCode={countrySlug || ""}
+              countrySlug={countrySlug || ""}
+              bbox={entry.bbox}
+              center={config.defaultMapFocus?.center}
+              defaultFilters={config.defaultFilters}
+              highlightedSpecies={selectedSpiralSpecies}
+            />
+          </div>
         </section>
 
         {/* ─── Province filter chips ─── */}
@@ -734,7 +758,7 @@ const CountryPortalPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {filteredTrees.map(tree => (
                     <div key={tree.id} onClick={() => setSelectedTreeId(selectedTreeId === tree.id ? null : tree.id)} className="cursor-pointer">
-                      <ResearchTreeCard tree={tree} onNavigate={handleMapNavigate} />
+                      <ResearchTreeCard tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
                       {selectedTreeId === tree.id && (
                         <div className="mt-2">
                           <VerificationPipeline
@@ -843,7 +867,7 @@ const CountryPortalPage = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {pilgrimageList.map(tree => (
-                      <ResearchTreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} />
+                      <ResearchTreeCard key={tree.id} tree={tree} onNavigate={handleMapNavigate} onVerify={handleVerifyTree} />
                     ))}
                   </div>
                 )}

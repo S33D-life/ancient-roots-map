@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { useMapFocus } from "@/hooks/use-map-focus";
 import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -69,6 +68,7 @@ import PhenologyObservationButton from "@/components/PhenologyObservationButton"
 import PresenceRitual from "@/components/PresenceRitual";
 import { useTreePresence } from "@/hooks/use-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
+import { goToTreeOnMap } from "@/utils/mapNavigation";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
@@ -84,7 +84,6 @@ const offeringIcons: Record<OfferingType, React.ReactNode> = {
 const TreeDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { focusMap } = useMapFocus();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tree, setTree] = useState<Tree | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,6 +106,7 @@ const TreeDetailPage = () => {
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
+  const [whisperContextLabel, setWhisperContextLabel] = useState<string | null>(null);
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
@@ -165,6 +165,18 @@ const TreeDetailPage = () => {
       setSearchParams({}, { replace: true });
     }
   }, [searchParams, setSearchParams]);
+
+  // Handle whisper deep-link from map popup/tree cards
+  useEffect(() => {
+    if (!tree) return;
+    if (searchParams.get("whisper") !== "1") return;
+    if (searchParams.get("context") === "map") setWhisperContextLabel("Opened from map popup");
+    setWhisperModalOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete("whisper");
+    next.delete("context");
+    setSearchParams(next, { replace: true });
+  }, [tree, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!id) return;
@@ -296,11 +308,17 @@ const TreeDetailPage = () => {
           onMakeOffering={() => setAddOfferingOpen(true)}
           onAddWish={() => setSectionTab("overview")}
           onViewMap={() => {
-            if (tree.latitude && tree.longitude) {
-              focusMap({ type: "tree", id: tree.id, lat: tree.latitude, lng: tree.longitude, source: "tree" });
-            } else if (tree.what3words) {
-              focusMap({ type: "tree", id: tree.id, w3w: tree.what3words, source: "tree" });
-            }
+            goToTreeOnMap(navigate, {
+              treeId: tree.id,
+              lat: tree.latitude,
+              lng: tree.longitude,
+              w3w: tree.what3words,
+              source: "tree",
+            });
+          }}
+          onWhisper={() => {
+            setWhisperContextLabel("Opened from tree profile hero");
+            setWhisperModalOpen(true);
           }}
           onShare={() => setShareCardOpen(true)}
           ecoBelonging={ecoBelonging}
@@ -725,10 +743,14 @@ const TreeDetailPage = () => {
       {tree && (
         <SendWhisperModal
           open={whisperModalOpen}
-          onOpenChange={setWhisperModalOpen}
+          onOpenChange={(open) => {
+            setWhisperModalOpen(open);
+            if (!open) setWhisperContextLabel(null);
+          }}
           treeId={tree.id}
           treeName={tree.name}
           treeSpecies={tree.species}
+          contextLabel={whisperContextLabel || undefined}
         />
       )}
 
