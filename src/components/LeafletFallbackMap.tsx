@@ -25,7 +25,7 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
 import BloomingClockDial from "./BloomingClockDial";
@@ -122,6 +122,16 @@ interface MycelialConnection {
   from: MycelialPoint;
   to: MycelialPoint;
   targetTreeId?: string;
+}
+
+interface MapPerfDebugStats {
+  fps: number | null;
+  frameDeltaMs: number | null;
+  markerCount: number;
+  clusterCount: number;
+  renderMs: number | null;
+  lastRenderAt: string | null;
+  activeFilters: string[];
 }
 
 /* ── Shared tier & species logic ── */
@@ -565,6 +575,7 @@ function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
 }
 
 const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, initialJourney, initialBbox, onFullscreenToggle, isFullscreen, onJourneyEnd }: LeafletFallbackMapProps) => {
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -585,6 +596,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const hasFittedRef = useRef(false);
   const focusHandledRef = useRef<string | null>(null);
   const focusHaloRef = useRef<L.Marker | null>(null);
+  const focusFetchAttemptRef = useRef<string | null>(null);
+  const focusFallbackMarkerRef = useRef<L.Marker | null>(null);
   const geo = useGeolocation();
   const locating = geo.isLocating;
   const [located, setLocated] = useState(false);
@@ -592,6 +605,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [discoveryCount, setDiscoveryCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const debugEnabled = useMemo(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      return params.get("debug") === "1";
+    } catch {
+      return false;
+    }
+  }, [location.search]);
+  const [perfDebug, setPerfDebug] = useState<MapPerfDebugStats>({
+    fps: null,
+    frameDeltaMs: null,
+    markerCount: 0,
+    clusterCount: 0,
+    renderMs: null,
+    lastRenderAt: null,
+    activeFilters: [],
+  });
 
   // Filter state — species remains local (multi-select), others from context
   const [species, setSpecies] = useState<string[]>([]);
@@ -826,6 +856,95 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
     return result;
   }, [trees, species, perspective, lineageFilter, projectFilter, userId, groveScale, mapCenter, userLatLng, ageBand, girthBand]);
+
+  const activeFilterLabels = useMemo(() => {
+    const labels: string[] = [];
+    if (perspective !== "collective") labels.push(`perspective:${perspective}`);
+    if (species.length > 0) labels.push(`species:${species.length}`);
+    if (ageBand !== "all") labels.push(`age:${ageBand}`);
+    if (girthBand !== "all") labels.push(`girth:${girthBand}`);
+    if (lineageFilter !== "all") labels.push(`lineage:${lineageFilter}`);
+    if (projectFilter !== "all") labels.push(`project:${projectFilter}`);
+    if (groveScale !== "all") labels.push(`grove:${groveScale}`);
+    if (showResearchLayer) labels.push("layer:research");
+    if (showRootstones) labels.push("layer:rootstones");
+    if (showMycelialNetwork) labels.push("layer:mycelial");
+    return labels;
+  }, [
+    perspective,
+    species,
+    ageBand,
+    girthBand,
+    lineageFilter,
+    projectFilter,
+    groveScale,
+    showResearchLayer,
+    showRootstones,
+    showMycelialNetwork,
+  ]);
+
+  useEffect(() => {
+    if (!debugEnabled) return;
+    setPerfDebug((prev) => ({ ...prev, activeFilters: activeFilterLabels }));
+  }, [debugEnabled, activeFilterLabels]);
+
+  useEffect(() => {
+    if (!debugEnabled || typeof window === "undefined") return;
+
+    let raf = 0;
+    let previousTs = 0;
+    let sampleFrames = 0;
+    let sampleDeltaTotal = 0;
+    let lastFlushTs = 0;
+
+    const tick = (ts: number) => {
+      if (previousTs > 0) {
+        const delta = ts - previousTs;
+        sampleFrames += 1;
+        sampleDeltaTotal += delta;
+      }
+      previousTs = ts;
+
+      if (sampleFrames >= 12 && ts - lastFlushTs >= 450) {
+        const avgDelta = sampleDeltaTotal / sampleFrames;
+        const fps = avgDelta > 0 ? 1000 / avgDelta : 0;
+        setPerfDebug((prev) => ({
+          ...prev,
+          fps: Number(fps.toFixed(1)),
+          frameDeltaMs: Number(avgDelta.toFixed(2)),
+        }));
+        sampleFrames = 0;
+        sampleDeltaTotal = 0;
+        lastFlushTs = ts;
+      }
+
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [debugEnabled]);
+
+  useEffect(() => {
+    if (!debugEnabled || typeof window === "undefined") return;
+    const map = mapRef.current;
+    if (!map) return;
+
+    const refreshClusterCount = () => {
+      const clusterCount = containerRef.current?.querySelectorAll(".tree-cluster").length ?? 0;
+      setPerfDebug((prev) => ({ ...prev, clusterCount }));
+    };
+
+    map.on("zoomend", refreshClusterCount);
+    map.on("moveend", refreshClusterCount);
+    const timer = window.setTimeout(refreshClusterCount, 120);
+
+    return () => {
+      window.clearTimeout(timer);
+      map.off("zoomend", refreshClusterCount);
+      map.off("moveend", refreshClusterCount);
+    };
+  }, [debugEnabled, filteredTrees.length]);
 
   /** Compute per-hive data from ALL trees so the legend stays stable when filtering */
   const hiveMap = useMemo(() => {
@@ -1086,6 +1205,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       clusterRef.current = null;
       userMarkerRef.current = null;
       userAccuracyRef.current = null;
+      focusHaloRef.current = null;
+      focusFallbackMarkerRef.current = null;
       groveLayerRef.current = null;
       seedLayerRef.current = null;
       mycelialNetworkLayerRef.current = null;
@@ -1572,6 +1693,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+    const renderStartedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
 
     if (clusterRef.current) {
       map.removeLayer(clusterRef.current);
@@ -1818,10 +1940,30 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     map.addLayer(clusterGroup);
     clusterRef.current = clusterGroup;
+    const renderMetricsTimer =
+      typeof window !== "undefined"
+        ? window.setTimeout(() => {
+            if (!debugEnabled) return;
+            const markerCount = typeof clusterGroup.getLayers === "function" ? clusterGroup.getLayers().length : treeCount;
+            const clusterCount = containerRef.current?.querySelectorAll(".tree-cluster").length ?? 0;
+            const renderEndedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
+            const renderMs = Number((renderEndedAt - renderStartedAt).toFixed(2));
+            console.info(
+              `[MapPerf] Leaflet render ${renderMs}ms | markers=${markerCount} | clusters=${clusterCount}`,
+            );
+            setPerfDebug((prev) => ({
+              ...prev,
+              markerCount,
+              clusterCount,
+              renderMs,
+              lastRenderAt: new Date().toISOString(),
+            }));
+          }, 80)
+        : 0;
 
     // ── Per-geo-spiderfy preload with jitter prevention ──
     // Cache last computed state to skip redundant recalculations during rapid zoom
-    let lastSpiderfyState = { zoom: -1, densityBand: -1, disableZoom: -1, timerHandle: 0 as any };
+    const lastSpiderfyState = { zoom: -1, densityBand: -1, disableZoom: -1, timerHandle: 0 as any };
 
     const computeDensityBand = (count: number): number =>
       count > 200 ? 4 : count > 80 ? 3 : count > 30 ? 2 : 1;
@@ -1908,13 +2050,27 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           const bounds = L.latLngBounds(nearby.map((t) => [t.latitude, t.longitude]));
           bounds.extend(userLatLng);
           map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13, animate: true, duration: 1 });
-          return;
+        } else {
+          const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
+          map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
         }
+      } else {
+        const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
       }
-      const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
-      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
     }
-  }, [filteredTrees, userLatLng, lineageFilter, groveScale, showHiveLayer]);
+
+    return () => {
+      map.off("zoomend", adjustClusteringOnZoom);
+      map.off("moveend", adjustClusteringOnZoom);
+      if (lastSpiderfyState.timerHandle) {
+        clearTimeout(lastSpiderfyState.timerHandle);
+      }
+      if (renderMetricsTimer) {
+        window.clearTimeout(renderMetricsTimer);
+      }
+    };
+  }, [filteredTrees, userLatLng, lineageFilter, groveScale, showHiveLayer, debugEnabled]);
 
   // ── Focus on a specific tree when navigated via "View on Map" ──
   useEffect(() => {
@@ -1923,33 +2079,86 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     if (!map || !cluster || !initialTreeId) return;
     const focusKey = `${initialTreeId}:${initialZoom ?? ""}:${initialJourney ? "1" : "0"}`;
     if (focusHandledRef.current === focusKey) return;
-    // Wait until trees are loaded and markers exist
-    if (filteredTrees.length === 0) return;
+    if (trees.length === 0) return;
 
-    // Find the target tree
-    const targetTree = filteredTrees.find(t => t.id === initialTreeId);
+    const clearFallbackMarker = () => {
+      if (focusFallbackMarkerRef.current) {
+        map.removeLayer(focusFallbackMarkerRef.current);
+        focusFallbackMarkerRef.current = null;
+      }
+    };
+
+    const showDetachedFocus = (
+      lat: number,
+      lng: number,
+      treeName: string,
+      treeSpecies?: string | null,
+    ) => {
+      clearFallbackMarker();
+
+      const targetLatLng = L.latLng(lat, lng);
+      map.flyTo(targetLatLng, Math.max(initialZoom ?? 17, 16), {
+        duration: initialJourney ? 1.2 : 0.9,
+        easeLinearity: 0.35,
+      });
+
+      const popupHtml = `<div style="font-family:'Cinzel',serif;min-width:190px;padding:10px 12px;text-align:center">
+        <div style="font-size:13px;color:hsl(42,80%,60%);margin-bottom:3px">${escapeHtml(treeName || "Tree")}</div>
+        ${treeSpecies ? `<div style="font-size:11px;color:hsl(120,30%,60%);margin-bottom:6px">${escapeHtml(treeSpecies)}</div>` : ""}
+        <div style="font-size:10px;color:hsl(42,18%,72%)">Focused from deep link</div>
+      </div>`;
+
+      const marker = L.marker(targetLatLng, { zIndexOffset: 900 }).addTo(map);
+      marker.bindPopup(popupHtml, { className: "atlas-leaflet-popup", maxWidth: 250 }).openPopup();
+      focusFallbackMarkerRef.current = marker;
+
+      setTimeout(() => {
+        if (focusFallbackMarkerRef.current === marker) {
+          map.removeLayer(marker);
+          focusFallbackMarkerRef.current = null;
+        }
+      }, 8000);
+
+      onJourneyEnd?.();
+    };
+
+    // Find target tree from loaded in-memory dataset first.
+    const targetTree = trees.find((tree) => tree.id === initialTreeId);
     if (!targetTree) {
-      // Tree might be hidden by filters — check ALL trees
-      const allTree = trees.find(t => t.id === initialTreeId);
-      if (!allTree) return;
-      // Tree exists but is filtered out — it will still show on map since
-      // the deep-link already set the view position. Mark as handled.
-      focusHandledRef.current = focusKey;
+      // Fallback: fetch by tree ID so deep links still work even if current dataset is partial.
+      if (focusFetchAttemptRef.current === focusKey) return;
+      focusFetchAttemptRef.current = focusKey;
+
+      void (async () => {
+        const { data, error } = await supabase
+          .from("trees")
+          .select("id,name,species,latitude,longitude")
+          .eq("id", initialTreeId)
+          .maybeSingle();
+        if (error || !data || data.latitude == null || data.longitude == null) return;
+        if (focusHandledRef.current === focusKey) return;
+        focusHandledRef.current = focusKey;
+        showDetachedFocus(data.latitude, data.longitude, data.name, data.species);
+      })();
       return;
     }
 
     focusHandledRef.current = focusKey;
     const targetLatLng = L.latLng(targetTree.latitude, targetTree.longitude);
 
-    // Find the marker in the cluster group
+    // Find the rendered marker in the cluster group.
     let targetMarker: L.Marker | null = null;
     cluster.eachLayer((layer: any) => {
-      if (layer._treeId === initialTreeId) {
-        targetMarker = layer;
+      if (layer?._treeId === initialTreeId) {
+        targetMarker = layer as L.Marker;
       }
     });
 
-    if (!targetMarker) return;
+    // Marker may be filtered out. Keep focus behavior by dropping a temporary marker.
+    if (!targetMarker) {
+      showDetachedFocus(targetTree.latitude, targetTree.longitude, targetTree.name, targetTree.species);
+      return;
+    }
 
     // --- Multi-stage ceremonial journey ---
     const targetZoom = Math.max(initialZoom ?? 17, 17);
@@ -2048,6 +2257,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (focusHaloRef.current) {
         map.removeLayer(focusHaloRef.current);
       }
+      clearFallbackMarker();
 
       const haloMarker = L.marker(marker.getLatLng(), {
         icon: haloIcon,
@@ -2069,7 +2279,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }
       }, 3000);
     }
-  }, [filteredTrees, trees, initialTreeId, initialZoom]);
+  }, [filteredTrees, trees, initialTreeId, initialZoom, initialJourney, onJourneyEnd]);
 
   // Render bloomed seed heart markers
   useEffect(() => {
@@ -3180,6 +3390,40 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           window.history.replaceState(null, "", "/map");
         }}
       />
+
+      {debugEnabled && (
+        <div
+          className="absolute right-3 z-[1002] max-w-[260px] rounded-xl border px-3 py-2.5 text-[11px] shadow-xl backdrop-blur-md"
+          style={{
+            top: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+            background: "hsla(210, 20%, 12%, 0.85)",
+            borderColor: "hsla(190, 35%, 45%, 0.45)",
+            color: "hsl(185, 35%, 82%)",
+          }}
+        >
+          <p className="font-semibold tracking-wide">Map Debug</p>
+          <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-[10px]">
+            <span>fps</span>
+            <span>{perfDebug.fps ?? "—"}</span>
+            <span>frame</span>
+            <span>{perfDebug.frameDeltaMs != null ? `${perfDebug.frameDeltaMs}ms` : "—"}</span>
+            <span>render</span>
+            <span>{perfDebug.renderMs != null ? `${perfDebug.renderMs}ms` : "—"}</span>
+            <span>markers</span>
+            <span>{perfDebug.markerCount}</span>
+            <span>clusters</span>
+            <span>{perfDebug.clusterCount}</span>
+            <span>filtered</span>
+            <span>{filteredTrees.length}</span>
+            <span>total</span>
+            <span>{trees.length}</span>
+          </div>
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-wide opacity-80">Active filters</p>
+          <p className="mt-1 text-[10px] leading-relaxed opacity-90">
+            {perfDebug.activeFilters.length > 0 ? perfDebug.activeFilters.join(" · ") : "none"}
+          </p>
+        </div>
+      )}
 
       {/* GroveView Living Earth Mode */}
       <GroveViewOverlay

@@ -1,8 +1,6 @@
 import { hasMissingEnvVars, missingEnvVars } from "@/config/env";
 
 const MissingEnvBanner = () => {
-  // In production (Lovable Cloud), env vars are always injected — never show the banner
-  if (import.meta.env.PROD) return null;
   if (!hasMissingEnvVars) return null;
 
   return (
