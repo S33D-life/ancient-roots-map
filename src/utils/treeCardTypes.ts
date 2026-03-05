@@ -3,6 +3,32 @@
  * used by both the map interface and the gallery.
  */
 
+/* ── Source reference (for research trees) ── */
+export interface TreeSource {
+  title: string;
+  url?: string;
+  year?: number;
+  program?: string;
+}
+
+/* ── Research-specific metadata ── */
+export interface ResearchMeta {
+  /** true = research/seed tree, false/undefined = mapped Ancient Friend */
+  isResearch: true;
+  /** Has a wanderer verified this tree in person? */
+  verified: boolean;
+  /** Geo precision level */
+  geoPrecision?: "exact" | "approx" | "locality" | string;
+  /** Designation from source register */
+  designationType?: string;
+  /** Source documents / registers */
+  sources: TreeSource[];
+  /** Linked mapped-tree id (after verification) */
+  linkedTreeId?: string | null;
+  /** Record kind: individual_tree, grove, ecology_node, cultural_site */
+  recordKind?: string;
+}
+
 /* ── Tree entity ── */
 export interface TreeCardData {
   id: string;
@@ -20,6 +46,8 @@ export interface TreeCardData {
   created_at?: string;
   created_by?: string | null;
   project_name?: string | null;
+  /** Present only for research/seed trees */
+  research?: ResearchMeta;
 }
 
 /* ── Offering summary (lightweight) ── */
