@@ -144,42 +144,66 @@ export default function MapArrivalBanner({ arrival, contextLabel, countrySlug, h
   if (!profile) return null;
 
   const canReturn = !!returnRoute();
+  const showPersistentCountryReturn = arrival === "country" && canReturn;
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="absolute left-1/2 -translate-x-1/2 z-[25]"
-          style={{
-            top: "calc(env(safe-area-inset-top, 0px) + 4rem)",
-            pointerEvents: canReturn ? "auto" : "none",
-          }}
-        >
-          <button
-            onClick={canReturn ? handleReturn : undefined}
-            disabled={!canReturn}
-            className="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border transition-transform active:scale-95 disabled:cursor-default"
+    <>
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute left-1/2 -translate-x-1/2 z-[25]"
             style={{
-              background: `hsla(${profile.accentHsl} / 0.12)`,
-              borderColor: `hsla(${profile.accentHsl} / 0.3)`,
-              color: `hsl(${profile.accentHsl})`,
+              top: "calc(env(safe-area-inset-top, 0px) + 4rem)",
+              pointerEvents: canReturn ? "auto" : "none",
             }}
           >
-            {canReturn && <ArrowLeft className="w-3 h-3 opacity-60" />}
-            {profile.icon}
-            <span className="font-serif text-[11px] tracking-wide">
-              {contextLabel || profile.label}
-            </span>
-            <span className="text-[9px] opacity-60 font-serif italic hidden sm:inline">
-              — {profile.feeling}
-            </span>
+            <button
+              onClick={canReturn ? handleReturn : undefined}
+              disabled={!canReturn}
+              className="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border transition-transform active:scale-95 disabled:cursor-default"
+              style={{
+                background: `hsla(${profile.accentHsl} / 0.12)`,
+                borderColor: `hsla(${profile.accentHsl} / 0.3)`,
+                color: `hsl(${profile.accentHsl})`,
+              }}
+            >
+              {canReturn && <ArrowLeft className="w-3 h-3 opacity-60" />}
+              {profile.icon}
+              <span className="font-serif text-[11px] tracking-wide">
+                {contextLabel || profile.label}
+              </span>
+              <span className="text-[9px] opacity-60 font-serif italic hidden sm:inline">
+                — {profile.feeling}
+              </span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {showPersistentCountryReturn && !visible && (
+        <div
+          className="absolute right-3 z-[25]"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 4rem)" }}
+        >
+          <button
+            onClick={handleReturn}
+            className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-serif tracking-wide backdrop-blur-md transition-colors hover:bg-primary/10 active:scale-95"
+            style={{
+              background: "hsla(160 50% 45% / 0.12)",
+              borderColor: "hsla(160 50% 45% / 0.35)",
+              color: "hsl(160 50% 45%)",
+            }}
+            aria-label="Return to country portal"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Return to Country
           </button>
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

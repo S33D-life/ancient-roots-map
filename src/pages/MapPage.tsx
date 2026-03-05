@@ -11,7 +11,7 @@ import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTe
 import MapJourneyOverlay from "@/components/MapJourneyOverlay";
 import MapArrivalBanner from "@/components/MapArrivalBanner";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
-import { getTreeIdFromMapParams } from "@/utils/mapNavigation";
+import { parseMapFocusParams } from "@/utils/mapNavigation";
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -22,19 +22,19 @@ const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "
 
 const MapPage = () => {
   const [searchParams] = useSearchParams();
+  const mapFocus = parseMapFocusParams(searchParams);
   const paramW3w = searchParams.get("w3w") || undefined;
-  const paramLat = searchParams.get("lat") ? parseFloat(searchParams.get("lat")!) : undefined;
-  const paramLng = searchParams.get("lng") ? parseFloat(searchParams.get("lng")!) : undefined;
-  const paramZoom = searchParams.get("zoom") ? parseFloat(searchParams.get("zoom")!) : undefined;
+  const paramLat = mapFocus.lat;
+  const paramLng = mapFocus.lng;
+  const paramZoom = mapFocus.zoom;
   const paramSpecies = searchParams.get("species") || undefined;
-  const paramTreeId = getTreeIdFromMapParams(searchParams) || undefined;
-  const paramCountry = searchParams.get("country") || undefined;
-  const paramHive = searchParams.get("hive") || undefined;
-  // Support both "arrival" (new) and "origin" (legacy) params
-  const rawArrival = searchParams.get("arrival") || searchParams.get("origin") || undefined;
+  const paramTreeId = mapFocus.treeId || undefined;
+  const paramCountry = mapFocus.country;
+  const paramHive = mapFocus.hive;
+  const rawArrival = mapFocus.arrival;
   const paramArrival: ArrivalOrigin | null = rawArrival && VALID_ARRIVALS.has(rawArrival) ? (rawArrival as ArrivalOrigin) : null;
-  const paramJourney = searchParams.get("journey") === "1";
-  const paramBbox = searchParams.get("bbox") || undefined;
+  const paramJourney = mapFocus.journey;
+  const paramBbox = mapFocus.bbox?.join(",") || undefined;
   const [journeyActive, setJourneyActive] = useState(paramJourney);
 
   const [selectedView, setSelectedView] = useState("collective");
