@@ -189,32 +189,43 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
     setLoading(true);
 
     try {
+      console.log("[Offering] Step 1: validating form", { title, content, type, treeId, hasFile: !!selectedFile });
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        console.error("[Offering] Step 2: no user session");
         toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
         return;
       }
+      console.log("[Offering] Step 2: user session OK", user.id);
 
+      // Step 3: Upload photo — failure is non-fatal
       let finalMediaUrl = mediaUrl.trim() || null;
+      let photoUploadFailed = false;
       if (selectedFile) {
         setUploading(true);
         try {
+          console.log("[Offering] Step 3: uploading photo", { bucket: "offerings", size: selectedFile.size, name: selectedFile.name });
           finalMediaUrl = await uploadFile(selectedFile, user.id);
+          console.log("[Offering] Step 3: photo uploaded", finalMediaUrl);
         } catch (uploadErr: any) {
-          toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
-          return;
+          console.error("[Offering] Step 3: photo upload FAILED", uploadErr);
+          photoUploadFailed = true;
+          finalMediaUrl = null;
+          toast({ title: "Photo upload failed", description: `${uploadErr.message}. Your text offering will still be saved.`, variant: "destructive" });
         } finally {
           setUploading(false);
         }
       }
 
+      // Step 4: Insert offering row — always attempted
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
 
       const quoteText = quote.text.trim() || null;
       const quoteAuthor = quoteText ? (quote.author.trim() || null) : null;
       const quoteSource = quoteText ? (quote.source.trim() || null) : null;
 
-      const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
+      const payload = {
         tree_id: treeId,
         type,
         title: title.trim(),
@@ -230,8 +241,15 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         quote_text: quoteText,
         quote_author: quoteAuthor,
         quote_source: quoteSource,
-      }).select("id").single();
-      if (error) throw error;
+      };
+      console.log("[Offering] Step 4: inserting offering row", payload);
+
+      const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert(payload).select("id").single();
+      if (error) {
+        console.error("[Offering] Step 4: DB insert FAILED", error);
+        throw error;
+      }
+      console.log("[Offering] Step 4: offering saved", insertedOffering);
 
       // Attach Skystamp (fire-and-forget, non-blocking)
       if (insertedOffering) {
@@ -262,7 +280,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         );
       }
 
-      // Issue species/influence rewards (stewardship gets +2, anchored gets +1)
+      // Issue species/influence rewards
       let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const s33dOverride = treeRole === "stewardship" ? 2 : 1;
@@ -273,7 +291,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         }
       }
 
-      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed!`, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
+      console.log("[Offering] Step 5: complete", { photoUploadFailed, earnedReward });
+
+      const successMsg = photoUploadFailed
+        ? `${cfg.singular} saved (photo could not be attached)`
+        : `${cfg.singular} sealed!`;
+
+      setCelebrationMsg({ emoji: cfg.emoji, message: successMsg, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
       setShowCelebration(true);
       setTimeout(() => {
         setShowCelebration(false);
@@ -287,8 +311,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       setTaggedUsers([]);
       setQuote({ text: "", author: "", source: "" });
       clearSelectedFile();
-      return; // onOpenChange handled by celebration timeout
+
+      // Dispatch custom event so TreeDetailPage can refetch offerings
+      window.dispatchEvent(new CustomEvent("offering-created", { detail: { treeId } }));
+
+      return;
     } catch (err: any) {
+      console.error("[Offering] submit error:", err);
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
