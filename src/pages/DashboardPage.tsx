@@ -197,9 +197,16 @@ const DashboardPage = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Track whether initial session has been resolved to avoid premature redirect
+    let initialResolved = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+
+      // Only act on auth changes AFTER we've resolved the initial session
+      if (!initialResolved) return;
+
       if (!session) {
         navigate("/auth");
       } else {
@@ -211,6 +218,7 @@ const DashboardPage = () => {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      initialResolved = true;
       setSession(session);
       setUser(session?.user ?? null);
       if (!session) {
