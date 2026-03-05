@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhisper } from "@/hooks/use-whispers";
 import { emitMycelialThread } from "@/lib/mycelial-network";
+import { upsertMycelialEdge } from "@/services/mycelialEdges";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -125,6 +126,26 @@ export default function SendWhisperModal({
         } catch {
           senderLocation = null;
         }
+      }
+      // Best-effort persistence for the Mycelial Layer. Never blocks whisper UX.
+      try {
+        await upsertMycelialEdge({
+          fromType: "user",
+          fromId: userId,
+          toType: "tree",
+          toId: treeId,
+          edgeKind: "whisper",
+          weight: 1,
+          metadata: {
+            tree_name: treeName,
+            recipient_scope: recipientScope,
+            delivery_scope: deliveryScope,
+            message_preview: message.trim().slice(0, 120),
+            ...(senderLocation ? { from: senderLocation } : {}),
+          },
+        });
+      } catch {
+        // Ignore and continue; whisper itself already succeeded.
       }
       emitMycelialThread({
         source: "whisper",
