@@ -195,8 +195,9 @@ export default function PlaceMapPreview({
       }
 
       if (resolvedCountrySlug) {
-        const rootstones = getRootstonesByCountrySlug(resolvedCountrySlug);
-        rootstones.forEach((stone) => {
+        const rootstoneBuckets = getRootstonesByCountrySlug(resolvedCountrySlug);
+        const allRootstones = [...rootstoneBuckets.trees, ...rootstoneBuckets.groves];
+        allRootstones.forEach((stone) => {
           if (stone.location.lat == null || stone.location.lng == null) return;
           if (!inBBox(stone.location.lat, stone.location.lng, normalizedBBox)) return;
           const key = `rootstone:${stone.name}:${stone.location.lat.toFixed(4)}:${stone.location.lng.toFixed(4)}`;

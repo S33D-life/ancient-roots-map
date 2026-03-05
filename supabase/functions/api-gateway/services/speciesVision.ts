@@ -84,8 +84,8 @@ const normalizeINaturalist = (payload: unknown): SpeciesPrediction[] => {
         sourceUrl: INATURALIST_ENDPOINT,
       };
     })
-    .filter((prediction): prediction is SpeciesPrediction => prediction !== null)
-    .sort((a, b) => b.confidence - a.confidence);
+    .filter((p): p is NonNullable<typeof p> => p !== null)
+    .sort((a, b) => b.confidence - a.confidence) as SpeciesPrediction[];
 };
 
 const normalizePlantNet = (payload: unknown, sourceUrl: string): SpeciesPrediction[] => {
@@ -113,8 +113,8 @@ const normalizePlantNet = (payload: unknown, sourceUrl: string): SpeciesPredicti
         sourceUrl,
       };
     })
-    .filter((prediction): prediction is SpeciesPrediction => prediction !== null)
-    .sort((a, b) => b.confidence - a.confidence);
+    .filter((p): p is NonNullable<typeof p> => p !== null)
+    .sort((a, b) => b.confidence - a.confidence) as SpeciesPrediction[];
 };
 
 const identifyWithINaturalist = async (blob: Blob): Promise<{ predictions: SpeciesPrediction[]; rawSnapshot: string | null }> => {
