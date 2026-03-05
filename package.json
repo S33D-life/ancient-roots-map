@@ -11,9 +11,13 @@
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
+    "security:check": "node scripts/security-check.mjs",
+    "guard:config-churn": "node scripts/assert-no-churn-writers.mjs",
     "release-check": "npm run test && npm run build && npm run typecheck",
     "import:rootstones": "node scripts/import-rootstones.mjs",
-    "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs"
+    "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs",
+    "open:country": "node scripts/open-country.mjs",
+    "seed:country": "node scripts/seed-country.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
