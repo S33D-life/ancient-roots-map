@@ -1,3 +1,4 @@
+// Environment configuration — vars auto-injected by Lovable Cloud at build time
 const REQUIRED_ENV_VARS = ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"] as const;
 
 type RequiredEnvVar = (typeof REQUIRED_ENV_VARS)[number];
