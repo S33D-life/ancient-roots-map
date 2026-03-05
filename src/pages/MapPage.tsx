@@ -3,6 +3,7 @@ import ActiveFilterChips from "@/components/ActiveFilterChips";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
+import MapErrorBoundary from "@/components/MapErrorBoundary";
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
@@ -51,7 +52,9 @@ const MapPage = () => {
   return (
     <div className="fixed inset-0 z-[10] bg-background">
       {/* Map renders immediately — preloads while blessing is visible */}
-      <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
+      <MapErrorBoundary>
+        <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
+      </MapErrorBoundary>
       <MapJourneyOverlay active={journeyActive} />
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
