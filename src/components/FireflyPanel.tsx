@@ -3,7 +3,7 @@
  * Now includes unified search as a primary action.
  */
 import { useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search } from "lucide-react";
 import {
   Dialog,
@@ -16,6 +16,7 @@ import GlobalSearch from "@/components/GlobalSearch";
 const ACTIONS = [
   { type: "search", icon: Search, emoji: "🔍", label: "Search Everything", desc: "Trees, places, rooms, wanderers", reward: null, isSearch: true },
   { type: "whisper", icon: Wind, emoji: "🌬️", label: "Send a Whisper", desc: "Message through the trees", reward: null, isNav: true },
+  { type: "mycelial-layer", icon: Sparkles, emoji: "🕸️", label: "Mycelial Layer", desc: "Toggle living network lines", reward: null, isNav: true },
   { type: "bug", icon: Bug, emoji: "🐞", label: "Report a Bug", desc: "Something isn't working", reward: "3–20" },
   { type: "ux_improvement", icon: Sparkles, emoji: "✨", label: "Improve the Flow", desc: "UX refinement idea", reward: "5–15" },
   { type: "insight", icon: Lightbulb, emoji: "💡", label: "Share an Insight", desc: "Propose an evolution", reward: "variable" },
@@ -29,6 +30,7 @@ interface FireflyPanelProps {
 
 const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
 
   const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean }) => {
@@ -38,10 +40,23 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
       setTimeout(() => setSearchOpen(true), 150);
     } else if (flags?.isNav && type === "whisper") {
       setTimeout(() => navigate("/whispers"), 150);
+    } else if (flags?.isNav && type === "mycelial-layer") {
+      setTimeout(() => {
+        if (location.pathname === "/map") {
+          const params = new URLSearchParams(location.search);
+          const enabled = params.get("mycelial") === "on";
+          if (enabled) params.delete("mycelial");
+          else params.set("mycelial", "on");
+          const query = params.toString();
+          navigate(query ? ("/map?" + query) : "/map");
+        } else {
+          navigate("/map?mycelial=on");
+        }
+      }, 150);
     } else {
       setTimeout(() => onSelectAction(type), 150);
     }
-  }, [onOpenChange, onSelectAction, navigate]);
+  }, [onOpenChange, onSelectAction, navigate, location.pathname, location.search]);
 
   return (
     <>

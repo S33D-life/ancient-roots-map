@@ -25,7 +25,7 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
 import BloomingClockDial from "./BloomingClockDial";
@@ -41,7 +41,6 @@ import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useWhisperCounts } from "@/hooks/use-whisper-counts";
-import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
 import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
@@ -50,6 +49,7 @@ import HiveFruitPreview from "./HiveFruitPreview";
 import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
 import type { Rootstone } from "@/data/rootstones";
 import { consumeQueuedMycelialThreads, onMycelialThread, type MycelialPoint, type MycelialThreadEvent } from "@/lib/mycelial-network";
+import { fetchRecentMycelialConnections, rankConnectionsForViewport, type MycelialConnection, type MycelialEdgeKind } from "@/services/mycelialEdges";
 
 interface Tree {
   id: string;
@@ -113,15 +113,6 @@ interface LeafletFallbackMapProps {
   onFullscreenToggle?: () => void;
   isFullscreen?: boolean;
   onJourneyEnd?: () => void;
-}
-
-interface MycelialConnection {
-  id: string;
-  created_at: string;
-  type: "whisper";
-  from: MycelialPoint;
-  to: MycelialPoint;
-  targetTreeId?: string;
 }
 
 /* ── Shared tier & species logic ── */
@@ -565,6 +556,7 @@ function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
 }
 
 const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, initialJourney, initialBbox, onFullscreenToggle, isFullscreen, onJourneyEnd }: LeafletFallbackMapProps) => {
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<any>(null);
@@ -612,7 +604,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   });
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
+  const lowPowerMycelial = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    const lowThreads = typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency <= 4;
+    const lowMemory = typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4;
+    const saveData = Boolean(nav.connection?.saveData);
+    return lowThreads || lowMemory || saveData;
+  }, []);
+  const [mycelialPausedForPerf, setMycelialPausedForPerf] = useState(false);
+  const canRenderMycelialLayer = showMycelialNetwork && !lowPowerMycelial && !mycelialPausedForPerf;
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (!params.has("mycelial")) return;
+    setShowMycelialNetwork(params.get("mycelial") === "on");
+  }, [location.search]);
   const [showOfferingGlow, setShowOfferingGlow] = useState(false);
   const [showExternalTrees, setShowExternalTrees] = useState(false);
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
@@ -855,7 +863,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "offering-glow", label: "🔥 Forest Warmth", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
         { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => setShowHeartGlow(v => !v), accent: "0, 65%, 55%" },
         { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
-        { key: "mycelial-network", label: "🕸️ Mycelial Network", active: showMycelialNetwork, toggle: () => setShowMycelialNetwork(v => !v), extra: showMycelialNetwork ? `${mycelialConnections.length}` : "off" },
+        {
+          key: "mycelial-network",
+          label: "🕸️ Mycelial Network",
+          active: showMycelialNetwork,
+          toggle: () => setShowMycelialNetwork(v => !v),
+          extra: showMycelialNetwork
+            ? lowPowerMycelial || mycelialPausedForPerf
+              ? "paused"
+              : `${mycelialConnections.length}`
+            : "off",
+        },
         { key: "hive-layer", label: "🐝 Species Hives", active: showHiveLayer, toggle: () => setShowHiveLayer(v => !v), accent: "42, 70%, 55%" },
       ],
       subContent: showBirdsongHeat ? (
@@ -955,7 +973,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ) : undefined,
     },
   ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
-      showMycelialNetwork, mycelialConnections.length,
+      showMycelialNetwork, mycelialConnections.length, lowPowerMycelial, mycelialPausedForPerf,
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
       showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
@@ -1235,37 +1253,62 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   }, []);
 
   useEffect(() => {
+    if (!showMycelialNetwork || lowPowerMycelial) return;
     let active = true;
-    const fallbackOrigin = (id: string, to: MycelialPoint): MycelialPoint => {
-      const seed = Array.from(id).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-      const angle = (seed % 360) * (Math.PI / 180);
-      const radius = 0.16 + (seed % 13) * 0.01;
-      return {
-        lat: to.lat + Math.sin(angle) * radius,
-        lng: to.lng + Math.cos(angle) * radius,
-      };
+
+    const mergeById = (incoming: MycelialConnection[]) => {
+      setMycelialConnections((prev) => {
+        const next = new Map<string, MycelialConnection>();
+        incoming.forEach((edge) => next.set(edge.id, edge));
+        prev.forEach((edge) => {
+          if (!next.has(edge.id)) next.set(edge.id, edge);
+        });
+        return Array.from(next.values()).slice(0, 320);
+      });
     };
-    (async () => {
-      const recent = await fetchRecentWhisperConnections(200);
+
+    const load = async () => {
+      const recent = await fetchRecentMycelialConnections(320);
       if (!active || recent.length === 0) return;
-      const mapped: MycelialConnection[] = recent
-        .filter((item) => item.to != null)
-        .map((item) => ({
-          id: item.id,
-          created_at: item.created_at,
-          type: "whisper",
-          from: item.from || fallbackOrigin(item.id, item.to as MycelialPoint),
-          to: item.to as MycelialPoint,
-          targetTreeId: item.target_tree_id,
-        }));
-      if (mapped.length > 0) {
-        setMycelialConnections((prev) => [...mapped, ...prev].slice(0, 200));
-      }
-    })();
+      mergeById(recent);
+    };
+
+    load();
+    const timer = window.setInterval(load, 45_000);
     return () => {
       active = false;
+      window.clearInterval(timer);
     };
-  }, []);
+  }, [showMycelialNetwork, lowPowerMycelial]);
+
+  useEffect(() => {
+    if (!showMycelialNetwork) {
+      setMycelialPausedForPerf(false);
+      return;
+    }
+    if (lowPowerMycelial) {
+      setMycelialPausedForPerf(true);
+      return;
+    }
+
+    let rafId = 0;
+    let frames = 0;
+    const start = performance.now();
+    const sampleMs = 1800;
+
+    const tick = (ts: number) => {
+      frames += 1;
+      if (ts - start >= sampleMs) {
+        const fps = frames / ((ts - start) / 1000);
+        setMycelialPausedForPerf(fps < 22);
+        return;
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [showMycelialNetwork, lowPowerMycelial]);
 
   const pulseTreeMarker = useCallback((treeId?: string) => {
     if (!treeId || !clusterRef.current) return;
@@ -1340,13 +1383,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const from = resolveFromPoint(event);
       const connection: MycelialConnection = {
         id: event.id || `${event.createdAt || Date.now()}:${to.lat}:${to.lng}`,
-        created_at: event.createdAt || new Date().toISOString(),
-        type: "whisper",
+        createdAt: event.createdAt || new Date().toISOString(),
+        lastSeenAt: event.createdAt || new Date().toISOString(),
+        edgeKind: "whisper",
+        fromType: "user",
+        fromId: "realtime",
+        toType: "tree",
+        toId: event.targetTreeId || "unknown-tree",
+        weight: 1,
+        metadata: {},
         from,
         to,
-        targetTreeId: event.targetTreeId,
       };
-      setMycelialConnections((prev) => [connection, ...prev].slice(0, 200));
+      setMycelialConnections((prev) => [connection, ...prev.filter((edge) => edge.id !== connection.id)].slice(0, 320));
       if (!prefersReducedMotion) animateMycelialThread(from, to);
       pulseTreeMarker(event.targetTreeId);
     };
@@ -1365,32 +1414,72 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       mycelialNetworkLayerRef.current = null;
     }
 
-    if (!showMycelialNetwork || mycelialConnections.length === 0) return;
+    if (!showMycelialNetwork || mycelialConnections.length === 0 || !canRenderMycelialLayer) return;
 
     const layer = L.layerGroup().addTo(map);
     mycelialNetworkLayerRef.current = layer;
 
+    const kindColor: Record<MycelialEdgeKind, string> = {
+      whisper: "hsl(178, 64%, 62%)",
+      offering: "hsl(42, 78%, 60%)",
+      visit: "hsl(120, 45%, 58%)",
+      seed: "hsl(145, 55%, 58%)",
+      book: "hsl(220, 55%, 65%)",
+      council: "hsl(280, 48%, 68%)",
+      staff_mint: "hsl(20, 70%, 62%)",
+    };
+
+    const kindLabel: Record<MycelialEdgeKind, string> = {
+      whisper: "Whisper",
+      offering: "Offering",
+      visit: "Visit",
+      seed: "Seed",
+      book: "Book",
+      council: "Council",
+      staff_mint: "Staff Mint",
+    };
+
+    const edgeLimit = lowPowerMycelial ? 80 : 150;
+
     const render = () => {
       layer.clearLayers();
       const bounds = map.getBounds().pad(0.25);
-      let rendered = 0;
-      for (const connection of mycelialConnections) {
-        if (rendered >= 120) break;
-        const fromIn = bounds.contains([connection.from.lat, connection.from.lng]);
-        const toIn = bounds.contains([connection.to.lat, connection.to.lng]);
-        if (!fromIn && !toIn) continue;
+      const selected = rankConnectionsForViewport(
+        mycelialConnections,
+        (point) => bounds.contains([point.lat, point.lng]),
+        edgeLimit,
+      );
+
+      selected.forEach((connection) => {
+        const edgeColor = kindColor[connection.edgeKind] || "hsl(178, 64%, 62%)";
+        const treeTarget =
+          connection.toType === "tree"
+            ? connection.toId
+            : connection.fromType === "tree"
+              ? connection.fromId
+              : null;
+        const trailUrl = treeTarget ? `/tree/${encodeURIComponent(treeTarget)}` : "/map?mycelial=on";
+        const lastSeen = new Date(connection.lastSeenAt).toLocaleString();
+        const popupHtml = `<div style="min-width:180px;padding:8px 2px 2px;font-family:'Cinzel',serif;">
+          <p style="margin:0 0 6px;font-size:12px;color:hsl(42,75%,65%);">${kindLabel[connection.edgeKind]} Trail</p>
+          <p style="margin:0;font-size:11px;color:hsl(0,0%,82%);">Last seen: ${escapeHtml(lastSeen)}</p>
+          <p style="margin:4px 0 10px;font-size:11px;color:hsl(0,0%,82%);">Count: ${connection.weight}</p>
+          <a href="${trailUrl}" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:7px;background:hsla(42,70%,45%,0.2);border:1px solid hsla(42,75%,55%,0.35);color:hsl(42,80%,70%);font-size:11px;text-decoration:none;">View trail</a>
+        </div>`;
+
         L.polyline(
           [[connection.from.lat, connection.from.lng], [connection.to.lat, connection.to.lng]],
           {
-            color: "hsl(178, 64%, 62%)",
-            weight: 1.2,
-            opacity: 0.2,
+            color: edgeColor,
+            weight: Math.min(3.2, 0.8 + connection.weight * 0.18),
+            opacity: 0.24,
             dashArray: "3 9",
-            interactive: false,
+            interactive: true,
           },
-        ).addTo(layer);
-        rendered += 1;
-      }
+        )
+          .addTo(layer)
+          .bindPopup(popupHtml, { className: "atlas-leaflet-popup", maxWidth: 260, closeButton: true });
+      });
     };
 
     let redrawTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1409,7 +1498,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (redrawTimer) clearTimeout(redrawTimer);
       if (map.hasLayer(layer)) map.removeLayer(layer);
     };
-  }, [showMycelialNetwork, mycelialConnections]);
+  }, [showMycelialNetwork, mycelialConnections, canRenderMycelialLayer, lowPowerMycelial]);
 
   // ── Event pulse rendering on map (gold shimmers at tree coords) ──
   useEffect(() => {
@@ -3353,6 +3442,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               {/* Atlas portal — above layers & eye */}
               <AtlasNavButton btnBase={btnBase} />
             </div>
+
+            {showMycelialNetwork && (
+              <div
+                className="absolute left-1/2 -translate-x-1/2 z-[1000] px-3 py-1.5 rounded-full text-[10px] font-serif tracking-wide"
+                style={{
+                  bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 64px)",
+                  color: "hsl(178, 70%, 72%)",
+                  background: "hsla(180, 24%, 12%, 0.88)",
+                  border: "1px solid hsla(178, 58%, 55%, 0.35)",
+                  backdropFilter: "blur(6px)",
+                }}
+              >
+                Mycelium: whispers, offerings, seeds
+                {(lowPowerMycelial || mycelialPausedForPerf) && " (paused for performance)"}
+              </div>
+            )}
 
             <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
               <button
