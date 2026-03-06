@@ -51,3 +51,11 @@ If you see repeated restart logs like `.env changed` or `vite.config.ts changed`
    - `npm run guard:config-churn`
 3. Keep env values in local `.env` only, and keep Vite config static.
 4. Build/version generation is build-only and writes `public/version.json` only.
+
+## Duplicate artifact guardrail
+
+Files or folders ending in `" 2"` (for example, `MapPage 2.tsx`) are banned because they create unstable builds and ambiguous imports.
+Run `npm run check:duplicates` before pushing to detect offenders quickly.
+The script fails with a list of exact paths, so CI blocks accidental duplicates early.
+To fix an offender, rename it to the canonical filename or remove it if stale.
+Only keep one source of truth per module/page/script path.

@@ -33,6 +33,9 @@ jobs:
       - name: Config churn guard
         run: npm run guard:config-churn
 
+      - name: Duplicate artifact guard
+        run: npm run check:duplicates
+
       - name: Lint
         run: npm run lint
 
