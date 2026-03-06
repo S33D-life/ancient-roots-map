@@ -13,6 +13,7 @@
     "test": "vitest run",
     "security:check": "node scripts/security-check.mjs",
     "guard:config-churn": "node scripts/assert-no-churn-writers.mjs",
+    "check:duplicates": "node scripts/check-duplicate-artifacts.mjs",
     "release-check": "npm run test && npm run build && npm run typecheck",
     "import:rootstones": "node scripts/import-rootstones.mjs",
     "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs",
