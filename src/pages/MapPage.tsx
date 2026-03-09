@@ -43,6 +43,7 @@ const MapPage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
   const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
+  const [blessingJustDismissed, setBlessingJustDismissed] = useState(false);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
