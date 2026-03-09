@@ -149,6 +149,13 @@ const TreeDetailPage = () => {
     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
   }, [userId, tree]);
 
+  // Auto-dismiss poetry whisper after 8 seconds
+  useEffect(() => {
+    if (!tree?.lore_text) return;
+    const timer = setTimeout(() => setShowLoreWhisper(false), 8000);
+    return () => clearTimeout(timer);
+  }, [tree?.lore_text]);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
