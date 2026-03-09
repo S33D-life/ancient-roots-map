@@ -68,7 +68,7 @@ const FairyDust = () => {
       speedY: -Math.random() * 0.5 - 0.2, opacity: Math.random() * 0.8 + 0.2,
       fadeSpeed: Math.random() * 0.005 + 0.002, hue: Math.random() > 0.5 ? 45 : 120,
     });
-    for (let i = 0; i < 60; i++) particles.push(spawnParticle());
+    for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(spawnParticle());
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p, i) => {
