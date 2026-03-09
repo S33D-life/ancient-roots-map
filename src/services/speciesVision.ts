@@ -1,4 +1,4 @@
-import { supabaseEnv } from "@/config/env";
+import { isSupabaseConfigured, supabaseEnv } from "@/config/env";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SpeciesVisionPrediction = {
@@ -51,6 +51,18 @@ const normalizePrediction = (input: unknown): SpeciesVisionPrediction | null => 
 };
 
 export const identifyTreeSpeciesFromPhoto = async (file: File): Promise<SpeciesVisionResult> => {
+  if (!isSupabaseConfigured) {
+    return {
+      predictions: [],
+      provider: "none",
+      fallbackUsed: false,
+      threshold: 0.6,
+      identifiedAt: new Date().toISOString(),
+      rawSnapshot: null,
+      error: "Species identification is unavailable until Supabase environment variables are configured.",
+    };
+  }
+
   try {
     const imageData = await fileToDataUrl(file);
     const { data: { session } } = await supabase.auth.getSession();

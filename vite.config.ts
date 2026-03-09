@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { readFileSync } from "node:fs";
 import path from "path";
@@ -58,9 +58,6 @@ const resolveBuildId = () => {
 };
 
 const BUILD_ID = resolveBuildId();
-const SUPABASE_FUNCTIONS_BASE =
-  (process.env.VITE_SUPABASE_URL ? `${process.env.VITE_SUPABASE_URL}/functions/v1` : null) ||
-  "https://mwzcuczfedrjplndggiv.supabase.co/functions/v1";
 
 async function loadPwaPlugin() {
   try {
@@ -179,7 +176,11 @@ async function loadPwaPlugin() {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => {
+export default defineConfig(async ({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const supabaseFunctionsBase = env.VITE_SUPABASE_URL
+    ? `${env.VITE_SUPABASE_URL}/functions/v1`
+    : null;
   const pwaPlugin = await loadPwaPlugin();
   return ({
   server: {
@@ -188,13 +189,15 @@ export default defineConfig(async () => {
     headers: {
       "Content-Security-Policy": DEV_CSP,
     },
-    proxy: {
-      "/api/identify-tree": {
-        target: SUPABASE_FUNCTIONS_BASE,
-        changeOrigin: true,
-        rewrite: () => "/identify-tree",
-      },
-    },
+    proxy: supabaseFunctionsBase
+      ? {
+          "/api/identify-tree": {
+            target: supabaseFunctionsBase,
+            changeOrigin: true,
+            rewrite: () => "/identify-tree",
+          },
+        }
+      : undefined,
   },
   preview: {
     headers: {
