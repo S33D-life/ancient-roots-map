@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
+import OfflineIndicator from "./OfflineIndicator";
 
 
 const Header = () => {
