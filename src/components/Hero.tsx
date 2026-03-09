@@ -49,12 +49,16 @@ interface Particle {
 const FairyDust = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    // Respect reduced-motion preference
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     let animId: number;
     let particles: Particle[] = [];
+    const isMobile = window.innerWidth < 768;
+    const PARTICLE_COUNT = isMobile ? 15 : 60;
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
