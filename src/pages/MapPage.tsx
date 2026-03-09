@@ -10,6 +10,7 @@ import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
 import MapJourneyOverlay from "@/components/MapJourneyOverlay";
 import MapArrivalBanner from "@/components/MapArrivalBanner";
+import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
 
