@@ -26,6 +26,10 @@ import CanopyHeartPulse from "@/components/CanopyHeartPulse";
 import AppUpdateBanner from "@/components/AppUpdateBanner";
 import FireflyFAB from "@/components/FireflyFAB";
 import MissingEnvBanner from "@/components/MissingEnvBanner";
+import { attachAutoSync } from "@/utils/syncEngine";
+
+// Attach offline auto-sync listener once at app startup
+attachAutoSync();
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
