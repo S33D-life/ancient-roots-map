@@ -10,6 +10,7 @@ import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
 import MapJourneyOverlay from "@/components/MapJourneyOverlay";
 import MapArrivalBanner from "@/components/MapArrivalBanner";
+import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
 
@@ -55,6 +56,7 @@ const MapPage = () => {
       <MapErrorBoundary>
         <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
       </MapErrorBoundary>
+      <MapOfflineOverlay />
       <MapJourneyOverlay active={journeyActive} />
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
