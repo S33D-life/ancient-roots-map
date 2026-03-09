@@ -67,7 +67,7 @@ const MapPage = () => {
 
       {/* Public Tester Blessing — overlays map, shown once */}
       {showBlessing && (
-        <PublicTesterBlessing onComplete={() => setShowBlessing(false)} />
+        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); }} />
       )}
 
       {/* Standard header — hidden in fullscreen and during blessing */}
