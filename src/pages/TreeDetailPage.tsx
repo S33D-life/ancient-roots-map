@@ -110,6 +110,7 @@ const TreeDetailPage = () => {
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
+  const [showLoreWhisper, setShowLoreWhisper] = useState(true);
 
   // Capture referral params from shared tree links
   useEffect(() => {
