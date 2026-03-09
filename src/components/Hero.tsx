@@ -104,12 +104,15 @@ interface Leaf {
 const FallingLeaves = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     let animId: number;
     let leaves: Leaf[] = [];
+    const isMobile = window.innerWidth < 768;
+    const LEAF_COUNT = isMobile ? 10 : 25;
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
