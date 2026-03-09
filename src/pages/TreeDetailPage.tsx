@@ -289,7 +289,7 @@ const TreeDetailPage = () => {
 
       {/* Poetry Whisper — lore_text fade-in */}
       <AnimatePresence>
-        {tree.lore_text && (
+        {tree.lore_text && showLoreWhisper && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
