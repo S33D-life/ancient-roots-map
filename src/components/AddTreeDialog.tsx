@@ -610,6 +610,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         return;
       }
 
+      // AI fields (species_ai_*) intentionally excluded — columns not yet in DB schema
       const { data, error } = await supabase.from('trees').insert({
         name: name.trim() || species.trim(),
         species: species.trim(),
@@ -618,21 +619,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         latitude: lat,
         longitude: lng,
         estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
-        species_ai_predictions: normalizedAiPredictions.length > 0 ? normalizedAiPredictions : null,
-        species_ai_selected: selectedSpeciesPrediction
-          ? {
-              scientificName: selectedSpeciesPrediction.scientificName,
-              commonName: selectedSpeciesPrediction.commonName,
-              confidence: selectedSpeciesPrediction.confidence,
-              source: selectedSpeciesPrediction.source,
-              sourceUrl: selectedSpeciesPrediction.sourceUrl,
-              identifiedAt: speciesVisionResult?.identifiedAt || null,
-              rawSnapshot: speciesVisionResult?.rawSnapshot || null,
-            }
-          : null,
-        species_ai_provider: resolvedProvider,
-        species_ai_confidence: resolvedAiConfidence,
-        species_ai_confirmed: aiConfirmed,
         created_by: user.id,
         ...(photoDate ? { created_at: photoDate } : {}),
       }).select('id').single();
