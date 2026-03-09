@@ -110,6 +110,7 @@ const TreeDetailPage = () => {
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
+  const [showLoreWhisper, setShowLoreWhisper] = useState(true);
 
   // Capture referral params from shared tree links
   useEffect(() => {
@@ -147,6 +148,13 @@ const TreeDetailPage = () => {
     if (!userId || !tree) return;
     checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
   }, [userId, tree]);
+
+  // Auto-dismiss poetry whisper after 8 seconds
+  useEffect(() => {
+    if (!tree?.lore_text) return;
+    const timer = setTimeout(() => setShowLoreWhisper(false), 8000);
+    return () => clearTimeout(timer);
+  }, [tree?.lore_text]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
@@ -285,6 +293,31 @@ const TreeDetailPage = () => {
     <InfluenceTokenProvider userId={userId}>
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* Poetry Whisper — lore_text fade-in */}
+      <AnimatePresence>
+        {tree.lore_text && showLoreWhisper && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, delay: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="fixed bottom-20 left-0 right-0 z-30 flex justify-center pointer-events-none px-4"
+          >
+            <div
+              className="max-w-sm rounded-xl px-5 py-3 backdrop-blur-md border text-center pointer-events-auto"
+              style={{
+                background: 'hsl(var(--card) / 0.85)',
+                borderColor: 'hsl(var(--border) / 0.3)',
+              }}
+            >
+              <p className="text-xs font-serif italic text-foreground/70 leading-relaxed">
+                "{tree.lore_text.length > 140 ? tree.lore_text.slice(0, 140).trim() + '…' : tree.lore_text}"
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
         <button

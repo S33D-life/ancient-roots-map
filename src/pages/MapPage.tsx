@@ -43,6 +43,7 @@ const MapPage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
   const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
+  const [blessingJustDismissed, setBlessingJustDismissed] = useState(false);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
@@ -66,7 +67,7 @@ const MapPage = () => {
 
       {/* Public Tester Blessing — overlays map, shown once */}
       {showBlessing && (
-        <PublicTesterBlessing onComplete={() => setShowBlessing(false)} />
+        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); }} />
       )}
 
       {/* Standard header — hidden in fullscreen and during blessing */}
@@ -87,7 +88,7 @@ const MapPage = () => {
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
-      {!showBlessing && (
+      {!showBlessing && !blessingJustDismissed && (
         <Suspense fallback={null}>
           <MapOnboardingRitual />
           <ContextualWhisper

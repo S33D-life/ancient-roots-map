@@ -195,7 +195,7 @@ const Header = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical overflow-visible"
         style={{
-          background: 'hsl(140 30% 10%)',
+          background: 'hsl(var(--card))',
           paddingTop: 'env(safe-area-inset-top, 0px)',
           paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
@@ -212,7 +212,7 @@ const Header = () => {
       />
       <div className="absolute inset-0 z-[1]" aria-hidden="true"
         style={{
-          background: 'linear-gradient(180deg, hsl(140 30% 10% / 0.7), hsl(145 28% 8% / 0.8))',
+          background: 'linear-gradient(180deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.95))',
         }}
       />
       {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
