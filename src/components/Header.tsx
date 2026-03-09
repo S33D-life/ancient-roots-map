@@ -212,7 +212,7 @@ const Header = () => {
       />
       <div className="absolute inset-0 z-[1]" aria-hidden="true"
         style={{
-          background: 'linear-gradient(180deg, hsl(140 30% 10% / 0.7), hsl(145 28% 8% / 0.8))',
+          background: 'linear-gradient(180deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.95))',
         }}
       />
       {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
