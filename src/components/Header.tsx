@@ -195,7 +195,7 @@ const Header = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical overflow-visible"
         style={{
-          background: 'hsl(140 30% 10%)',
+          background: 'hsl(var(--card))',
           paddingTop: 'env(safe-area-inset-top, 0px)',
           paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',

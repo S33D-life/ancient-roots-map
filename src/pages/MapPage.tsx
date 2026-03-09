@@ -88,7 +88,7 @@ const MapPage = () => {
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
-      {!showBlessing && (
+      {!showBlessing && !blessingJustDismissed && (
         <Suspense fallback={null}>
           <MapOnboardingRitual />
           <ContextualWhisper

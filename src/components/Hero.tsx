@@ -130,7 +130,7 @@ const FallingLeaves = () => {
       drift: Math.random() * Math.PI * 2,
     });
 
-    for (let i = 0; i < 25; i++) leaves.push(spawnLeaf(true));
+    for (let i = 0; i < LEAF_COUNT; i++) leaves.push(spawnLeaf(true));
 
     const drawLeaf = (l: Leaf) => {
       ctx.save();

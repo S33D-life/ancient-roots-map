@@ -73,7 +73,6 @@ const Index = () => {
         <div id="atlas-content" className="relative overflow-hidden">
           <SectionAtmosphere theme="roots" />
           <IdentitySection />
-          <DiscoveryRow />
           <div className="section-divider max-w-xl mx-auto" />
           <ParticipationSection />
           <SupportDiscoveryRow />
