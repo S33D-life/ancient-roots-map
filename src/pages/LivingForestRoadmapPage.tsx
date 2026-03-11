@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 import StageIcon from "@/components/roadmap/StageIcon";
+import { hslAlpha } from "@/utils/colorUtils";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
@@ -125,7 +126,7 @@ const FeatureNode = ({
       </span>
       <span
         className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full font-sans"
-        style={{ background: `${meta.color}20`, color: meta.color }}
+        style={{ background: hslAlpha(meta.color, 0.12), color: meta.color }}
       >
         {meta.emoji} {feature.stage}
       </span>
@@ -172,7 +173,7 @@ const DetailPanel = ({
           <h3 className="font-serif text-base text-foreground">{feature.name}</h3>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
             <span className="text-[10px] px-2 py-0.5 rounded-full font-sans"
-              style={{ background: `${statusMeta.color}15`, color: statusMeta.color }}>
+              style={{ background: hslAlpha(statusMeta.color, 0.08), color: statusMeta.color }}>
               {statusMeta.emoji} {statusMeta.label}
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full font-sans bg-primary/5 text-muted-foreground">

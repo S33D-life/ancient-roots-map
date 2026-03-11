@@ -16,6 +16,7 @@ import {
   type RoadmapCategory,
 } from "@/data/roadmap-forest";
 import StageIcon from "@/components/roadmap/StageIcon";
+import { hslAlpha } from "@/utils/colorUtils";
 
 /** Milestone card */
 const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {
@@ -36,7 +37,7 @@ const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {
       <div className="flex items-start gap-2.5">
         {/* Icon */}
         <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border text-sm"
-          style={{ borderColor: `${stageMeta.color}40`, background: `${stageMeta.color}10` }}>
+          style={{ borderColor: hslAlpha(stageMeta.color, 0.25), background: hslAlpha(stageMeta.color, 0.06) }}>
           {feature.symbol || stageMeta.emoji}
         </span>
 
@@ -49,7 +50,7 @@ const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {
           {/* Status pill */}
           <div className="flex items-center gap-1.5">
             <span className="text-[9px] px-1.5 py-0.5 rounded-full font-sans"
-              style={{ background: `${statusMeta.color}15`, color: statusMeta.color }}>
+              style={{ background: hslAlpha(statusMeta.color, 0.08), color: statusMeta.color }}>
               {statusMeta.emoji} {statusMeta.label}
             </span>
             <StageIcon stage={feature.stage} className="w-3 h-3 text-muted-foreground/50" />
@@ -97,12 +98,12 @@ const StageSection = ({ stage, features }: { stage: RoadmapStage; features: Road
     <div className="relative">
       {/* Growth line */}
       <div className="absolute left-[18px] top-8 bottom-0 w-[2px] rounded-full"
-        style={{ background: `linear-gradient(180deg, ${meta.color}40, transparent)` }} />
+        style={{ background: `linear-gradient(180deg, ${hslAlpha(meta.color, 0.25)}, transparent)` }} />
 
       {/* Stage header */}
       <div className="flex items-center gap-2 mb-3">
         <span className="w-9 h-9 rounded-full flex items-center justify-center border-2 relative z-10"
-          style={{ borderColor: `${meta.color}60`, background: `${meta.color}15` }}>
+          style={{ borderColor: hslAlpha(meta.color, 0.38), background: hslAlpha(meta.color, 0.08) }}>
           <StageIcon stage={stage} className="w-4 h-4" />
         </span>
         <div>
