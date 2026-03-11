@@ -1,21 +1,28 @@
 /**
  * MapOfflineOverlay — subtle indicator when the map is being used offline.
  * Shows cached tile availability hint and pending queue count.
- * Dismisses properly when back online.
+ * Dismisses properly when back online. User can dismiss with X.
  */
-import { WifiOff, Database, Loader2 } from "lucide-react";
+import { WifiOff, Database, Loader2, X } from "lucide-react";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const MapOfflineOverlay = () => {
   const { status, pendingCount } = useConnectivity();
+  const [dismissed, setDismissed] = useState(false);
 
   const isOffline = status === "offline";
   const isReconnecting = status === "reconnecting";
 
+  // Reset dismissed when back online
+  useEffect(() => {
+    if (status === "online") setDismissed(false);
+  }, [status]);
+
   return (
     <AnimatePresence>
-      {(isOffline || isReconnecting) && (
+      {!dismissed && (isOffline || isReconnecting) && (
         <motion.div
           key={isReconnecting ? "reconnecting" : "offline"}
           initial={{ y: -20, opacity: 0 }}
@@ -47,6 +54,13 @@ const MapOfflineOverlay = () => {
                 <span>{pendingCount} queued</span>
               </>
             )}
+            <button
+              onClick={() => setDismissed(true)}
+              className="ml-1 p-0.5 rounded-full hover:bg-muted/50 transition-colors"
+              aria-label="Dismiss offline notification"
+            >
+              <X className="w-3 h-3" />
+            </button>
           </div>
         </motion.div>
       )}
