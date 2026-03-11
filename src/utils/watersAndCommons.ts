@@ -147,6 +147,9 @@ export interface FetchLandscapeOptions {
   includeFootpaths?: boolean;
   includeHeritage?: boolean;
   includeCastles?: boolean;
+  includeLibraries?: boolean;
+  includeBookshops?: boolean;
+  includeBotanicalGardens?: boolean;
 }
 
 /**
