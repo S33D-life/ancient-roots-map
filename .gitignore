@@ -15,6 +15,7 @@ dist-ssr
 # Environment files (never commit secrets)
 .env
 .env.*
+.env.production
 !.env.example
 !.env.example.*
 

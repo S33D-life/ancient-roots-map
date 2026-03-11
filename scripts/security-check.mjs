@@ -1,51 +1,72 @@
 #!/usr/bin/env node
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
+const TEXT_MAX_BYTES = 1_000_000;
 const SKIP_DIRS = new Set([".git", "node_modules", "dist", "coverage"]);
-const SCAN_EXT = new Set([
-  ".js",
-  ".cjs",
-  ".mjs",
-  ".ts",
-  ".tsx",
-  ".json",
-  ".md",
-  ".yml",
-  ".yaml",
-  ".toml",
-  ".html",
-  ".css",
-  ".sql",
-]);
 
-const walkFiles = (dir) => {
-  const files = [];
-  const entries = readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (SKIP_DIRS.has(entry.name)) continue;
-    const abs = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...walkFiles(abs));
-      continue;
-    }
-    if (!entry.isFile()) continue;
-    const rel = path.relative(ROOT, abs);
-    const ext = path.extname(entry.name).toLowerCase();
-    if (SCAN_EXT.has(ext) || entry.name === ".env.example") {
-      files.push(rel);
-    }
+const decodeTracked = (raw) =>
+  raw
+    .toString("utf8")
+    .split("\0")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+const isBinary = (buf) => {
+  for (let i = 0; i < Math.min(buf.length, 2048); i += 1) {
+    if (buf[i] === 0) return true;
   }
-  return files;
+  return false;
 };
 
-const forbiddenEnvFiles = [".env", ".env.local", ".env.production", ".env.development"];
-const presentForbidden = forbiddenEnvFiles.filter((file) => existsSync(path.join(ROOT, file)));
-if (presentForbidden.length > 0) {
-  console.error("Blocked: local env files present in repository root:");
-  presentForbidden.forEach((file) => console.error(` - ${file}`));
-  console.error("Move secrets to untracked local env files outside git scope before committing.");
+const collectFiles = (dir) => {
+  const out = [];
+  const stack = [dir];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) break;
+    const entries = readdirSync(current, { withFileTypes: true });
+    for (const entry of entries) {
+      if (SKIP_DIRS.has(entry.name)) continue;
+      const abs = path.join(current, entry.name);
+      const rel = path.relative(ROOT, abs);
+      if (entry.isDirectory()) {
+        stack.push(abs);
+      } else if (entry.isFile()) {
+        out.push(rel);
+      }
+    }
+  }
+
+  return out;
+};
+
+let tracked = [];
+try {
+  tracked = decodeTracked(
+    execSync("git ls-files -z", {
+      encoding: "buffer",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 10_000,
+    }),
+  );
+} catch {
+  tracked = collectFiles(ROOT);
+}
+
+const forbiddenEnv = tracked.filter((file) => {
+  const base = path.basename(file);
+  if (!existsSync(path.join(ROOT, file))) return false;
+  if (base === ".env.example") return false;
+  return /^\.env(\..+)?$/.test(base);
+});
+
+if (forbiddenEnv.length > 0) {
+  console.error("Blocked: committed env files detected:");
+  forbiddenEnv.forEach((file) => console.error(` - ${file}`));
   process.exit(1);
 }
 
@@ -66,9 +87,22 @@ const secretPatterns = [
 
 const allowList = new Set([".env.example"]);
 const findings = [];
-for (const file of walkFiles(ROOT)) {
+for (const file of tracked) {
+  if (file.startsWith("dist/") || file.startsWith("node_modules/")) continue;
   if (allowList.has(path.basename(file))) continue;
-  const text = readFileSync(path.join(ROOT, file), "utf8");
+
+  let buf;
+  try {
+    buf = readFileSync(path.join(ROOT, file));
+  } catch {
+    continue;
+  }
+  if (buf.length === 0 || buf.length > TEXT_MAX_BYTES || isBinary(buf)) continue;
+
+  const st = statSync(path.join(ROOT, file));
+  if (!st.isFile()) continue;
+
+  const text = buf.toString("utf8");
   for (const pattern of secretPatterns) {
     if (pattern.regex.test(text)) {
       findings.push({ file, label: pattern.label });

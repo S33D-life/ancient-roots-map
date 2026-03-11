@@ -1,4 +1,4 @@
-import { supabaseEnv } from "@/config/env";
+import { isSupabaseConfigured, supabaseEnv } from "@/config/env";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SpeciesVisionPrediction = {
@@ -20,7 +20,9 @@ export type SpeciesVisionResult = {
 };
 
 const APP_ENDPOINT = "/api/identify-tree";
-const SUPABASE_FALLBACK_ENDPOINT = `${supabaseEnv.url}/functions/v1/identify-tree`;
+const SUPABASE_FALLBACK_ENDPOINT = supabaseEnv
+  ? `${supabaseEnv.url}/functions/v1/identify-tree`
+  : null;
 
 const fileToDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -41,25 +43,43 @@ const normalizePrediction = (input: unknown): SpeciesVisionPrediction | null => 
   const rawConfidence = typeof row.confidence === "number" ? row.confidence : 0;
   const confidence = Math.max(0, Math.min(1, rawConfidence > 1 ? rawConfidence / 100 : rawConfidence));
   const source = row.source === "plantnet" ? "plantnet" : "inaturalist";
-  const sourceUrl = typeof row.sourceUrl === "string" ? row.sourceUrl : SUPABASE_FALLBACK_ENDPOINT;
+  const sourceUrl = typeof row.sourceUrl === "string"
+    ? row.sourceUrl
+    : SUPABASE_FALLBACK_ENDPOINT ?? APP_ENDPOINT;
 
   return { scientificName, commonName, confidence, source, sourceUrl };
 };
 
 export const identifyTreeSpeciesFromPhoto = async (file: File): Promise<SpeciesVisionResult> => {
+  if (!isSupabaseConfigured) {
+    return {
+      predictions: [],
+      provider: "none",
+      fallbackUsed: false,
+      threshold: 0.6,
+      identifiedAt: new Date().toISOString(),
+      rawSnapshot: null,
+      error: "Species identification is unavailable until Supabase environment variables are configured.",
+    };
+  }
+
   try {
     const imageData = await fileToDataUrl(file);
     const { data: { session } } = await supabase.auth.getSession();
 
     const headers = {
       "Content-Type": "application/json",
-      apikey: supabaseEnv.anonKey,
+      ...(supabaseEnv ? { apikey: supabaseEnv.anonKey } : {}),
       ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
     };
 
     let payload: Record<string, unknown> | null = null;
     let lastError: Error | null = null;
-    for (const endpoint of [APP_ENDPOINT, SUPABASE_FALLBACK_ENDPOINT]) {
+    const endpoints = SUPABASE_FALLBACK_ENDPOINT
+      ? [APP_ENDPOINT, SUPABASE_FALLBACK_ENDPOINT]
+      : [APP_ENDPOINT];
+
+    for (const endpoint of endpoints) {
       try {
         const response = await fetch(endpoint, {
           method: "POST",
