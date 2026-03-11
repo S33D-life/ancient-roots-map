@@ -221,6 +221,9 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         speciesFamily={receiptData.speciesFamily}
         actionLabel="Heart Collected from Bloomed Seed"
       />
+
+      {/* Seed Burst celebration */}
+      <SeedBurst visible={showBurst} />
     </div>
   );
 };
