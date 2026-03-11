@@ -8,12 +8,12 @@ export interface WandererStreak {
   streak_tier: string;
 }
 
-const TIER_META: Record<string, { label: string; emoji: string; color: string }> = {
-  none: { label: "No streak", emoji: "🌑", color: "hsl(var(--muted-foreground))" },
-  seedling: { label: "Seedling", emoji: "🌱", color: "hsl(120, 40%, 50%)" },
-  sapling: { label: "Sapling", emoji: "🌿", color: "hsl(100, 50%, 45%)" },
-  young_tree: { label: "Young Tree", emoji: "🌳", color: "hsl(80, 55%, 40%)" },
-  guardian: { label: "Guardian", emoji: "👑", color: "hsl(45, 80%, 50%)" },
+const TIER_META: Record<string, { label: string; emoji: string; color: string; threshold: number }> = {
+  none: { label: "No streak", emoji: "🌑", color: "hsl(var(--muted-foreground))", threshold: 0 },
+  seedling: { label: "Seedling", emoji: "🌱", color: "hsl(120, 40%, 50%)", threshold: 3 },
+  sapling: { label: "Sapling", emoji: "🌿", color: "hsl(100, 50%, 45%)", threshold: 7 },
+  young_tree: { label: "Young Tree", emoji: "🌳", color: "hsl(80, 55%, 40%)", threshold: 21 },
+  guardian: { label: "Forest Guardian", emoji: "👑", color: "hsl(45, 80%, 50%)", threshold: 90 },
 };
 
 export function getTierMeta(tier: string) {
