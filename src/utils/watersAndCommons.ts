@@ -420,6 +420,22 @@ function classifyElement(
     return { id: `wc-wt-${id}`, lat, lng, category: "waterway", name, subtype: tags.waterway, source: "osm", geometry };
   }
 
+  // Libraries
+  if (tags.amenity === "library") {
+    return { id: `wc-lb-${id}`, lat, lng, category: "library", name, subtype: "library", source: "osm" };
+  }
+
+  // Bookshops
+  if (tags.shop === "books") {
+    return { id: `wc-bs-${id}`, lat, lng, category: "bookshop", name, subtype: "bookshop", source: "osm" };
+  }
+
+  // Botanical gardens
+  if ((tags.leisure === "garden" && tags["garden:type"] === "botanical") ||
+      (tags.tourism === "attraction" && tags.attraction === "botanical_garden")) {
+    return { id: `wc-bg-${id}`, lat, lng, category: "botanical_garden", name, subtype: "botanical garden", source: "osm" };
+  }
+
   return null;
 }
 
