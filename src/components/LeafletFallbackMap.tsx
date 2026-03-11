@@ -3452,7 +3452,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               : GUARDIAN_TAGS[context.category].color;
 
             // Pulsing outer ring for trees near paths/water (zoom >= 14)
-            if ((isPathNearby || isWaterNearby) && zoom >= 14) {
+            if ((isPathNearby || isWaterNearby) && currentZoom >= 14) {
               const pulseDiv = L.divIcon({
                 className: "tree-near-path-marker",
                 html: `<div class="tree-near-path" style="width:28px;height:28px;background:${glowColor};border:1.5px solid ${ringColor}60;"></div>`,
