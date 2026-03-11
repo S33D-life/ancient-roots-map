@@ -193,8 +193,17 @@ const App = () => {
     );
   }
 
-  // Show loading skeleton while auth state resolves — prevents premature
-  // redirects and white-screen flashes on page refresh
+  const CelebrationOverlay = () => {
+    const { celebration, dismiss } = useTreeCelebration();
+    if (!celebration) return null;
+    return (
+      <Suspense fallback={null}>
+        <TreeMappedCelebration treeName={celebration.treeName} species={celebration.species} onComplete={dismiss} />
+      </Suspense>
+    );
+  };
+
+  // Show loading skeleton while auth state resolves
   if (!authReady) {
     return <PageSkeleton variant="default" />;
   }

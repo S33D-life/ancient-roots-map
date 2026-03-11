@@ -305,6 +305,11 @@ const DashboardPage = () => {
 
       const { error } = await supabase.from("trees").insert(treeData.map(t => ({ ...t, created_by: user?.id })));
       if (error) throw error;
+      // Dispatch celebration for last imported tree
+      if (treeData.length > 0) {
+        const last = treeData[treeData.length - 1];
+        window.dispatchEvent(new CustomEvent("tree-created", { detail: { treeName: last.name, species: last.species } }));
+      }
 
       toast({ title: "Import successful", description: `Imported ${treeData.length} trees` });
       if (user) fetchUserTrees(user.id);

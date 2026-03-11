@@ -90,6 +90,8 @@ const OfflineSyncBanner = () => {
           if (!error) {
             await removePendingTree(tree.id);
             synced++;
+            // Dispatch celebration event
+            window.dispatchEvent(new CustomEvent("tree-created", { detail: { treeName: tree.name, species: tree.species } }));
           }
         } catch (err) {
           console.error("Sync failed for tree:", tree.id, err);
