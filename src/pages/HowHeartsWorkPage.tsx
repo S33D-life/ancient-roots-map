@@ -90,6 +90,7 @@ const HowHeartsWorkPage = () => (
         <Section icon={<BarChart3 className="w-4 h-4 text-primary" />} title="Influence & Staking">
           <p><strong>Influence Tokens</strong> are a separate layer — earned through stewardship actions and used to vote on offerings within tree, species, or place scopes. You have a daily influence budget of 50 tokens.</p>
           <p><strong>Market Staking</strong> — in Cycle Markets, you can stake seeds on ecological outcomes. If your prediction is correct, staked seeds convert to hearts. This is risk-based and irreversible.</p>
+          <p className="text-[10px] text-muted-foreground/50 italic mt-1">Long-term vision: Some Heart distribution may relate to DAO governance, treasury funding, and local pod-hive allocation as the ecosystem scales.</p>
         </Section>
 
         <Section icon={<Lock className="w-4 h-4 text-primary" />} title="Anti-Abuse Protections">
