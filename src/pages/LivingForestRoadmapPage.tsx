@@ -1,10 +1,11 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, TreeDeciduous, Sprout, Leaf, ExternalLink } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
+import StageIcon from "@/components/roadmap/StageIcon";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
@@ -17,17 +18,6 @@ import {
   type RoadmapStatus,
   type RoadmapCategory,
 } from "@/data/roadmap-forest";
-
-/* ── stage icon helper ── */
-const StageIcon = ({ stage, className = "" }: { stage: RoadmapStage; className?: string }) => {
-  const base = `shrink-0 ${className}`;
-  switch (stage) {
-    case "seed":    return <Sprout className={base} />;
-    case "sprout":  return <Leaf className={base} />;
-    case "rooted":  return <TreeDeciduous className={base} />;
-    case "ancient": return <Sparkles className={base} />;
-  }
-};
 
 /* ── mycelial SVG connections ── */
 const MycelialLines = ({
