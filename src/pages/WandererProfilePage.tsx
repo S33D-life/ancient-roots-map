@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -150,7 +150,7 @@ const WandererProfilePage = () => {
           </Card>
         </div>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

@@ -2,7 +2,7 @@
  * HiveUserBalance — shows the logged-in user's personal species hearts
  * balance for a given hive family.
  */
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart } from "lucide-react";
 
@@ -14,21 +14,21 @@ interface Props {
 }
 
 const HiveUserBalance = ({ userId, family, accentHsl, icon }: Props) => {
-  const [balance, setBalance] = useState<number | null>(null);
+  const { data: balance } = useQuery({
+    queryKey: ["hive-user-balance", userId, family],
+    enabled: Boolean(userId),
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("species_heart_transactions")
+        .select("amount")
+        .eq("user_id", userId!)
+        .eq("species_family", family);
+      return (data || []).reduce((s, tx) => s + tx.amount, 0);
+    },
+  });
 
-  useEffect(() => {
-    if (!userId) return;
-    supabase
-      .from("species_heart_transactions")
-      .select("amount")
-      .eq("user_id", userId)
-      .eq("species_family", family)
-      .then(({ data }) => {
-        setBalance((data || []).reduce((s, tx) => s + tx.amount, 0));
-      });
-  }, [userId, family]);
-
-  if (!userId || balance === null || balance === 0) return null;
+  if (!userId || !balance) return null;
 
   return (
     <div

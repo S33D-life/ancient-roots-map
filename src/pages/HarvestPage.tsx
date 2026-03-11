@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Plus, Leaf, TreeDeciduous, Calendar, MapPin, ArrowRight } from "lucide-
 import { useHarvestListings, CATEGORY_LABELS, AVAILABILITY_LABELS } from "@/hooks/use-harvest-listings";
 import { useSeasonalEvents } from "@/hooks/use-seasonal-events";
 import HarvestCard from "@/components/harvest/HarvestCard";
-import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
@@ -15,11 +15,7 @@ import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 const CreateHarvestForm = lazy(() => import("@/components/harvest/CreateHarvestForm"));
 
 const HarvestPage = () => {
-  const [user, setUser] = useState<{ id: string } | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ? { id: u.id } : null));
-  }, []);
+  const { user } = useCurrentUser();
 
   const [showCreate, setShowCreate] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");

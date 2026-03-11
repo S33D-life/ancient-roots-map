@@ -3,7 +3,7 @@
  * 
  * Harmonised with: Map, Blooming Clock, Harvest Exchange, TEOTAG.
  */
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } from "@/hooks/use-cosmic-clock";
 import { useFoodCycles } from "@/hooks/use-food-cycles";
@@ -12,7 +12,7 @@ import { usePhenology, getPhaseDisplay } from "@/hooks/use-phenology";
 import { useMarkets } from "@/hooks/use-markets";
 import { useSeasonalEvents } from "@/hooks/use-seasonal-events";
 import { getTzolkinDay, formatTzolkinLabel } from "@/utils/mayanTzolkin";
-import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity, TreeDeciduous, MapPin, Calendar, ArrowRight } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
@@ -25,14 +25,10 @@ const CosmicCalendarPage = () => {
   const { lunar, season, countdown } = useCosmicClock();
   const { foods } = useFoodCycles();
   const { markets: openMarkets } = useMarkets({ status: "open" });
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useCurrentUser();
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
   const [viewYear, setViewYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id || null));
-  }, []);
 
   const { activeLenses, getLensDataForDate, todayMayan, prefs } = useCalendarLenses(userId);
   const { activeLens: seasonalLens, isLensMonth } = useSeasonalLens();

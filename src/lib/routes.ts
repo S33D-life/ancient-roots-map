@@ -32,6 +32,28 @@ export const ROUTES = {
   SUPPORT: "/support",
   /** Guardian Harvest Exchange */
   HARVEST: "/harvest",
+  /** Harvest detail */
+  HARVEST_DETAIL: (id: string) => `/harvest/${id}` as const,
   /** Living Forest Roadmap */
   ROADMAP: "/roadmap",
+  /** Species Hives index */
+  HIVES: "/hives",
+  /** Species Hive dashboard */
+  HIVE: (family: string) => `/hive/${family}` as const,
+  /** Cosmic Calendar */
+  COSMIC: "/cosmic",
+  /** Tree detail */
+  TREE: (id: string) => `/tree/${id}` as const,
+  /** Wanderer profile */
+  WANDERER: (id: string) => `/wanderer/${id}` as const,
+  /** Authentication */
+  AUTH: "/auth",
+  /** Add tree */
+  ADD_TREE: "/add-tree",
+  /** Bug garden */
+  BUG_GARDEN: "/bug-garden",
+  /** Bio-regions index */
+  BIO_REGIONS: "/atlas/bio-regions",
+  /** Bio-region detail */
+  BIO_REGION: (slug: string) => `/atlas/bio-regions/${slug}` as const,
 } as const;
