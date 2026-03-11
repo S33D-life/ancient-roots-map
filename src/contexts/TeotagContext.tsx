@@ -1,6 +1,6 @@
 /**
  * TeotagContext — captures application state for context-aware TEOTAG intelligence.
- * Provides current route, map state, selected features, and library section
+ * Provides current route, map state, page-level context (tree, harvest, staff, etc.)
  * so TEOTAG can tailor its guidance to where the user is in the S33D world.
  */
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
@@ -21,7 +21,7 @@ export interface MapContext {
 }
 
 export interface LibraryContext {
-  section?: string; // e.g. "gallery", "music-room", "staff-room", "ledger"
+  section?: string;
   selectedBookTitle?: string;
   selectedBookAuthor?: string;
   selectedTreeId?: string;
@@ -32,25 +32,51 @@ export interface CouncilContext {
   activeCouncilName?: string;
 }
 
-export interface TeotagContextValue {
-  /** Auto-detected mode based on current route */
-  activeMode: TeotagMode;
-  /** Current route pathname */
-  currentRoute: string;
-  /** Map-specific context */
-  mapContext: MapContext;
-  setMapContext: (ctx: Partial<MapContext>) => void;
-  /** Library-specific context */
-  libraryContext: LibraryContext;
-  setLibraryContext: (ctx: Partial<LibraryContext>) => void;
-  /** Council-specific context */
-  councilContext: CouncilContext;
-  setCouncilContext: (ctx: Partial<CouncilContext>) => void;
-  /** Build the context summary string for the AI prompt */
-  buildContextSummary: () => string;
-  /** Suggested quick actions based on current context */
-  quickActions: QuickAction[];
+/* ── Page-level context signals ─────────────────── */
+
+export interface TreePageContext {
+  id: string;
+  name: string;
+  species?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  hasHarvestListings?: boolean;
+  bloomStatus?: string;
+  offeringCount?: number;
 }
+
+export interface HarvestPageContext {
+  id?: string;
+  produceName?: string;
+  category?: string;
+  availabilityType?: string;
+  treeId?: string;
+  treeName?: string;
+  locationName?: string;
+  seasonStart?: number;
+  seasonEnd?: number;
+}
+
+export interface StaffPageContext {
+  code?: string;
+  staffName?: string;
+  species?: string;
+}
+
+export interface VaultPageContext {
+  section?: string;
+  assetCount?: number;
+}
+
+export interface PageContext {
+  tree?: TreePageContext;
+  harvest?: HarvestPageContext;
+  staff?: StaffPageContext;
+  vault?: VaultPageContext;
+}
+
+/* ── Quick actions ──────────────────────────────── */
 
 export interface QuickAction {
   label: string;
@@ -58,19 +84,50 @@ export interface QuickAction {
   emoji: string;
 }
 
+/* ── Context value ──────────────────────────────── */
+
+export interface TeotagContextValue {
+  activeMode: TeotagMode;
+  currentRoute: string;
+  mapContext: MapContext;
+  setMapContext: (ctx: Partial<MapContext>) => void;
+  libraryContext: LibraryContext;
+  setLibraryContext: (ctx: Partial<LibraryContext>) => void;
+  councilContext: CouncilContext;
+  setCouncilContext: (ctx: Partial<CouncilContext>) => void;
+  pageContext: PageContext;
+  setPageContext: (ctx: Partial<PageContext>) => void;
+  clearPageContext: () => void;
+  buildContextSummary: () => string;
+  quickActions: QuickAction[];
+}
+
 const TeotagContext = createContext<TeotagContextValue | null>(null);
+
+/* ── Mode detection ─────────────────────────────── */
 
 function detectMode(pathname: string): TeotagMode {
   if (pathname.startsWith("/map") || pathname.startsWith("/atlas") || pathname.startsWith("/hive")) return "guide";
-  if (pathname.startsWith("/harvest")) return "guide"; // Harvest is place+season oriented
-  if (pathname.startsWith("/cosmic")) return "guide"; // Calendar is rhythm-oriented
+  if (pathname.startsWith("/tree/")) return "guide";
+  if (pathname.startsWith("/harvest")) return "guide";
+  if (pathname.startsWith("/cosmic")) return "guide";
+  if (pathname.startsWith("/staff/")) return "guide";
   if (pathname.startsWith("/library") || pathname.startsWith("/vault") || pathname.startsWith("/heartwood") || pathname.startsWith("/dashboard")) return "librarian";
   if (pathname.startsWith("/council")) return "scribe";
   return "guide";
 }
 
-function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext, route: string, seasonalLens?: string | null): QuickAction[] {
-  // Spring Lens overrides — prioritise spring-themed prompts
+/* ── Quick actions builder ──────────────────────── */
+
+function getQuickActions(
+  mode: TeotagMode,
+  mapCtx: MapContext,
+  libraryCtx: LibraryContext,
+  pageCtx: PageContext,
+  route: string,
+  seasonalLens?: string | null,
+): QuickAction[] {
+  // Spring Lens overrides
   if (seasonalLens === "spring") {
     return [
       { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
@@ -80,7 +137,40 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
     ];
   }
 
-  // Harvest-specific quick actions
+  // ── Tree detail page ──────────────────────────
+  if (pageCtx.tree) {
+    const t = pageCtx.tree;
+    const actions: QuickAction[] = [
+      { label: `About ${t.name}`, prompt: `Tell me about ${t.name}${t.species ? ` (${t.species})` : ""}. What makes this tree special?`, emoji: "🌳" },
+      { label: "Seasonal rhythm", prompt: `What is the seasonal cycle for ${t.species || t.name}? When does it bloom, fruit, and rest?`, emoji: "🌸" },
+    ];
+    if (t.hasHarvestListings) {
+      actions.push({ label: "View produce", prompt: `What harvests or produce are available from ${t.name}?`, emoji: "🍎" });
+    }
+    actions.push({ label: "Nearby trees", prompt: `What other ancient trees are near ${t.name}? Show me walking routes.`, emoji: "🥾" });
+    if (t.bloomStatus) {
+      actions.push({ label: "Bloom status", prompt: `${t.name} is currently ${t.bloomStatus}. Tell me more about this phase.`, emoji: "🌿" });
+    }
+    return actions.slice(0, 4);
+  }
+
+  // ── Harvest detail / listing page ─────────────
+  if (pageCtx.harvest?.id) {
+    const h = pageCtx.harvest;
+    const actions: QuickAction[] = [
+      { label: `About ${h.produceName || "this harvest"}`, prompt: `Tell me about ${h.produceName || "this harvest listing"}. What can I learn about this produce?`, emoji: "🍎" },
+    ];
+    if (h.treeId) {
+      actions.push({ label: "View source tree", prompt: `Tell me about the tree that produces this ${h.produceName || "harvest"}.`, emoji: "🌳" });
+    }
+    actions.push(
+      { label: "Season guide", prompt: `When is the best time to harvest ${h.produceName || "this produce"}? Show me the seasonal window.`, emoji: "📅" },
+      { label: "Similar harvests", prompt: `What other ${h.category || "produce"} harvests are available nearby?`, emoji: "🌿" },
+    );
+    return actions.slice(0, 4);
+  }
+
+  // ── Harvest index page ────────────────────────
   if (route.startsWith("/harvest")) {
     return [
       { label: "Harvests near me", prompt: "What harvests are happening near me this month?", emoji: "🍎" },
@@ -90,7 +180,17 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
     ];
   }
 
-  // Calendar-specific quick actions
+  // ── Staff page ────────────────────────────────
+  if (pageCtx.staff?.code) {
+    const s = pageCtx.staff;
+    return [
+      { label: `About this staff`, prompt: `Tell me about the Walking Staff "${s.staffName || s.code}"${s.species ? ` crafted from ${s.species}` : ""}.`, emoji: "🪵" },
+      { label: "Staff ceremonies", prompt: "What ceremonies and rituals are connected to Walking Staffs in S33D?", emoji: "✨" },
+      { label: "Species lore", prompt: `What is the significance of ${s.species || "this wood species"} in the grove?`, emoji: "🌿" },
+    ];
+  }
+
+  // ── Calendar page ─────────────────────────────
   if (route.startsWith("/cosmic")) {
     return [
       { label: "What's happening now", prompt: "What seasonal events and harvests are happening this month?", emoji: "📅" },
@@ -100,6 +200,15 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
     ];
   }
 
+  // ── Vault page ────────────────────────────────
+  if (pageCtx.vault || route.startsWith("/vault")) {
+    return [
+      { label: "My vault", prompt: "What assets and anchored records do I have in my vault?", emoji: "🔐" },
+      { label: "What is anchoring?", prompt: "Explain how content anchoring and CID preservation works in S33D.", emoji: "⚓" },
+    ];
+  }
+
+  // ── Map mode (default guide) ──────────────────
   if (mode === "guide") {
     const actions: QuickAction[] = [
       { label: "Nearby features", prompt: "What interesting features are near the current map view?", emoji: "🗺️" },
@@ -128,7 +237,7 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
     ];
     if (libraryCtx.selectedBookTitle) {
       actions.unshift({
-        label: `About this book`,
+        label: "About this book",
         prompt: `Tell me about "${libraryCtx.selectedBookTitle}" by ${libraryCtx.selectedBookAuthor || "unknown"}.`,
         emoji: "📖",
       });
@@ -150,6 +259,91 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
   ];
 }
 
+/* ── Context summary builder ────────────────────── */
+
+function buildSummary(
+  pathname: string,
+  mode: TeotagMode,
+  mapCtx: MapContext,
+  libraryCtx: LibraryContext,
+  councilCtx: CouncilContext,
+  pageCtx: PageContext,
+  activeLens: string | null,
+  lensConfig: { label: string; emoji: string; months: number[]; keywords: string[] } | null,
+): string {
+  const parts: string[] = [];
+  parts.push(`Route: ${pathname}`);
+  parts.push(`Mode: ${mode}`);
+
+  // Page-level context (highest specificity)
+  if (pageCtx.tree) {
+    const t = pageCtx.tree;
+    parts.push(`Viewing tree: ${t.name} (ID: ${t.id})`);
+    if (t.species) parts.push(`Species: ${t.species}`);
+    if (t.country) parts.push(`Country: ${t.country}`);
+    if (t.latitude && t.longitude) parts.push(`Location: ${t.latitude.toFixed(4)}, ${t.longitude.toFixed(4)}`);
+    if (t.bloomStatus) parts.push(`Current bloom status: ${t.bloomStatus}`);
+    if (t.hasHarvestListings) parts.push(`This tree has active harvest listings`);
+    if (t.offeringCount) parts.push(`Offerings: ${t.offeringCount}`);
+  }
+
+  if (pageCtx.harvest) {
+    const h = pageCtx.harvest;
+    if (h.id) {
+      parts.push(`Viewing harvest listing: ${h.produceName || "unknown"}`);
+      if (h.category) parts.push(`Category: ${h.category}`);
+      if (h.availabilityType) parts.push(`Availability: ${h.availabilityType}`);
+      if (h.locationName) parts.push(`Location: ${h.locationName}`);
+      if (h.seasonStart && h.seasonEnd) {
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        parts.push(`Season: ${months[h.seasonStart - 1] || "?"} – ${months[h.seasonEnd - 1] || "?"}`);
+      }
+      if (h.treeName) parts.push(`Source tree: ${h.treeName}`);
+    }
+  }
+
+  if (pageCtx.staff) {
+    const s = pageCtx.staff;
+    parts.push(`Viewing Walking Staff: ${s.staffName || s.code}`);
+    if (s.species) parts.push(`Wood species: ${s.species}`);
+  }
+
+  if (pageCtx.vault) {
+    parts.push(`Viewing vault${pageCtx.vault.section ? `: ${pageCtx.vault.section}` : ""}`);
+    if (pageCtx.vault.assetCount) parts.push(`Assets: ${pageCtx.vault.assetCount}`);
+  }
+
+  // Map context
+  if (mode === "guide" && mapCtx.center && !pageCtx.tree) {
+    parts.push(`Map center: ${mapCtx.center.lat.toFixed(4)}, ${mapCtx.center.lng.toFixed(4)}`);
+    if (mapCtx.zoom) parts.push(`Zoom: ${mapCtx.zoom}`);
+    if (mapCtx.selectedTreeName) parts.push(`Selected tree: ${mapCtx.selectedTreeName} (${mapCtx.selectedTreeSpecies || "unknown species"})`);
+    if (mapCtx.visibleTreeCount !== undefined) parts.push(`Visible trees: ${mapCtx.visibleTreeCount}`);
+    if (mapCtx.activeFilters?.length) parts.push(`Active filters: ${mapCtx.activeFilters.join(", ")}`);
+    if (mapCtx.activeLayers?.length) parts.push(`Active layers: ${mapCtx.activeLayers.join(", ")}`);
+  }
+
+  if (mode === "librarian") {
+    if (libraryCtx.section) parts.push(`Library section: ${libraryCtx.section}`);
+    if (libraryCtx.selectedBookTitle) parts.push(`Viewing book: "${libraryCtx.selectedBookTitle}" by ${libraryCtx.selectedBookAuthor || "unknown"}`);
+  }
+
+  if (mode === "scribe" && councilCtx.activeCouncilName) {
+    parts.push(`Council: ${councilCtx.activeCouncilName}`);
+  }
+
+  // Seasonal lens
+  if (activeLens && lensConfig) {
+    parts.push(`Seasonal lens: ${lensConfig.label} (${lensConfig.emoji})`);
+    parts.push(`Lens emphasis months: ${lensConfig.months.join(", ")}`);
+    parts.push(`Lens keywords: ${lensConfig.keywords.slice(0, 5).join(", ")}`);
+  }
+
+  return parts.join("\n");
+}
+
+/* ── Provider ───────────────────────────────────── */
+
 export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
   const activeMode = detectMode(pathname);
@@ -158,6 +352,7 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   const [mapContext, setMapContextState] = useState<MapContext>({});
   const [libraryContext, setLibraryContextState] = useState<LibraryContext>({});
   const [councilContext, setCouncilContextState] = useState<CouncilContext>({});
+  const [pageContext, setPageContextState] = useState<PageContext>({});
 
   // Listen for map context events from LeafletFallbackMap
   useEffect(() => {
@@ -171,6 +366,11 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("teotag-map-context", handler);
   }, []);
 
+  // Clear page context on route change
+  useEffect(() => {
+    setPageContextState({});
+  }, [pathname]);
+
   const setMapContext = useCallback((ctx: Partial<MapContext>) => {
     setMapContextState(prev => ({ ...prev, ...ctx }));
   }, []);
@@ -183,42 +383,22 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
     setCouncilContextState(prev => ({ ...prev, ...ctx }));
   }, []);
 
-  const buildContextSummary = useCallback((): string => {
-    const parts: string[] = [];
-    parts.push(`Route: ${pathname}`);
-    parts.push(`Mode: ${activeMode}`);
+  const setPageContext = useCallback((ctx: Partial<PageContext>) => {
+    setPageContextState(prev => ({ ...prev, ...ctx }));
+  }, []);
 
-    if (activeMode === "guide" && mapContext.center) {
-      parts.push(`Map center: ${mapContext.center.lat.toFixed(4)}, ${mapContext.center.lng.toFixed(4)}`);
-      if (mapContext.zoom) parts.push(`Zoom: ${mapContext.zoom}`);
-      if (mapContext.selectedTreeName) parts.push(`Selected tree: ${mapContext.selectedTreeName} (${mapContext.selectedTreeSpecies || "unknown species"})`);
-      if (mapContext.visibleTreeCount !== undefined) parts.push(`Visible trees: ${mapContext.visibleTreeCount}`);
-      if (mapContext.activeFilters?.length) parts.push(`Active filters: ${mapContext.activeFilters.join(", ")}`);
-      if (mapContext.activeLayers?.length) parts.push(`Active layers: ${mapContext.activeLayers.join(", ")}`);
-    }
+  const clearPageContext = useCallback(() => {
+    setPageContextState({});
+  }, []);
 
-    if (activeMode === "librarian") {
-      if (libraryContext.section) parts.push(`Library section: ${libraryContext.section}`);
-      if (libraryContext.selectedBookTitle) parts.push(`Viewing book: "${libraryContext.selectedBookTitle}" by ${libraryContext.selectedBookAuthor || "unknown"}`);
-    }
-
-    if (activeMode === "scribe" && councilContext.activeCouncilName) {
-      parts.push(`Council: ${councilContext.activeCouncilName}`);
-    }
-
-    // Seasonal lens context
-    if (activeLens && lensConfig) {
-      parts.push(`Seasonal lens: ${lensConfig.label} (${lensConfig.emoji})`);
-      parts.push(`Lens emphasis months: ${lensConfig.months.join(", ")}`);
-      parts.push(`Lens keywords: ${lensConfig.keywords.slice(0, 5).join(", ")}`);
-    }
-
-    return parts.join("\n");
-  }, [pathname, activeMode, mapContext, libraryContext, councilContext, activeLens, lensConfig]);
+  const buildContextSummary = useCallback(
+    () => buildSummary(pathname, activeMode, mapContext, libraryContext, councilContext, pageContext, activeLens, lensConfig),
+    [pathname, activeMode, mapContext, libraryContext, councilContext, pageContext, activeLens, lensConfig],
+  );
 
   const quickActions = useMemo(
-    () => getQuickActions(activeMode, mapContext, libraryContext, pathname, activeLens),
-    [activeMode, mapContext, libraryContext, pathname, activeLens]
+    () => getQuickActions(activeMode, mapContext, libraryContext, pageContext, pathname, activeLens),
+    [activeMode, mapContext, libraryContext, pageContext, pathname, activeLens],
   );
 
   const value = useMemo<TeotagContextValue>(() => ({
@@ -230,9 +410,12 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
     setLibraryContext,
     councilContext,
     setCouncilContext,
+    pageContext,
+    setPageContext,
+    clearPageContext,
     buildContextSummary,
     quickActions,
-  }), [activeMode, pathname, mapContext, setMapContext, libraryContext, setLibraryContext, councilContext, setCouncilContext, buildContextSummary, quickActions]);
+  }), [activeMode, pathname, mapContext, setMapContext, libraryContext, setLibraryContext, councilContext, setCouncilContext, pageContext, setPageContext, clearPageContext, buildContextSummary, quickActions]);
 
   return (
     <TeotagContext.Provider value={value}>
