@@ -365,6 +365,7 @@ const DashboardPage = () => {
       <div className="space-y-8">
         <FirstEncounterFunnel userId={userId} />
         <GroveIdentityCard userId={userId} userName={p?.full_name} />
+        <ContributionPathways />
         <StreakBadge streak={streak} />
         <SeasonalQuestCard
           quests={quests || []}

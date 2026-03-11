@@ -195,13 +195,26 @@ const App = () => {
   }
 
   const CelebrationOverlay = () => {
-    const { celebration, dismiss } = useTreeCelebration();
-    if (!celebration) return null;
-    return (
-      <Suspense fallback={null}>
-        <TreeMappedCelebration treeName={celebration.treeName} species={celebration.species} onComplete={dismiss} />
-      </Suspense>
-    );
+    const { celebration, dismiss: dismissTree } = useTreeCelebration();
+    const { event: contribEvent, dismiss: dismissContrib } = useContributionCelebration();
+
+    // Tree creation events (legacy)
+    if (celebration) {
+      return (
+        <Suspense fallback={null}>
+          <ContributionCelebration event={{ type: "tree", name: celebration.treeName, species: celebration.species }} onComplete={dismissTree} />
+        </Suspense>
+      );
+    }
+    // Offering / harvest events
+    if (contribEvent) {
+      return (
+        <Suspense fallback={null}>
+          <ContributionCelebration event={contribEvent} onComplete={dismissContrib} />
+        </Suspense>
+      );
+    }
+    return null;
   };
 
   // Show loading skeleton while auth state resolves
