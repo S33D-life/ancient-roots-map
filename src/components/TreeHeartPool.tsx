@@ -122,7 +122,7 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           />
         </div>
         <p className="text-[10px] text-muted-foreground/60 font-serif italic">
-          Every 144 hearts → 12 released to wanderers
+          Every 144 S33D Hearts → 12 released to wanderers
         </p>
       </div>
 

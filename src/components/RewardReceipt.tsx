@@ -75,7 +75,7 @@ const RewardReceipt = ({
                 transition={{ delay: 0.3 }}
               >
                 <span className="text-4xl font-serif font-bold text-primary tabular-nums">+{totalHearts}</span>
-                <p className="text-sm text-muted-foreground font-serif mt-1">Hearts earned</p>
+                <p className="text-sm text-muted-foreground font-serif mt-1">S33D Hearts earned</p>
               </motion.div>
 
               <motion.p

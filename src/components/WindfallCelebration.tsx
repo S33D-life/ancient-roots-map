@@ -138,7 +138,7 @@ const WindfallCelebration = ({ active, onComplete }: WindfallCelebrationProps) =
           >
             <p className="text-lg font-bold tracking-wider">🌳 Windfall Released!</p>
             <p className="text-xs mt-1 tracking-wide" style={{ color: "hsl(45, 80%, 75%)" }}>
-              12 Hearts gifted to wanderers
+              12 S33D Hearts gifted to wanderers
             </p>
           </motion.div>
         </motion.div>
