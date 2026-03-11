@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
+import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
 
 /* ─── Value-node data model ────────────────────────────────── */
 
@@ -880,29 +881,7 @@ const ValueTreePage = () => {
           </TabsContent>
 
           <TabsContent value="proposals">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-muted-foreground font-serif">
-                  Community proposals for new value branches. Vote with Influence tokens.
-                </p>
-                <Button variant="outline" size="sm" className="font-serif text-xs gap-1.5" disabled>
-                  <Vote className="w-3.5 h-3.5" /> Submit Proposal
-                </Button>
-              </div>
-              {PROPOSALS.map((p, i) => (
-                <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                  <ProposalCard proposal={p} />
-                </motion.div>
-              ))}
-              <Card className="bg-card/40 backdrop-blur border-border/30">
-                <CardContent className="p-5 text-center">
-                  <p className="text-xs text-muted-foreground font-serif">
-                    Approved proposals are migrated into the active Value Tree.
-                    Earn <span style={{ color: "hsl(42, 80%, 50%)" }}>Influence tokens</span> through curation actions to participate in governance.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            <GovernanceProposalsList />
           </TabsContent>
         </Tabs>
       </div>
