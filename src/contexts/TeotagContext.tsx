@@ -61,6 +61,8 @@ const TeotagContext = createContext<TeotagContextValue | null>(null);
 
 function detectMode(pathname: string): TeotagMode {
   if (pathname.startsWith("/map") || pathname.startsWith("/atlas") || pathname.startsWith("/hive")) return "guide";
+  if (pathname.startsWith("/harvest")) return "guide"; // Harvest is place+season oriented
+  if (pathname.startsWith("/cosmic")) return "guide"; // Calendar is rhythm-oriented
   if (pathname.startsWith("/library") || pathname.startsWith("/vault") || pathname.startsWith("/heartwood") || pathname.startsWith("/dashboard")) return "librarian";
   if (pathname.startsWith("/council")) return "scribe";
   return "guide";
