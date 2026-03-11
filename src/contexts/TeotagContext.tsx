@@ -159,6 +159,10 @@ function getQuickActions(
     if (t.bloomStatus) {
       actions.push({ label: "Bloom status", prompt: `${t.name} is currently ${t.bloomStatus}. Tell me more about this phase.`, emoji: "🌿" });
     }
+    // Species Hearts hint
+    if (t.species) {
+      actions.push({ label: "Earn Hearts", prompt: `How can I earn Species Hearts by mapping or making offerings to ${t.species} trees?`, emoji: "💚" });
+    }
     return withSeason(actions);
   }
 
