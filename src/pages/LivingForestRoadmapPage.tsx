@@ -1,18 +1,21 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, TreeDeciduous, Sprout, Leaf } from "lucide-react";
+import { X, Sparkles, TreeDeciduous, Sprout, Leaf, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
-import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
+  STATUS_META,
+  CATEGORY_META,
   REGION_META,
   type RoadmapFeature,
   type RoadmapRegion,
   type RoadmapStage,
+  type RoadmapStatus,
+  type RoadmapCategory,
 } from "@/data/roadmap-forest";
 
 /* ── stage icon helper ── */
@@ -106,32 +109,25 @@ const FeatureNode = ({
       style={{ transform: `scale(${stageScale})` }}
       aria-label={`${feature.name} — ${meta.label}`}
     >
-      {/* glow ring for ancient */}
       {feature.stage === "ancient" && (
         <span className="absolute inset-0 rounded-xl animate-pulse opacity-30"
           style={{ boxShadow: `0 0 20px 4px hsl(var(--sacred-gold) / 0.4)` }} />
       )}
-
-      {/* icon circle */}
       <span
         className={`
           w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center
-          border-2 transition-colors duration-300
+          border-2 transition-colors duration-300 text-sm
           ${isActive
             ? "border-primary bg-primary/20 shadow-lg"
             : "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card"
           }
         `}
       >
-        <StageIcon stage={feature.stage} className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+        {feature.symbol || <StageIcon stage={feature.stage} className="w-5 h-5 md:w-6 md:h-6 text-primary" />}
       </span>
-
-      {/* label */}
       <span className="text-[10px] md:text-xs font-serif text-foreground/80 text-center leading-tight max-w-[90px]">
         {feature.name}
       </span>
-
-      {/* stage pill */}
       <span
         className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full font-sans"
         style={{ background: `${meta.color}20`, color: meta.color }}
@@ -152,6 +148,8 @@ const DetailPanel = ({
 }) => {
   const meta = STAGE_META[feature.stage];
   const regionMeta = REGION_META[feature.region];
+  const statusMeta = STATUS_META[feature.status];
+  const catMeta = CATEGORY_META[feature.category];
   const connected = ROADMAP_FEATURES.filter((f) => feature.connections.includes(f.id));
 
   return (
@@ -172,26 +170,41 @@ const DetailPanel = ({
       </button>
 
       <div className="flex items-start gap-3 mb-3">
-        <span className="w-10 h-10 rounded-full flex items-center justify-center border border-primary/30 bg-primary/10 shrink-0">
-          <StageIcon stage={feature.stage} className="w-5 h-5 text-primary" />
+        <span className="w-10 h-10 rounded-full flex items-center justify-center border border-primary/30 bg-primary/10 shrink-0 text-sm">
+          {feature.symbol || <StageIcon stage={feature.stage} className="w-5 h-5 text-primary" />}
         </span>
         <div>
           <h3 className="font-serif text-base text-foreground">{feature.name}</h3>
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-sans inline-block mt-0.5"
-            style={{ background: `${meta.color}20`, color: meta.color }}>
-            {meta.emoji} {meta.label}
-          </span>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-sans"
+              style={{ background: `${statusMeta.color}15`, color: statusMeta.color }}>
+              {statusMeta.emoji} {statusMeta.label}
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full font-sans bg-primary/5 text-muted-foreground">
+              {catMeta.emoji} {catMeta.label}
+            </span>
+          </div>
         </div>
       </div>
 
       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.description}</p>
 
-      {/* region */}
       <div className="text-xs text-muted-foreground/70 mb-3">
         <span className="font-serif text-foreground/60">{regionMeta.label}</span> · {regionMeta.description}
       </div>
 
-      {/* mycelial connections */}
+      {/* Notion link */}
+      {feature.notionLink && (
+        <a
+          href={feature.notionLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline mb-3"
+        >
+          <ExternalLink className="w-3 h-3" /> View documentation in Notion
+        </a>
+      )}
+
       {connected.length > 0 && (
         <div>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1.5 font-sans">
@@ -210,27 +223,9 @@ const DetailPanel = ({
   );
 };
 
-/* ── region label strip ── */
-const RegionStrip = ({ region, row }: { region: RoadmapRegion; row: number }) => {
-  const meta = REGION_META[region];
-  return (
-    <div
-      className="col-span-full flex items-center gap-2 px-2 py-1"
-      style={{ gridRow: row }}
-    >
-      <span className="h-px flex-1 bg-border/20" />
-      <span className="text-[10px] md:text-xs font-serif tracking-widest uppercase text-muted-foreground/50">
-        {meta.label}
-      </span>
-      <span className="h-px flex-1 bg-border/20" />
-    </div>
-  );
-};
-
 /* ── environment particles ── */
 const ForestParticles = () => (
   <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-    {/* fireflies */}
     {Array.from({ length: 8 }).map((_, i) => (
       <motion.span
         key={i}
@@ -260,14 +255,17 @@ const ForestParticles = () => (
 const LivingForestRoadmapPage = () => {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
-  const seasonal = useSeasonalSummary();
+  const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<RoadmapCategory | null>(null);
 
-  const filtered = useMemo(
-    () => regionFilter ? ROADMAP_FEATURES.filter((f) => f.region === regionFilter) : ROADMAP_FEATURES,
-    [regionFilter],
-  );
+  const filtered = useMemo(() => {
+    let items = ROADMAP_FEATURES;
+    if (regionFilter) items = items.filter((f) => f.region === regionFilter);
+    if (statusFilter) items = items.filter((f) => f.status === statusFilter);
+    if (categoryFilter) items = items.filter((f) => f.category === categoryFilter);
+    return items;
+  }, [regionFilter, statusFilter, categoryFilter]);
 
-  /* compute positions for mycelial lines */
   const COLS = 5;
   const COL_W = 140;
   const ROW_H = 120;
@@ -276,7 +274,7 @@ const LivingForestRoadmapPage = () => {
     for (const f of ROADMAP_FEATURES) {
       map.set(f.id, {
         x: f.col * COL_W + COL_W / 2,
-        y: f.row * ROW_H + ROW_H / 2 + 40, // offset for region labels
+        y: f.row * ROW_H + ROW_H / 2 + 40,
       });
     }
     return map;
@@ -288,7 +286,6 @@ const LivingForestRoadmapPage = () => {
     setActiveFeature((prev) => (prev?.id === f.id ? null : f));
   }, []);
 
-  /* stats */
   const counts = useMemo(() => {
     const c: Record<RoadmapStage, number> = { seed: 0, sprout: 0, rooted: 0, ancient: 0 };
     ROADMAP_FEATURES.forEach((f) => c[f.stage]++);
@@ -307,7 +304,7 @@ const LivingForestRoadmapPage = () => {
               Living Forest Roadmap
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The S33D ecosystem grows like a forest. Seedlings are planted, shoots emerge,
+              The S33D ecosystem grows like a forest. Seeds are planted, shoots emerge,
               trees take root, and ancient pillars anchor the canopy.
               Beneath the surface, mycelial threads connect everything.
             </p>
@@ -329,31 +326,65 @@ const LivingForestRoadmapPage = () => {
             <SeasonalLensBanner context="general" />
           </div>
 
-          {/* ── Region filter chips ── */}
-          <div className="flex justify-center gap-2 mb-8 flex-wrap">
-            <button
-              onClick={() => setRegionFilter(null)}
-              className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
-                ${!regionFilter
-                  ? "border-primary/40 bg-primary/10 text-primary"
-                  : "border-border/30 text-muted-foreground hover:border-primary/30"
-                }`}
-            >
-              All regions
-            </button>
-            {(Object.keys(REGION_META) as RoadmapRegion[]).map((r) => (
+          {/* ── Filter chips ── */}
+          <div className="space-y-2 mb-8">
+            {/* Region */}
+            <div className="flex justify-center gap-2 flex-wrap">
               <button
-                key={r}
-                onClick={() => setRegionFilter(regionFilter === r ? null : r)}
+                onClick={() => setRegionFilter(null)}
                 className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
-                  ${regionFilter === r
+                  ${!regionFilter
                     ? "border-primary/40 bg-primary/10 text-primary"
                     : "border-border/30 text-muted-foreground hover:border-primary/30"
                   }`}
               >
-                {REGION_META[r].label}
+                All regions
               </button>
-            ))}
+              {(Object.keys(REGION_META) as RoadmapRegion[]).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRegionFilter(regionFilter === r ? null : r)}
+                  className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
+                    ${regionFilter === r
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                >
+                  {REGION_META[r].label}
+                </button>
+              ))}
+            </div>
+
+            {/* Category + Status */}
+            <div className="flex justify-center gap-2 flex-wrap">
+              {(Object.keys(CATEGORY_META) as RoadmapCategory[]).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
+                  className={`text-[10px] px-2.5 py-1 rounded-full font-serif transition-colors border
+                    ${categoryFilter === cat
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                >
+                  {CATEGORY_META[cat].emoji} {CATEGORY_META[cat].label}
+                </button>
+              ))}
+              <span className="w-px h-5 bg-border/30 self-center" />
+              {(Object.keys(STATUS_META) as RoadmapStatus[]).map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setStatusFilter(statusFilter === st ? null : st)}
+                  className={`text-[10px] px-2.5 py-1 rounded-full font-serif transition-colors border
+                    ${statusFilter === st
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-border/30 text-muted-foreground hover:border-primary/30"
+                    }`}
+                >
+                  {STATUS_META[st].emoji} {STATUS_META[st].label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── Forest landscape ── */}
@@ -372,7 +403,6 @@ const LivingForestRoadmapPage = () => {
                 activeId={activeFeature?.id ?? null}
               />
 
-              {/* region labels */}
               {([
                 { region: "roots" as RoadmapRegion, startRow: 0 },
                 { region: "trunk" as RoadmapRegion, startRow: 4 },
@@ -392,7 +422,6 @@ const LivingForestRoadmapPage = () => {
                 </div>
               ))}
 
-              {/* feature nodes */}
               {filtered.map((f) => {
                 const pos = positions.get(f.id);
                 if (!pos) return null;
@@ -433,7 +462,6 @@ const LivingForestRoadmapPage = () => {
           </section>
         </main>
 
-        {/* detail panel */}
         <AnimatePresence>
           {activeFeature && (
             <DetailPanel

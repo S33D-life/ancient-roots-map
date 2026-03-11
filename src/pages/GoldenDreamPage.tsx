@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, BookOpen, Cherry, Archive } from "lucide-react";
+import { Maximize2, Minimize2, BookOpen, Cherry, Archive, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
@@ -12,7 +12,16 @@ import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
+const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
+
 const goldenDreamRooms = [
+  {
+    id: "roadmap",
+    title: "Living Roadmap",
+    description: "The evolving S33D ecosystem",
+    icon: Map,
+    internal: true,
+  },
   {
     id: "current",
     title: "Current Version",
@@ -50,7 +59,8 @@ const GoldenDreamPage = () => {
     return <LevelEntrance phases={[{ src: isDark ? goldenDreamNight : goldenDreamBanner, alt: "The Crown" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
-  if (isFullscreen && activeRoom) {
+  // Fullscreen Notion view
+  if (isFullscreen && activeRoom && activeRoom !== "roadmap") {
     const room = goldenDreamRooms.find((r) => r.id === activeRoom);
     return (
       <div className="fixed inset-0 z-50 bg-background">
@@ -74,6 +84,42 @@ const GoldenDreamPage = () => {
     );
   }
 
+  // Roadmap room
+  if (activeRoom === "roadmap") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header />
+        <main className="pt-28 pb-8 px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveRoom(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ← Back to Golden Dream
+              </Button>
+            </div>
+
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">Living Forest Roadmap</h2>
+              <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+                The S33D ecosystem unfolds organically — from seeds of vision to the full canopy of a living world.
+              </p>
+            </div>
+
+            <Suspense fallback={<div className="py-12 text-center text-muted-foreground text-sm">Growing the roadmap…</div>}>
+              <RoadmapEmbed />
+            </Suspense>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Notion room
   if (activeRoom) {
     const room = goldenDreamRooms.find((r) => r.id === activeRoom);
     return (
@@ -160,7 +206,7 @@ const GoldenDreamPage = () => {
             A living vision for the future
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
             {goldenDreamRooms.map((room) => {
               const Icon = room.icon;
               return (
@@ -175,12 +221,12 @@ const GoldenDreamPage = () => {
                     }
                   }}
                 >
-                  <CardHeader className="text-center p-4 md:p-6">
-                    <Icon className="h-8 w-8 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
-                    <CardTitle className="text-base md:text-lg font-serif tracking-wide">
+                  <CardHeader className="text-center p-3 md:p-5">
+                    <Icon className="h-7 w-7 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
+                    <CardTitle className="text-sm md:text-base font-serif tracking-wide">
                       {room.title}
                     </CardTitle>
-                    <CardDescription className="text-xs md:text-sm">
+                    <CardDescription className="text-[10px] md:text-xs">
                       {room.description}
                     </CardDescription>
                   </CardHeader>
