@@ -260,6 +260,29 @@ export async function fetchLandscapePOIs(
     `);
   }
 
+  if (opts.includeLibraries) {
+    queryParts.push(`
+      node["amenity"="library"]${bb};
+      way["amenity"="library"]${bb};
+    `);
+  }
+
+  if (opts.includeBookshops) {
+    queryParts.push(`
+      node["shop"="books"]${bb};
+      way["shop"="books"]${bb};
+    `);
+  }
+
+  if (opts.includeBotanicalGardens) {
+    queryParts.push(`
+      node["leisure"="garden"]["garden:type"="botanical"]${bb};
+      way["leisure"="garden"]["garden:type"="botanical"]${bb};
+      node["tourism"="attraction"]["attraction"="botanical_garden"]${bb};
+      way["tourism"="attraction"]["attraction"="botanical_garden"]${bb};
+    `);
+  }
+
   if (queryParts.length === 0) return [];
 
   const query = `
