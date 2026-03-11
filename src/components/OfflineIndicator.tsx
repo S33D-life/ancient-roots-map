@@ -9,7 +9,7 @@
  * 5. Failed items — warning pill with retry
  * 6. Online + no pending — hidden (null)
  */
-import { WifiOff, Upload, Loader2, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { WifiOff, Upload, Loader2, AlertTriangle, CheckCircle2, Clock, X } from "lucide-react";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { runSync } from "@/utils/syncEngine";
 import { useState, useCallback, useEffect } from "react";
