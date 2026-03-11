@@ -370,6 +370,7 @@ const TreeDetailPage = () => {
             setWhisperModalOpen(true);
           }}
           onShare={() => setShareCardOpen(true)}
+          onGreetingCard={() => setGreetingCardOpen(true)}
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
         />
