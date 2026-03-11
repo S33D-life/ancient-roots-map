@@ -3432,22 +3432,48 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           .addTo(wcLayer);
       });
 
-      // Draw soft proximity circles around nearby trees
-      filteredTrees.forEach((tree) => {
-        const context = getNearbyLandscapeContext(tree.latitude, tree.longitude, pois);
-        if (context) {
-          const meta = GUARDIAN_TAGS[context.category];
-          L.circleMarker([tree.latitude, tree.longitude], {
-            radius: 18,
-            color: meta.color,
-            fillColor: meta.glowColor,
-            fillOpacity: 0.25,
-            weight: 1.5,
-            opacity: 0.5,
-            interactive: false,
-          }).addTo(wcLayer);
-        }
-      });
+      // Draw soft proximity glow around trees near landscape features
+      const zoom = map.getZoom();
+      if (zoom >= 13) {
+        filteredTrees.forEach((tree) => {
+          const context = getNearbyLandscapeContext(tree.latitude, tree.longitude, pois);
+          if (context) {
+            const isPathNearby = context.category === "footpath";
+            const isWaterNearby = context.category === "waterway";
+            const glowColor = isPathNearby
+              ? "hsla(42, 80%, 55%, 0.25)"
+              : isWaterNearby
+              ? "hsla(210, 40%, 78%, 0.20)"
+              : GUARDIAN_TAGS[context.category].glowColor;
+            const ringColor = isPathNearby
+              ? "hsl(42, 75%, 52%)"
+              : isWaterNearby
+              ? "hsl(210, 35%, 75%)"
+              : GUARDIAN_TAGS[context.category].color;
+
+            // Pulsing outer ring for trees near paths/water (zoom >= 14)
+            if ((isPathNearby || isWaterNearby) && zoom >= 14) {
+              const pulseDiv = L.divIcon({
+                className: "tree-near-path-marker",
+                html: `<div class="tree-near-path" style="width:28px;height:28px;background:${glowColor};border:1.5px solid ${ringColor}60;"></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14],
+              });
+              L.marker([tree.latitude, tree.longitude], { icon: pulseDiv, interactive: false }).addTo(wcLayer);
+            }
+
+            L.circleMarker([tree.latitude, tree.longitude], {
+              radius: 18,
+              color: ringColor,
+              fillColor: glowColor,
+              fillOpacity: 0.25,
+              weight: 1.5,
+              opacity: 0.5,
+              interactive: false,
+            }).addTo(wcLayer);
+          }
+        });
+      }
     };
 
     const onMoveEnd = () => {
