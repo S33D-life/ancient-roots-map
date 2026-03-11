@@ -228,9 +228,20 @@ function getQuickActions(
     return withSeason([
       { label: "My journey", prompt: "Show me a summary of my journey — trees mapped, hearts earned, and milestones reached.", emoji: "🔥" },
       { label: "Earn today", prompt: "What actions can I take today to earn hearts and advance my journey?", emoji: "💚" },
+      { label: "My streak", prompt: "How is my mapping streak going? What tier am I? How do I level up?", emoji: "🔥" },
+      { label: "Seasonal quests", prompt: "What seasonal quests are available right now? How do I complete them?", emoji: "🌸" },
       { label: "My grove", prompt: "Tell me about my grove of Ancient Friends — species, locations, and health.", emoji: "🌳" },
       { label: "Seed trail", prompt: "How does the seed trail work? How do I plant and collect seeds?", emoji: "🌱" },
     ]);
+  }
+
+  // ── Council of Life page ──────────────────────
+  if (route.startsWith("/council")) {
+    return [
+      { label: "Join a gathering", prompt: "How do I join the Council of Life gathering? When is the next one?", emoji: "🏛️" },
+      { label: "Digital fire", prompt: "What is the Digital Fire? How do lunar cycles determine gathering times?", emoji: "🔥" },
+      { label: "Host a council", prompt: "How can I host a local council gathering in my bioregion?", emoji: "🌍" },
+    ];
   }
 
   // ── Wanderer profile page ─────────────────────

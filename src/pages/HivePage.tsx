@@ -511,6 +511,14 @@ const HivePage = () => {
                   </CardContent>
                 </Card>
 
+                {/* Monthly Leaderboard */}
+                <HiveLeaderboardCard
+                  family={hive.family}
+                  accentHsl={hive.accentHsl}
+                  icon={hive.icon}
+                  compact
+                />
+
                 {/* Top Trees + Wanderers */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card className="bg-card/60 backdrop-blur border-border/40">
