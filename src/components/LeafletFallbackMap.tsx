@@ -3433,8 +3433,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       });
 
       // Draw soft proximity glow around trees near landscape features
-      const zoom = map.getZoom();
-      if (zoom >= 13) {
+      const currentZoom = map.getZoom();
+      if (currentZoom >= 13) {
         filteredTrees.forEach((tree) => {
           const context = getNearbyLandscapeContext(tree.latitude, tree.longitude, pois);
           if (context) {
