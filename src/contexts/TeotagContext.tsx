@@ -124,6 +124,18 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   const [libraryContext, setLibraryContextState] = useState<LibraryContext>({});
   const [councilContext, setCouncilContextState] = useState<CouncilContext>({});
 
+  // Listen for map context events from LeafletFallbackMap
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.center) {
+        setMapContextState(prev => ({ ...prev, center: detail.center, zoom: detail.zoom }));
+      }
+    };
+    window.addEventListener("teotag-map-context", handler);
+    return () => window.removeEventListener("teotag-map-context", handler);
+  }, []);
+
   const setMapContext = useCallback((ctx: Partial<MapContext>) => {
     setMapContextState(prev => ({ ...prev, ...ctx }));
   }, []);
