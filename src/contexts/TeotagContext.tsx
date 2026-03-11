@@ -3,7 +3,7 @@
  * Provides current route, map state, selected features, and library section
  * so TEOTAG can tailor its guidance to where the user is in the S33D world.
  */
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
 export type TeotagMode = "guide" | "librarian" | "scribe" | "oracle";
