@@ -159,7 +159,7 @@ function getQuickActions(
     if (t.bloomStatus) {
       actions.push({ label: "Bloom status", prompt: `${t.name} is currently ${t.bloomStatus}. Tell me more about this phase.`, emoji: "🌿" });
     }
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   // ── Harvest detail / listing page ─────────────
