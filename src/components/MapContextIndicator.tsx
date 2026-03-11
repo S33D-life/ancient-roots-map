@@ -31,14 +31,13 @@ const MapContextIndicator = ({ label, treeCount, origin, onClear }: MapContextIn
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
         transition={{ duration: 0.3, delay: 0.5 }}
-        className="absolute z-[1001] left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-2 rounded-full font-serif text-[11px] backdrop-blur-md"
+        className="absolute z-[1001] left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full font-serif text-[11px] backdrop-blur-md max-w-[calc(100vw-3rem)]"
         style={{
-          top: "9.5rem",
+          top: "calc(env(safe-area-inset-top, 0px) + 4.5rem)",
           background: "hsla(30, 25%, 10%, 0.9)",
           color: "hsl(42, 80%, 60%)",
           border: "1px solid hsla(42, 60%, 45%, 0.3)",
           boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-          maxWidth: "calc(100vw - 2rem)",
         }}
       >
         <span className="truncate">

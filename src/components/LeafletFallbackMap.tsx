@@ -3552,8 +3552,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       {/* Discovery cue — hidden in clear view */}
       {discoveryCount > 0 && !clearView && (
         <div
-          className="absolute top-[6.5rem] left-1/2 -translate-x-1/2 z-[1001] px-3 py-1.5 rounded-full font-serif text-[11px] animate-fade-in"
+          className="absolute left-1/2 -translate-x-1/2 z-[1001] px-3 py-1.5 rounded-full font-serif text-[11px] animate-fade-in"
           style={{
+            top: "calc(env(safe-area-inset-top, 0px) + 4rem)",
             background: "hsla(120, 40%, 15%, 0.9)",
             color: "hsl(42, 80%, 60%)",
             border: "1px solid hsla(42, 60%, 45%, 0.3)",
