@@ -260,6 +260,7 @@ const ForestParticles = () => (
 const LivingForestRoadmapPage = () => {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
+  const seasonal = useSeasonalSummary();
 
   const filtered = useMemo(
     () => regionFilter ? ROADMAP_FEATURES.filter((f) => f.region === regionFilter) : ROADMAP_FEATURES,
