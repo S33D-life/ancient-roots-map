@@ -111,7 +111,7 @@ const OfflineIndicator = () => {
           {mode === "failed" && (
             <button
               onClick={handleSync}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-serif hover:bg-amber-500/25 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-warning/15 border border-warning/30 text-warning text-[10px] font-serif hover:bg-warning/25 transition-colors"
               title={`${failedCount} failed — tap to retry`}
             >
               <AlertTriangle className="w-3 h-3" />
