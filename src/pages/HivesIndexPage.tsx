@@ -236,7 +236,7 @@ const HivesIndexPage = () => {
 
           {/* Live animated global stats */}
           {!loading && (
-            <div className="flex flex-wrap items-center gap-5 text-xs font-serif text-muted-foreground mb-5 pb-5 border-b border-border/30">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-serif text-muted-foreground mb-6 pb-5 border-b border-border/30">
               <span className="flex items-center gap-1.5">
                 <TreePine className="w-3.5 h-3.5 text-primary" />
                 <AnimatedStat value={totalTrees} /> trees
