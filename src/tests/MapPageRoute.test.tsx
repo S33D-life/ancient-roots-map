@@ -23,6 +23,20 @@ vi.mock("@/components/MapArrivalBanner", () => ({
   default: () => <div data-testid="arrival-banner">arrival</div>,
 }));
 
+vi.mock("@/components/seasonal/SeasonalLensBanner", () => ({
+  default: () => null,
+}));
+
+vi.mock("@/contexts/SeasonalLensContext", () => ({
+  useSeasonalLens: () => ({
+    activeLens: "gregorian",
+    setActiveLens: vi.fn(),
+    lensConfig: { slug: "gregorian", label: "Gregorian", icon: "📅" },
+  }),
+  SeasonalLensProvider: ({ children }: { children: React.ReactNode }) => children,
+  LENS_CONFIGS: {},
+}));
+
 vi.mock("@/components/PublicTesterBlessing", () => ({
   default: () => <div data-testid="blessing">blessing</div>,
   isBlessingDismissed: () => true,
