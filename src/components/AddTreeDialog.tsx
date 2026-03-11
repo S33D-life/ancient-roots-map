@@ -953,6 +953,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     isIdentifyingSpecies={isIdentifyingSpecies}
                   />
 
+                  {/* Divider */}
+                  <div className="relative py-1">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t" style={{ borderColor: 'hsla(42, 30%, 30%, 0.2)' }} />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="px-3 text-[9px] uppercase tracking-[0.2em] font-serif" style={{
+                        color: 'hsla(42, 40%, 50%, 0.5)',
+                        background: 'hsl(var(--card))',
+                      }}>Location</span>
+                    </div>
+                  </div>
+
                   {/* Find Me button — primary location action */}
                   <Button
                     type="button"
