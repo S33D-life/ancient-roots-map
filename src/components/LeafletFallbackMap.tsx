@@ -24,7 +24,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
@@ -695,6 +695,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
+  // Clear View — hide non-essential UI overlays for distraction-free browsing
+  const [clearView, setClearView] = useState(false);
+
   // GroveView — Living Earth Mode
   const [groveViewActive, setGroveViewActive] = useState(false);
 
@@ -3413,60 +3416,59 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }}
       />
 
-      {/* Unified Atlas Filter */}
-      <AtlasFilter
-        speciesCounts={speciesCounts}
-        totalVisible={filteredTrees.length}
-        selectedSpecies={species}
-        onSpeciesChange={setSpecies}
-        lineageFilter={lineageFilter}
-        onLineageChange={setLineageFilter}
-        availableLineages={availableLineages}
-        projectFilter={projectFilter}
-        onProjectChange={setProjectFilter}
-        availableProjects={availableProjects}
-        hiveMap={hiveMap}
-        visualSections={visualSections}
-        panelOpen={atlasFilterOpen}
-        onPanelOpenChange={setAtlasFilterOpen}
-        onFullscreenToggle={onFullscreenToggle}
-        isFullscreen={isFullscreen}
-        onPerspectivePreset={(preset: PerspectivePreset) => {
-          // Apply layer presets when perspective changes
-          setShowHiveLayer(preset.hiveEmphasis);
-          if (preset.bloomingClockVisible && !showBloomingClock) setShowBloomingClock(true);
-          // Activate recommended layers for this perspective
-          const layerMap: Record<string, (v: boolean) => void> = {
-            "seeds": (v) => setShowSeeds(v),
-            "offering-glow": (v) => setShowOfferingGlow(v),
-            "heart-glow": (v) => setShowHeartGlow(v),
-            "hive-layer": (v) => setShowHiveLayer(v),
-            "groves": (v) => setShowGroves(v),
-            "bloomed-seeds": (v) => setShowBloomedSeeds(v),
-            "recent-visits": (v) => setShowRecentVisits(v),
-            "seed-traces": (v) => setShowSeedTraces(v),
-            "seed-trail": (v) => setShowSeedTrail(v),
-            "shared-trees": (v) => setShowSharedTrees(v),
-            "tribe-activity": (v) => setShowTribeActivity(v),
-          };
-          // Turn off all, then turn on preset layers
-          Object.values(layerMap).forEach(fn => fn(false));
-          preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
-        }}
-        onAddTree={() => {
-          const map = mapRef.current;
-          if (map) {
-            const c = map.getCenter();
-            setAddTreeCoords({ lat: c.lat, lng: c.lng });
-          } else {
-            setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-          }
-          setAddDialogOpen(true);
-        }}
-      />
+      {/* Unified Atlas Filter — hidden in clear view */}
+      {!clearView && (
+        <AtlasFilter
+          speciesCounts={speciesCounts}
+          totalVisible={filteredTrees.length}
+          selectedSpecies={species}
+          onSpeciesChange={setSpecies}
+          lineageFilter={lineageFilter}
+          onLineageChange={setLineageFilter}
+          availableLineages={availableLineages}
+          projectFilter={projectFilter}
+          onProjectChange={setProjectFilter}
+          availableProjects={availableProjects}
+          hiveMap={hiveMap}
+          visualSections={visualSections}
+          panelOpen={atlasFilterOpen}
+          onPanelOpenChange={setAtlasFilterOpen}
+          onFullscreenToggle={onFullscreenToggle}
+          isFullscreen={isFullscreen}
+          onPerspectivePreset={(preset: PerspectivePreset) => {
+            setShowHiveLayer(preset.hiveEmphasis);
+            if (preset.bloomingClockVisible && !showBloomingClock) setShowBloomingClock(true);
+            const layerMap: Record<string, (v: boolean) => void> = {
+              "seeds": (v) => setShowSeeds(v),
+              "offering-glow": (v) => setShowOfferingGlow(v),
+              "heart-glow": (v) => setShowHeartGlow(v),
+              "hive-layer": (v) => setShowHiveLayer(v),
+              "groves": (v) => setShowGroves(v),
+              "bloomed-seeds": (v) => setShowBloomedSeeds(v),
+              "recent-visits": (v) => setShowRecentVisits(v),
+              "seed-traces": (v) => setShowSeedTraces(v),
+              "seed-trail": (v) => setShowSeedTrail(v),
+              "shared-trees": (v) => setShowSharedTrees(v),
+              "tribe-activity": (v) => setShowTribeActivity(v),
+            };
+            Object.values(layerMap).forEach(fn => fn(false));
+            preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
+          }}
+          onAddTree={() => {
+            const map = mapRef.current;
+            if (map) {
+              const c = map.getCenter();
+              setAddTreeCoords({ lat: c.lat, lng: c.lng });
+            } else {
+              setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+            }
+            setAddDialogOpen(true);
+          }}
+        />
+      )}
 
-      {/* Discovery cue */}
-      {discoveryCount > 0 && (
+      {/* Discovery cue — hidden in clear view */}
+      {discoveryCount > 0 && !clearView && (
         <div
           className="absolute top-[6.5rem] left-1/2 -translate-x-1/2 z-[1001] px-3 py-1.5 rounded-full font-serif text-[11px] animate-fade-in"
           style={{
@@ -3480,20 +3482,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* Context indicator for deep-linked views */}
-      <MapContextIndicator
-        label={contextLabel}
-        treeCount={filteredTrees.length}
-        origin={initialOrigin}
-        onClear={() => {
-          setContextLabel(null);
-          setSpecies([]);
-          clearMapMemory();
-          const map = mapRef.current;
-          if (map) map.setView([25, 10], 3, { animate: true });
-          window.history.replaceState(null, "", "/map");
-        }}
-      />
+      {/* Context indicator for deep-linked views — hidden in clear view */}
+      {!clearView && (
+        <MapContextIndicator
+          label={contextLabel}
+          treeCount={filteredTrees.length}
+          origin={initialOrigin}
+          onClear={() => {
+            setContextLabel(null);
+            setSpecies([]);
+            clearMapMemory();
+            const map = mapRef.current;
+            if (map) map.setView([25, 10], 3, { animate: true });
+            window.history.replaceState(null, "", "/map");
+          }}
+        />
+      )}
 
       {debugEnabled && (
         <div
@@ -3564,8 +3568,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }))}
       />
 
-      {/* Blooming Clock — Seasonal sigils legend */}
-      {showBloomingClock && bloomRegionStages.length > 0 && (
+      {/* Blooming Clock — Seasonal sigils legend (hidden in clear view) */}
+      {showBloomingClock && bloomRegionStages.length > 0 && !clearView && (
         <BloomingClockSigils
           activeStages={[...new Set(bloomRegionStages.map(rs => rs.stage))]}
           currentMonth={bloomMonth}
@@ -3582,16 +3586,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onFruitClick={handleFruitClick}
       />
 
-      {/* Hive Fruit Preview — mini card on fruit click */}
-      <HiveFruitPreview
-        visible={!!fruitPreview}
-        hive={fruitPreview?.hive || { family: "", slug: "", displayName: "", description: "", accentHsl: "0 0% 50%", icon: "🌿", representativeSpecies: [] }}
-        stage={fruitPreview?.status.stage || ""}
-        stageLabel={fruitPreview?.status.label || ""}
-        stageEmoji={fruitPreview?.status.emoji || ""}
-        treeCount={fruitPreview?.treeCount || 0}
-        onClose={() => setFruitPreview(null)}
-      />
+      {/* Hive Fruit Preview — mini card on fruit click (hidden in clear view) */}
+      {!clearView && (
+        <HiveFruitPreview
+          visible={!!fruitPreview}
+          hive={fruitPreview?.hive || { family: "", slug: "", displayName: "", description: "", accentHsl: "0 0% 50%", icon: "🌿", representativeSpecies: [] }}
+          stage={fruitPreview?.status.stage || ""}
+          stageLabel={fruitPreview?.status.label || ""}
+          stageEmoji={fruitPreview?.status.emoji || ""}
+          treeCount={fruitPreview?.treeCount || 0}
+          onClose={() => setFruitPreview(null)}
+        />
+      )}
 
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (
@@ -3623,130 +3629,154 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const globeEmphasis = perspective === "collective";
         return (
           <>
-            <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+            {/* Clear View toggle — always visible, right side */}
+            <div className="absolute right-3 z-[1000]" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
               <button
-                onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
+                onClick={() => setClearView(v => !v)}
+                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 active:scale-90 glow-button`}
                 style={{
                   ...btnBase,
-                  color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                  background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  color: clearView ? "hsl(200, 60%, 70%)" : "hsl(var(--muted-foreground) / 0.6)",
+                  background: clearView ? "hsla(200, 40%, 15%, 0.95)" : btnBase.background,
+                  border: clearView ? "1px solid hsla(200, 50%, 50%, 0.4)" : btnBase.border,
                 }}
-                title="Filters & Layers"
+                title={clearView ? "Show controls" : "Clear view"}
+                aria-label={clearView ? "Show map controls" : "Hide map controls for clear view"}
               >
-                <Layers className="w-[18px] h-[18px]" />
-                {(() => {
-                  const activeLayers = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
-                  const totalActive = activeLayers + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
-                  return totalActive > 0 ? (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
-                      style={{
-                        background: `hsl(${modeAccent})`,
-                        color: "hsl(30, 20%, 10%)",
-                        boxShadow: `0 0 6px hsla(${modeAccent}, 0.4)`,
-                      }}
-                    >
-                      {totalActive}
-                    </span>
-                  ) : null;
-                })()}
+                {clearView ? <Eye className="w-[18px] h-[18px]" /> : <EyeOff className="w-[18px] h-[18px]" />}
               </button>
-              {/* Living Earth Mode toggle */}
-              <button
-                onClick={() => setGroveViewActive(v => !v)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
-                style={{
-                  ...btnBase,
-                  color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
-                  background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
-                  border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
-                }}
-                title="Living Earth Mode"
-              >
-                <Eye className="w-[18px] h-[18px]" />
-                {groveViewActive && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                    style={{
-                      background: "hsl(120, 55%, 50%)",
-                      boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
-                      animation: "ancientGlow 3s ease-in-out infinite",
-                    }}
-                  />
-                )}
-              </button>
-              <button
-                onClick={() => setShowMycelialNetwork((v) => !v)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: showMycelialNetwork ? "hsl(178, 72%, 68%)" : "hsl(42, 60%, 60%)",
-                  border: showMycelialNetwork ? "1px solid hsla(178, 65%, 55%, 0.5)" : btnBase.border,
-                }}
-                title="Toggle Mycelial Network"
-                aria-label="Toggle Mycelial Network"
-              >
-                <TreePine className="w-[16px] h-[16px]" />
-                {showMycelialNetwork && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                    style={{
-                      background: "hsl(178, 72%, 62%)",
-                      boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
-                    }}
-                  />
-                )}
-              </button>
-              {/* Atlas portal — above layers & eye */}
-              <AtlasNavButton btnBase={btnBase} />
             </div>
 
-            <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
-              <button
-                onClick={handleFindMe}
-                disabled={locating}
-                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                }}
-                title={geo.error ? `Location: ${geo.error.message}` : "Locate me"}
-              >
-                {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
-              </button>
-              <button
-                onClick={() => {
-                  const map = mapRef.current;
-                  if (map) {
-                    const c = map.getCenter();
-                    setAddTreeCoords({ lat: c.lat, lng: c.lng });
-                  } else {
-                    setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-                  }
-                  setAddDialogOpen(true);
-                }}
-                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
-                style={{
-                  ...btnBase,
-                  color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
-                }}
-                title="Add tree"
-              >
-                <Plus className="w-[18px] h-[18px]" />
-              </button>
-              <button
-                onClick={handleCompassReset}
-                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                }}
-                title="Reset view"
-              >
-                <Globe className="w-[18px] h-[18px]" />
-              </button>
-            </div>
+            {/* Left column — hidden in clear view */}
+            {!clearView && (
+              <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+                <button
+                  onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
+                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                    background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  }}
+                  title="Filters & Layers"
+                >
+                  <Layers className="w-[18px] h-[18px]" />
+                  {(() => {
+                    const activeLayers = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
+                    const totalActive = activeLayers + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
+                    return totalActive > 0 ? (
+                      <span
+                        className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
+                        style={{
+                          background: `hsl(${modeAccent})`,
+                          color: "hsl(30, 20%, 10%)",
+                          boxShadow: `0 0 6px hsla(${modeAccent}, 0.4)`,
+                        }}
+                      >
+                        {totalActive}
+                      </span>
+                    ) : null;
+                  })()}
+                </button>
+                {/* Living Earth Mode toggle */}
+                <button
+                  onClick={() => setGroveViewActive(v => !v)}
+                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
+                    background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
+                    border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
+                  }}
+                  title="Living Earth Mode"
+                >
+                  <Eye className="w-[18px] h-[18px]" />
+                  {groveViewActive && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                      style={{
+                        background: "hsl(120, 55%, 50%)",
+                        boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
+                        animation: "ancientGlow 3s ease-in-out infinite",
+                      }}
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowMycelialNetwork((v) => !v)}
+                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: showMycelialNetwork ? "hsl(178, 72%, 68%)" : "hsl(42, 60%, 60%)",
+                    border: showMycelialNetwork ? "1px solid hsla(178, 65%, 55%, 0.5)" : btnBase.border,
+                  }}
+                  title="Toggle Mycelial Network"
+                  aria-label="Toggle Mycelial Network"
+                >
+                  <TreePine className="w-[16px] h-[16px]" />
+                  {showMycelialNetwork && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                      style={{
+                        background: "hsl(178, 72%, 62%)",
+                        boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
+                      }}
+                    />
+                  )}
+                </button>
+                {/* Atlas portal — above layers & eye */}
+                <AtlasNavButton btnBase={btnBase} />
+              </div>
+            )}
+
+            {/* Bottom center — hidden in clear view */}
+            {!clearView && (
+              <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+                <button
+                  onClick={handleFindMe}
+                  disabled={locating}
+                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  }}
+                  title={geo.error ? `Location: ${geo.error.message}` : "Locate me"}
+                >
+                  {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
+                </button>
+                <button
+                  onClick={() => {
+                    const map = mapRef.current;
+                    if (map) {
+                      const c = map.getCenter();
+                      setAddTreeCoords({ lat: c.lat, lng: c.lng });
+                    } else {
+                      setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+                    }
+                    setAddDialogOpen(true);
+                  }}
+                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
+                  }}
+                  title="Add tree"
+                >
+                  <Plus className="w-[18px] h-[18px]" />
+                </button>
+                <button
+                  onClick={handleCompassReset}
+                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  }}
+                  title="Reset view"
+                >
+                  <Globe className="w-[18px] h-[18px]" />
+                </button>
+              </div>
+            )}
           </>
         );
       })()}
