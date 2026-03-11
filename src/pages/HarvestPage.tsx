@@ -10,8 +10,7 @@ import HarvestCard from "@/components/harvest/HarvestCard";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import SpringLensToggle from "@/components/seasonal/SpringLensToggle";
-import SpringLensBanner from "@/components/seasonal/SpringLensBanner";
+import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 
 const CreateHarvestForm = lazy(() => import("@/components/harvest/CreateHarvestForm"));
 
