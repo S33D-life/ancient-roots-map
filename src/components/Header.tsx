@@ -382,7 +382,7 @@ const Header = () => {
             </div>
           </nav>
 
-          <div className="flex items-center gap-1 md:gap-2">
+          <div className="flex items-center gap-1 md:gap-2 shrink-0">
             <OfflineIndicator />
             {user && <DailySeedCounter remaining={seedsRemaining} compact />}
             {user && <NotificationBell />}

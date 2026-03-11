@@ -16,14 +16,15 @@ const BottomNav = () => {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-[80] md:hidden border-t transition-all duration-300 ${isMap ? "opacity-80 hover:opacity-100 focus-within:opacity-100" : ""}`}
+      className={`fixed bottom-0 left-0 right-0 z-[80] md:hidden border-t transition-all duration-300 will-change-transform ${isMap ? "opacity-85 hover:opacity-100 focus-within:opacity-100" : ""}`}
       style={{
-        background: isMap ? "hsl(var(--card) / 0.85)" : "hsl(var(--card) / 0.95)",
+        background: isMap ? "hsl(var(--card) / 0.88)" : "hsl(var(--card) / 0.96)",
         borderColor: "hsl(var(--border) / 0.15)",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)",
-        backdropFilter: "blur(20px) saturate(1.2)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.2)",
-        boxShadow: "0 -1px 12px hsl(var(--background) / 0.3)",
+        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 6px)",
+        backdropFilter: "blur(24px) saturate(1.3)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.3)",
+        boxShadow: "0 -2px 16px hsl(var(--background) / 0.4)",
+        transform: "translate3d(0,0,0)",
       }}
     >
       <div className="flex items-center justify-around py-1.5">
