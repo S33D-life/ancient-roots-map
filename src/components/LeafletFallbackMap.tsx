@@ -693,6 +693,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showHeartGlow, setShowHeartGlow] = useState(false);
   const [showChurchyards, setShowChurchyards] = useState(false);
   const [showWaterways, setShowWaterways] = useState(false);
+  const [showFootpaths, setShowFootpaths] = useState(false);
+  const [showHeritage, setShowHeritage] = useState(false);
+  const [showCastles, setShowCastles] = useState(false);
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
@@ -1027,16 +1030,37 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
-      key: "pilgrimage",
-      title: "Pilgrimage Lenses",
+      key: "nature",
+      title: "Nature & Waterways",
       icon: "🌊",
-      accent: "hsl(35, 65%, 55%)",
-      description: "Where trees, water, and people have long met.",
+      accent: "hsl(200, 55%, 55%)",
+      description: "Rivers, streams, and springs that shape the land.",
       layers: [
-        { key: "waters", label: "🌊 Waterside Guardians", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "UK", accent: "200, 60%, 65%" },
-        { key: "churchyards", label: "⛪ Churchyards & Sacred Sites", active: showChurchyards, toggle: () => { setShowChurchyards(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "35, 65%, 55%" },
+        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "200, 60%, 65%" },
         { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "145, 50%, 50%" },
-        { key: "commons", label: "🌾 Commons Witnesses", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "75, 50%, 50%" },
+        { key: "commons", label: "🌾 Commons & Greens", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "75, 50%, 50%" },
+      ],
+    },
+    {
+      key: "walking",
+      title: "Walking Network",
+      icon: "🥾",
+      accent: "hsl(130, 45%, 50%)",
+      description: "Footpaths, bridleways, and trails across the land.",
+      layers: [
+        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { setShowFootpaths(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "130, 50%, 50%" },
+      ],
+    },
+    {
+      key: "culture",
+      title: "Culture & Heritage",
+      icon: "⛪",
+      accent: "hsl(35, 65%, 55%)",
+      description: "Churches, castles, heritage buildings, and sacred places.",
+      layers: [
+        { key: "churchyards", label: "⛪ Churches & Sacred Sites", active: showChurchyards, toggle: () => { setShowChurchyards(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "35, 65%, 55%" },
+        { key: "heritage", label: "🏛️ Heritage Buildings", active: showHeritage, toggle: () => { setShowHeritage(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "25, 55%, 55%" },
+        { key: "castles", label: "🏰 Castles & Monuments", active: showCastles, toggle: () => { setShowCastles(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "0, 35%, 55%" },
       ],
     },
     {
@@ -1086,7 +1110,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
       showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
-      externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards,
+      externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
       showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
@@ -3069,7 +3093,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const pois = await fetchLandscapePOIs(
         bounds.getSouth(), bounds.getWest(),
         bounds.getNorth(), bounds.getEast(),
-        ac.signal
+        ac.signal,
+        {
+          includeWaterways: showWaterways,
+          includeChurches: showChurchyards,
+          includeCommons: true,
+          includeParklands: true,
+          includeFootpaths: showFootpaths,
+          includeHeritage: showHeritage,
+          includeCastles: showCastles,
+        }
       );
 
       if (ac.signal.aborted) return;
@@ -3080,7 +3113,36 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
       pois.forEach((poi) => {
         const meta = GUARDIAN_TAGS[poi.category];
-        const sz = poi.category === "waterway" ? 10 : 14;
+
+        // Render line geometries (rivers, footpaths, etc.)
+        if (poi.geometry && poi.geometry.length > 1) {
+          const isPath = poi.category === "footpath";
+          const isWater = poi.category === "waterway";
+          L.polyline(poi.geometry, {
+            color: meta.color,
+            weight: isPath ? 2.5 : isWater ? 3 : 2,
+            opacity: 0.6,
+            dashArray: isPath ? "6, 8" : undefined,
+            lineCap: "round",
+            lineJoin: "round",
+            interactive: true,
+          })
+            .bindPopup(
+              `<div style="padding:10px 12px;font-family:'Cinzel',serif;width:200px;background:hsl(30,15%,10%);border-radius:10px;border:1px solid ${meta.color}44;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                  <span style="font-size:16px;">${meta.icon}</span>
+                  <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:${meta.color}22;color:${meta.color};border:1px solid ${meta.color}44;font-family:sans-serif;">${meta.tag}</span>
+                </div>
+                <h3 style="margin:0;font-size:13px;color:${meta.color};font-weight:700;">${escapeHtml(poi.name || meta.tag)}</h3>
+                ${poi.subtype ? `<p style="margin:2px 0 0;font-size:10px;color:hsl(0,0%,55%);font-style:italic;">${escapeHtml(poi.subtype)}</p>` : ""}
+              </div>`,
+              { className: "atlas-leaflet-popup", closeButton: true, maxWidth: 220, offset: L.point(0, -4) }
+            )
+            .addTo(wcLayer);
+          return; // don't also add a point marker for lines
+        }
+
+        const sz = poi.category === "waterway" ? 10 : poi.category === "footpath" ? 8 : 14;
         const half = sz / 2;
 
         const icon = L.divIcon({
@@ -3144,7 +3206,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (watersCommonsAbortRef.current) watersCommonsAbortRef.current.abort();
       if (map.hasLayer(wcLayer)) map.removeLayer(wcLayer);
     };
-  }, [showWatersCommons, filteredTrees]);
+  }, [showWatersCommons, filteredTrees, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles]);
 
   // Show contextual whisper when adding a tree near a W&C landmark
   useEffect(() => {
