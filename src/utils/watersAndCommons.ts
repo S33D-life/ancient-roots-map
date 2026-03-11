@@ -87,6 +87,27 @@ export const GUARDIAN_TAGS: Record<LandscapeCategory, {
     color: "hsl(0, 35%, 50%)",
     glowColor: "hsla(0, 40%, 55%, 0.35)",
   },
+  library: {
+    tag: "Knowledge Keeper",
+    icon: "📚",
+    whisper: "Stories sleep in shelves here — and in the rings of nearby trees.",
+    color: "hsl(270, 45%, 55%)",
+    glowColor: "hsla(270, 50%, 60%, 0.35)",
+  },
+  bookshop: {
+    tag: "Book Haven",
+    icon: "📖",
+    whisper: "Words take root here. A place where stories and seeds are exchanged.",
+    color: "hsl(310, 40%, 50%)",
+    glowColor: "hsla(310, 45%, 55%, 0.35)",
+  },
+  botanical_garden: {
+    tag: "Living Archive",
+    icon: "🌺",
+    whisper: "A garden of living knowledge — where species are studied, protected, and celebrated.",
+    color: "hsl(160, 50%, 45%)",
+    glowColor: "hsla(160, 55%, 50%, 0.35)",
+  },
 };
 
 /** Proximity radius in km for each category */
