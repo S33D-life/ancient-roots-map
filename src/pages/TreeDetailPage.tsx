@@ -162,6 +162,19 @@ const TreeDetailPage = () => {
   });
   const presenceCount = useTreePresenceCount(userId, id);
 
+  // Feed TEOTAG context with tree page data (must be above early returns)
+  useTeotagPageContext({
+    tree: tree ? {
+      id: tree.id,
+      name: tree.name,
+      species: tree.species ?? undefined,
+      latitude: tree.latitude ?? undefined,
+      longitude: tree.longitude ?? undefined,
+      bloomStatus: bloomStatus?.label ?? undefined,
+      offeringCount: offerings.length,
+    } : undefined,
+  });
+
   // Check for available whispers at this tree
   useEffect(() => {
     if (!userId || !tree) return;
@@ -286,19 +299,6 @@ const TreeDetailPage = () => {
       </div>
     );
   }
-
-  // Feed TEOTAG context with tree page data
-  useTeotagPageContext({
-    tree: {
-      id: tree.id,
-      name: tree.name,
-      species: tree.species ?? undefined,
-      latitude: tree.latitude ?? undefined,
-      longitude: tree.longitude ?? undefined,
-      bloomStatus: bloomStatus?.label ?? undefined,
-      offeringCount: offerings.length,
-    },
-  });
 
   // getOfferingsByType provided by useOfferings hook
 
