@@ -726,3 +726,58 @@ All colors MUST be HSL.
 @media (prefers-reduced-motion: reduce) {
   .canopy-heart-glow { animation: none !important; }
 }
+
+/* ── Honeycomb Grid ── */
+.honeycomb-grid {
+  --hex-size: 170px;
+  --hex-gap: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--hex-gap);
+  padding: 0 calc(var(--hex-size) * 0.12);
+}
+
+.honeycomb-grid > * {
+  width: var(--hex-size);
+  flex-shrink: 0;
+}
+
+/* Offset every other "row" by half a hex width.
+   We use margin-top negative to create tight vertical packing. */
+.honeycomb-grid > *:nth-child(n) {
+  margin-top: 0;
+}
+
+/* Background honeycomb texture */
+.honeycomb-bg {
+  background-image:
+    radial-gradient(circle at 50% 50%, hsl(45 50% 40% / 0.03) 0%, transparent 60%);
+  background-size: 120px 104px;
+}
+
+/* Pollen drift particles */
+@keyframes pollen-drift {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.4; }
+  100% { transform: translateY(-80px) translateX(30px); opacity: 0; }
+}
+.pollen-particle {
+  animation: pollen-drift 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pollen-particle { animation: none !important; display: none; }
+}
+
+/* Responsive hex sizes */
+@media (max-width: 640px) {
+  .honeycomb-grid { --hex-size: 130px; --hex-gap: 3px; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .honeycomb-grid { --hex-size: 155px; }
+}
+@media (min-width: 1025px) {
+  .honeycomb-grid { --hex-size: 180px; }
+}

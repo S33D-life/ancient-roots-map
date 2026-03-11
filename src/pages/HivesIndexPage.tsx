@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import { getAllHives, type HiveInfo, getHiveForSpecies } from "@/utils/hiveUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import HexHiveCell from "@/components/hives/HexHiveCell";
+import HoneycombGrid from "@/components/hives/HoneycombGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -387,163 +389,125 @@ const HivesIndexPage = () => {
             <Button variant="ghost" className="mt-3 font-serif text-xs" onClick={() => { setSearch(""); setFilterFamily(null); }}>Clear filters</Button>
           </div>
         ) : (
-          /* ── Hive Grid ── */
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            <AnimatePresence mode="popLayout">
+          /* ── Honeycomb Hive Wall ── */
+          <div className="honeycomb-bg relative">
+            {/* Pollen particles */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="pollen-particle absolute w-1 h-1 rounded-full bg-primary/30"
+                  style={{
+                    left: `${15 + i * 18}%`,
+                    top: `${60 + (i % 3) * 15}%`,
+                    animationDelay: `${i * 1.2}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            <HoneycombGrid>
               {sortedHives.map((hive, i) => {
                 const stats = hiveStats[hive.family];
-                const isExpanded = activeFamily === hive.family;
-
                 return (
                   <motion.div
                     key={hive.family}
-                    layout
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: i * 0.03, type: "spring", stiffness: 300, damping: 30 }}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.04, type: "spring", stiffness: 300, damping: 25 }}
                   >
-                    <Card
-                      className="bg-card/70 backdrop-blur border-border/50 hover:border-primary/30 transition-all group cursor-pointer overflow-hidden relative"
-                      onClick={() => setActiveFamily(isExpanded ? null : hive.family)}
-                    >
-                      <div
-                        className="h-1 w-full"
-                        style={{ background: `linear-gradient(90deg, transparent, hsl(${hive.accentHsl}), transparent)` }}
-                      />
-
-                      <CardContent className="p-5">
-                        <div className="flex items-start gap-3 mb-3">
-                          <span className="text-3xl">{hive.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-serif text-lg text-foreground group-hover:text-primary transition-colors leading-tight">
-                              {hive.displayName}
-                            </h3>
-                            <p className="text-[11px] text-muted-foreground font-serif mt-0.5 line-clamp-2 leading-snug">
-                              {hive.description}
-                            </p>
-                          </div>
-                        </div>
-
-                        {stats && (
-                          <div className="grid grid-cols-4 gap-2 mb-3">
-                            {[
-                              { icon: <TreePine className="w-3 h-3" />, value: stats.treeCount, label: "Trees" },
-                              { icon: <Music className="w-3 h-3" />, value: stats.offeringCount, label: "Offerings" },
-                              { icon: <Heart className="w-3 h-3" />, value: stats.heartCount, label: "Hearts" },
-                              { icon: <Users className="w-3 h-3" />, value: stats.wandererCount, label: "Wanderers" },
-                            ].map(m => (
-                              <div key={m.label} className="text-center">
-                                <div className="flex items-center justify-center text-muted-foreground mb-0.5">{m.icon}</div>
-                                <p className="text-sm font-serif tabular-nums" style={{ color: `hsl(${hive.accentHsl})` }}>
-                                  <AnimatedStat value={m.value} color={`hsl(${hive.accentHsl})`} />
-                                </p>
-                                <p className="text-[9px] text-muted-foreground font-serif leading-none">{m.label}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {stats && stats.topSpecies.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-2">
-                            {stats.topSpecies.slice(0, 4).map(sp => (
-                              <Badge
-                                key={sp}
-                                variant="outline"
-                                className="text-[9px] font-serif py-0 px-1.5 cursor-pointer hover:bg-primary/10 transition-colors"
-                                style={{ borderColor: `hsl(${hive.accentHsl} / 0.35)` }}
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  focusMap({ type: "area", id: sp, source: "hive" });
-                                }}
-                              >
-                                {sp}
-                                {stats.speciesCounts[sp] && (
-                                  <span className="ml-1 text-muted-foreground/50">{stats.speciesCounts[sp]}</span>
-                                )}
-                              </Badge>
-                            ))}
-                            {stats.topSpecies.length > 4 && (
-                              <Badge variant="secondary" className="text-[9px] font-serif py-0 px-1.5">
-                                +{hive.representativeSpecies.length - 4}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-
-                        {stats && stats.nations.length > 0 && (
-                          <p className="text-[10px] text-muted-foreground/70 font-serif truncate">
-                            🌍 {stats.nations.join(" · ")}
-                          </p>
-                        )}
-
-                        <AnimatePresence>
-                          {isExpanded && stats && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="border-t border-border/30 mt-3 pt-3 space-y-3">
-                                {stats.recentTrees.length > 0 && (
-                                  <div>
-                                    <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider mb-1.5">Recent Encounters</p>
-                                    <div className="space-y-1">
-                                      {stats.recentTrees.map(t => (
-                                        <Link
-                                          key={t.id}
-                                          to={`/tree/${t.id}`}
-                                          onClick={e => e.stopPropagation()}
-                                          className="block text-xs font-serif text-foreground/80 hover:text-primary transition-colors truncate"
-                                        >
-                                          🌳 {t.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-
-                                <div className="flex gap-2">
-                                  <Link
-                                    to={`/hive/${hive.slug}`}
-                                    onClick={e => e.stopPropagation()}
-                                    className="flex-1"
-                                  >
-                                    <Button variant="outline" size="sm" className="w-full font-serif text-xs gap-1.5">
-                                      Enter Hive <ArrowRight className="w-3 h-3" />
-                                    </Button>
-                                  </Link>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="font-serif text-xs gap-1.5"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      handleFilterOnMap(hive);
-                                    }}
-                                  >
-                                    <MapPin className="w-3 h-3" /> Atlas
-                                  </Button>
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
-                        {!isExpanded && (
-                          <div className="flex items-center justify-end mt-2">
-                            <span className="text-[10px] font-serif text-muted-foreground/50 group-hover:text-primary/60 transition-colors flex items-center gap-1">
-                              Tap to explore <ArrowRight className="w-3 h-3" />
-                            </span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <HexHiveCell
+                      icon={hive.icon}
+                      name={hive.displayName}
+                      accentHsl={hive.accentHsl}
+                      treeCount={stats?.treeCount || 0}
+                      offeringCount={stats?.offeringCount || 0}
+                      heartCount={stats?.heartCount || 0}
+                      wandererCount={stats?.wandererCount || 0}
+                      topSpecies={stats?.topSpecies || []}
+                      isExpanded={activeFamily === hive.family}
+                      onClick={() => {
+                        if (activeFamily === hive.family) {
+                          navigate(`/hive/${hive.slug}`);
+                        } else {
+                          setActiveFamily(hive.family);
+                        }
+                      }}
+                    />
                   </motion.div>
                 );
               })}
+            </HoneycombGrid>
+
+            {/* Expanded hive detail panel */}
+            <AnimatePresence>
+              {activeFamily && (() => {
+                const hive = allHives.find(h => h.family === activeFamily);
+                const stats = hiveStats[activeFamily];
+                if (!hive || !stats) return null;
+                return (
+                  <motion.div
+                    key={activeFamily}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    className="mt-6 mx-auto max-w-md rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm p-5 relative"
+                  >
+                    <button
+                      onClick={() => setActiveFamily(null)}
+                      className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-3xl">{hive.icon}</span>
+                      <div>
+                        <h3 className="font-serif text-lg text-foreground">{hive.displayName}</h3>
+                        <p className="text-[11px] text-muted-foreground font-serif">{hive.description}</p>
+                      </div>
+                    </div>
+
+                    {stats.recentTrees.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider mb-1.5">Recent Encounters</p>
+                        <div className="space-y-1">
+                          {stats.recentTrees.map(t => (
+                            <Link
+                              key={t.id}
+                              to={`/tree/${t.id}`}
+                              className="block text-xs font-serif text-foreground/80 hover:text-primary transition-colors truncate"
+                            >
+                              🌳 {t.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {stats.nations.length > 0 && (
+                      <p className="text-[10px] text-muted-foreground/70 font-serif mb-3">
+                        🌍 {stats.nations.join(" · ")}
+                      </p>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Link to={`/hive/${hive.slug}`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full font-serif text-xs gap-1.5">
+                          Enter Hive <ArrowRight className="w-3 h-3" />
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="font-serif text-xs gap-1.5"
+                        onClick={() => handleFilterOnMap(hive)}
+                      >
+                        <MapPin className="w-3 h-3" /> Atlas
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })()}
             </AnimatePresence>
           </div>
         )}
