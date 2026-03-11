@@ -1,5 +1,8 @@
 /**
- * FireflyFAB — stable movable floating action button.
+ * FireflyFAB — TEOTAG's guiding orb.
+ *
+ * A living, movable floating action button that serves as the wanderer's
+ * companion light — sent from TEOTAG's staff to guide, assist, and illuminate.
  *
  * STABILITY RULES (inherited from DraggableSparkFAB v4):
  * - No framer-motion gestures on FAB
@@ -15,12 +18,13 @@ import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import FireflyPanel from "@/components/FireflyPanel";
+import FireflyGuidance from "@/components/FireflyGuidance";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
 const STORAGE_KEY = "s33d-firefly-fab-pos";
 const EDGE_PAD = 12;
-const FAB_SIZE = 44;
+const FAB_SIZE = 48;
 const DRAG_THRESHOLD = 8;
 const TAP_DEBOUNCE_MS = 800;
 
@@ -48,7 +52,6 @@ function posToXY(p: StoredPos): { x: number; y: number } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const x = p.edge === "right" ? vw - FAB_SIZE - EDGE_PAD : EDGE_PAD;
-  // Reserve space: bottom nav (56px) + safe-area + 16px breathing room
   const maxY = vh - FAB_SIZE - 56 - 24;
   const minY = EDGE_PAD + 56;
   const y = Math.max(minY, Math.min(maxY, p.y));
@@ -65,6 +68,7 @@ const FireflyFAB = () => {
   const [preselectedType, setPreselectedType] = useState("bug");
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
+  const [hovered, setHovered] = useState(false);
 
   const isDragging = useRef(false);
   const dragConfirmed = useRef(false);
@@ -104,14 +108,12 @@ const FireflyFAB = () => {
     setPos(newPos);
     setXY(posToXY(newPos));
     savePos(newPos);
-    // snap silently
   }, []);
 
   const handleTap = useCallback(() => {
     if (debounceRef.current) return;
     const now = Date.now();
     if (now - lastTapTime.current < DOUBLE_TAP_MS) {
-      // Double-tap → navigate home
       lastTapTime.current = 0;
       debounceRef.current = true;
       navigate("/");
@@ -121,14 +123,11 @@ const FireflyFAB = () => {
     }
     lastTapTime.current = now;
     debounceRef.current = true;
-    // Single tap → open panel
     setPanelOpen(true);
     setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
   }, [navigate]);
 
-  // onClick fallback for accessibility and automation (keyboard Enter, assistive tech)
   const handleClick = useCallback((e: React.MouseEvent) => {
-    // Skip if drag just happened
     if (dragConfirmed.current) return;
     handleTap();
   }, [handleTap]);
@@ -142,8 +141,7 @@ const FireflyFAB = () => {
       dragStart.current = { px: e.clientX, py: e.clientY, ox: xyRef.current.x, oy: xyRef.current.y };
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       e.stopPropagation();
-    } catch (err) {
-      // pointerDown error — ignore
+    } catch {
       isDragging.current = false;
     }
   }, []);
@@ -181,13 +179,10 @@ const FireflyFAB = () => {
       } else {
         snapToEdge(xyRef.current.x, xyRef.current.y);
       }
-    } catch (err) {
-      // pointerUp error — ignore
-    }
+    } catch { /* ignore */ }
   }, [snapToEdge, handleTap]);
 
   const handleSelectAction = useCallback((type: string) => {
-    // action selected
     setPreselectedType(type);
     setDialogEverOpened(true);
     setDialogOpen(true);
@@ -197,24 +192,21 @@ const FireflyFAB = () => {
     setDialogOpen(open);
   }, []);
 
-  // FAB is always visible — not gated by usePopupGate
-
   const anyOpen = panelOpen || dialogOpen;
 
   return (
     <>
-      {/* Firefly orb */}
+      {/* TEOTAG's Guiding Orb */}
       <button
         className="fixed flex items-center justify-center rounded-full touch-none select-none
-          glow-button glow-breath
-          focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+          group"
         style={{
           width: FAB_SIZE,
           height: FAB_SIZE,
           left: xy.x,
           top: xy.y,
           zIndex: Z.FLOATING,
-          background: "radial-gradient(circle at 40% 35%, hsl(48 90% 65% / 0.9), hsl(38 80% 45% / 0.85))",
           cursor: anyOpen ? "default" : "grab",
           pointerEvents: anyOpen ? "none" : "auto",
         }}
@@ -222,30 +214,63 @@ const FireflyFAB = () => {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onClick={handleClick}
-        aria-label="Firefly: report a bug, suggest improvements, or share insights"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        aria-label="TEOTAG's guiding orb — explore, contribute, and discover"
         tabIndex={0}
       >
-        {/* Firefly inner glow */}
+        {/* Outer ambient glow — always present */}
         <span
-          className="absolute inset-1 rounded-full"
+          className={`absolute rounded-full pointer-events-none transition-all duration-700 ${anyOpen ? '' : 'firefly-ambient'}`}
           style={{
-            background: "radial-gradient(circle at 45% 40%, hsl(50 95% 80% / 0.7), transparent 70%)",
+            inset: -8,
+            background: "radial-gradient(circle, hsl(var(--primary) / 0.15), transparent 70%)",
+            filter: "blur(8px)",
           }}
         />
-        {/* Spark symbol */}
-        <span className="relative text-sm" style={{ filter: "drop-shadow(0 0 3px hsl(45 90% 75% / 0.6))" }}>
-          ✦
-        </span>
-        {/* Breathing pulse — arterial rhythm, pauses when dialog open */}
+
+        {/* Core orb body */}
         <span
-          className={`absolute inset-0 rounded-full pointer-events-none ${anyOpen ? '' : 'pulse-cta'}`}
+          className="absolute inset-0 rounded-full transition-transform duration-300"
           style={{
-            boxShadow: "0 0 16px 5px hsl(45 90% 60% / 0.2)",
+            background: "radial-gradient(circle at 38% 32%, hsl(48 92% 68% / 0.95), hsl(36 85% 48% / 0.9) 60%, hsl(30 70% 35% / 0.85))",
+            boxShadow: hovered
+              ? "0 0 24px 8px hsl(45 90% 60% / 0.35), inset 0 0 12px hsl(50 95% 80% / 0.4)"
+              : "0 0 16px 4px hsl(45 90% 60% / 0.2), inset 0 0 8px hsl(50 95% 80% / 0.3)",
+            transform: hovered ? "scale(1.08)" : "scale(1)",
+          }}
+        />
+
+        {/* Inner light — the "soul" of the orb */}
+        <span
+          className="absolute rounded-full"
+          style={{
+            inset: 6,
+            background: "radial-gradient(circle at 42% 38%, hsl(50 97% 85% / 0.8), transparent 65%)",
+          }}
+        />
+
+        {/* TEOTAG sigil — leaf symbol */}
+        <span className="relative text-[13px] drop-shadow-sm" style={{ filter: "drop-shadow(0 0 4px hsl(45 90% 75% / 0.7))" }}>
+          🍃
+        </span>
+
+        {/* Breathing pulse ring — arterial rhythm */}
+        <span
+          className={`absolute inset-0 rounded-full pointer-events-none ${anyOpen ? '' : 'firefly-pulse'}`}
+          style={{
+            boxShadow: "0 0 20px 6px hsl(45 90% 60% / 0.15)",
           }}
         />
       </button>
 
-      {/* Lightweight panel */}
+      {/* Contextual guidance whispers from TEOTAG */}
+      <FireflyGuidance
+        fabPosition={xy}
+        visible={!anyOpen}
+      />
+
+      {/* TEOTAG Panel */}
       <FireflyPanel
         open={panelOpen}
         onOpenChange={setPanelOpen}
@@ -254,7 +279,7 @@ const FireflyFAB = () => {
 
       {/* Heavy dialog — lazy, only after first action selected */}
       {dialogEverOpened && (
-        <SparkErrorBoundary fallbackMessage="Firefly couldn't open the form — please try again.">
+        <SparkErrorBoundary fallbackMessage="The orb couldn't open the form — please try again.">
           <Suspense fallback={null}>
             <BugReportDialog
               open={dialogOpen}
