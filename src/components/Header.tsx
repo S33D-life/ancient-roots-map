@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
+import OfflineIndicator from "./OfflineIndicator";
 
 
 const Header = () => {
@@ -194,7 +195,7 @@ const Header = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical overflow-visible"
         style={{
-          background: 'hsl(140 30% 10%)',
+          background: 'hsl(var(--card))',
           paddingTop: 'env(safe-area-inset-top, 0px)',
           paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
@@ -211,7 +212,7 @@ const Header = () => {
       />
       <div className="absolute inset-0 z-[1]" aria-hidden="true"
         style={{
-          background: 'linear-gradient(180deg, hsl(140 30% 10% / 0.7), hsl(145 28% 8% / 0.8))',
+          background: 'linear-gradient(180deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.95))',
         }}
       />
       {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
@@ -379,6 +380,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
+            <OfflineIndicator />
             {user && <NotificationBell />}
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden h-10 w-10">
               <Sunrise className={`w-4 h-4 absolute transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />

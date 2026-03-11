@@ -174,19 +174,12 @@ All colors MUST be HSL.
 }
 
 @layer base {
-  *,
-  *::before,
-  *::after {
+  * {
     @apply border-border;
-    box-sizing: border-box;
   }
 
-  html,
   body {
     @apply bg-background text-foreground;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 

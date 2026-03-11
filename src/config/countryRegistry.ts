@@ -345,6 +345,31 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     isCommunitySeeded: true,
     provenanceText: "These seeds were planted by the S33D community. Walk among them and help them grow.",
   },
+  {
+    country: "Iran",
+    slug: "iran",
+    flag: "🇮🇷",
+    descriptor: "Land of Eternal Cypress",
+    portalTitle: "Iran — Land of Eternal Cypress",
+    portalSubtitle: "Where desert winds, mountain forests and ancient civilizations meet beneath trees that have witnessed millennia.",
+    sourceLabel: "Heritage & cultural sources",
+    isoCode: "IR",
+    bbox: [25.0, 44.0, 39.8, 63.3],
+    defaultMapFocus: {
+      center: { lat: 32.4279, lng: 53.6880 },
+      zoom: 5,
+    },
+    defaultFilters: {
+      tags: ["ancient", "champion", "research"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "Iran Cultural Heritage Organization (placeholder)", url: "https://www.ichto.ir/" },
+      { label: "Iran Department of Environment (placeholder)", url: "https://www.doe.ir/" },
+    ],
+    isCommunitySeeded: true,
+    provenanceText: "These seeds were planted by the S33D community. Walk among them and help them grow.",
+  },
 ];
 
 export default COUNTRY_REGISTRY;

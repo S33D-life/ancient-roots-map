@@ -10,6 +10,7 @@ import { useFullscreenMap } from "@/hooks/use-fullscreen-map";
 import PublicTesterBlessing, { isBlessingDismissed } from "@/components/PublicTesterBlessing";
 import MapJourneyOverlay from "@/components/MapJourneyOverlay";
 import MapArrivalBanner from "@/components/MapArrivalBanner";
+import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
 
@@ -42,6 +43,7 @@ const MapPage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
   const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
+  const [blessingJustDismissed, setBlessingJustDismissed] = useState(false);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
@@ -55,6 +57,7 @@ const MapPage = () => {
       <MapErrorBoundary>
         <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
       </MapErrorBoundary>
+      <MapOfflineOverlay />
       <MapJourneyOverlay active={journeyActive} />
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
@@ -64,7 +67,7 @@ const MapPage = () => {
 
       {/* Public Tester Blessing — overlays map, shown once */}
       {showBlessing && (
-        <PublicTesterBlessing onComplete={() => setShowBlessing(false)} />
+        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); }} />
       )}
 
       {/* Standard header — hidden in fullscreen and during blessing */}
@@ -85,7 +88,7 @@ const MapPage = () => {
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
-      {!showBlessing && (
+      {!showBlessing && !blessingJustDismissed && (
         <Suspense fallback={null}>
           <MapOnboardingRitual />
           <ContextualWhisper

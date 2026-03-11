@@ -49,12 +49,16 @@ interface Particle {
 const FairyDust = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    // Respect reduced-motion preference
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     let animId: number;
     let particles: Particle[] = [];
+    const isMobile = window.innerWidth < 768;
+    const PARTICLE_COUNT = isMobile ? 15 : 60;
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
@@ -64,7 +68,7 @@ const FairyDust = () => {
       speedY: -Math.random() * 0.5 - 0.2, opacity: Math.random() * 0.8 + 0.2,
       fadeSpeed: Math.random() * 0.005 + 0.002, hue: Math.random() > 0.5 ? 45 : 120,
     });
-    for (let i = 0; i < 60; i++) particles.push(spawnParticle());
+    for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(spawnParticle());
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p, i) => {
@@ -100,12 +104,15 @@ interface Leaf {
 const FallingLeaves = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     let animId: number;
     let leaves: Leaf[] = [];
+    const isMobile = window.innerWidth < 768;
+    const LEAF_COUNT = isMobile ? 10 : 25;
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
@@ -123,7 +130,7 @@ const FallingLeaves = () => {
       drift: Math.random() * Math.PI * 2,
     });
 
-    for (let i = 0; i < 25; i++) leaves.push(spawnLeaf(true));
+    for (let i = 0; i < LEAF_COUNT; i++) leaves.push(spawnLeaf(true));
 
     const drawLeaf = (l: Leaf) => {
       ctx.save();

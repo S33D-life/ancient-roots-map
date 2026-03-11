@@ -54,6 +54,9 @@ const Index = () => {
       />
 
       <main className="flex-1">
+        {/* ── Discovery Row — Countries & Hives (moved up for fast access) ── */}
+        <DiscoveryRow />
+
         {/* ── CROWN — yOur Golden Dream ── */}
         <CrownSection />
 
@@ -63,21 +66,6 @@ const Index = () => {
         {/* ── TRUNK — HeARTwood Library ── */}
         <TrunkSection />
 
-        {/* ── THRESHOLD — Gateway / Navigation Hub ── */}
-        <div id="atlas-hero" className="relative overflow-hidden">
-          <SectionAtmosphere theme="threshold" />
-          <div className="min-h-[40vh] flex flex-col items-center justify-center px-6 py-16 relative z-10">
-            <div className="vine-divider mb-8" />
-            <p className="text-[9px] uppercase tracking-[0.35em] font-serif text-muted-foreground/40 mb-3">
-              The Threshold
-            </p>
-            <p className="text-muted-foreground/50 font-serif text-xs text-center max-w-xs leading-relaxed">
-              The door between earth and sky. Step down into the roots, or climb into the canopy.
-            </p>
-            <div className="vine-divider mt-8" />
-          </div>
-        </div>
-
         {/* ── GROUND — Ancient Friend Landing (scroll anchor) ── */}
         <GroundSection />
 
@@ -85,7 +73,6 @@ const Index = () => {
         <div id="atlas-content" className="relative overflow-hidden">
           <SectionAtmosphere theme="roots" />
           <IdentitySection />
-          <DiscoveryRow />
           <div className="section-divider max-w-xl mx-auto" />
           <ParticipationSection />
           <SupportDiscoveryRow />
