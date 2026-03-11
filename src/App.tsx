@@ -4,6 +4,7 @@ import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 import { MapFilterProvider } from "@/contexts/MapFilterContext";
 import { UIFlowProvider } from "@/contexts/UIFlowContext";
+import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
