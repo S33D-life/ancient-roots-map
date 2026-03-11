@@ -293,6 +293,7 @@ const App = () => {
               </Routes>
             </Suspense>
           </TeotagProvider>
+          </SeasonalLensProvider>
           </UIFlowProvider>
           </MapFilterProvider>
           </HiveSeasonProvider>
