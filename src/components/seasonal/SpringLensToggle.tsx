@@ -1,22 +1,41 @@
 /**
- * SpringLensToggle — Subtle toggle for activating the Spring Lens.
- * Can be placed inline in any page header or filter bar.
+ * @deprecated The Blooming Clock Dial is now the primary seasonal entry point.
+ * This component is retained as a thin wrapper for backward compatibility
+ * but will be removed in a future pass.
+ * 
+ * It now toggles all seasons (not just spring) via the SeasonalLens context.
  */
-import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
-import { Flower2 } from "lucide-react";
+import { useSeasonalLens, LENS_CONFIGS, type SeasonalLensType } from "@/contexts/SeasonalLensContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SpringLensToggleProps {
   compact?: boolean;
 }
 
+/** Determine the "natural" season for the current month */
+function currentSeasonKey(): SeasonalLensType {
+  const m = new Date().getMonth() + 1;
+  if (m >= 3 && m <= 5) return "spring";
+  if (m >= 6 && m <= 8) return "summer";
+  if (m >= 9 && m <= 11) return "autumn";
+  return "winter";
+}
+
 const SpringLensToggle = ({ compact = false }: SpringLensToggleProps) => {
-  const { activeLens, toggleSpringLens } = useSeasonalLens();
-  const isActive = activeLens === "spring";
+  const { activeLens, setLens } = useSeasonalLens();
+  const seasonKey = currentSeasonKey();
+  const config = LENS_CONFIGS[seasonKey];
+  const isActive = activeLens != null;
+
+  const handleToggle = () => {
+    setLens(isActive ? null : seasonKey);
+  };
+
+  const activeConfig = activeLens ? LENS_CONFIGS[activeLens] : null;
 
   return (
     <button
-      onClick={toggleSpringLens}
+      onClick={handleToggle}
       className={`
         inline-flex items-center gap-1.5 font-serif transition-all duration-300 rounded-full
         ${compact ? "text-[9px] px-2 py-0.5" : "text-[10px] px-2.5 py-1"}
@@ -25,10 +44,10 @@ const SpringLensToggle = ({ compact = false }: SpringLensToggleProps) => {
           : "bg-card/40 text-muted-foreground/60 border border-border/20 hover:border-primary/20 hover:text-muted-foreground"
         }
       `}
-      title={isActive ? "Deactivate Spring Lens" : "Activate Spring Lens"}
+      title={isActive ? `Deactivate ${activeConfig?.label || "Seasonal Lens"}` : `Activate ${config?.label || "Seasonal Lens"}`}
     >
       <AnimatePresence mode="wait">
-        {isActive ? (
+        {isActive && activeConfig ? (
           <motion.span
             key="active"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -36,8 +55,7 @@ const SpringLensToggle = ({ compact = false }: SpringLensToggleProps) => {
             exit={{ scale: 0.8, opacity: 0 }}
             className="flex items-center gap-1"
           >
-            <Flower2 className={`${compact ? "w-2.5 h-2.5" : "w-3 h-3"}`} />
-            🌸 Spring Lens
+            {activeConfig.emoji} {activeConfig.label}
           </motion.span>
         ) : (
           <motion.span
@@ -47,8 +65,7 @@ const SpringLensToggle = ({ compact = false }: SpringLensToggleProps) => {
             exit={{ opacity: 0 }}
             className="flex items-center gap-1"
           >
-            <Flower2 className={`${compact ? "w-2.5 h-2.5" : "w-3 h-3"}`} />
-            Spring
+            {config?.emoji} {config?.label?.replace(" Lens", "") || "Season"}
           </motion.span>
         )}
       </AnimatePresence>
