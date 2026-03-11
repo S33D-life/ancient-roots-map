@@ -61,6 +61,7 @@ const HivePage = () => {
   const hive = family ? getHiveBySlug(family) : null;
   const { getStatusForFamily } = useHiveSeasonalStatus();
   const seasonalStatus = hive ? getStatusForFamily(hive.family) : undefined;
+  const seasonal = useSeasonalSummary();
 
   const [trees, setTrees] = useState<TreeRow[]>([]);
   const [offerings, setOfferings] = useState<OfferingRow[]>([]);
