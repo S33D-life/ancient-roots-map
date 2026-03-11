@@ -730,7 +730,8 @@ All colors MUST be HSL.
 /* ── Honeycomb Grid ── */
 .honeycomb-grid {
   --hex-size: 170px;
-  --hex-gap: 4px;
+  --hex-gap: 6px;
+  --cols: 4;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -743,11 +744,8 @@ All colors MUST be HSL.
   flex-shrink: 0;
 }
 
-/* Offset every other "row" by half a hex width.
-   We use margin-top negative to create tight vertical packing. */
-.honeycomb-grid > *:nth-child(n) {
-  margin-top: 0;
-}
+/* Honeycomb row stagger: offset every other visual row by half a hex width.
+   The HoneycombGrid component handles this via inline styles on wrapper divs. */
 
 /* Background honeycomb texture */
 .honeycomb-bg {
@@ -773,13 +771,13 @@ All colors MUST be HSL.
 
 /* Responsive hex sizes */
 @media (max-width: 640px) {
-  .honeycomb-grid { --hex-size: 130px; --hex-gap: 3px; }
+  .honeycomb-grid { --hex-size: 130px; --hex-gap: 4px; --cols: 2; }
 }
 @media (min-width: 641px) and (max-width: 1024px) {
-  .honeycomb-grid { --hex-size: 155px; }
+  .honeycomb-grid { --hex-size: 155px; --cols: 3; }
 }
 @media (min-width: 1025px) {
-  .honeycomb-grid { --hex-size: 180px; }
+  .honeycomb-grid { --hex-size: 180px; --cols: 4; }
 }
 
 /* ── Hex Constellation ── */
