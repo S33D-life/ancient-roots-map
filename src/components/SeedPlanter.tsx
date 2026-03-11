@@ -54,9 +54,10 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setPlanting(false);
 
     if (success) {
+      setShowBurst(true);
       setShowPlanted(true);
       toast.success("🌱 Seed planted! It will bloom into a Heart in 24 hours.");
-      setTimeout(() => setShowPlanted(false), 3000);
+      setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
       if (seedsRemaining <= 0) {
         toast.error("No seeds remaining today. They refresh at midnight.");
