@@ -204,7 +204,7 @@ interface TeotagWhisperProps {
 
 const TeotagWhisper = ({ onAction }: TeotagWhisperProps) => {
   const popupsAllowed = usePopupGate();
-  const { activeMode, mapContext, libraryContext, councilContext } = useTeotagContext();
+  const { activeMode, mapContext, libraryContext, councilContext, pageContext } = useTeotagContext();
   const [current, setCurrent] = useState<Whisper | null>(null);
   const [visible, setVisible] = useState(false);
   const lastShownRef = useRef(0);
