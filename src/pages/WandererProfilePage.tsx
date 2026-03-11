@@ -135,6 +135,27 @@ const WandererProfilePage = () => {
                   {/* Species Discovery Badges */}
                   <SpeciesBadgeList badges={badges || []} />
 
+                  {/* Recent Mapped Trees */}
+                  {recentTrees && recentTrees.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <p className="text-xs font-serif text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        <TreePine className="w-3 h-3" /> Recently Mapped
+                      </p>
+                      <div className="space-y-1">
+                        {recentTrees.map(t => (
+                          <Link
+                            key={t.id}
+                            to={ROUTES.TREE(t.id)}
+                            className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                          >
+                            <span className="font-serif">{t.name || "Unnamed tree"}</span>
+                            {t.species && <span className="text-[10px] text-muted-foreground">({t.species})</span>}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Species Hearts Balances */}
                   {speciesBalances && speciesBalances.length > 0 && (
                     <div className="space-y-2 pt-2">

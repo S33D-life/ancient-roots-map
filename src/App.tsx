@@ -101,7 +101,6 @@ const CountryPortalPage = lazyImportWithRetry(() => import("./pages/CountryPorta
 const WorldAtlasPage = lazyImportWithRetry(() => import("./pages/WorldAtlasPage"), "world-atlas");
 const PilgrimagePathwaysPage = lazyImportWithRetry(() => import("./pages/PilgrimagePathwaysPage"), "pathways");
 // ValaisPortalPage removed — served by CountryPortalPage with canton filter
-const CycleMarketsPage = lazyImportWithRetry(() => import("./pages/CycleMarketsPage"), "cycle-markets");
 const MarketDetailPage = lazyImportWithRetry(() => import("./pages/MarketDetailPage"), "market-detail");
 const AddTreePage = lazyImportWithRetry(() => import("./pages/AddTreePage"), "add-tree");
 const CityTemplatePage = lazyImportWithRetry(() => import("./pages/CityTemplatePage"), "city-template");
