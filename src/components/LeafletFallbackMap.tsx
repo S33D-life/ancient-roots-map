@@ -3483,20 +3483,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* Context indicator for deep-linked views */}
-      <MapContextIndicator
-        label={contextLabel}
-        treeCount={filteredTrees.length}
-        origin={initialOrigin}
-        onClear={() => {
-          setContextLabel(null);
-          setSpecies([]);
-          clearMapMemory();
-          const map = mapRef.current;
-          if (map) map.setView([25, 10], 3, { animate: true });
-          window.history.replaceState(null, "", "/map");
-        }}
-      />
+      {/* Context indicator for deep-linked views — hidden in clear view */}
+      {!clearView && (
+        <MapContextIndicator
+          label={contextLabel}
+          treeCount={filteredTrees.length}
+          origin={initialOrigin}
+          onClear={() => {
+            setContextLabel(null);
+            setSpecies([]);
+            clearMapMemory();
+            const map = mapRef.current;
+            if (map) map.setView([25, 10], 3, { animate: true });
+            window.history.replaceState(null, "", "/map");
+          }}
+        />
+      )}
 
       {debugEnabled && (
         <div
