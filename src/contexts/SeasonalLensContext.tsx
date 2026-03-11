@@ -83,6 +83,8 @@ interface SeasonalLensContextValue {
   lensConfig: SeasonalLensConfig | null;
   setLens: (lens: SeasonalLensType) => void;
   toggleSpringLens: () => void;
+  /** Toggle any lens on/off */
+  toggleLens: (lens: SeasonalLensType) => void;
   /** Check if a month falls within the active lens */
   isLensMonth: (month: number) => boolean;
   /** Check if content matches lens keywords */
@@ -112,6 +114,10 @@ export const SeasonalLensProvider = ({ children }: { children: ReactNode }) => {
     setActiveLens(prev => (prev === "spring" ? null : "spring"));
   }, []);
 
+  const toggleLens = useCallback((lens: SeasonalLensType) => {
+    setActiveLens(prev => (prev === lens ? null : lens));
+  }, []);
+
   const isLensMonth = useCallback(
     (month: number) => lensConfig?.months.includes(month) ?? false,
     [lensConfig]
@@ -127,8 +133,8 @@ export const SeasonalLensProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const value = useMemo<SeasonalLensContextValue>(
-    () => ({ activeLens, lensConfig, setLens, toggleSpringLens, isLensMonth, matchesLens }),
-    [activeLens, lensConfig, setLens, toggleSpringLens, isLensMonth, matchesLens]
+    () => ({ activeLens, lensConfig, setLens, toggleSpringLens, toggleLens, isLensMonth, matchesLens }),
+    [activeLens, lensConfig, setLens, toggleSpringLens, toggleLens, isLensMonth, matchesLens]
   );
 
   return (

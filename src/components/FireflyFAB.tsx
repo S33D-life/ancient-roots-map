@@ -19,6 +19,7 @@ import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import FireflyPanel from "@/components/FireflyPanel";
 import FireflyGuidance from "@/components/FireflyGuidance";
+import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
@@ -62,6 +63,7 @@ const DOUBLE_TAP_MS = 350;
 
 const FireflyFAB = () => {
   const navigate = useNavigate();
+  const { activeLens, lensConfig } = useSeasonalLens();
   const [panelOpen, setPanelOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
@@ -254,6 +256,16 @@ const FireflyFAB = () => {
         <span className="relative text-[13px] drop-shadow-sm" style={{ filter: "drop-shadow(0 0 4px hsl(45 90% 75% / 0.7))" }}>
           🍃
         </span>
+
+        {/* Seasonal lens badge — subtle emoji indicator */}
+        {activeLens && lensConfig && (
+          <span
+            className="absolute -top-1 -right-1 text-[10px] leading-none pointer-events-none animate-in fade-in duration-500"
+            title={lensConfig.label}
+          >
+            {lensConfig.emoji}
+          </span>
+        )}
 
         {/* Breathing pulse ring — arterial rhythm */}
         <span

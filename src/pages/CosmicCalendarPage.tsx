@@ -43,8 +43,8 @@ const CosmicCalendarPage = () => {
   // Mayan lens active?
   const mayanActive = activeLenses.some(l => l.slug === "mayan");
 
-  // Spring lens: is current view month a spring month?
-  const isSpringMonth = seasonalLens === "spring" && isLensMonth(viewMonth + 1);
+  // Seasonal lens: is current view month within the active lens?
+  const isSeasonalMonth = !!seasonalLens && isLensMonth(viewMonth + 1);
 
   // Calendar grid
   const calendarDays = useMemo(() => {
@@ -219,7 +219,7 @@ const CosmicCalendarPage = () => {
                     text-xs font-serif transition-all
                     ${isSelected ? "bg-primary/20 ring-1 ring-primary/40 text-primary" : "hover:bg-card/80 text-foreground/70"}
                     ${isTodayCell ? "ring-1 ring-primary/30 font-bold text-primary" : ""}
-                    ${isSpringMonth && !isSelected ? "bg-primary/[0.03]" : ""}
+                    ${isSeasonalMonth && !isSelected ? "bg-primary/[0.03]" : ""}
                   `}
                 >
                   <span className="leading-none">{day.getDate()}</span>

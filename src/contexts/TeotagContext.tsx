@@ -127,37 +127,23 @@ function getQuickActions(
   route: string,
   seasonalLens?: string | null,
 ): QuickAction[] {
-  // Seasonal Lens overrides — context-aware prompts for each season
-  if (seasonalLens) {
-    const seasonActions: Record<string, QuickAction[]> = {
-      spring: [
-        { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
-        { label: "Spring harvests", prompt: "What early spring harvests and produce are available nearby?", emoji: "🌱" },
-        { label: "Planting season", prompt: "What should be planted this spring? Show me planting windows.", emoji: "🪴" },
-        { label: "Blossom walks", prompt: "Suggest blossom walks and spring exploration routes near me.", emoji: "🥾" },
-      ],
-      summer: [
-        { label: "What's fruiting?", prompt: "What trees are fruiting or ripening near me this summer?", emoji: "☀️" },
-        { label: "Summer harvests", prompt: "What summer harvests and produce are available?", emoji: "🍎" },
-        { label: "Canopy walks", prompt: "Suggest shaded walks under tree canopies near me.", emoji: "🌿" },
-        { label: "Pollinator trees", prompt: "Which trees near me are important for pollinators this summer?", emoji: "🐝" },
-      ],
-      autumn: [
-        { label: "Autumn harvests", prompt: "What nuts, fruits, and produce are ready for harvest this autumn?", emoji: "🍂" },
-        { label: "Seed gathering", prompt: "Which trees have seeds ready for gathering? Show me collection opportunities.", emoji: "🌰" },
-        { label: "Colour walks", prompt: "Suggest autumn colour walks near me to see changing leaves.", emoji: "🍁" },
-        { label: "Preserving guide", prompt: "What can be preserved or stored from this autumn's harvest?", emoji: "🫙" },
-      ],
-      winter: [
-        { label: "Evergreen trees", prompt: "What evergreen Ancient Friends are near me for winter walks?", emoji: "🌲" },
-        { label: "Dormant care", prompt: "Which trees need winter care, pruning, or mulching right now?", emoji: "❄️" },
-        { label: "Winter foraging", prompt: "What winter foraging opportunities exist near me?", emoji: "🍄" },
-        { label: "Rest & reflection", prompt: "Tell me about the winter rest cycle and how trees prepare for spring.", emoji: "🌙" },
-      ],
-    };
-    const actions = seasonActions[seasonalLens];
-    if (actions) return actions;
-  }
+  // Seasonal Lens — blend one seasonal action into page-specific context
+  // instead of fully overriding, so page context remains visible
+  const SEASONAL_LEAD: Record<string, QuickAction> = {
+    spring: { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
+    summer: { label: "What's fruiting?", prompt: "What trees are fruiting or ripening near me this summer?", emoji: "☀️" },
+    autumn: { label: "Autumn harvests", prompt: "What nuts, fruits, and produce are ready for harvest this autumn?", emoji: "🍂" },
+    winter: { label: "Evergreen walks", prompt: "What evergreen Ancient Friends are near me for winter walks?", emoji: "🌲" },
+  };
+  const seasonalLead = seasonalLens ? SEASONAL_LEAD[seasonalLens] : null;
+
+  /** Prepend one seasonal action into a page-specific action list */
+  const withSeason = (actions: QuickAction[], max = 4): QuickAction[] => {
+    if (!seasonalLead) return actions.slice(0, max);
+    // Avoid duplicate if label already present
+    if (actions.some(a => a.label === seasonalLead.label)) return actions.slice(0, max);
+    return [seasonalLead, ...actions].slice(0, max);
+  };
 
   // ── Tree detail page ──────────────────────────
   if (pageCtx.tree) {
@@ -173,7 +159,7 @@ function getQuickActions(
     if (t.bloomStatus) {
       actions.push({ label: "Bloom status", prompt: `${t.name} is currently ${t.bloomStatus}. Tell me more about this phase.`, emoji: "🌿" });
     }
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   // ── Harvest detail / listing page ─────────────
@@ -189,17 +175,17 @@ function getQuickActions(
       { label: "Season guide", prompt: `When is the best time to harvest ${h.produceName || "this produce"}? Show me the seasonal window.`, emoji: "📅" },
       { label: "Similar harvests", prompt: `What other ${h.category || "produce"} harvests are available nearby?`, emoji: "🌿" },
     );
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   // ── Harvest index page ────────────────────────
   if (route.startsWith("/harvest")) {
-    return [
+    return withSeason([
       { label: "Harvests near me", prompt: "What harvests are happening near me this month?", emoji: "🍎" },
       { label: "Seasonal produce", prompt: "What tree produce is in season right now?", emoji: "🌿" },
       { label: "Find on map", prompt: "Show me harvest locations on the map.", emoji: "🗺️" },
       { label: "Blooming now", prompt: "What trees are flowering or fruiting this month?", emoji: "🌸" },
-    ];
+    ]);
   }
 
   // ── Staff page ────────────────────────────────
@@ -214,12 +200,12 @@ function getQuickActions(
 
   // ── Calendar page ─────────────────────────────
   if (route.startsWith("/cosmic")) {
-    return [
+    return withSeason([
       { label: "What's happening now", prompt: "What seasonal events and harvests are happening this month?", emoji: "📅" },
       { label: "Upcoming harvests", prompt: "What harvests are coming up in the next few months?", emoji: "🍎" },
       { label: "Blooming cycles", prompt: "What is blooming or fruiting right now across the atlas?", emoji: "🌸" },
       { label: "Next gathering", prompt: "When is the next Council of Life gathering?", emoji: "🍃" },
-    ];
+    ]);
   }
 
   // ── Vault page ────────────────────────────────
@@ -249,7 +235,7 @@ function getQuickActions(
         emoji: "🌊",
       });
     }
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   if (mode === "librarian") {
@@ -264,21 +250,21 @@ function getQuickActions(
         emoji: "📖",
       });
     }
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   if (mode === "scribe") {
-    return [
+    return withSeason([
       { label: "Council overview", prompt: "Give me an overview of the Council of Life and its purpose.", emoji: "🍃" },
       { label: "Meeting themes", prompt: "What key themes have emerged from recent council gatherings?", emoji: "📋" },
       { label: "Plant of the week", prompt: "What is the current plant of the week from the council?", emoji: "🌿" },
-    ];
+    ]);
   }
 
-  return [
+  return withSeason([
     { label: "Guide me", prompt: "Where should I begin my journey in S33D?", emoji: "✨" },
     { label: "What is S33D?", prompt: "Explain the S33D ecosystem and how it works.", emoji: "🌱" },
-  ];
+  ]);
 }
 
 /* ── Context summary builder ────────────────────── */
