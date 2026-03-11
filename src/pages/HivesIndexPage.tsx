@@ -257,7 +257,7 @@ const HivesIndexPage = () => {
 
           {/* Quick-filter chips — horizontally scrollable */}
           {!loading && activeChips.length > 0 && (
-            <div className="mb-4">
+            <div className="mb-5">
               <div className="flex items-center gap-2 mb-2">
                 <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider">Quick Filter</span>
