@@ -175,7 +175,7 @@ function getQuickActions(
       { label: "Season guide", prompt: `When is the best time to harvest ${h.produceName || "this produce"}? Show me the seasonal window.`, emoji: "📅" },
       { label: "Similar harvests", prompt: `What other ${h.category || "produce"} harvests are available nearby?`, emoji: "🌿" },
     );
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   // ── Harvest index page ────────────────────────
