@@ -114,6 +114,10 @@ export const SeasonalLensProvider = ({ children }: { children: ReactNode }) => {
     setActiveLens(prev => (prev === "spring" ? null : "spring"));
   }, []);
 
+  const toggleLens = useCallback((lens: SeasonalLensType) => {
+    setActiveLens(prev => (prev === lens ? null : lens));
+  }, []);
+
   const isLensMonth = useCallback(
     (month: number) => lensConfig?.months.includes(month) ?? false,
     [lensConfig]
