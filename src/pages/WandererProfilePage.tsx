@@ -9,12 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Compass, Heart } from "lucide-react";
+import { Loader2, MapPin, Compass, Heart, TreePine } from "lucide-react";
 import { getHiveInfo } from "@/utils/hiveUtils";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
 import { useSpeciesBadges } from "@/hooks/use-species-badges";
 import StreakBadge from "@/components/growth/StreakBadge";
 import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
+import { ROUTES } from "@/lib/routes";
 
 const WandererProfilePage = () => {
   const { id } = useParams<{ id: string }>();
