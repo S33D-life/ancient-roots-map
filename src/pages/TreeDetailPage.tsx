@@ -282,7 +282,6 @@ const TreeDetailPage = () => {
       id: tree.id,
       name: tree.name,
       species: tree.species ?? undefined,
-      country: tree.country ?? undefined,
       latitude: tree.latitude ?? undefined,
       longitude: tree.longitude ?? undefined,
       bloomStatus: bloomStatus?.label ?? undefined,
