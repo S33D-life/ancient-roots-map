@@ -112,6 +112,12 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
          <p className="text-sm font-serif mt-0.5" style={{ color: `hsl(${hue}, ${sat}%, ${light + 20}%)` }}>
           {isLoading ? "Sensing…" : vitality < 20 ? "Dormant" : vitality < 50 ? "Stirring" : vitality < 80 ? "Flourishing" : "Thriving"}
         </p>
+        {/* Seasonal sub-count overlay */}
+        {seasonal.active && !isLoading && (
+          <p className="text-[9px] text-muted-foreground/50 font-serif mt-1">
+            {seasonal.emoji} {seasonal.summaryLine}
+          </p>
+        )}
       </div>
 
       {/* Stats row */}

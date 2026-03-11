@@ -314,7 +314,7 @@ const LivingForestRoadmapPage = () => {
           </section>
 
           {/* ── Stats strip ── */}
-          <div className="flex justify-center gap-4 md:gap-6 mb-6 flex-wrap">
+          <div className="flex justify-center gap-4 md:gap-6 mb-4 flex-wrap">
             {(Object.keys(STAGE_META) as RoadmapStage[]).map((s) => (
               <div key={s} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <StageIcon stage={s} className="w-3.5 h-3.5" />
@@ -322,6 +322,11 @@ const LivingForestRoadmapPage = () => {
                 <span className="hidden sm:inline">{STAGE_META[s].label.split("—")[0].trim()}</span>
               </div>
             ))}
+          </div>
+
+          {/* Seasonal lens context */}
+          <div className="max-w-lg mx-auto mb-6">
+            <SeasonalLensBanner context="general" />
           </div>
 
           {/* ── Region filter chips ── */}
