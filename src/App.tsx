@@ -114,6 +114,8 @@ const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"),
 const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/BioregionCalendarPage"), "bio-calendar");
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
+const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
+const HarvestDetailPage = lazyImportWithRetry(() => import("./pages/HarvestDetailPage"), "harvest-detail");
 const HowHeartsWorkPage = lazyImportWithRetry(() => import("./pages/HowHeartsWorkPage"), "how-hearts");
 const CosmicCalendarPage = lazyImportWithRetry(() => import("./pages/CosmicCalendarPage"), "cosmic-calendar");
 const TreeLedgerPage = lazyImportWithRetry(() => import("./pages/TreeLedgerPage"), "tree-ledger");
@@ -277,6 +279,8 @@ const App = () => {
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />
+                <Route path="/harvest" element={<HarvestPage />} />
+                <Route path="/harvest/:id" element={<HarvestDetailPage />} />
                 <Route path="/how-hearts-work" element={<HowHeartsWorkPage />} />
                 <Route path="/cosmic" element={<CosmicCalendarPage />} />
                 <Route path="/cosmic/settings" element={<CalendarSettingsPage />} />

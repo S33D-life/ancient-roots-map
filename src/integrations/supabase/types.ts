@@ -1924,6 +1924,89 @@ export type Database = {
         }
         Relationships: []
       }
+      harvest_listings: {
+        Row: {
+          availability_type: string
+          category: string
+          contact_method: string | null
+          created_at: string
+          description: string | null
+          external_link: string | null
+          guardian_id: string
+          harvest_month_end: number | null
+          harvest_month_start: number | null
+          id: string
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          photos: string[] | null
+          pickup_instructions: string | null
+          price_note: string | null
+          produce_name: string
+          quantity_note: string | null
+          shipping_available: boolean | null
+          status: string
+          tree_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability_type?: string
+          category?: string
+          contact_method?: string | null
+          created_at?: string
+          description?: string | null
+          external_link?: string | null
+          guardian_id: string
+          harvest_month_end?: number | null
+          harvest_month_start?: number | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          photos?: string[] | null
+          pickup_instructions?: string | null
+          price_note?: string | null
+          produce_name: string
+          quantity_note?: string | null
+          shipping_available?: boolean | null
+          status?: string
+          tree_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability_type?: string
+          category?: string
+          contact_method?: string | null
+          created_at?: string
+          description?: string | null
+          external_link?: string | null
+          guardian_id?: string
+          harvest_month_end?: number | null
+          harvest_month_start?: number | null
+          id?: string
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          photos?: string[] | null
+          pickup_instructions?: string | null
+          price_note?: string | null
+          produce_name?: string
+          quantity_note?: string | null
+          shipping_available?: boolean | null
+          status?: string
+          tree_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "harvest_listings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       heart_campaigns: {
         Row: {
           created_at: string

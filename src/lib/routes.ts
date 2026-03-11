@@ -30,6 +30,8 @@ export const ROUTES = {
   VALUE_TREE_EARN: "/value-tree?tab=earn",
   /** Support hub */
   SUPPORT: "/support",
+  /** Guardian Harvest Exchange */
+  HARVEST: "/harvest",
   /** Living Forest Roadmap */
   ROADMAP: "/roadmap",
 } as const;
