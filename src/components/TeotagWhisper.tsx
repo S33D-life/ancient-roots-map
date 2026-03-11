@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, X, Map, Route, BookOpen, Compass } from "lucide-react";
+import { Leaf, X, Map, Route, BookOpen, Compass, TreeDeciduous, ShoppingBasket } from "lucide-react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
-import { useTeotagContext, type TeotagMode, type MapContext, type LibraryContext, type CouncilContext } from "@/contexts/TeotagContext";
+import { useTeotagContext, type TeotagMode, type MapContext, type LibraryContext, type CouncilContext, type PageContext } from "@/contexts/TeotagContext";
 
 /* ── Whisper types ────────────────────────────────── */
 export type WhisperKind = "landscape" | "tree" | "knowledge" | "journey";
@@ -99,6 +99,74 @@ function buildCouncilWhispers(_ctx: CouncilContext, onAction: (type: string) => 
   ];
 }
 
+/* ── Page-specific whispers ─────────────────────── */
+
+function buildTreePageWhispers(ctx: NonNullable<PageContext["tree"]>, onAction: (type: string) => void): Whisper[] {
+  const pool: Whisper[] = [
+    {
+      kind: "tree",
+      message: `You are visiting ${ctx.name}. Every tree holds a living story waiting to be heard.`,
+      action: { label: "Ask TEOTAG", emoji: "✨", onClick: () => onAction("open-guide") },
+    },
+  ];
+  if (ctx.bloomStatus) {
+    pool.push({
+      kind: "landscape",
+      message: `${ctx.name} is currently ${ctx.bloomStatus}. The seasons shape its rhythm.`,
+    });
+  }
+  if (ctx.species) {
+    pool.push({
+      kind: "knowledge",
+      message: `${ctx.species} trees share deep connections across the grove. Explore their kin.`,
+      action: { label: "Explore species", emoji: "🌿", onClick: () => onAction("species") },
+    });
+  }
+  if (ctx.offeringCount && ctx.offeringCount > 0) {
+    pool.push({
+      kind: "journey",
+      message: `${ctx.offeringCount} offerings have been left at ${ctx.name}. Songs, stories, and images gather here.`,
+    });
+  }
+  return pool;
+}
+
+function buildHarvestPageWhispers(ctx: NonNullable<PageContext["harvest"]>, onAction: (type: string) => void): Whisper[] {
+  const pool: Whisper[] = [];
+  if (ctx.produceName) {
+    pool.push({
+      kind: "landscape",
+      message: `${ctx.produceName} — a gift from the living landscape. Discover its seasonal rhythm.`,
+      action: { label: "Season guide", emoji: "📅", onClick: () => onAction("open-guide") },
+    });
+  }
+  if (ctx.treeId) {
+    pool.push({
+      kind: "tree",
+      message: "This harvest is linked to a living tree. Visit the source of this abundance.",
+      action: { label: "View tree", emoji: "🌳", onClick: () => onAction("view-tree") },
+    });
+  }
+  pool.push({
+    kind: "journey",
+    message: "The Harvest Exchange connects guardians and foragers through seasonal abundance.",
+  });
+  return pool;
+}
+
+function buildStaffPageWhispers(ctx: NonNullable<PageContext["staff"]>): Whisper[] {
+  return [
+    {
+      kind: "journey",
+      message: `The Walking Staff "${ctx.staffName || ctx.code}" carries the memory of its bearer's journey.`,
+    },
+    {
+      kind: "knowledge",
+      message: `${ctx.species || "This wood"} holds stories older than words. Each grain is a year remembered.`,
+    },
+  ];
+}
+
 function buildGenericWhispers(): Whisper[] {
   return [
     { kind: "landscape", message: "The roots remember what the branches dream…" },
@@ -136,7 +204,7 @@ interface TeotagWhisperProps {
 
 const TeotagWhisper = ({ onAction }: TeotagWhisperProps) => {
   const popupsAllowed = usePopupGate();
-  const { activeMode, mapContext, libraryContext, councilContext } = useTeotagContext();
+  const { activeMode, mapContext, libraryContext, councilContext, pageContext } = useTeotagContext();
   const [current, setCurrent] = useState<Whisper | null>(null);
   const [visible, setVisible] = useState(false);
   const lastShownRef = useRef(0);
@@ -152,23 +220,34 @@ const TeotagWhisper = ({ onAction }: TeotagWhisperProps) => {
     if (getSessionCount() >= MAX_PER_SESSION) return null;
 
     let pool: Whisper[];
-    switch (activeMode) {
-      case "guide":
-        pool = buildMapWhispers(mapContext, handleAction);
-        break;
-      case "librarian":
-        pool = buildLibraryWhispers(libraryContext, handleAction);
-        break;
-      case "scribe":
-        pool = buildCouncilWhispers(councilContext, handleAction);
-        break;
-      default:
-        pool = buildGenericWhispers();
+
+    // Page-level context takes priority
+    if (pageContext.tree) {
+      pool = buildTreePageWhispers(pageContext.tree, handleAction);
+    } else if (pageContext.harvest?.id) {
+      pool = buildHarvestPageWhispers(pageContext.harvest, handleAction);
+    } else if (pageContext.staff?.code) {
+      pool = buildStaffPageWhispers(pageContext.staff);
+    } else {
+      // Fall back to mode-based whispers
+      switch (activeMode) {
+        case "guide":
+          pool = buildMapWhispers(mapContext, handleAction);
+          break;
+        case "librarian":
+          pool = buildLibraryWhispers(libraryContext, handleAction);
+          break;
+        case "scribe":
+          pool = buildCouncilWhispers(councilContext, handleAction);
+          break;
+        default:
+          pool = buildGenericWhispers();
+      }
     }
 
     if (pool.length === 0) return null;
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [activeMode, mapContext, libraryContext, councilContext, handleAction]);
+  }, [activeMode, mapContext, libraryContext, councilContext, pageContext, handleAction]);
 
   const showNext = useCallback(() => {
     const now = Date.now();
@@ -206,13 +285,22 @@ const TeotagWhisper = ({ onAction }: TeotagWhisperProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMode]);
 
-  // Show a fresh whisper when a tree is selected (with cooldown)
+  // Show a fresh whisper when a tree is selected on map (with cooldown)
   useEffect(() => {
     if (mapContext.selectedTreeId) {
       const delay = setTimeout(() => showNext(), 3000);
       return () => clearTimeout(delay);
     }
   }, [mapContext.selectedTreeId, showNext]);
+
+  // Show a contextual whisper when arriving at a tree/harvest/staff page
+  useEffect(() => {
+    const hasPageCtx = pageContext.tree || pageContext.harvest?.id || pageContext.staff?.code;
+    if (hasPageCtx) {
+      const delay = setTimeout(() => showNext(), 5000);
+      return () => clearTimeout(delay);
+    }
+  }, [pageContext.tree?.id, pageContext.harvest?.id, pageContext.staff?.code, showNext]);
 
   const dismiss = () => {
     setVisible(false);

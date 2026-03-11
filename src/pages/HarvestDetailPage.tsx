@@ -10,10 +10,29 @@ import {
   STATUS_LABELS,
   MONTHS,
 } from "@/hooks/use-harvest-listings";
+import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 
 const HarvestDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: listing, isLoading, error } = useHarvestListing(id);
+
+  // Feed TEOTAG context with harvest listing data
+  useTeotagPageContext(
+    listing
+      ? {
+          harvest: {
+            id: listing.id,
+            produceName: listing.produce_name,
+            category: listing.category,
+            availabilityType: listing.availability_type,
+            treeId: listing.tree_id ?? undefined,
+            locationName: listing.location_name ?? undefined,
+            seasonStart: listing.harvest_month_start ?? undefined,
+            seasonEnd: listing.harvest_month_end ?? undefined,
+          },
+        }
+      : {},
+  );
 
   if (isLoading) {
     return (

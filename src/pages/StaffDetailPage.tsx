@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -118,6 +119,12 @@ export default function StaffDetailPage() {
     : "";
   const counts = useMemo(() => getSpeciesStaffCounts(), []);
   const total = counts[speciesCode] || 1;
+  // Feed TEOTAG context with staff data
+  useTeotagPageContext(
+    staff
+      ? { staff: { code: staff.code, staffName: staff.speciesName, species: staff.speciesName } }
+      : {},
+  );
 
   /* ── Data fetch: offerings + trees + ceremonies ────────────── */
   useEffect(() => {
