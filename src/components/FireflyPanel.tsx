@@ -1,10 +1,13 @@
 /**
  * FireflyPanel — Contribution + Search entry panel.
- * Now includes unified search as a primary action.
+ * Now includes unified search as a primary action
+ * and a daily seed counter for core loop visibility.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search } from "lucide-react";
+import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search, Sprout } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import {
   Dialog,
   DialogContent,
