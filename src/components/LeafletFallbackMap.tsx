@@ -3416,57 +3416,56 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }}
       />
 
-      {/* Unified Atlas Filter */}
-      <AtlasFilter
-        speciesCounts={speciesCounts}
-        totalVisible={filteredTrees.length}
-        selectedSpecies={species}
-        onSpeciesChange={setSpecies}
-        lineageFilter={lineageFilter}
-        onLineageChange={setLineageFilter}
-        availableLineages={availableLineages}
-        projectFilter={projectFilter}
-        onProjectChange={setProjectFilter}
-        availableProjects={availableProjects}
-        hiveMap={hiveMap}
-        visualSections={visualSections}
-        panelOpen={atlasFilterOpen}
-        onPanelOpenChange={setAtlasFilterOpen}
-        onFullscreenToggle={onFullscreenToggle}
-        isFullscreen={isFullscreen}
-        onPerspectivePreset={(preset: PerspectivePreset) => {
-          // Apply layer presets when perspective changes
-          setShowHiveLayer(preset.hiveEmphasis);
-          if (preset.bloomingClockVisible && !showBloomingClock) setShowBloomingClock(true);
-          // Activate recommended layers for this perspective
-          const layerMap: Record<string, (v: boolean) => void> = {
-            "seeds": (v) => setShowSeeds(v),
-            "offering-glow": (v) => setShowOfferingGlow(v),
-            "heart-glow": (v) => setShowHeartGlow(v),
-            "hive-layer": (v) => setShowHiveLayer(v),
-            "groves": (v) => setShowGroves(v),
-            "bloomed-seeds": (v) => setShowBloomedSeeds(v),
-            "recent-visits": (v) => setShowRecentVisits(v),
-            "seed-traces": (v) => setShowSeedTraces(v),
-            "seed-trail": (v) => setShowSeedTrail(v),
-            "shared-trees": (v) => setShowSharedTrees(v),
-            "tribe-activity": (v) => setShowTribeActivity(v),
-          };
-          // Turn off all, then turn on preset layers
-          Object.values(layerMap).forEach(fn => fn(false));
-          preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
-        }}
-        onAddTree={() => {
-          const map = mapRef.current;
-          if (map) {
-            const c = map.getCenter();
-            setAddTreeCoords({ lat: c.lat, lng: c.lng });
-          } else {
-            setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-          }
-          setAddDialogOpen(true);
-        }}
-      />
+      {/* Unified Atlas Filter — hidden in clear view */}
+      {!clearView && (
+        <AtlasFilter
+          speciesCounts={speciesCounts}
+          totalVisible={filteredTrees.length}
+          selectedSpecies={species}
+          onSpeciesChange={setSpecies}
+          lineageFilter={lineageFilter}
+          onLineageChange={setLineageFilter}
+          availableLineages={availableLineages}
+          projectFilter={projectFilter}
+          onProjectChange={setProjectFilter}
+          availableProjects={availableProjects}
+          hiveMap={hiveMap}
+          visualSections={visualSections}
+          panelOpen={atlasFilterOpen}
+          onPanelOpenChange={setAtlasFilterOpen}
+          onFullscreenToggle={onFullscreenToggle}
+          isFullscreen={isFullscreen}
+          onPerspectivePreset={(preset: PerspectivePreset) => {
+            setShowHiveLayer(preset.hiveEmphasis);
+            if (preset.bloomingClockVisible && !showBloomingClock) setShowBloomingClock(true);
+            const layerMap: Record<string, (v: boolean) => void> = {
+              "seeds": (v) => setShowSeeds(v),
+              "offering-glow": (v) => setShowOfferingGlow(v),
+              "heart-glow": (v) => setShowHeartGlow(v),
+              "hive-layer": (v) => setShowHiveLayer(v),
+              "groves": (v) => setShowGroves(v),
+              "bloomed-seeds": (v) => setShowBloomedSeeds(v),
+              "recent-visits": (v) => setShowRecentVisits(v),
+              "seed-traces": (v) => setShowSeedTraces(v),
+              "seed-trail": (v) => setShowSeedTrail(v),
+              "shared-trees": (v) => setShowSharedTrees(v),
+              "tribe-activity": (v) => setShowTribeActivity(v),
+            };
+            Object.values(layerMap).forEach(fn => fn(false));
+            preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
+          }}
+          onAddTree={() => {
+            const map = mapRef.current;
+            if (map) {
+              const c = map.getCenter();
+              setAddTreeCoords({ lat: c.lat, lng: c.lng });
+            } else {
+              setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+            }
+            setAddDialogOpen(true);
+          }}
+        />
+      )}
 
       {/* Discovery cue — hidden in clear view */}
       {discoveryCount > 0 && !clearView && (
