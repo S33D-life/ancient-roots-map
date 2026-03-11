@@ -28,6 +28,7 @@ import HiveActivityOrb from "@/components/hive/HiveActivityOrb";
 import HiveUserBalance from "@/components/hive/HiveUserBalance";
 import HiveLeaderboardCard from "@/components/growth/HiveLeaderboardCard";
 import HiveStewardshipSignals from "@/components/governance/HiveStewardshipSignals";
+import HiveContributionCTA from "@/components/hive/HiveContributionCTA";
 
 interface TreeRow {
   id: string;
