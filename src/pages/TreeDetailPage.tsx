@@ -276,6 +276,20 @@ const TreeDetailPage = () => {
     );
   }
 
+  // Feed TEOTAG context with tree page data
+  useTeotagPageContext({
+    tree: {
+      id: tree.id,
+      name: tree.name,
+      species: tree.species ?? undefined,
+      country: tree.country ?? undefined,
+      latitude: tree.latitude ?? undefined,
+      longitude: tree.longitude ?? undefined,
+      bloomStatus: bloomStatus?.label ?? undefined,
+      offeringCount: offerings.length,
+    },
+  });
+
   // getOfferingsByType provided by useOfferings hook
 
   const handleAddOffering = (type: OfferingType) => {

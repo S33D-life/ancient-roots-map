@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
