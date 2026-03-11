@@ -7,6 +7,7 @@
  * - Emits 's33d-queue-change' events for UI reactivity
  */
 import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured } from "@/config/env";
 import {
   getActionsByStatus,
   updateAction,
