@@ -723,7 +723,32 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [bloomMonth, setBloomMonth] = useState(new Date().getMonth() + 1);
   const [bloomRegionStages, setBloomRegionStages] = useState<RegionStageInfo[]>([]);
 
-  // Hive Fruit Layer — unified seasonal system
+  // Seasonal Lens — harmonises calendar, blooming clock, and map layers
+  const { activeLens, setLens, lensConfig } = useSeasonalLens();
+
+  // When a seasonal lens is activated, auto-enable relevant map layers and set blooming clock month
+  useEffect(() => {
+    if (!activeLens) return;
+    const config = LENS_CONFIGS[activeLens];
+    if (!config) return;
+    // Auto-enable harvest + offering + blooming clock layers
+    setShowHarvestLayer(true);
+    setShowOfferingGlow(true);
+    setShowBloomingClock(true);
+    // Set blooming clock to the middle month of the season
+    const midMonth = config.months[Math.floor(config.months.length / 2)];
+    setBloomMonth(midMonth);
+    // Set appropriate stage filter based on season
+    const stageMap: Record<string, CycleStage | "all"> = {
+      spring: "flowering",
+      summer: "fruiting",
+      autumn: "harvest",
+      winter: "dormant",
+    };
+    setBloomStageFilter(stageMap[activeLens] || "all");
+  }, [activeLens]);
+
+
   const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
   const { activeHiveFamily, setActiveHive } = useHiveSeasonFilter();
   const [fruitPreview, setFruitPreview] = useState<{
