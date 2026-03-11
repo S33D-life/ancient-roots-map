@@ -5,6 +5,7 @@
  */
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 
 export type TeotagMode = "guide" | "librarian" | "scribe" | "oracle";
 
