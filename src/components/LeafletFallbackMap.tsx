@@ -3093,7 +3093,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       const pois = await fetchLandscapePOIs(
         bounds.getSouth(), bounds.getWest(),
         bounds.getNorth(), bounds.getEast(),
-        ac.signal
+        ac.signal,
+        {
+          includeWaterways: showWaterways,
+          includeChurches: showChurchyards,
+          includeCommons: true,
+          includeParklands: true,
+          includeFootpaths: showFootpaths,
+          includeHeritage: showHeritage,
+          includeCastles: showCastles,
+        }
       );
 
       if (ac.signal.aborted) return;
