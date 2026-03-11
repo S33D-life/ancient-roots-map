@@ -388,6 +388,20 @@ const TreeDetailPage = () => {
           />
         )}
 
+        {tree && (
+          <GreetingCardDialog
+            open={greetingCardOpen}
+            onOpenChange={setGreetingCardOpen}
+            tree={{
+              name: tree.name,
+              species: tree.species,
+              imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
+              location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
+            }}
+            whispers={availableWhispers.map((w) => w.message_content)}
+          />
+        )}
+
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
