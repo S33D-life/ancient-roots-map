@@ -6,6 +6,7 @@ import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getAllHives, type HiveInfo, getHiveForSpecies } from "@/utils/hiveUtils";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HexHiveCell from "@/components/hives/HexHiveCell";
 import HoneycombGrid from "@/components/hives/HoneycombGrid";
