@@ -3113,7 +3113,36 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
       pois.forEach((poi) => {
         const meta = GUARDIAN_TAGS[poi.category];
-        const sz = poi.category === "waterway" ? 10 : 14;
+
+        // Render line geometries (rivers, footpaths, etc.)
+        if (poi.geometry && poi.geometry.length > 1) {
+          const isPath = poi.category === "footpath";
+          const isWater = poi.category === "waterway";
+          L.polyline(poi.geometry, {
+            color: meta.color,
+            weight: isPath ? 2.5 : isWater ? 3 : 2,
+            opacity: 0.6,
+            dashArray: isPath ? "6, 8" : undefined,
+            lineCap: "round",
+            lineJoin: "round",
+            interactive: true,
+          })
+            .bindPopup(
+              `<div style="padding:10px 12px;font-family:'Cinzel',serif;width:200px;background:hsl(30,15%,10%);border-radius:10px;border:1px solid ${meta.color}44;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                  <span style="font-size:16px;">${meta.icon}</span>
+                  <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:${meta.color}22;color:${meta.color};border:1px solid ${meta.color}44;font-family:sans-serif;">${meta.tag}</span>
+                </div>
+                <h3 style="margin:0;font-size:13px;color:${meta.color};font-weight:700;">${escapeHtml(poi.name || meta.tag)}</h3>
+                ${poi.subtype ? `<p style="margin:2px 0 0;font-size:10px;color:hsl(0,0%,55%);font-style:italic;">${escapeHtml(poi.subtype)}</p>` : ""}
+              </div>`,
+              { className: "atlas-leaflet-popup", closeButton: true, maxWidth: 220, offset: L.point(0, -4) }
+            )
+            .addTo(wcLayer);
+          return; // don't also add a point marker for lines
+        }
+
+        const sz = poi.category === "waterway" ? 10 : poi.category === "footpath" ? 8 : 14;
         const half = sz / 2;
 
         const icon = L.divIcon({
