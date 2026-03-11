@@ -3568,8 +3568,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }))}
       />
 
-      {/* Blooming Clock — Seasonal sigils legend */}
-      {showBloomingClock && bloomRegionStages.length > 0 && (
+      {/* Blooming Clock — Seasonal sigils legend (hidden in clear view) */}
+      {showBloomingClock && bloomRegionStages.length > 0 && !clearView && (
         <BloomingClockSigils
           activeStages={[...new Set(bloomRegionStages.map(rs => rs.stage))]}
           currentMonth={bloomMonth}
@@ -3586,16 +3586,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onFruitClick={handleFruitClick}
       />
 
-      {/* Hive Fruit Preview — mini card on fruit click */}
-      <HiveFruitPreview
-        visible={!!fruitPreview}
-        hive={fruitPreview?.hive || { family: "", slug: "", displayName: "", description: "", accentHsl: "0 0% 50%", icon: "🌿", representativeSpecies: [] }}
-        stage={fruitPreview?.status.stage || ""}
-        stageLabel={fruitPreview?.status.label || ""}
-        stageEmoji={fruitPreview?.status.emoji || ""}
-        treeCount={fruitPreview?.treeCount || 0}
-        onClose={() => setFruitPreview(null)}
-      />
+      {/* Hive Fruit Preview — mini card on fruit click (hidden in clear view) */}
+      {!clearView && (
+        <HiveFruitPreview
+          visible={!!fruitPreview}
+          hive={fruitPreview?.hive || { family: "", slug: "", displayName: "", description: "", accentHsl: "0 0% 50%", icon: "🌿", representativeSpecies: [] }}
+          stage={fruitPreview?.status.stage || ""}
+          stageLabel={fruitPreview?.status.label || ""}
+          stageEmoji={fruitPreview?.status.emoji || ""}
+          treeCount={fruitPreview?.treeCount || 0}
+          onClose={() => setFruitPreview(null)}
+        />
+      )}
 
       {/* Empty state */}
       {filteredTrees.length === 0 && trees.length > 0 && (
