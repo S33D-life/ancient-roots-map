@@ -57,6 +57,14 @@ const HarvestPage = () => {
           </p>
         </section>
 
+        {/* Spring Lens toggle + banner */}
+        <div className="mb-4 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <SpringLensToggle />
+          </div>
+          <SpringLensBanner context="harvest" />
+        </div>
+
         {/* Seasonal context bar */}
         {bloomEvents.length > 0 && (
           <div className="mb-6 rounded-xl bg-card/40 border border-border/20 p-3">
