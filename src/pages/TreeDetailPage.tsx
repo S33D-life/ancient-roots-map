@@ -19,6 +19,7 @@ import {
   TreeHiveConnections,
   TreeHeartRewards,
 } from "@/components/tree-sections";
+import TreeJourneyInvitations from "@/components/tree-sections/TreeJourneyInvitations";
 import SeedPlanter from "@/components/SeedPlanter";
 import CoreLoopBar from "@/components/CoreLoopBar";
 import WhisperRipple from "@/components/WhisperRipple";
@@ -480,6 +481,14 @@ const TreeDetailPage = () => {
               lat={tree.latitude}
               lng={tree.longitude}
               w3w={tree.what3words}
+            />
+
+            {/* Journey Invitations — contribution CTAs + hive link */}
+            <TreeJourneyInvitations
+              species={tree.species}
+              treeId={id!}
+              treeName={tree.name}
+              onAddOffering={() => setAddOfferingOpen(true)}
             />
 
             {/* Hive Connections */}

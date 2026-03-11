@@ -28,6 +28,7 @@ import HiveActivityOrb from "@/components/hive/HiveActivityOrb";
 import HiveUserBalance from "@/components/hive/HiveUserBalance";
 import HiveLeaderboardCard from "@/components/growth/HiveLeaderboardCard";
 import HiveStewardshipSignals from "@/components/governance/HiveStewardshipSignals";
+import HiveContributionCTA from "@/components/hive/HiveContributionCTA";
 
 interface TreeRow {
   id: string;
@@ -313,6 +314,14 @@ const HivePage = () => {
         {/* Seasonal Lens Banner */}
         <div className="mb-4">
           <SeasonalLensBanner context="general" />
+        </div>
+
+        {/* Contribution CTAs */}
+        <div className="mb-6">
+          <HiveContributionCTA
+            hive={hive}
+            onMapTrees={() => focusMap({ type: "area", id: hive.family, source: "hive", hiveSlug: family })}
+          />
         </div>
 
         {/* Activity Orb + User Balance */}
