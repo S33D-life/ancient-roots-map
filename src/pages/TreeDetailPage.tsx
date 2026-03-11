@@ -175,7 +175,7 @@ const TreeDetailPage = () => {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
   }, []);
 
   // Handle ?add=type query param
