@@ -84,7 +84,7 @@ const OfferingSortControls = lazy(() => import("@/components/OfferingSortControl
 const PhenologyBadge = lazy(() => import("@/components/PhenologyBadge"));
 const PhenologyObservationButton = lazy(() => import("@/components/PhenologyObservationButton"));
 const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
-const InfluenceTokenProvider = lazy(() => import("@/contexts/InfluenceTokenContext").then(m => ({ default: m.InfluenceTokenProvider })));
+import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
