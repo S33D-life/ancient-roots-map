@@ -2136,6 +2136,59 @@ export type Database = {
           },
         ]
       }
+      hive_stewardship_signals: {
+        Row: {
+          author_id: string
+          created_at: string
+          description: string | null
+          hive_family: string
+          id: string
+          linked_proposal_id: string | null
+          linked_tree_ids: string[] | null
+          signal_type: string
+          status: string
+          title: string
+          updated_at: string
+          upvotes: number
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          description?: string | null
+          hive_family: string
+          id?: string
+          linked_proposal_id?: string | null
+          linked_tree_ids?: string[] | null
+          signal_type?: string
+          status?: string
+          title: string
+          updated_at?: string
+          upvotes?: number
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          description?: string | null
+          hive_family?: string
+          id?: string
+          linked_proposal_id?: string | null
+          linked_tree_ids?: string[] | null
+          signal_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          upvotes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hive_stewardship_signals_linked_proposal_id_fkey"
+            columns: ["linked_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "value_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       influence_transactions: {
         Row: {
           action_type: string
@@ -3267,6 +3320,98 @@ export type Database = {
             columns: ["active_staff_id"]
             isOneToOne: false
             referencedRelation: "staffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_council_reviews: {
+        Row: {
+          council_id: string | null
+          created_at: string
+          id: string
+          library_entry_id: string | null
+          next_steps: string | null
+          outcome: string
+          proposal_id: string
+          recorded_by: string
+          reviewed_at: string
+          summary: string | null
+        }
+        Insert: {
+          council_id?: string | null
+          created_at?: string
+          id?: string
+          library_entry_id?: string | null
+          next_steps?: string | null
+          outcome?: string
+          proposal_id: string
+          recorded_by: string
+          reviewed_at?: string
+          summary?: string | null
+        }
+        Update: {
+          council_id?: string | null
+          created_at?: string
+          id?: string
+          library_entry_id?: string | null
+          next_steps?: string | null
+          outcome?: string
+          proposal_id?: string
+          recorded_by?: string
+          reviewed_at?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_council_reviews_council_id_fkey"
+            columns: ["council_id"]
+            isOneToOne: false
+            referencedRelation: "councils"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_council_reviews_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "value_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_pledges: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          pledge_type: string
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          pledge_type?: string
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          pledge_type?: string
+          proposal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_pledges_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "value_proposals"
             referencedColumns: ["id"]
           },
         ]
@@ -5456,9 +5601,20 @@ export type Database = {
       }
       value_proposals: {
         Row: {
+          category: string
+          council_notes: string | null
+          council_outcome: string | null
+          council_review_date: string | null
+          council_reviewed: boolean | null
           created_at: string
           description: string
+          funding_current: number | null
+          funding_target: number | null
+          funding_type: string | null
+          hive_family: string | null
           id: string
+          library_entry_id: string | null
+          location_name: string | null
           moderator_note: string | null
           proposed_by: string
           status: string
@@ -5467,13 +5623,25 @@ export type Database = {
           support_count: number
           title: string
           updated_at: string
+          value_tree_branch: string | null
           verification_level: string
           why_it_matters: string | null
         }
         Insert: {
+          category?: string
+          council_notes?: string | null
+          council_outcome?: string | null
+          council_review_date?: string | null
+          council_reviewed?: boolean | null
           created_at?: string
           description: string
+          funding_current?: number | null
+          funding_target?: number | null
+          funding_type?: string | null
+          hive_family?: string | null
           id?: string
+          library_entry_id?: string | null
+          location_name?: string | null
           moderator_note?: string | null
           proposed_by: string
           status?: string
@@ -5482,13 +5650,25 @@ export type Database = {
           support_count?: number
           title: string
           updated_at?: string
+          value_tree_branch?: string | null
           verification_level?: string
           why_it_matters?: string | null
         }
         Update: {
+          category?: string
+          council_notes?: string | null
+          council_outcome?: string | null
+          council_review_date?: string | null
+          council_reviewed?: boolean | null
           created_at?: string
           description?: string
+          funding_current?: number | null
+          funding_target?: number | null
+          funding_type?: string | null
+          hive_family?: string | null
           id?: string
+          library_entry_id?: string | null
+          location_name?: string | null
           moderator_note?: string | null
           proposed_by?: string
           status?: string
@@ -5497,6 +5677,7 @@ export type Database = {
           support_count?: number
           title?: string
           updated_at?: string
+          value_tree_branch?: string | null
           verification_level?: string
           why_it_matters?: string | null
         }
