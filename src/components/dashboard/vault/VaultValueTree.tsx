@@ -214,7 +214,7 @@ const VaultValueTree = ({ userId, totalHearts }: Props) => {
 const RootsPanel = () => (
   <div className="space-y-2">
     <p className="text-[10px] text-muted-foreground/60 font-serif mb-3">
-      Permanent ways to earn S33D Hearts — the foundation of the value tree.
+      Currently active ways to earn S33D Hearts — the foundation of the value tree.
     </p>
     {EARN_ACTIONS.map((a, i) => {
       const Icon = a.icon;
