@@ -16,6 +16,7 @@ import { parseMapFocusParams } from "@/utils/mapNavigation";
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
+const TeotagWhisper = lazy(() => import("@/components/TeotagWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
 
@@ -97,6 +98,7 @@ const MapPage = () => {
             delay={8000}
             position="bottom-center"
           />
+          <TeotagWhisper />
         </Suspense>
       )}
     </div>
