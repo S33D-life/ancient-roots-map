@@ -23,6 +23,7 @@ interface TreePageHeroProps {
   onAddWish: () => void;
   onViewMap: () => void;
   onShare: () => void;
+  onGreetingCard?: () => void;
   onWhisper?: () => void;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
