@@ -218,6 +218,7 @@ const App = () => {
               <ProximityNudge />
               <OfflineSyncBanner />
               <FirstWalkTrail />
+              <DailySeedRitual />
             </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
