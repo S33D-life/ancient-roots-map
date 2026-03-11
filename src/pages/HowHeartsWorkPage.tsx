@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
+import WhyThisMatters from "@/components/WhyThisMatters";
 import { Heart, ShieldCheck, Sprout, TreeDeciduous, Sparkles, Clock, Lock, BarChart3, Globe } from "lucide-react";
 
 const Section = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
