@@ -118,7 +118,7 @@ const OfflineSyncBanner = () => {
     <AnimatePresence>
       {(count > 0 || !online) && (
         <motion.div
-          className="fixed top-16 left-1/2 -translate-x-1/2 z-[60]"
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-[65]"
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -40, opacity: 0 }}

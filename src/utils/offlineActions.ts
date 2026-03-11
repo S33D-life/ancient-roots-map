@@ -108,7 +108,7 @@ interface OfflineNoteInput {
 
 /** Create a note — online or queued offline */
 export async function createNoteOfflineAware(input: OfflineNoteInput): Promise<{ queued: boolean; error?: string }> {
-  if (isOnline()) {
+  if (canSync()) {
     // Notes could go to different tables — for now, store as offering type 'note'
     const { error } = await supabase.from("offerings").insert({
       tree_id: input.tree_id,
