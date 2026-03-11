@@ -33,21 +33,21 @@ export function useGovernanceProposals(opts?: {
     queryKey: ["governance-proposals", opts],
     staleTime: 60_000,
     queryFn: async (): Promise<GovernanceProposal[]> => {
-      let q = supabase
+      let q: any = supabase
         .from("value_proposals")
         .select("*")
         .order("support_count", { ascending: false })
         .limit(50);
 
-      if (opts?.category) q = q.eq("category" as any, opts.category);
-      if (opts?.hiveFamily) q = q.eq("hive_family" as any, opts.hiveFamily);
-      if (opts?.valueBranch) q = q.eq("value_tree_branch" as any, opts.valueBranch);
+      if (opts?.category) q = q.eq("category", opts.category);
+      if (opts?.hiveFamily) q = q.eq("hive_family", opts.hiveFamily);
+      if (opts?.valueBranch) q = q.eq("value_tree_branch", opts.valueBranch);
       if (opts?.status) q = q.eq("status", opts.status);
       else q = q.in("status", ["pending", "active"]);
 
       const { data, error } = await q;
       if (error) { console.error("Proposals fetch:", error); return []; }
-      return (data || []) as unknown as GovernanceProposal[];
+      return (data || []) as GovernanceProposal[];
     },
   });
 }
