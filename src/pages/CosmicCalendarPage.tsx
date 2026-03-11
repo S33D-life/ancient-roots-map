@@ -25,14 +25,10 @@ const CosmicCalendarPage = () => {
   const { lunar, season, countdown } = useCosmicClock();
   const { foods } = useFoodCycles();
   const { markets: openMarkets } = useMarkets({ status: "open" });
-  const [userId, setUserId] = useState<string | null>(null);
+  const { userId } = useCurrentUser();
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
   const [viewYear, setViewYear] = useState(new Date().getFullYear());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id || null));
-  }, []);
 
   const { activeLenses, getLensDataForDate, todayMayan, prefs } = useCalendarLenses(userId);
   const { activeLens: seasonalLens, isLensMonth } = useSeasonalLens();
