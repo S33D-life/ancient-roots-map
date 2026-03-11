@@ -133,6 +133,7 @@ export default function SendWhisperModal({
         from: senderLocation,
       });
       setSent(true);
+      window.dispatchEvent(new CustomEvent("whisper-sent", { detail: { treeId } }));
     }
     setSending(false);
   };

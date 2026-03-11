@@ -101,10 +101,9 @@ const TodaysSeeds = ({ userId }: TodaysSeedsProps) => {
             const detail = [tree?.species, tree?.nation].filter(Boolean).join(" · ");
 
             return (
-              <motion.a
+              <Link
                 key={treeId}
-                href={`/tree/${treeId}`}
-                variants={{ hidden: { opacity: 0, x: -8 }, visible: { opacity: 1, x: 0 } }}
+                to={`/tree/${treeId}`}
                 className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-primary/[0.04] transition-colors group"
               >
                 <div className="flex items-center gap-1">
@@ -129,7 +128,7 @@ const TodaysSeeds = ({ userId }: TodaysSeedsProps) => {
                     minute: "2-digit",
                   })}
                 </span>
-              </motion.a>
+              </Link>
             );
           })}
         </motion.div>
