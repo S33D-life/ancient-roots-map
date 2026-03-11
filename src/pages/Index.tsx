@@ -47,6 +47,7 @@ const Index = () => {
       {/* Network Pulse — the tree's nervous system */}
       <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
       <Header />
+      <WelcomeBanner />
 
       {/* Tree Scroll Indicator — desktop only */}
       <TreeScrollIndicator
