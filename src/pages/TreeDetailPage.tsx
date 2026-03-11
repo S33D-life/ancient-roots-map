@@ -788,6 +788,13 @@ const TreeDetailPage = () => {
         />
       )}
 
+      {/* Why This Matters — offerings explanation for first 3 visits */}
+      <WhyThisMatters
+        id="tree-offerings-why"
+        message="Offerings are gifts to a tree — a song, a story, a photo, a reflection. They become part of the tree's living record and earn you S33D Hearts."
+        delay={4000}
+      />
+
       {/* Edit proposal nudge — appears once per tree */}
       <ContextualWhisper
         id={`edit-nudge-${id}`}
