@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useCreateHarvestListing, CATEGORY_LABELS, AVAILABILITY_LABELS, MONTHS, type CreateHarvestInput, type HarvestCategory, type AvailabilityType, type HarvestStatus } from "@/hooks/use-harvest-listings";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 interface CreateHarvestFormProps {
   onClose: () => void;

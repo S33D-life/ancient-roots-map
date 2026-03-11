@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Leaf, TreeDeciduous } from "lucide-react";
 import { useHarvestListings, CATEGORY_LABELS, AVAILABILITY_LABELS } from "@/hooks/use-harvest-listings";
 import HarvestCard from "@/components/harvest/HarvestCard";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence } from "framer-motion";
 
 const CreateHarvestForm = lazy(() => import("@/components/harvest/CreateHarvestForm"));
