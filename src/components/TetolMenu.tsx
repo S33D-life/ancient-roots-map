@@ -39,7 +39,13 @@ const treeItems = [
   },
 ];
 
-// Static pages removed — now handled by unified search
+const quickLinks = [
+  { to: "/hives", label: "Species Hives", icon: Hexagon },
+  { to: "/harvest", label: "Harvest Exchange", icon: Apple },
+  { to: "/cosmic", label: "Cosmic Calendar", icon: CalendarDays },
+  { to: "/value-tree", label: "Value Tree", icon: TreePine },
+  { to: "/roadmap", label: "Roadmap", icon: Map },
+];
 
 const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
   const navigate = useNavigate();
