@@ -693,6 +693,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showHeartGlow, setShowHeartGlow] = useState(false);
   const [showChurchyards, setShowChurchyards] = useState(false);
   const [showWaterways, setShowWaterways] = useState(false);
+  const [showFootpaths, setShowFootpaths] = useState(false);
+  const [showHeritage, setShowHeritage] = useState(false);
+  const [showCastles, setShowCastles] = useState(false);
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
