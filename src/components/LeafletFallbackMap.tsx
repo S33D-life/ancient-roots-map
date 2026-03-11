@@ -3445,6 +3445,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             "bloomed-seeds": (v) => setShowBloomedSeeds(v),
             "recent-visits": (v) => setShowRecentVisits(v),
             "seed-traces": (v) => setShowSeedTraces(v),
+            "seed-trail": (v) => setShowSeedTrail(v),
             "shared-trees": (v) => setShowSharedTrees(v),
             "tribe-activity": (v) => setShowTribeActivity(v),
           };
