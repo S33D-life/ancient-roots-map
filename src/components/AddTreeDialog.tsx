@@ -623,8 +623,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       }
 
       const { data, error } = await supabase.from('trees').insert({
-        name: name.trim() || species.trim(),
-        species: species.trim(),
+        name: name.trim() || speciesValue,
+        species: speciesValue,
         description: description.trim() || null,
         what3words: what3words.trim() || '',
         latitude: lat,
