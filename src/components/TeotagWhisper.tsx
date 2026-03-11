@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, X, Map, Route, BookOpen, Compass } from "lucide-react";
+import { Leaf, X, Map, Route, BookOpen, Compass, TreeDeciduous, ShoppingBasket } from "lucide-react";
 import { usePopupGate } from "@/contexts/UIFlowContext";
-import { useTeotagContext, type TeotagMode, type MapContext, type LibraryContext, type CouncilContext } from "@/contexts/TeotagContext";
+import { useTeotagContext, type TeotagMode, type MapContext, type LibraryContext, type CouncilContext, type PageContext } from "@/contexts/TeotagContext";
 
 /* ── Whisper types ────────────────────────────────── */
 export type WhisperKind = "landscape" | "tree" | "knowledge" | "journey";
