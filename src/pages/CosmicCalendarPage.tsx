@@ -4,6 +4,7 @@
  * Harmonised with: Map, Blooming Clock, Harvest Exchange, TEOTAG.
  */
 import { useState, useMemo, useEffect } from "react";
+import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } from "@/hooks/use-cosmic-clock";
 import { useFoodCycles } from "@/hooks/use-food-cycles";
 import { useCalendarLenses } from "@/hooks/use-calendar-lenses";
