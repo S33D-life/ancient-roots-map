@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, TreePine, Wallet, Wand2, Mail, ArrowLeft, Eye, EyeOff, CheckCircle2, KeyRound, Gift } from "lucide-react";
 import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
-import teotagLogo from "@/assets/teotag.jpeg";
+import teotagLogo from "@/assets/teotag-small.webp";
 import { recordReferral } from "@/hooks/use-referrals";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 

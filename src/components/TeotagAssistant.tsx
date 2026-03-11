@@ -1,5 +1,5 @@
 import { useState } from "react";
-import teotag from "@/assets/teotag.jpeg";
+import teotag from "@/assets/teotag-small.webp";
 
 const TeotagAssistant = () => {
   const [expanded, setExpanded] = useState(false);

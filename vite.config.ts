@@ -65,6 +65,8 @@ async function loadPwaPlugin() {
     return VitePWA({
       // "prompt" mode gives us control — we show the banner ourselves
       registerType: "prompt",
+      // SW registered manually in main.tsx — don't inject render-blocking script
+      injectRegister: false,
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],

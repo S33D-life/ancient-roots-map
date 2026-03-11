@@ -23,7 +23,10 @@
 
     <!-- DNS prefetch for map tiles & Supabase -->
     <link rel="dns-prefetch" href="https://mwzcuczfedrjplndggiv.supabase.co">
-    <link rel="preconnect" href="https://mwzcuczfedrjplndggiv.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://mwzcuczfedrjplndggiv.supabase.co">
+
+    <!-- Preload LCP image so the browser discovers it before JS executes -->
+    <link rel="preload" href="/src/assets/header-moss-wood.jpg" as="image" fetchpriority="high">
 
     <meta property="og:title" content="S33D.life — The Living Atlas of Ancient Friends" />
     <meta property="og:description" content="A globally distributed, locally curated living library of seeds, stories, and mystery. Map trees, gather wisdom, earn hearts." />
