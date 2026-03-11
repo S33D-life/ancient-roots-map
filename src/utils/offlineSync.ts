@@ -1,12 +1,12 @@
 /**
- * Generic Offline Sync Queue — stores any pending mutation
- * in IndexedDB when offline, and syncs when connectivity returns.
+ * Offline Sync Queue — stores pending mutations in IndexedDB
+ * when offline, and syncs when connectivity returns.
  *
  * Supported record types: tree, offering, checkin, note
  */
 
 const DB_NAME = "s33d_offline";
-const DB_VERSION = 2; // bumped from v1 (tree-only) to v2 (generic)
+const DB_VERSION = 2;
 const STORE_NAME = "pending_actions";
 
 export type PendingActionType = "tree" | "offering" | "checkin" | "note";
@@ -44,7 +44,6 @@ function openDB(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
-      // Keep legacy store if it exists (migration-safe)
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
         store.createIndex("by_status", "status", { unique: false });
@@ -106,19 +105,16 @@ export async function removeAction(id: string): Promise<void> {
   });
 }
 
-/** Count all pending (not yet synced) */
+/**
+ * Count all actionable items (pending + failed + syncing).
+ * This is the single source of truth for "things that need syncing".
+ */
 export async function pendingActionCount(): Promise<number> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const idx = tx.objectStore(STORE_NAME).index("by_status");
-    const req = idx.count("pending");
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+  const all = await getAllActions();
+  return all.filter(a => a.status !== "synced").length;
 }
 
-/** Count by type */
+/** Count by type (only non-synced) */
 export async function countByType(): Promise<Record<PendingActionType, number>> {
   const all = await getAllActions();
   const counts: Record<string, number> = { tree: 0, offering: 0, checkin: 0, note: 0 };
@@ -128,6 +124,18 @@ export async function countByType(): Promise<Record<PendingActionType, number>> 
     }
   }
   return counts as Record<PendingActionType, number>;
+}
+
+/** Count failed items separately */
+export async function failedActionCount(): Promise<number> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const idx = tx.objectStore(STORE_NAME).index("by_status");
+    const req = idx.count("failed");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
 }
 
 /** Helper: generate a unique ID for offline records */
