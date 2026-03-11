@@ -65,17 +65,15 @@ const ROOT_ACTIONS: ValueNode[] = [
     actionLink: "/map",
     children: [
       {
-        id: "checkin-offering",
-        label: "Check-in with Offering",
-        description: "Add a photo, poem, or voice note during check-in.",
+        id: "checkin-canopy",
+        label: "Check-in with Canopy Proof",
+        description: "Include a verified canopy photo for a +1 S33D Heart bonus.",
         icon: <Camera className="w-4 h-4" />,
         rewards: [
-          { token: "s33d", amount: "2" },
-          { token: "species", amount: "2" },
-          { token: "influence", amount: "1", note: "Quality media bonus" },
+          { token: "s33d", amount: "1", note: "Canopy bonus" },
         ],
         cooldown: "3 per tree per day",
-        verification: "Content quality check",
+        verification: "Canopy photo verified",
         actionLink: "/map",
       },
     ],
