@@ -112,6 +112,12 @@ const WandererProfilePage = () => {
                     {data.bio || "This wanderer has not added a biography yet."}
                   </p>
 
+                  {/* Mapping Streak */}
+                  <StreakBadge streak={streak} />
+
+                  {/* Species Discovery Badges */}
+                  <SpeciesBadgeList badges={badges || []} />
+
                   {/* Species Hearts Balances */}
                   {speciesBalances && speciesBalances.length > 0 && (
                     <div className="space-y-2 pt-2">

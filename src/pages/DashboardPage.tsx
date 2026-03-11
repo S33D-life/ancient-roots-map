@@ -38,6 +38,12 @@ import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
+import { useWandererStreak } from "@/hooks/use-wanderer-streak";
+import { useSpeciesBadges } from "@/hooks/use-species-badges";
+import { useSeasonalQuests } from "@/hooks/use-seasonal-quests";
+import StreakBadge from "@/components/growth/StreakBadge";
+import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
+import SeasonalQuestCard from "@/components/growth/SeasonalQuestCard";
 
 /** Contextual pill showing the last tree the user visited, for easy return */
 const ReturnPill = () => {
