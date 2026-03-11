@@ -47,6 +47,7 @@ import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
+import NearbyDiscoveryPanel from "./NearbyDiscoveryPanel";
 import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
 import type { Rootstone } from "@/data/rootstones";
 import { consumeQueuedMycelialThreads, onMycelialThread, type MycelialPoint, type MycelialThreadEvent } from "@/lib/mycelial-network";
