@@ -38,6 +38,9 @@ const NotFound = () => {
             <Link to="/map"><Map className="h-3.5 w-3.5" /> Explore Map</Link>
           </Button>
           <Button asChild variant="outline" className="font-serif text-xs tracking-wider gap-2">
+            <Link to="/hives"><TreePine className="h-3.5 w-3.5" /> Species Hives</Link>
+          </Button>
+          <Button asChild variant="outline" className="font-serif text-xs tracking-wider gap-2">
             <Link to="/library"><BookOpen className="h-3.5 w-3.5" /> Visit Library</Link>
           </Button>
           <Button asChild variant="outline" className="font-serif text-xs tracking-wider gap-2">
