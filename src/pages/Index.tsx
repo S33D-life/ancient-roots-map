@@ -1,34 +1,34 @@
-import { useCallback } from "react";
+import { useCallback, lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ContextualWhisper from "@/components/ContextualWhisper";
-import TetolBridge from "@/components/TetolBridge";
 import S33dEntrance from "@/components/S33dEntrance";
 import WelcomeBanner from "@/components/WelcomeBanner";
-import EcosystemOverview from "@/components/EcosystemOverview";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useVineFade } from "@/hooks/use-vine-fade";
-import {
-  IdentitySection,
-  DiscoveryRow,
-  ParticipationSection,
-  SupportDiscoveryRow,
-  TetolNavSection,
-} from "@/components/HomeSections";
-import { WisdomOfTheGrove } from "@/components/WisdomOfTheGrove";
+import { DiscoveryRow } from "@/components/HomeSections";
 import { useTreeScroll } from "@/hooks/use-tree-scroll";
 import TreeScrollIndicator from "@/components/TreeScrollIndicator";
 import CrownSection from "@/components/tree-sections/CrownSection";
-import WhisperEchoesFeed from "@/components/WhisperEchoesFeed";
-import CanopySection from "@/components/tree-sections/CanopySection";
-import TrunkSection from "@/components/tree-sections/TrunkSection";
-import GroundSection from "@/components/tree-sections/GroundSection";
-import NetworkPulseOverlay from "@/components/tree-sections/NetworkPulseOverlay";
-import SectionAtmosphere from "@/components/tree-sections/SectionAtmosphere";
 import { useTimeOfDay } from "@/hooks/use-time-of-day";
 import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
 import { useNetworkPulse } from "@/hooks/use-network-pulse";
 import { useTreeVitality } from "@/hooks/use-tree-vitality";
+
+// Lazy-load below-the-fold sections to reduce initial bundle
+const NetworkPulseOverlay = lazy(() => import("@/components/tree-sections/NetworkPulseOverlay"));
+const CanopySection = lazy(() => import("@/components/tree-sections/CanopySection"));
+const TrunkSection = lazy(() => import("@/components/tree-sections/TrunkSection"));
+const GroundSection = lazy(() => import("@/components/tree-sections/GroundSection"));
+const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionAtmosphere"));
+const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
+const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
+const WisdomOfTheGrove = lazy(() => import("@/components/WisdomOfTheGrove").then(m => ({ default: m.WisdomOfTheGrove })));
+const TetolBridge = lazy(() => import("@/components/TetolBridge"));
+const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
+const IdentitySection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.IdentitySection })));
+const ParticipationSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.ParticipationSection })));
+const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
+const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
 
 const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
@@ -47,7 +47,9 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col relative">
       {/* Network Pulse — the tree's nervous system */}
-      <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
+      <Suspense fallback={null}>
+        <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
+      </Suspense>
       <Header />
       <WelcomeBanner />
 
@@ -64,40 +66,45 @@ const Index = () => {
         {/* ── CROWN — yOur Golden Dream ── */}
         <CrownSection />
 
-        {/* ── CANOPY — Council of Life ── */}
-        <CanopySection />
+        {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
+        <Suspense fallback={null}>
+          {/* ── CANOPY — Council of Life ── */}
+          <CanopySection />
 
-        {/* ── TRUNK — HeARTwood Library ── */}
-        <TrunkSection />
+          {/* ── TRUNK — HeARTwood Library ── */}
+          <TrunkSection />
 
-        {/* ── GROUND — Ancient Friend Landing (scroll anchor) ── */}
-        <GroundSection />
+          {/* ── GROUND — Ancient Friend Landing (scroll anchor) ── */}
+          <GroundSection />
 
-        {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
-        <div id="atlas-content" className="relative overflow-hidden">
-          <SectionAtmosphere theme="roots" />
-          <IdentitySection />
-          <div className="section-divider max-w-xl mx-auto" />
-          <ParticipationSection />
-          <SupportDiscoveryRow />
-          <div className="section-divider max-w-xl mx-auto" />
-          <EcosystemOverview />
-          <div className="section-divider max-w-xl mx-auto" />
-          <div className="max-w-2xl mx-auto px-4 py-6">
-            <WhisperEchoesFeed limit={6} />
+          {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
+          <div id="atlas-content" className="relative overflow-hidden">
+            <SectionAtmosphere theme="roots" />
+            <IdentitySection />
+            <div className="section-divider max-w-xl mx-auto" />
+            <ParticipationSection />
+            <SupportDiscoveryRow />
+            <div className="section-divider max-w-xl mx-auto" />
+            <EcosystemOverview />
+            <div className="section-divider max-w-xl mx-auto" />
+            <div className="max-w-2xl mx-auto px-4 py-6">
+              <WhisperEchoesFeed limit={6} />
+            </div>
+            <WisdomOfTheGrove />
+            <TetolNavSection />
           </div>
-          <WisdomOfTheGrove />
-          <TetolNavSection />
-        </div>
+        </Suspense>
       </main>
-      <TetolBridge />
-      <ContextualWhisper
-        id="home-explore"
-        message="Every ancient tree has a story. Tap the Atlas to discover one near you."
-        cta={{ label: "Open Atlas", to: "/map" }}
-        delay={8000}
-        position="bottom-center"
-      />
+      <Suspense fallback={null}>
+        <TetolBridge />
+        <ContextualWhisper
+          id="home-explore"
+          message="Every ancient tree has a story. Tap the Atlas to discover one near you."
+          cta={{ label: "Open Atlas", to: "/map" }}
+          delay={8000}
+          position="bottom-center"
+        />
+      </Suspense>
       <Footer />
     </div>
   );

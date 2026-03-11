@@ -231,11 +231,27 @@ export default defineConfig(async ({ mode }) => {
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-motion': ['framer-motion'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-query': ['@tanstack/react-query'],
+        manualChunks(id) {
+          // Core React runtime
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router')) {
+            return 'vendor-react';
+          }
+          // Animation engine
+          if (id.includes('node_modules/framer-motion')) return 'vendor-motion';
+          // Backend client
+          if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
+          // Data layer
+          if (id.includes('node_modules/@tanstack')) return 'vendor-query';
+          // Map libraries — heavy, only needed on /map
+          if (id.includes('node_modules/leaflet') || id.includes('node_modules/maplibre-gl')) return 'vendor-map';
+          // Charts — only needed on dashboard/hive pages
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) return 'vendor-charts';
+          // Blockchain — rarely used
+          if (id.includes('node_modules/ethers')) return 'vendor-ethers';
+          // Radix UI primitives
+          if (id.includes('node_modules/@radix-ui')) return 'vendor-radix';
+          // date-fns
+          if (id.includes('node_modules/date-fns')) return 'vendor-date';
         },
       },
     },
