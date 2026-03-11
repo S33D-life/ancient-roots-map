@@ -21,6 +21,12 @@ const OfflineIndicator = () => {
   const { status, pendingCount, failedCount, pendingByType, lastSyncedAt } = useConnectivity();
   const [syncing, setSyncing] = useState(false);
   const [justSynced, setJustSynced] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  // Reset dismissed when connectivity status changes
+  useEffect(() => {
+    if (status === "online") setDismissed(false);
+  }, [status]);
 
   // Determine display mode
   let mode: IndicatorMode = "hidden";
