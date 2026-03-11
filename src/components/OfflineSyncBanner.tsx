@@ -47,7 +47,7 @@ const OfflineSyncBanner = () => {
   }, [refreshCount]);
 
   const syncPending = useCallback(async () => {
-    if (syncing) return;
+    if (syncing || !isSupabaseConfigured) return;
     setSyncing(true);
 
     try {
