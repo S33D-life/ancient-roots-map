@@ -30,7 +30,8 @@ const OfflineIndicator = () => {
 
   // Determine display mode
   let mode: IndicatorMode = "hidden";
-  if (status === "offline") mode = "offline";
+  if (dismissed) mode = "hidden";
+  else if (status === "offline") mode = "offline";
   else if (status === "reconnecting") mode = "reconnecting";
   else if (syncing) mode = "syncing";
   else if (failedCount > 0) mode = "failed";
