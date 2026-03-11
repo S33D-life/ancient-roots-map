@@ -212,6 +212,7 @@ const App = () => {
           <HiveSeasonProvider>
           <MapFilterProvider>
           <UIFlowProvider>
+          <TeotagProvider>
             <BottomNav />
             <FireflyFAB />
             <Suspense fallback={null}>
