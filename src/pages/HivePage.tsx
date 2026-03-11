@@ -316,6 +316,22 @@ const HivePage = () => {
           <SeasonalLensBanner context="general" />
         </div>
 
+        {/* Activity Orb + User Balance */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
+          <HiveActivityOrb
+            monthlyHearts={monthlyHearts}
+            accentHsl={hive.accentHsl}
+            icon={hive.icon}
+            familyLabel={hive.family}
+          />
+          <HiveUserBalance
+            userId={currentUserId}
+            family={hive.family}
+            accentHsl={hive.accentHsl}
+            icon={hive.icon}
+          />
+        </div>
+
         {/* Metrics — now includes Species Hearts + Influence */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           {[
