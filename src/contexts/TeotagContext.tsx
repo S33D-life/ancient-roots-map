@@ -61,16 +61,39 @@ const TeotagContext = createContext<TeotagContextValue | null>(null);
 
 function detectMode(pathname: string): TeotagMode {
   if (pathname.startsWith("/map") || pathname.startsWith("/atlas") || pathname.startsWith("/hive")) return "guide";
+  if (pathname.startsWith("/harvest")) return "guide"; // Harvest is place+season oriented
+  if (pathname.startsWith("/cosmic")) return "guide"; // Calendar is rhythm-oriented
   if (pathname.startsWith("/library") || pathname.startsWith("/vault") || pathname.startsWith("/heartwood") || pathname.startsWith("/dashboard")) return "librarian";
   if (pathname.startsWith("/council")) return "scribe";
   return "guide";
 }
 
-function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext): QuickAction[] {
+function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext, route: string): QuickAction[] {
+  // Harvest-specific quick actions
+  if (route.startsWith("/harvest")) {
+    return [
+      { label: "Harvests near me", prompt: "What harvests are happening near me this month?", emoji: "🍎" },
+      { label: "Seasonal produce", prompt: "What tree produce is in season right now?", emoji: "🌿" },
+      { label: "Find on map", prompt: "Show me harvest locations on the map.", emoji: "🗺️" },
+      { label: "Blooming now", prompt: "What trees are flowering or fruiting this month?", emoji: "🌸" },
+    ];
+  }
+
+  // Calendar-specific quick actions
+  if (route.startsWith("/cosmic")) {
+    return [
+      { label: "What's happening now", prompt: "What seasonal events and harvests are happening this month?", emoji: "📅" },
+      { label: "Upcoming harvests", prompt: "What harvests are coming up in the next few months?", emoji: "🍎" },
+      { label: "Blooming cycles", prompt: "What is blooming or fruiting right now across the atlas?", emoji: "🌸" },
+      { label: "Next gathering", prompt: "When is the next Council of Life gathering?", emoji: "🍃" },
+    ];
+  }
+
   if (mode === "guide") {
     const actions: QuickAction[] = [
       { label: "Nearby features", prompt: "What interesting features are near the current map view?", emoji: "🗺️" },
       { label: "Walking routes", prompt: "Suggest walking routes connecting trees and landmarks nearby.", emoji: "🥾" },
+      { label: "Seasonal harvests", prompt: "What harvests are available near me this month?", emoji: "🍎" },
     ];
     if (mapCtx.selectedTreeName) {
       actions.unshift({
@@ -175,8 +198,8 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   }, [pathname, activeMode, mapContext, libraryContext, councilContext]);
 
   const quickActions = useMemo(
-    () => getQuickActions(activeMode, mapContext, libraryContext),
-    [activeMode, mapContext, libraryContext]
+    () => getQuickActions(activeMode, mapContext, libraryContext, pathname),
+    [activeMode, mapContext, libraryContext, pathname]
   );
 
   const value = useMemo<TeotagContextValue>(() => ({

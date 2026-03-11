@@ -1,5 +1,7 @@
 /**
  * Cosmic Calendar — Unified cycle view with modular Calendar Lenses + Phenology signals.
+ * 
+ * Harmonised with: Map, Blooming Clock, Harvest Exchange, TEOTAG.
  */
 import { useState, useMemo, useEffect } from "react";
 import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } from "@/hooks/use-cosmic-clock";
@@ -7,14 +9,15 @@ import { useFoodCycles } from "@/hooks/use-food-cycles";
 import { useCalendarLenses } from "@/hooks/use-calendar-lenses";
 import { usePhenology, getPhaseDisplay } from "@/hooks/use-phenology";
 import { useMarkets } from "@/hooks/use-markets";
+import { useSeasonalEvents } from "@/hooks/use-seasonal-events";
 import { getTzolkinDay, formatTzolkinLabel } from "@/utils/mayanTzolkin";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity, TreeDeciduous, MapPin, Calendar, ArrowRight } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 const CosmicCalendarPage = () => {
   const { lunar, season, countdown } = useCosmicClock();
@@ -30,6 +33,9 @@ const CosmicCalendarPage = () => {
   }, []);
 
   const { activeLenses, getLensDataForDate, todayMayan, prefs } = useCalendarLenses(userId);
+
+  // Unified seasonal events (includes harvest listings + food cycles)
+  const { harvestEvents, bloomEvents, getEventsForMonth } = useSeasonalEvents(viewMonth + 1);
 
   // Mayan lens active?
   const mayanActive = activeLenses.some(l => l.slug === "mayan");
@@ -69,11 +75,19 @@ const CosmicCalendarPage = () => {
     );
   }, [foods, viewMonth]);
 
-  // Selected date: combine built-in events + lens events
+  // Check if a day has harvest events (for dot indicator)
+  const hasHarvestForDay = useMemo(() => {
+    if (harvestEvents.length === 0) return new Set<number>();
+    // Harvest events span entire months, so all days in the month show
+    return new Set(harvestEvents.map(() => -1)); // flag: has any
+  }, [harvestEvents]);
+  const monthHasHarvests = harvestEvents.length > 0;
+
+  // Selected date: combine built-in events + lens events + harvest events
   const selectedDateEvents = useMemo(() => {
     if (!selectedDate) return [];
     const key = selectedDate.toDateString();
-    const events: { icon: string; label: string; detail: string; lensSlug?: string }[] = [];
+    const events: { icon: string; label: string; detail: string; lensSlug?: string; link?: string }[] = [];
 
     const l = lunarDates.get(key);
     if (l) events.push({ icon: l.emoji, label: l.phase, detail: l.phase === "Full Moon" ? "Time Tree: Outside of Time" : "Time Tree: Inside of Time" });
@@ -86,13 +100,24 @@ const CosmicCalendarPage = () => {
     // Lens-contributed events
     const lensData = getLensDataForDate(selectedDate);
     for (const ld of lensData) {
-      // Skip astronomical duplicates (already shown above)
       if (ld.lensSlug === "astronomical") continue;
       events.push({ icon: ld.lensIcon, label: ld.label, detail: ld.detail, lensSlug: ld.lensSlug });
     }
 
+    // Harvest listing events for this month
+    const selMonth = selectedDate.getMonth() + 1;
+    const monthHarvests = getEventsForMonth(selMonth).filter(e => e.source === "harvest_listing");
+    for (const h of monthHarvests) {
+      events.push({
+        icon: h.emoji,
+        label: h.title,
+        detail: `${h.metadata?.availLabel || "Harvest"} · ${h.subtitle || ""}`.trim(),
+        link: h.links?.harvestId ? `/harvest/${h.links.harvestId}` : undefined,
+      });
+    }
+
     return events;
-  }, [selectedDate, lunarDates, solarEvents, getLensDataForDate]);
+  }, [selectedDate, lunarDates, solarEvents, getLensDataForDate, getEventsForMonth]);
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
@@ -149,7 +174,7 @@ const CosmicCalendarPage = () => {
             <ChevronLeft className="w-4 h-4" />
           </button>
           <h2 className="font-serif text-base tracking-wide text-foreground">
-            {MONTHS[viewMonth]} {viewYear}
+            {MONTH_NAMES[viewMonth]} {viewYear}
           </h2>
           <button onClick={nextMonth} className="p-2 rounded-lg hover:bg-card/60 text-muted-foreground">
             <ChevronRight className="w-4 h-4" />
@@ -195,6 +220,10 @@ const CosmicCalendarPage = () => {
                     {solarEvent && !lunarEvent && <span className="text-[8px] leading-none">{solarEvent.emoji}</span>}
                     {mayanGlyph && <span className="text-[7px] leading-none opacity-50">{mayanGlyph}</span>}
                   </div>
+                  {/* Harvest dot indicator */}
+                  {monthHasHarvests && (
+                    <div className="absolute bottom-0.5 right-0.5 w-1 h-1 rounded-full bg-amber-500/60" />
+                  )}
                 </button>
               );
             })}
@@ -218,6 +247,12 @@ const CosmicCalendarPage = () => {
                       <span className="text-[9px] text-muted-foreground/40 font-serif italic">Mayan Tzolkin lens · GMT correlation</span>
                     )}
                   </div>
+                  {/* Cross-navigation link for harvest events */}
+                  {e.link && (
+                    <Link to={e.link} className="text-[9px] text-primary/60 hover:text-primary font-serif flex items-center gap-0.5 shrink-0">
+                      View <ArrowRight className="w-2.5 h-2.5" />
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>
@@ -251,6 +286,41 @@ const CosmicCalendarPage = () => {
                 </div>
               );
             })()}
+          </div>
+        )}
+
+        {/* ── Harvest Exchange — This Month ── */}
+        {harvestEvents.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif text-sm text-foreground/80 tracking-wide flex items-center gap-1.5">
+                <TreeDeciduous className="w-3.5 h-3.5 text-primary" />
+                Harvests This Month
+              </h3>
+              <Link to="/harvest" className="text-[10px] text-primary/60 hover:text-primary font-serif flex items-center gap-0.5">
+                Browse all <ArrowRight className="w-2.5 h-2.5" />
+              </Link>
+            </div>
+            <div className="space-y-1.5">
+              {harvestEvents.slice(0, 4).map(h => (
+                <Link
+                  key={h.id}
+                  to={h.links?.harvestId ? `/harvest/${h.links.harvestId}` : "/harvest"}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-card/40 border border-border/20 hover:border-primary/30 transition-all no-underline"
+                >
+                  <span className="text-lg">{h.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-serif text-foreground/80 line-clamp-1">{h.title}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {h.metadata?.availLabel} {h.subtitle ? `· ${h.subtitle}` : ""}
+                    </p>
+                  </div>
+                  {h.links?.treeId && (
+                    <MapPin className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
@@ -334,6 +404,30 @@ const CosmicCalendarPage = () => {
           </div>
         )}
 
+        {/* ── Cross-navigation footer ── */}
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          <Link
+            to="/harvest"
+            className="flex items-center gap-2 p-3 rounded-xl bg-card/30 border border-border/20 hover:border-primary/20 transition-all no-underline"
+          >
+            <TreeDeciduous className="w-4 h-4 text-primary/60" />
+            <div>
+              <p className="text-[10px] font-serif text-foreground/70">Harvest Exchange</p>
+              <p className="text-[9px] text-muted-foreground/50">Browse guardian produce</p>
+            </div>
+          </Link>
+          <Link
+            to="/map"
+            className="flex items-center gap-2 p-3 rounded-xl bg-card/30 border border-border/20 hover:border-primary/20 transition-all no-underline"
+          >
+            <MapPin className="w-4 h-4 text-primary/60" />
+            <div>
+              <p className="text-[10px] font-serif text-foreground/70">Living Atlas</p>
+              <p className="text-[9px] text-muted-foreground/50">Explore the map</p>
+            </div>
+          </Link>
+        </div>
+
         {/* How This Works */}
         <div className="rounded-xl bg-card/30 border border-border/20 p-4 space-y-2">
           <h3 className="font-serif text-sm text-foreground/60">How the Cosmic Calendar Works</h3>
@@ -342,6 +436,7 @@ const CosmicCalendarPage = () => {
             <p>🌱☀️ <strong>Solar events</strong> mark seasonal transitions and future global gatherings.</p>
             <p>💚 <strong>Daily reset</strong> at midnight refreshes your 33 seeds, check-in caps, and Time Tree rewards.</p>
             <p>🌸 <strong>Bloom windows</strong> come from the Seed Cellar's seasonal data.</p>
+            <p>🍎 <strong>Harvest listings</strong> from guardian produce appear as seasonal calendar events.</p>
             <p>🐍 <strong>Calendar Lenses</strong> are optional overlays. Cultural lenses are offered with respect and attribution. <Link to="/cosmic/settings" className="text-primary underline">Manage lenses →</Link></p>
             <p>All cycles are transparent. No hidden mechanics.</p>
           </div>
