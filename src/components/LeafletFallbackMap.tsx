@@ -3500,7 +3500,33 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         />
       )}
 
-      {debugEnabled && (
+      {/* Nearby Ancient Friends discovery panel */}
+      {!clearView && (
+        <NearbyDiscoveryPanel
+          trees={filteredTrees}
+          userLat={userLatLng?.[0] ?? null}
+          userLng={userLatLng?.[1] ?? null}
+          visible={!!userLatLng && !atlasFilterOpen}
+          onTreeSelect={(lat, lng, treeId) => {
+            const map = mapRef.current;
+            if (map) {
+              map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 1.2 });
+              // Trigger marker focus after fly
+              setTimeout(() => {
+                const cluster = clusterRef.current;
+                if (cluster) {
+                  cluster.eachLayer((layer: any) => {
+                    if (layer?.options?.treeData?.id === treeId) {
+                      layer.openPopup();
+                    }
+                  });
+                }
+              }, 1400);
+            }
+          }}
+        />
+      )}
+
         <div
           className="absolute right-3 z-[1002] max-w-[260px] rounded-xl border px-3 py-2.5 text-[11px] shadow-xl backdrop-blur-md"
           style={{
