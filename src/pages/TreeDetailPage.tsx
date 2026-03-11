@@ -26,6 +26,7 @@ import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
 import BloomingClock from "@/components/BloomingClock";
 import TreeShareCard from "@/components/TreeShareCard";
+import GreetingCardDialog from "@/components/greeting-cards/GreetingCardDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
