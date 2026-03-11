@@ -65,17 +65,15 @@ const ROOT_ACTIONS: ValueNode[] = [
     actionLink: "/map",
     children: [
       {
-        id: "checkin-offering",
-        label: "Check-in with Offering",
-        description: "Add a photo, poem, or voice note during check-in.",
+        id: "checkin-canopy",
+        label: "Check-in with Canopy Proof",
+        description: "Include a verified canopy photo for a +1 S33D Heart bonus.",
         icon: <Camera className="w-4 h-4" />,
         rewards: [
-          { token: "s33d", amount: "2" },
-          { token: "species", amount: "2" },
-          { token: "influence", amount: "1", note: "Quality media bonus" },
+          { token: "s33d", amount: "1", note: "Canopy bonus" },
         ],
         cooldown: "3 per tree per day",
-        verification: "Content quality check",
+        verification: "Canopy photo verified",
         actionLink: "/map",
       },
     ],
@@ -87,23 +85,23 @@ const ROOT_ACTIONS: ValueNode[] = [
     icon: <TreePine className="w-4 h-4" />,
     rewards: [
       { token: "s33d", amount: "10" },
-      { token: "species", amount: "3", note: "Higher for complete data" },
-      { token: "influence", amount: "2", note: "If verified or high-quality" },
+      { token: "species", amount: "3", note: "Routed to tree's hive" },
+      { token: "influence", amount: "2" },
     ],
     verification: "Location + species + photo recommended",
     actionLink: "/add-tree",
     children: [
       {
-        id: "mapping-complete",
-        label: "Complete Mapping",
-        description: "Include photo, estimated age, description, and species confidence.",
+        id: "mapping-photo",
+        label: "Map + Photo",
+        description: "Add a photo when mapping for a +1 S33D bonus.",
         icon: <Check className="w-4 h-4" />,
         rewards: [
-          { token: "s33d", amount: "15" },
-          { token: "species", amount: "5" },
-          { token: "influence", amount: "3" },
+          { token: "s33d", amount: "11" },
+          { token: "species", amount: "3" },
+          { token: "influence", amount: "2" },
         ],
-        verification: "All fields completed",
+        verification: "Photo included",
         actionLink: "/add-tree",
       },
     ],
@@ -114,25 +112,10 @@ const ROOT_ACTIONS: ValueNode[] = [
     description: "Gift a photo, poem, song, story, or voice note to a tree.",
     icon: <Music className="w-4 h-4" />,
     rewards: [
-      { token: "s33d", amount: "1-5" },
+      { token: "s33d", amount: "2" },
       { token: "species", amount: "1" },
     ],
     actionLink: "/map",
-    children: [
-      {
-        id: "offering-quality",
-        label: "High-Quality Offering",
-        description: "Offering that enriches hive library quality.",
-        icon: <Star className="w-4 h-4" />,
-        rewards: [
-          { token: "s33d", amount: "5" },
-          { token: "species", amount: "2" },
-          { token: "influence", amount: "1" },
-        ],
-        verification: "Minimum content threshold",
-        actionLink: "/map",
-      },
-    ],
   },
   {
     id: "curation",
@@ -189,41 +172,15 @@ const ROOT_ACTIONS: ValueNode[] = [
 
 const ADVANCED_CHAINS: ValueNode[] = [
   {
-    id: "multi-tree",
-    label: "Multi-Tree Exploration",
-    description: "Visit 3+ trees in a single session for a journey bonus.",
-    icon: <GitBranch className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "5 bonus" },
-      { token: "species", amount: "3 bonus" },
-    ],
-    status: "experimental",
-    verification: "GPS + time-gap validation",
-  },
-  {
     id: "documentation",
     label: "Tree Media Documentation",
     description: "Capture seasonal photos, audio recordings, or field notes.",
     icon: <Camera className="w-4 h-4" />,
     rewards: [
-      { token: "s33d", amount: "3-8" },
-      { token: "species", amount: "2-5" },
-      { token: "influence", amount: "1-2" },
+      { token: "s33d", amount: "1-5" },
+      { token: "species", amount: "1-2" },
     ],
     status: "active",
-  },
-  {
-    id: "meditation",
-    label: "Silent Tree Meditation",
-    description: "30-minute silent presence session at a tree. Requires phone inactivity.",
-    icon: <Sun className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "10" },
-      { token: "species", amount: "5" },
-    ],
-    status: "coming_soon",
-    verification: "Motion sensor + time validation",
-    cooldown: "1 per day",
   },
   {
     id: "hive-radio",
@@ -237,17 +194,55 @@ const ADVANCED_CHAINS: ValueNode[] = [
     verification: "Minimum 5 tracks, peer reviewed",
   },
   {
-    id: "seasonal-quest",
-    label: "Seasonal Quest",
-    description: "Participate in time-limited ecological observation challenges.",
+    id: "staking",
+    label: "Staking at Ancient Friend Trees",
+    description: "Stake Species Hearts at trees or hives to earn S33D Hearts. Part of Chapter 3.",
+    icon: <Lock className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+    ],
+    status: "coming_soon",
+  },
+  {
+    id: "nft-minting",
+    label: "Minting / Holding Relevant NFTs",
+    description: "Earn Hearts through NFT participation in the S33D ecosystem. Part of Chapter 3.",
+    icon: <Star className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+    ],
+    status: "coming_soon",
+  },
+  {
+    id: "sapling-nurture",
+    label: "Nurturing Saplings of Ancient Friends",
+    description: "Care for the next generation of ancient trees. Part of Chapter 3.",
+    icon: <Sprout className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+      { token: "species", amount: "TBD" },
+    ],
+    status: "coming_soon",
+  },
+  {
+    id: "seed-saving",
+    label: "Saving, Sharing, or Growing Seeds",
+    description: "Participate in the broader seed economy beyond planting and collecting.",
     icon: <Leaf className="w-4 h-4" />,
     rewards: [
-      { token: "s33d", amount: "20 bonus" },
-      { token: "species", amount: "10 bonus" },
-      { token: "influence", amount: "5" },
+      { token: "s33d", amount: "TBD" },
     ],
-    status: "seasonal",
-    cooldown: "Per season",
+    status: "coming_soon",
+  },
+  {
+    id: "founding-minters",
+    label: "Founding Minter Drops & Airdrops",
+    description: "Early supporters may receive drops or airdrops as the ecosystem grows.",
+    icon: <Flame className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+    ],
+    status: "coming_soon",
   },
 ];
 
@@ -532,10 +527,10 @@ const EarnBranch = () => {
       {
         id: "council",
         label: "Attend or Host a Council",
-        description: "Join or organize a gathering of the Council of Life.",
+        description: "Join or organize a Council of Life gathering.",
         icon: <Users className="w-5 h-5" />,
         category: "Council",
-        estimatedReward: "+5-20 ❤️ +5 🛡️",
+        estimatedReward: "+5 ❤️ per event",
         link: "/council-of-life",
         ready: true,
         priority: 6,
@@ -723,13 +718,13 @@ const ValueTreePage = () => {
             The S33D Value Tree
           </h1>
           <p className="text-muted-foreground font-serif max-w-lg mx-auto text-sm leading-relaxed">
-            Explore how every action grows into ecosystem value — from roots to fruit.
+            Explore how every action grows into ecosystem value — from roots to fruit. S33D Hearts are the commons currency, earned through stewardship, not speculation.
           </p>
         </motion.div>
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {[
-            { icon: "❤️", label: "S33D Hearts", sub: "Global currency", color: "hsl(0, 65%, 55%)" },
+            { icon: "❤️", label: "S33D Hearts", sub: "Commons currency", color: "hsl(0, 65%, 55%)" },
             { icon: "🌿", label: "Species Hearts", sub: "Fractal / hive", color: "hsl(var(--primary))" },
             { icon: "🛡️", label: "Influence", sub: "Governance voice", color: "hsl(42, 80%, 50%)" },
           ].map(t => (
@@ -821,12 +816,13 @@ const ValueTreePage = () => {
                   <CardContent className="p-5 text-center">
                     <span className="text-3xl block mb-2">❤️</span>
                     <h4 className="text-sm font-serif text-foreground mb-1">S33D Hearts</h4>
-                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Global currency — always issued</p>
+                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Commons currency — always issued</p>
                     <div className="space-y-1.5 text-[11px] font-serif text-left">
                       <div className="flex justify-between"><span className="text-muted-foreground">Check-in</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+1</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">Map tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+10</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Offering</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+1-5</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Complete map</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+15</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Offering</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+2</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Time Tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5-7</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Council</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5</span></div>
                     </div>
                   </CardContent>
                 </Card>
@@ -873,7 +869,7 @@ const ValueTreePage = () => {
           <TabsContent value="chains">
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground font-serif mb-4">
-                Advanced and multi-step reward systems — deeper engagement unlocks greater value.
+                Active and coming-soon reward systems. Items marked "Coming Soon" are part of Chapter 3 and beyond.
               </p>
               {ADVANCED_CHAINS.map((node, i) => (
                 <motion.div key={node.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
