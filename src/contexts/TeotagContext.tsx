@@ -5,6 +5,7 @@
  */
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 
 export type TeotagMode = "guide" | "librarian" | "scribe" | "oracle";
 
@@ -68,7 +69,17 @@ function detectMode(pathname: string): TeotagMode {
   return "guide";
 }
 
-function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext, route: string): QuickAction[] {
+function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext, route: string, seasonalLens?: string | null): QuickAction[] {
+  // Spring Lens overrides — prioritise spring-themed prompts
+  if (seasonalLens === "spring") {
+    return [
+      { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
+      { label: "Spring harvests", prompt: "What early spring harvests and produce are available nearby?", emoji: "🌱" },
+      { label: "Planting season", prompt: "What should be planted this spring? Show me planting windows.", emoji: "🪴" },
+      { label: "Blossom walks", prompt: "Suggest blossom walks and spring exploration routes near me.", emoji: "🥾" },
+    ];
+  }
+
   // Harvest-specific quick actions
   if (route.startsWith("/harvest")) {
     return [
@@ -142,6 +153,7 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
 export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
   const activeMode = detectMode(pathname);
+  const { activeLens, lensConfig } = useSeasonalLens();
 
   const [mapContext, setMapContextState] = useState<MapContext>({});
   const [libraryContext, setLibraryContextState] = useState<LibraryContext>({});
@@ -194,12 +206,19 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
       parts.push(`Council: ${councilContext.activeCouncilName}`);
     }
 
+    // Seasonal lens context
+    if (activeLens && lensConfig) {
+      parts.push(`Seasonal lens: ${lensConfig.label} (${lensConfig.emoji})`);
+      parts.push(`Lens emphasis months: ${lensConfig.months.join(", ")}`);
+      parts.push(`Lens keywords: ${lensConfig.keywords.slice(0, 5).join(", ")}`);
+    }
+
     return parts.join("\n");
-  }, [pathname, activeMode, mapContext, libraryContext, councilContext]);
+  }, [pathname, activeMode, mapContext, libraryContext, councilContext, activeLens, lensConfig]);
 
   const quickActions = useMemo(
-    () => getQuickActions(activeMode, mapContext, libraryContext, pathname),
-    [activeMode, mapContext, libraryContext, pathname]
+    () => getQuickActions(activeMode, mapContext, libraryContext, pathname, activeLens),
+    [activeMode, mapContext, libraryContext, pathname, activeLens]
   );
 
   const value = useMemo<TeotagContextValue>(() => ({

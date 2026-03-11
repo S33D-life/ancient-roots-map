@@ -6,6 +6,7 @@ import { MapFilterProvider } from "@/contexts/MapFilterContext";
 import { UIFlowProvider } from "@/contexts/UIFlowContext";
 import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
+import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
@@ -214,6 +215,7 @@ const App = () => {
           <HiveSeasonProvider>
           <MapFilterProvider>
           <UIFlowProvider>
+          <SeasonalLensProvider>
           <TeotagProvider>
             <BottomNav />
             <FireflyFAB />
@@ -291,6 +293,7 @@ const App = () => {
               </Routes>
             </Suspense>
           </TeotagProvider>
+          </SeasonalLensProvider>
           </UIFlowProvider>
           </MapFilterProvider>
           </HiveSeasonProvider>

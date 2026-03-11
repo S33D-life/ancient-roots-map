@@ -4,6 +4,7 @@
  * Harmonised with: Map, Blooming Clock, Harvest Exchange, TEOTAG.
  */
 import { useState, useMemo, useEffect } from "react";
+import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } from "@/hooks/use-cosmic-clock";
 import { useFoodCycles } from "@/hooks/use-food-cycles";
 import { useCalendarLenses } from "@/hooks/use-calendar-lenses";
@@ -15,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity, TreeDeciduous, MapPin, Calendar, ArrowRight } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
+import SpringLensToggle from "@/components/seasonal/SpringLensToggle";
+import SpringLensBanner from "@/components/seasonal/SpringLensBanner";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -33,12 +36,16 @@ const CosmicCalendarPage = () => {
   }, []);
 
   const { activeLenses, getLensDataForDate, todayMayan, prefs } = useCalendarLenses(userId);
+  const { activeLens: seasonalLens, isLensMonth } = useSeasonalLens();
 
   // Unified seasonal events (includes harvest listings + food cycles)
   const { harvestEvents, bloomEvents, getEventsForMonth } = useSeasonalEvents(viewMonth + 1);
 
   // Mayan lens active?
   const mayanActive = activeLenses.some(l => l.slug === "mayan");
+
+  // Spring lens: is current view month a spring month?
+  const isSpringMonth = seasonalLens === "spring" && isLensMonth(viewMonth + 1);
 
   // Calendar grid
   const calendarDays = useMemo(() => {
@@ -150,23 +157,25 @@ const CosmicCalendarPage = () => {
         {/* Live Cosmic Clock */}
         <CosmicClock variant="full" />
 
-        {/* Active Lenses indicator */}
-        {activeLenses.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">Lenses:</span>
-            {activeLenses.map(lens => (
-              <span
-                key={lens.id}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-card/60 border border-border/20 text-muted-foreground font-serif flex items-center gap-1"
-              >
-                {lens.icon} {lens.name}
-              </span>
-            ))}
-            <Link to="/cosmic/settings" className="text-[10px] text-primary/60 hover:text-primary font-serif">
-              Edit
-            </Link>
-          </div>
-        )}
+        {/* Lenses + Spring Lens toggle */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">Lenses:</span>
+          {activeLenses.map(lens => (
+            <span
+              key={lens.id}
+              className="text-[10px] px-2 py-0.5 rounded-full bg-card/60 border border-border/20 text-muted-foreground font-serif flex items-center gap-1"
+            >
+              {lens.icon} {lens.name}
+            </span>
+          ))}
+          <SpringLensToggle compact />
+          <Link to="/cosmic/settings" className="text-[10px] text-primary/60 hover:text-primary font-serif">
+            Edit
+          </Link>
+        </div>
+
+        {/* Spring Lens banner */}
+        <SpringLensBanner context="calendar" />
 
         {/* Month Navigator */}
         <div className="flex items-center justify-between">
@@ -212,6 +221,7 @@ const CosmicCalendarPage = () => {
                     text-xs font-serif transition-all
                     ${isSelected ? "bg-primary/20 ring-1 ring-primary/40 text-primary" : "hover:bg-card/80 text-foreground/70"}
                     ${isTodayCell ? "ring-1 ring-primary/30 font-bold text-primary" : ""}
+                    ${isSpringMonth && !isSelected ? "bg-primary/[0.03]" : ""}
                   `}
                 >
                   <span className="leading-none">{day.getDate()}</span>
