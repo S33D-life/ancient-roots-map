@@ -254,11 +254,11 @@ function getQuickActions(
   }
 
   if (mode === "scribe") {
-    return [
+    return withSeason([
       { label: "Council overview", prompt: "Give me an overview of the Council of Life and its purpose.", emoji: "🍃" },
       { label: "Meeting themes", prompt: "What key themes have emerged from recent council gatherings?", emoji: "📋" },
       { label: "Plant of the week", prompt: "What is the current plant of the week from the council?", emoji: "🌿" },
-    ];
+    ]);
   }
 
   return [
