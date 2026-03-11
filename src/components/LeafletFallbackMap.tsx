@@ -3628,130 +3628,154 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const globeEmphasis = perspective === "collective";
         return (
           <>
-            <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+            {/* Clear View toggle — always visible, right side */}
+            <div className="absolute right-3 z-[1000]" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
               <button
-                onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
+                onClick={() => setClearView(v => !v)}
+                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 active:scale-90 glow-button`}
                 style={{
                   ...btnBase,
-                  color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                  background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  color: clearView ? "hsl(200, 60%, 70%)" : "hsl(var(--muted-foreground) / 0.6)",
+                  background: clearView ? "hsla(200, 40%, 15%, 0.95)" : btnBase.background,
+                  border: clearView ? "1px solid hsla(200, 50%, 50%, 0.4)" : btnBase.border,
                 }}
-                title="Filters & Layers"
+                title={clearView ? "Show controls" : "Clear view"}
+                aria-label={clearView ? "Show map controls" : "Hide map controls for clear view"}
               >
-                <Layers className="w-[18px] h-[18px]" />
-                {(() => {
-                  const activeLayers = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
-                  const totalActive = activeLayers + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
-                  return totalActive > 0 ? (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
-                      style={{
-                        background: `hsl(${modeAccent})`,
-                        color: "hsl(30, 20%, 10%)",
-                        boxShadow: `0 0 6px hsla(${modeAccent}, 0.4)`,
-                      }}
-                    >
-                      {totalActive}
-                    </span>
-                  ) : null;
-                })()}
+                {clearView ? <Eye className="w-[18px] h-[18px]" /> : <EyeOff className="w-[18px] h-[18px]" />}
               </button>
-              {/* Living Earth Mode toggle */}
-              <button
-                onClick={() => setGroveViewActive(v => !v)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
-                style={{
-                  ...btnBase,
-                  color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
-                  background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
-                  border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
-                }}
-                title="Living Earth Mode"
-              >
-                <Eye className="w-[18px] h-[18px]" />
-                {groveViewActive && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                    style={{
-                      background: "hsl(120, 55%, 50%)",
-                      boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
-                      animation: "ancientGlow 3s ease-in-out infinite",
-                    }}
-                  />
-                )}
-              </button>
-              <button
-                onClick={() => setShowMycelialNetwork((v) => !v)}
-                className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: showMycelialNetwork ? "hsl(178, 72%, 68%)" : "hsl(42, 60%, 60%)",
-                  border: showMycelialNetwork ? "1px solid hsla(178, 65%, 55%, 0.5)" : btnBase.border,
-                }}
-                title="Toggle Mycelial Network"
-                aria-label="Toggle Mycelial Network"
-              >
-                <TreePine className="w-[16px] h-[16px]" />
-                {showMycelialNetwork && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                    style={{
-                      background: "hsl(178, 72%, 62%)",
-                      boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
-                    }}
-                  />
-                )}
-              </button>
-              {/* Atlas portal — above layers & eye */}
-              <AtlasNavButton btnBase={btnBase} />
             </div>
 
-            <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
-              <button
-                onClick={handleFindMe}
-                disabled={locating}
-                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                }}
-                title={geo.error ? `Location: ${geo.error.message}` : "Locate me"}
-              >
-                {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
-              </button>
-              <button
-                onClick={() => {
-                  const map = mapRef.current;
-                  if (map) {
-                    const c = map.getCenter();
-                    setAddTreeCoords({ lat: c.lat, lng: c.lng });
-                  } else {
-                    setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-                  }
-                  setAddDialogOpen(true);
-                }}
-                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
-                style={{
-                  ...btnBase,
-                  color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
-                }}
-                title="Add tree"
-              >
-                <Plus className="w-[18px] h-[18px]" />
-              </button>
-              <button
-                onClick={handleCompassReset}
-                className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                }}
-                title="Reset view"
-              >
-                <Globe className="w-[18px] h-[18px]" />
-              </button>
-            </div>
+            {/* Left column — hidden in clear view */}
+            {!clearView && (
+              <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+                <button
+                  onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
+                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                    background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : btnBase.background,
+                  }}
+                  title="Filters & Layers"
+                >
+                  <Layers className="w-[18px] h-[18px]" />
+                  {(() => {
+                    const activeLayers = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
+                    const totalActive = activeLayers + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
+                    return totalActive > 0 ? (
+                      <span
+                        className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
+                        style={{
+                          background: `hsl(${modeAccent})`,
+                          color: "hsl(30, 20%, 10%)",
+                          boxShadow: `0 0 6px hsla(${modeAccent}, 0.4)`,
+                        }}
+                      >
+                        {totalActive}
+                      </span>
+                    ) : null;
+                  })()}
+                </button>
+                {/* Living Earth Mode toggle */}
+                <button
+                  onClick={() => setGroveViewActive(v => !v)}
+                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
+                    background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
+                    border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
+                  }}
+                  title="Living Earth Mode"
+                >
+                  <Eye className="w-[18px] h-[18px]" />
+                  {groveViewActive && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                      style={{
+                        background: "hsl(120, 55%, 50%)",
+                        boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
+                        animation: "ancientGlow 3s ease-in-out infinite",
+                      }}
+                    />
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowMycelialNetwork((v) => !v)}
+                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: showMycelialNetwork ? "hsl(178, 72%, 68%)" : "hsl(42, 60%, 60%)",
+                    border: showMycelialNetwork ? "1px solid hsla(178, 65%, 55%, 0.5)" : btnBase.border,
+                  }}
+                  title="Toggle Mycelial Network"
+                  aria-label="Toggle Mycelial Network"
+                >
+                  <TreePine className="w-[16px] h-[16px]" />
+                  {showMycelialNetwork && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                      style={{
+                        background: "hsl(178, 72%, 62%)",
+                        boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
+                      }}
+                    />
+                  )}
+                </button>
+                {/* Atlas portal — above layers & eye */}
+                <AtlasNavButton btnBase={btnBase} />
+              </div>
+            )}
+
+            {/* Bottom center — hidden in clear view */}
+            {!clearView && (
+              <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+                <button
+                  onClick={handleFindMe}
+                  disabled={locating}
+                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  }}
+                  title={geo.error ? `Location: ${geo.error.message}` : "Locate me"}
+                >
+                  {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
+                </button>
+                <button
+                  onClick={() => {
+                    const map = mapRef.current;
+                    if (map) {
+                      const c = map.getCenter();
+                      setAddTreeCoords({ lat: c.lat, lng: c.lng });
+                    } else {
+                      setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+                    }
+                    setAddDialogOpen(true);
+                  }}
+                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
+                  }}
+                  title="Add tree"
+                >
+                  <Plus className="w-[18px] h-[18px]" />
+                </button>
+                <button
+                  onClick={handleCompassReset}
+                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+                  style={{
+                    ...btnBase,
+                    color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
+                  }}
+                  title="Reset view"
+                >
+                  <Globe className="w-[18px] h-[18px]" />
+                </button>
+              </div>
+            )}
           </>
         );
       })()}
