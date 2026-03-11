@@ -16,6 +16,7 @@ import { searchSpecies, type TreeSpecies } from "@/data/treeSpecies";
 import OfferingCelebration from "@/components/OfferingCelebration";
 import NearbyTreesSheet from "@/components/NearbyTreesSheet";
 import CanopyCheckinModal from "@/components/CanopyCheckinModal";
+import SpeciesIdentifier, { type SpeciesResult, type SpeciesCertainty } from "@/components/encounter/SpeciesIdentifier";
 import {
   identifyTreeSpeciesFromPhoto,
   type SpeciesVisionPrediction,
