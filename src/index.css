@@ -599,7 +599,9 @@ All colors MUST be HSL.
     .pulse-live,
     .pulse-cta,
     .pulse-fruit,
-    .glow-breath {
+    .glow-breath,
+    .firefly-ambient,
+    .firefly-pulse {
       animation: none !important;
     }
   }
@@ -609,7 +611,9 @@ All colors MUST be HSL.
   .tab-hidden .pulse-live,
   .tab-hidden .pulse-cta,
   .tab-hidden .pulse-fruit,
-  .tab-hidden .glow-breath {
+  .tab-hidden .glow-breath,
+  .tab-hidden .firefly-ambient,
+  .tab-hidden .firefly-pulse {
     animation-play-state: paused !important;
   }
 
