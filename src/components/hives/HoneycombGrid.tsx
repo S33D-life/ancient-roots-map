@@ -1,92 +1,72 @@
 /**
  * HoneycombGrid — Staggered hexagonal layout that arranges children
- * in a honeycomb pattern with proper row offsets.
+ * in a honeycomb pattern with proper row offsets and negative margins
+ * for a tight, organic honeycomb feel.
  *
  * Responsive: 2 cols mobile, 3 cols tablet, 4 cols desktop.
- * Uses JS row grouping to apply translateX offset on odd rows.
  */
-import { type ReactNode, type ReactElement, Children, useMemo } from "react";
+import { type ReactNode, Children } from "react";
 
 interface HoneycombGridProps {
   children: ReactNode[];
 }
 
-/**
- * Break children into rows based on viewport-responsive column count.
- * We use a CSS custom property (--cols) but since JS can't read it at render,
- * we use a responsive hook approach with a fixed breakpoint map.
- */
-const useColumns = () => {
-  // We'll use CSS classes for the offset instead of JS column detection.
-  // The grid itself handles wrapping via flex-wrap.
-  return null;
-};
-
 const HoneycombGrid = ({ children }: HoneycombGridProps) => {
-  // Group children into rows for stagger offset
-  // We detect row boundaries using the flex-wrap behavior:
-  // Since flex-wrap handles columns automatically, we apply the offset
-  // via a wrapper approach: odd-indexed items in each "conceptual row" get offset.
-  
-  // For true honeycomb stagger, we wrap items with row-aware containers.
   const items = Children.toArray(children);
 
   return (
     <div className="honeycomb-grid-container">
-      {/* Desktop 4-col, Tablet 3-col, Mobile 2-col — handled by CSS grid */}
-      <div className="honeycomb-rows">
+      <div className="hcomb-rows">
         {items.map((child, i) => (
-          <div key={i} className="honeycomb-cell" data-index={i}>
+          <div key={i} className="hcomb-cell" data-index={i}>
             {child}
           </div>
         ))}
       </div>
       <style>{`
-        .honeycomb-rows {
+        .hcomb-rows {
           --hex-size: 170px;
           --hex-gap: 6px;
-          --cols: 4;
-          --row-offset: calc(var(--hex-size) * 0.5);
-          --row-overlap: calc(var(--hex-size) * -0.08);
+          --row-shift: calc(var(--hex-size) * 0.52);
+          --row-overlap: -8px;
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: var(--hex-gap);
+          column-gap: var(--hex-gap);
+          row-gap: var(--row-overlap);
           padding: 0 calc(var(--hex-size) * 0.12);
         }
-        .honeycomb-cell {
+        .hcomb-cell {
           width: var(--hex-size);
           flex-shrink: 0;
+          transition: transform 0.2s ease;
         }
-        /* Stagger offset: items in odd rows shift right by half hex width */
-        /* Row detection via nth-child math */
-        /* For 4 cols: items 5-8 (2nd row), 13-16 (4th row), etc. */
-        .honeycomb-cell:nth-child(n+${4 + 1}):nth-child(-n+${4 * 2}) { margin-left: calc(var(--row-offset) * 0); }
-        
-        /* Using a simpler approach: every other row of items */
-        /* 4-col: row 2 = items 5..8, row 4 = items 13..16 */
+
+        /* ── Desktop 4-col stagger ── */
         @media (min-width: 1025px) {
-          .honeycomb-rows { --hex-size: 180px; --cols: 4; }
-          .honeycomb-cell:nth-child(8n+5),
-          .honeycomb-cell:nth-child(8n+6),
-          .honeycomb-cell:nth-child(8n+7),
-          .honeycomb-cell:nth-child(8n+8) {
-            transform: translateX(calc(var(--hex-size) * 0.52));
+          .hcomb-rows { --hex-size: 185px; }
+          .hcomb-cell:nth-child(8n+5),
+          .hcomb-cell:nth-child(8n+6),
+          .hcomb-cell:nth-child(8n+7),
+          .hcomb-cell:nth-child(8n+8) {
+            transform: translateX(var(--row-shift));
           }
         }
+        /* ── Tablet 3-col stagger ── */
         @media (min-width: 641px) and (max-width: 1024px) {
-          .honeycomb-rows { --hex-size: 155px; --cols: 3; }
-          .honeycomb-cell:nth-child(6n+4),
-          .honeycomb-cell:nth-child(6n+5),
-          .honeycomb-cell:nth-child(6n+6) {
-            transform: translateX(calc(var(--hex-size) * 0.52));
+          .hcomb-rows { --hex-size: 158px; }
+          .hcomb-cell:nth-child(6n+4),
+          .hcomb-cell:nth-child(6n+5),
+          .hcomb-cell:nth-child(6n+6) {
+            transform: translateX(var(--row-shift));
           }
         }
+        /* ── Mobile 2-col stagger ── */
         @media (max-width: 640px) {
-          .honeycomb-rows { --hex-size: 130px; --cols: 2; --hex-gap: 4px; }
-          .honeycomb-cell:nth-child(4n+3),
-          .honeycomb-cell:nth-child(4n+4) {
-            transform: translateX(calc(var(--hex-size) * 0.52));
+          .hcomb-rows { --hex-size: 140px; --hex-gap: 4px; --row-overlap: -6px; }
+          .hcomb-cell:nth-child(4n+3),
+          .hcomb-cell:nth-child(4n+4) {
+            transform: translateX(var(--row-shift));
           }
         }
       `}</style>
