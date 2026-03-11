@@ -723,7 +723,7 @@ const ValueTreePage = () => {
             The S33D Value Tree
           </h1>
           <p className="text-muted-foreground font-serif max-w-lg mx-auto text-sm leading-relaxed">
-            Explore how every action grows into ecosystem value — from roots to fruit.
+            Explore how every action grows into ecosystem value — from roots to fruit. S33D Hearts are the commons currency, earned through stewardship, not speculation.
           </p>
         </motion.div>
 
