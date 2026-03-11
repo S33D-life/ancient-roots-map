@@ -157,23 +157,25 @@ const CosmicCalendarPage = () => {
         {/* Live Cosmic Clock */}
         <CosmicClock variant="full" />
 
-        {/* Active Lenses indicator */}
-        {activeLenses.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">Lenses:</span>
-            {activeLenses.map(lens => (
-              <span
-                key={lens.id}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-card/60 border border-border/20 text-muted-foreground font-serif flex items-center gap-1"
-              >
-                {lens.icon} {lens.name}
-              </span>
-            ))}
-            <Link to="/cosmic/settings" className="text-[10px] text-primary/60 hover:text-primary font-serif">
-              Edit
-            </Link>
-          </div>
-        )}
+        {/* Lenses + Spring Lens toggle */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">Lenses:</span>
+          {activeLenses.map(lens => (
+            <span
+              key={lens.id}
+              className="text-[10px] px-2 py-0.5 rounded-full bg-card/60 border border-border/20 text-muted-foreground font-serif flex items-center gap-1"
+            >
+              {lens.icon} {lens.name}
+            </span>
+          ))}
+          <SpringLensToggle compact />
+          <Link to="/cosmic/settings" className="text-[10px] text-primary/60 hover:text-primary font-serif">
+            Edit
+          </Link>
+        </div>
+
+        {/* Spring Lens banner */}
+        <SpringLensBanner context="calendar" />
 
         {/* Month Navigator */}
         <div className="flex items-center justify-between">
