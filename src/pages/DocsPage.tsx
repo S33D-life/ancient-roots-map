@@ -35,7 +35,7 @@ const DocsPage = () => (
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm font-serif text-foreground/70 space-y-4">
-              <p>Follow these steps to earn your first S33D Hearts, Species Hearts, and Influence tokens.</p>
+              <p>Follow these steps to earn your first S33D Hearts, Species Hearts, and Influence tokens. These are the currently active earning pathways.</p>
 
               <div className="space-y-3">
                 <Step number={1} title="Encounter — Find a Tree">
@@ -135,7 +135,7 @@ const DocsPage = () => (
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm font-serif text-foreground/70 space-y-4">
-              <p>Every contribution earns tokens across up to three layers. Rewards are issued instantly via a Reward Receipt.</p>
+              <p>Every contribution earns tokens across up to three layers. Rewards are issued instantly via a Reward Receipt. These are the currently active reward rates.</p>
 
               <div className="space-y-3">
                 <RewardRow action="Map a new tree" s33d={10} species={3} influence={2} note="Issued once when the tree record is created" />
@@ -160,7 +160,7 @@ const DocsPage = () => (
                 icon={<Heart className="h-4 w-4" />}
                 name="S33D Hearts"
                 tag="Global Currency"
-                description="Earned for every contribution. Used across the entire ecosystem — the universal heartbeat of S33D."
+                description="The commons currency of S33D. Earned for every stewardship contribution — mapping trees, sharing offerings, attending councils, and more."
               />
               <TokenLayer
                 icon={<Leaf className="h-4 w-4" />}

@@ -82,10 +82,10 @@ const faqs = [
     q: "Do I need to sign in?",
     a: "Browsing the map and atlas is open to everyone. To add trees, make offerings, or earn Hearts you'll need a free account.",
   },
-  {
-    q: "What are Hearts?",
-    a: "Hearts are the internal value token of S33D. You earn them by contributing — reporting bugs, adding trees, making offerings, and participating in councils.",
-  },
+   {
+     q: "What are Hearts?",
+     a: "S33D Hearts are the commons currency of the ecosystem. You currently earn them by mapping ancient trees, making offerings, attending Council of Life gatherings, and other stewardship actions. Additional earning pathways — such as staking and NFT-based rewards — are planned for future chapters.",
+   },
   {
     q: "Are my screenshots private?",
     a: "Screenshots attached to bug reports are only visible to the S33D team. They are never shared publicly.",
@@ -336,7 +336,7 @@ const SupportPage = () => {
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
             Validated bug reports, UX refinements, tree suggestions, and insights may earn Hearts —
-            the living currency of S33D.
+            the commons currency of the S33D ecosystem.
           </p>
           <Link
             to={ROUTES.VALUE_TREE_EARN}

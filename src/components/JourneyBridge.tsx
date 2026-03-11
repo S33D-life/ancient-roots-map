@@ -197,7 +197,7 @@ export default function JourneyBridge({ current, hasStaff = false, className }: 
       {current === "map" && (
         <p className="text-center text-[10px] text-muted-foreground/40 mt-3 flex items-center justify-center gap-1">
           <TreeDeciduous className="w-2.5 h-2.5" />
-          Each tree mapped earns 10 S33D Hearts + 3 Species Hearts + 2 Influence
+          Mapping a tree currently earns 10 S33D Hearts + 3 Species Hearts + 2 Influence
         </p>
       )}
     </motion.div>

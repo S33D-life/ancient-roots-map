@@ -144,7 +144,7 @@ const VaultValueTree = ({ userId, totalHearts }: Props) => {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-serif tracking-wide text-foreground">S33D Hearts — The Value Tree</h3>
-            <p className="text-[10px] text-muted-foreground font-serif">How Hearts grow from roots to canopy</p>
+            <p className="text-[10px] text-muted-foreground font-serif">The commons currency — how Hearts grow from roots to canopy</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-serif font-bold tabular-nums" style={{ color: "hsl(42, 95%, 55%)" }}>
@@ -214,7 +214,7 @@ const VaultValueTree = ({ userId, totalHearts }: Props) => {
 const RootsPanel = () => (
   <div className="space-y-2">
     <p className="text-[10px] text-muted-foreground/60 font-serif mb-3">
-      Permanent ways to earn S33D Hearts — the foundation of the value tree.
+      Currently active ways to earn S33D Hearts — the foundation of the value tree.
     </p>
     {EARN_ACTIONS.map((a, i) => {
       const Icon = a.icon;
@@ -253,10 +253,15 @@ const RootsPanel = () => (
         </motion.div>
       );
     })}
-    <div className="pt-2 flex items-start gap-2 px-1">
-      <AlertTriangle className="w-3 h-3 text-muted-foreground/40 mt-0.5 shrink-0" />
-      <p className="text-[9px] text-muted-foreground/50 font-serif leading-relaxed">
-        Anti-spam: GPS validation for mapping, daily caps on check-ins (3/tree/day), duplicate detection on media uploads. All Heart issuance is logged in an immutable ledger.
+    <div className="pt-2 space-y-2">
+      <div className="flex items-start gap-2 px-1">
+        <AlertTriangle className="w-3 h-3 text-muted-foreground/40 mt-0.5 shrink-0" />
+        <p className="text-[9px] text-muted-foreground/50 font-serif leading-relaxed">
+          Anti-spam: GPS validation for mapping, daily caps on check-ins (3/tree/day), duplicate detection on media uploads. All Heart issuance is logged in an immutable ledger.
+        </p>
+      </div>
+      <p className="text-[9px] text-muted-foreground/40 font-serif leading-relaxed px-1 italic">
+        Additional earning pathways — including staking, NFT rewards, and sapling nurturing — are planned for future chapters.
       </p>
     </div>
   </div>
