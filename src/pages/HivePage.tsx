@@ -23,6 +23,8 @@ import HiveSpeciesLeaderboard from "@/components/HiveSpeciesLeaderboard";
 import InfluenceWeightedVoting from "@/components/InfluenceWeightedVoting";
 import BloomingClock from "@/components/BloomingClock";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
+import HiveActivityOrb from "@/components/hive/HiveActivityOrb";
+import HiveUserBalance from "@/components/hive/HiveUserBalance";
 
 interface TreeRow {
   id: string;
