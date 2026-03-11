@@ -781,3 +781,41 @@ All colors MUST be HSL.
 @media (min-width: 1025px) {
   .honeycomb-grid { --hex-size: 180px; }
 }
+
+/* ── Hex Constellation ── */
+.constellation-bg {
+  background:
+    radial-gradient(circle at 50% 50%, hsl(150 20% 10% / 0.9), hsl(150 25% 6%));
+}
+
+.constellation-line {
+  transition: opacity 0.4s ease;
+}
+.constellation-line:hover {
+  opacity: 0.3 !important;
+}
+
+/* Breathing pulse for constellation nodes */
+@keyframes constellation-breath {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+.constellation-breath {
+  animation: constellation-breath 4s ease-in-out infinite;
+}
+
+/* Drifting starlight particles */
+@keyframes constellation-drift {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  15% { opacity: 0.5; }
+  85% { opacity: 0.3; }
+  100% { transform: translateY(-60px) translateX(25px); opacity: 0; }
+}
+.constellation-particle {
+  animation: constellation-drift 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-breath { animation: none !important; }
+  .constellation-particle { animation: none !important; display: none; }
+}

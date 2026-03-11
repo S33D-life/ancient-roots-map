@@ -28,7 +28,7 @@ import { getRootstonesByCountrySlug, type Rootstone } from "@/data/rootstones";
 import { buildRootstoneMapUrl } from "@/utils/map-link";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 
-const CountrySpeciesSpiral = lazy(() => import("@/components/atlas/CountrySpeciesSpiral"));
+const HexConstellationMap = lazy(() => import("@/components/atlas/HexConstellationMap"));
 
 /* ─── Types ─── */
 interface ResearchTree {
@@ -686,10 +686,10 @@ const CountryPortalPage = () => {
               <CardContent className="py-6">
                 <Suspense fallback={
                   <div className="py-12 text-center">
-                    <p className="text-sm text-muted-foreground">Loading species spiral…</p>
+                    <p className="text-sm text-muted-foreground font-serif">Mapping the constellation…</p>
                   </div>
                 }>
-                  <CountrySpeciesSpiral
+                  <HexConstellationMap
                     species={speciesActivity || []}
                     country={config.country}
                     countrySlug={countrySlug || ""}
