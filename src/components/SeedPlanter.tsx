@@ -8,6 +8,7 @@ import { useSeedEconomy, PROXIMITY_METERS } from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
 import RewardReceipt from "@/components/RewardReceipt";
+import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 
 interface SeedPlanterProps {
