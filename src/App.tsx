@@ -118,6 +118,7 @@ const TreeLedgerPage = lazyImportWithRetry(() => import("./pages/TreeLedgerPage"
 const CalendarSettingsPage = lazyImportWithRetry(() => import("./pages/CalendarSettingsPage"), "calendar-settings");
 const RootstoneImporterPage = lazyImportWithRetry(() => import("./pages/RootstoneImporterPage"), "rootstone-importer");
 const WandererProfilePage = lazyImportWithRetry(() => import("./pages/WandererProfilePage"), "wanderer-profile");
+const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/LivingForestRoadmapPage"), "roadmap");
 
 const queryClient = new QueryClient({
   defaultOptions: {
