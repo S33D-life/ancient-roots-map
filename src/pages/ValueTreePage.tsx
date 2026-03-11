@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
+import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
 
 /* ─── Value-node data model ────────────────────────────────── */
 
