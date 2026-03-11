@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 const DocsPage = () => (
   <div className="min-h-screen bg-background">
     <Header />
-    <main className="container max-w-2xl mx-auto px-4 pt-24 pb-16 space-y-6">
+    <main className="container max-w-2xl mx-auto px-4 pt-24 pb-24 space-y-6">
       <div className="space-y-1">
         <h1 className="font-serif text-2xl text-primary tracking-wide">Documentation</h1>
         <p className="text-sm text-muted-foreground/70 font-serif">
