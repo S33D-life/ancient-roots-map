@@ -33,6 +33,7 @@ import DashboardActivity from "@/components/dashboard/DashboardActivity";
 import HearthWarmth from "@/components/dashboard/HearthWarmth";
 import EarnableToday from "@/components/dashboard/EarnableToday";
 import TodaysSeeds from "@/components/TodaysSeeds";
+import SeedTrailPanel from "@/components/SeedTrailPanel";
 import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
 import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
@@ -435,6 +436,7 @@ const DashboardPage = () => {
                   <HearthWarmth userId={user.id} />
                   <EarnableToday userId={user.id} />
                   <TodaysSeeds userId={user.id} />
+                  <SeedTrailPanel userId={user.id} />
                   <ActiveCampaigns />
                   <HearthCrossLinks />
                 </div>
