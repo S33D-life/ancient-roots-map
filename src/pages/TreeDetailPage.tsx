@@ -68,6 +68,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 import { useBloomStatus } from "@/hooks/use-bloom-status";
+import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import PhenologyBadge from "@/components/PhenologyBadge";
 import PhenologyObservationButton from "@/components/PhenologyObservationButton";
 import PresenceRitual from "@/components/PresenceRitual";
