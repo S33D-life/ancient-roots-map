@@ -228,6 +228,17 @@ export default defineConfig(async ({ mode }) => {
   },
   build: {
     target: "es2022",
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-query': ['@tanstack/react-query'],
+        },
+      },
+    },
   },
   test: {
     globals: true,

@@ -43,7 +43,14 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Inline initial content for fast FCP — replaced once React mounts -->
+      <div id="s33d-splash" style="display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;background:#1a1f14;flex-direction:column;gap:1rem">
+        <div style="width:48px;height:48px;border-radius:50%;border:2px solid #d4a017;border-top-color:transparent;animation:s33d-spin .8s linear infinite"></div>
+        <p style="font-family:Cinzel,serif;color:hsl(45,100%,85%);font-size:14px;letter-spacing:.15em;opacity:.7">Loading Ancient Friends…</p>
+      </div>
+    </div>
+    <style>@keyframes s33d-spin{to{transform:rotate(360deg)}}</style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
