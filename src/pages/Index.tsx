@@ -19,6 +19,7 @@ import { WisdomOfTheGrove } from "@/components/WisdomOfTheGrove";
 import { useTreeScroll } from "@/hooks/use-tree-scroll";
 import TreeScrollIndicator from "@/components/TreeScrollIndicator";
 import CrownSection from "@/components/tree-sections/CrownSection";
+import WhisperEchoesFeed from "@/components/WhisperEchoesFeed";
 import CanopySection from "@/components/tree-sections/CanopySection";
 import TrunkSection from "@/components/tree-sections/TrunkSection";
 import GroundSection from "@/components/tree-sections/GroundSection";
@@ -82,6 +83,9 @@ const Index = () => {
           <div className="section-divider max-w-xl mx-auto" />
           <EcosystemOverview />
           <div className="section-divider max-w-xl mx-auto" />
+          <div className="max-w-2xl mx-auto px-4 py-6">
+            <WhisperEchoesFeed limit={6} />
+          </div>
           <WisdomOfTheGrove />
           <TetolNavSection />
         </div>
