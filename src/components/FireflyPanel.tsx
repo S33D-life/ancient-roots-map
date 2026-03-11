@@ -113,6 +113,17 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
             </div>
           </div>
 
+          {/* Core loop strip */}
+          {userId && (
+            <div className="border-t border-border/10 px-5 py-2.5 flex items-center gap-3 bg-primary/3">
+              <Sprout className="w-3.5 h-3.5 text-primary/60" />
+              <span className="text-[10px] font-serif text-foreground/60">
+                {seedsRemaining} seed{seedsRemaining !== 1 ? "s" : ""} remaining today
+              </span>
+              <span className="text-[9px] text-muted-foreground/30 ml-auto">33/day</span>
+            </div>
+          )}
+
           <div className="border-t border-border/10 px-5 py-3 flex items-center justify-between bg-muted/5">
             <div className="flex gap-3">
               <Link
