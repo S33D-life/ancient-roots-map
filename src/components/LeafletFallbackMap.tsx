@@ -3352,14 +3352,34 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       pois.forEach((poi) => {
         const meta = GUARDIAN_TAGS[poi.category];
 
-        // Render line geometries (rivers, footpaths, etc.)
+        // Render line geometries (rivers, footpaths, coastlines, etc.)
         if (poi.geometry && poi.geometry.length > 1) {
           const isPath = poi.category === "footpath";
           const isWater = poi.category === "waterway";
+          const zoom = map.getZoom();
+
+          // Outer glow layer — wider, low-opacity halo beneath the main line
+          if (isPath || isWater) {
+            const glowColor = isPath ? "hsla(42, 80%, 55%, 0.18)" : "hsla(210, 40%, 78%, 0.15)";
+            const glowWeight = isPath ? 10 : 12;
+            L.polyline(poi.geometry, {
+              color: glowColor,
+              weight: glowWeight,
+              opacity: 1,
+              lineCap: "round",
+              lineJoin: "round",
+              interactive: false,
+              className: isPath ? "wc-footpath-glow" : "wc-waterway-line",
+            }).addTo(wcLayer);
+          }
+
+          // Main line
+          const mainColor = isPath ? "hsl(42, 75%, 52%)" : isWater ? "hsl(210, 35%, 75%)" : meta.color;
+          const mainWeight = isPath ? 3 : isWater ? (zoom >= 14 ? 4 : 3) : 2;
           L.polyline(poi.geometry, {
-            color: meta.color,
-            weight: isPath ? 2.5 : isWater ? 3 : 2,
-            opacity: 0.6,
+            color: mainColor,
+            weight: mainWeight,
+            opacity: isPath ? 0.75 : isWater ? 0.65 : 0.6,
             dashArray: isPath ? "6, 8" : undefined,
             lineCap: "round",
             lineJoin: "round",
