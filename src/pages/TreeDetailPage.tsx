@@ -212,7 +212,7 @@ const TreeDetailPage = () => {
         .from("trees")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       if (error) console.error("Error fetching tree:", error);
       else setTree(data);
     };
