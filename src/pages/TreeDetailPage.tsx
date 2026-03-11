@@ -20,6 +20,8 @@ import {
   TreeHeartRewards,
 } from "@/components/tree-sections";
 import SeedPlanter from "@/components/SeedPlanter";
+import CoreLoopBar from "@/components/CoreLoopBar";
+import WhisperRipple from "@/components/WhisperRipple";
 import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
 import BloomingClock from "@/components/BloomingClock";
