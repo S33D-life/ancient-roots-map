@@ -298,6 +298,15 @@ const Header = () => {
                     <Hexagon className="w-4 h-4 shrink-0" />
                     <span>Hives</span>
                   </Link>
+                  <div className="my-1 mx-2 h-px" style={{ background: 'hsl(var(--border) / 0.3)' }} />
+                  <Link to="/harvest" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Sprout className="w-4 h-4 shrink-0" />
+                    <span>Harvest Exchange</span>
+                  </Link>
+                  <Link to="/cosmic" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Stars className="w-4 h-4 shrink-0" />
+                    <span>Cosmic Calendar</span>
+                  </Link>
                 </div>
               </div>
             </div>
