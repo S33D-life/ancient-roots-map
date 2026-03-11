@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Compass } from "lucide-react";
+import { Loader2, MapPin, Compass, Heart } from "lucide-react";
+import { getHiveInfo } from "@/utils/hiveUtils";
 
 const WandererProfilePage = () => {
   const { id } = useParams<{ id: string }>();
