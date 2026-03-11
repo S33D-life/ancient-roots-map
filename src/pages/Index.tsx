@@ -80,6 +80,8 @@ const Index = () => {
           <ParticipationSection />
           <SupportDiscoveryRow />
           <div className="section-divider max-w-xl mx-auto" />
+          <EcosystemOverview />
+          <div className="section-divider max-w-xl mx-auto" />
           <WisdomOfTheGrove />
           <TetolNavSection />
         </div>
