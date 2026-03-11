@@ -1,0 +1,445 @@
+import { useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Sparkles, TreeDeciduous, Sprout, Leaf } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageShell from "@/components/PageShell";
+import {
+  ROADMAP_FEATURES,
+  STAGE_META,
+  REGION_META,
+  type RoadmapFeature,
+  type RoadmapRegion,
+  type RoadmapStage,
+} from "@/data/roadmap-forest";
+
+/* ── stage icon helper ── */
+const StageIcon = ({ stage, className = "" }: { stage: RoadmapStage; className?: string }) => {
+  const base = `shrink-0 ${className}`;
+  switch (stage) {
+    case "seed":    return <Sprout className={base} />;
+    case "sprout":  return <Leaf className={base} />;
+    case "rooted":  return <TreeDeciduous className={base} />;
+    case "ancient": return <Sparkles className={base} />;
+  }
+};
+
+/* ── mycelial SVG connections ── */
+const MycelialLines = ({
+  features,
+  positions,
+  activeId,
+}: {
+  features: RoadmapFeature[];
+  positions: Map<string, { x: number; y: number }>;
+  activeId: string | null;
+}) => {
+  const lines = useMemo(() => {
+    const result: { x1: number; y1: number; x2: number; y2: number; highlight: boolean }[] = [];
+    const seen = new Set<string>();
+    for (const f of features) {
+      for (const cId of f.connections) {
+        const key = [f.id, cId].sort().join("-");
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const a = positions.get(f.id);
+        const b = positions.get(cId);
+        if (!a || !b) continue;
+        const highlight = activeId === f.id || activeId === cId;
+        result.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, highlight });
+      }
+    }
+    return result;
+  }, [features, positions, activeId]);
+
+  return (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden>
+      <defs>
+        <linearGradient id="myc-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="hsl(var(--sacred-gold))" stopOpacity="0.2" />
+        </linearGradient>
+        <linearGradient id="myc-active" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="hsl(var(--sacred-gold))" stopOpacity="0.6" />
+        </linearGradient>
+      </defs>
+      {lines.map((l, i) => (
+        <line
+          key={i}
+          x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+          stroke={`url(#${l.highlight ? "myc-active" : "myc-glow"})`}
+          strokeWidth={l.highlight ? 2.5 : 1.2}
+          strokeDasharray={l.highlight ? "none" : "6 4"}
+          className="transition-all duration-500"
+        />
+      ))}
+    </svg>
+  );
+};
+
+/* ── feature marker node ── */
+const FeatureNode = ({
+  feature,
+  isActive,
+  onSelect,
+}: {
+  feature: RoadmapFeature;
+  isActive: boolean;
+  onSelect: (f: RoadmapFeature) => void;
+}) => {
+  const meta = STAGE_META[feature.stage];
+  const stageScale = { seed: 0.85, sprout: 0.95, rooted: 1, ancient: 1.1 }[feature.stage];
+
+  return (
+    <motion.button
+      onClick={() => onSelect(feature)}
+      whileHover={{ scale: 1.12 }}
+      whileTap={{ scale: 0.95 }}
+      className={`
+        group relative flex flex-col items-center gap-1.5 p-2 rounded-xl
+        transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring
+        ${isActive ? "z-20" : "z-10"}
+      `}
+      style={{ transform: `scale(${stageScale})` }}
+      aria-label={`${feature.name} — ${meta.label}`}
+    >
+      {/* glow ring for ancient */}
+      {feature.stage === "ancient" && (
+        <span className="absolute inset-0 rounded-xl animate-pulse opacity-30"
+          style={{ boxShadow: `0 0 20px 4px hsl(var(--sacred-gold) / 0.4)` }} />
+      )}
+
+      {/* icon circle */}
+      <span
+        className={`
+          w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center
+          border-2 transition-colors duration-300
+          ${isActive
+            ? "border-primary bg-primary/20 shadow-lg"
+            : "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card"
+          }
+        `}
+      >
+        <StageIcon stage={feature.stage} className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+      </span>
+
+      {/* label */}
+      <span className="text-[10px] md:text-xs font-serif text-foreground/80 text-center leading-tight max-w-[90px]">
+        {feature.name}
+      </span>
+
+      {/* stage pill */}
+      <span
+        className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full font-sans"
+        style={{ background: `${meta.color}20`, color: meta.color }}
+      >
+        {meta.emoji} {feature.stage}
+      </span>
+    </motion.button>
+  );
+};
+
+/* ── detail panel ── */
+const DetailPanel = ({
+  feature,
+  onClose,
+}: {
+  feature: RoadmapFeature;
+  onClose: () => void;
+}) => {
+  const meta = STAGE_META[feature.stage];
+  const regionMeta = REGION_META[feature.region];
+  const connected = ROADMAP_FEATURES.filter((f) => feature.connections.includes(f.id));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 12 }}
+      className="fixed inset-x-4 bottom-4 md:inset-auto md:bottom-8 md:right-8 md:w-96
+                 bg-card/95 backdrop-blur-md border border-border/40 rounded-2xl p-5
+                 shadow-2xl z-50"
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground/50 hover:text-foreground transition-colors"
+        aria-label="Close"
+      >
+        <X className="w-4 h-4" />
+      </button>
+
+      <div className="flex items-start gap-3 mb-3">
+        <span className="w-10 h-10 rounded-full flex items-center justify-center border border-primary/30 bg-primary/10 shrink-0">
+          <StageIcon stage={feature.stage} className="w-5 h-5 text-primary" />
+        </span>
+        <div>
+          <h3 className="font-serif text-base text-foreground">{feature.name}</h3>
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-sans inline-block mt-0.5"
+            style={{ background: `${meta.color}20`, color: meta.color }}>
+            {meta.emoji} {meta.label}
+          </span>
+        </div>
+      </div>
+
+      <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.description}</p>
+
+      {/* region */}
+      <div className="text-xs text-muted-foreground/70 mb-3">
+        <span className="font-serif text-foreground/60">{regionMeta.label}</span> · {regionMeta.description}
+      </div>
+
+      {/* mycelial connections */}
+      {connected.length > 0 && (
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 mb-1.5 font-sans">
+            Mycelial connections
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {connected.map((c) => (
+              <span key={c.id} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/8 text-primary/80 border border-primary/15 font-sans">
+                {STAGE_META[c.stage].emoji} {c.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+/* ── region label strip ── */
+const RegionStrip = ({ region, row }: { region: RoadmapRegion; row: number }) => {
+  const meta = REGION_META[region];
+  return (
+    <div
+      className="col-span-full flex items-center gap-2 px-2 py-1"
+      style={{ gridRow: row }}
+    >
+      <span className="h-px flex-1 bg-border/20" />
+      <span className="text-[10px] md:text-xs font-serif tracking-widest uppercase text-muted-foreground/50">
+        {meta.label}
+      </span>
+      <span className="h-px flex-1 bg-border/20" />
+    </div>
+  );
+};
+
+/* ── environment particles ── */
+const ForestParticles = () => (
+  <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+    {/* fireflies */}
+    {Array.from({ length: 8 }).map((_, i) => (
+      <motion.span
+        key={i}
+        className="absolute w-1 h-1 rounded-full"
+        style={{
+          background: "hsl(var(--sacred-gold))",
+          left: `${12 + (i * 11) % 80}%`,
+          top: `${8 + (i * 17) % 85}%`,
+        }}
+        animate={{
+          opacity: [0, 0.6, 0],
+          y: [0, -15, 0],
+          x: [0, (i % 2 ? 8 : -8), 0],
+        }}
+        transition={{
+          duration: 5 + (i % 3) * 2,
+          repeat: Infinity,
+          delay: i * 1.2,
+          ease: "easeInOut",
+        }}
+      />
+    ))}
+  </div>
+);
+
+/* ── MAIN PAGE ── */
+const LivingForestRoadmapPage = () => {
+  const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
+  const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
+
+  const filtered = useMemo(
+    () => regionFilter ? ROADMAP_FEATURES.filter((f) => f.region === regionFilter) : ROADMAP_FEATURES,
+    [regionFilter],
+  );
+
+  /* compute positions for mycelial lines */
+  const COLS = 5;
+  const COL_W = 140;
+  const ROW_H = 120;
+  const positions = useMemo(() => {
+    const map = new Map<string, { x: number; y: number }>();
+    for (const f of ROADMAP_FEATURES) {
+      map.set(f.id, {
+        x: f.col * COL_W + COL_W / 2,
+        y: f.row * ROW_H + ROW_H / 2 + 40, // offset for region labels
+      });
+    }
+    return map;
+  }, []);
+
+  const totalRows = Math.max(...ROADMAP_FEATURES.map((f) => f.row)) + 1;
+
+  const handleSelect = useCallback((f: RoadmapFeature) => {
+    setActiveFeature((prev) => (prev?.id === f.id ? null : f));
+  }, []);
+
+  /* stats */
+  const counts = useMemo(() => {
+    const c: Record<RoadmapStage, number> = { seed: 0, sprout: 0, rooted: 0, ancient: 0 };
+    ROADMAP_FEATURES.forEach((f) => c[f.stage]++);
+    return c;
+  }, []);
+
+  return (
+    <PageShell cinematic>
+      <div className="min-h-screen flex flex-col relative">
+        <Header />
+
+        <main className="flex-1 container mx-auto px-4 pt-24 pb-28 md:pb-12">
+          {/* ── Hero ── */}
+          <section className="text-center mb-10 max-w-2xl mx-auto">
+            <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
+              Living Forest Roadmap
+            </h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              The S33D ecosystem grows like a forest. Seedlings are planted, shoots emerge,
+              trees take root, and ancient pillars anchor the canopy.
+              Beneath the surface, mycelial threads connect everything.
+            </p>
+          </section>
+
+          {/* ── Stats strip ── */}
+          <div className="flex justify-center gap-4 md:gap-6 mb-6 flex-wrap">
+            {(Object.keys(STAGE_META) as RoadmapStage[]).map((s) => (
+              <div key={s} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <StageIcon stage={s} className="w-3.5 h-3.5" />
+                <span className="font-serif">{counts[s]}</span>
+                <span className="hidden sm:inline">{STAGE_META[s].label.split("—")[0].trim()}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Region filter chips ── */}
+          <div className="flex justify-center gap-2 mb-8 flex-wrap">
+            <button
+              onClick={() => setRegionFilter(null)}
+              className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
+                ${!regionFilter
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border/30 text-muted-foreground hover:border-primary/30"
+                }`}
+            >
+              All regions
+            </button>
+            {(Object.keys(REGION_META) as RoadmapRegion[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRegionFilter(regionFilter === r ? null : r)}
+                className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
+                  ${regionFilter === r
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-border/30 text-muted-foreground hover:border-primary/30"
+                  }`}
+              >
+                {REGION_META[r].label}
+              </button>
+            ))}
+          </div>
+
+          {/* ── Forest landscape ── */}
+          <div className="relative mx-auto overflow-x-auto">
+            <div
+              className="relative mx-auto"
+              style={{
+                width: COLS * COL_W,
+                minHeight: totalRows * ROW_H + 80,
+              }}
+            >
+              <ForestParticles />
+              <MycelialLines
+                features={ROADMAP_FEATURES}
+                positions={positions}
+                activeId={activeFeature?.id ?? null}
+              />
+
+              {/* region labels */}
+              {([
+                { region: "roots" as RoadmapRegion, startRow: 0 },
+                { region: "trunk" as RoadmapRegion, startRow: 4 },
+                { region: "canopy" as RoadmapRegion, startRow: 6 },
+                { region: "mycelium" as RoadmapRegion, startRow: 8 },
+              ]).map(({ region, startRow }) => (
+                <div
+                  key={region}
+                  className="absolute left-0 right-0 flex items-center gap-2 px-2"
+                  style={{ top: startRow * ROW_H - 8 }}
+                >
+                  <span className="h-px flex-1 bg-border/15" />
+                  <span className="text-[9px] md:text-[10px] font-serif tracking-[0.2em] uppercase text-muted-foreground/40">
+                    {REGION_META[region].label}
+                  </span>
+                  <span className="h-px flex-1 bg-border/15" />
+                </div>
+              ))}
+
+              {/* feature nodes */}
+              {filtered.map((f) => {
+                const pos = positions.get(f.id);
+                if (!pos) return null;
+                return (
+                  <div
+                    key={f.id}
+                    className="absolute"
+                    style={{
+                      left: pos.x - COL_W / 2,
+                      top: pos.y - ROW_H / 2 + 10,
+                      width: COL_W,
+                      height: ROW_H,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <FeatureNode
+                      feature={f}
+                      isActive={activeFeature?.id === f.id}
+                      onSelect={handleSelect}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Legend ── */}
+          <section className="mt-12 text-center max-w-md mx-auto">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2 font-sans">
+              How to read the forest
+            </p>
+            <p className="text-xs text-muted-foreground/60 leading-relaxed">
+              Each node is a feature. Faint dashed lines beneath represent mycelial connections
+              between systems. Click any node to learn more. The forest grows richer as development continues.
+            </p>
+          </section>
+        </main>
+
+        {/* detail panel */}
+        <AnimatePresence>
+          {activeFeature && (
+            <DetailPanel
+              key={activeFeature.id}
+              feature={activeFeature}
+              onClose={() => setActiveFeature(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        <Footer />
+      </div>
+    </PageShell>
+  );
+};
+
+export default LivingForestRoadmapPage;
