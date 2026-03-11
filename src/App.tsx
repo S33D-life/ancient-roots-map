@@ -30,7 +30,8 @@ import FireflyFAB from "@/components/FireflyFAB";
 import MissingEnvBanner from "@/components/MissingEnvBanner";
 import { attachAutoSync } from "@/utils/syncEngine";
 import { useTreeCelebration } from "@/hooks/use-tree-celebration";
-const TreeMappedCelebration = lazy(() => import("@/components/growth/TreeMappedCelebration"));
+import { useContributionCelebration } from "@/hooks/use-contribution-celebration";
+const ContributionCelebration = lazy(() => import("@/components/growth/ContributionCelebration"));
 
 // Attach offline auto-sync listener once at app startup
 attachAutoSync();
@@ -194,13 +195,26 @@ const App = () => {
   }
 
   const CelebrationOverlay = () => {
-    const { celebration, dismiss } = useTreeCelebration();
-    if (!celebration) return null;
-    return (
-      <Suspense fallback={null}>
-        <TreeMappedCelebration treeName={celebration.treeName} species={celebration.species} onComplete={dismiss} />
-      </Suspense>
-    );
+    const { celebration, dismiss: dismissTree } = useTreeCelebration();
+    const { event: contribEvent, dismiss: dismissContrib } = useContributionCelebration();
+
+    // Tree creation events (legacy)
+    if (celebration) {
+      return (
+        <Suspense fallback={null}>
+          <ContributionCelebration event={{ type: "tree", name: celebration.treeName, species: celebration.species }} onComplete={dismissTree} />
+        </Suspense>
+      );
+    }
+    // Offering / harvest events
+    if (contribEvent) {
+      return (
+        <Suspense fallback={null}>
+          <ContributionCelebration event={contribEvent} onComplete={dismissContrib} />
+        </Suspense>
+      );
+    }
+    return null;
   };
 
   // Show loading skeleton while auth state resolves
