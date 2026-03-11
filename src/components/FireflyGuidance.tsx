@@ -97,6 +97,7 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
   }, []);
 
   const { seedsRemaining } = useSeedEconomy(userId);
+  const seasonal = useSeasonalSummary();
 
   const pickMessage = useCallback((): GuidanceMessage | null => {
     // Seed-aware guidance
