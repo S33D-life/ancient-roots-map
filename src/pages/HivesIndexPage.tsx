@@ -465,48 +465,88 @@ const HivesIndexPage = () => {
                       <span className="text-3xl">{hive.icon}</span>
                       <div>
                         <h3 className="font-serif text-lg text-foreground">{hive.displayName}</h3>
-                        <p className="text-[11px] text-muted-foreground font-serif">{hive.description}</p>
-                      </div>
-                    </div>
+                     <p className="text-[11px] text-muted-foreground font-serif">{hive.description}</p>
+                       </div>
+                     </div>
 
-                    {stats.recentTrees.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider mb-1.5">Recent Encounters</p>
-                        <div className="space-y-1">
-                          {stats.recentTrees.map(t => (
-                            <Link
-                              key={t.id}
-                              to={`/tree/${t.id}`}
-                              className="block text-xs font-serif text-foreground/80 hover:text-primary transition-colors truncate"
-                            >
-                              🌳 {t.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                     {/* Quick stats row */}
+                     <div className="grid grid-cols-4 gap-2 mb-3 text-center">
+                       {[
+                         { icon: <TreePine className="w-3 h-3" />, val: stats.treeCount, label: "trees" },
+                         { icon: <Music className="w-3 h-3" />, val: stats.offeringCount, label: "offerings" },
+                         { icon: <Heart className="w-3 h-3" />, val: stats.heartCount, label: "hearts" },
+                         { icon: <Users className="w-3 h-3" />, val: stats.wandererCount, label: "wanderers" },
+                       ].map(m => (
+                         <div key={m.label} className="text-center">
+                           <div className="flex items-center justify-center gap-0.5 text-muted-foreground/60 mb-0.5">{m.icon}</div>
+                           <p className="text-sm font-serif font-semibold" style={{ color: `hsl(${hive.accentHsl})` }}>{m.val}</p>
+                           <p className="text-[8px] text-muted-foreground/50 font-serif">{m.label}</p>
+                         </div>
+                       ))}
+                     </div>
 
-                    {stats.nations.length > 0 && (
-                      <p className="text-[10px] text-muted-foreground/70 font-serif mb-3">
-                        🌍 {stats.nations.join(" · ")}
-                      </p>
-                    )}
+                     {/* Species breakdown mini-bars */}
+                     {Object.keys(stats.speciesCounts).length > 0 && (
+                       <div className="mb-3">
+                         <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider mb-1.5">Top Species</p>
+                         <div className="space-y-1">
+                           {Object.entries(stats.speciesCounts)
+                             .sort((a, b) => b[1] - a[1])
+                             .slice(0, 4)
+                             .map(([sp, count]) => {
+                               const pct = Math.min(100, (count / stats.treeCount) * 100);
+                               return (
+                                 <div key={sp} className="flex items-center gap-2">
+                                   <span className="text-[10px] font-serif text-muted-foreground/80 truncate w-24">{sp}</span>
+                                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: `hsl(${hive.accentHsl} / 0.1)` }}>
+                                     <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `hsl(${hive.accentHsl} / 0.6)` }} />
+                                   </div>
+                                   <span className="text-[9px] tabular-nums text-muted-foreground/60 w-5 text-right">{count}</span>
+                                 </div>
+                               );
+                             })}
+                         </div>
+                       </div>
+                     )}
 
-                    <div className="flex gap-2">
-                      <Link to={`/hive/${hive.slug}`} className="flex-1">
-                        <Button variant="outline" size="sm" className="w-full font-serif text-xs gap-1.5">
-                          Enter Hive <ArrowRight className="w-3 h-3" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="font-serif text-xs gap-1.5"
-                        onClick={() => handleFilterOnMap(hive)}
-                      >
-                        <MapPin className="w-3 h-3" /> Atlas
-                      </Button>
-                    </div>
+                     {stats.recentTrees.length > 0 && (
+                       <div className="mb-3">
+                         <p className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider mb-1.5">Recent Encounters</p>
+                         <div className="space-y-1">
+                           {stats.recentTrees.map(t => (
+                             <Link
+                               key={t.id}
+                               to={`/tree/${t.id}`}
+                               className="block text-xs font-serif text-foreground/80 hover:text-primary transition-colors truncate"
+                             >
+                               🌳 {t.name}
+                             </Link>
+                           ))}
+                         </div>
+                       </div>
+                     )}
+
+                     {stats.nations.length > 0 && (
+                       <p className="text-[10px] text-muted-foreground/70 font-serif mb-3">
+                         🌍 {stats.nations.join(" · ")}
+                       </p>
+                     )}
+
+                     <div className="flex gap-2">
+                       <Link to={`/hive/${hive.slug}`} className="flex-1">
+                         <Button variant="outline" size="sm" className="w-full font-serif text-xs gap-1.5">
+                           Enter Hive <ArrowRight className="w-3 h-3" />
+                         </Button>
+                       </Link>
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         className="font-serif text-xs gap-1.5"
+                         onClick={() => handleFilterOnMap(hive)}
+                       >
+                         <MapPin className="w-3 h-3" /> Atlas
+                       </Button>
+                     </div>
                   </motion.div>
                 );
               })()}
