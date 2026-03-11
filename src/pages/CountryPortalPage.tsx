@@ -28,7 +28,7 @@ import { getRootstonesByCountrySlug, type Rootstone } from "@/data/rootstones";
 import { buildRootstoneMapUrl } from "@/utils/map-link";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 
-const CountrySpeciesSpiral = lazy(() => import("@/components/atlas/CountrySpeciesSpiral"));
+const HexConstellationMap = lazy(() => import("@/components/atlas/HexConstellationMap"));
 
 /* ─── Types ─── */
 interface ResearchTree {
