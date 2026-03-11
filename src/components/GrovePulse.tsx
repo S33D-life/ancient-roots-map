@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import { motion } from "framer-motion";
 import { Heart, TreeDeciduous, Gift, Sprout } from "lucide-react";
+import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 
 interface GrovePulseProps {
   userId: string;
@@ -12,6 +13,7 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
   const [stats, setStats] = useState({ trees: 0, hearts: 0, seeds: 0 });
   const [loading, setLoading] = useState(true);
   const { count: offeringCount, loading: offeringsLoading } = useUserOfferingCount(userId);
+  const seasonal = useSeasonalSummary();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -110,6 +112,12 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
          <p className="text-sm font-serif mt-0.5" style={{ color: `hsl(${hue}, ${sat}%, ${light + 20}%)` }}>
           {isLoading ? "Sensing…" : vitality < 20 ? "Dormant" : vitality < 50 ? "Stirring" : vitality < 80 ? "Flourishing" : "Thriving"}
         </p>
+        {/* Seasonal sub-count overlay */}
+        {seasonal.active && !isLoading && (
+          <p className="text-[9px] text-muted-foreground/50 font-serif mt-1">
+            {seasonal.emoji} {seasonal.summaryLine}
+          </p>
+        )}
       </div>
 
       {/* Stats row */}

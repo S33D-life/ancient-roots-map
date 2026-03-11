@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
+import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import { Leaf } from "lucide-react";
 
 interface GuidanceMessage {
@@ -60,6 +61,25 @@ const NO_SEED_GUIDANCE: GuidanceMessage[] = [
   { text: "Your seeds rest until dawn. Return tomorrow.", icon: "🌙" },
 ];
 
+const SEASONAL_GUIDANCE: Record<string, GuidanceMessage[]> = {
+  spring: [
+    { text: "Apple blossom season has begun…", icon: "🌸" },
+    { text: "Early harvests are stirring in the grove.", icon: "🌱" },
+  ],
+  summer: [
+    { text: "The canopy is full and alive.", icon: "☀️" },
+    { text: "Fruits are ripening across the grove.", icon: "🍎" },
+  ],
+  autumn: [
+    { text: "Seeds are falling — time to gather.", icon: "🍂" },
+    { text: "The harvest is at its peak.", icon: "🌰" },
+  ],
+  winter: [
+    { text: "The grove rests beneath frost.", icon: "❄️" },
+    { text: "Evergreen friends hold the quiet watch.", icon: "🌲" },
+  ],
+};
+
 interface FireflyGuidanceProps {
   fabPosition: { x: number; y: number };
   visible: boolean;
@@ -77,6 +97,7 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
   }, []);
 
   const { seedsRemaining } = useSeedEconomy(userId);
+  const seasonal = useSeasonalSummary();
 
   const pickMessage = useCallback((): GuidanceMessage | null => {
     // Seed-aware guidance
@@ -90,6 +111,12 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
       return SEED_GUIDANCE[Math.floor(Math.random() * SEED_GUIDANCE.length)];
     }
 
+    // Seasonal lens whispers — 30% chance when active
+    if (seasonal.active && seasonal.season && Math.random() < 0.3) {
+      const pool = SEASONAL_GUIDANCE[seasonal.season];
+      if (pool?.length) return pool[Math.floor(Math.random() * pool.length)];
+    }
+
     // Route-based
     const path = location.pathname;
     const routeKey = Object.keys(ROUTE_GUIDANCE).find(k =>
@@ -97,7 +124,7 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
     );
     const pool = routeKey ? ROUTE_GUIDANCE[routeKey] : ROUTE_GUIDANCE["/"];
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [location.pathname, userId, seedsRemaining]);
+  }, [location.pathname, userId, seedsRemaining, seasonal]);
 
   // Show a guidance whisper periodically
   useEffect(() => {
