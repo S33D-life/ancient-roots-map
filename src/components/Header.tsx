@@ -118,6 +118,7 @@ const Header = () => {
   // Use unified heart balance hook
   const heartBalance = useHeartBalance(user?.id ?? null);
   const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
+  const { seedsRemaining } = useSeedEconomy(user?.id ?? null);
 
   // Realtime heart toast — listen for new heart_transactions, group duplicates
   useEffect(() => {
