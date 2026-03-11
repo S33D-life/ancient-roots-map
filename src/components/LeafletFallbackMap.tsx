@@ -530,6 +530,13 @@ const LITE_CSS = `
 .wc-dot:hover{transform:scale(1.4)!important;opacity:1!important}
 @keyframes wcGlow{0%,100%{opacity:0.5}50%{opacity:0.8}}
 .wc-waterway{animation:wcGlow 4s ease-in-out infinite}
+@keyframes wcShimmer{0%,100%{opacity:0.55;filter:brightness(1)}50%{opacity:0.85;filter:brightness(1.15)}}
+.wc-waterway-line{animation:wcShimmer 5s ease-in-out infinite}
+@keyframes pathGlow{0%,100%{opacity:0.35}50%{opacity:0.6}}
+.wc-footpath-glow{animation:pathGlow 4s ease-in-out infinite}
+@keyframes treeNearPathPulse{0%,100%{box-shadow:0 0 6px hsla(42,80%,55%,0.3);transform:scale(1)}50%{box-shadow:0 0 14px hsla(42,80%,55%,0.6);transform:scale(1.08)}}
+.tree-near-path{animation:treeNearPathPulse 2.5s ease-in-out infinite;border-radius:50%}
+@media(prefers-reduced-motion:reduce){.wc-waterway-line,.wc-footpath-glow,.tree-near-path{animation:none}}
 @keyframes seedPulse{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.2);opacity:1}}
 `;
 
@@ -1078,10 +1085,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       key: "nature",
       title: "Nature & Waterways",
       icon: "🌊",
-      accent: "hsl(200, 55%, 55%)",
-      description: "Rivers, streams, and springs that shape the land.",
+      accent: "hsl(210, 35%, 75%)",
+      description: "Silver rivers, streams, and springs that shape the land.",
       layers: [
-        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "200, 60%, 65%" },
+        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "210, 35%, 75%" },
         { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "145, 50%, 50%" },
         { key: "commons", label: "🌾 Commons & Greens", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "75, 50%, 50%" },
       ],
@@ -1090,10 +1097,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       key: "walking",
       title: "Walking Network",
       icon: "🥾",
-      accent: "hsl(130, 45%, 50%)",
-      description: "Footpaths, bridleways, and trails across the land.",
+      accent: "hsl(42, 75%, 52%)",
+      description: "Golden paths, bridleways, and trails across the land.",
       layers: [
-        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { setShowFootpaths(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "130, 50%, 50%" },
+        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { setShowFootpaths(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "42, 75%, 52%" },
       ],
     },
     {
@@ -3345,14 +3352,34 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       pois.forEach((poi) => {
         const meta = GUARDIAN_TAGS[poi.category];
 
-        // Render line geometries (rivers, footpaths, etc.)
+        // Render line geometries (rivers, footpaths, coastlines, etc.)
         if (poi.geometry && poi.geometry.length > 1) {
           const isPath = poi.category === "footpath";
           const isWater = poi.category === "waterway";
+          const zoom = map.getZoom();
+
+          // Outer glow layer — wider, low-opacity halo beneath the main line
+          if (isPath || isWater) {
+            const glowColor = isPath ? "hsla(42, 80%, 55%, 0.18)" : "hsla(210, 40%, 78%, 0.15)";
+            const glowWeight = isPath ? 10 : 12;
+            L.polyline(poi.geometry, {
+              color: glowColor,
+              weight: glowWeight,
+              opacity: 1,
+              lineCap: "round",
+              lineJoin: "round",
+              interactive: false,
+              className: isPath ? "wc-footpath-glow" : "wc-waterway-line",
+            }).addTo(wcLayer);
+          }
+
+          // Main line
+          const mainColor = isPath ? "hsl(42, 75%, 52%)" : isWater ? "hsl(210, 35%, 75%)" : meta.color;
+          const mainWeight = isPath ? 3 : isWater ? (zoom >= 14 ? 4 : 3) : 2;
           L.polyline(poi.geometry, {
-            color: meta.color,
-            weight: isPath ? 2.5 : isWater ? 3 : 2,
-            opacity: 0.6,
+            color: mainColor,
+            weight: mainWeight,
+            opacity: isPath ? 0.75 : isWater ? 0.65 : 0.6,
             dashArray: isPath ? "6, 8" : undefined,
             lineCap: "round",
             lineJoin: "round",
@@ -3405,22 +3432,48 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           .addTo(wcLayer);
       });
 
-      // Draw soft proximity circles around nearby trees
-      filteredTrees.forEach((tree) => {
-        const context = getNearbyLandscapeContext(tree.latitude, tree.longitude, pois);
-        if (context) {
-          const meta = GUARDIAN_TAGS[context.category];
-          L.circleMarker([tree.latitude, tree.longitude], {
-            radius: 18,
-            color: meta.color,
-            fillColor: meta.glowColor,
-            fillOpacity: 0.25,
-            weight: 1.5,
-            opacity: 0.5,
-            interactive: false,
-          }).addTo(wcLayer);
-        }
-      });
+      // Draw soft proximity glow around trees near landscape features
+      const currentZoom = map.getZoom();
+      if (currentZoom >= 13) {
+        filteredTrees.forEach((tree) => {
+          const context = getNearbyLandscapeContext(tree.latitude, tree.longitude, pois);
+          if (context) {
+            const isPathNearby = context.category === "footpath";
+            const isWaterNearby = context.category === "waterway";
+            const glowColor = isPathNearby
+              ? "hsla(42, 80%, 55%, 0.25)"
+              : isWaterNearby
+              ? "hsla(210, 40%, 78%, 0.20)"
+              : GUARDIAN_TAGS[context.category].glowColor;
+            const ringColor = isPathNearby
+              ? "hsl(42, 75%, 52%)"
+              : isWaterNearby
+              ? "hsl(210, 35%, 75%)"
+              : GUARDIAN_TAGS[context.category].color;
+
+            // Pulsing outer ring for trees near paths/water (zoom >= 14)
+            if ((isPathNearby || isWaterNearby) && currentZoom >= 14) {
+              const pulseDiv = L.divIcon({
+                className: "tree-near-path-marker",
+                html: `<div class="tree-near-path" style="width:28px;height:28px;background:${glowColor};border:1.5px solid ${ringColor}60;"></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14],
+              });
+              L.marker([tree.latitude, tree.longitude], { icon: pulseDiv, interactive: false }).addTo(wcLayer);
+            }
+
+            L.circleMarker([tree.latitude, tree.longitude], {
+              radius: 18,
+              color: ringColor,
+              fillColor: glowColor,
+              fillOpacity: 0.25,
+              weight: 1.5,
+              opacity: 0.5,
+              interactive: false,
+            }).addTo(wcLayer);
+          }
+        });
+      }
     };
 
     const onMoveEnd = () => {
