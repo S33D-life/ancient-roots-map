@@ -5,6 +5,7 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import TetolBridge from "@/components/TetolBridge";
 import S33dEntrance from "@/components/S33dEntrance";
 import WelcomeBanner from "@/components/WelcomeBanner";
+import EcosystemOverview from "@/components/EcosystemOverview";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useVineFade } from "@/hooks/use-vine-fade";
 import {
@@ -78,6 +79,8 @@ const Index = () => {
           <div className="section-divider max-w-xl mx-auto" />
           <ParticipationSection />
           <SupportDiscoveryRow />
+          <div className="section-divider max-w-xl mx-auto" />
+          <EcosystemOverview />
           <div className="section-divider max-w-xl mx-auto" />
           <WisdomOfTheGrove />
           <TetolNavSection />

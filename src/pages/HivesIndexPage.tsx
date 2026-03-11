@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import WhyThisMatters from "@/components/WhyThisMatters";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
@@ -227,6 +228,11 @@ const HivesIndexPage = () => {
           <p className="text-muted-foreground font-serif mb-5 max-w-2xl text-sm">
             Living botanical families of the Ancient Friends grove. Each hive holds its own trees, offerings, and ecological wisdom.
           </p>
+          <WhyThisMatters
+            id="hives-intro"
+            message="Hives group trees by botanical family. Each hive is a living community — the more trees mapped, the stronger the hive grows. Explore one to see its species, offerings, and regional presence."
+            delay={2500}
+          />
 
           {/* Live animated global stats */}
           {!loading && (

@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import ContextualWhisper from "@/components/ContextualWhisper";
+import WhyThisMatters from "@/components/WhyThisMatters";
 import TreeLoreSection from "@/components/TreeLoreSection";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import WishTagSigils from "@/components/WishTagSigils";
@@ -786,6 +787,13 @@ const TreeDetailPage = () => {
           contextLabel={whisperContextLabel || undefined}
         />
       )}
+
+      {/* Why This Matters — offerings explanation for first 3 visits */}
+      <WhyThisMatters
+        id="tree-offerings-why"
+        message="Offerings are gifts to a tree — a song, a story, a photo, a reflection. They become part of the tree's living record and earn you S33D Hearts."
+        delay={4000}
+      />
 
       {/* Edit proposal nudge — appears once per tree */}
       <ContextualWhisper

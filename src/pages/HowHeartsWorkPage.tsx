@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
+import WhyThisMatters from "@/components/WhyThisMatters";
 import { Heart, ShieldCheck, Sprout, TreeDeciduous, Sparkles, Clock, Lock, BarChart3, Globe } from "lucide-react";
 
 const Section = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
@@ -35,6 +36,11 @@ const HowHeartsWorkPage = () => (
             S33D Hearts are the commons currency of the ecosystem — earned through stewardship, not speculation. They represent your care for the living atlas.
           </p>
         </div>
+        <WhyThisMatters
+          id="hearts-why"
+          message="Hearts aren't cryptocurrency — they're a measure of care. The more you contribute to the living atlas, the more Hearts you earn, and the greater your voice in community decisions."
+          delay={2000}
+        />
 
         <Section icon={<Sprout className="w-4 h-4 text-primary" />} title="How You Earn Hearts">
           <p>Hearts are awarded automatically by the server when you complete qualifying actions. They cannot be created, edited, or duplicated from the app.</p>
