@@ -17,8 +17,12 @@ interface CreateHarvestFormProps {
 }
 
 const CreateHarvestForm = ({ onClose, onSuccess }: CreateHarvestFormProps) => {
-  const { user } = useAuth();
+  const [userId, setUserId] = useState<string | null>(null);
   const createMutation = useCreateHarvestListing();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
+  }, []);
 
   const [produceName, setProduceName] = useState("");
   const [description, setDescription] = useState("");
