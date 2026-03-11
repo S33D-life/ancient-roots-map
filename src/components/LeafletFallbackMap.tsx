@@ -984,12 +984,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   /** Visual layer sections for AtlasFilter — renderer-specific toggles passed as props */
   const visualSections: VisualLayerSection[] = useMemo(() => [
     {
+      key: "discovery",
+      title: "Discovery Filters",
+      icon: "🔍",
+      accent: "hsl(42, 80%, 55%)",
+      description: "Highlight trees by significance, harvest availability, or community offerings.",
+      layers: [
+        { key: "ancient-highlight", label: "👑 Ancient Trees", description: "Golden halos on the oldest, most storied trees", active: showAncientHighlight, toggle: () => setShowAncientHighlight(v => !v), accent: "42, 80%, 55%" },
+        { key: "harvest-layer", label: "🍎 Harvest Available", description: "Trees with active produce listings", active: showHarvestLayer, toggle: () => setShowHarvestLayer(v => !v), extra: showHarvestLayer ? (harvestTreeIds.size > 0 ? `${harvestTreeIds.size}` : "—") : undefined, accent: "25, 70%, 50%" },
+        { key: "offering-glow", label: "✦ Offerings", description: "Warm glow on trees with community contributions", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v), accent: "42, 85%, 55%" },
+      ],
+    },
+    {
       key: "signals",
       title: "Mycelial Whispers",
       icon: "✦",
       layers: [
         { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(v => !v) },
-        { key: "offering-glow", label: "🔥 Forest Warmth", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
         { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => setShowHeartGlow(v => !v), accent: "0, 65%, 55%" },
         { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
         { key: "mycelial-network", label: "🕸️ Mycelial Network", active: showMycelialNetwork, toggle: () => setShowMycelialNetwork(v => !v), extra: showMycelialNetwork ? `${mycelialConnections.length}` : "off" },
