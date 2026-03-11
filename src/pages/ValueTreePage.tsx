@@ -873,7 +873,7 @@ const ValueTreePage = () => {
           <TabsContent value="chains">
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground font-serif mb-4">
-                Advanced and multi-step reward systems — deeper engagement unlocks greater value.
+                Active and coming-soon reward systems. Items marked "Coming Soon" are part of Chapter 3 and beyond.
               </p>
               {ADVANCED_CHAINS.map((node, i) => (
                 <motion.div key={node.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
