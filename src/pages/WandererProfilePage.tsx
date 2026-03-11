@@ -61,6 +61,22 @@ const WandererProfilePage = () => {
   const { data: streak } = useWandererStreak(id);
   const { data: badges } = useSpeciesBadges(id);
 
+  // Recent mapped trees
+  const { data: recentTrees } = useQuery({
+    queryKey: ["wanderer-recent-trees", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      if (!id) return [];
+      const { data } = await supabase
+        .from("trees")
+        .select("id, name, species, created_at")
+        .eq("created_by", id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
+
   const initials = useMemo(() => {
     const name = data?.full_name || "Wanderer";
     return name
