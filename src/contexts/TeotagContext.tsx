@@ -261,10 +261,10 @@ function getQuickActions(
     ]);
   }
 
-  return [
+  return withSeason([
     { label: "Guide me", prompt: "Where should I begin my journey in S33D?", emoji: "✨" },
     { label: "What is S33D?", prompt: "Explain the S33D ecosystem and how it works.", emoji: "🌱" },
-  ];
+  ]);
 }
 
 /* ── Context summary builder ────────────────────── */
