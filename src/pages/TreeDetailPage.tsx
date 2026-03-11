@@ -160,6 +160,16 @@ const TreeDetailPage = () => {
     return () => clearTimeout(timer);
   }, [tree?.lore_text]);
 
+  // Listen for successful whisper sends to trigger ripple
+  useEffect(() => {
+    const handler = () => {
+      setWhisperRippleVisible(true);
+      setTimeout(() => setWhisperRippleVisible(false), 2000);
+    };
+    window.addEventListener("whisper-sent", handler);
+    return () => window.removeEventListener("whisper-sent", handler);
+  }, []);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
