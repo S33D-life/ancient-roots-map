@@ -285,13 +285,22 @@ const TeotagWhisper = ({ onAction }: TeotagWhisperProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMode]);
 
-  // Show a fresh whisper when a tree is selected (with cooldown)
+  // Show a fresh whisper when a tree is selected on map (with cooldown)
   useEffect(() => {
     if (mapContext.selectedTreeId) {
       const delay = setTimeout(() => showNext(), 3000);
       return () => clearTimeout(delay);
     }
   }, [mapContext.selectedTreeId, showNext]);
+
+  // Show a contextual whisper when arriving at a tree/harvest/staff page
+  useEffect(() => {
+    const hasPageCtx = pageContext.tree || pageContext.harvest?.id || pageContext.staff?.code;
+    if (hasPageCtx) {
+      const delay = setTimeout(() => showNext(), 5000);
+      return () => clearTimeout(delay);
+    }
+  }, [pageContext.tree?.id, pageContext.harvest?.id, pageContext.staff?.code, showNext]);
 
   const dismiss = () => {
     setVisible(false);
