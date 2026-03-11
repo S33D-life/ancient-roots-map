@@ -133,8 +133,8 @@ export const SeasonalLensProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const value = useMemo<SeasonalLensContextValue>(
-    () => ({ activeLens, lensConfig, setLens, toggleSpringLens, isLensMonth, matchesLens }),
-    [activeLens, lensConfig, setLens, toggleSpringLens, isLensMonth, matchesLens]
+    () => ({ activeLens, lensConfig, setLens, toggleSpringLens, toggleLens, isLensMonth, matchesLens }),
+    [activeLens, lensConfig, setLens, toggleSpringLens, toggleLens, isLensMonth, matchesLens]
   );
 
   return (
