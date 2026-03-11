@@ -1055,6 +1055,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
+      key: "knowledge",
+      title: "Knowledge Places",
+      icon: "📚",
+      accent: "hsl(270, 45%, 55%)",
+      description: "Libraries, bookshops, and botanical gardens — places where knowledge takes root.",
+      layers: [
+        { key: "libraries", label: "📚 Libraries", active: showLibraries, toggle: () => { setShowLibraries(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "270, 45%, 55%" },
+        { key: "bookshops", label: "📖 Bookshops", active: showBookshops, toggle: () => { setShowBookshops(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "310, 40%, 55%" },
+        { key: "botanical", label: "🌺 Botanical Gardens", active: showBotanicalGardens, toggle: () => { setShowBotanicalGardens(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "160, 50%, 50%" },
+      ],
+    },
+    {
       key: "culture",
       title: "Culture & Heritage",
       icon: "⛪",
