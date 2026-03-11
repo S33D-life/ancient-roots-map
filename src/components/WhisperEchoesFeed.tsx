@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wind, ChevronDown, TreePine } from "lucide-react";
 import { useWhisperEchoes, type WhisperEcho } from "@/hooks/use-whisper-echoes";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface WhisperEchoesFeedProps {
   /** Max whispers to display */

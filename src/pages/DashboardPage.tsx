@@ -435,7 +435,6 @@ const DashboardPage = () => {
                   <PresenceSpiralCard userId={user.id} />
                   <HearthWarmth userId={user.id} />
                   <EarnableToday userId={user.id} />
-                  <TodaysSeeds userId={user.id} />
                   <SeedTrailPanel userId={user.id} />
                   <ActiveCampaigns />
                   <HearthCrossLinks />

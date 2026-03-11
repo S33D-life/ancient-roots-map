@@ -62,7 +62,7 @@ const SeedEntry = memo(({ seed, index }: { seed: SeedTrailEntry; index: number }
           })}
         </span>
         {seed.isBloomed && !seed.isCollected && (
-          <p className="text-[9px] font-serif text-green-500/70">bloomed</p>
+          <p className="text-[9px] font-serif text-primary/70">bloomed</p>
         )}
       </div>
 

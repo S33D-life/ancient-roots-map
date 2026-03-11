@@ -35,13 +35,11 @@ const HoneycombGrid = ({ children }: HoneycombGridProps) => {
           --cols: 2;
           --hex-w: 160px;
           --row-offset: calc(var(--hex-w) * 0.5);
-          --vert-shift: calc(var(--hex-w) * -0.13);
 
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
-          gap: 8px var(--vert-shift);
-          row-gap: 8px;
+          gap: 10px;
           padding: 0 4px;
         }
 
