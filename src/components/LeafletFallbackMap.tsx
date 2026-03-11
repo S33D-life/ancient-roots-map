@@ -3206,7 +3206,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (watersCommonsAbortRef.current) watersCommonsAbortRef.current.abort();
       if (map.hasLayer(wcLayer)) map.removeLayer(wcLayer);
     };
-  }, [showWatersCommons, filteredTrees]);
+  }, [showWatersCommons, filteredTrees, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles]);
 
   // Show contextual whisper when adding a tree near a W&C landmark
   useEffect(() => {
