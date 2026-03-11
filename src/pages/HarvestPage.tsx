@@ -12,7 +12,11 @@ import { AnimatePresence } from "framer-motion";
 const CreateHarvestForm = lazy(() => import("@/components/harvest/CreateHarvestForm"));
 
 const HarvestPage = () => {
-  const { user } = useAuth();
+  const [user, setUser] = useState<{ id: string } | null>(null);
+
+  useState(() => {
+    supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ? { id: u.id } : null));
+  });
   const [showCreate, setShowCreate] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");

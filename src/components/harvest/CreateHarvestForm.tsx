@@ -40,11 +40,11 @@ const CreateHarvestForm = ({ onClose, onSuccess }: CreateHarvestFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) { toast.error("Please sign in first"); return; }
+    if (!userId) { toast.error("Please sign in first"); return; }
     if (!produceName.trim()) { toast.error("Please enter a produce name"); return; }
 
     const input: CreateHarvestInput & { guardian_id: string } = {
-      guardian_id: user.id,
+      guardian_id: userId,
       produce_name: produceName.trim(),
       description: description.trim() || undefined,
       category,
