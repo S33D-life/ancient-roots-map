@@ -219,8 +219,8 @@ const Header = () => {
         }}
       />
       {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
-      <div className="container mx-auto px-4 py-2 relative z-[2]">
-        <div className="flex items-center justify-between relative">
+      <div className="relative z-[2] px-0 py-2">
+        <div className="flex items-center justify-between relative min-w-0">
           {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
             {/* Mobile TEOTAG logo — top left, navigates to Hearth */}
