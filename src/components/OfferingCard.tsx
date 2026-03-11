@@ -397,6 +397,8 @@ const OfferingCard = (props: OfferingCardProps) => {
       return <SongFull {...props} />;
     case "nft":
       return <NftFull {...props} />;
+    case "photo":
+      return <PhotoFull {...props} />;
     default:
       return <GenericFull {...props} />;
   }
