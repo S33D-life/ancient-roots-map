@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
+import type { OfferingPrompt } from "@/hooks/use-seasonal-offerings";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
