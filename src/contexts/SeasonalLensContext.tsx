@@ -83,6 +83,8 @@ interface SeasonalLensContextValue {
   lensConfig: SeasonalLensConfig | null;
   setLens: (lens: SeasonalLensType) => void;
   toggleSpringLens: () => void;
+  /** Toggle any lens on/off */
+  toggleLens: (lens: SeasonalLensType) => void;
   /** Check if a month falls within the active lens */
   isLensMonth: (month: number) => boolean;
   /** Check if content matches lens keywords */
