@@ -9,12 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Compass, Heart } from "lucide-react";
+import { Loader2, MapPin, Compass, Heart, TreePine } from "lucide-react";
 import { getHiveInfo } from "@/utils/hiveUtils";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
 import { useSpeciesBadges } from "@/hooks/use-species-badges";
 import StreakBadge from "@/components/growth/StreakBadge";
 import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
+import { ROUTES } from "@/lib/routes";
 
 const WandererProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,6 +60,22 @@ const WandererProfilePage = () => {
   // Growth engine data
   const { data: streak } = useWandererStreak(id);
   const { data: badges } = useSpeciesBadges(id);
+
+  // Recent mapped trees
+  const { data: recentTrees } = useQuery({
+    queryKey: ["wanderer-recent-trees", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      if (!id) return [];
+      const { data } = await supabase
+        .from("trees")
+        .select("id, name, species, created_at")
+        .eq("created_by", id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      return data || [];
+    },
+  });
 
   const initials = useMemo(() => {
     const name = data?.full_name || "Wanderer";
@@ -117,6 +134,27 @@ const WandererProfilePage = () => {
 
                   {/* Species Discovery Badges */}
                   <SpeciesBadgeList badges={badges || []} />
+
+                  {/* Recent Mapped Trees */}
+                  {recentTrees && recentTrees.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <p className="text-xs font-serif text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        <TreePine className="w-3 h-3" /> Recently Mapped
+                      </p>
+                      <div className="space-y-1">
+                        {recentTrees.map(t => (
+                          <Link
+                            key={t.id}
+                            to={ROUTES.TREE(t.id)}
+                            className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
+                          >
+                            <span className="font-serif">{t.name || "Unnamed tree"}</span>
+                            {t.species && <span className="text-[10px] text-muted-foreground">({t.species})</span>}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Species Hearts Balances */}
                   {speciesBalances && speciesBalances.length > 0 && (

@@ -10,6 +10,12 @@ import { toast } from "sonner";
 
 const DAILY_CHECKIN_CAP = 3;
 
+/**
+ * In-flight guard: prevents duplicate submissions from double-clicks
+ * or concurrent React re-renders. Keyed by `userId:treeId:actionType`.
+ */
+const _inflight = new Set<string>();
+
 export interface RewardResult {
   s33dHearts: number;
   speciesHearts: number;
@@ -46,6 +52,24 @@ const ACTION_DEFAULTS: Record<string, { s33d: number; species: number; influence
 };
 
 export async function issueRewards(params: IssueParams): Promise<RewardResult | null> {
+  const { userId, treeId, treeSpecies, actionType } = params;
+
+  // ── Duplicate-submission guard ──
+  const inflightKey = `${userId}:${treeId}:${actionType}`;
+  if (_inflight.has(inflightKey)) {
+    console.warn("[issueRewards] duplicate submission blocked", inflightKey);
+    return null;
+  }
+  _inflight.add(inflightKey);
+
+  try {
+    return await _issueRewardsInner(params);
+  } finally {
+    _inflight.delete(inflightKey);
+  }
+}
+
+async function _issueRewardsInner(params: IssueParams): Promise<RewardResult | null> {
   const { userId, treeId, treeSpecies, actionType } = params;
   const match = matchSpecies(treeSpecies);
   const family = match?.family || "Unknown";
