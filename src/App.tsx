@@ -215,7 +215,6 @@ const App = () => {
             <FireflyFAB />
             <Suspense fallback={null}>
               <ProximityNudge />
-              <OfflineSyncBanner />
               <FirstWalkTrail />
               <DailySeedRitual />
             </Suspense>
