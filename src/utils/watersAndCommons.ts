@@ -171,6 +171,9 @@ export async function fetchLandscapePOIs(
     includeFootpaths: false,
     includeHeritage: false,
     includeCastles: false,
+    includeLibraries: false,
+    includeBookshops: false,
+    includeBotanicalGardens: false,
     ...options,
   };
 
