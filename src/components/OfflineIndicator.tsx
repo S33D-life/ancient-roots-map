@@ -120,7 +120,7 @@ const OfflineIndicator = () => {
           )}
 
           {mode === "synced" && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-serif">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-serif">
               <CheckCircle2 className="w-3 h-3" />
               <span>Synced</span>
             </div>
