@@ -279,6 +279,8 @@ const App = () => {
                 <Route path="/evolution" element={<AdminEvolutionPage />} />
                 <Route path="/press" element={<PressPage />} />
                 <Route path="/support" element={<SupportPage />} />
+                <Route path="/harvest" element={<HarvestPage />} />
+                <Route path="/harvest/:id" element={<HarvestDetailPage />} />
                 <Route path="/how-hearts-work" element={<HowHeartsWorkPage />} />
                 <Route path="/cosmic" element={<CosmicCalendarPage />} />
                 <Route path="/cosmic/settings" element={<CalendarSettingsPage />} />
