@@ -2,8 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { useTetolLevel } from "@/contexts/TetolLevelContext";
+import { useTeotagContext, type TeotagMode } from "@/contexts/TeotagContext";
 import teotagImg from "@/assets/teotag.jpeg";
-import { X, Send, TreeDeciduous, MapPin, Sprout, BookOpen, Search, Leaf, Sparkles, ScrollText, BarChart3, ExternalLink, Loader2, MessageCircle } from "lucide-react";
+import { X, Send, Search, Sparkles, ScrollText, ExternalLink, Loader2, MessageCircle, Map, BookOpen, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator } from "@/components/ui/command";
@@ -14,16 +15,31 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 type Tab = "guide" | "search";
 
-// Static pages now handled by unified search service
-
-// Level-aware greeting
-const LEVEL_GREETINGS: Record<string, string> = {
-  s33d: "Welcome, traveller. You stand at the seed of all journeys. Where would you like to wander?",
-  roots: "You've found the Roots — the Ancient Friends Atlas. Every tree here has a story. What draws your curiosity?",
-  heartwood: "You're in the Heartwood — the living library of the grove. What scrolls or stories call to you?",
-  canopy: "The Canopy spreads above — the Council of Life gathers here. What would you like to explore?",
-  crown: "You've reached the Crown — the place of golden dreams and collective vision. What stirs within?",
-  hearth: "Welcome to your Hearth — your personal fire in the grove. How can I tend to your journey?",
+const MODE_META: Record<TeotagMode, { label: string; icon: typeof Map; color: string; greeting: string }> = {
+  guide: {
+    label: "Guide",
+    icon: Map,
+    color: "hsl(42, 80%, 55%)",
+    greeting: "I see the landscape before us. What would you like to explore?",
+  },
+  librarian: {
+    label: "Librarian",
+    icon: BookOpen,
+    color: "hsl(270, 45%, 60%)",
+    greeting: "Welcome to the Heartwood. What knowledge calls to you?",
+  },
+  scribe: {
+    label: "Scribe",
+    icon: Leaf,
+    color: "hsl(120, 40%, 50%)",
+    greeting: "The Council records are open. How can I help you navigate them?",
+  },
+  oracle: {
+    label: "Oracle",
+    icon: Sparkles,
+    color: "hsl(45, 90%, 60%)",
+    greeting: "You have invoked the Oracle. Speak, and the grove shall listen deeply.",
+  },
 };
 
 interface TeotagGuideProps {
@@ -37,10 +53,26 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/teotag-guide
 const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const navigate = useNavigate();
   const { level } = useTetolLevel();
+
+  // Context awareness — safely handle being outside provider
+  let teotagCtx: ReturnType<typeof useTeotagContext> | null = null;
+  try {
+    teotagCtx = useTeotagContext();
+  } catch {
+    // Not wrapped in TeotagProvider — fallback to basic mode
+  }
+
+  const activeMode = teotagCtx?.activeMode || "guide";
+  const quickActions = teotagCtx?.quickActions || [];
+  const buildContextSummary = teotagCtx?.buildContextSummary;
+
+  const modeMeta = MODE_META[activeMode];
+
   const [tab, setTab] = useState<Tab>(initialTab || "guide");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [oracleMode, setOracleMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UnifiedResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -48,22 +80,23 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const hasGreeted = useRef(false);
+  const lastMode = useRef(activeMode);
 
   // Sync tab when initialTab changes on open
   useEffect(() => {
-    if (open && initialTab) {
-      setTab(initialTab);
-    }
+    if (open && initialTab) setTab(initialTab);
   }, [open, initialTab]);
 
-  // Auto-greet on first open
+  // Auto-greet on first open or mode change
   useEffect(() => {
-    if (open && !hasGreeted.current && messages.length === 0) {
+    if (!open) return;
+    if (!hasGreeted.current || lastMode.current !== activeMode) {
       hasGreeted.current = true;
-      const greeting = LEVEL_GREETINGS[level] || LEVEL_GREETINGS.s33d;
+      lastMode.current = activeMode;
+      const greeting = modeMeta.greeting;
       setMessages([{ role: "assistant", content: greeting }]);
     }
-  }, [open, level, messages.length]);
+  }, [open, activeMode, modeMeta.greeting]);
 
   // Auto-scroll
   useEffect(() => {
@@ -117,14 +150,14 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
     [navigate, onClose]
   );
 
-  const sendMessage = async () => {
-    const text = input.trim();
+  const sendMessage = async (overrideText?: string) => {
+    const text = (overrideText || input).trim();
     if (!text || isStreaming) return;
 
     const userMsg: Msg = { role: "user", content: text };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
-    setInput("");
+    if (!overrideText) setInput("");
     setIsStreaming(true);
 
     let assistantSoFar = "";
@@ -136,13 +169,19 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
         return;
       }
 
+      const contextSummary = buildContextSummary?.() || `Route: ${window.location.pathname}`;
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: updatedMessages }),
+        body: JSON.stringify({
+          messages: updatedMessages,
+          context: contextSummary,
+          mode: oracleMode ? "oracle" : activeMode,
+        }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -234,6 +273,8 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const searchGrouped = groupResults(searchResults);
   if (!open) return null;
 
+  const ModeIcon = modeMeta.icon;
+
   return (
     <>
       {/* Backdrop */}
@@ -249,14 +290,32 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
           <img
             src={teotagImg}
             alt="TEOTAG"
-            className="w-10 h-10 rounded-full border-2 border-primary/50 shadow-md"
+            className="w-10 h-10 rounded-full border-2 shadow-md"
+            style={{ borderColor: modeMeta.color }}
           />
           <div className="flex-1 min-w-0">
-            <h2 className="font-serif text-base font-bold text-primary tracking-wide">TEOTAG</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-serif text-base font-bold text-primary tracking-wide">TEOTAG</h2>
+              <Badge
+                variant="secondary"
+                className="text-[9px] font-serif gap-1 px-1.5 py-0"
+                style={{ color: modeMeta.color, borderColor: `${modeMeta.color}40` }}
+              >
+                <ModeIcon className="w-2.5 h-2.5" />
+                {modeMeta.label}
+              </Badge>
+            </div>
             <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground">
               The Echo Of The Ancient Grove
             </p>
           </div>
+          <button
+            onClick={() => { setOracleMode(v => !v); }}
+            className={`p-2 rounded-lg transition-colors ${oracleMode ? "bg-primary/20" : "hover:bg-muted/50"}`}
+            title={oracleMode ? "Exit Oracle mode" : "Invoke the Oracle"}
+          >
+            <Sparkles className="w-4 h-4" style={{ color: oracleMode ? modeMeta.color : "hsl(var(--muted-foreground))" }} />
+          </button>
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-muted/50 transition-colors"
@@ -276,7 +335,7 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
             }`}
           >
             <MessageCircle className="w-3.5 h-3.5" />
-            Guide
+            {modeMeta.label}
           </button>
           <button
             onClick={() => setTab("search")}
@@ -318,6 +377,28 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
                   </div>
                 </div>
               ))}
+
+              {/* Quick actions — show after greeting, before first user message */}
+              {messages.length === 1 && messages[0].role === "assistant" && !isStreaming && quickActions.length > 0 && (
+                <div className="flex flex-wrap gap-2 animate-fade-in">
+                  {quickActions.map((action) => (
+                    <button
+                      key={action.label}
+                      onClick={() => sendMessage(action.prompt)}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-serif transition-all hover:scale-[1.02] active:scale-95 border"
+                      style={{
+                        background: "hsl(var(--muted) / 0.5)",
+                        borderColor: "hsl(var(--border) / 0.4)",
+                        color: "hsl(var(--foreground))",
+                      }}
+                    >
+                      <span>{action.emoji}</span>
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {isStreaming && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex justify-start animate-fade-in">
                   <div className="bg-muted/40 rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
@@ -366,14 +447,14 @@ const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask TEOTAG anything…"
+                  placeholder={oracleMode ? "Speak to the Oracle…" : `Ask TEOTAG (${modeMeta.label})…`}
                   rows={1}
                   className="flex-1 resize-none rounded-xl border border-border/60 bg-background px-3 py-2.5 text-sm font-serif placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/50 transition-colors"
                   style={{ minHeight: "40px", maxHeight: "120px" }}
                 />
                 <Button
                   size="icon"
-                  onClick={sendMessage}
+                  onClick={() => sendMessage()}
                   disabled={!input.trim() || isStreaming}
                   className="shrink-0 rounded-xl h-10 w-10"
                 >
