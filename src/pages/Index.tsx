@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import TetolBridge from "@/components/TetolBridge";
 import S33dEntrance from "@/components/S33dEntrance";
+import WelcomeBanner from "@/components/WelcomeBanner";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useVineFade } from "@/hooks/use-vine-fade";
 import {
@@ -46,6 +47,7 @@ const Index = () => {
       {/* Network Pulse — the tree's nervous system */}
       <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
       <Header />
+      <WelcomeBanner />
 
       {/* Tree Scroll Indicator — desktop only */}
       <TreeScrollIndicator

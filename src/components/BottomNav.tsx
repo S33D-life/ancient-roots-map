@@ -1,18 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { TreeDeciduous, BookOpen, Leaf, Globe } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/"] },
   { to: "/atlas", icon: Globe, label: "Atlas", matchPrefixes: ["/atlas"] },
+  // Center slot reserved for Add button
   { to: "/library", icon: BookOpen, label: "Library", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard"] },
   { to: "/council-of-life", icon: Leaf, label: "Council", matchPrefixes: ["/council"] },
 ] as const;
 
 const BottomNav = () => {
   const { pathname } = useLocation();
-
-  // Always show on mobile — map has its own controls but needs nav back
   const isMap = pathname === "/map";
 
   return (
@@ -27,36 +26,72 @@ const BottomNav = () => {
       }}
     >
       <div className="flex items-center justify-around py-1.5">
-        {NAV_ITEMS.map((item) => {
-          const { to, icon: Icon, label } = item;
-          const active = item.matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
+        {/* First two nav items */}
+        {NAV_ITEMS.slice(0, 2).map((item) => (
+          <NavItem key={item.to} item={item} pathname={pathname} />
+        ))}
 
-          return (
-            <Link
-              key={to}
-              to={to}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] justify-center"
-              style={{
-                color: active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.5)",
-              }}
-            >
-              <div className={`relative rounded-full p-1.5 ${active ? "glow-button" : ""}`} style={active ? { boxShadow: "inset 0 0 8px rgba(255,215,120,0.2), 0 0 12px rgba(255,200,80,0.25)" } : {}}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-serif tracking-wider">{label}</span>
-              {active && (
-                <motion.span
-                  layoutId="bottomnav-indicator"
-                  className="absolute -bottom-0.5 w-6 h-0.5 rounded-full"
-                  style={{ background: "hsl(var(--primary) / 0.7)" }}
-                  transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.8 }}
-                />
-              )}
-            </Link>
-          );
-        })}
+        {/* Center: Add Tree FAB */}
+        <Link
+          to="/add-tree"
+          className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[44px] min-h-[44px]"
+          aria-label="Add a tree"
+        >
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center -mt-4 shadow-lg border-2"
+            style={{
+              background: "hsl(var(--primary))",
+              borderColor: "hsl(var(--card) / 0.9)",
+              boxShadow: "0 2px 12px hsl(var(--primary) / 0.3)",
+            }}
+          >
+            <Plus className="w-5 h-5" style={{ color: "hsl(var(--primary-foreground))" }} />
+          </div>
+          <span className="text-[9px] font-serif tracking-wider text-primary">Add</span>
+        </Link>
+
+        {/* Last two nav items */}
+        {NAV_ITEMS.slice(2).map((item) => (
+          <NavItem key={item.to} item={item} pathname={pathname} />
+        ))}
       </div>
     </nav>
+  );
+};
+
+interface NavItemProps {
+  item: typeof NAV_ITEMS[number];
+  pathname: string;
+}
+
+const NavItem = ({ item, pathname }: NavItemProps) => {
+  const { to, icon: Icon, label } = item;
+  const active = item.matchPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
+  return (
+    <Link
+      to={to}
+      className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] justify-center"
+      style={{
+        color: active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.5)",
+      }}
+    >
+      <div
+        className={`relative rounded-full p-1.5 ${active ? "glow-button" : ""}`}
+        style={active ? { boxShadow: "inset 0 0 8px rgba(255,215,120,0.2), 0 0 12px rgba(255,200,80,0.25)" } : {}}
+      >
+        <Icon className="w-5 h-5" />
+      </div>
+      <span className="text-[10px] font-serif tracking-wider">{label}</span>
+      {active && (
+        <motion.span
+          layoutId="bottomnav-indicator"
+          className="absolute -bottom-0.5 w-6 h-0.5 rounded-full"
+          style={{ background: "hsl(var(--primary) / 0.7)" }}
+          transition={{ type: "spring", stiffness: 380, damping: 28, mass: 0.8 }}
+        />
+      )}
+    </Link>
   );
 };
 
