@@ -127,14 +127,36 @@ function getQuickActions(
   route: string,
   seasonalLens?: string | null,
 ): QuickAction[] {
-  // Spring Lens overrides
-  if (seasonalLens === "spring") {
-    return [
-      { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
-      { label: "Spring harvests", prompt: "What early spring harvests and produce are available nearby?", emoji: "🌱" },
-      { label: "Planting season", prompt: "What should be planted this spring? Show me planting windows.", emoji: "🪴" },
-      { label: "Blossom walks", prompt: "Suggest blossom walks and spring exploration routes near me.", emoji: "🥾" },
-    ];
+  // Seasonal Lens overrides — context-aware prompts for each season
+  if (seasonalLens) {
+    const seasonActions: Record<string, QuickAction[]> = {
+      spring: [
+        { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
+        { label: "Spring harvests", prompt: "What early spring harvests and produce are available nearby?", emoji: "🌱" },
+        { label: "Planting season", prompt: "What should be planted this spring? Show me planting windows.", emoji: "🪴" },
+        { label: "Blossom walks", prompt: "Suggest blossom walks and spring exploration routes near me.", emoji: "🥾" },
+      ],
+      summer: [
+        { label: "What's fruiting?", prompt: "What trees are fruiting or ripening near me this summer?", emoji: "☀️" },
+        { label: "Summer harvests", prompt: "What summer harvests and produce are available?", emoji: "🍎" },
+        { label: "Canopy walks", prompt: "Suggest shaded walks under tree canopies near me.", emoji: "🌿" },
+        { label: "Pollinator trees", prompt: "Which trees near me are important for pollinators this summer?", emoji: "🐝" },
+      ],
+      autumn: [
+        { label: "Autumn harvests", prompt: "What nuts, fruits, and produce are ready for harvest this autumn?", emoji: "🍂" },
+        { label: "Seed gathering", prompt: "Which trees have seeds ready for gathering? Show me collection opportunities.", emoji: "🌰" },
+        { label: "Colour walks", prompt: "Suggest autumn colour walks near me to see changing leaves.", emoji: "🍁" },
+        { label: "Preserving guide", prompt: "What can be preserved or stored from this autumn's harvest?", emoji: "🫙" },
+      ],
+      winter: [
+        { label: "Evergreen trees", prompt: "What evergreen Ancient Friends are near me for winter walks?", emoji: "🌲" },
+        { label: "Dormant care", prompt: "Which trees need winter care, pruning, or mulching right now?", emoji: "❄️" },
+        { label: "Winter foraging", prompt: "What winter foraging opportunities exist near me?", emoji: "🍄" },
+        { label: "Rest & reflection", prompt: "Tell me about the winter rest cycle and how trees prepare for spring.", emoji: "🌙" },
+      ],
+    };
+    const actions = seasonActions[seasonalLens];
+    if (actions) return actions;
   }
 
   // ── Tree detail page ──────────────────────────

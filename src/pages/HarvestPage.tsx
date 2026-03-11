@@ -56,12 +56,9 @@ const HarvestPage = () => {
           </p>
         </section>
 
-        {/* Spring Lens toggle + banner */}
-        <div className="mb-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <SpringLensToggle />
-          </div>
-          <SpringLensBanner context="harvest" />
+        {/* Seasonal Lens banner */}
+        <div className="mb-4">
+          <SeasonalLensBanner context="harvest" />
         </div>
 
         {/* Seasonal context bar */}
