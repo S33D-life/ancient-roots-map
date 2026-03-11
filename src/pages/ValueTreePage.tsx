@@ -821,7 +821,7 @@ const ValueTreePage = () => {
                   <CardContent className="p-5 text-center">
                     <span className="text-3xl block mb-2">❤️</span>
                     <h4 className="text-sm font-serif text-foreground mb-1">S33D Hearts</h4>
-                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Global currency — always issued</p>
+                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Commons currency — always issued</p>
                     <div className="space-y-1.5 text-[11px] font-serif text-left">
                       <div className="flex justify-between"><span className="text-muted-foreground">Check-in</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+1</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">Map tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+10</span></div>
