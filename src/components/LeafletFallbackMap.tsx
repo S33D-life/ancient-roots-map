@@ -44,6 +44,7 @@ import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
 import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
+import { useSeasonalLens, LENS_CONFIGS, type SeasonalLensType } from "@/contexts/SeasonalLensContext";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
@@ -722,7 +723,32 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [bloomMonth, setBloomMonth] = useState(new Date().getMonth() + 1);
   const [bloomRegionStages, setBloomRegionStages] = useState<RegionStageInfo[]>([]);
 
-  // Hive Fruit Layer — unified seasonal system
+  // Seasonal Lens — harmonises calendar, blooming clock, and map layers
+  const { activeLens, setLens, lensConfig } = useSeasonalLens();
+
+  // When a seasonal lens is activated, auto-enable relevant map layers and set blooming clock month
+  useEffect(() => {
+    if (!activeLens) return;
+    const config = LENS_CONFIGS[activeLens];
+    if (!config) return;
+    // Auto-enable harvest + offering + blooming clock layers
+    setShowHarvestLayer(true);
+    setShowOfferingGlow(true);
+    setShowBloomingClock(true);
+    // Set blooming clock to the middle month of the season
+    const midMonth = config.months[Math.floor(config.months.length / 2)];
+    setBloomMonth(midMonth);
+    // Set appropriate stage filter based on season
+    const stageMap: Record<string, CycleStage | "all"> = {
+      spring: "flowering",
+      summer: "fruiting",
+      autumn: "harvest",
+      winter: "dormant",
+    };
+    setBloomStageFilter(stageMap[activeLens] || "all");
+  }, [activeLens]);
+
+
   const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
   const { activeHiveFamily, setActiveHive } = useHiveSeasonFilter();
   const [fruitPreview, setFruitPreview] = useState<{
@@ -1110,6 +1136,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
+      key: "seasonal-lens",
+      title: "🌿 Seasonal Lens",
+      icon: "🌿",
+      accent: activeLens ? `hsl(${({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[activeLens] || "42, 50%, 55%"})` : "hsl(42, 50%, 55%)",
+      description: "Harmonise the map with the Blooming Clock — highlight seasonal harvests, blooming trees, and council gatherings.",
+      layers: (["spring", "summer", "autumn", "winter"] as const).map(season => ({
+        key: `lens-${season}`,
+        label: `${LENS_CONFIGS[season].emoji} ${LENS_CONFIGS[season].label}`,
+        description: `Months ${LENS_CONFIGS[season].months.join(", ")} — ${season === "spring" ? "Blossom & planting" : season === "summer" ? "Fruiting & canopy" : season === "autumn" ? "Harvest & seed gathering" : "Rest & dormancy"}`,
+        active: activeLens === season,
+        toggle: () => setLens(activeLens === season ? null : season),
+        accent: ({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[season],
+      })),
+      subContent: activeLens && lensConfig ? (
+        <div className="pl-7 pt-1 pb-1">
+          <p className="text-[10px] font-serif" style={{ color: `hsl(${({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[activeLens] || "42, 50%, 55%"})` }}>
+            {lensConfig.emoji} Active — highlighting {activeLens} harvests, blooming trees & offerings
+          </p>
+        </div>
+      ) : undefined,
+    },
+    {
       key: "blooming-clock",
       title: "🌸 Blooming Clock",
       icon: "🌸",
@@ -1147,6 +1195,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
       showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
+      activeLens, lensConfig, setLens,
       showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles]);
 
   const offeringCountsRef = useRef(offeringCounts);

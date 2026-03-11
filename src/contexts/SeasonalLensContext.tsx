@@ -26,10 +26,27 @@ const LENS_CONFIGS: Record<string, SeasonalLensConfig> = {
     months: [3, 4, 5],
     keywords: ["blossom", "flowering", "planting", "spring", "bloom", "cherry", "apple", "pear", "pollination", "seedling"],
   },
-  // Future lenses — structure ready
-  // summer: { type: "summer", label: "Summer Lens", emoji: "☀️", months: [6, 7, 8], keywords: [...] },
-  // autumn: { type: "autumn", label: "Autumn Harvest Lens", emoji: "🍂", months: [9, 10, 11], keywords: [...] },
-  // winter: { type: "winter", label: "Winter Rest Lens", emoji: "❄️", months: [12, 1, 2], keywords: [...] },
+  summer: {
+    type: "summer",
+    label: "Summer Lens",
+    emoji: "☀️",
+    months: [6, 7, 8],
+    keywords: ["summer", "fruiting", "growth", "canopy", "shade", "ripening", "solstice", "nectar", "pollinator", "abundance"],
+  },
+  autumn: {
+    type: "autumn",
+    label: "Autumn Harvest Lens",
+    emoji: "🍂",
+    months: [9, 10, 11],
+    keywords: ["harvest", "autumn", "fall", "nut", "fruit", "walnut", "acorn", "cider", "mushroom", "seed gathering", "equinox"],
+  },
+  winter: {
+    type: "winter",
+    label: "Winter Rest Lens",
+    emoji: "❄️",
+    months: [12, 1, 2],
+    keywords: ["winter", "dormant", "rest", "evergreen", "solstice", "bare", "frost", "hibernation", "pruning", "mulch"],
+  },
 };
 
 interface SeasonalLensContextValue {
