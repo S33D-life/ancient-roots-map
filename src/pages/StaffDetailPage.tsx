@@ -122,7 +122,7 @@ export default function StaffDetailPage() {
   // Feed TEOTAG context with staff data
   useTeotagPageContext(
     staff
-      ? { staff: { code: staff.code, staffName: staff.name, species: staff.species } }
+      ? { staff: { code: staff.code, staffName: staff.speciesName, species: staff.speciesName } }
       : {},
   );
 
