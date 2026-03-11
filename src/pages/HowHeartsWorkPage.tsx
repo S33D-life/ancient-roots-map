@@ -38,7 +38,9 @@ const HowHeartsWorkPage = () => (
 
         <Section icon={<Sprout className="w-4 h-4 text-primary" />} title="How You Earn Hearts">
           <p>Hearts are awarded automatically by the server when you complete qualifying actions. They cannot be created, edited, or duplicated from the app.</p>
-          <div className="rounded-xl border border-border/20 bg-card/30 p-3 mt-2">
+          
+          <p className="text-[10px] uppercase tracking-wider text-primary/70 font-semibold mt-3 mb-1">Current — Active Now</p>
+          <div className="rounded-xl border border-border/20 bg-card/30 p-3 mt-1">
             <RewardRow action="Map a new tree to the Atlas" hearts="+10" />
             <RewardRow action="Add a photo to a tree" hearts="+1" note="per unique tree" />
             <RewardRow action="Write a Stewardship offering" hearts="+2" />
@@ -47,9 +49,23 @@ const HowHeartsWorkPage = () => (
             <RewardRow action="Your seed is collected (Sower)" hearts="+1" />
             <RewardRow action="Time Tree entry" hearts="+5 to +7" note="once per day" />
             <RewardRow action="Tree check-in with canopy proof" hearts="+1" note="bonus" />
+            <RewardRow action="Attend a Council of Life gathering" hearts="+5" note="per event" />
             <RewardRow action="Milestone achievements" hearts="varies" note="5 to 1,000" />
             <RewardRow action="Windfall (144-heart threshold)" hearts="+3" note="random/loyalty" />
           </div>
+
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold mt-4 mb-1">Coming Later — Chapter 3 & Beyond</p>
+          <div className="rounded-xl border border-border/10 bg-card/20 p-3 mt-1 opacity-80">
+            <RewardRow action="Staking at Ancient Friend trees" hearts="TBD" note="planned" />
+            <RewardRow action="Minting / holding relevant NFTs" hearts="TBD" note="planned" />
+            <RewardRow action="Nurturing saplings of Ancient Friends" hearts="TBD" note="planned" />
+            <RewardRow action="Saving, sharing, or growing seeds" hearts="TBD" note="planned" />
+            <RewardRow action="Founding minter drops & airdrops" hearts="TBD" note="early supporters" />
+          </div>
+
+          <p className="text-[10px] text-muted-foreground/50 mt-2 italic">
+            Not all earning channels launch at once. New pathways are phased in as the ecosystem matures.
+          </p>
         </Section>
 
         <Section icon={<Clock className="w-4 h-4 text-primary" />} title="Daily Limits">
