@@ -221,6 +221,11 @@ const TreePageHero = ({
             <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onShare}>
               <Share2 className="h-3.5 w-3.5" /> Share
             </Button>
+            {onGreetingCard && (
+              <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onGreetingCard}>
+                <ImageIcon className="h-3.5 w-3.5" /> Card
+              </Button>
+            )}
           </div>
         </motion.div>
       </div>
