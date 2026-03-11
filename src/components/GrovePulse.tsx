@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import { motion } from "framer-motion";
 import { Heart, TreeDeciduous, Gift, Sprout } from "lucide-react";
+import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 
 interface GrovePulseProps {
   userId: string;
