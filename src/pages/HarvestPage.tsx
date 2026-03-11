@@ -1,22 +1,25 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Leaf, TreeDeciduous } from "lucide-react";
+import { Plus, Leaf, TreeDeciduous, Calendar, MapPin, ArrowRight } from "lucide-react";
 import { useHarvestListings, CATEGORY_LABELS, AVAILABILITY_LABELS } from "@/hooks/use-harvest-listings";
+import { useSeasonalEvents } from "@/hooks/use-seasonal-events";
 import HarvestCard from "@/components/harvest/HarvestCard";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const CreateHarvestForm = lazy(() => import("@/components/harvest/CreateHarvestForm"));
 
 const HarvestPage = () => {
   const [user, setUser] = useState<{ id: string } | null>(null);
 
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ? { id: u.id } : null));
-  });
+  }, []);
+
   const [showCreate, setShowCreate] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -27,6 +30,10 @@ const HarvestPage = () => {
     status: statusFilter,
     availability: availabilityFilter,
   });
+
+  // Seasonal context — show what's blooming/fruiting this month
+  const { bloomEvents } = useSeasonalEvents();
+  const currentMonthName = new Date().toLocaleDateString(undefined, { month: "long" });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -47,6 +54,31 @@ const HarvestPage = () => {
             rooted in the land and connected to the living atlas.
           </p>
         </section>
+
+        {/* Seasonal context bar */}
+        {bloomEvents.length > 0 && (
+          <div className="mb-6 rounded-xl bg-card/40 border border-border/20 p-3">
+            <p className="text-[10px] font-serif text-muted-foreground/60 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <Leaf className="w-3 h-3 text-primary/50" />
+              Seasonal rhythms — {currentMonthName}
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {bloomEvents.slice(0, 8).map(e => (
+                <span key={e.id} className="text-[9px] px-2 py-0.5 rounded-full bg-primary/5 text-primary/70 font-serif border border-primary/10">
+                  {e.emoji} {e.title}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 mt-2">
+              <Link to="/cosmic/calendar" className="text-[9px] text-primary/50 hover:text-primary font-serif flex items-center gap-0.5">
+                <Calendar className="w-2.5 h-2.5" /> Cosmic Calendar
+              </Link>
+              <Link to="/map" className="text-[9px] text-primary/50 hover:text-primary font-serif flex items-center gap-0.5">
+                <MapPin className="w-2.5 h-2.5" /> View on map
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Filters + Create */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
@@ -132,6 +164,30 @@ const HarvestPage = () => {
             )}
           </div>
         )}
+
+        {/* Cross-navigation footer */}
+        <div className="grid grid-cols-2 gap-2 mt-8">
+          <Link
+            to="/cosmic/calendar"
+            className="flex items-center gap-2 p-3 rounded-xl bg-card/30 border border-border/20 hover:border-primary/20 transition-all no-underline"
+          >
+            <Calendar className="w-4 h-4 text-primary/60" />
+            <div>
+              <p className="text-[10px] font-serif text-foreground/70">Cosmic Calendar</p>
+              <p className="text-[9px] text-muted-foreground/50">Seasonal rhythms</p>
+            </div>
+          </Link>
+          <Link
+            to="/map"
+            className="flex items-center gap-2 p-3 rounded-xl bg-card/30 border border-border/20 hover:border-primary/20 transition-all no-underline"
+          >
+            <MapPin className="w-4 h-4 text-primary/60" />
+            <div>
+              <p className="text-[10px] font-serif text-foreground/70">Living Atlas</p>
+              <p className="text-[9px] text-muted-foreground/50">Explore the map</p>
+            </div>
+          </Link>
+        </div>
       </main>
       <Footer />
 
