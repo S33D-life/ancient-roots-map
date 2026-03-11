@@ -1,16 +1,14 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon, Wand2, Music, Sprout, ScrollText, TreePine, Palette, Lock, BarChart3 } from "lucide-react";
-import teotagLogo from "@/assets/teotag.jpeg";
+import teotagLogo from "@/assets/teotag-small.webp";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import TetolMenu from "./TetolMenu";
 import GlobalSearch from "./GlobalSearch";
-import TeotagGuide from "./TeotagGuide";
 import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
@@ -18,6 +16,9 @@ import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
 import DailySeedCounter from "./DailySeedCounter";
+
+const TetolMenu = lazy(() => import("./TetolMenu"));
+const TeotagGuide = lazy(() => import("./TeotagGuide"));
 
 
 const Header = () => {
