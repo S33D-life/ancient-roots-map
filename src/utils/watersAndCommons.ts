@@ -119,6 +119,9 @@ export const PROXIMITY_KM: Record<LandscapeCategory, number> = {
   footpath: 0.1,
   heritage: 0.15,
   castle: 0.2,
+  library: 0.15,
+  bookshop: 0.1,
+  botanical_garden: 0.3,
 };
 
 // ── Cache ──
