@@ -56,6 +56,10 @@ const WandererProfilePage = () => {
     },
   });
 
+  // Growth engine data
+  const { data: streak } = useWandererStreak(id);
+  const { data: badges } = useSpeciesBadges(id);
+
   const initials = useMemo(() => {
     const name = data?.full_name || "Wanderer";
     return name
