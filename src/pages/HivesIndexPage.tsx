@@ -228,6 +228,11 @@ const HivesIndexPage = () => {
           <p className="text-muted-foreground font-serif mb-5 max-w-2xl text-sm">
             Living botanical families of the Ancient Friends grove. Each hive holds its own trees, offerings, and ecological wisdom.
           </p>
+          <WhyThisMatters
+            id="hives-intro"
+            message="Hives group trees by botanical family. Each hive is a living community — the more trees mapped, the stronger the hive grows. Explore one to see its species, offerings, and regional presence."
+            delay={2500}
+          />
 
           {/* Live animated global stats */}
           {!loading && (
