@@ -97,18 +97,15 @@ const createMissingEnvSupabaseClient = () => {
         getPublicUrl: () => ({ data: { publicUrl: "" } }),
       }),
     },
-    channel: () => ({
-      on: () => ({
-        subscribe: () => ({
-          unsubscribe: () => undefined,
-        }),
-      }),
-      subscribe: () => ({
+    channel: () => {
+      const channelStub: Record<string, any> = {
+        on: () => channelStub,
+        subscribe: () => ({ unsubscribe: () => undefined }),
         unsubscribe: () => undefined,
-      }),
-      unsubscribe: () => undefined,
-      send: async () => ({ error: missingEnvError }),
-    }),
+        send: async () => ({ error: missingEnvError }),
+      };
+      return channelStub;
+    },
     removeChannel: () => undefined,
     removeAllChannels: () => undefined,
   } as unknown as SupabaseClient<Database>;
