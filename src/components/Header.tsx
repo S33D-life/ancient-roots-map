@@ -196,7 +196,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical overflow-visible"
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-mystical overflow-hidden md:overflow-visible"
         style={{
           background: 'hsl(var(--card))',
           paddingTop: 'env(safe-area-inset-top, 0px)',
@@ -219,8 +219,8 @@ const Header = () => {
         }}
       />
       {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
-      <div className="container mx-auto px-4 py-2 relative z-[2]">
-        <div className="flex items-center justify-between relative">
+      <div className="relative z-[2] px-0 py-2">
+        <div className="flex items-center justify-between relative min-w-0">
           {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
             {/* Mobile TEOTAG logo — top left, navigates to Hearth */}
@@ -382,7 +382,7 @@ const Header = () => {
             </div>
           </nav>
 
-          <div className="flex items-center gap-1 md:gap-2">
+          <div className="flex items-center gap-1 md:gap-2 shrink-0">
             <OfflineIndicator />
             {user && <DailySeedCounter remaining={seedsRemaining} compact />}
             {user && <NotificationBell />}
