@@ -32,6 +32,26 @@ const WandererProfilePage = () => {
     },
   });
 
+  // Fetch species heart balances for this wanderer
+  const { data: speciesBalances } = useQuery({
+    queryKey: ["wanderer-species-hearts", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      if (!id) return [];
+      const { data } = await supabase
+        .from("species_heart_transactions")
+        .select("species_family, amount")
+        .eq("user_id", id);
+      const familyMap = new Map<string, number>();
+      (data || []).forEach(tx => {
+        familyMap.set(tx.species_family, (familyMap.get(tx.species_family) || 0) + tx.amount);
+      });
+      return Array.from(familyMap.entries())
+        .map(([family, amount]) => ({ family, amount, hive: getHiveInfo(family) }))
+        .sort((a, b) => b.amount - a.amount);
+    },
+  });
+
   const initials = useMemo(() => {
     const name = data?.full_name || "Wanderer";
     return name
