@@ -10,7 +10,6 @@ import { Switch } from "@/components/ui/switch";
 import { useCreateHarvestListing, CATEGORY_LABELS, AVAILABILITY_LABELS, MONTHS, type CreateHarvestInput, type HarvestCategory, type AvailabilityType, type HarvestStatus } from "@/hooks/use-harvest-listings";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
 
 interface CreateHarvestFormProps {
   onClose: () => void;
