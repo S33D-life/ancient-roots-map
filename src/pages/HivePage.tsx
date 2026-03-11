@@ -198,6 +198,15 @@ const HivePage = () => {
   const totalSpeciesHearts = speciesHearts.reduce((s, tx) => s + tx.amount, 0);
   const totalInfluence = influenceTxs.reduce((s, tx) => s + tx.amount, 0);
 
+  // Monthly species hearts for activity orb
+  const monthlyHearts = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return speciesHearts
+      .filter(tx => tx.created_at >= monthStart)
+      .reduce((s, tx) => s + tx.amount, 0);
+  }, [speciesHearts]);
+
   // Top contributing trees (by species hearts)
   const treeHeartMap: Record<string, number> = {};
   speciesHearts.forEach(tx => {
