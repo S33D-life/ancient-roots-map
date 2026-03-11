@@ -143,6 +143,7 @@ function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: Libra
 export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   const { pathname } = useLocation();
   const activeMode = detectMode(pathname);
+  const { activeLens, lensConfig } = useSeasonalLens();
 
   const [mapContext, setMapContextState] = useState<MapContext>({});
   const [libraryContext, setLibraryContextState] = useState<LibraryContext>({});
