@@ -150,7 +150,7 @@ const WandererProfilePage = () => {
           </Card>
         </div>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };
