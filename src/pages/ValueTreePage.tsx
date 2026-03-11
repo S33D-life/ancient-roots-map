@@ -820,8 +820,9 @@ const ValueTreePage = () => {
                     <div className="space-y-1.5 text-[11px] font-serif text-left">
                       <div className="flex justify-between"><span className="text-muted-foreground">Check-in</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+1</span></div>
                       <div className="flex justify-between"><span className="text-muted-foreground">Map tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+10</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Offering</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+1-5</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Complete map</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+15</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Offering</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+2</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Time Tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5-7</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Council</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5</span></div>
                     </div>
                   </CardContent>
                 </Card>
