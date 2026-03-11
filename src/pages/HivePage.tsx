@@ -64,11 +64,7 @@ const HivePage = () => {
   const { getStatusForFamily } = useHiveSeasonalStatus();
   const seasonalStatus = hive ? getStatusForFamily(hive.family) : undefined;
   const seasonal = useSeasonalSummary();
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id || null));
-  }, []);
+  const { userId: currentUserId } = useCurrentUser();
   const [trees, setTrees] = useState<TreeRow[]>([]);
   const [offerings, setOfferings] = useState<OfferingRow[]>([]);
   const [speciesHearts, setSpeciesHearts] = useState<SpeciesHeartTx[]>([]);
