@@ -37,7 +37,7 @@ const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {
       <div className="flex items-start gap-2.5">
         {/* Icon */}
         <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border text-sm"
-          style={{ borderColor: `${stageMeta.color}40`, background: `${stageMeta.color}10` }}>
+          style={{ borderColor: hslAlpha(stageMeta.color, 0.25), background: hslAlpha(stageMeta.color, 0.06) }}>
           {feature.symbol || stageMeta.emoji}
         </span>
 
