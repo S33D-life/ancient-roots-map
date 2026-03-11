@@ -137,6 +137,14 @@ function getQuickActions(
   };
   const seasonalLead = seasonalLens ? SEASONAL_LEAD[seasonalLens] : null;
 
+  /** Prepend one seasonal action into a page-specific action list */
+  const withSeason = (actions: QuickAction[], max = 4): QuickAction[] => {
+    if (!seasonalLead) return actions.slice(0, max);
+    // Avoid duplicate if label already present
+    if (actions.some(a => a.label === seasonalLead.label)) return actions.slice(0, max);
+    return [seasonalLead, ...actions].slice(0, max);
+  };
+
   // ── Tree detail page ──────────────────────────
   if (pageCtx.tree) {
     const t = pageCtx.tree;
