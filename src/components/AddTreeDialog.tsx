@@ -116,6 +116,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setSelectedSpeciesPrediction(null);
       setLocationConfirmed(false);
       setGpsAccuracy(null);
+      setSpeciesCertainty("exact");
+      setSpeciesHiveFamily(undefined);
     }
   }, [open]);
 
