@@ -196,8 +196,15 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
       parts.push(`Council: ${councilContext.activeCouncilName}`);
     }
 
+    // Seasonal lens context
+    if (activeLens && lensConfig) {
+      parts.push(`Seasonal lens: ${lensConfig.label} (${lensConfig.emoji})`);
+      parts.push(`Lens emphasis months: ${lensConfig.months.join(", ")}`);
+      parts.push(`Lens keywords: ${lensConfig.keywords.slice(0, 5).join(", ")}`);
+    }
+
     return parts.join("\n");
-  }, [pathname, activeMode, mapContext, libraryContext, councilContext]);
+  }, [pathname, activeMode, mapContext, libraryContext, councilContext, activeLens, lensConfig]);
 
   const quickActions = useMemo(
     () => getQuickActions(activeMode, mapContext, libraryContext, pathname),
