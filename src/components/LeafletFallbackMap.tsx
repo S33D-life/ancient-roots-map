@@ -1221,7 +1221,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
     }
 
-    // Save MapMemory on every moveend (debounced)
+    // Save MapMemory on every moveend (debounced) + publish TEOTAG context
     let saveTimer: ReturnType<typeof setTimeout>;
     const onMoveEndSave = () => {
       clearTimeout(saveTimer);
@@ -1229,6 +1229,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         const c = map.getCenter();
         const z = map.getZoom();
         saveMapMemory({ lat: c.lat, lng: c.lng, zoom: z });
+        // Publish to TEOTAG context via custom event
+        window.dispatchEvent(new CustomEvent("teotag-map-context", {
+          detail: { center: { lat: c.lat, lng: c.lng }, zoom: z },
+        }));
       }, 500);
     };
     map.on("moveend", onMoveEndSave);
