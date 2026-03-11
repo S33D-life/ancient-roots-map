@@ -1126,6 +1126,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
       externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles,
+      showLibraries, showBookshops, showBotanicalGardens,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
       showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
