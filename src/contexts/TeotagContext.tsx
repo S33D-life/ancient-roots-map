@@ -69,7 +69,17 @@ function detectMode(pathname: string): TeotagMode {
   return "guide";
 }
 
-function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext, route: string): QuickAction[] {
+function getQuickActions(mode: TeotagMode, mapCtx: MapContext, libraryCtx: LibraryContext, route: string, seasonalLens?: string | null): QuickAction[] {
+  // Spring Lens overrides — prioritise spring-themed prompts
+  if (seasonalLens === "spring") {
+    return [
+      { label: "What's blooming?", prompt: "What trees are flowering or blooming near me right now in spring?", emoji: "🌸" },
+      { label: "Spring harvests", prompt: "What early spring harvests and produce are available nearby?", emoji: "🌱" },
+      { label: "Planting season", prompt: "What should be planted this spring? Show me planting windows.", emoji: "🪴" },
+      { label: "Blossom walks", prompt: "Suggest blossom walks and spring exploration routes near me.", emoji: "🥾" },
+    ];
+  }
+
   // Harvest-specific quick actions
   if (route.startsWith("/harvest")) {
     return [
