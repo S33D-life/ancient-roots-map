@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf, Search, MapPin, BookOpen, BarChart3, Loader2 } from "lucide-react";
+import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf, Search, MapPin, BookOpen, BarChart3, Loader2, Hexagon, Apple, CalendarDays, TreePine, Map } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { unifiedSearch, type SearchResult } from "@/services/unified-search";
 
