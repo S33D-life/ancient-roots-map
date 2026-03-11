@@ -44,6 +44,7 @@ import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
 import { useFoodCycles, type CycleStage, type RegionStageInfo, STAGE_VISUALS } from "@/hooks/use-food-cycles";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
+import { useSeasonalLens, LENS_CONFIGS, type SeasonalLensType } from "@/contexts/SeasonalLensContext";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
