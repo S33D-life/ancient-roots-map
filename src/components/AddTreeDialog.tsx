@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus, Users, AlertTriangle, Camera } from "lucide-react";
+import { Loader2, LocateFixed, Search, MapPin, Check, TreeDeciduous, Feather, Sparkles, ChevronRight, ChevronLeft, ImagePlus, Users, AlertTriangle, Camera, Navigation, Leaf } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { convertToCoordinates, convertToWhat3Words } from "@/utils/what3words";
 // maplibre-gl is dynamically imported in adjustMode useEffect
@@ -79,6 +79,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [speciesVisionResult, setSpeciesVisionResult] = useState<SpeciesVisionResult | null>(null);
   const [speciesDecision, setSpeciesDecision] = useState<SpeciesDecision>("none");
   const [selectedSpeciesPrediction, setSelectedSpeciesPrediction] = useState<SpeciesVisionPrediction | null>(null);
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const dragCounter = useRef(0);
@@ -110,6 +111,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       setSpeciesVisionResult(null);
       setSpeciesDecision("none");
       setSelectedSpeciesPrediction(null);
+      setLocationConfirmed(false);
+      setGpsAccuracy(null);
     }
   }, [open]);
 
@@ -180,6 +183,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     setLat(latitude);
     setLng(longitude);
     setAdjustMode(true);
+    setLocationConfirmed(false);
   }, []);
 
   const getDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
@@ -238,12 +242,28 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       });
 
       const markerEl = document.createElement('div');
-      markerEl.style.cssText = 'width:24px;height:24px;border-radius:50%;background:hsl(42,95%,55%);border:2px solid white;cursor:grab;';
+      markerEl.className = 'encounter-map-pin';
+      markerEl.style.cssText = `
+        width: 28px; height: 28px; border-radius: 50%;
+        background: radial-gradient(circle at 40% 35%, hsl(42, 95%, 65%), hsl(42, 90%, 45%));
+        border: 2.5px solid white;
+        cursor: grab;
+        box-shadow: 0 0 0 0 hsla(42, 90%, 55%, 0.4), 0 2px 8px hsla(0, 0%, 0%, 0.3);
+        animation: pinPulse 2s ease-in-out infinite;
+        transition: transform 0.2s ease;
+      `;
       const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
         .setLngLat([lng, lat])
         .addTo(map);
 
+      marker.on("dragstart", () => {
+        markerEl.style.transform = 'scale(1.2)';
+        markerEl.style.cursor = 'grabbing';
+      });
+
       marker.on("dragend", () => {
+        markerEl.style.transform = 'scale(1)';
+        markerEl.style.cursor = 'grab';
         const pos = marker.getLngLat();
         const [clampedLat, clampedLng] = clampPosition(pos.lat, pos.lng);
         if (clampedLat !== pos.lat || clampedLng !== pos.lng) marker.setLngLat([clampedLng, clampedLat]);
@@ -256,8 +276,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         circleAddedRef.current = true;
         const circleGeoJSON = createCircleGeoJSON(lng, lat, MAX_ADJUST_METERS);
         map.addSource("adjust-radius", { type: "geojson", data: circleGeoJSON });
-        map.addLayer({ id: "adjust-radius-fill", type: "fill", source: "adjust-radius", paint: { "fill-color": "hsl(42, 95%, 55%)", "fill-opacity": 0.1 } });
-        map.addLayer({ id: "adjust-radius-border", type: "line", source: "adjust-radius", paint: { "line-color": "hsl(42, 95%, 55%)", "line-width": 2, "line-dasharray": [3, 2], "line-opacity": 0.6 } });
+        map.addLayer({ id: "adjust-radius-fill", type: "fill", source: "adjust-radius", paint: { "fill-color": "hsl(42, 95%, 55%)", "fill-opacity": 0.08 } });
+        map.addLayer({ id: "adjust-radius-border", type: "line", source: "adjust-radius", paint: { "line-color": "hsl(42, 95%, 55%)", "line-width": 1.5, "line-dasharray": [4, 3], "line-opacity": 0.45 } });
       });
 
       mapRef.current = map;
@@ -269,8 +289,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
   const confirmAdjustment = () => {
     setAdjustMode(false);
+    setLocationConfirmed(true);
     if (lat !== null && lng !== null) fetchWhat3words(lat, lng);
-    toast({ title: "Location confirmed", description: `${lat?.toFixed(6)}, ${lng?.toFixed(6)}` });
+    toast({ title: "📍 Location confirmed", description: `This is where the tree stands` });
   };
 
   const handleFindMe = () => {
@@ -468,7 +489,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   }, []);
 
   // Check for nearby duplicates before creating
-  // Two tiers: exact proximity (25m any tree) + wider species/name match (2km)
   const checkForDuplicates = useCallback(async (): Promise<boolean> => {
     if (lat === null || lng === null) return false;
 
@@ -496,7 +516,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           }))
           .sort((a, b) => a.distanceM - b.distanceM);
 
-        // Tier 1: Any tree within 25m
         const exactMatch = withDist.find((t) => t.distanceM <= EXACT_RADIUS_M);
         if (exactMatch) {
           setDuplicateTree({ id: exactMatch.id, name: exactMatch.name, distanceM: Math.round(exactMatch.distanceM) });
@@ -504,7 +523,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           return true;
         }
 
-        // Tier 2: Same name or species within 2km
         const trimName = (name.trim() || "").toLowerCase();
         const trimSpecies = (species.trim() || "").toLowerCase();
         const nameOrSpeciesMatch = withDist.find((t) => {
@@ -570,13 +588,12 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         const hasDuplicate = await checkForDuplicates();
         if (hasDuplicate) {
           setLoading(false);
-          return; // Wait for user decision
+          return;
         }
       }
       setShowDuplicateGuard(false);
       const { data: { user } } = await supabase.auth.getUser();
 
-      // If not logged in, store tree data and redirect to auth
       if (!user) {
         const pendingTree = {
           name: name.trim() || species.trim(),
@@ -610,7 +627,6 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         return;
       }
 
-      // AI fields (species_ai_*) intentionally excluded — columns not yet in DB schema
       const { data, error } = await supabase.from('trees').insert({
         name: name.trim() || species.trim(),
         species: species.trim(),
@@ -628,36 +644,30 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
       setShowCelebration(true);
 
-      // Check if this is the user's first tree for milestone moment
       const { count: userTreeCount } = await supabase
         .from("trees")
         .select("*", { count: "exact", head: true })
         .eq("created_by", user.id);
       
-      // Fetch collective count for echo
       const { count: totalTrees } = await supabase
         .from("trees")
         .select("*", { count: "exact", head: true });
       setCollectiveCount(totalTrees || 0);
 
       if (userTreeCount === 1) {
-        // First tree — show milestone after celebration
         setTimeout(() => setShowFirstTreeMilestone(true), 2400);
       }
 
-      // Store last visited tree for Hearth return pill
       sessionStorage.setItem("s33d_last_tree", JSON.stringify({
         id: data.id,
         name: name.trim() || species.trim(),
         species: species.trim(),
       }));
 
-      // Auto-upload dropped photo as first offering
       if (droppedPhotoFile) {
         uploadPhotoOffering(data.id, user.id, droppedPhotoFile);
       }
 
-      // Auto-advance to offering step
       setTransitionDir("forward");
       setStep("offering");
     } catch (err: any) {
@@ -697,9 +707,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const currentStepIndex = STEPS.findIndex(s => s.key === step);
   const currentStepConfig = STEPS[currentStepIndex];
 
+  const distanceFromGps = (originLat !== null && originLng !== null && lat !== null && lng !== null)
+    ? Math.round(getDistance(originLat, originLng, lat, lng) * 3.28084)
+    : 0;
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) setAdjustMode(false); onOpenChange(v); }}>
-      <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent
+        className="bg-card border-border/40 max-w-md p-0 overflow-hidden flex flex-col"
+        style={{
+          maxHeight: 'min(92dvh, 720px)',
+          background: 'linear-gradient(180deg, hsl(var(--card)), hsl(var(--card) / 0.97))',
+        }}
+      >
         <OfferingCelebration
           active={showCelebration}
           emoji="🌳"
@@ -761,38 +781,44 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Ritual Header */}
-        <div className="px-6 pt-6 pb-4" style={{
+
+        {/* ─── Compact Ritual Header ─── */}
+        <div className="px-5 pt-5 pb-3 shrink-0" style={{
           background: 'linear-gradient(135deg, hsla(120, 30%, 12%, 0.95), hsla(30, 25%, 10%, 0.95))',
-          borderBottom: '1px solid hsla(42, 50%, 30%, 0.3)',
+          borderBottom: '1px solid hsla(42, 50%, 30%, 0.2)',
         }}>
           {/* Step indicators */}
-          <div className="flex items-center justify-center gap-1 mb-4">
+          <div className="flex items-center justify-center gap-1 mb-3">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
               const isActive = i === currentStepIndex;
               const isDone = i < currentStepIndex;
               return (
                 <div key={s.key} className="flex items-center">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 ${
-                    isActive ? 'scale-110' : ''
-                  }`} style={{
-                    background: isActive
-                      ? 'linear-gradient(135deg, hsla(42, 80%, 50%, 0.3), hsla(42, 70%, 40%, 0.15))'
-                      : isDone
-                        ? 'hsla(120, 40%, 30%, 0.4)'
-                        : 'hsla(0, 0%, 100%, 0.05)',
-                    border: `1.5px solid ${isActive ? 'hsla(42, 80%, 55%, 0.6)' : isDone ? 'hsla(120, 50%, 45%, 0.4)' : 'hsla(0, 0%, 100%, 0.1)'}`,
-                  }}>
+                  <motion.div
+                    className="flex items-center justify-center w-7 h-7 rounded-full"
+                    animate={{
+                      scale: isActive ? 1.1 : 1,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    style={{
+                      background: isActive
+                        ? 'linear-gradient(135deg, hsla(42, 80%, 50%, 0.3), hsla(42, 70%, 40%, 0.15))'
+                        : isDone
+                          ? 'hsla(120, 40%, 30%, 0.4)'
+                          : 'hsla(0, 0%, 100%, 0.04)',
+                      border: `1.5px solid ${isActive ? 'hsla(42, 80%, 55%, 0.6)' : isDone ? 'hsla(120, 50%, 45%, 0.4)' : 'hsla(0, 0%, 100%, 0.08)'}`,
+                    }}
+                  >
                     {isDone ? (
-                      <Check className="w-3.5 h-3.5" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                      <Check className="w-3 h-3" style={{ color: 'hsl(120, 50%, 55%)' }} />
                     ) : (
-                      <Icon className="w-3.5 h-3.5" style={{ color: isActive ? 'hsl(42, 80%, 60%)' : 'hsla(0, 0%, 100%, 0.3)' }} />
+                      <Icon className="w-3 h-3" style={{ color: isActive ? 'hsl(42, 80%, 60%)' : 'hsla(0, 0%, 100%, 0.25)' }} />
                     )}
-                  </div>
+                  </motion.div>
                   {i < STEPS.length - 1 && (
-                    <div className="w-8 h-px mx-1" style={{
-                      background: isDone ? 'hsla(120, 50%, 45%, 0.4)' : 'hsla(0, 0%, 100%, 0.08)',
+                    <div className="w-6 h-px mx-0.5" style={{
+                      background: isDone ? 'hsla(120, 50%, 45%, 0.4)' : 'hsla(0, 0%, 100%, 0.06)',
                     }} />
                   )}
                 </div>
@@ -800,516 +826,672 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
             })}
           </div>
 
-          <h2 className="text-center font-serif text-lg tracking-wide" style={{ color: 'hsl(42, 75%, 60%)' }}>
+          <h2 className="text-center font-serif text-base tracking-wide" style={{ color: 'hsl(42, 75%, 60%)' }}>
             {currentStepConfig.label}
           </h2>
-          <p className="text-center text-xs mt-1 font-serif" style={{ color: 'hsla(42, 40%, 55%, 0.7)' }}>
+          <p className="text-center text-[11px] mt-0.5 font-serif" style={{ color: 'hsla(42, 40%, 55%, 0.6)' }}>
             {currentStepConfig.desc}
           </p>
         </div>
 
-        {/* Step Content */}
-        <div className="px-6 py-5 space-y-4" key={step} style={{
-          animation: `${transitionDir === 'forward' ? 'slideInRight' : 'slideInLeft'} 0.35s ease-out`,
-        }}>
-          {/* ─── ENCOUNTER STEP ─── */}
-          {step === "encounter" && !adjustMode && (
-            <div
-              onDragEnter={onDragEnter}
-              onDragLeave={onDragLeave}
-              onDragOver={onDragOver}
-              onDrop={onDrop}
-            >
-              <div className="space-y-4">
-                {/* Hidden file input for CAMERA capture */}
-                <input
-                  ref={photoInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePhotoDrop(file);
-                    e.target.value = '';
-                  }}
-                />
-                {/* Hidden file input for LIBRARY selection (no capture attr) */}
-                <input
-                  id="photo-library-input"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePhotoDrop(file);
-                    e.target.value = '';
-                  }}
-                />
-                {/* Photo of the tree — PRIMARY action */}
-                <div
-                  className={`relative rounded-lg border-2 border-dashed p-5 text-center transition-all cursor-pointer ${
-                    isDragging
-                      ? 'border-primary bg-primary/10 scale-[1.02]'
-                      : droppedPhotoFile
-                        ? 'border-green-600/40 hover:border-green-600/60'
-                        : 'border-border/50 hover:border-border'
-                  }`}
-                  style={{
-                    background: isDragging
-                      ? 'hsla(42, 80%, 50%, 0.08)'
-                      : droppedPhotoFile
-                        ? 'hsla(120, 30%, 15%, 0.3)'
-                        : 'hsla(0, 0%, 100%, 0.02)',
-                  }}
-                >
-                  {extractingPhoto ? (
-                    <div className="flex flex-col items-center gap-2 py-1">
-                      <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
-                      <span className="text-xs font-serif text-muted-foreground">Processing photo…</span>
-                    </div>
-                  ) : droppedPhotoFile ? (
-                    <div className="flex flex-col items-center gap-1.5 py-1" onClick={() => photoInputRef.current?.click()}>
-                      <Check className="h-5 w-5" style={{ color: 'hsl(120, 50%, 55%)' }} />
-                      <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>
-                        📷 {droppedPhotoFile.name}
-                      </span>
-                      <span className="text-[10px] font-serif text-muted-foreground/60">
-                        This will become your first offering · Tap to change
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-3 py-2">
-                      <ImagePlus className="h-6 w-6" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(42, 60%, 50%)' }} />
-                      <span className="text-sm font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(42, 50%, 55%)' }}>
-                        {isDragging ? 'Drop photo here' : 'Add a photo of your tree'}
-                      </span>
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className="text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            photoInputRef.current?.click();
-                          }}
-                        >
-                          <Camera className="h-3.5 w-3.5 mr-1" />
-                          Take Photo
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            document.getElementById('photo-library-input')?.click();
-                          }}
-                        >
-                          <ImagePlus className="h-3.5 w-3.5 mr-1" />
-                          Choose from Library
-                        </Button>
+        {/* ─── Scrollable Step Content ─── */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="px-5 py-4 space-y-3" key={step} style={{
+            animation: `${transitionDir === 'forward' ? 'slideInRight' : 'slideInLeft'} 0.3s ease-out`,
+          }}>
+            {/* ─── ENCOUNTER STEP ─── */}
+            {step === "encounter" && !adjustMode && (
+              <div
+                onDragEnter={onDragEnter}
+                onDragLeave={onDragLeave}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+              >
+                <div className="space-y-3">
+                  {/* Hidden file inputs */}
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePhotoDrop(file);
+                      e.target.value = '';
+                    }}
+                  />
+                  <input
+                    id="photo-library-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handlePhotoDrop(file);
+                      e.target.value = '';
+                    }}
+                  />
+
+                  {/* Photo area — compact */}
+                  <div
+                    className={`relative rounded-xl border-2 border-dashed p-4 text-center transition-all ${
+                      isDragging
+                        ? 'border-primary bg-primary/10 scale-[1.01]'
+                        : droppedPhotoFile
+                          ? 'border-green-600/30'
+                          : 'border-border/40 hover:border-border/60'
+                    }`}
+                    style={{
+                      background: isDragging
+                        ? 'hsla(42, 80%, 50%, 0.06)'
+                        : droppedPhotoFile
+                          ? 'hsla(120, 30%, 15%, 0.2)'
+                          : 'hsla(0, 0%, 100%, 0.015)',
+                    }}
+                  >
+                    {extractingPhoto ? (
+                      <div className="flex flex-col items-center gap-2 py-1">
+                        <Loader2 className="h-5 w-5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                        <span className="text-xs font-serif text-muted-foreground">Processing photo…</span>
                       </div>
-                    </div>
-                  )}
-                </div>
-
-                {isIdentifyingSpecies && (
-                  <div
-                    className="rounded-lg border px-3 py-2 text-xs font-serif flex items-center gap-2"
-                    style={{
-                      borderColor: "hsla(42, 45%, 35%, 0.4)",
-                      background: "hsla(42, 35%, 12%, 0.5)",
-                      color: "hsl(42, 70%, 65%)",
-                    }}
-                  >
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    AI is identifying likely species from this photo…
-                  </div>
-                )}
-
-                {!isIdentifyingSpecies && (speciesVisionResult?.predictions?.length || 0) > 0 && (
-                  <div
-                    className="rounded-lg border p-3 space-y-2"
-                    style={{
-                      borderColor: "hsla(160, 35%, 35%, 0.45)",
-                      background: "hsla(160, 35%, 10%, 0.35)",
-                    }}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-serif" style={{ color: "hsl(160, 60%, 65%)" }}>
-                        AI suggestions ({speciesVisionResult?.provider === "plantnet" ? "PlantNet fallback" : "iNaturalist Vision"})
-                      </p>
-                      {speciesDecision === "confirmed" && (
-                        <span className="text-[10px] font-serif" style={{ color: "hsl(120, 55%, 62%)" }}>
-                          Confirmed
+                    ) : droppedPhotoFile ? (
+                      <div className="flex items-center gap-3 py-0.5" onClick={() => photoInputRef.current?.click()}>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{
+                          background: 'hsla(120, 40%, 30%, 0.3)',
+                          border: '1px solid hsla(120, 40%, 40%, 0.3)',
+                        }}>
+                          <Check className="h-4 w-4" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                        </div>
+                        <div className="text-left min-w-0">
+                          <span className="text-xs font-serif block truncate" style={{ color: 'hsl(120, 40%, 55%)' }}>
+                            Photo added — your first offering
+                          </span>
+                          <span className="text-[10px] font-serif text-muted-foreground/50">Tap to change</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2.5 py-1">
+                        <ImagePlus className="h-5 w-5" style={{ color: isDragging ? 'hsl(42, 80%, 55%)' : 'hsl(42, 55%, 48%)' }} />
+                        <span className="text-xs font-serif" style={{ color: isDragging ? 'hsl(42, 80%, 60%)' : 'hsl(42, 45%, 52%)' }}>
+                          {isDragging ? 'Drop photo here' : 'Add a photo of your tree'}
                         </span>
-                      )}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      {(speciesVisionResult?.predictions || []).slice(0, 3).map((prediction, index) => {
-                        const isSelected =
-                          selectedSpeciesPrediction?.scientificName === prediction.scientificName &&
-                          selectedSpeciesPrediction?.source === prediction.source;
-                        return (
-                          <button
-                            key={`${prediction.source}-${prediction.scientificName}-${index}`}
+                        <div className="flex gap-2">
+                          <Button
                             type="button"
-                            className="w-full text-left rounded-md border px-2.5 py-2 transition-colors hover:bg-white/5"
-                            style={{
-                              borderColor: isSelected ? "hsla(120, 45%, 45%, 0.6)" : "hsla(160, 20%, 40%, 0.35)",
-                              background: isSelected ? "hsla(120, 35%, 18%, 0.45)" : "transparent",
+                            variant="secondary"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              photoInputRef.current?.click();
                             }}
-                            onClick={() => handleConfirmSpeciesSuggestion(prediction)}
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <p className="text-sm font-serif truncate" style={{ color: "hsl(42, 76%, 65%)" }}>
-                                  {prediction.commonName || prediction.scientificName}
-                                </p>
-                                {prediction.commonName && (
-                                  <p className="text-[11px] italic truncate text-muted-foreground">
-                                    {prediction.scientificName}
-                                  </p>
-                                )}
-                              </div>
-                              <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: "hsl(42, 80%, 68%)" }}>
-                                {Math.round(prediction.confidence * 100)}%
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {speciesDecision === "pending" && (
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-[11px] text-muted-foreground font-serif">
-                          Select one suggestion above, or type your own species name below.
-                        </p>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-[11px] font-serif"
-                          onClick={() => {
-                            setSpeciesDecision("overridden");
-                            setSelectedSpeciesPrediction(null);
-                          }}
-                        >
-                          Not sure · enter manually
-                        </Button>
+                            <Camera className="h-3.5 w-3.5 mr-1" />
+                            Take Photo
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              document.getElementById('photo-library-input')?.click();
+                            }}
+                          >
+                            <ImagePlus className="h-3.5 w-3.5 mr-1" />
+                            Library
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
-                )}
 
-                {!isIdentifyingSpecies &&
-                  speciesVisionResult?.predictions?.length === 0 &&
-                  speciesVisionResult?.error && (
-                    <p className="text-[11px] font-serif text-muted-foreground">
-                      AI species suggestion unavailable right now. You can still save this tree with a manual species.
-                    </p>
-                  )}
-
-                <div className="space-y-2 relative">
-                  <Label htmlFor="species" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
-                  <Input
-                    id="species"
-                    value={species}
-                    onChange={(e) => {
-                      setSpecies(e.target.value.slice(0, 200));
-                      if ((speciesVisionResult?.predictions?.length || 0) > 0) {
-                        setSpeciesDecision("overridden");
-                        setSelectedSpeciesPrediction(null);
-                      }
-                      setShowSpeciesSuggestions(true);
-                    }}
-                    onFocus={() => setShowSpeciesSuggestions(true)}
-                    placeholder="Start typing… e.g. Oak, Yew, Birch"
-                    maxLength={200}
-                    required
-                    className="font-serif"
-                    autoComplete="off"
-                  />
-                  {showSpeciesSuggestions && speciesSuggestions.length > 0 && (
+                  {isIdentifyingSpecies && (
                     <div
-                      className="absolute left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
+                      className="rounded-lg border px-3 py-2 text-xs font-serif flex items-center gap-2"
                       style={{
-                        background: "hsl(30, 15%, 12%)",
-                        borderColor: "hsla(42, 40%, 30%, 0.5)",
+                        borderColor: "hsla(42, 45%, 35%, 0.4)",
+                        background: "hsla(42, 35%, 12%, 0.5)",
+                        color: "hsl(42, 70%, 65%)",
                       }}
                     >
-                      {speciesSuggestions.map((sp) => (
-                        <button
-                          key={sp.scientific}
-                          type="button"
-                          className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/5 flex flex-col gap-0.5"
-                          onClick={() => {
-                            setSpecies(sp.common);
-                            if ((speciesVisionResult?.predictions?.length || 0) > 0) {
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      AI is identifying species from this photo…
+                    </div>
+                  )}
+
+                  {!isIdentifyingSpecies && (speciesVisionResult?.predictions?.length || 0) > 0 && (
+                    <div
+                      className="rounded-lg border p-3 space-y-2"
+                      style={{
+                        borderColor: "hsla(160, 35%, 35%, 0.45)",
+                        background: "hsla(160, 35%, 10%, 0.35)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-serif" style={{ color: "hsl(160, 60%, 65%)" }}>
+                          AI suggestions ({speciesVisionResult?.provider === "plantnet" ? "PlantNet" : "iNaturalist"})
+                        </p>
+                        {speciesDecision === "confirmed" && (
+                          <span className="text-[10px] font-serif" style={{ color: "hsl(120, 55%, 62%)" }}>
+                            ✓ Confirmed
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        {(speciesVisionResult?.predictions || []).slice(0, 3).map((prediction, index) => {
+                          const isSelected =
+                            selectedSpeciesPrediction?.scientificName === prediction.scientificName &&
+                            selectedSpeciesPrediction?.source === prediction.source;
+                          return (
+                            <button
+                              key={`${prediction.source}-${prediction.scientificName}-${index}`}
+                              type="button"
+                              className="w-full text-left rounded-md border px-2.5 py-1.5 transition-colors hover:bg-white/5"
+                              style={{
+                                borderColor: isSelected ? "hsla(120, 45%, 45%, 0.6)" : "hsla(160, 20%, 40%, 0.35)",
+                                background: isSelected ? "hsla(120, 35%, 18%, 0.45)" : "transparent",
+                              }}
+                              onClick={() => handleConfirmSpeciesSuggestion(prediction)}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="text-sm font-serif truncate" style={{ color: "hsl(42, 76%, 65%)" }}>
+                                    {prediction.commonName || prediction.scientificName}
+                                  </p>
+                                  {prediction.commonName && (
+                                    <p className="text-[10px] italic truncate text-muted-foreground">
+                                      {prediction.scientificName}
+                                    </p>
+                                  )}
+                                </div>
+                                <span className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(42, 80%, 68%)" }}>
+                                  {Math.round(prediction.confidence * 100)}%
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {speciesDecision === "pending" && (
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-[10px] text-muted-foreground font-serif">
+                            Select above, or type your own species below.
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-[10px] font-serif"
+                            onClick={() => {
                               setSpeciesDecision("overridden");
                               setSelectedSpeciesPrediction(null);
-                            }
-                            setShowSpeciesSuggestions(false);
-                          }}
-                        >
-                          <span className="font-serif" style={{ color: "hsl(42, 75%, 60%)" }}>{sp.common}</span>
-                          <span className="text-[11px] italic" style={{ color: "hsla(42, 40%, 55%, 0.7)" }}>
-                            {sp.scientific} · {sp.family}
-                          </span>
-                          {sp.aliases && sp.aliases.length > 0 && (
-                            <span className="text-[10px]" style={{ color: "hsla(0, 0%, 100%, 0.35)" }}>
-                              Also: {sp.aliases.join(", ")}
+                            }}
+                          >
+                            Enter manually
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!isIdentifyingSpecies &&
+                    speciesVisionResult?.predictions?.length === 0 &&
+                    speciesVisionResult?.error && (
+                      <p className="text-[10px] font-serif text-muted-foreground">
+                        AI species suggestion unavailable. You can still save with manual species.
+                      </p>
+                    )}
+
+                  {/* Species input */}
+                  <div className="space-y-1.5 relative">
+                    <Label htmlFor="species" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
+                    <Input
+                      id="species"
+                      value={species}
+                      onChange={(e) => {
+                        setSpecies(e.target.value.slice(0, 200));
+                        if ((speciesVisionResult?.predictions?.length || 0) > 0) {
+                          setSpeciesDecision("overridden");
+                          setSelectedSpeciesPrediction(null);
+                        }
+                        setShowSpeciesSuggestions(true);
+                      }}
+                      onFocus={() => setShowSpeciesSuggestions(true)}
+                      placeholder="Start typing… e.g. Oak, Yew, Birch"
+                      maxLength={200}
+                      required
+                      className="font-serif h-9 text-sm"
+                      autoComplete="off"
+                    />
+                    {showSpeciesSuggestions && speciesSuggestions.length > 0 && (
+                      <div
+                        className="absolute left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto rounded-lg border shadow-lg"
+                        style={{
+                          background: "hsl(30, 15%, 12%)",
+                          borderColor: "hsla(42, 40%, 30%, 0.5)",
+                        }}
+                      >
+                        {speciesSuggestions.map((sp) => (
+                          <button
+                            key={sp.scientific}
+                            type="button"
+                            className="w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-white/5 flex flex-col gap-0"
+                            onClick={() => {
+                              setSpecies(sp.common);
+                              if ((speciesVisionResult?.predictions?.length || 0) > 0) {
+                                setSpeciesDecision("overridden");
+                                setSelectedSpeciesPrediction(null);
+                              }
+                              setShowSpeciesSuggestions(false);
+                            }}
+                          >
+                            <span className="font-serif" style={{ color: "hsl(42, 75%, 60%)" }}>{sp.common}</span>
+                            <span className="text-[10px] italic" style={{ color: "hsla(42, 40%, 55%, 0.7)" }}>
+                              {sp.scientific} · {sp.family}
                             </span>
-                          )}
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Divider */}
+                  <div className="relative py-1">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t" style={{ borderColor: 'hsla(42, 30%, 30%, 0.2)' }} />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="px-3 text-[9px] uppercase tracking-[0.2em] font-serif" style={{
+                        color: 'hsla(42, 40%, 50%, 0.5)',
+                        background: 'hsl(var(--card))',
+                      }}>Location</span>
+                    </div>
+                  </div>
+
+                  {/* Find Me button — primary location action */}
+                  <Button
+                    type="button"
+                    className="w-full gap-2 font-serif h-10 text-sm"
+                    onClick={handleFindMe}
+                    disabled={findingMe}
+                    style={{
+                      background: findingMe
+                        ? 'hsla(42, 40%, 20%, 0.6)'
+                        : 'linear-gradient(135deg, hsla(42, 60%, 25%, 0.8), hsla(120, 25%, 18%, 0.8))',
+                      color: 'hsl(42, 80%, 65%)',
+                      border: '1px solid hsla(42, 50%, 35%, 0.4)',
+                    }}
+                  >
+                    {findingMe ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Navigation className="h-4 w-4" />
+                    )}
+                    {findingMe ? 'Finding your location…' : 'Find Me — Use My Location'}
+                  </Button>
+
+                  {/* GPS accuracy + coordinates (when location is known but not in adjust mode) */}
+                  {gpsAccuracy !== null && !adjustMode && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2 text-xs rounded-lg px-3 py-2"
+                      style={{
+                        background: gpsAccuracy <= 15 ? 'hsla(120, 30%, 20%, 0.25)' : 'hsla(42, 30%, 20%, 0.25)',
+                        border: `1px solid ${gpsAccuracy <= 15 ? 'hsla(120, 30%, 30%, 0.25)' : 'hsla(42, 40%, 30%, 0.25)'}`,
+                      }}
+                    >
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{
+                        background: gpsAccuracy <= 15 ? 'hsl(120, 50%, 50%)' : gpsAccuracy <= 30 ? 'hsl(42, 80%, 55%)' : 'hsl(0, 60%, 55%)',
+                        boxShadow: `0 0 6px ${gpsAccuracy <= 15 ? 'hsla(120, 50%, 50%, 0.4)' : 'hsla(42, 80%, 55%, 0.4)'}`,
+                      }} />
+                      <span className="font-serif text-muted-foreground">
+                        GPS ~{gpsAccuracy}m
+                        {gpsAccuracy > 20 && " · drag pin for precision"}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {/* Location confirmed badge */}
+                  {locationConfirmed && lat && lng && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="rounded-xl p-3"
+                      style={{
+                        background: 'linear-gradient(135deg, hsla(120, 30%, 15%, 0.4), hsla(42, 25%, 12%, 0.3))',
+                        border: '1px solid hsla(120, 40%, 35%, 0.3)',
+                        boxShadow: '0 0 20px hsla(120, 40%, 40%, 0.08)',
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                          style={{
+                            background: 'hsla(120, 40%, 30%, 0.4)',
+                            border: '1px solid hsla(120, 45%, 40%, 0.4)',
+                          }}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: [0, 1.2, 1] }}
+                          transition={{ duration: 0.4 }}
+                        >
+                          <Check className="w-4 h-4" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                        </motion.div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-serif" style={{ color: 'hsl(120, 45%, 60%)' }}>
+                            Location confirmed
+                          </p>
+                          <p className="text-[10px] font-mono text-muted-foreground/60 truncate">
+                            📍 {lat.toFixed(6)}, {lng.toFixed(6)}
+                          </p>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" className="text-[10px] h-6 px-2 shrink-0" onClick={() => startAdjustMode(lat, lng)}>
+                          Adjust
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Coordinates shown (before adjustment / no confirmation yet) */}
+                  {!locationConfirmed && lat && lng && (
+                    <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg px-3 py-2" style={{ background: 'hsla(120, 30%, 20%, 0.2)', border: '1px solid hsla(120, 30%, 30%, 0.2)' }}>
+                      <span className="font-mono text-[11px]">📍 {lat.toFixed(6)}, {lng.toFixed(6)}</span>
+                      <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => startAdjustMode(lat, lng)}>
+                        <MapPin className="h-3 w-3 mr-1" /> Fine-tune
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* ─── Check in to existing tree ─── */}
+                  <div
+                    className="rounded-xl p-3.5 cursor-pointer group transition-all hover:scale-[1.01]"
+                    style={{
+                      background: 'linear-gradient(135deg, hsla(120, 25%, 14%, 0.4), hsla(42, 20%, 12%, 0.3))',
+                      border: '1px solid hsla(120, 35%, 30%, 0.25)',
+                    }}
+                    onClick={() => setNearbySheetOpen(true)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all group-hover:scale-105" style={{
+                        background: 'hsla(120, 35%, 25%, 0.4)',
+                        border: '1px solid hsla(120, 40%, 35%, 0.3)',
+                      }}>
+                        <Leaf className="w-4 h-4" style={{ color: 'hsl(120, 45%, 55%)' }} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-serif" style={{ color: 'hsl(120, 45%, 58%)' }}>
+                          Visit an Ancient Friend already mapped
+                        </p>
+                        <p className="text-[10px] font-serif text-muted-foreground/50 mt-0.5">
+                          Check in to a tree the grove already knows
+                        </p>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                    </div>
+                  </div>
+
+                  {/* what3words — compact */}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="what3words" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">
+                      what3words {fetchingW3w && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
+                      <kbd className="ml-1.5 inline-flex items-center rounded border border-border/40 px-1 py-0.5 text-[8px] font-mono text-muted-foreground/50">/</kbd>
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input ref={w3wInputRef} id="what3words" value={what3words} onChange={(e) => setWhat3words(e.target.value)} placeholder="filled.count.soap" className="flex-1 font-serif h-9 text-sm" />
+                      <Button type="button" variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={handleLookupW3w} disabled={lookingUpW3w || !what3words.trim()}>
+                        {lookingUpW3w ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ─── ADJUST MAP (within encounter) ─── */}
+            {step === "encounter" && adjustMode && (
+              <div className="space-y-3 -mx-5 -my-4">
+                {/* Header bar over map */}
+                <div className="px-5 pt-4 pb-2">
+                  <p className="text-xs text-muted-foreground font-serif leading-relaxed">
+                    Drag the golden pin to fine-tune — up to <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) from your GPS fix.
+                  </p>
+                </div>
+
+                {/* Map container — fills available space */}
+                <div
+                  ref={mapContainerRef}
+                  className="w-full border-y overflow-hidden"
+                  style={{
+                    height: 'clamp(200px, 40dvh, 340px)',
+                    borderColor: 'hsla(42, 40%, 30%, 0.2)',
+                  }}
+                />
+
+                {/* Location info bar */}
+                <div className="px-5 space-y-3 pb-4">
+                  {lat !== null && lng !== null && (
+                    <motion.div
+                      className="flex items-center justify-between text-xs"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-3 w-3" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                        <span className="font-mono text-[11px]">{lat.toFixed(6)}, {lng.toFixed(6)}</span>
+                      </div>
+                      {originLat !== null && originLng !== null && (
+                        <span className="text-muted-foreground/60 font-serif text-[10px]">
+                          {distanceFromGps} ft from GPS
+                        </span>
+                      )}
+                    </motion.div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 font-serif h-11 text-sm"
+                      onClick={() => { setAdjustMode(false); setLat(originLat); setLng(originLng); }}
+                    >
+                      Skip
+                    </Button>
+                    <Button
+                      className="flex-1 gap-2 font-serif h-11 text-sm"
+                      onClick={confirmAdjustment}
+                      style={{
+                        background: 'linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))',
+                        color: 'hsl(120, 50%, 70%)',
+                        border: '1px solid hsla(120, 40%, 35%, 0.4)',
+                      }}
+                    >
+                      <Check className="h-4 w-4" /> Confirm Location
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ─── REFLECTION STEP ─── */}
+            {step === "reflection" && (
+              <>
+                <div className="text-center py-2">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                  >
+                    <TreeDeciduous className="w-7 h-7 mx-auto mb-1.5" style={{ color: 'hsl(120, 50%, 45%)' }} />
+                  </motion.div>
+                  <p className="font-serif text-sm text-foreground">{species}</p>
+                  {what3words && <p className="font-serif text-[10px] text-muted-foreground/50">/{what3words}</p>}
+                  {lat && lng && (
+                    <p className="font-mono text-[10px] text-muted-foreground/40 mt-0.5">
+                      {lat.toFixed(5)}, {lng.toFixed(5)}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="age" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Estimated Age (years)</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    value={estimatedAge}
+                    onChange={(e) => setEstimatedAge(e.target.value)}
+                    placeholder="How many rings might it hold?"
+                    className="font-serif h-9 text-sm"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="description" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
+                    placeholder="What did you notice? How did you feel standing beside it?"
+                    maxLength={2000}
+                    rows={4}
+                    className="font-serif text-sm"
+                  />
+                </div>
+
+                <p className="text-[10px] text-center font-serif" style={{ color: 'hsla(42, 40%, 55%, 0.4)' }}>
+                  Take your time. This tree has waited centuries.
+                </p>
+              </>
+            )}
+
+            {/* ─── OFFERING STEP ─── */}
+            {step === "offering" && (
+              <div className="text-center space-y-4 py-3">
+                <motion.div
+                  className="w-14 h-14 rounded-full mx-auto flex items-center justify-center"
+                  style={{
+                    background: 'radial-gradient(circle, hsla(42, 80%, 50%, 0.2), hsla(120, 40%, 20%, 0.3))',
+                    border: '2px solid hsla(42, 70%, 50%, 0.4)',
+                  }}
+                  animate={{
+                    boxShadow: [
+                      '0 0 4px hsla(42, 80%, 50%, 0.2)',
+                      '0 0 20px hsla(42, 80%, 50%, 0.35)',
+                      '0 0 4px hsla(42, 80%, 50%, 0.2)',
+                    ],
+                  }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Sparkles className="w-6 h-6" style={{ color: 'hsl(42, 80%, 60%)' }} />
+                </motion.div>
+
+                <div>
+                  <h3 className="font-serif text-sm" style={{ color: 'hsl(42, 75%, 60%)' }}>
+                    {name || species} has been planted in the Atlas
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-1 font-serif">
+                    Give this ancient friend a name, then leave an offering
+                  </p>
+                  {uploadingOffering && (
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                      <Loader2 className="h-3 w-3 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
+                      <span className="text-[10px] font-serif" style={{ color: 'hsl(42, 60%, 55%)' }}>Uploading photo offering…</span>
+                    </div>
+                  )}
+                  {!uploadingOffering && droppedPhotoFile && (
+                    <div className="flex items-center justify-center gap-1.5 mt-2">
+                      <Check className="h-3 w-3" style={{ color: 'hsl(120, 50%, 55%)' }} />
+                      <span className="text-[10px] font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>Photo offering saved</span>
                     </div>
                   )}
                 </div>
 
-                <Button type="button" variant="outline" className="w-full gap-2 font-serif" onClick={handleFindMe} disabled={findingMe}>
-                  {findingMe ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
-                  Find Me — Use My Location
-                </Button>
-
-                {/* GPS accuracy indicator */}
-                {gpsAccuracy !== null && (
-                  <div className="flex items-center gap-2 text-xs rounded-lg px-3 py-2" style={{
-                    background: gpsAccuracy <= 15 ? 'hsla(120, 30%, 20%, 0.3)' : 'hsla(42, 30%, 20%, 0.3)',
-                    border: `1px solid ${gpsAccuracy <= 15 ? 'hsla(120, 30%, 30%, 0.3)' : 'hsla(42, 40%, 30%, 0.3)'}`,
-                  }}>
-                    <div className="w-2 h-2 rounded-full" style={{
-                      background: gpsAccuracy <= 15 ? 'hsl(120, 50%, 50%)' : gpsAccuracy <= 30 ? 'hsl(42, 80%, 55%)' : 'hsl(0, 60%, 55%)',
-                      boxShadow: `0 0 6px ${gpsAccuracy <= 15 ? 'hsla(120, 50%, 50%, 0.5)' : gpsAccuracy <= 30 ? 'hsla(42, 80%, 55%, 0.5)' : 'hsla(0, 60%, 55%, 0.5)'}`,
-                    }} />
-                    <span className="font-serif text-muted-foreground">
-                      GPS accuracy ~{gpsAccuracy}m
-                      {gpsAccuracy > 20 && " · Drag pin for precision"}
-                    </span>
-                  </div>
-                )}
-
-                {lat && lng && (
-                  <div className="flex items-center justify-between text-xs text-muted-foreground rounded-lg p-2" style={{ background: 'hsla(120, 30%, 20%, 0.3)', border: '1px solid hsla(120, 30%, 30%, 0.3)' }}>
-                    <span className="font-mono">📍 {lat.toFixed(6)}, {lng.toFixed(6)}</span>
-                    <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => startAdjustMode(lat, lng)}>
-                      <MapPin className="h-3 w-3 mr-1" /> Adjust
+                {/* Name field */}
+                <div className="space-y-1.5 text-left max-w-xs mx-auto">
+                  <Label htmlFor="tree-name" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Name this Ancient Friend</Label>
+                  <Input
+                    id="tree-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value.slice(0, 200))}
+                    placeholder="e.g., The Old Oak of Glastonbury"
+                    maxLength={200}
+                    className="font-serif h-9 text-sm"
+                  />
+                  {name.trim() && name.trim() !== species.trim() && savedTreeId && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs font-serif gap-1.5 h-8"
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase.from('trees').update({ name: name.trim() }).eq('id', savedTreeId);
+                          if (error) throw error;
+                          toast({ title: "Name saved ✨", description: `Now known as "${name.trim()}"` });
+                        } catch (err: any) {
+                          toast({ title: "Could not save name", description: err.message, variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Check className="h-3 w-3" /> Save Name
                     </Button>
-                  </div>
-                )}
-
-                {/* Check in to existing tree */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full gap-2 font-serif text-xs"
-                  style={{
-                    borderColor: 'hsla(120, 40%, 35%, 0.3)',
-                    color: 'hsl(120, 45%, 55%)',
-                  }}
-                  onClick={() => setNearbySheetOpen(true)}
-                >
-                  <Users className="h-4 w-4" />
-                  Check in to an already mapped tree
-                </Button>
-
-                <div className="space-y-2">
-                  <Label htmlFor="what3words" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">
-                    what3words {fetchingW3w && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
-                    <kbd className="ml-2 inline-flex items-center rounded border border-border/50 px-1 py-0.5 text-[9px] font-mono text-muted-foreground/60">/</kbd>
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input ref={w3wInputRef} id="what3words" value={what3words} onChange={(e) => setWhat3words(e.target.value)} placeholder="filled.count.soap" className="flex-1 font-serif" />
-                    <Button type="button" variant="outline" size="icon" onClick={handleLookupW3w} disabled={lookingUpW3w || !what3words.trim()}>
-                      {lookingUpW3w ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ─── ADJUST MAP (within encounter) ─── */}
-          {step === "encounter" && adjustMode && (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground font-serif">
-                Drag the marker to fine-tune. Up to <strong>144 feet</strong> (≈44m) from your GPS fix.
-              </p>
-              <div ref={mapContainerRef} className="w-full rounded-lg border border-border overflow-hidden" style={{ height: 260 }} />
-              {lat !== null && lng !== null && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3 text-primary" />
-                  <span className="font-mono">{lat.toFixed(6)}, {lng.toFixed(6)}</span>
-                  {originLat !== null && originLng !== null && (
-                    <span className="ml-auto">{Math.round(getDistance(originLat, originLng, lat, lng) * 3.28084)} ft from GPS</span>
                   )}
                 </div>
-              )}
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1 font-serif" onClick={() => { setAdjustMode(false); setLat(originLat); setLng(originLng); }}>Skip</Button>
-                <Button className="flex-1 gap-1.5 font-serif" onClick={confirmAdjustment}>
-                  <Check className="h-4 w-4" /> Confirm Location
+
+                <div className="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+                  {[
+                    { emoji: "📷", label: "Memory", type: "photo" },
+                    { emoji: "🎵", label: "Song", type: "song" },
+                    { emoji: "💭", label: "Story", type: "story" },
+                  ].map((o) => (
+                    <a
+                      key={o.type}
+                      href={savedTreeId ? `/tree/${encodeURIComponent(savedTreeId)}?add=${o.type}` : '#'}
+                      className="flex flex-col items-center gap-1 p-2.5 rounded-xl transition-all hover:scale-105"
+                      style={{
+                        background: 'hsla(0, 0%, 100%, 0.03)',
+                        border: '1px solid hsla(42, 50%, 40%, 0.15)',
+                      }}
+                    >
+                      <span className="text-xl">{o.emoji}</span>
+                      <span className="text-[10px] font-serif text-muted-foreground">{o.label}</span>
+                    </a>
+                  ))}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  className="text-xs font-serif text-muted-foreground/60"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Perhaps another time
                 </Button>
               </div>
-            </div>
-          )}
-
-          {/* ─── REFLECTION STEP ─── */}
-          {step === "reflection" && (
-            <>
-              <div className="text-center py-2">
-                <TreeDeciduous className="w-8 h-8 mx-auto mb-2" style={{ color: 'hsl(120, 50%, 45%)' }} />
-                <p className="font-serif text-sm text-foreground">{species}</p>
-                {what3words && <p className="font-serif text-xs text-muted-foreground">/{what3words}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="age" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Estimated Age (years)</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  min="0"
-                  max="10000"
-                  value={estimatedAge}
-                  onChange={(e) => setEstimatedAge(e.target.value)}
-                  placeholder="How many rings might it hold?"
-                  className="font-serif"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Your Reflection</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value.slice(0, 2000))}
-                  placeholder="What did you notice? How did you feel standing beside it? What story does it seem to hold?"
-                  maxLength={2000}
-                  rows={5}
-                  className="font-serif"
-                />
-              </div>
-
-              <p className="text-[10px] text-center font-serif" style={{ color: 'hsla(42, 40%, 55%, 0.5)' }}>
-                Take your time. This tree has waited centuries.
-              </p>
-            </>
-          )}
-
-          {/* ─── OFFERING STEP ─── */}
-          {step === "offering" && (
-            <div className="text-center space-y-5 py-4">
-              <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center" style={{
-                background: 'radial-gradient(circle, hsla(42, 80%, 50%, 0.2), hsla(120, 40%, 20%, 0.3))',
-                border: '2px solid hsla(42, 70%, 50%, 0.4)',
-                animation: 'ancientPulse 4s ease-in-out infinite',
-              }}>
-                <Sparkles className="w-7 h-7" style={{ color: 'hsl(42, 80%, 60%)' }} />
-              </div>
-
-              <div>
-                <h3 className="font-serif text-base" style={{ color: 'hsl(42, 75%, 60%)' }}>
-                  {name || species} has been planted in the Atlas
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1 font-serif">
-                  Give this ancient friend a name, then leave an offering
-                </p>
-                {uploadingOffering && (
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" style={{ color: 'hsl(42, 80%, 55%)' }} />
-                    <span className="text-xs font-serif" style={{ color: 'hsl(42, 60%, 55%)' }}>Uploading your photo offering…</span>
-                  </div>
-                )}
-                {!uploadingOffering && droppedPhotoFile && (
-                  <div className="flex items-center justify-center gap-1.5 mt-2">
-                    <Check className="h-3.5 w-3.5" style={{ color: 'hsl(120, 50%, 55%)' }} />
-                    <span className="text-xs font-serif" style={{ color: 'hsl(120, 40%, 55%)' }}>📷 Photo offering saved</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Name field — now in the offering step */}
-              <div className="space-y-2 text-left max-w-xs mx-auto">
-                <Label htmlFor="tree-name" className="text-xs uppercase tracking-widest text-muted-foreground font-serif">Name this Ancient Friend</Label>
-                <Input
-                  id="tree-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value.slice(0, 200))}
-                  placeholder="e.g., The Old Oak of Glastonbury"
-                  maxLength={200}
-                  className="font-serif"
-                />
-                {name.trim() && name.trim() !== species.trim() && savedTreeId && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs font-serif gap-1.5"
-                    onClick={async () => {
-                      try {
-                        const { error } = await supabase.from('trees').update({ name: name.trim() }).eq('id', savedTreeId);
-                        if (error) throw error;
-                        toast({ title: "Name saved ✨", description: `Now known as "${name.trim()}"` });
-                      } catch (err: any) {
-                        toast({ title: "Could not save name", description: err.message, variant: "destructive" });
-                      }
-                    }}
-                  >
-                    <Check className="h-3 w-3" /> Save Name
-                  </Button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-                {[
-                  { emoji: "📷", label: "Memory", type: "photo" },
-                  { emoji: "🎵", label: "Song", type: "song" },
-                  { emoji: "💭", label: "Story", type: "story" },
-                ].map((o) => (
-                  <a
-                    key={o.type}
-                    href={savedTreeId ? `/tree/${encodeURIComponent(savedTreeId)}?add=${o.type}` : '#'}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all hover:scale-105"
-                    style={{
-                      background: 'hsla(0, 0%, 100%, 0.04)',
-                      border: '1px solid hsla(42, 50%, 40%, 0.2)',
-                    }}
-                  >
-                    <span className="text-2xl">{o.emoji}</span>
-                    <span className="text-[10px] font-serif text-muted-foreground">{o.label}</span>
-                  </a>
-                ))}
-              </div>
-
-              <Button
-                variant="ghost"
-                className="text-xs font-serif text-muted-foreground"
-                onClick={() => onOpenChange(false)}
-              >
-                Perhaps another time
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Navigation Footer */}
+        {/* ─── Navigation Footer ─── */}
         {step !== "offering" && !adjustMode && (
-          <div className="px-6 pb-5 flex gap-2">
+          <div className="px-5 pb-5 pt-2 flex gap-2 shrink-0" style={{
+            borderTop: '1px solid hsla(42, 30%, 25%, 0.15)',
+            background: 'hsl(var(--card))',
+          }}>
             {step !== "encounter" ? (
-              <Button variant="outline" className="flex-1 gap-1.5 font-serif" onClick={goBack}>
+              <Button variant="outline" className="flex-1 gap-1.5 font-serif h-11" onClick={goBack}>
                 <ChevronLeft className="h-4 w-4" /> Back
               </Button>
             ) : (
-              <Button variant="outline" className="flex-1 font-serif" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" className="flex-1 font-serif h-11" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
             )}
             <Button
-              className="flex-1 gap-1.5 font-serif"
+              className="flex-1 gap-1.5 font-serif h-11"
               onClick={goNext}
               disabled={loading}
               style={{
@@ -1330,18 +1512,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
         <style>{`
           @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
+            from { opacity: 0; transform: translateX(16px); }
             to { opacity: 1; transform: translateX(0); }
           }
           @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
+            from { opacity: 0; transform: translateX(-16px); }
             to { opacity: 1; transform: translateX(0); }
           }
-          @keyframes ancientPulse {
-            0%, 100% { box-shadow: 0 0 4px hsla(42, 80%, 50%, 0.2); }
-            50% { box-shadow: 0 0 20px hsla(42, 80%, 50%, 0.4); }
+          @keyframes pinPulse {
+            0%, 100% { box-shadow: 0 0 0 0 hsla(42, 90%, 55%, 0.4), 0 2px 8px hsla(0, 0%, 0%, 0.3); }
+            50% { box-shadow: 0 0 0 8px hsla(42, 90%, 55%, 0), 0 2px 8px hsla(0, 0%, 0%, 0.3); }
           }
         `}</style>
+
         {/* Duplicate guard overlay */}
         <AnimatePresence>
           {showDuplicateGuard && duplicateTree && (
@@ -1369,7 +1552,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    className="flex-1 text-xs font-serif"
+                    className="flex-1 text-xs font-serif h-9"
                     style={{
                       background: 'linear-gradient(135deg, hsl(120, 30%, 22%), hsl(120, 25%, 18%))',
                       color: 'hsl(120, 50%, 65%)',
@@ -1386,7 +1569,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 text-xs font-serif"
+                    className="flex-1 text-xs font-serif h-9"
                     onClick={() => {
                       setShowDuplicateGuard(false);
                       handleSubmit();
