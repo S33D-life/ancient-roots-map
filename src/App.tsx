@@ -30,7 +30,8 @@ import FireflyFAB from "@/components/FireflyFAB";
 import MissingEnvBanner from "@/components/MissingEnvBanner";
 import { attachAutoSync } from "@/utils/syncEngine";
 import { useTreeCelebration } from "@/hooks/use-tree-celebration";
-const TreeMappedCelebration = lazy(() => import("@/components/growth/TreeMappedCelebration"));
+import { useContributionCelebration } from "@/hooks/use-contribution-celebration";
+const ContributionCelebration = lazy(() => import("@/components/growth/ContributionCelebration"));
 
 // Attach offline auto-sync listener once at app startup
 attachAutoSync();
