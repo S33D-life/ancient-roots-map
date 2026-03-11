@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { useTetolLevel } from "@/contexts/TetolLevelContext";
 import { useTeotagContext, type TeotagMode } from "@/contexts/TeotagContext";
-import teotagImg from "@/assets/teotag.jpeg";
+import teotagImg from "@/assets/teotag-small.webp";
 import { X, Send, Search, Sparkles, ScrollText, ExternalLink, Loader2, MessageCircle, Map, BookOpen, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
