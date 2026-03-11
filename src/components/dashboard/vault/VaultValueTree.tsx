@@ -144,7 +144,7 @@ const VaultValueTree = ({ userId, totalHearts }: Props) => {
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-serif tracking-wide text-foreground">S33D Hearts — The Value Tree</h3>
-            <p className="text-[10px] text-muted-foreground font-serif">How Hearts grow from roots to canopy</p>
+            <p className="text-[10px] text-muted-foreground font-serif">The commons currency — how Hearts grow from roots to canopy</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-serif font-bold tabular-nums" style={{ color: "hsl(42, 95%, 55%)" }}>
