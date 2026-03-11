@@ -35,7 +35,7 @@ const DocsPage = () => (
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm font-serif text-foreground/70 space-y-4">
-              <p>Follow these steps to earn your first S33D Hearts, Species Hearts, and Influence tokens.</p>
+              <p>Follow these steps to earn your first S33D Hearts, Species Hearts, and Influence tokens. These are the currently active earning pathways.</p>
 
               <div className="space-y-3">
                 <Step number={1} title="Encounter — Find a Tree">
