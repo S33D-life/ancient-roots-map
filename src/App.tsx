@@ -33,6 +33,7 @@ attachAutoSync();
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
 const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
+const FirstWalkTrail = lazy(() => import("@/components/FirstWalkTrail"));
 
 const lazyImportWithRetry = <T extends ComponentType<any>>(
   importer: () => Promise<{ default: T }>,
