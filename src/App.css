@@ -65,6 +65,12 @@ body.season-winter .vine-divider { --vine-hue: 200; }
   animation-play-state: paused !important;
 }
 
+/* Hex cell pulse — arterial rhythm for hive activity */
+@keyframes hex-pulse {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.25; }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   [style*="arterial-flow"],

@@ -221,11 +221,11 @@ const HivesIndexPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-6xl">
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-7xl">
         {/* Hero header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="text-3xl md:text-4xl font-serif text-primary tracking-wide mb-2">Species Hives</h1>
-          <p className="text-muted-foreground font-serif mb-5 max-w-2xl text-sm">
+          <p className="text-muted-foreground font-serif mb-4 max-w-2xl text-sm leading-relaxed">
             Living botanical families of the Ancient Friends grove. Each hive holds its own trees, offerings, and ecological wisdom.
           </p>
           <WhyThisMatters
@@ -236,7 +236,7 @@ const HivesIndexPage = () => {
 
           {/* Live animated global stats */}
           {!loading && (
-            <div className="flex flex-wrap items-center gap-5 text-xs font-serif text-muted-foreground mb-5 pb-5 border-b border-border/30">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-serif text-muted-foreground mb-6 pb-5 border-b border-border/30">
               <span className="flex items-center gap-1.5">
                 <TreePine className="w-3.5 h-3.5 text-primary" />
                 <AnimatedStat value={totalTrees} /> trees
@@ -257,7 +257,7 @@ const HivesIndexPage = () => {
 
           {/* Quick-filter chips — horizontally scrollable */}
           {!loading && activeChips.length > 0 && (
-            <div className="mb-4">
+            <div className="mb-5">
               <div className="flex items-center gap-2 mb-2">
                 <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-[10px] text-muted-foreground font-serif uppercase tracking-wider">Quick Filter</span>
@@ -303,7 +303,7 @@ const HivesIndexPage = () => {
           )}
 
           {/* Search + sort + mode toggle */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input

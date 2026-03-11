@@ -123,20 +123,21 @@ const HexHiveCell = memo(({
   );
 
   return (
-    <TooltipProvider delayDuration={250}>
+    <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
           <motion.button
             onClick={onClick}
-            whileHover={{ scale: 1.06 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.97 }}
             className="group relative focus:outline-none w-full"
             style={{ aspectRatio: "1.1547 / 1" }}
           >
             {/* Activity ring — outer glow border */}
             <div
-              className="absolute -inset-[3px] transition-all duration-500"
+              className="absolute transition-all duration-500"
               style={{
+                inset: "-3px",
                 clipPath: HEX_CLIP,
                 background: isExpanded
                   ? `linear-gradient(135deg, hsl(${accentHsl}), hsl(45 80% 55%))`
@@ -179,33 +180,34 @@ const HexHiveCell = memo(({
               {/* Heart pulse glow — scales with activity */}
               {hasHearts && (
                 <div
-                  className="absolute inset-0 animate-pulse"
+                  className="absolute inset-0"
                   style={{
-                    opacity: activity === "thriving" ? 0.3 : activity === "active" ? 0.2 : 0.1,
-                    background: `radial-gradient(circle at 50% 70%, hsl(${accentHsl} / 0.3), transparent 60%)`,
+                    opacity: activity === "thriving" ? 0.25 : activity === "active" ? 0.15 : 0.08,
+                    background: `radial-gradient(circle at 50% 65%, hsl(${accentHsl} / 0.3), transparent 60%)`,
+                    animation: activity !== "dormant" ? "hex-pulse 3.6s ease-in-out infinite" : undefined,
                   }}
                 />
               )}
 
               {/* Content */}
-              <div className="relative h-full flex flex-col items-center justify-center px-2 py-3 gap-0.5">
+              <div className="relative h-full flex flex-col items-center justify-center px-3 gap-0.5">
                 {/* Activity dot */}
                 <div
-                  className="absolute top-2 right-3 w-1.5 h-1.5 rounded-full"
+                  className="absolute top-[10%] right-[15%] w-1.5 h-1.5 rounded-full"
                   style={{ background: ACTIVITY_COLORS[activity] }}
                   title={ACTIVITY_LABELS[activity]}
                 />
 
                 {/* Icon */}
-                <span className="text-2xl sm:text-3xl leading-none drop-shadow-sm">{icon}</span>
+                <span className="text-2xl leading-none drop-shadow-sm">{icon}</span>
 
                 {/* Name */}
-                <p className="text-[10px] sm:text-xs font-serif text-center leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2 max-w-[90%] mt-0.5">
+                <p className="text-[11px] font-serif text-center leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2 max-w-[85%] mt-0.5 font-medium">
                   {shortName}
                 </p>
 
-                {/* Stats 2×2 grid */}
-                <div className="grid grid-cols-2 gap-x-3 gap-y-0 mt-1">
+                {/* Stats row — compact 2×2 */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-0 mt-1">
                   {[
                     { Icon: TreePine, val: treeCount },
                     { Icon: Music, val: offeringCount },
@@ -213,10 +215,10 @@ const HexHiveCell = memo(({
                     { Icon: Users, val: wandererCount },
                   ].map(({ Icon, val }, i) => (
                     <div key={i} className="flex items-center gap-0.5 justify-center">
-                      <Icon className="w-2.5 h-2.5 text-muted-foreground/60" />
+                      <Icon className="w-2.5 h-2.5 text-muted-foreground/50" />
                       <span
-                        className="text-[9px] sm:text-[10px] font-serif tabular-nums"
-                        style={{ color: val > 0 ? `hsl(${accentHsl})` : "hsl(var(--muted-foreground) / 0.4)" }}
+                        className="text-[10px] font-serif tabular-nums"
+                        style={{ color: val > 0 ? `hsl(${accentHsl})` : "hsl(var(--muted-foreground) / 0.35)" }}
                       >
                         {val}
                       </span>
@@ -224,23 +226,23 @@ const HexHiveCell = memo(({
                   ))}
                 </div>
 
-                {/* Nation indicators */}
+                {/* Nation indicator — single line */}
                 {nations.length > 0 && (
                   <div className="flex items-center gap-0.5 mt-0.5">
                     <Globe className="w-2 h-2 text-muted-foreground/40" />
-                    <span className="text-[7px] font-serif text-muted-foreground/50 truncate max-w-[70px]">
+                    <span className="text-[8px] font-serif text-muted-foreground/50 truncate max-w-[70px]">
                       {nations.length <= 2 ? nations.join(", ") : `${nations.length} regions`}
                     </span>
                   </div>
                 )}
 
-                {/* Species tags */}
+                {/* Species tags — max 2 */}
                 {topSpecies.length > 0 && (
-                  <div className="flex flex-wrap gap-0.5 justify-center mt-0.5 max-w-[95%]">
+                  <div className="flex flex-wrap gap-0.5 justify-center mt-0.5 max-w-[92%]">
                     {topSpecies.slice(0, 2).map(sp => (
                       <span
                         key={sp}
-                        className="text-[7px] sm:text-[8px] font-serif px-1.5 py-0 rounded-full truncate max-w-[60px]"
+                        className="text-[7px] font-serif px-1.5 py-0 rounded-full truncate max-w-[65px]"
                         style={{
                           background: `hsl(${accentHsl} / 0.15)`,
                           color: `hsl(${accentHsl})`,
@@ -259,7 +261,12 @@ const HexHiveCell = memo(({
             </div>
           </motion.button>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[240px] p-3">
+        <TooltipContent
+          side="top"
+          sideOffset={8}
+          className="max-w-[250px] p-3 z-50"
+          collisionPadding={16}
+        >
           {tooltipContent}
         </TooltipContent>
       </Tooltip>
