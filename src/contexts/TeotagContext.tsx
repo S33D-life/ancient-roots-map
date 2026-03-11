@@ -250,7 +250,7 @@ function getQuickActions(
         emoji: "📖",
       });
     }
-    return actions.slice(0, 4);
+    return withSeason(actions);
   }
 
   if (mode === "scribe") {
