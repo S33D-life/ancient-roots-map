@@ -3118,6 +3118,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           includeFootpaths: showFootpaths,
           includeHeritage: showHeritage,
           includeCastles: showCastles,
+          includeLibraries: showLibraries,
+          includeBookshops: showBookshops,
+          includeBotanicalGardens: showBotanicalGardens,
         }
       );
 
