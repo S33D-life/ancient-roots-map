@@ -36,6 +36,7 @@ const TreePageHero = ({
   onAddWish,
   onViewMap,
   onShare,
+  onGreetingCard,
   onWhisper,
   ecoBelonging,
   onNavigateHive,
