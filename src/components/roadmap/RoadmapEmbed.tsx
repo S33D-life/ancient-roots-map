@@ -16,6 +16,7 @@ import {
   type RoadmapCategory,
 } from "@/data/roadmap-forest";
 import StageIcon from "@/components/roadmap/StageIcon";
+import { hslAlpha } from "@/utils/colorUtils";
 
 /** Milestone card */
 const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {
