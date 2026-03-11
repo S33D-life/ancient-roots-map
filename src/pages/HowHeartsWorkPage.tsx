@@ -32,7 +32,7 @@ const HowHeartsWorkPage = () => (
           <Heart className="w-8 h-8 mx-auto text-primary" />
           <h1 className="text-2xl font-serif tracking-wide text-foreground">How S33D Hearts Work</h1>
           <p className="text-xs font-serif text-muted-foreground/60 max-w-md mx-auto">
-            Hearts are earned through meaningful actions — mapping trees, sharing offerings, and contributing to the living atlas. They represent your care for the ecosystem.
+            S33D Hearts are the commons currency of the ecosystem — earned through stewardship, not speculation. They represent your care for the living atlas.
           </p>
         </div>
 
