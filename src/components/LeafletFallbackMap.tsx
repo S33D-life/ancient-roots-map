@@ -1136,6 +1136,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
+      key: "seasonal-lens",
+      title: "🌿 Seasonal Lens",
+      icon: "🌿",
+      accent: activeLens ? `hsl(${({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[activeLens] || "42, 50%, 55%"})` : "hsl(42, 50%, 55%)",
+      description: "Harmonise the map with the Blooming Clock — highlight seasonal harvests, blooming trees, and council gatherings.",
+      layers: (["spring", "summer", "autumn", "winter"] as const).map(season => ({
+        key: `lens-${season}`,
+        label: `${LENS_CONFIGS[season].emoji} ${LENS_CONFIGS[season].label}`,
+        description: `Months ${LENS_CONFIGS[season].months.join(", ")} — ${season === "spring" ? "Blossom & planting" : season === "summer" ? "Fruiting & canopy" : season === "autumn" ? "Harvest & seed gathering" : "Rest & dormancy"}`,
+        active: activeLens === season,
+        toggle: () => setLens(activeLens === season ? null : season),
+        accent: ({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[season],
+      })),
+      subContent: activeLens && lensConfig ? (
+        <div className="pl-7 pt-1 pb-1">
+          <p className="text-[10px] font-serif" style={{ color: `hsl(${({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[activeLens] || "42, 50%, 55%"})` }}>
+            {lensConfig.emoji} Active — highlighting {activeLens} harvests, blooming trees & offerings
+          </p>
+        </div>
+      ) : undefined,
+    },
+    {
       key: "blooming-clock",
       title: "🌸 Blooming Clock",
       icon: "🌸",
@@ -1173,6 +1195,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
       showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
+      activeLens, lensConfig, setLens,
       showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles]);
 
   const offeringCountsRef = useRef(offeringCounts);
