@@ -112,7 +112,7 @@ const StageSection = ({ stage, features }: { stage: RoadmapStage; features: Road
       <div className="flex items-center gap-2 mb-3">
         <span className="w-9 h-9 rounded-full flex items-center justify-center border-2 relative z-10"
           style={{ borderColor: `${meta.color}60`, background: `${meta.color}15` }}>
-          <StageIcon stage={stage} className="w-4 h-4" style={{ color: meta.color } as any} />
+          <StageIcon stage={stage} className="w-4 h-4" />
         </span>
         <div>
           <h3 className="font-serif text-sm text-foreground">{meta.label}</h3>
