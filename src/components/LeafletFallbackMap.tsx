@@ -1045,6 +1045,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", description: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => setShowBloomedSeeds(v => !v), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
         { key: "recent-visits", label: "◎ Recent Visits", description: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => setShowRecentVisits(v => !v), accent: "260, 55%, 70%" },
         { key: "seed-traces", label: "✿ Seed & Offering Traces", description: "Subtle pulses that fade over time", active: showSeedTraces, toggle: () => setShowSeedTraces(v => !v), accent: "260, 55%, 70%" },
+        { key: "seed-trail", label: "🌱 My Seed Trail", description: "Golden trail of seeds you planted today", active: showSeedTrail, toggle: () => setShowSeedTrail(v => !v), extra: showSeedTrail ? (seedTrailCount > 0 ? `${seedTrailCount}` : "—") : undefined, accent: "42, 80%, 60%" },
         { key: "shared-trees", label: "◐ Shared Trees", description: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => setShowSharedTrees(v => !v), accent: "260, 55%, 70%" },
         { key: "tribe-activity", label: "⊛ Tribe Activity", description: "Opt-in visibility for invited wanderers", active: showTribeActivity, toggle: () => setShowTribeActivity(v => !v), accent: "260, 55%, 70%" },
       ],
