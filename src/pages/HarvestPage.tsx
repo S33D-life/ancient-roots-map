@@ -10,8 +10,7 @@ import HarvestCard from "@/components/harvest/HarvestCard";
 import { supabase } from "@/integrations/supabase/client";
 import { AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import SpringLensToggle from "@/components/seasonal/SpringLensToggle";
-import SpringLensBanner from "@/components/seasonal/SpringLensBanner";
+import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 
 const CreateHarvestForm = lazy(() => import("@/components/harvest/CreateHarvestForm"));
 
@@ -57,12 +56,9 @@ const HarvestPage = () => {
           </p>
         </section>
 
-        {/* Spring Lens toggle + banner */}
-        <div className="mb-4 flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <SpringLensToggle />
-          </div>
-          <SpringLensBanner context="harvest" />
+        {/* Seasonal Lens banner */}
+        <div className="mb-4">
+          <SeasonalLensBanner context="harvest" />
         </div>
 
         {/* Seasonal context bar */}

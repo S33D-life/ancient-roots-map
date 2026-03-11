@@ -1,10 +1,11 @@
 /**
- * SeasonalLensContext — Lightweight seasonal exploration lens.
+ * SeasonalLensContext — Seasonal exploration lens with session persistence.
  * 
- * Provides a simple toggle for seasonal emphasis across the app.
- * Currently supports "spring" lens; designed to extend to summer/autumn/winter.
+ * Supports spring, summer, autumn, winter lenses.
+ * The active lens persists across navigation via sessionStorage.
+ * The Blooming Clock Dial is the primary activation interface.
  */
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
 
 export type SeasonalLensType = "spring" | "summer" | "autumn" | "winter" | null;
 
@@ -49,6 +50,34 @@ const LENS_CONFIGS: Record<string, SeasonalLensConfig> = {
   },
 };
 
+const STORAGE_KEY = "s33d-seasonal-lens";
+
+/** Restore persisted lens from sessionStorage */
+function restoreLens(): SeasonalLensType {
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored && (stored === "spring" || stored === "summer" || stored === "autumn" || stored === "winter")) {
+      return stored as SeasonalLensType;
+    }
+  } catch {
+    // sessionStorage may be unavailable
+  }
+  return null;
+}
+
+/** Persist lens to sessionStorage */
+function persistLens(lens: SeasonalLensType) {
+  try {
+    if (lens) {
+      sessionStorage.setItem(STORAGE_KEY, lens);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 interface SeasonalLensContextValue {
   activeLens: SeasonalLensType;
   lensConfig: SeasonalLensConfig | null;
@@ -63,7 +92,12 @@ interface SeasonalLensContextValue {
 const SeasonalLensContext = createContext<SeasonalLensContextValue | null>(null);
 
 export const SeasonalLensProvider = ({ children }: { children: ReactNode }) => {
-  const [activeLens, setActiveLens] = useState<SeasonalLensType>(null);
+  const [activeLens, setActiveLens] = useState<SeasonalLensType>(restoreLens);
+
+  // Persist whenever lens changes
+  useEffect(() => {
+    persistLens(activeLens);
+  }, [activeLens]);
 
   const lensConfig = useMemo(
     () => (activeLens ? LENS_CONFIGS[activeLens] ?? null : null),

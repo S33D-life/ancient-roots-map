@@ -16,8 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity, TreeDeciduous, MapPin, Calendar, ArrowRight } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
-import SpringLensToggle from "@/components/seasonal/SpringLensToggle";
-import SpringLensBanner from "@/components/seasonal/SpringLensBanner";
+import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -157,7 +156,7 @@ const CosmicCalendarPage = () => {
         {/* Live Cosmic Clock */}
         <CosmicClock variant="full" />
 
-        {/* Lenses + Spring Lens toggle */}
+        {/* Calendar Lenses */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">Lenses:</span>
           {activeLenses.map(lens => (
@@ -168,14 +167,13 @@ const CosmicCalendarPage = () => {
               {lens.icon} {lens.name}
             </span>
           ))}
-          <SpringLensToggle compact />
           <Link to="/cosmic/settings" className="text-[10px] text-primary/60 hover:text-primary font-serif">
             Edit
           </Link>
         </div>
 
-        {/* Spring Lens banner */}
-        <SpringLensBanner context="calendar" />
+        {/* Seasonal Lens banner */}
+        <SeasonalLensBanner context="calendar" />
 
         {/* Month Navigator */}
         <div className="flex items-center justify-between">
