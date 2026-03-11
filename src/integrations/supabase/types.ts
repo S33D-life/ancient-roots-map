@@ -1250,6 +1250,35 @@ export type Database = {
         }
         Relationships: []
       }
+      contribution_supports: {
+        Row: {
+          contribution_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          contribution_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          contribution_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contribution_supports_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "tree_contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       council_bio_regions: {
         Row: {
           bio_region_id: string
@@ -4879,6 +4908,65 @@ export type Database = {
             columns: ["weather_snapshot_id"]
             isOneToOne: false
             referencedRelation: "weather_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_contributions: {
+        Row: {
+          content: string | null
+          contribution_type: string
+          created_at: string
+          id: string
+          media_url: string | null
+          metadata: Json | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          state: string
+          support_count: number
+          title: string | null
+          tree_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          contribution_type: string
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          state?: string
+          support_count?: number
+          title?: string | null
+          tree_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          contribution_type?: string
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          metadata?: Json | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          state?: string
+          support_count?: number
+          title?: string | null
+          tree_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_contributions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
             referencedColumns: ["id"]
           },
         ]

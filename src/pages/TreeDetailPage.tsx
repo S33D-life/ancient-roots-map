@@ -60,6 +60,9 @@ import LinkedVolumesPanel from "@/components/LinkedVolumesPanel";
 import TreeStewardshipLog from "@/components/stewardship/TreeStewardshipLog";
 import TreeGuardianRoles from "@/components/stewardship/TreeGuardianRoles";
 import SendWhisperModal from "@/components/SendWhisperModal";
+import AddContributionPanel from "@/components/contributions/AddContributionPanel";
+import ContributionFeed from "@/components/contributions/ContributionFeed";
+import { useTreeContributions } from "@/hooks/use-tree-contributions";
 import WhisperCollector from "@/components/WhisperCollector";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import WeatherCard from "@/components/WeatherCard";
@@ -145,6 +148,7 @@ const TreeDetailPage = () => {
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
   const bloomStatus = useBloomStatus(tree?.species);
+  const { data: treeContributions = [] } = useTreeContributions(id);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
     treeId: id,
     treeSpecies: tree?.species || "",
@@ -450,6 +454,11 @@ const TreeDetailPage = () => {
               }}
             />
 
+            {/* Universal Contribution Entry Point */}
+            <AddContributionPanel treeId={id!} treeName={tree.name} />
+
+            {/* Community Contributions Feed */}
+            <ContributionFeed contributions={treeContributions} treeId={id!} />
 
             {/* Offerings Preview */}
             <TreeOfferingsPreview
