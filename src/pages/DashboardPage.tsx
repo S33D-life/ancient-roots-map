@@ -44,6 +44,7 @@ import { useSeasonalQuests } from "@/hooks/use-seasonal-quests";
 import StreakBadge from "@/components/growth/StreakBadge";
 import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
 import SeasonalQuestCard from "@/components/growth/SeasonalQuestCard";
+import ContributionPathways from "@/components/growth/ContributionPathways";
 
 /** Contextual pill showing the last tree the user visited, for easy return */
 const ReturnPill = () => {
