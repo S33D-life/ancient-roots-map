@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Sparkles, Heart, Share2, Map, Wind } from "lucide-react";
+import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
