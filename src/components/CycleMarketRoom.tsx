@@ -23,7 +23,7 @@ const CycleMarketRoom = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
   }, []);
 
   const { marketSeedsRemaining, giftSeedsRemaining } = useMarketSeeds(userId);
