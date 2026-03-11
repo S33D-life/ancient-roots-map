@@ -3,8 +3,14 @@
  * or execute directly when online. Always show appropriate feedback.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured } from "@/config/env";
 import { queueAction, offlineId, isOnline, type PendingAction } from "@/utils/offlineSync";
 import { toast } from "sonner";
+
+/** True when we can actually reach Supabase */
+function canSync(): boolean {
+  return isOnline() && isSupabaseConfigured;
+}
 
 function emitChange() {
   window.dispatchEvent(new CustomEvent("s33d-queue-change"));
