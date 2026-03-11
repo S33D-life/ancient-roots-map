@@ -536,6 +536,7 @@ const LITE_CSS = `
 .wc-footpath-glow{animation:pathGlow 4s ease-in-out infinite}
 @keyframes treeNearPathPulse{0%,100%{box-shadow:0 0 6px hsla(42,80%,55%,0.3);transform:scale(1)}50%{box-shadow:0 0 14px hsla(42,80%,55%,0.6);transform:scale(1.08)}}
 .tree-near-path{animation:treeNearPathPulse 2.5s ease-in-out infinite;border-radius:50%}
+.tree-near-path-marker{background:transparent!important;border:none!important}
 @media(prefers-reduced-motion:reduce){.wc-waterway-line,.wc-footpath-glow,.tree-near-path{animation:none}}
 @keyframes seedPulse{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.2);opacity:1}}
 `;
