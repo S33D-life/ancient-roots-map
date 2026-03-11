@@ -686,10 +686,10 @@ const CountryPortalPage = () => {
               <CardContent className="py-6">
                 <Suspense fallback={
                   <div className="py-12 text-center">
-                    <p className="text-sm text-muted-foreground">Loading species spiral…</p>
+                    <p className="text-sm text-muted-foreground font-serif">Mapping the constellation…</p>
                   </div>
                 }>
-                  <CountrySpeciesSpiral
+                  <HexConstellationMap
                     species={speciesActivity || []}
                     country={config.country}
                     countrySlug={countrySlug || ""}
