@@ -85,6 +85,12 @@ const FeatureNode = ({
 }) => {
   const meta = STAGE_META[feature.stage];
   const stageScale = { seed: 0.85, sprout: 0.95, rooted: 1, ancient: 1.1 }[feature.stage];
+  const sizeClass = {
+    seed: "scale-[0.85]",
+    sprout: "scale-95",
+    rooted: "scale-100",
+    ancient: "scale-110",
+  }[feature.stage];
 
   return (
     <motion.button
@@ -94,9 +100,9 @@ const FeatureNode = ({
       className={`
         group relative flex flex-col items-center gap-1.5 p-2 rounded-xl
         transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring
+        ${sizeClass}
         ${isActive ? "z-20" : "z-10"}
       `}
-      style={{ transform: `scale(${stageScale})` }}
       aria-label={`${feature.name} — ${meta.label}`}
     >
       {feature.stage === "ancient" && (
