@@ -32,7 +32,6 @@ import { attachAutoSync } from "@/utils/syncEngine";
 attachAutoSync();
 
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
-const OfflineSyncBanner = lazy(() => import("@/components/OfflineSyncBanner"));
 const FirstWalkTrail = lazy(() => import("@/components/FirstWalkTrail"));
 const DailySeedRitual = lazy(() => import("@/components/DailySeedRitual"));
 
@@ -216,7 +215,6 @@ const App = () => {
             <FireflyFAB />
             <Suspense fallback={null}>
               <ProximityNudge />
-              <OfflineSyncBanner />
               <FirstWalkTrail />
               <DailySeedRitual />
             </Suspense>
