@@ -212,6 +212,17 @@ function getQuickActions(
     ]);
   }
 
+  // ── Hive page ──────────────────────────────────
+  if (route.startsWith("/hive/")) {
+    const hiveSlug = route.split("/")[2];
+    return withSeason([
+      { label: "Earn Hearts", prompt: `How do I earn Species Hearts in this hive? What actions award hearts?`, emoji: "💚" },
+      { label: "Hive ecology", prompt: `Tell me about the ecology and distribution of this species family.`, emoji: "🌿" },
+      { label: "Top trees", prompt: `Which trees in this hive have the most offerings and hearts?`, emoji: "🌳" },
+      { label: "Governance", prompt: `How does influence and governance work within this species hive?`, emoji: "🛡️" },
+    ]);
+  }
+
   // ── Vault page ────────────────────────────────
   if (pageCtx.vault || route.startsWith("/vault")) {
     return [
