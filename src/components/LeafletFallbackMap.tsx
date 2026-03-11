@@ -3788,54 +3788,58 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     ) : null;
                   })()}
                 </button>
-                {/* Living Earth Mode toggle */}
-                <button
-                  onClick={() => setGroveViewActive(v => !v)}
-                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
-                  style={{
-                    ...btnBase,
-                    color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
-                    background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
-                    border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
-                  }}
-                  title="Living Earth Mode"
-                >
-                  <Eye className="w-[18px] h-[18px]" />
-                  {groveViewActive && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                {/* Secondary controls — compact size on mobile, hidden when atlas filter is open */}
+                {!atlasFilterOpen && (
+                  <>
+                    <button
+                      onClick={() => setGroveViewActive(v => !v)}
+                      className={`relative flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
                       style={{
-                        background: "hsl(120, 55%, 50%)",
-                        boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
-                        animation: "ancientGlow 3s ease-in-out infinite",
+                        ...btnBase,
+                        color: groveViewActive ? "hsl(120, 55%, 65%)" : "hsl(42, 60%, 60%)",
+                        background: groveViewActive ? "hsla(120, 30%, 12%, 0.95)" : btnBase.background,
+                        border: groveViewActive ? "1px solid hsla(120, 40%, 40%, 0.5)" : btnBase.border,
                       }}
-                    />
-                  )}
-                </button>
-                <button
-                  onClick={() => setShowMycelialNetwork((v) => !v)}
-                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                  style={{
-                    ...btnBase,
-                    color: showMycelialNetwork ? "hsl(178, 72%, 68%)" : "hsl(42, 60%, 60%)",
-                    border: showMycelialNetwork ? "1px solid hsla(178, 65%, 55%, 0.5)" : btnBase.border,
-                  }}
-                  title="Toggle Mycelial Network"
-                  aria-label="Toggle Mycelial Network"
-                >
-                  <TreePine className="w-[16px] h-[16px]" />
-                  {showMycelialNetwork && (
-                    <span
-                      className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
+                      title="Living Earth Mode"
+                    >
+                      <Eye className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+                      {groveViewActive && (
+                        <span
+                          className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+                          style={{
+                            background: "hsl(120, 55%, 50%)",
+                            boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
+                            animation: "ancientGlow 3s ease-in-out infinite",
+                          }}
+                        />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setShowMycelialNetwork((v) => !v)}
+                      className={`relative flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
                       style={{
-                        background: "hsl(178, 72%, 62%)",
-                        boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
+                        ...btnBase,
+                        color: showMycelialNetwork ? "hsl(178, 72%, 68%)" : "hsl(42, 60%, 60%)",
+                        border: showMycelialNetwork ? "1px solid hsla(178, 65%, 55%, 0.5)" : btnBase.border,
                       }}
-                    />
-                  )}
-                </button>
-                {/* Atlas portal — above layers & eye */}
-                <AtlasNavButton btnBase={btnBase} />
+                      title="Toggle Mycelial Network"
+                      aria-label="Toggle Mycelial Network"
+                    >
+                      <TreePine className="w-4 h-4 md:w-[16px] md:h-[16px]" />
+                      {showMycelialNetwork && (
+                        <span
+                          className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+                          style={{
+                            background: "hsl(178, 72%, 62%)",
+                            boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
+                          }}
+                        />
+                      )}
+                    </button>
+                    {/* Atlas portal — above layers & eye */}
+                    <AtlasNavButton btnBase={btnBase} />
+                  </>
+                )}
               </div>
             )}
 
