@@ -221,6 +221,7 @@ const App = () => {
           <TeotagProvider>
             <BottomNav />
             <FireflyFAB />
+            <CelebrationOverlay />
             <Suspense fallback={null}>
               <ProximityNudge />
               <FirstWalkTrail />
