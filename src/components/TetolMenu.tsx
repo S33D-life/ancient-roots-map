@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf, Search, MapPin, BookOpen, BarChart3, Loader2 } from "lucide-react";
+import { Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf, Search, MapPin, BookOpen, BarChart3, Loader2, Hexagon, Apple, CalendarDays, TreePine, Map } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { unifiedSearch, type SearchResult } from "@/services/unified-search";
 
@@ -39,7 +39,13 @@ const treeItems = [
   },
 ];
 
-// Static pages removed — now handled by unified search
+const quickLinks = [
+  { to: "/hives", label: "Species Hives", icon: Hexagon },
+  { to: "/harvest", label: "Harvest Exchange", icon: Apple },
+  { to: "/cosmic", label: "Cosmic Calendar", icon: CalendarDays },
+  { to: "/value-tree", label: "Value Tree", icon: TreePine },
+  { to: "/roadmap", label: "Roadmap", icon: Map },
+];
 
 const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
   const navigate = useNavigate();
@@ -258,9 +264,36 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
         />
         </div>
 
+        {/* Quick links — feature discovery */}
+        <div
+          className="flex flex-wrap justify-center gap-2 mt-5 max-w-xs"
+          style={{
+            opacity: visible ? 1 : 0,
+            transition: "opacity 0.5s ease-out 1s",
+          }}
+        >
+          {quickLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <button
+                key={link.to}
+                onClick={(e) => handleItemClick(link.to, e)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-serif transition-all hover:border-primary/50 hover:bg-primary/10"
+                style={{
+                  borderColor: "hsl(var(--border) / 0.3)",
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{link.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* Close hint */}
         <p
-          className="mt-6 text-[10px] font-serif tracking-widest"
+          className="mt-4 text-[10px] font-serif tracking-widest"
           style={{
             color: "hsl(var(--muted-foreground) / 0.4)",
             opacity: visible ? 1 : 0,
