@@ -126,7 +126,7 @@ const FeatureNode = ({
       </span>
       <span
         className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-full font-sans"
-        style={{ background: `${meta.color}20`, color: meta.color }}
+        style={{ background: hslAlpha(meta.color, 0.12), color: meta.color }}
       >
         {meta.emoji} {feature.stage}
       </span>
