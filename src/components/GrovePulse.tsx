@@ -13,6 +13,7 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
   const [stats, setStats] = useState({ trees: 0, hearts: 0, seeds: 0 });
   const [loading, setLoading] = useState(true);
   const { count: offeringCount, loading: offeringsLoading } = useUserOfferingCount(userId);
+  const seasonal = useSeasonalSummary();
 
   useEffect(() => {
     const fetchStats = async () => {
