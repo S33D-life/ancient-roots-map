@@ -56,6 +56,8 @@ import CanopyVisitsTimeline from "@/components/CanopyVisitsTimeline";
 import TreeMarkets from "@/components/TreeMarkets";
 import StewardshipLeaderboard from "@/components/StewardshipLeaderboard";
 import LinkedVolumesPanel from "@/components/LinkedVolumesPanel";
+import TreeStewardshipLog from "@/components/stewardship/TreeStewardshipLog";
+import TreeGuardianRoles from "@/components/stewardship/TreeGuardianRoles";
 import SendWhisperModal from "@/components/SendWhisperModal";
 import WhisperCollector from "@/components/WhisperCollector";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
@@ -518,6 +520,12 @@ const TreeDetailPage = () => {
               loading={sourcesLoading}
               onContribute={() => setContributeSourceOpen(true)}
             />
+
+            {/* Stewardship Log */}
+            <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
+
+            {/* Tree Guardians */}
+            <TreeGuardianRoles treeId={id!} />
 
             {/* Stewardship Leaderboard */}
             <StewardshipLeaderboard treeId={id!} />
