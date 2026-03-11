@@ -675,18 +675,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const goNext = () => {
     setTransitionDir("forward");
     if (step === "encounter") {
-      if (!species.trim()) {
-        toast({ title: "Species required", description: "Please enter the species before continuing", variant: "destructive" });
-        return;
-      }
-      if ((speciesVisionResult?.predictions?.length || 0) > 0 && speciesDecision === "pending") {
-        toast({
-          title: "Confirm your species",
-          description: "Choose an AI suggestion or type your own species before continuing.",
-          variant: "destructive",
-        });
-        return;
-      }
+      // Species is no longer hard-required — uncertainty is welcome
       setStep("reflection");
     } else if (step === "reflection") {
       handleSubmit();
