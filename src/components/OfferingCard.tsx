@@ -262,6 +262,30 @@ const NftFull = ({ offering, treeId, treeSpecies, treeNation, userId }: Offering
   </Card>
 );
 
+const PhotoFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
+  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden group hover:border-primary/20 transition-all">
+    {offering.media_url && (
+      <div className="relative overflow-hidden">
+        <img
+          src={offering.media_url}
+          alt={offering.title}
+          className="w-full max-h-64 object-cover group-hover:scale-[1.02] transition-transform duration-700"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent" />
+      </div>
+    )}
+    <CardContent className="p-5">
+      <h4 className="font-serif text-lg text-primary tracking-wide">{offering.title}</h4>
+      {offering.content && (
+        <p className="text-sm text-foreground/70 font-serif mt-2 whitespace-pre-wrap">{offering.content}</p>
+      )}
+      <QuoteSection offering={offering} />
+      <CardFooter offering={offering} treeId={treeId} treeSpecies={treeSpecies} treeNation={treeNation} userId={userId} />
+    </CardContent>
+  </Card>
+);
+
 const GenericFull = ({ offering, treeId, treeSpecies, treeNation, userId }: OfferingCardProps) => (
   <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
     <CardContent className="p-5">
@@ -373,6 +397,8 @@ const OfferingCard = (props: OfferingCardProps) => {
       return <SongFull {...props} />;
     case "nft":
       return <NftFull {...props} />;
+    case "photo":
+      return <PhotoFull {...props} />;
     default:
       return <GenericFull {...props} />;
   }
