@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Sparkles, Heart, Share2, Map, Wind } from "lucide-react";
+import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
@@ -23,6 +23,7 @@ interface TreePageHeroProps {
   onAddWish: () => void;
   onViewMap: () => void;
   onShare: () => void;
+  onGreetingCard?: () => void;
   onWhisper?: () => void;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
@@ -35,6 +36,7 @@ const TreePageHero = ({
   onAddWish,
   onViewMap,
   onShare,
+  onGreetingCard,
   onWhisper,
   ecoBelonging,
   onNavigateHive,
@@ -219,6 +221,11 @@ const TreePageHero = ({
             <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onShare}>
               <Share2 className="h-3.5 w-3.5" /> Share
             </Button>
+            {onGreetingCard && (
+              <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onGreetingCard}>
+                <ImageIcon className="h-3.5 w-3.5" /> Card
+              </Button>
+            )}
           </div>
         </motion.div>
       </div>

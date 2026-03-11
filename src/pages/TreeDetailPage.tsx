@@ -26,6 +26,7 @@ import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
 import BloomingClock from "@/components/BloomingClock";
 import TreeShareCard from "@/components/TreeShareCard";
+import GreetingCardDialog from "@/components/greeting-cards/GreetingCardDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -106,6 +107,7 @@ const TreeDetailPage = () => {
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>("overview");
   const [shareCardOpen, setShareCardOpen] = useState(false);
+  const [greetingCardOpen, setGreetingCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
@@ -368,6 +370,7 @@ const TreeDetailPage = () => {
             setWhisperModalOpen(true);
           }}
           onShare={() => setShareCardOpen(true)}
+          onGreetingCard={() => setGreetingCardOpen(true)}
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
         />
@@ -383,6 +386,20 @@ const TreeDetailPage = () => {
               imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
               location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
             }}
+          />
+        )}
+
+        {tree && (
+          <GreetingCardDialog
+            open={greetingCardOpen}
+            onOpenChange={setGreetingCardOpen}
+            tree={{
+              name: tree.name,
+              species: tree.species,
+              imageUrl: getOfferingsByType("photo")[0]?.media_url || null,
+              location: [tree.state, tree.nation].filter(Boolean).join(", ") || null,
+            }}
+            whispers={availableWhispers.map((w) => w.message_content)}
           />
         )}
 
