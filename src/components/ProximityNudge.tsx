@@ -112,12 +112,23 @@ const ProximityNudge = () => {
   useEffect(() => {
     if (isMapPage || !("geolocation" in navigator)) return;
 
-    // Use watchPosition for continuous monitoring
-    watchId.current = navigator.geolocation.watchPosition(
-      (pos) => checkNearby(pos.coords.latitude, pos.coords.longitude),
-      () => {}, // silently fail
-      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 }
-    );
+    // Only watch if permission was already granted — never trigger the browser prompt
+    const startWatchIfGranted = async () => {
+      try {
+        const perm = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+        if (perm.state !== "granted") return;
+
+        watchId.current = navigator.geolocation.watchPosition(
+          (pos) => checkNearby(pos.coords.latitude, pos.coords.longitude),
+          () => {}, // silently fail
+          { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 }
+        );
+      } catch {
+        // permissions API not supported — skip to avoid triggering prompt
+      }
+    };
+
+    startWatchIfGranted();
 
     return () => {
       if (watchId.current !== null) {
