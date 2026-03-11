@@ -655,8 +655,8 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
       sessionStorage.setItem("s33d_last_tree", JSON.stringify({
         id: data.id,
-        name: name.trim() || species.trim(),
-        species: species.trim(),
+        name: name.trim() || speciesValue,
+        species: speciesValue,
       }));
 
       if (droppedPhotoFile) {
