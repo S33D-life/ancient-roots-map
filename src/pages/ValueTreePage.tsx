@@ -729,7 +729,7 @@ const ValueTreePage = () => {
 
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {[
-            { icon: "❤️", label: "S33D Hearts", sub: "Global currency", color: "hsl(0, 65%, 55%)" },
+            { icon: "❤️", label: "S33D Hearts", sub: "Commons currency", color: "hsl(0, 65%, 55%)" },
             { icon: "🌿", label: "Species Hearts", sub: "Fractal / hive", color: "hsl(var(--primary))" },
             { icon: "🛡️", label: "Influence", sub: "Governance voice", color: "hsl(42, 80%, 50%)" },
           ].map(t => (
