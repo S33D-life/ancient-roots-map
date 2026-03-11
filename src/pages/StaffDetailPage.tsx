@@ -119,6 +119,12 @@ export default function StaffDetailPage() {
     : "";
   const counts = useMemo(() => getSpeciesStaffCounts(), []);
   const total = counts[speciesCode] || 1;
+  // Feed TEOTAG context with staff data
+  useTeotagPageContext(
+    staff
+      ? { staff: { code: staff.code, staffName: staff.name, species: staff.species } }
+      : {},
+  );
 
   /* ── Data fetch: offerings + trees + ceremonies ────────────── */
   useEffect(() => {
