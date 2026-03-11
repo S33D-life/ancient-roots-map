@@ -4353,6 +4353,47 @@ export type Database = {
         }
         Relationships: []
       }
+      stewardship_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          notes: string | null
+          photo_url: string | null
+          season: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          season?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          season?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stewardship_actions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_events: {
         Row: {
           amount: number | null
@@ -4891,6 +4932,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tree_edit_proposals_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_guardians: {
+        Row: {
+          contribution_count: number
+          earned_at: string
+          id: string
+          role: string
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          contribution_count?: number
+          earned_at?: string
+          id?: string
+          role?: string
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          contribution_count?: number
+          earned_at?: string
+          id?: string
+          role?: string
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_guardians_tree_id_fkey"
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
