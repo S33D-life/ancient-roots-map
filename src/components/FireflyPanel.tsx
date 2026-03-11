@@ -33,6 +33,13 @@ interface FireflyPanelProps {
 const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps) => {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  const { seedsRemaining } = useSeedEconomy(userId);
 
   const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean }) => {
     console.info("[Firefly] firefly_action_selected", { type });
