@@ -316,6 +316,14 @@ const HivePage = () => {
           <SeasonalLensBanner context="general" />
         </div>
 
+        {/* Contribution CTAs */}
+        <div className="mb-6">
+          <HiveContributionCTA
+            hive={hive}
+            onMapTrees={() => focusMap({ type: "area", id: hive.family, source: "hive", hiveSlug: family })}
+          />
+        </div>
+
         {/* Activity Orb + User Balance */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
           <HiveActivityOrb

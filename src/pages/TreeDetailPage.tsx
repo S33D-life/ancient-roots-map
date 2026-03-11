@@ -19,6 +19,7 @@ import {
   TreeHiveConnections,
   TreeHeartRewards,
 } from "@/components/tree-sections";
+import TreeJourneyInvitations from "@/components/tree-sections/TreeJourneyInvitations";
 import SeedPlanter from "@/components/SeedPlanter";
 import CoreLoopBar from "@/components/CoreLoopBar";
 import WhisperRipple from "@/components/WhisperRipple";
