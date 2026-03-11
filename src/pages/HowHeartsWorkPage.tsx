@@ -104,8 +104,9 @@ const HowHeartsWorkPage = () => (
           </ul>
         </Section>
 
-        <Section icon={<Globe className="w-4 h-4 text-primary" />} title="Future: On-Chain Anchoring">
+        <Section icon={<Globe className="w-4 h-4 text-primary" />} title="Long-Term Vision: On-Chain Anchoring">
           <p>The ledger is structured for future blockchain anchoring. Transaction IDs and timestamps are designed to be verifiable on-chain, enabling transparent proof of ecological stewardship without changing how you use the app today.</p>
+          <p className="text-[10px] text-muted-foreground/50 italic mt-1">This is part of the long-term vision. Current Hearts are tracked in a secure server-side ledger. On-chain anchoring is planned but not yet active.</p>
         </Section>
 
         <div className="text-center pt-4">
