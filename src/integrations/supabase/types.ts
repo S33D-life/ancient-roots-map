@@ -3635,6 +3635,57 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_quests: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_count: number
+          hearts_awarded: number
+          id: string
+          quest_description: string | null
+          quest_title: string
+          quest_type: string
+          season: string
+          species_hearts_awarded: number
+          target_count: number
+          user_id: string
+          year: number
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number
+          hearts_awarded?: number
+          id?: string
+          quest_description?: string | null
+          quest_title: string
+          quest_type: string
+          season: string
+          species_hearts_awarded?: number
+          target_count?: number
+          user_id: string
+          year: number
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number
+          hearts_awarded?: number
+          id?: string
+          quest_description?: string | null
+          quest_title?: string
+          quest_type?: string
+          season?: string
+          species_hearts_awarded?: number
+          target_count?: number
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       seasonal_witnesses: {
         Row: {
           created_at: string
@@ -3917,6 +3968,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      species_badges: {
+        Row: {
+          badge_name: string
+          earned_at: string
+          id: string
+          species_key: string
+          species_name: string
+          trees_mapped: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          badge_name: string
+          earned_at?: string
+          id?: string
+          species_key: string
+          species_name: string
+          trees_mapped?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          badge_name?: string
+          earned_at?: string
+          id?: string
+          species_key?: string
+          species_name?: string
+          trees_mapped?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       species_heart_transactions: {
         Row: {
@@ -5462,6 +5546,33 @@ export type Database = {
           },
         ]
       }
+      wanderer_streaks: {
+        Row: {
+          current_streak: number
+          last_mapped_date: string | null
+          longest_streak: number
+          streak_tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_mapped_date?: string | null
+          longest_streak?: number
+          streak_tier?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_mapped_date?: string | null
+          longest_streak?: number
+          streak_tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       weather_snapshots: {
         Row: {
           alerts: Json | null
@@ -5667,6 +5778,15 @@ export type Database = {
           name: string
           nation: string
           species: string
+        }[]
+      }
+      get_hive_leaderboard: {
+        Args: { p_family: string; p_limit?: number }
+        Returns: {
+          offerings_count: number
+          species_hearts: number
+          trees_mapped: number
+          user_id: string
         }[]
       }
       get_offering_counts: {

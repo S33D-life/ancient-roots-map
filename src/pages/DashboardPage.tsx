@@ -38,6 +38,12 @@ import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
+import { useWandererStreak } from "@/hooks/use-wanderer-streak";
+import { useSpeciesBadges } from "@/hooks/use-species-badges";
+import { useSeasonalQuests } from "@/hooks/use-seasonal-quests";
+import StreakBadge from "@/components/growth/StreakBadge";
+import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
+import SeasonalQuestCard from "@/components/growth/SeasonalQuestCard";
 
 /** Contextual pill showing the last tree the user visited, for easy return */
 const ReturnPill = () => {
@@ -299,6 +305,11 @@ const DashboardPage = () => {
 
       const { error } = await supabase.from("trees").insert(treeData.map(t => ({ ...t, created_by: user?.id })));
       if (error) throw error;
+      // Dispatch celebration for last imported tree
+      if (treeData.length > 0) {
+        const last = treeData[treeData.length - 1];
+        window.dispatchEvent(new CustomEvent("tree-created", { detail: { treeName: last.name, species: last.species } }));
+      }
 
       toast({ title: "Import successful", description: `Imported ${treeData.length} trees` });
       if (user) fetchUserTrees(user.id);
@@ -344,6 +355,44 @@ const DashboardPage = () => {
       </div>
     );
   }
+
+  // ── Growth Engine sub-components ──
+  const GrowthEngineHearth = ({ userId, profile: p }: { userId: string; profile: Profile | null }) => {
+    const { data: streak } = useWandererStreak(userId);
+    const { data: quests, initQuests, season } = useSeasonalQuests(userId);
+    return (
+      <div className="space-y-8">
+        <FirstEncounterFunnel userId={userId} />
+        <GroveIdentityCard userId={userId} userName={p?.full_name} />
+        <StreakBadge streak={streak} />
+        <SeasonalQuestCard
+          quests={quests || []}
+          season={season}
+          onInit={() => initQuests.mutate()}
+        />
+        <PresenceSpiralCard userId={userId} />
+        <HearthWarmth userId={userId} />
+        <EarnableToday userId={userId} />
+        <SeedTrailPanel userId={userId} />
+        <ActiveCampaigns />
+        <HearthCrossLinks />
+      </div>
+    );
+  };
+
+  const GrowthEngineJourney = ({ userId }: { userId: string }) => {
+    const { data: badges } = useSpeciesBadges(userId);
+    const { data: streak } = useWandererStreak(userId);
+    return (
+      <div className="space-y-8">
+        <StreakBadge streak={streak} />
+        <SpeciesBadgeList badges={badges || []} />
+        <PersonalLegend userId={userId} />
+        <AncientFriendPassport userId={userId} />
+        <DashboardActivity userId={userId} />
+      </div>
+    );
+  };
 
     const TAB_ITEMS = [
       { value: "hearth", label: "Embers", icon: Flame },
@@ -428,26 +477,13 @@ const DashboardPage = () => {
 
             <TabsContent value="hearth">
               {user && (
-                <div className="space-y-8">
-                  <FirstEncounterFunnel userId={user.id} />
-                  <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
-                  <PresenceSpiralCard userId={user.id} />
-                  <HearthWarmth userId={user.id} />
-                  <EarnableToday userId={user.id} />
-                  <SeedTrailPanel userId={user.id} />
-                  <ActiveCampaigns />
-                  <HearthCrossLinks />
-                </div>
+                <GrowthEngineHearth userId={user.id} profile={profile} />
               )}
             </TabsContent>
 
             <TabsContent value="journey">
               {user && (
-                <div className="space-y-8">
-                  <PersonalLegend userId={user.id} />
-                  <AncientFriendPassport userId={user.id} />
-                  <DashboardActivity userId={user.id} />
-                </div>
+                <GrowthEngineJourney userId={user.id} />
               )}
             </TabsContent>
 

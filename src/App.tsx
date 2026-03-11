@@ -29,6 +29,8 @@ import AppUpdateBanner from "@/components/AppUpdateBanner";
 import FireflyFAB from "@/components/FireflyFAB";
 import MissingEnvBanner from "@/components/MissingEnvBanner";
 import { attachAutoSync } from "@/utils/syncEngine";
+import { useTreeCelebration } from "@/hooks/use-tree-celebration";
+const TreeMappedCelebration = lazy(() => import("@/components/growth/TreeMappedCelebration"));
 
 // Attach offline auto-sync listener once at app startup
 attachAutoSync();
@@ -191,8 +193,17 @@ const App = () => {
     );
   }
 
-  // Show loading skeleton while auth state resolves — prevents premature
-  // redirects and white-screen flashes on page refresh
+  const CelebrationOverlay = () => {
+    const { celebration, dismiss } = useTreeCelebration();
+    if (!celebration) return null;
+    return (
+      <Suspense fallback={null}>
+        <TreeMappedCelebration treeName={celebration.treeName} species={celebration.species} onComplete={dismiss} />
+      </Suspense>
+    );
+  };
+
+  // Show loading skeleton while auth state resolves
   if (!authReady) {
     return <PageSkeleton variant="default" />;
   }
@@ -219,6 +230,7 @@ const App = () => {
           <TeotagProvider>
             <BottomNav />
             <FireflyFAB />
+            <CelebrationOverlay />
             <Suspense fallback={null}>
               <ProximityNudge />
               <FirstWalkTrail />

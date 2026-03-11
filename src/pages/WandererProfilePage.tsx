@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MapPin, Compass, Heart } from "lucide-react";
 import { getHiveInfo } from "@/utils/hiveUtils";
+import { useWandererStreak } from "@/hooks/use-wanderer-streak";
+import { useSpeciesBadges } from "@/hooks/use-species-badges";
+import StreakBadge from "@/components/growth/StreakBadge";
+import SpeciesBadgeList from "@/components/growth/SpeciesBadgeList";
 
 const WandererProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +55,10 @@ const WandererProfilePage = () => {
         .sort((a, b) => b.amount - a.amount);
     },
   });
+
+  // Growth engine data
+  const { data: streak } = useWandererStreak(id);
+  const { data: badges } = useSpeciesBadges(id);
 
   const initials = useMemo(() => {
     const name = data?.full_name || "Wanderer";
@@ -103,6 +111,12 @@ const WandererProfilePage = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                     {data.bio || "This wanderer has not added a biography yet."}
                   </p>
+
+                  {/* Mapping Streak */}
+                  <StreakBadge streak={streak} />
+
+                  {/* Species Discovery Badges */}
+                  <SpeciesBadgeList badges={badges || []} />
 
                   {/* Species Hearts Balances */}
                   {speciesBalances && speciesBalances.length > 0 && (

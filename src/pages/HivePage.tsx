@@ -26,6 +26,7 @@ import BloomingClock from "@/components/BloomingClock";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import HiveActivityOrb from "@/components/hive/HiveActivityOrb";
 import HiveUserBalance from "@/components/hive/HiveUserBalance";
+import HiveLeaderboardCard from "@/components/growth/HiveLeaderboardCard";
 
 interface TreeRow {
   id: string;
@@ -509,6 +510,14 @@ const HivePage = () => {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Monthly Leaderboard */}
+                <HiveLeaderboardCard
+                  family={hive.family}
+                  accentHsl={hive.accentHsl}
+                  icon={hive.icon}
+                  compact
+                />
 
                 {/* Top Trees + Wanderers */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
