@@ -13,7 +13,10 @@ export type LandscapeCategory =
   | "commons"
   | "footpath"
   | "heritage"
-  | "castle";
+  | "castle"
+  | "library"
+  | "bookshop"
+  | "botanical_garden";
 
 export interface LandscapePOI {
   id: string;
