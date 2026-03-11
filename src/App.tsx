@@ -215,6 +215,7 @@ const App = () => {
           <HiveSeasonProvider>
           <MapFilterProvider>
           <UIFlowProvider>
+          <SeasonalLensProvider>
           <TeotagProvider>
             <BottomNav />
             <FireflyFAB />
