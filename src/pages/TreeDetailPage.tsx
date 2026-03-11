@@ -107,6 +107,7 @@ const TreeDetailPage = () => {
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>("overview");
   const [shareCardOpen, setShareCardOpen] = useState(false);
+  const [greetingCardOpen, setGreetingCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
