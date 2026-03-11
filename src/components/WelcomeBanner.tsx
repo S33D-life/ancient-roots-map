@@ -55,10 +55,11 @@ const WelcomeBanner = () => {
             <Link
               to="/map"
               onClick={handleDismiss}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-serif bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-serif bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"
             >
               <MapPin className="w-3 h-3" />
-              Explore
+              <span className="hidden sm:inline">Explore</span>
+              <span className="sm:hidden">Map</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
             <button
