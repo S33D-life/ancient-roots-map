@@ -454,6 +454,11 @@ const TreeDetailPage = () => {
               }}
             />
 
+            {/* Universal Contribution Entry Point */}
+            <AddContributionPanel treeId={id!} treeName={tree.name} />
+
+            {/* Community Contributions Feed */}
+            <ContributionFeed contributions={treeContributions} treeId={id!} />
 
             {/* Offerings Preview */}
             <TreeOfferingsPreview
