@@ -3220,6 +3220,104 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [showBloomedSeeds]);
 
+  // ── Seed Trail layer — user's planted seeds today ──
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (seedTrailLayerRef.current) {
+      map.removeLayer(seedTrailLayerRef.current);
+      seedTrailLayerRef.current = null;
+    }
+
+    if (!showSeedTrail || !userId) { setSeedTrailCount(0); return; }
+
+    const loadTrail = async () => {
+      const midnight = new Date();
+      midnight.setHours(0, 0, 0, 0);
+
+      const { data: seeds } = await supabase
+        .from("planted_seeds")
+        .select("id, tree_id, planted_at, latitude, longitude")
+        .eq("planter_id", userId)
+        .gte("planted_at", midnight.toISOString())
+        .order("planted_at", { ascending: true })
+        .limit(100);
+
+      if (!seeds || seeds.length === 0) { setSeedTrailCount(0); return; }
+
+      // Get tree coords for seeds without lat/lng
+      const needsCoords = seeds.filter((s: any) => !s.latitude || !s.longitude);
+      let treeCoordMap: Record<string, { lat: number; lng: number }> = {};
+      if (needsCoords.length > 0) {
+        const treeIds = [...new Set(needsCoords.map((s: any) => s.tree_id))];
+        const { data: treeData } = await supabase
+          .from("trees")
+          .select("id, latitude, longitude")
+          .in("id", treeIds);
+        (treeData || []).forEach((t: any) => {
+          if (t.latitude && t.longitude) treeCoordMap[t.id] = { lat: t.latitude, lng: t.longitude };
+        });
+      }
+
+      const points: [number, number][] = [];
+      const layer = L.layerGroup();
+
+      setSeedTrailCount(seeds.length);
+
+      seeds.forEach((seed: any, idx: number) => {
+        const lat = seed.latitude || treeCoordMap[seed.tree_id]?.lat;
+        const lng = seed.longitude || treeCoordMap[seed.tree_id]?.lng;
+        if (!lat || !lng) return;
+
+        points.push([lat, lng]);
+
+        // Golden sprout marker
+        const age = (Date.now() - new Date(seed.planted_at).getTime()) / 3600000; // hours
+        const opacity = Math.max(0.4, 1 - age / 24);
+
+        const sproutIcon = L.divIcon({
+          className: "seed-trail-marker",
+          html: `<div style="
+            width: 14px; height: 14px; border-radius: 50%;
+            background: radial-gradient(circle, hsla(42, 85%, 60%, ${opacity}), hsla(42, 70%, 45%, ${opacity * 0.4}));
+            box-shadow: 0 0 8px hsla(42, 80%, 55%, ${opacity * 0.5}), 0 0 16px hsla(42, 70%, 50%, ${opacity * 0.2});
+            border: 1.5px solid hsla(42, 90%, 70%, ${opacity * 0.6});
+            animation: seedTrailPulse 3s ease-in-out infinite;
+            animation-delay: ${idx * 0.2}s;
+          "></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+
+        L.marker([lat, lng], { icon: sproutIcon, zIndexOffset: 600 }).addTo(layer);
+      });
+
+      // Draw faint trail line connecting seeds in chronological order
+      if (points.length >= 2) {
+        const trail = L.polyline(points, {
+          color: "hsla(42, 75%, 55%, 0.3)",
+          weight: 2,
+          dashArray: "6,8",
+          lineCap: "round",
+          lineJoin: "round",
+        });
+        layer.addLayer(trail);
+      }
+
+      layer.addTo(map);
+      seedTrailLayerRef.current = layer;
+    };
+
+    loadTrail();
+
+    return () => {
+      if (seedTrailLayerRef.current && map.hasLayer(seedTrailLayerRef.current)) {
+        map.removeLayer(seedTrailLayerRef.current);
+      }
+    };
+  }, [showSeedTrail, userId]);
+
   const handleFindMe = useCallback(async () => {
     if (!mapRef.current) return;
     const result = await geo.locate("map-locate-button");
