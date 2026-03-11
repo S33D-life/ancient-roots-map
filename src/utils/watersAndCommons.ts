@@ -13,7 +13,10 @@ export type LandscapeCategory =
   | "commons"
   | "footpath"
   | "heritage"
-  | "castle";
+  | "castle"
+  | "library"
+  | "bookshop"
+  | "botanical_garden";
 
 export interface LandscapePOI {
   id: string;
@@ -84,6 +87,27 @@ export const GUARDIAN_TAGS: Record<LandscapeCategory, {
     color: "hsl(0, 35%, 50%)",
     glowColor: "hsla(0, 40%, 55%, 0.35)",
   },
+  library: {
+    tag: "Knowledge Keeper",
+    icon: "📚",
+    whisper: "Stories sleep in shelves here — and in the rings of nearby trees.",
+    color: "hsl(270, 45%, 55%)",
+    glowColor: "hsla(270, 50%, 60%, 0.35)",
+  },
+  bookshop: {
+    tag: "Book Haven",
+    icon: "📖",
+    whisper: "Words take root here. A place where stories and seeds are exchanged.",
+    color: "hsl(310, 40%, 50%)",
+    glowColor: "hsla(310, 45%, 55%, 0.35)",
+  },
+  botanical_garden: {
+    tag: "Living Archive",
+    icon: "🌺",
+    whisper: "A garden of living knowledge — where species are studied, protected, and celebrated.",
+    color: "hsl(160, 50%, 45%)",
+    glowColor: "hsla(160, 55%, 50%, 0.35)",
+  },
 };
 
 /** Proximity radius in km for each category */
@@ -95,6 +119,9 @@ export const PROXIMITY_KM: Record<LandscapeCategory, number> = {
   footpath: 0.1,
   heritage: 0.15,
   castle: 0.2,
+  library: 0.15,
+  bookshop: 0.1,
+  botanical_garden: 0.3,
 };
 
 // ── Cache ──
@@ -120,6 +147,9 @@ export interface FetchLandscapeOptions {
   includeFootpaths?: boolean;
   includeHeritage?: boolean;
   includeCastles?: boolean;
+  includeLibraries?: boolean;
+  includeBookshops?: boolean;
+  includeBotanicalGardens?: boolean;
 }
 
 /**
@@ -141,6 +171,9 @@ export async function fetchLandscapePOIs(
     includeFootpaths: false,
     includeHeritage: false,
     includeCastles: false,
+    includeLibraries: false,
+    includeBookshops: false,
+    includeBotanicalGardens: false,
     ...options,
   };
 
@@ -224,6 +257,29 @@ export async function fetchLandscapePOIs(
       way["historic"="castle"]${bb};
       node["castle_type"]${bb};
       way["castle_type"]${bb};
+    `);
+  }
+
+  if (opts.includeLibraries) {
+    queryParts.push(`
+      node["amenity"="library"]${bb};
+      way["amenity"="library"]${bb};
+    `);
+  }
+
+  if (opts.includeBookshops) {
+    queryParts.push(`
+      node["shop"="books"]${bb};
+      way["shop"="books"]${bb};
+    `);
+  }
+
+  if (opts.includeBotanicalGardens) {
+    queryParts.push(`
+      node["leisure"="garden"]["garden:type"="botanical"]${bb};
+      way["leisure"="garden"]["garden:type"="botanical"]${bb};
+      node["tourism"="attraction"]["attraction"="botanical_garden"]${bb};
+      way["tourism"="attraction"]["attraction"="botanical_garden"]${bb};
     `);
   }
 
@@ -362,6 +418,22 @@ function classifyElement(
   }
   if (tags.waterway && /river|stream|canal/.test(tags.waterway)) {
     return { id: `wc-wt-${id}`, lat, lng, category: "waterway", name, subtype: tags.waterway, source: "osm", geometry };
+  }
+
+  // Libraries
+  if (tags.amenity === "library") {
+    return { id: `wc-lb-${id}`, lat, lng, category: "library", name, subtype: "library", source: "osm" };
+  }
+
+  // Bookshops
+  if (tags.shop === "books") {
+    return { id: `wc-bs-${id}`, lat, lng, category: "bookshop", name, subtype: "bookshop", source: "osm" };
+  }
+
+  // Botanical gardens
+  if ((tags.leisure === "garden" && tags["garden:type"] === "botanical") ||
+      (tags.tourism === "attraction" && tags.attraction === "botanical_garden")) {
+    return { id: `wc-bg-${id}`, lat, lng, category: "botanical_garden", name, subtype: "botanical garden", source: "osm" };
   }
 
   return null;

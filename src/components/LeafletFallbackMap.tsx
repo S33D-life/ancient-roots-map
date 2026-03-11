@@ -696,6 +696,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showFootpaths, setShowFootpaths] = useState(false);
   const [showHeritage, setShowHeritage] = useState(false);
   const [showCastles, setShowCastles] = useState(false);
+  const [showLibraries, setShowLibraries] = useState(false);
+  const [showBookshops, setShowBookshops] = useState(false);
+  const [showBotanicalGardens, setShowBotanicalGardens] = useState(false);
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
@@ -1052,6 +1055,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
+      key: "knowledge",
+      title: "Knowledge Places",
+      icon: "📚",
+      accent: "hsl(270, 45%, 55%)",
+      description: "Libraries, bookshops, and botanical gardens — places where knowledge takes root.",
+      layers: [
+        { key: "libraries", label: "📚 Libraries", active: showLibraries, toggle: () => { setShowLibraries(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "270, 45%, 55%" },
+        { key: "bookshops", label: "📖 Bookshops", active: showBookshops, toggle: () => { setShowBookshops(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "310, 40%, 55%" },
+        { key: "botanical", label: "🌺 Botanical Gardens", active: showBotanicalGardens, toggle: () => { setShowBotanicalGardens(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "160, 50%, 50%" },
+      ],
+    },
+    {
       key: "culture",
       title: "Culture & Heritage",
       icon: "⛪",
@@ -1111,6 +1126,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
       externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles,
+      showLibraries, showBookshops, showBotanicalGardens,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
       showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
@@ -3102,6 +3118,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           includeFootpaths: showFootpaths,
           includeHeritage: showHeritage,
           includeCastles: showCastles,
+          includeLibraries: showLibraries,
+          includeBookshops: showBookshops,
+          includeBotanicalGardens: showBotanicalGardens,
         }
       );
 
@@ -3206,7 +3225,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (watersCommonsAbortRef.current) watersCommonsAbortRef.current.abort();
       if (map.hasLayer(wcLayer)) map.removeLayer(wcLayer);
     };
-  }, [showWatersCommons, filteredTrees, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles]);
+  }, [showWatersCommons, filteredTrees, showWaterways, showChurchyards, showFootpaths, showHeritage, showCastles, showLibraries, showBookshops, showBotanicalGardens]);
 
   // Show contextual whisper when adding a tree near a W&C landmark
   useEffect(() => {
