@@ -43,8 +43,8 @@ const CosmicCalendarPage = () => {
   // Mayan lens active?
   const mayanActive = activeLenses.some(l => l.slug === "mayan");
 
-  // Spring lens: is current view month a spring month?
-  const isSpringMonth = seasonalLens === "spring" && isLensMonth(viewMonth + 1);
+  // Seasonal lens: is current view month within the active lens?
+  const isSeasonalMonth = !!seasonalLens && isLensMonth(viewMonth + 1);
 
   // Calendar grid
   const calendarDays = useMemo(() => {
