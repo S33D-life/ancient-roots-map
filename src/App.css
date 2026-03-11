@@ -18,6 +18,12 @@ html {
   0%, 100% { opacity: 0.25; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.08); }
 }
+
+/* Seed trail pulse — golden pollen rhythm */
+@keyframes seedTrailPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
 .offering-count-badge {
   background: transparent !important;
   border: none !important;
