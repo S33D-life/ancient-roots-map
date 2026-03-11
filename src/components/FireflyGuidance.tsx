@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
+import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import { Leaf } from "lucide-react";
 
 interface GuidanceMessage {
