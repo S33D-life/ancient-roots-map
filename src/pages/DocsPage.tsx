@@ -135,7 +135,7 @@ const DocsPage = () => (
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm font-serif text-foreground/70 space-y-4">
-              <p>Every contribution earns tokens across up to three layers. Rewards are issued instantly via a Reward Receipt.</p>
+              <p>Every contribution earns tokens across up to three layers. Rewards are issued instantly via a Reward Receipt. These are the currently active reward rates.</p>
 
               <div className="space-y-3">
                 <RewardRow action="Map a new tree" s33d={10} species={3} influence={2} note="Issued once when the tree record is created" />
