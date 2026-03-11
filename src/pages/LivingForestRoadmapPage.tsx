@@ -202,7 +202,7 @@ const DetailPanel = ({
           </p>
           <div className="flex flex-wrap gap-1.5">
             {connected.map((c) => (
-              <span key={c.id} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/8 text-primary/80 border border-primary/15 font-sans">
+              <span key={c.id} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary/80 border border-primary/15 font-sans">
                 {STAGE_META[c.stage].emoji} {c.name}
               </span>
             ))}
