@@ -531,6 +531,18 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: init
           </div>
 
           <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-2 relative">
+            {/* Seasonal offering prompt */}
+            <SeasonalMomentPanel
+              compact
+              onPromptSelect={(prompt: OfferingPrompt) => {
+                if (prompt.suggestedType) {
+                  setActiveType(prompt.suggestedType as OfferingType);
+                }
+                if (!content && prompt.text) {
+                  // Set as placeholder inspiration, not overwrite
+                }
+              }}
+            />
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Title</Label>
