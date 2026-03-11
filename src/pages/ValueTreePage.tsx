@@ -172,41 +172,15 @@ const ROOT_ACTIONS: ValueNode[] = [
 
 const ADVANCED_CHAINS: ValueNode[] = [
   {
-    id: "multi-tree",
-    label: "Multi-Tree Exploration",
-    description: "Visit 3+ trees in a single session for a journey bonus.",
-    icon: <GitBranch className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "5 bonus" },
-      { token: "species", amount: "3 bonus" },
-    ],
-    status: "experimental",
-    verification: "GPS + time-gap validation",
-  },
-  {
     id: "documentation",
     label: "Tree Media Documentation",
     description: "Capture seasonal photos, audio recordings, or field notes.",
     icon: <Camera className="w-4 h-4" />,
     rewards: [
-      { token: "s33d", amount: "3-8" },
-      { token: "species", amount: "2-5" },
-      { token: "influence", amount: "1-2" },
+      { token: "s33d", amount: "1-5" },
+      { token: "species", amount: "1-2" },
     ],
     status: "active",
-  },
-  {
-    id: "meditation",
-    label: "Silent Tree Meditation",
-    description: "30-minute silent presence session at a tree. Requires phone inactivity.",
-    icon: <Sun className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "10" },
-      { token: "species", amount: "5" },
-    ],
-    status: "coming_soon",
-    verification: "Motion sensor + time validation",
-    cooldown: "1 per day",
   },
   {
     id: "hive-radio",
@@ -220,17 +194,55 @@ const ADVANCED_CHAINS: ValueNode[] = [
     verification: "Minimum 5 tracks, peer reviewed",
   },
   {
-    id: "seasonal-quest",
-    label: "Seasonal Quest",
-    description: "Participate in time-limited ecological observation challenges.",
+    id: "staking",
+    label: "Staking at Ancient Friend Trees",
+    description: "Stake Species Hearts at trees or hives to earn S33D Hearts. Part of Chapter 3.",
+    icon: <Lock className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+    ],
+    status: "coming_soon",
+  },
+  {
+    id: "nft-minting",
+    label: "Minting / Holding Relevant NFTs",
+    description: "Earn Hearts through NFT participation in the S33D ecosystem. Part of Chapter 3.",
+    icon: <Star className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+    ],
+    status: "coming_soon",
+  },
+  {
+    id: "sapling-nurture",
+    label: "Nurturing Saplings of Ancient Friends",
+    description: "Care for the next generation of ancient trees. Part of Chapter 3.",
+    icon: <Sprout className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+      { token: "species", amount: "TBD" },
+    ],
+    status: "coming_soon",
+  },
+  {
+    id: "seed-saving",
+    label: "Saving, Sharing, or Growing Seeds",
+    description: "Participate in the broader seed economy beyond planting and collecting.",
     icon: <Leaf className="w-4 h-4" />,
     rewards: [
-      { token: "s33d", amount: "20 bonus" },
-      { token: "species", amount: "10 bonus" },
-      { token: "influence", amount: "5" },
+      { token: "s33d", amount: "TBD" },
     ],
-    status: "seasonal",
-    cooldown: "Per season",
+    status: "coming_soon",
+  },
+  {
+    id: "founding-minters",
+    label: "Founding Minter Drops & Airdrops",
+    description: "Early supporters may receive drops or airdrops as the ecosystem grows.",
+    icon: <Flame className="w-4 h-4" />,
+    rewards: [
+      { token: "s33d", amount: "TBD" },
+    ],
+    status: "coming_soon",
   },
 ];
 
