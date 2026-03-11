@@ -1,14 +1,9 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
-import ContextualWhisper from "@/components/ContextualWhisper";
-import WhyThisMatters from "@/components/WhyThisMatters";
-import TreeLoreSection from "@/components/TreeLoreSection";
-import HeartCanopyPulse from "@/components/HeartCanopyPulse";
-import WishTagSigils from "@/components/WishTagSigils";
 import {
   TreePageHero,
   TreeStorySection,
@@ -19,16 +14,7 @@ import {
   TreeHiveConnections,
   TreeHeartRewards,
 } from "@/components/tree-sections";
-import TreeJourneyInvitations from "@/components/tree-sections/TreeJourneyInvitations";
-import SeedPlanter from "@/components/SeedPlanter";
 import CoreLoopBar from "@/components/CoreLoopBar";
-import WhisperRipple from "@/components/WhisperRipple";
-import TreeHeartPool from "@/components/TreeHeartPool";
-import SpeciesAttestation from "@/components/SpeciesAttestation";
-import BloomingClock from "@/components/BloomingClock";
-import TreeShareCard from "@/components/TreeShareCard";
-import GreetingCardDialog from "@/components/greeting-cards/GreetingCardDialog";
-import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,50 +23,68 @@ import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous,
 } from "lucide-react";
-import AddOfferingDialog from "@/components/AddOfferingDialog";
-import ProposeEditDrawer from "@/components/ProposeEditDrawer";
-import MeetingTimer, { type Meeting, type TimerStatus } from "@/components/MeetingTimer";
-import OfferingHistory from "@/components/OfferingHistory";
-import BirdsongOfferingFlow from "@/components/BirdsongOfferingFlow";
-import BirdsongTab from "@/components/BirdsongTab";
-import EncounterClusterPanel from "@/components/EncounterClusterPanel";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
 import { useTreeSources } from "@/hooks/use-tree-sources";
 import { useTreeCheckins, useCheckinStats } from "@/hooks/use-tree-checkins";
-import ContributeSourceModal from "@/components/ContributeSourceModal";
-import TreeSourcesDisplay from "@/components/TreeSourcesDisplay";
-import CanopyCheckinModal from "@/components/CanopyCheckinModal";
-import CanopyVisitsTimeline from "@/components/CanopyVisitsTimeline";
-import TreeMarkets from "@/components/TreeMarkets";
-import StewardshipLeaderboard from "@/components/StewardshipLeaderboard";
-import LinkedVolumesPanel from "@/components/LinkedVolumesPanel";
-import TreeStewardshipLog from "@/components/stewardship/TreeStewardshipLog";
-import TreeGuardianRoles from "@/components/stewardship/TreeGuardianRoles";
-import SendWhisperModal from "@/components/SendWhisperModal";
-import AddContributionPanel from "@/components/contributions/AddContributionPanel";
-import ContributionFeed from "@/components/contributions/ContributionFeed";
 import { useTreeContributions } from "@/hooks/use-tree-contributions";
-import WhisperCollector from "@/components/WhisperCollector";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
-import WeatherCard from "@/components/WeatherCard";
-import TreeCheckinButton from "@/components/TreeCheckinButton";
-import SkystampSeal from "@/components/SkystampSeal";
-import OfferingQuoteBlock from "@/components/OfferingQuoteBlock";
-import OfferingCard from "@/components/OfferingCard";
-import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
-import OfferingSortControls, { type OfferingSortMode } from "@/components/OfferingSortControls";
-import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
+import type { Meeting, TimerStatus } from "@/components/MeetingTimer";
+import type { OfferingSortMode } from "@/components/OfferingSortControls";
 import { useBloomStatus } from "@/hooks/use-bloom-status";
 import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
-import PhenologyBadge from "@/components/PhenologyBadge";
-import PhenologyObservationButton from "@/components/PhenologyObservationButton";
-import PresenceRitual from "@/components/PresenceRitual";
 import { useTreePresence } from "@/hooks/use-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
+import OfferingCard from "@/components/OfferingCard";
+import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
+
+// Lazy-loaded secondary components (modals, panels, below-fold)
+const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
+const WhyThisMatters = lazy(() => import("@/components/WhyThisMatters"));
+const TreeLoreSection = lazy(() => import("@/components/TreeLoreSection"));
+const HeartCanopyPulse = lazy(() => import("@/components/HeartCanopyPulse"));
+const WishTagSigils = lazy(() => import("@/components/WishTagSigils"));
+const TreeJourneyInvitations = lazy(() => import("@/components/tree-sections/TreeJourneyInvitations"));
+const SeedPlanter = lazy(() => import("@/components/SeedPlanter"));
+const WhisperRipple = lazy(() => import("@/components/WhisperRipple"));
+const TreeHeartPool = lazy(() => import("@/components/TreeHeartPool"));
+const SpeciesAttestation = lazy(() => import("@/components/SpeciesAttestation"));
+const BloomingClock = lazy(() => import("@/components/BloomingClock"));
+const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
+const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
+const SeasonalMomentPanel = lazy(() => import("@/components/SeasonalMomentPanel"));
+const AddOfferingDialog = lazy(() => import("@/components/AddOfferingDialog"));
+const ProposeEditDrawer = lazy(() => import("@/components/ProposeEditDrawer"));
+const MeetingTimer = lazy(() => import("@/components/MeetingTimer"));
+const OfferingHistory = lazy(() => import("@/components/OfferingHistory"));
+const BirdsongOfferingFlow = lazy(() => import("@/components/BirdsongOfferingFlow"));
+const BirdsongTab = lazy(() => import("@/components/BirdsongTab"));
+const EncounterClusterPanel = lazy(() => import("@/components/EncounterClusterPanel"));
+const ContributeSourceModal = lazy(() => import("@/components/ContributeSourceModal"));
+const TreeSourcesDisplay = lazy(() => import("@/components/TreeSourcesDisplay"));
+const CanopyCheckinModal = lazy(() => import("@/components/CanopyCheckinModal"));
+const CanopyVisitsTimeline = lazy(() => import("@/components/CanopyVisitsTimeline"));
+const TreeMarkets = lazy(() => import("@/components/TreeMarkets"));
+const StewardshipLeaderboard = lazy(() => import("@/components/StewardshipLeaderboard"));
+const LinkedVolumesPanel = lazy(() => import("@/components/LinkedVolumesPanel"));
+const TreeStewardshipLog = lazy(() => import("@/components/stewardship/TreeStewardshipLog"));
+const TreeGuardianRoles = lazy(() => import("@/components/stewardship/TreeGuardianRoles"));
+const SendWhisperModal = lazy(() => import("@/components/SendWhisperModal"));
+const AddContributionPanel = lazy(() => import("@/components/contributions/AddContributionPanel"));
+const ContributionFeed = lazy(() => import("@/components/contributions/ContributionFeed"));
+const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
+const WeatherCard = lazy(() => import("@/components/WeatherCard"));
+const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
+const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
+const OfferingQuoteBlock = lazy(() => import("@/components/OfferingQuoteBlock"));
+const OfferingSortControls = lazy(() => import("@/components/OfferingSortControls"));
+const PhenologyBadge = lazy(() => import("@/components/PhenologyBadge"));
+const PhenologyObservationButton = lazy(() => import("@/components/PhenologyObservationButton"));
+const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
+const InfluenceTokenProvider = lazy(() => import("@/contexts/InfluenceTokenContext").then(m => ({ default: m.InfluenceTokenProvider })));
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 const offeringIcons: Record<OfferingType, React.ReactNode> = {
