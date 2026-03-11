@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import ContextualWhisper from "@/components/ContextualWhisper";
+import WhyThisMatters from "@/components/WhyThisMatters";
 import TreeLoreSection from "@/components/TreeLoreSection";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import WishTagSigils from "@/components/WishTagSigils";
