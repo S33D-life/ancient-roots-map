@@ -173,7 +173,7 @@ const DetailPanel = ({
           <h3 className="font-serif text-base text-foreground">{feature.name}</h3>
           <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
             <span className="text-[10px] px-2 py-0.5 rounded-full font-sans"
-              style={{ background: `${statusMeta.color}15`, color: statusMeta.color }}>
+              style={{ background: hslAlpha(statusMeta.color, 0.08), color: statusMeta.color }}>
               {statusMeta.emoji} {statusMeta.label}
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full font-sans bg-primary/5 text-muted-foreground">
