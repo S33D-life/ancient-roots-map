@@ -550,20 +550,10 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   }, [lat, lng, name, species]);
 
   const handleSubmit = async () => {
-    if (!species.trim()) {
-      toast({ title: "Missing fields", description: "Please fill in species", variant: "destructive" });
-      return;
-    }
+    // Species is no longer strictly required — uncertainty is allowed
+    const speciesValue = species.trim() || "Unknown species";
 
     const aiPredictions = speciesVisionResult?.predictions ?? [];
-    if (aiPredictions.length > 0 && speciesDecision === "pending") {
-      toast({
-        title: "Confirm species first",
-        description: "Choose an AI suggestion or edit the species manually before saving.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     const normalizedAiPredictions = aiPredictions.map((prediction) => ({
       scientificName: prediction.scientificName,
