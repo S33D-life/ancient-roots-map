@@ -3,6 +3,7 @@ import ActiveFilterChips from "@/components/ActiveFilterChips";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
+import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 import MapErrorBoundary from "@/components/MapErrorBoundary";
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
