@@ -220,23 +220,34 @@ const TeotagWhisper = ({ onAction }: TeotagWhisperProps) => {
     if (getSessionCount() >= MAX_PER_SESSION) return null;
 
     let pool: Whisper[];
-    switch (activeMode) {
-      case "guide":
-        pool = buildMapWhispers(mapContext, handleAction);
-        break;
-      case "librarian":
-        pool = buildLibraryWhispers(libraryContext, handleAction);
-        break;
-      case "scribe":
-        pool = buildCouncilWhispers(councilContext, handleAction);
-        break;
-      default:
-        pool = buildGenericWhispers();
+
+    // Page-level context takes priority
+    if (pageContext.tree) {
+      pool = buildTreePageWhispers(pageContext.tree, handleAction);
+    } else if (pageContext.harvest?.id) {
+      pool = buildHarvestPageWhispers(pageContext.harvest, handleAction);
+    } else if (pageContext.staff?.code) {
+      pool = buildStaffPageWhispers(pageContext.staff);
+    } else {
+      // Fall back to mode-based whispers
+      switch (activeMode) {
+        case "guide":
+          pool = buildMapWhispers(mapContext, handleAction);
+          break;
+        case "librarian":
+          pool = buildLibraryWhispers(libraryContext, handleAction);
+          break;
+        case "scribe":
+          pool = buildCouncilWhispers(councilContext, handleAction);
+          break;
+        default:
+          pool = buildGenericWhispers();
+      }
     }
 
     if (pool.length === 0) return null;
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [activeMode, mapContext, libraryContext, councilContext, handleAction]);
+  }, [activeMode, mapContext, libraryContext, councilContext, pageContext, handleAction]);
 
   const showNext = useCallback(() => {
     const now = Date.now();
