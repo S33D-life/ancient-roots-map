@@ -13,9 +13,11 @@ import GlobalSearch from "./GlobalSearch";
 import TeotagGuide from "./TeotagGuide";
 import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
+import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
+import DailySeedCounter from "./DailySeedCounter";
 
 
 const Header = () => {
