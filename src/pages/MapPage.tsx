@@ -98,6 +98,7 @@ const MapPage = () => {
             delay={8000}
             position="bottom-center"
           />
+          <TeotagWhisper />
         </Suspense>
       )}
     </div>
