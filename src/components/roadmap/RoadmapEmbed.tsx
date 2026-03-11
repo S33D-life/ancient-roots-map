@@ -50,7 +50,7 @@ const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {
           {/* Status pill */}
           <div className="flex items-center gap-1.5">
             <span className="text-[9px] px-1.5 py-0.5 rounded-full font-sans"
-              style={{ background: `${statusMeta.color}15`, color: statusMeta.color }}>
+              style={{ background: hslAlpha(statusMeta.color, 0.08), color: statusMeta.color }}>
               {statusMeta.emoji} {statusMeta.label}
             </span>
             <StageIcon stage={feature.stage} className="w-3 h-3 text-muted-foreground/50" />
