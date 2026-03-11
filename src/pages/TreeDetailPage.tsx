@@ -27,6 +27,7 @@ import SpeciesAttestation from "@/components/SpeciesAttestation";
 import BloomingClock from "@/components/BloomingClock";
 import TreeShareCard from "@/components/TreeShareCard";
 import GreetingCardDialog from "@/components/greeting-cards/GreetingCardDialog";
+import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -421,6 +422,17 @@ const TreeDetailPage = () => {
           <TabsContent value="overview" className="space-y-8">
             {/* Story + Structured Data (two-column) */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
+
+            {/* Seasonal Moment — ceremonial timing context */}
+            <SeasonalMomentPanel
+              onPromptSelect={(prompt) => {
+                if (prompt.suggestedType) {
+                  setActiveTab(prompt.suggestedType);
+                }
+                setAddOfferingOpen(true);
+              }}
+            />
+
 
             {/* Offerings Preview */}
             <TreeOfferingsPreview
