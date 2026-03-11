@@ -435,8 +435,10 @@ const Header = () => {
       
       </div>
       </header>
-      <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />
-      <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />
+      <Suspense fallback={null}>
+        {tetolOpen && <TetolMenu open={tetolOpen} onClose={() => setTetolOpen(false)} />}
+        {guideOpen && <TeotagGuide open={guideOpen} onClose={() => { setGuideOpen(false); setGuideTab("guide"); }} initialTab={guideTab} />}
+      </Suspense>
       <GlobalSearch open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
     </>
   );
