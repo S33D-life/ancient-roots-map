@@ -521,6 +521,12 @@ const TreeDetailPage = () => {
               onContribute={() => setContributeSourceOpen(true)}
             />
 
+            {/* Stewardship Log */}
+            <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
+
+            {/* Tree Guardians */}
+            <TreeGuardianRoles treeId={id!} />
+
             {/* Stewardship Leaderboard */}
             <StewardshipLeaderboard treeId={id!} />
           </TabsContent>
