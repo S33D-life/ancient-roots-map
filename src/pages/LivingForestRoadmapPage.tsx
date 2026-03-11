@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 import StageIcon from "@/components/roadmap/StageIcon";
+import { hslAlpha } from "@/utils/colorUtils";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
