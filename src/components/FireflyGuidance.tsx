@@ -61,6 +61,25 @@ const NO_SEED_GUIDANCE: GuidanceMessage[] = [
   { text: "Your seeds rest until dawn. Return tomorrow.", icon: "🌙" },
 ];
 
+const SEASONAL_GUIDANCE: Record<string, GuidanceMessage[]> = {
+  spring: [
+    { text: "Apple blossom season has begun…", icon: "🌸" },
+    { text: "Early harvests are stirring in the grove.", icon: "🌱" },
+  ],
+  summer: [
+    { text: "The canopy is full and alive.", icon: "☀️" },
+    { text: "Fruits are ripening across the grove.", icon: "🍎" },
+  ],
+  autumn: [
+    { text: "Seeds are falling — time to gather.", icon: "🍂" },
+    { text: "The harvest is at its peak.", icon: "🌰" },
+  ],
+  winter: [
+    { text: "The grove rests beneath frost.", icon: "❄️" },
+    { text: "Evergreen friends hold the quiet watch.", icon: "🌲" },
+  ],
+};
+
 interface FireflyGuidanceProps {
   fabPosition: { x: number; y: number };
   visible: boolean;
