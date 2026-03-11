@@ -680,6 +680,9 @@ const HivePage = () => {
                 {/* Species Heart Leaderboard */}
                 <HiveSpeciesLeaderboard family={hive.family} accentHsl={hive.accentHsl} icon={hive.icon} />
 
+                {/* Stewardship Signals */}
+                <HiveStewardshipSignals hiveFamily={hive.family} accentHsl={hive.accentHsl} userId={currentUserId} />
+
                 {/* Blooming Clock for hive species */}
                 <BloomingClock />
 
