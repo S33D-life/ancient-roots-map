@@ -532,10 +532,10 @@ const EarnBranch = () => {
       {
         id: "council",
         label: "Attend or Host a Council",
-        description: "Join or organize a gathering of the Council of Life.",
+        description: "Join or organize a Council of Life gathering.",
         icon: <Users className="w-5 h-5" />,
         category: "Council",
-        estimatedReward: "+5-20 ❤️ +5 🛡️",
+        estimatedReward: "+5 ❤️ per event",
         link: "/council-of-life",
         ready: true,
         priority: 6,
