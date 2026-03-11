@@ -104,6 +104,29 @@ const WandererProfilePage = () => {
                     {data.bio || "This wanderer has not added a biography yet."}
                   </p>
 
+                  {/* Species Hearts Balances */}
+                  {speciesBalances && speciesBalances.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <p className="text-xs font-serif text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        <Heart className="w-3 h-3" /> Species Hearts
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {speciesBalances.slice(0, 8).map(b => (
+                          <Link key={b.family} to={`/hive/${b.hive.slug}`}>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-serif gap-1 cursor-pointer hover:border-primary/40 transition-colors"
+                            >
+                              <span>{b.hive.icon}</span>
+                              <span className="tabular-nums font-bold">{b.amount}</span>
+                              <span className="text-muted-foreground">{b.family}</span>
+                            </Badge>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Button variant="sacred" size="sm" asChild>
                       <Link to="/map">
