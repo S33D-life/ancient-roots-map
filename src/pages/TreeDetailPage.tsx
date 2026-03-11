@@ -423,6 +423,17 @@ const TreeDetailPage = () => {
             {/* Story + Structured Data (two-column) */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
 
+            {/* Seasonal Moment — ceremonial timing context */}
+            <SeasonalMomentPanel
+              onPromptSelect={(prompt) => {
+                if (prompt.suggestedType) {
+                  setActiveTab(prompt.suggestedType);
+                }
+                setAddOfferingOpen(true);
+              }}
+            />
+
+
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
