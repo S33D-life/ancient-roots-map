@@ -94,14 +94,14 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           <span className="text-lg">🌳</span>
         </div>
         <div>
-          <h3 className="font-serif text-sm tracking-wide text-foreground">Heart Reservoir</h3>
-          <p className="text-xs text-muted-foreground font-serif">This tree's living treasury</p>
+          <h3 className="font-serif text-sm tracking-wide text-foreground">S33D Heart Reservoir</h3>
+          <p className="text-xs text-muted-foreground font-serif">This tree's commons treasury</p>
         </div>
         <div className="ml-auto text-right">
           <p className="font-serif text-lg tabular-nums" style={{ color: "hsl(120 45% 55%)" }}>
             {pool.total_hearts}
           </p>
-          <p className="text-[10px] text-muted-foreground font-serif">🌳 Hearts</p>
+          <p className="text-[10px] text-muted-foreground font-serif">🌳 S33D Hearts</p>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           />
         </div>
         <p className="text-[10px] text-muted-foreground/60 font-serif italic">
-          Every 144 hearts → 12 released to wanderers
+          Every 144 S33D Hearts → 12 released to wanderers
         </p>
       </div>
 

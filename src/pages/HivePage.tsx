@@ -522,9 +522,9 @@ const HivePage = () => {
                     <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                     <h4 className="text-sm font-serif text-foreground mb-1">Species Heart Staking</h4>
                     <p className="text-xs text-muted-foreground font-serif mb-3 max-w-md mx-auto">
-                      Stake {hive.family} Hearts at individual trees or the collective hive to earn S33D Hearts drip, species boosts, and lottery eligibility.
+                      Stake {hive.family} Hearts at individual trees or the collective hive to earn S33D Hearts and species boosts. Staking is part of the broader S33D Heart economy being built in Chapter 3.
                     </p>
-                    <Badge variant="outline" className="font-serif text-[10px]">Coming Soon</Badge>
+                    <Badge variant="outline" className="font-serif text-[10px]">Coming Later — Chapter 3</Badge>
                   </CardContent>
                 </Card>
               </div>

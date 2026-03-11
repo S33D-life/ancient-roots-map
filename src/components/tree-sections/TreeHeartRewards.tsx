@@ -1,12 +1,12 @@
 /**
  * TreeHeartRewards — Elegant, non-cluttered display of heart reward mechanics.
- * Shows what actions earn hearts beneath the tree.
+ * Shows what actions earn S33D Hearts beneath the tree.
  */
 import { motion } from "framer-motion";
 import { Heart, MapPin, Sparkles, Star, BookOpen, Eye } from "lucide-react";
 
 const ACTIONS = [
-  { icon: <MapPin className="w-4 h-4" />, label: "Mapping", desc: "Add a tree to the atlas" },
+  { icon: <MapPin className="w-4 h-4" />, label: "Mapping", desc: "Add a tree to the living atlas" },
   { icon: <Sparkles className="w-4 h-4" />, label: "Offering", desc: "Share songs, poems, stories" },
   { icon: <Star className="w-4 h-4" />, label: "Wishing", desc: "Leave a wish in the canopy" },
   { icon: <BookOpen className="w-4 h-4" />, label: "Research", desc: "Contribute verified sources" },
@@ -18,7 +18,7 @@ const TreeHeartRewards = () => {
     <section className="space-y-4">
       <div className="text-center">
         <p className="text-sm font-serif text-muted-foreground italic">
-          Actions that grow the forest earn <Heart className="w-3.5 h-3.5 inline text-primary pulse-live" /> Hearts.
+          Stewardship actions earn <Heart className="w-3.5 h-3.5 inline text-primary pulse-live" /> S33D Hearts — the commons currency.
         </p>
       </div>
 

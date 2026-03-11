@@ -258,7 +258,7 @@ const SpeciesDetail = ({
       <div className="py-3 text-center">
         <span className="text-2xl">🌿</span>
         <p className="text-[10px] text-muted-foreground font-serif mt-1">
-          Map trees and make offerings to earn Species Hearts
+          Map trees and make offerings to earn Species Hearts — fractal S33D Hearts within each hive
         </p>
       </div>
     );

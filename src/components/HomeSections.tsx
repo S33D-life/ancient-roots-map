@@ -30,7 +30,7 @@ export const IdentitySection = () => (
         className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto"
       >
         S33D maps ancient trees worldwide, gathers stories from those who visit them,
-        and rewards stewardship with S33D Hearts — a digital currency of care.
+        and rewards stewardship with S33D Hearts — the commons currency of the ecosystem.
       </motion.p>
 
       {/* Value chips */}
