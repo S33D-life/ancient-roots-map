@@ -198,8 +198,8 @@ export const TeotagProvider = ({ children }: { children: ReactNode }) => {
   }, [pathname, activeMode, mapContext, libraryContext, councilContext]);
 
   const quickActions = useMemo(
-    () => getQuickActions(activeMode, mapContext, libraryContext),
-    [activeMode, mapContext, libraryContext]
+    () => getQuickActions(activeMode, mapContext, libraryContext, pathname),
+    [activeMode, mapContext, libraryContext, pathname]
   );
 
   const value = useMemo<TeotagContextValue>(() => ({
