@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wind, ChevronDown, TreePine } from "lucide-react";
 import { useWhisperEchoes, type WhisperEcho } from "@/hooks/use-whisper-echoes";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface WhisperEchoesFeedProps {
   /** Max whispers to display */
@@ -123,14 +122,15 @@ const WhisperEchoesFeed = ({ limit = 8, compact = false }: WhisperEchoesFeedProp
         </AnimatePresence>
       </div>
 
-      {/* Expand/collapse */}
+      {/* Show more / fewer */}
       {echoes && echoes.length > limit && (
-        <Collapsible open={expanded} onOpenChange={setExpanded}>
-          <CollapsibleTrigger className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[10px] font-serif text-muted-foreground/50 hover:text-primary/60 transition-colors border-t border-border/15">
-            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
-            {expanded ? "Show fewer" : `${echoes.length - limit} more echoes`}
-          </CollapsibleTrigger>
-        </Collapsible>
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[10px] font-serif text-muted-foreground/50 hover:text-primary/60 transition-colors border-t border-border/15"
+        >
+          <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
+          {expanded ? "Show fewer" : `${echoes.length - limit} more echoes`}
+        </button>
       )}
     </div>
   );
