@@ -111,6 +111,12 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
       return SEED_GUIDANCE[Math.floor(Math.random() * SEED_GUIDANCE.length)];
     }
 
+    // Seasonal lens whispers — 30% chance when active
+    if (seasonal.active && seasonal.season && Math.random() < 0.3) {
+      const pool = SEASONAL_GUIDANCE[seasonal.season];
+      if (pool?.length) return pool[Math.floor(Math.random() * pool.length)];
+    }
+
     // Route-based
     const path = location.pathname;
     const routeKey = Object.keys(ROUTE_GUIDANCE).find(k =>
@@ -118,7 +124,7 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
     );
     const pool = routeKey ? ROUTE_GUIDANCE[routeKey] : ROUTE_GUIDANCE["/"];
     return pool[Math.floor(Math.random() * pool.length)];
-  }, [location.pathname, userId, seedsRemaining]);
+  }, [location.pathname, userId, seedsRemaining, seasonal]);
 
   // Show a guidance whisper periodically
   useEffect(() => {
