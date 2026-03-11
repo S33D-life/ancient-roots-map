@@ -1136,7 +1136,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       ) : undefined,
     },
-  ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
+  ], [showSeeds, showOfferingGlow, showAncientHighlight, showHarvestLayer, harvestTreeIds.size,
+      showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
       showMycelialNetwork, mycelialConnections.length,
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
       showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
