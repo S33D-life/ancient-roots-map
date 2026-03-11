@@ -180,12 +180,12 @@ function getQuickActions(
 
   // ── Harvest index page ────────────────────────
   if (route.startsWith("/harvest")) {
-    return [
+    return withSeason([
       { label: "Harvests near me", prompt: "What harvests are happening near me this month?", emoji: "🍎" },
       { label: "Seasonal produce", prompt: "What tree produce is in season right now?", emoji: "🌿" },
       { label: "Find on map", prompt: "Show me harvest locations on the map.", emoji: "🗺️" },
       { label: "Blooming now", prompt: "What trees are flowering or fruiting this month?", emoji: "🌸" },
-    ];
+    ]);
   }
 
   // ── Staff page ────────────────────────────────
