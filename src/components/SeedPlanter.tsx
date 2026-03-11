@@ -31,6 +31,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   const [planting, setPlanting] = useState(false);
   const [collecting, setCollecting] = useState<string | null>(null);
   const [showPlanted, setShowPlanted] = useState(false);
+  const [showBurst, setShowBurst] = useState(false);
   const [receiptVisible, setReceiptVisible] = useState(false);
   const [receiptData, setReceiptData] = useState<{ s33dHearts: number; speciesHearts: number; speciesFamily?: string }>({ s33dHearts: 0, speciesHearts: 0 });
 
