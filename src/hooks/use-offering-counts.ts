@@ -42,11 +42,16 @@ export function useOfferingCounts({ realtime = true }: { realtime?: boolean } = 
 
   useEffect(() => {
     if (!realtime) return;
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const debouncedFetch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(fetch, 2000);
+    };
     const channel = supabase
       .channel("offering-counts-global")
-      .on("postgres_changes", { event: "*", schema: "public", table: "offerings" }, () => fetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "offerings" }, debouncedFetch)
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { clearTimeout(debounceTimer); supabase.removeChannel(channel); };
   }, [realtime, fetch]);
 
   return { counts, photos, loading, refetch: fetch };

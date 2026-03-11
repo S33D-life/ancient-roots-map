@@ -11,7 +11,7 @@ import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import StarryNight from "@/components/StarryNight";
+const StarryNight = lazy(() => import("@/components/StarryNight"));
 
 import DevQAPanel from "@/components/DevQAPanel";
 import DevDiagnosticsOverlay from "@/components/DevDiagnosticsOverlay";
@@ -227,7 +227,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <StarryNight />
+        <Suspense fallback={null}><StarryNight /></Suspense>
         <MissingEnvBanner />
         {ShowDevPanel && <DevQAPanel />}
         {ShowDevPanel && <DevDiagnosticsOverlay />}
