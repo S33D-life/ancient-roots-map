@@ -645,6 +645,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [showOfferingGlow, setShowOfferingGlow] = useState(false);
+  const [showHarvestLayer, setShowHarvestLayer] = useState(false);
+  const [showAncientHighlight, setShowAncientHighlight] = useState(false);
+  const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
+  const harvestLayerRef = useRef<L.LayerGroup | null>(null);
+  const ancientHighlightLayerRef = useRef<L.LayerGroup | null>(null);
   const [showExternalTrees, setShowExternalTrees] = useState(false);
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
   const [showHiveLayer, setShowHiveLayer] = useState(false);
@@ -979,12 +984,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   /** Visual layer sections for AtlasFilter — renderer-specific toggles passed as props */
   const visualSections: VisualLayerSection[] = useMemo(() => [
     {
+      key: "discovery",
+      title: "Discovery Filters",
+      icon: "🔍",
+      accent: "hsl(42, 80%, 55%)",
+      description: "Highlight trees by significance, harvest availability, or community offerings.",
+      layers: [
+        { key: "ancient-highlight", label: "👑 Ancient Trees", description: "Golden halos on the oldest, most storied trees", active: showAncientHighlight, toggle: () => setShowAncientHighlight(v => !v), accent: "42, 80%, 55%" },
+        { key: "harvest-layer", label: "🍎 Harvest Available", description: "Trees with active produce listings", active: showHarvestLayer, toggle: () => setShowHarvestLayer(v => !v), extra: showHarvestLayer ? (harvestTreeIds.size > 0 ? `${harvestTreeIds.size}` : "—") : undefined, accent: "25, 70%, 50%" },
+        { key: "offering-glow", label: "✦ Offerings", description: "Warm glow on trees with community contributions", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v), accent: "42, 85%, 55%" },
+      ],
+    },
+    {
       key: "signals",
       title: "Mycelial Whispers",
       icon: "✦",
       layers: [
         { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(v => !v) },
-        { key: "offering-glow", label: "🔥 Forest Warmth", active: showOfferingGlow, toggle: () => setShowOfferingGlow(v => !v) },
         { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => setShowHeartGlow(v => !v), accent: "0, 65%, 55%" },
         { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
         { key: "mycelial-network", label: "🕸️ Mycelial Network", active: showMycelialNetwork, toggle: () => setShowMycelialNetwork(v => !v), extra: showMycelialNetwork ? `${mycelialConnections.length}` : "off" },
@@ -1120,7 +1136,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       ) : undefined,
     },
-  ], [showSeeds, showOfferingGlow, showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
+  ], [showSeeds, showOfferingGlow, showAncientHighlight, showHarvestLayer, harvestTreeIds.size,
+      showBirdsongHeat, birdsongHeatPoints.length, birdsongSeason,
       showMycelialNetwork, mycelialConnections.length,
       showGroves, showRootThreads, showResearchLayer, researchLoading, researchTreeCount,
       showRootstones, showRootstoneTrees, showRootstoneGroves, rootstoneCount,
@@ -2596,6 +2613,148 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       if (map.hasLayer(glowLayer)) map.removeLayer(glowLayer);
     };
   }, [filteredTrees, showOfferingGlow]);
+
+  // Fetch harvest tree IDs for the harvest layer
+  useEffect(() => {
+    if (!showHarvestLayer) return;
+    const fetchHarvestTrees = async () => {
+      const { data } = await supabase
+        .from("harvest_listings")
+        .select("tree_id")
+        .not("tree_id", "is", null)
+        .in("status", ["available", "upcoming"]);
+      if (data) {
+        setHarvestTreeIds(new Set(data.map(d => d.tree_id).filter(Boolean) as string[]));
+      }
+    };
+    fetchHarvestTrees();
+  }, [showHarvestLayer]);
+
+  // Harvest layer — 🍎 badges on trees with active harvest listings
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (harvestLayerRef.current) {
+      map.removeLayer(harvestLayerRef.current);
+      harvestLayerRef.current = null;
+    }
+
+    if (!showHarvestLayer || harvestTreeIds.size === 0) return;
+
+    const layer = L.layerGroup();
+    const visible = getVisibleTrees(map, filteredTrees, 0.05);
+
+    visible.forEach((tree) => {
+      if (!harvestTreeIds.has(tree.id)) return;
+
+      // Warm glow ring
+      L.circleMarker([tree.latitude, tree.longitude], {
+        radius: 18,
+        color: "hsl(25, 75%, 50%)",
+        fillColor: "hsl(30, 80%, 55%)",
+        fillOpacity: 0.2,
+        weight: 1.5,
+        opacity: 0.5,
+        interactive: false,
+        className: "harvest-glow",
+      }).addTo(layer);
+
+      // Harvest badge
+      const badgeIcon = L.divIcon({
+        html: `<span style="
+          background: hsl(25, 70%, 45%);
+          color: hsl(45, 95%, 90%);
+          font-size: 11px;
+          border-radius: 50%;
+          width: 22px; height: 22px;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 8px hsla(25, 80%, 50%, 0.5);
+          pointer-events: none;
+        ">🍎</span>`,
+        className: "harvest-badge",
+        iconSize: L.point(22, 22),
+        iconAnchor: L.point(11, -6),
+      });
+      L.marker([tree.latitude, tree.longitude], { icon: badgeIcon, interactive: false }).addTo(layer);
+    });
+
+    layer.addTo(map);
+    harvestLayerRef.current = layer;
+
+    return () => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    };
+  }, [filteredTrees, showHarvestLayer, harvestTreeIds]);
+
+  // Ancient tree highlight layer — golden pulse ring around ancient-tier trees
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (ancientHighlightLayerRef.current) {
+      map.removeLayer(ancientHighlightLayerRef.current);
+      ancientHighlightLayerRef.current = null;
+    }
+
+    if (!showAncientHighlight) return;
+
+    const layer = L.layerGroup();
+    const currentOfferings = offeringCountsRef.current;
+    const visible = getVisibleTrees(map, filteredTrees, 0.05);
+
+    visible.forEach((tree) => {
+      const age = tree.estimated_age || 0;
+      const offerings = currentOfferings[tree.id] || 0;
+      const tier = getTreeTier(age, offerings);
+
+      if (tier !== "ancient") return;
+
+      // Outer golden pulse ring
+      L.circleMarker([tree.latitude, tree.longitude], {
+        radius: 24,
+        color: "hsl(42, 90%, 55%)",
+        fillColor: "hsl(42, 85%, 60%)",
+        fillOpacity: 0.15,
+        weight: 2,
+        opacity: 0.6,
+        interactive: false,
+        className: "ancient-highlight-outer",
+      }).addTo(layer);
+
+      // Inner ring
+      L.circleMarker([tree.latitude, tree.longitude], {
+        radius: 16,
+        color: "hsl(42, 80%, 50%)",
+        fillColor: "hsl(42, 90%, 65%)",
+        fillOpacity: 0.25,
+        weight: 1.5,
+        opacity: 0.7,
+        interactive: false,
+        className: "ancient-highlight-inner",
+      }).addTo(layer);
+
+      // Crown badge
+      const crownIcon = L.divIcon({
+        html: `<span style="
+          font-size: 13px;
+          filter: drop-shadow(0 0 4px hsla(42, 90%, 55%, 0.7));
+          pointer-events: none;
+        ">👑</span>`,
+        className: "ancient-crown-badge",
+        iconSize: L.point(18, 18),
+        iconAnchor: L.point(9, 28),
+      });
+      L.marker([tree.latitude, tree.longitude], { icon: crownIcon, interactive: false }).addTo(layer);
+    });
+
+    layer.addTo(map);
+    ancientHighlightLayerRef.current = layer;
+
+    return () => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    };
+  }, [filteredTrees, showAncientHighlight]);
 
   // Birdsong seasonal heatmap layer
   const SEASON_COLORS: Record<string, { fill: string; stroke: string; label: string }> = {
