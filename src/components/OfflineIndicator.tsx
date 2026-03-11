@@ -87,6 +87,13 @@ const OfflineIndicator = () => {
             >
               <WifiOff className="w-3 h-3" />
               <span>Offline{pendingCount > 0 ? ` · ${pendingCount} queued` : ""}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
+                className="ml-0.5 p-0.5 rounded-full hover:bg-destructive/20 transition-colors"
+                aria-label="Dismiss offline notification"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
             </div>
           )}
 
