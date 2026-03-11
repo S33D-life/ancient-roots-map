@@ -512,6 +512,24 @@ All colors MUST be HSL.
     animation: glowPulse var(--pulse-duration) var(--pulse-ease) infinite;
   }
 
+  /* TEOTAG Firefly orb — ambient aura breathing */
+  @keyframes fireflyAmbient {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%      { opacity: 0.7; transform: scale(1.12); }
+  }
+  .firefly-ambient {
+    animation: fireflyAmbient 4.5s ease-in-out infinite;
+  }
+
+  /* TEOTAG Firefly orb — subtle pulse ring */
+  @keyframes fireflyPulse {
+    0%, 100% { box-shadow: 0 0 20px 6px hsl(45 90% 60% / 0.1); }
+    50%      { box-shadow: 0 0 28px 10px hsl(45 90% 60% / 0.25); }
+  }
+  .firefly-pulse {
+    animation: fireflyPulse var(--pulse-duration) var(--pulse-ease) infinite;
+  }
+
   /* ═══════════════════════════════════════════════════
      ARTERIAL PULSE SYSTEM — one heartbeat, many nodes
      ═══════════════════════════════════════════════════ */
@@ -581,7 +599,9 @@ All colors MUST be HSL.
     .pulse-live,
     .pulse-cta,
     .pulse-fruit,
-    .glow-breath {
+    .glow-breath,
+    .firefly-ambient,
+    .firefly-pulse {
       animation: none !important;
     }
   }
@@ -591,7 +611,9 @@ All colors MUST be HSL.
   .tab-hidden .pulse-live,
   .tab-hidden .pulse-cta,
   .tab-hidden .pulse-fruit,
-  .tab-hidden .glow-breath {
+  .tab-hidden .glow-breath,
+  .tab-hidden .firefly-ambient,
+  .tab-hidden .firefly-pulse {
     animation-play-state: paused !important;
   }
 

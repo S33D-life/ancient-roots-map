@@ -60,11 +60,11 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
           <div className="p-5 pb-4">
             <DialogHeader className="mb-5">
               <DialogTitle className="font-serif text-base flex items-center gap-2">
-                <span className="text-lg">✦</span>
-                Firefly
+                <span className="text-lg">🍃</span>
+                TEOTAG's Orb
               </DialogTitle>
-              <p className="text-[11px] text-muted-foreground/50 font-serif leading-relaxed mt-1.5">
-                Search, contribute, and explore. Earn Hearts when validated.
+              <p className="text-[11px] text-muted-foreground/50 font-serif leading-relaxed mt-1.5 italic">
+                The Echo of the Ancient Grove guides your path. Search, contribute, and explore.
               </p>
             </DialogHeader>
 
