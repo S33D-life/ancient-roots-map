@@ -33,7 +33,7 @@ export function useWandererStreak(userId: string | null | undefined) {
         .eq("user_id", userId)
         .maybeSingle();
       if (error) { console.error("Streak fetch error:", error); return null; }
-      return data as WandererStreak | null;
+      return data as unknown as WandererStreak | null;
     },
   });
 }

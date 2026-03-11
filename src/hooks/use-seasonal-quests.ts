@@ -67,7 +67,7 @@ export function useSeasonalQuests(userId: string | null | undefined) {
         .eq("season", season)
         .eq("year", year);
       if (error) { console.error("Quests fetch error:", error); return []; }
-      return (data || []) as SeasonalQuest[];
+      return (data || []) as unknown as SeasonalQuest[];
     },
   });
 

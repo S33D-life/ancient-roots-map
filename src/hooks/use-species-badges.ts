@@ -23,7 +23,7 @@ export function useSpeciesBadges(userId: string | null | undefined) {
         .eq("user_id", userId)
         .order("trees_mapped", { ascending: false });
       if (error) { console.error("Badges fetch error:", error); return []; }
-      return (data || []) as SpeciesBadge[];
+      return (data || []) as unknown as SpeciesBadge[];
     },
   });
 }
