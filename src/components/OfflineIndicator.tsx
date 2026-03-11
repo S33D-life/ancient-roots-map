@@ -84,7 +84,7 @@ const OfflineIndicator = () => {
           )}
 
           {mode === "reconnecting" && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px] font-serif">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-warning/15 border border-warning/30 text-warning text-[10px] font-serif">
               <Loader2 className="w-3 h-3 animate-spin" />
               <span>Reconnecting…</span>
             </div>
