@@ -4,6 +4,8 @@ import { X, Sparkles, TreeDeciduous, Sprout, Leaf } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
+import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
+import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
