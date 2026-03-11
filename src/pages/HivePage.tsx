@@ -16,6 +16,8 @@ import { Loader2, TreePine, Heart, Music, Users, Map, Shield, TrendingUp, Lock, 
 import { useMarkets } from "@/hooks/use-markets";
 import MarketCard from "@/components/MarketCard";
 import { motion } from "framer-motion";
+import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
+import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import OfferingList from "@/components/OfferingList";
 import HiveSpeciesLeaderboard from "@/components/HiveSpeciesLeaderboard";
 import InfluenceWeightedVoting from "@/components/InfluenceWeightedVoting";
