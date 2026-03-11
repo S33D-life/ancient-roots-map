@@ -36,12 +36,16 @@ const CosmicCalendarPage = () => {
   }, []);
 
   const { activeLenses, getLensDataForDate, todayMayan, prefs } = useCalendarLenses(userId);
+  const { activeLens: seasonalLens, isLensMonth } = useSeasonalLens();
 
   // Unified seasonal events (includes harvest listings + food cycles)
   const { harvestEvents, bloomEvents, getEventsForMonth } = useSeasonalEvents(viewMonth + 1);
 
   // Mayan lens active?
   const mayanActive = activeLenses.some(l => l.slug === "mayan");
+
+  // Spring lens: is current view month a spring month?
+  const isSpringMonth = seasonalLens === "spring" && isLensMonth(viewMonth + 1);
 
   // Calendar grid
   const calendarDays = useMemo(() => {
