@@ -482,6 +482,14 @@ const TreeDetailPage = () => {
               w3w={tree.what3words}
             />
 
+            {/* Journey Invitations — contribution CTAs + hive link */}
+            <TreeJourneyInvitations
+              species={tree.species}
+              treeId={id!}
+              treeName={tree.name}
+              onAddOffering={() => setAddOfferingOpen(true)}
+            />
+
             {/* Hive Connections */}
             <TreeHiveConnections
               species={tree.species}
