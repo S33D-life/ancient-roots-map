@@ -32,7 +32,7 @@ interface OfflineOfferingInput {
 export async function createOfferingOfflineAware(input: OfflineOfferingInput): Promise<{ queued: boolean; error?: string }> {
   const { photoDataUrl, ...payload } = input;
 
-  if (isOnline()) {
+  if (canSync()) {
     // Try direct insert
     const { error } = await supabase.from("offerings").insert(payload as any);
     if (error) return { queued: false, error: error.message };
