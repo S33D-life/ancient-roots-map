@@ -9,7 +9,7 @@
  * 5. Failed items — warning pill with retry
  * 6. Online + no pending — hidden (null)
  */
-import { WifiOff, Upload, Loader2, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { WifiOff, Upload, Loader2, AlertTriangle, CheckCircle2, Clock, X } from "lucide-react";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { runSync } from "@/utils/syncEngine";
 import { useState, useCallback, useEffect } from "react";
@@ -21,10 +21,17 @@ const OfflineIndicator = () => {
   const { status, pendingCount, failedCount, pendingByType, lastSyncedAt } = useConnectivity();
   const [syncing, setSyncing] = useState(false);
   const [justSynced, setJustSynced] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  // Reset dismissed when connectivity status changes
+  useEffect(() => {
+    if (status === "online") setDismissed(false);
+  }, [status]);
 
   // Determine display mode
   let mode: IndicatorMode = "hidden";
-  if (status === "offline") mode = "offline";
+  if (dismissed) mode = "hidden";
+  else if (status === "offline") mode = "offline";
   else if (status === "reconnecting") mode = "reconnecting";
   else if (syncing) mode = "syncing";
   else if (failedCount > 0) mode = "failed";
@@ -80,6 +87,13 @@ const OfflineIndicator = () => {
             >
               <WifiOff className="w-3 h-3" />
               <span>Offline{pendingCount > 0 ? ` · ${pendingCount} queued` : ""}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
+                className="ml-0.5 p-0.5 rounded-full hover:bg-destructive/20 transition-colors"
+                aria-label="Dismiss offline notification"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
             </div>
           )}
 
