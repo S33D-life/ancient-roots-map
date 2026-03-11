@@ -257,6 +257,16 @@ const FireflyFAB = () => {
           🍃
         </span>
 
+        {/* Seasonal lens badge — subtle emoji indicator */}
+        {activeLens && lensConfig && (
+          <span
+            className="absolute -top-1 -right-1 text-[10px] leading-none pointer-events-none animate-in fade-in duration-500"
+            title={lensConfig.label}
+          >
+            {lensConfig.emoji}
+          </span>
+        )}
+
         {/* Breathing pulse ring — arterial rhythm */}
         <span
           className={`absolute inset-0 rounded-full pointer-events-none ${anyOpen ? '' : 'firefly-pulse'}`}

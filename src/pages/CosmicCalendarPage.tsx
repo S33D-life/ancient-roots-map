@@ -219,7 +219,7 @@ const CosmicCalendarPage = () => {
                     text-xs font-serif transition-all
                     ${isSelected ? "bg-primary/20 ring-1 ring-primary/40 text-primary" : "hover:bg-card/80 text-foreground/70"}
                     ${isTodayCell ? "ring-1 ring-primary/30 font-bold text-primary" : ""}
-                    ${isSpringMonth && !isSelected ? "bg-primary/[0.03]" : ""}
+                    ${isSeasonalMonth && !isSelected ? "bg-primary/[0.03]" : ""}
                   `}
                 >
                   <span className="leading-none">{day.getDate()}</span>

@@ -78,6 +78,9 @@ const MapPage = () => {
           <Header />
            <div className="absolute left-0 right-0 z-[20]" style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px))" }}>
             <ActiveFilterChips />
+            <div className="px-3 mt-1">
+              <SeasonalLensBanner context="map" />
+            </div>
           </div>
         </>
       )}
