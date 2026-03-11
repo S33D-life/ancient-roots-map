@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, Upload, Loader2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured } from "@/config/env";
 import { getPendingTrees, removePendingTree, pendingCount, PendingTree } from "@/utils/offlineQueue";
 import { toast } from "sonner";
 
@@ -46,7 +47,7 @@ const OfflineSyncBanner = () => {
   }, [refreshCount]);
 
   const syncPending = useCallback(async () => {
-    if (syncing) return;
+    if (syncing || !isSupabaseConfigured) return;
     setSyncing(true);
 
     try {
@@ -117,7 +118,7 @@ const OfflineSyncBanner = () => {
     <AnimatePresence>
       {(count > 0 || !online) && (
         <motion.div
-          className="fixed top-16 left-1/2 -translate-x-1/2 z-[60]"
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-[65]"
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -40, opacity: 0 }}

@@ -3,8 +3,14 @@
  * or execute directly when online. Always show appropriate feedback.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured } from "@/config/env";
 import { queueAction, offlineId, isOnline, type PendingAction } from "@/utils/offlineSync";
 import { toast } from "sonner";
+
+/** True when we can actually reach Supabase */
+function canSync(): boolean {
+  return isOnline() && isSupabaseConfigured;
+}
 
 function emitChange() {
   window.dispatchEvent(new CustomEvent("s33d-queue-change"));
@@ -26,7 +32,7 @@ interface OfflineOfferingInput {
 export async function createOfferingOfflineAware(input: OfflineOfferingInput): Promise<{ queued: boolean; error?: string }> {
   const { photoDataUrl, ...payload } = input;
 
-  if (isOnline()) {
+  if (canSync()) {
     // Try direct insert
     const { error } = await supabase.from("offerings").insert(payload as any);
     if (error) return { queued: false, error: error.message };
@@ -68,7 +74,7 @@ interface OfflineCheckinInput {
 export async function createCheckinOfflineAware(input: OfflineCheckinInput): Promise<{ queued: boolean; error?: string }> {
   const { photoDataUrl, ...payload } = input;
 
-  if (isOnline()) {
+  if (canSync()) {
     const { error } = await supabase.from("tree_checkins").insert(payload as any);
     if (error) return { queued: false, error: error.message };
     toast.success("🌳 Check-in recorded");
@@ -102,7 +108,7 @@ interface OfflineNoteInput {
 
 /** Create a note — online or queued offline */
 export async function createNoteOfflineAware(input: OfflineNoteInput): Promise<{ queued: boolean; error?: string }> {
-  if (isOnline()) {
+  if (canSync()) {
     // Notes could go to different tables — for now, store as offering type 'note'
     const { error } = await supabase.from("offerings").insert({
       tree_id: input.tree_id,

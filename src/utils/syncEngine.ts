@@ -7,6 +7,7 @@
  * - Emits 's33d-queue-change' events for UI reactivity
  */
 import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured } from "@/config/env";
 import {
   getActionsByStatus,
   updateAction,
@@ -89,7 +90,7 @@ async function processAction(action: PendingAction): Promise<boolean> {
 
 /** Run the sync loop — call on reconnect or manually */
 export async function runSync(): Promise<{ synced: number; failed: number }> {
-  if (syncing || !navigator.onLine) return { synced: 0, failed: 0 };
+  if (syncing || !navigator.onLine || !isSupabaseConfigured) return { synced: 0, failed: 0 };
   syncing = true;
 
   let synced = 0;
