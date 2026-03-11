@@ -227,7 +227,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <StarryNight />
+        <Suspense fallback={null}><StarryNight /></Suspense>
         <MissingEnvBanner />
         {ShowDevPanel && <DevQAPanel />}
         {ShowDevPanel && <DevDiagnosticsOverlay />}
