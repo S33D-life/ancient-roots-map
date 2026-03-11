@@ -351,6 +351,44 @@ const DashboardPage = () => {
     );
   }
 
+  // ── Growth Engine sub-components ──
+  const GrowthEngineHearth = ({ userId, profile: p }: { userId: string; profile: Profile | null }) => {
+    const { data: streak } = useWandererStreak(userId);
+    const { data: quests, initQuests, season } = useSeasonalQuests(userId);
+    return (
+      <div className="space-y-8">
+        <FirstEncounterFunnel userId={userId} />
+        <GroveIdentityCard userId={userId} userName={p?.full_name} />
+        <StreakBadge streak={streak} />
+        <SeasonalQuestCard
+          quests={quests || []}
+          season={season}
+          onInit={() => initQuests.mutate()}
+        />
+        <PresenceSpiralCard userId={userId} />
+        <HearthWarmth userId={userId} />
+        <EarnableToday userId={userId} />
+        <SeedTrailPanel userId={userId} />
+        <ActiveCampaigns />
+        <HearthCrossLinks />
+      </div>
+    );
+  };
+
+  const GrowthEngineJourney = ({ userId }: { userId: string }) => {
+    const { data: badges } = useSpeciesBadges(userId);
+    const { data: streak } = useWandererStreak(userId);
+    return (
+      <div className="space-y-8">
+        <StreakBadge streak={streak} />
+        <SpeciesBadgeList badges={badges || []} />
+        <PersonalLegend userId={userId} />
+        <AncientFriendPassport userId={userId} />
+        <DashboardActivity userId={userId} />
+      </div>
+    );
+  };
+
     const TAB_ITEMS = [
       { value: "hearth", label: "Embers", icon: Flame },
       { value: "journey", label: "Journey", icon: Compass },
