@@ -3,7 +3,8 @@
  * A gentle history panel reinforcing participation.
  */
 import { useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Sprout, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
