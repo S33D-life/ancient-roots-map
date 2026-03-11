@@ -74,7 +74,7 @@ interface OfflineCheckinInput {
 export async function createCheckinOfflineAware(input: OfflineCheckinInput): Promise<{ queued: boolean; error?: string }> {
   const { photoDataUrl, ...payload } = input;
 
-  if (isOnline()) {
+  if (canSync()) {
     const { error } = await supabase.from("tree_checkins").insert(payload as any);
     if (error) return { queued: false, error: error.message };
     toast.success("🌳 Check-in recorded");
