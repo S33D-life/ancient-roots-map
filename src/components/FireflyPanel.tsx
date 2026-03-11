@@ -1,10 +1,13 @@
 /**
  * FireflyPanel — Contribution + Search entry panel.
- * Now includes unified search as a primary action.
+ * Now includes unified search as a primary action
+ * and a daily seed counter for core loop visibility.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search } from "lucide-react";
+import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search, Sprout } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +33,13 @@ interface FireflyPanelProps {
 const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps) => {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  const { seedsRemaining } = useSeedEconomy(userId);
 
   const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean }) => {
     console.info("[Firefly] firefly_action_selected", { type });
@@ -102,6 +112,17 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
               ))}
             </div>
           </div>
+
+          {/* Core loop strip */}
+          {userId && (
+            <div className="border-t border-border/10 px-5 py-2.5 flex items-center gap-3 bg-primary/3">
+              <Sprout className="w-3.5 h-3.5 text-primary/60" />
+              <span className="text-[10px] font-serif text-foreground/60">
+                {seedsRemaining} seed{seedsRemaining !== 1 ? "s" : ""} remaining today
+              </span>
+              <span className="text-[9px] text-muted-foreground/30 ml-auto">33/day</span>
+            </div>
+          )}
 
           <div className="border-t border-border/10 px-5 py-3 flex items-center justify-between bg-muted/5">
             <div className="flex gap-3">

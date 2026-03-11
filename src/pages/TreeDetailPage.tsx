@@ -20,6 +20,8 @@ import {
   TreeHeartRewards,
 } from "@/components/tree-sections";
 import SeedPlanter from "@/components/SeedPlanter";
+import CoreLoopBar from "@/components/CoreLoopBar";
+import WhisperRipple from "@/components/WhisperRipple";
 import TreeHeartPool from "@/components/TreeHeartPool";
 import SpeciesAttestation from "@/components/SpeciesAttestation";
 import BloomingClock from "@/components/BloomingClock";
@@ -107,6 +109,7 @@ const TreeDetailPage = () => {
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
   const [canopyCheckinOpen, setCanopyCheckinOpen] = useState(false);
   const [whisperModalOpen, setWhisperModalOpen] = useState(false);
+  const [whisperRippleVisible, setWhisperRippleVisible] = useState(false);
   const [whisperContextLabel, setWhisperContextLabel] = useState<string | null>(null);
   const [availableWhispers, setAvailableWhispers] = useState<TreeWhisper[]>([]);
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
@@ -778,8 +781,15 @@ const TreeDetailPage = () => {
         <SendWhisperModal
           open={whisperModalOpen}
           onOpenChange={(open) => {
+            const wasSending = whisperModalOpen && !open;
             setWhisperModalOpen(open);
-            if (!open) setWhisperContextLabel(null);
+            if (!open) {
+              setWhisperContextLabel(null);
+              if (wasSending) {
+                setWhisperRippleVisible(true);
+                setTimeout(() => setWhisperRippleVisible(false), 2000);
+              }
+            }
           }}
           treeId={tree.id}
           treeName={tree.name}
@@ -787,6 +797,9 @@ const TreeDetailPage = () => {
           contextLabel={whisperContextLabel || undefined}
         />
       )}
+
+      {/* Whisper ripple celebration */}
+      <WhisperRipple visible={whisperRippleVisible} />
 
       {/* Why This Matters — offerings explanation for first 3 visits */}
       <WhyThisMatters

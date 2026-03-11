@@ -13,9 +13,11 @@ import GlobalSearch from "./GlobalSearch";
 import TeotagGuide from "./TeotagGuide";
 import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
+import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
+import DailySeedCounter from "./DailySeedCounter";
 
 
 const Header = () => {
@@ -116,6 +118,7 @@ const Header = () => {
   // Use unified heart balance hook
   const heartBalance = useHeartBalance(user?.id ?? null);
   const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
+  const { seedsRemaining } = useSeedEconomy(user?.id ?? null);
 
   // Realtime heart toast — listen for new heart_transactions, group duplicates
   useEffect(() => {
@@ -381,6 +384,7 @@ const Header = () => {
 
           <div className="flex items-center gap-2">
             <OfflineIndicator />
+            {user && <DailySeedCounter remaining={seedsRemaining} compact />}
             {user && <NotificationBell />}
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden h-10 w-10">
               <Sunrise className={`w-4 h-4 absolute transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />

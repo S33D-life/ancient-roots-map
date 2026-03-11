@@ -8,6 +8,7 @@ import { useSeedEconomy, PROXIMITY_METERS } from "@/hooks/use-seed-economy";
 import type { PlantedSeed } from "@/hooks/use-seed-economy";
 import { formatDistanceToNow } from "date-fns";
 import RewardReceipt from "@/components/RewardReceipt";
+import SeedBurst from "@/components/SeedBurst";
 import { getFamilyForSpecies } from "@/data/treeSpecies";
 
 interface SeedPlanterProps {
@@ -30,6 +31,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
   const [planting, setPlanting] = useState(false);
   const [collecting, setCollecting] = useState<string | null>(null);
   const [showPlanted, setShowPlanted] = useState(false);
+  const [showBurst, setShowBurst] = useState(false);
   const [receiptVisible, setReceiptVisible] = useState(false);
   const [receiptData, setReceiptData] = useState<{ s33dHearts: number; speciesHearts: number; speciesFamily?: string }>({ s33dHearts: 0, speciesHearts: 0 });
 
@@ -52,9 +54,10 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     setPlanting(false);
 
     if (success) {
+      setShowBurst(true);
       setShowPlanted(true);
       toast.success("🌱 Seed planted! It will bloom into a Heart in 24 hours.");
-      setTimeout(() => setShowPlanted(false), 3000);
+      setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
       if (seedsRemaining <= 0) {
         toast.error("No seeds remaining today. They refresh at midnight.");
@@ -218,6 +221,9 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
         speciesFamily={receiptData.speciesFamily}
         actionLabel="Heart Collected from Bloomed Seed"
       />
+
+      {/* Seed Burst celebration */}
+      <SeedBurst visible={showBurst} />
     </div>
   );
 };
