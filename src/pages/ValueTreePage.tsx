@@ -112,25 +112,10 @@ const ROOT_ACTIONS: ValueNode[] = [
     description: "Gift a photo, poem, song, story, or voice note to a tree.",
     icon: <Music className="w-4 h-4" />,
     rewards: [
-      { token: "s33d", amount: "1-5" },
+      { token: "s33d", amount: "2" },
       { token: "species", amount: "1" },
     ],
     actionLink: "/map",
-    children: [
-      {
-        id: "offering-quality",
-        label: "High-Quality Offering",
-        description: "Offering that enriches hive library quality.",
-        icon: <Star className="w-4 h-4" />,
-        rewards: [
-          { token: "s33d", amount: "5" },
-          { token: "species", amount: "2" },
-          { token: "influence", amount: "1" },
-        ],
-        verification: "Minimum content threshold",
-        actionLink: "/map",
-      },
-    ],
   },
   {
     id: "curation",
