@@ -645,6 +645,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [showOfferingGlow, setShowOfferingGlow] = useState(false);
+  const [showHarvestLayer, setShowHarvestLayer] = useState(false);
+  const [showAncientHighlight, setShowAncientHighlight] = useState(false);
+  const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
+  const harvestLayerRef = useRef<L.LayerGroup | null>(null);
+  const ancientHighlightLayerRef = useRef<L.LayerGroup | null>(null);
   const [showExternalTrees, setShowExternalTrees] = useState(false);
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
   const [showHiveLayer, setShowHiveLayer] = useState(false);
