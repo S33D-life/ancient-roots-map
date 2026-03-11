@@ -47,6 +47,7 @@ import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
+import NearbyDiscoveryPanel from "./NearbyDiscoveryPanel";
 import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
 import type { Rootstone } from "@/data/rootstones";
 import { consumeQueuedMycelialThreads, onMycelialThread, type MycelialPoint, type MycelialThreadEvent } from "@/lib/mycelial-network";
@@ -3495,6 +3496,33 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             const map = mapRef.current;
             if (map) map.setView([25, 10], 3, { animate: true });
             window.history.replaceState(null, "", "/map");
+          }}
+        />
+      )}
+
+      {/* Nearby Ancient Friends discovery panel */}
+      {!clearView && (
+        <NearbyDiscoveryPanel
+          trees={filteredTrees}
+          userLat={userLatLng?.[0] ?? null}
+          userLng={userLatLng?.[1] ?? null}
+          visible={!!userLatLng && !atlasFilterOpen}
+          onTreeSelect={(lat, lng, treeId) => {
+            const map = mapRef.current;
+            if (map) {
+              map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 1.2 });
+              // Trigger marker focus after fly
+              setTimeout(() => {
+                const cluster = clusterRef.current;
+                if (cluster) {
+                  cluster.eachLayer((layer: any) => {
+                    if (layer?.options?.treeData?.id === treeId) {
+                      layer.openPopup();
+                    }
+                  });
+                }
+              }, 1400);
+            }
           }}
         />
       )}
