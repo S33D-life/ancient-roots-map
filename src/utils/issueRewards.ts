@@ -10,6 +10,12 @@ import { toast } from "sonner";
 
 const DAILY_CHECKIN_CAP = 3;
 
+/**
+ * In-flight guard: prevents duplicate submissions from double-clicks
+ * or concurrent React re-renders. Keyed by `userId:treeId:actionType`.
+ */
+const _inflight = new Set<string>();
+
 export interface RewardResult {
   s33dHearts: number;
   speciesHearts: number;
