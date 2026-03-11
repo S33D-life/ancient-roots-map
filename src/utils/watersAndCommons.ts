@@ -42,8 +42,8 @@ export const GUARDIAN_TAGS: Record<LandscapeCategory, {
     tag: "Waterside Guardian",
     icon: "🌊",
     whisper: "Water remembers. Does an Ancient Friend stand watch by this water?",
-    color: "hsl(200, 55%, 50%)",
-    glowColor: "hsla(200, 60%, 55%, 0.35)",
+    color: "hsl(210, 35%, 75%)",
+    glowColor: "hsla(210, 40%, 78%, 0.35)",
   },
   churchyard: {
     tag: "Church Guardian",
