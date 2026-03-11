@@ -296,6 +296,10 @@ const HivePage = () => {
             </div>
           </motion.div>
         )}
+        {/* Seasonal Lens Banner */}
+        <div className="mb-4">
+          <SeasonalLensBanner context="general" />
+        </div>
 
         {/* Metrics — now includes Species Hearts + Influence */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
