@@ -114,6 +114,8 @@ const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"),
 const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/BioregionCalendarPage"), "bio-calendar");
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
+const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
+const HarvestDetailPage = lazyImportWithRetry(() => import("./pages/HarvestDetailPage"), "harvest-detail");
 const HowHeartsWorkPage = lazyImportWithRetry(() => import("./pages/HowHeartsWorkPage"), "how-hearts");
 const CosmicCalendarPage = lazyImportWithRetry(() => import("./pages/CosmicCalendarPage"), "cosmic-calendar");
 const TreeLedgerPage = lazyImportWithRetry(() => import("./pages/TreeLedgerPage"), "tree-ledger");
