@@ -223,6 +223,24 @@ function getQuickActions(
     ]);
   }
 
+  // ── Dashboard / Hearth page ────────────────────
+  if (route.startsWith("/dashboard")) {
+    return withSeason([
+      { label: "My journey", prompt: "Show me a summary of my journey — trees mapped, hearts earned, and milestones reached.", emoji: "🔥" },
+      { label: "Earn today", prompt: "What actions can I take today to earn hearts and advance my journey?", emoji: "💚" },
+      { label: "My grove", prompt: "Tell me about my grove of Ancient Friends — species, locations, and health.", emoji: "🌳" },
+      { label: "Seed trail", prompt: "How does the seed trail work? How do I plant and collect seeds?", emoji: "🌱" },
+    ]);
+  }
+
+  // ── Wanderer profile page ─────────────────────
+  if (route.startsWith("/wanderer/")) {
+    return [
+      { label: "About this wanderer", prompt: "Tell me about this wanderer's contributions to the grove.", emoji: "👤" },
+      { label: "Their trees", prompt: "What trees has this wanderer mapped?", emoji: "🌳" },
+    ];
+  }
+
   // ── Vault page ────────────────────────────────
   if (pageCtx.vault || route.startsWith("/vault")) {
     return [
