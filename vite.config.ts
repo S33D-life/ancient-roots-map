@@ -231,7 +231,7 @@ export default defineConfig(async ({ mode }) => {
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks(id) {
+        manualChunks(id: string) {
           // Core React runtime
           if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router')) {
             return 'vendor-react';
