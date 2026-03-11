@@ -425,6 +425,7 @@ const HivesIndexPage = () => {
                       heartCount={stats?.heartCount || 0}
                       wandererCount={stats?.wandererCount || 0}
                       topSpecies={stats?.topSpecies || []}
+                      nations={stats?.nations || []}
                       isExpanded={activeFamily === hive.family}
                       onClick={() => {
                         if (activeFamily === hive.family) {
