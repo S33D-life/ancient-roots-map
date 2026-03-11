@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, Compass } from "lucide-react";
+import { Loader2, MapPin, Compass, Heart } from "lucide-react";
+import { getHiveInfo } from "@/utils/hiveUtils";
 
 const WandererProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,26 @@ const WandererProfilePage = () => {
 
       if (error) throw error;
       return profile;
+    },
+  });
+
+  // Fetch species heart balances for this wanderer
+  const { data: speciesBalances } = useQuery({
+    queryKey: ["wanderer-species-hearts", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      if (!id) return [];
+      const { data } = await supabase
+        .from("species_heart_transactions")
+        .select("species_family, amount")
+        .eq("user_id", id);
+      const familyMap = new Map<string, number>();
+      (data || []).forEach(tx => {
+        familyMap.set(tx.species_family, (familyMap.get(tx.species_family) || 0) + tx.amount);
+      });
+      return Array.from(familyMap.entries())
+        .map(([family, amount]) => ({ family, amount, hive: getHiveInfo(family) }))
+        .sort((a, b) => b.amount - a.amount);
     },
   });
 
@@ -82,6 +103,29 @@ const WandererProfilePage = () => {
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                     {data.bio || "This wanderer has not added a biography yet."}
                   </p>
+
+                  {/* Species Hearts Balances */}
+                  {speciesBalances && speciesBalances.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <p className="text-xs font-serif text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        <Heart className="w-3 h-3" /> Species Hearts
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {speciesBalances.slice(0, 8).map(b => (
+                          <Link key={b.family} to={`/hive/${b.hive.slug}`}>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-serif gap-1 cursor-pointer hover:border-primary/40 transition-colors"
+                            >
+                              <span>{b.hive.icon}</span>
+                              <span className="tabular-nums font-bold">{b.amount}</span>
+                              <span className="text-muted-foreground">{b.family}</span>
+                            </Badge>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Button variant="sacred" size="sm" asChild>

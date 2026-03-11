@@ -23,6 +23,8 @@ import HiveSpeciesLeaderboard from "@/components/HiveSpeciesLeaderboard";
 import InfluenceWeightedVoting from "@/components/InfluenceWeightedVoting";
 import BloomingClock from "@/components/BloomingClock";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
+import HiveActivityOrb from "@/components/hive/HiveActivityOrb";
+import HiveUserBalance from "@/components/hive/HiveUserBalance";
 
 interface TreeRow {
   id: string;
@@ -62,7 +64,11 @@ const HivePage = () => {
   const { getStatusForFamily } = useHiveSeasonalStatus();
   const seasonalStatus = hive ? getStatusForFamily(hive.family) : undefined;
   const seasonal = useSeasonalSummary();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id || null));
+  }, []);
   const [trees, setTrees] = useState<TreeRow[]>([]);
   const [offerings, setOfferings] = useState<OfferingRow[]>([]);
   const [speciesHearts, setSpeciesHearts] = useState<SpeciesHeartTx[]>([]);
@@ -192,6 +198,15 @@ const HivePage = () => {
   const totalSpeciesHearts = speciesHearts.reduce((s, tx) => s + tx.amount, 0);
   const totalInfluence = influenceTxs.reduce((s, tx) => s + tx.amount, 0);
 
+  // Monthly species hearts for activity orb
+  const monthlyHearts = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    return speciesHearts
+      .filter(tx => tx.created_at >= monthStart)
+      .reduce((s, tx) => s + tx.amount, 0);
+  }, [speciesHearts]);
+
   // Top contributing trees (by species hearts)
   const treeHeartMap: Record<string, number> = {};
   speciesHearts.forEach(tx => {
@@ -299,6 +314,22 @@ const HivePage = () => {
         {/* Seasonal Lens Banner */}
         <div className="mb-4">
           <SeasonalLensBanner context="general" />
+        </div>
+
+        {/* Activity Orb + User Balance */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
+          <HiveActivityOrb
+            monthlyHearts={monthlyHearts}
+            accentHsl={hive.accentHsl}
+            icon={hive.icon}
+            familyLabel={hive.family}
+          />
+          <HiveUserBalance
+            userId={currentUserId}
+            family={hive.family}
+            accentHsl={hive.accentHsl}
+            icon={hive.icon}
+          />
         </div>
 
         {/* Metrics — now includes Species Hearts + Influence */}

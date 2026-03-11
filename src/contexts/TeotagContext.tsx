@@ -159,6 +159,10 @@ function getQuickActions(
     if (t.bloomStatus) {
       actions.push({ label: "Bloom status", prompt: `${t.name} is currently ${t.bloomStatus}. Tell me more about this phase.`, emoji: "🌿" });
     }
+    // Species Hearts hint
+    if (t.species) {
+      actions.push({ label: "Earn Hearts", prompt: `How can I earn Species Hearts by mapping or making offerings to ${t.species} trees?`, emoji: "💚" });
+    }
     return withSeason(actions);
   }
 
@@ -205,6 +209,17 @@ function getQuickActions(
       { label: "Upcoming harvests", prompt: "What harvests are coming up in the next few months?", emoji: "🍎" },
       { label: "Blooming cycles", prompt: "What is blooming or fruiting right now across the atlas?", emoji: "🌸" },
       { label: "Next gathering", prompt: "When is the next Council of Life gathering?", emoji: "🍃" },
+    ]);
+  }
+
+  // ── Hive page ──────────────────────────────────
+  if (route.startsWith("/hive/")) {
+    const hiveSlug = route.split("/")[2];
+    return withSeason([
+      { label: "Earn Hearts", prompt: `How do I earn Species Hearts in this hive? What actions award hearts?`, emoji: "💚" },
+      { label: "Hive ecology", prompt: `Tell me about the ecology and distribution of this species family.`, emoji: "🌿" },
+      { label: "Top trees", prompt: `Which trees in this hive have the most offerings and hearts?`, emoji: "🌳" },
+      { label: "Governance", prompt: `How does influence and governance work within this species hive?`, emoji: "🛡️" },
     ]);
   }
 
