@@ -781,8 +781,15 @@ const TreeDetailPage = () => {
         <SendWhisperModal
           open={whisperModalOpen}
           onOpenChange={(open) => {
+            const wasSending = whisperModalOpen && !open;
             setWhisperModalOpen(open);
-            if (!open) setWhisperContextLabel(null);
+            if (!open) {
+              setWhisperContextLabel(null);
+              if (wasSending) {
+                setWhisperRippleVisible(true);
+                setTimeout(() => setWhisperRippleVisible(false), 2000);
+              }
+            }
           }}
           treeId={tree.id}
           treeName={tree.name}
@@ -790,6 +797,9 @@ const TreeDetailPage = () => {
           contextLabel={whisperContextLabel || undefined}
         />
       )}
+
+      {/* Whisper ripple celebration */}
+      <WhisperRipple visible={whisperRippleVisible} />
 
       {/* Why This Matters — offerings explanation for first 3 visits */}
       <WhyThisMatters
