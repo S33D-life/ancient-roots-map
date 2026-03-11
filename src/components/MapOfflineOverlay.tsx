@@ -26,7 +26,7 @@ const MapOfflineOverlay = () => {
         >
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md border shadow-lg text-xs font-serif ${
             isReconnecting
-              ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400"
+              ? "bg-secondary border-border text-muted-foreground"
               : "bg-card/90 border-border/50 text-muted-foreground"
           }`}>
             {isReconnecting ? (
