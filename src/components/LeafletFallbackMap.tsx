@@ -3527,6 +3527,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         />
       )}
 
+      {debugEnabled && (
         <div
           className="absolute right-3 z-[1002] max-w-[260px] rounded-xl border px-3 py-2.5 text-[11px] shadow-xl backdrop-blur-md"
           style={{
