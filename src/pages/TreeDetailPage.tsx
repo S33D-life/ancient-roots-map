@@ -160,6 +160,16 @@ const TreeDetailPage = () => {
     return () => clearTimeout(timer);
   }, [tree?.lore_text]);
 
+  // Listen for successful whisper sends to trigger ripple
+  useEffect(() => {
+    const handler = () => {
+      setWhisperRippleVisible(true);
+      setTimeout(() => setWhisperRippleVisible(false), 2000);
+    };
+    window.addEventListener("whisper-sent", handler);
+    return () => window.removeEventListener("whisper-sent", handler);
+  }, []);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
   }, []);
@@ -781,14 +791,9 @@ const TreeDetailPage = () => {
         <SendWhisperModal
           open={whisperModalOpen}
           onOpenChange={(open) => {
-            const wasSending = whisperModalOpen && !open;
             setWhisperModalOpen(open);
             if (!open) {
               setWhisperContextLabel(null);
-              if (wasSending) {
-                setWhisperRippleVisible(true);
-                setTimeout(() => setWhisperRippleVisible(false), 2000);
-              }
             }
           }}
           treeId={tree.id}
@@ -798,7 +803,7 @@ const TreeDetailPage = () => {
         />
       )}
 
-      {/* Whisper ripple celebration */}
+      {/* Whisper ripple celebration — triggered by successful send event */}
       <WhisperRipple visible={whisperRippleVisible} />
 
       {/* Why This Matters — offerings explanation for first 3 visits */}
