@@ -16,10 +16,10 @@ const MapJourneyIndicator = () => {
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setUserId(user.id);
-        fetchStats(user.id);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+        fetchStats(session.user.id);
       }
     });
   }, []);

@@ -146,11 +146,9 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   // Get current user
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-    };
-    getUser();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserId(session?.user?.id || null);
+    });
   }, []);
 
   // User location is fetched on-demand via the Locate button (useGeolocation hook).

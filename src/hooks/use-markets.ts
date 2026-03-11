@@ -126,7 +126,7 @@ export function useMarket(marketId: string | undefined) {
     if (!marketId) return;
     setLoading(true);
     const [mRes, outRes, stRes] = await Promise.all([
-      supabase.from("markets").select("*").eq("id", marketId).single(),
+      supabase.from("markets").select("*").eq("id", marketId).maybeSingle(),
       supabase.from("market_outcomes").select("*").eq("market_id", marketId),
       supabase.from("market_stakes").select("*").eq("market_id", marketId),
     ]);

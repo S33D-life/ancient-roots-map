@@ -249,6 +249,41 @@ function getQuickActions(
     ];
   }
 
+  // ── Value Tree page ──────────────────────────
+  if (route.startsWith("/value-tree")) {
+    return withSeason([
+      { label: "How Hearts work", prompt: "Explain the S33D Hearts economy — how do I earn and use Hearts?", emoji: "❤️" },
+      { label: "Earning actions", prompt: "What specific actions earn hearts today? Show me the rewards table.", emoji: "💚" },
+      { label: "Species Hearts", prompt: "How do Species Hearts differ from S33D Hearts? How are they earned?", emoji: "🐝" },
+      { label: "Influence tokens", prompt: "What are influence tokens and how do they affect governance?", emoji: "🛡️" },
+    ]);
+  }
+
+  // ── Roadmap page ─────────────────────────────
+  if (route.startsWith("/roadmap")) {
+    return withSeason([
+      { label: "What's next", prompt: "What features are coming next to S33D?", emoji: "🗺️" },
+      { label: "Contribute", prompt: "How can I help shape the future of S33D?", emoji: "🤝" },
+    ]);
+  }
+
+  // ── Support page ─────────────────────────────
+  if (route.startsWith("/support")) {
+    return [
+      { label: "Get help", prompt: "I need help with S33D. What are common questions?", emoji: "❓" },
+      { label: "Report a bug", prompt: "How do I report a bug in the Bug Garden?", emoji: "🐛" },
+    ];
+  }
+
+  // ── Bio-region page ──────────────────────────
+  if (route.startsWith("/atlas/bio-regions")) {
+    return withSeason([
+      { label: "About this bioregion", prompt: "Tell me about this bioregion — its ecology, climate, and key species.", emoji: "🌍" },
+      { label: "Seasonal calendar", prompt: "What is the seasonal rhythm in this bioregion?", emoji: "📅" },
+      { label: "Find trees", prompt: "What ancient trees have been mapped in this bioregion?", emoji: "🌳" },
+    ]);
+  }
+
   // ── Map mode (default guide) ──────────────────
   if (mode === "guide") {
     const actions: QuickAction[] = [

@@ -495,7 +495,7 @@ const EarnBranch = () => {
   const [showNotifyModal, setShowNotifyModal] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
   }, []);
 
   const opportunities = useMemo<Opportunity[]>(() => {

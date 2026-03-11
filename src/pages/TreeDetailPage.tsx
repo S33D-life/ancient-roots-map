@@ -175,7 +175,7 @@ const TreeDetailPage = () => {
   }, []);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUserId(user?.id ?? null));
+    supabase.auth.getSession().then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
   }, []);
 
   // Handle ?add=type query param
@@ -212,7 +212,7 @@ const TreeDetailPage = () => {
         .from("trees")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
       if (error) console.error("Error fetching tree:", error);
       else setTree(data);
     };
