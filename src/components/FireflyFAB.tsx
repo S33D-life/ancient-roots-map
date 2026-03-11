@@ -19,6 +19,7 @@ import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import FireflyPanel from "@/components/FireflyPanel";
 import FireflyGuidance from "@/components/FireflyGuidance";
+import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
