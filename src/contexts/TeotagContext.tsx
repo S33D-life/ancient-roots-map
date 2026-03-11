@@ -200,12 +200,12 @@ function getQuickActions(
 
   // ── Calendar page ─────────────────────────────
   if (route.startsWith("/cosmic")) {
-    return [
+    return withSeason([
       { label: "What's happening now", prompt: "What seasonal events and harvests are happening this month?", emoji: "📅" },
       { label: "Upcoming harvests", prompt: "What harvests are coming up in the next few months?", emoji: "🍎" },
       { label: "Blooming cycles", prompt: "What is blooming or fruiting right now across the atlas?", emoji: "🌸" },
       { label: "Next gathering", prompt: "When is the next Council of Life gathering?", emoji: "🍃" },
-    ];
+    ]);
   }
 
   // ── Vault page ────────────────────────────────
