@@ -1084,6 +1084,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showImmutableLayer, immutableLoading, immutableTreeCount, showExternalTrees, externalLoading,
       externalTreeCount, showWatersCommons, watersCommonsLoading, showWaterways, showChurchyards,
       watersCommonsCount, showBloomedSeeds, bloomedSeedCount, showRecentVisits, showSeedTraces,
+      showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
       showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles]);
 
