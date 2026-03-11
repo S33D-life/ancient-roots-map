@@ -932,170 +932,26 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     )}
                   </div>
 
-                  {isIdentifyingSpecies && (
-                    <div
-                      className="rounded-lg border px-3 py-2 text-xs font-serif flex items-center gap-2"
-                      style={{
-                        borderColor: "hsla(42, 45%, 35%, 0.4)",
-                        background: "hsla(42, 35%, 12%, 0.5)",
-                        color: "hsl(42, 70%, 65%)",
-                      }}
-                    >
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      AI is identifying species from this photo…
-                    </div>
-                  )}
-
-                  {!isIdentifyingSpecies && (speciesVisionResult?.predictions?.length || 0) > 0 && (
-                    <div
-                      className="rounded-lg border p-3 space-y-2"
-                      style={{
-                        borderColor: "hsla(160, 35%, 35%, 0.45)",
-                        background: "hsla(160, 35%, 10%, 0.35)",
-                      }}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-serif" style={{ color: "hsl(160, 60%, 65%)" }}>
-                          AI suggestions ({speciesVisionResult?.provider === "plantnet" ? "PlantNet" : "iNaturalist"})
-                        </p>
-                        {speciesDecision === "confirmed" && (
-                          <span className="text-[10px] font-serif" style={{ color: "hsl(120, 55%, 62%)" }}>
-                            ✓ Confirmed
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5">
-                        {(speciesVisionResult?.predictions || []).slice(0, 3).map((prediction, index) => {
-                          const isSelected =
-                            selectedSpeciesPrediction?.scientificName === prediction.scientificName &&
-                            selectedSpeciesPrediction?.source === prediction.source;
-                          return (
-                            <button
-                              key={`${prediction.source}-${prediction.scientificName}-${index}`}
-                              type="button"
-                              className="w-full text-left rounded-md border px-2.5 py-1.5 transition-colors hover:bg-white/5"
-                              style={{
-                                borderColor: isSelected ? "hsla(120, 45%, 45%, 0.6)" : "hsla(160, 20%, 40%, 0.35)",
-                                background: isSelected ? "hsla(120, 35%, 18%, 0.45)" : "transparent",
-                              }}
-                              onClick={() => handleConfirmSpeciesSuggestion(prediction)}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                  <p className="text-sm font-serif truncate" style={{ color: "hsl(42, 76%, 65%)" }}>
-                                    {prediction.commonName || prediction.scientificName}
-                                  </p>
-                                  {prediction.commonName && (
-                                    <p className="text-[10px] italic truncate text-muted-foreground">
-                                      {prediction.scientificName}
-                                    </p>
-                                  )}
-                                </div>
-                                <span className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(42, 80%, 68%)" }}>
-                                  {Math.round(prediction.confidence * 100)}%
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {speciesDecision === "pending" && (
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-[10px] text-muted-foreground font-serif">
-                            Select above, or type your own species below.
-                          </p>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 px-2 text-[10px] font-serif"
-                            onClick={() => {
-                              setSpeciesDecision("overridden");
-                              setSelectedSpeciesPrediction(null);
-                            }}
-                          >
-                            Enter manually
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {!isIdentifyingSpecies &&
-                    speciesVisionResult?.predictions?.length === 0 &&
-                    speciesVisionResult?.error && (
-                      <p className="text-[10px] font-serif text-muted-foreground">
-                        AI species suggestion unavailable. You can still save with manual species.
-                      </p>
-                    )}
-
-                  {/* Species input */}
-                  <div className="space-y-1.5 relative">
-                    <Label htmlFor="species" className="text-[10px] uppercase tracking-widest text-muted-foreground font-serif">Species *</Label>
-                    <Input
-                      id="species"
-                      value={species}
-                      onChange={(e) => {
-                        setSpecies(e.target.value.slice(0, 200));
-                        if ((speciesVisionResult?.predictions?.length || 0) > 0) {
-                          setSpeciesDecision("overridden");
-                          setSelectedSpeciesPrediction(null);
-                        }
-                        setShowSpeciesSuggestions(true);
-                      }}
-                      onFocus={() => setShowSpeciesSuggestions(true)}
-                      placeholder="Start typing… e.g. Oak, Yew, Birch"
-                      maxLength={200}
-                      required
-                      className="font-serif h-9 text-sm"
-                      autoComplete="off"
-                    />
-                    {showSpeciesSuggestions && speciesSuggestions.length > 0 && (
-                      <div
-                        className="absolute left-0 right-0 z-50 mt-1 max-h-40 overflow-y-auto rounded-lg border shadow-lg"
-                        style={{
-                          background: "hsl(30, 15%, 12%)",
-                          borderColor: "hsla(42, 40%, 30%, 0.5)",
-                        }}
-                      >
-                        {speciesSuggestions.map((sp) => (
-                          <button
-                            key={sp.scientific}
-                            type="button"
-                            className="w-full text-left px-3 py-1.5 text-sm transition-colors hover:bg-white/5 flex flex-col gap-0"
-                            onClick={() => {
-                              setSpecies(sp.common);
-                              if ((speciesVisionResult?.predictions?.length || 0) > 0) {
-                                setSpeciesDecision("overridden");
-                                setSelectedSpeciesPrediction(null);
-                              }
-                              setShowSpeciesSuggestions(false);
-                            }}
-                          >
-                            <span className="font-serif" style={{ color: "hsl(42, 75%, 60%)" }}>{sp.common}</span>
-                            <span className="text-[10px] italic" style={{ color: "hsla(42, 40%, 55%, 0.7)" }}>
-                              {sp.scientific} · {sp.family}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Divider */}
-                  <div className="relative py-1">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t" style={{ borderColor: 'hsla(42, 30%, 30%, 0.2)' }} />
-                    </div>
-                    <div className="relative flex justify-center">
-                      <span className="px-3 text-[9px] uppercase tracking-[0.2em] font-serif" style={{
-                        color: 'hsla(42, 40%, 50%, 0.5)',
-                        background: 'hsl(var(--card))',
-                      }}>Location</span>
-                    </div>
-                  </div>
+                  {/* ─── Species Identifier ─── */}
+                  <SpeciesIdentifier
+                    species={species}
+                    onSpeciesChange={(result: SpeciesResult) => {
+                      setSpecies(result.species);
+                      setSpeciesCertainty(result.certainty);
+                      setSpeciesHiveFamily(result.hiveFamily);
+                      if (result.aiPrediction) {
+                        setSelectedSpeciesPrediction(result.aiPrediction);
+                        setSpeciesDecision("confirmed");
+                      }
+                      if (result.certainty === "exact" || result.certainty === "ai_confirmed") {
+                        setSpeciesDecision("confirmed");
+                      }
+                    }}
+                    photoFile={droppedPhotoFile}
+                    onRequestPhoto={() => photoInputRef.current?.click()}
+                    externalAiResult={speciesVisionResult}
+                    isIdentifyingSpecies={isIdentifyingSpecies}
+                  />
 
                   {/* Find Me button — primary location action */}
                   <Button
