@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic, BookOpen } from "lucide-react";
+import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic, BookOpen, ChevronDown, Settings2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 import MusicOfferingFlow, { type SelectedSongData } from "@/components/MusicOfferingFlow";
 import VoiceOfferingFlow, { type VoiceOfferingData } from "@/components/VoiceOfferingFlow";
 import BookOfferingFlow, { type BookOfferingData } from "@/components/BookOfferingFlow";
@@ -46,13 +48,22 @@ const typeConfig: Record<
   book: { singular: "Book", contentLabel: "Reflection", placeholder: "Why are you offering this story?", emoji: "📖" },
 };
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // target after compression
+/** Quick-select offering types shown as pills */
+const QUICK_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
+  { value: "photo", emoji: "📷", label: "Memory" },
+  { value: "story", emoji: "✍️", label: "Musing" },
+  { value: "poem", emoji: "📜", label: "Poem" },
+  { value: "song", emoji: "🎵", label: "Song" },
+  { value: "voice", emoji: "🎙️", label: "Voice" },
+  { value: "book", emoji: "📖", label: "Book" },
+  { value: "nft", emoji: "✨", label: "NFT" },
+];
 
-/** Resize an image client-side so it stays under MAX_UPLOAD_SIZE */
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
+
 const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =>
   new Promise((resolve, reject) => {
-    // If already small enough, skip
     if (file.size <= MAX_UPLOAD_SIZE) { resolve(file); return; }
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -83,7 +94,8 @@ const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =
     img.src = url;
   });
 
-const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meetingId }: AddOfferingDialogProps) => {
+const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: initialType, meetingId }: AddOfferingDialogProps) => {
+  const [activeType, setActiveType] = useState<OfferingType>(initialType);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [mediaUrl, setMediaUrl] = useState("");
@@ -93,9 +105,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const [sealedByStaff, setSealedByStaff] = useState(() => {
-    return localStorage.getItem("linked_staff_code") || "";
-  });
+  const [sealedByStaff, setSealedByStaff] = useState(() => localStorage.getItem("linked_staff_code") || "");
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const submittingRef = useRef(false);
@@ -108,25 +119,26 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
   const [celebrationMsg, setCelebrationMsg] = useState({ emoji: "✨", message: "", subtitle: "" });
   const [rewardResult, setRewardResult] = useState<RewardResult | null>(null);
   const [showRewardReceipt, setShowRewardReceipt] = useState(false);
-  const [visibility, setVisibility] = useState<OfferingVisibility>(type === "photo" ? "public" : "tribe");
+  const [visibility, setVisibility] = useState<OfferingVisibility>(initialType === "photo" ? "public" : "tribe");
   const [treeRole, setTreeRole] = useState<TreeRole>("anchored");
   const [quote, setQuote] = useState<QuoteData>({ text: "", author: "", source: "" });
 
-  const cfg = typeConfig[type];
+  // Sync type when prop changes
+  useEffect(() => { setActiveType(initialType); }, [initialType]);
 
-  // Smart role suggestion based on content keywords
+  const cfg = typeConfig[activeType];
+
+  // Smart role suggestion
   const STEWARDSHIP_KEYWORDS = /\b(species|season|blossom|leaf|bark|trunk|girth|height|canopy|wildlife|bird|fungi|lichen|moss|root|branch|crown|measurement|survey|observation|ecology|habitat|biodiversity|pollinator|insect|growth|decay|disease|health|circumference|diameter)\b/i;
   const ANCHORED_KEYWORDS = /\b(family|memory|remember|childhood|grandmother|grandfather|mother|father|love|heart|wedding|birthday|song|prayer|wish|dream|story|personal|feeling|emotion|grief|joy|peace|meditation)\b/i;
 
   useEffect(() => {
     const text = `${title} ${content}`;
     if (text.trim().length < 5) return;
-    if (STEWARDSHIP_KEYWORDS.test(text)) {
-      setTreeRole("stewardship");
-    } else if (ANCHORED_KEYWORDS.test(text)) {
-      setTreeRole("anchored");
-    }
+    if (STEWARDSHIP_KEYWORDS.test(text)) setTreeRole("stewardship");
+    else if (ANCHORED_KEYWORDS.test(text)) setTreeRole("anchored");
   }, [title, content]);
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processFile(file);
@@ -178,6 +190,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
     return data.publicUrl;
   };
 
+  const resetForm = () => {
+    setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]); setQuote({ text: "", author: "", source: "" }); clearSelectedFile();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current) return;
@@ -209,22 +225,21 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }
 
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
-
       const quoteText = quote.text.trim() || null;
       const quoteAuthor = quoteText ? (quote.author.trim() || null) : null;
       const quoteSource = quoteText ? (quote.source.trim() || null) : null;
 
       const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
         tree_id: treeId,
-        type,
+        type: activeType,
         title: title.trim(),
         content: content.trim() || null,
         media_url: finalMediaUrl,
-        nft_link: type === "nft" ? nftLink.trim() || null : null,
+        nft_link: activeType === "nft" ? nftLink.trim() || null : null,
         created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null,
         meeting_id: meetingId || null,
-        visibility: type === "photo" ? "public" : visibility,
+        visibility: activeType === "photo" ? "public" : visibility,
         tree_role: treeRole,
         impact_weight: impactWeight,
         quote_text: quoteText,
@@ -233,99 +248,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
       }).select("id").single();
       if (error) throw error;
 
-      // Attach Skystamp (fire-and-forget, non-blocking)
-      if (insertedOffering) {
-        supabase.from("trees").select("latitude, longitude").eq("id", treeId).single().then(async ({ data: treeData }) => {
-          if (treeData?.latitude && treeData?.longitude) {
-            const stampId = await createOrReuseSkystamp({
-              lat: treeData.latitude,
-              lng: treeData.longitude,
-              userId: user.id,
-              treeId,
-              offeringId: insertedOffering.id,
-            });
-            if (stampId) {
-              await supabase.from("offerings").update({ sky_stamp_id: stampId } as any).eq("id", insertedOffering.id);
-            }
-          }
-        });
-      }
-
-      // Save tags
-      if (taggedUsers.length > 0 && insertedOffering) {
-        await supabase.from("offering_tags").insert(
-          taggedUsers.map((t) => ({
-            offering_id: insertedOffering.id,
-            tagged_user_id: t.id,
-            tagged_by: user.id,
-          }))
-        );
-      }
-
-      // Issue species/influence rewards (stewardship gets +2, anchored gets +1)
-      let earnedReward: RewardResult | null = null;
-      if (treeSpecies) {
-        const s33dOverride = treeRole === "stewardship" ? 2 : 1;
-        const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering", s33dAmount: s33dOverride });
-        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) {
-          earnedReward = rr;
-          setRewardResult(rr);
-        }
-      }
-
-      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed!`, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
-      setShowCelebration(true);
-      setTimeout(() => {
-        setShowCelebration(false);
-        if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); }
-      }, 2000);
-      setTitle("");
-      setContent("");
-      setMediaUrl("");
-      setNftLink("");
-      setSealedByStaff("");
-      setTaggedUsers([]);
-      setQuote({ text: "", author: "", source: "" });
-      clearSelectedFile();
-      return; // onOpenChange handled by celebration timeout
-    } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-      submittingRef.current = false;
-    }
-  };
-
-  // Song offering via MusicOfferingFlow
-  const handleSongComplete = async (data: SelectedSongData) => {
-    if (submittingRef.current) return;
-    submittingRef.current = true;
-    setLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
-        return;
-      }
-
-      const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
-      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
-        tree_id: treeId,
-        type: "song" as const,
-        title: data.title,
-        content: data.message || `${data.artist}${data.album ? ` — ${data.album}` : ""}`,
-        media_url: data.previewUrl || null,
-        nft_link: data.externalUrl || null,
-        created_by: user.id,
-        sealed_by_staff: sealedByStaff.trim() || null,
-        meeting_id: meetingId || null,
-        visibility,
-        tree_role: treeRole,
-        impact_weight: impactWeight,
-      }).select("id").single();
-      if (error) throw error;
-
-      // Attach Skystamp
+      // Skystamp (fire-and-forget)
       if (insertedOffering) {
         supabase.from("trees").select("latitude, longitude").eq("id", treeId).single().then(async ({ data: treeData }) => {
           if (treeData?.latitude && treeData?.longitude) {
@@ -335,28 +258,27 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
         });
       }
 
+      // Save tags
       if (taggedUsers.length > 0 && insertedOffering) {
-        await supabase.from("offering_tags").insert(
-          taggedUsers.map((t) => ({
-            offering_id: insertedOffering.id,
-            tagged_user_id: t.id,
-            tagged_by: user.id,
-          }))
-        );
+        await supabase.from("offering_tags").insert(taggedUsers.map((t) => ({ offering_id: insertedOffering.id, tagged_user_id: t.id, tagged_by: user.id })));
       }
+
+      // Dispatch offering-created event for First Walk and other listeners
+      window.dispatchEvent(new CustomEvent("offering-created"));
 
       // Issue rewards
       let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
-        const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
+        const s33dOverride = treeRole === "stewardship" ? 2 : 1;
+        const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering", s33dAmount: s33dOverride });
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
 
-      setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
+      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed!`, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
       setShowCelebration(true);
-      setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
-      clearSelectedFile();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      resetForm();
+      return;
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
     } finally {
@@ -365,159 +287,144 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
     }
   };
 
-  // Voice offering via VoiceOfferingFlow
+  // Song offering
+  const handleSongComplete = async (data: SelectedSongData) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
+      const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
+      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
+        tree_id: treeId, type: "song" as const, title: data.title,
+        content: data.message || `${data.artist}${data.album ? ` — ${data.album}` : ""}`,
+        media_url: data.previewUrl || null, nft_link: data.externalUrl || null, created_by: user.id,
+        sealed_by_staff: sealedByStaff.trim() || null, meeting_id: meetingId || null, visibility, tree_role: treeRole, impact_weight: impactWeight,
+      }).select("id").single();
+      if (error) throw error;
+      if (insertedOffering) {
+        supabase.from("trees").select("latitude, longitude").eq("id", treeId).single().then(async ({ data: treeData }) => {
+          if (treeData?.latitude && treeData?.longitude) {
+            const stampId = await createOrReuseSkystamp({ lat: treeData.latitude, lng: treeData.longitude, userId: user.id, treeId, offeringId: insertedOffering.id });
+            if (stampId) await supabase.from("offerings").update({ sky_stamp_id: stampId } as any).eq("id", insertedOffering.id);
+          }
+        });
+      }
+      if (taggedUsers.length > 0 && insertedOffering) {
+        await supabase.from("offering_tags").insert(taggedUsers.map((t) => ({ offering_id: insertedOffering.id, tagged_user_id: t.id, tagged_by: user.id })));
+      }
+      window.dispatchEvent(new CustomEvent("offering-created"));
+      let earnedReward: RewardResult | null = null;
+      if (treeSpecies) {
+        const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
+        if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
+      }
+      setCelebrationMsg({ emoji: "🎵", message: "Song offering sealed!", subtitle: `"${data.title}" by ${data.artist}` });
+      setShowCelebration(true);
+      resetForm();
+      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+    } catch (err: any) {
+      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
+    } finally { setLoading(false); submittingRef.current = false; }
+  };
+
+  // Voice offering
   const handleVoiceComplete = async (data: VoiceOfferingData) => {
     if (submittingRef.current) return;
     submittingRef.current = true;
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
-        return;
-      }
-
+      if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
-        tree_id: treeId,
-        type: "voice" as const,
+        tree_id: treeId, type: "voice" as const,
         title: `Voice Offering (${Math.floor(data.duration / 60)}:${(data.duration % 60).toString().padStart(2, "0")})`,
-        content: data.message || null,
-        media_url: data.audioUrl,
-        created_by: user.id,
-        sealed_by_staff: sealedByStaff.trim() || null,
-        meeting_id: meetingId || null,
-        visibility,
-        tree_role: treeRole,
-        impact_weight: impactWeight,
+        content: data.message || null, media_url: data.audioUrl, created_by: user.id,
+        sealed_by_staff: sealedByStaff.trim() || null, meeting_id: meetingId || null, visibility, tree_role: treeRole, impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
-
       if (taggedUsers.length > 0 && insertedOffering) {
-        await supabase.from("offering_tags").insert(
-          taggedUsers.map((t) => ({
-            offering_id: insertedOffering.id,
-            tagged_user_id: t.id,
-            tagged_by: user.id,
-          }))
-        );
+        await supabase.from("offering_tags").insert(taggedUsers.map((t) => ({ offering_id: insertedOffering.id, tagged_user_id: t.id, tagged_by: user.id })));
       }
-
-      // Issue rewards
+      window.dispatchEvent(new CustomEvent("offering-created"));
       let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
-
       setCelebrationMsg({ emoji: "🎙️", message: "Voice offering sealed!", subtitle: "Your voice has been offered" });
       setShowCelebration(true);
-      setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
-      clearSelectedFile();
+      resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-      submittingRef.current = false;
-    }
+    } finally { setLoading(false); submittingRef.current = false; }
   };
 
-  // Book offering via BookOfferingFlow
+  // Book offering
   const handleBookComplete = async (data: BookOfferingData) => {
     if (submittingRef.current) return;
     submittingRef.current = true;
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
-        return;
-      }
-
+      if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
       const contentParts = [data.author];
       if (data.genre) contentParts.push(`Genre: ${data.genre}`);
       if (data.quote) contentParts.push(`\n"${data.quote}"`);
       if (data.reflection) contentParts.push(`\n${data.reflection}`);
-
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
       const { data: insertedOffering, error } = await supabase.from("offerings").insert({
-        tree_id: treeId,
-        type: "book" as const,
-        title: data.title,
-        content: contentParts.join("\n"),
-        media_url: data.coverUrl || null,
-        created_by: user.id,
-        sealed_by_staff: sealedByStaff.trim() || null,
-        meeting_id: meetingId || null,
-        visibility,
-        tree_role: treeRole,
-        impact_weight: impactWeight,
+        tree_id: treeId, type: "book" as const, title: data.title, content: contentParts.join("\n"),
+        media_url: data.coverUrl || null, created_by: user.id, sealed_by_staff: sealedByStaff.trim() || null,
+        meeting_id: meetingId || null, visibility, tree_role: treeRole, impact_weight: impactWeight,
       }).select("id").single();
       if (error) throw error;
-
       if (taggedUsers.length > 0 && insertedOffering) {
-        await supabase.from("offering_tags").insert(
-          taggedUsers.map((t) => ({
-            offering_id: insertedOffering.id,
-            tagged_user_id: t.id,
-            tagged_by: user.id,
-          }))
-        );
+        await supabase.from("offering_tags").insert(taggedUsers.map((t) => ({ offering_id: insertedOffering.id, tagged_user_id: t.id, tagged_by: user.id })));
       }
-
-      // Issue rewards
+      window.dispatchEvent(new CustomEvent("offering-created"));
       let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
         const rr = await issueRewards({ userId: user.id, treeId, treeSpecies, actionType: "offering" });
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
-
       setCelebrationMsg({ emoji: "📖", message: "Book offering sealed!", subtitle: `"${data.title}" by ${data.author}` });
       setShowCelebration(true);
-      setTitle(""); setContent(""); setMediaUrl(""); setNftLink(""); setSealedByStaff(""); setTaggedUsers([]);
-      clearSelectedFile();
+      resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
       toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-      submittingRef.current = false;
-    }
+    } finally { setLoading(false); submittingRef.current = false; }
   };
 
-  // For book type, render dedicated flow
-  if (type === "book") {
+  // Delegated flows for song/voice/book
+  if (activeType === "song") {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
           <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div
-            className="h-0.5"
-            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), hsl(var(--accent) / 0.3), transparent)" }}
-          />
+          {/* Ambient glow bar */}
+          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
           <div className="px-6 pt-5 pb-0">
             <DialogHeader>
               <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">📖</span>
-                Book Offering
+                <span className="text-2xl">🎵</span> Song Offering
               </DialogTitle>
-              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
-                Place a story in this Ancient Friend's living archive
+              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
+                Let music flow through this Ancient Friend
               </p>
             </DialogHeader>
+            {/* Type switcher */}
+            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
           </div>
           <div className="px-6 pb-6 mt-2">
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
+              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : (
-              <BookOfferingFlow
-                treeId={treeId}
-                onComplete={handleBookComplete}
-                onCancel={() => onOpenChange(false)}
-              />
+              <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
             )}
           </div>
         </DialogContent>
@@ -525,29 +432,103 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
     );
   }
 
+  if (activeType === "voice") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
+          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
+          <div className="px-6 pt-5 pb-0">
+            <DialogHeader>
+              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
+                <span className="text-2xl">🎙️</span> Voice Offering
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
+                Speak into the canopy — your voice becomes part of this tree
+              </p>
+            </DialogHeader>
+            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+          </div>
+          <div className="px-6 pb-6 mt-2">
+            {loading ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : (
+              <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (activeType === "book") {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
+          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
+          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
+          <div className="px-6 pt-5 pb-0">
+            <DialogHeader>
+              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
+                <span className="text-2xl">📖</span> Book Offering
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
+                Place a story in this Ancient Friend's living archive
+              </p>
+            </DialogHeader>
+            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+          </div>
+          <div className="px-6 pb-6 mt-2">
+            {loading ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : (
+              <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
           <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
+
+          {/* Ambient glow bar */}
+          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
+
+          {/* Ambient radial background */}
           <div
-            className="h-0.5"
-            style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6), transparent)" }}
+            className="absolute inset-0 pointer-events-none rounded-lg"
+            style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.04), transparent 60%)" }}
           />
-          <div className="px-6 pt-5 pb-0">
+
+          <div className="px-6 pt-5 pb-0 relative">
             <DialogHeader>
               <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">{cfg.emoji}</span>
+                <motion.span
+                  className="text-2xl"
+                  key={cfg.emoji}
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  {cfg.emoji}
+                </motion.span>
                 {cfg.singular} Offering
               </DialogTitle>
-              <p className="text-xs text-muted-foreground font-serif tracking-wider mt-1">
+              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
                 Offer {["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} {cfg.singular.toLowerCase()} to this Ancient Friend
               </p>
             </DialogHeader>
+
+            {/* Type switcher */}
+            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
           </div>
 
-          <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-2">
+          <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-2 relative">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Title</Label>
@@ -575,8 +556,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
               />
             </div>
 
-            {/* Photo upload for photo type */}
-            {type === "photo" && (
+            {/* Photo upload */}
+            {activeType === "photo" && (
               <div className="space-y-2">
                 <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Photo</Label>
                 {previewUrl ? (
@@ -588,20 +569,23 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
                   </div>
                 ) : (
                   <div
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      dragActive ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
+                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                      dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/40 hover:border-primary/30 hover:bg-primary/[0.02]"
                     }`}
+                    style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
                     onDragOver={e => { e.preventDefault(); setDragActive(true); }}
                     onDragLeave={() => setDragActive(false)}
                     onDrop={handleDrop}
                   >
-                    <ImagePlus className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground font-serif mb-2">Drag & drop or choose</p>
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                      <ImagePlus className="h-6 w-6 text-primary/50" />
+                    </div>
+                    <p className="text-sm text-muted-foreground/70 font-serif mb-3">Drop a photo here, or choose one</p>
                     <div className="flex justify-center gap-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1">
+                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
                         <ImagePlus className="h-3 w-3" /> Gallery
                       </Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="font-serif text-xs gap-1">
+                      <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
                         <Camera className="h-3 w-3" /> Camera
                       </Button>
                     </div>
@@ -612,8 +596,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
               </div>
             )}
 
-            {/* Media URL */}
-            {type !== "photo" && (
+            {/* Media URL for non-photo */}
+            {activeType !== "photo" && (
               <div className="space-y-2">
                 <Label htmlFor="media" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Media URL (optional)</Label>
                 <Input id="media" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://..." className="bg-secondary/20 border-border/50 font-serif" />
@@ -621,78 +605,104 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
             )}
 
             {/* NFT link */}
-            {type === "nft" && (
+            {activeType === "nft" && (
               <div className="space-y-2">
                 <Label htmlFor="nft" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">NFT Link</Label>
                 <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link..." className="bg-secondary/20 border-border/50 font-serif" />
               </div>
             )}
 
-            {/* Tree role picker */}
+            {/* Tree role picker — always visible as it's important */}
             <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
 
-            {/* Quote section */}
-            <OfferingQuoteInput value={quote} onChange={setQuote} />
+            {/* ─── Collapsible advanced options ─── */}
+            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/60 hover:text-muted-foreground transition-colors group"
+                >
+                  <div className="h-px flex-1 bg-border/20" />
+                  <Settings2 className="w-3 h-3" />
+                  <span>More options</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
+                  <div className="h-px flex-1 bg-border/20" />
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-2">
+                {/* Quote */}
+                <OfferingQuoteInput value={quote} onChange={setQuote} />
 
-            {/* Visibility picker (not shown for photos — always public) */}
-            {type !== "photo" && (
-              <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading} />
-            )}
-
-            {/* Staff seal */}
-            <div className="space-y-2">
-              <Label htmlFor="staff" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Sealed by Staff (optional)</Label>
-              <Input id="staff" value={sealedByStaff} onChange={e => setSealedByStaff(e.target.value)} placeholder="Staff code..." className="bg-secondary/20 border-border/50 font-serif" />
-            </div>
-
-            {/* Tag wanderers */}
-            <div className="space-y-2">
-              <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase flex items-center gap-1"><UserPlus className="h-3 w-3" /> Tag Wanderers</Label>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  value={tagQuery}
-                  onChange={e => {
-                    setTagQuery(e.target.value);
-                    if (tagTimerRef.current) clearTimeout(tagTimerRef.current);
-                    if (e.target.value.length >= 2) {
-                      tagTimerRef.current = setTimeout(() => searchTags(e.target.value), 300);
-                    } else { clearTagResults(); }
-                  }}
-                  placeholder="Search by name..."
-                  className="bg-secondary/20 border-border/50 font-serif pl-8"
-                />
-              </div>
-              {tagResults.length > 0 && (
-                <div className="border border-border/50 rounded-lg max-h-32 overflow-y-auto">
-                  {tagResults.filter(r => !taggedUsers.find(t => t.id === r.id)).map(r => (
-                    <button key={r.id} type="button" className="flex items-center gap-2 w-full px-3 py-2 hover:bg-secondary/30 text-left" onClick={() => { setTaggedUsers(prev => [...prev, r]); setTagQuery(""); clearTagResults(); }}>
-                      <Avatar className="h-5 w-5"><AvatarImage src={r.avatar_url || undefined} /><AvatarFallback className="text-[8px]">{(r.full_name || "?")[0]}</AvatarFallback></Avatar>
-                      <span className="text-xs font-serif">{r.full_name || "Unknown"}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-              {taggedUsers.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {taggedUsers.map(t => (
-                    <Badge key={t.id} variant="secondary" className="gap-1 text-[10px] font-serif">
-                      {t.full_name || "Unknown"}
-                      <button type="button" onClick={() => setTaggedUsers(prev => prev.filter(x => x.id !== t.id))}><X className="h-2.5 w-2.5" /></button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="pt-2">
-              <Button type="submit" disabled={loading || uploading} className="w-full font-serif tracking-wider gap-2">
-                {loading || uploading ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3 w-3" />
+                {/* Visibility (not for photos) */}
+                {activeType !== "photo" && (
+                  <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading} />
                 )}
-                {uploading ? "Uploading..." : `Add ${cfg.singular}`}
+
+                {/* Staff seal */}
+                <div className="space-y-2">
+                  <Label htmlFor="staff" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Sealed by Staff (optional)</Label>
+                  <Input id="staff" value={sealedByStaff} onChange={e => setSealedByStaff(e.target.value)} placeholder="Staff code..." className="bg-secondary/20 border-border/50 font-serif" />
+                </div>
+
+                {/* Tag wanderers */}
+                <div className="space-y-2">
+                  <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase flex items-center gap-1"><UserPlus className="h-3 w-3" /> Tag Wanderers</Label>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      value={tagQuery}
+                      onChange={e => {
+                        setTagQuery(e.target.value);
+                        if (tagTimerRef.current) clearTimeout(tagTimerRef.current);
+                        if (e.target.value.length >= 2) {
+                          tagTimerRef.current = setTimeout(() => searchTags(e.target.value), 300);
+                        } else { clearTagResults(); }
+                      }}
+                      placeholder="Search by name..."
+                      className="bg-secondary/20 border-border/50 font-serif pl-8"
+                    />
+                  </div>
+                  {tagResults.length > 0 && (
+                    <div className="border border-border/50 rounded-lg max-h-32 overflow-y-auto">
+                      {tagResults.filter(r => !taggedUsers.find(t => t.id === r.id)).map(r => (
+                        <button key={r.id} type="button" className="flex items-center gap-2 w-full px-3 py-2 hover:bg-secondary/30 text-left" onClick={() => { setTaggedUsers(prev => [...prev, r]); setTagQuery(""); clearTagResults(); }}>
+                          <Avatar className="h-5 w-5"><AvatarImage src={r.avatar_url || undefined} /><AvatarFallback className="text-[8px]">{(r.full_name || "?")[0]}</AvatarFallback></Avatar>
+                          <span className="text-xs font-serif">{r.full_name || "Unknown"}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {taggedUsers.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {taggedUsers.map(t => (
+                        <Badge key={t.id} variant="secondary" className="gap-1 text-[10px] font-serif">
+                          {t.full_name || "Unknown"}
+                          <button type="button" onClick={() => setTaggedUsers(prev => prev.filter(x => x.id !== t.id))}><X className="h-2.5 w-2.5" /></button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Submit */}
+            <div className="pt-2">
+              <Button
+                type="submit"
+                disabled={loading || uploading}
+                className="w-full font-serif tracking-wider gap-2 h-11"
+                style={{
+                  background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
+                  boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
+                }}
+              >
+                {loading || uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {uploading ? "Uploading..." : `Offer ${cfg.singular}`}
               </Button>
             </div>
           </form>
@@ -709,5 +719,26 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type, meet
     </>
   );
 };
+
+/** Inline type switcher — scrollable pill bar */
+const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onChange: (t: OfferingType) => void }) => (
+  <div className="flex gap-1.5 overflow-x-auto py-3 -mx-1 px-1 scrollbar-none">
+    {QUICK_TYPES.map((t) => (
+      <button
+        key={t.value}
+        type="button"
+        onClick={() => onChange(t.value)}
+        className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-serif transition-all ${
+          activeType === t.value
+            ? "border-primary/40 bg-primary/10 text-primary shadow-sm"
+            : "border-border/30 text-muted-foreground/60 hover:border-primary/20 hover:text-foreground/80"
+        }`}
+      >
+        <span className="text-sm">{t.emoji}</span>
+        <span>{t.label}</span>
+      </button>
+    ))}
+  </div>
+);
 
 export default AddOfferingDialog;
