@@ -4,6 +4,31 @@
  */
 
 export const SUPPORT_CONFIG = {
+  /** Recurring support tiers */
+  recurring: {
+    enabled: true,
+    tiers: [
+      {
+        id: "weekly",
+        amount: "£3.33",
+        period: "per week",
+        label: "Weekly Seed",
+        description: "A gentle weekly rhythm of support — like rain nurturing the grove.",
+        stripeLink: "", // Stripe payment link URL — set when ready
+        emoji: "🌱",
+      },
+      {
+        id: "monthly",
+        amount: "£3.33",
+        period: "per month",
+        label: "Monthly Root",
+        description: "Steady monthly support that helps the roots grow deeper.",
+        stripeLink: "", // Stripe payment link URL — set when ready
+        emoji: "🌿",
+      },
+    ],
+  },
+
   /** Fiat donation links (Stripe Payment Links or similar) */
   fiat: {
     oneOff: "", // Stripe payment link URL — set when ready
@@ -27,10 +52,9 @@ export const SUPPORT_CONFIG = {
         network: "Bitcoin Mainnet",
       },
     ] as const,
-    /** Optional external checkout (e.g. The Giving Block) */
     checkoutUrl: "",
     checkoutLabel: "",
-    enabled: false, // flip when real addresses are set
+    enabled: false,
   },
 
   /** External donation rails */
@@ -44,7 +68,7 @@ export const SUPPORT_CONFIG = {
   /** Pitch deck — hidden until ready */
   pitchDeck: {
     enabled: false,
-    url: "", // internal route or external URL
+    url: "",
     isExternal: false,
   },
 } as const;
