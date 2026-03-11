@@ -99,6 +99,74 @@ function buildCouncilWhispers(_ctx: CouncilContext, onAction: (type: string) => 
   ];
 }
 
+/* ── Page-specific whispers ─────────────────────── */
+
+function buildTreePageWhispers(ctx: NonNullable<PageContext["tree"]>, onAction: (type: string) => void): Whisper[] {
+  const pool: Whisper[] = [
+    {
+      kind: "tree",
+      message: `You are visiting ${ctx.name}. Every tree holds a living story waiting to be heard.`,
+      action: { label: "Ask TEOTAG", emoji: "✨", onClick: () => onAction("open-guide") },
+    },
+  ];
+  if (ctx.bloomStatus) {
+    pool.push({
+      kind: "landscape",
+      message: `${ctx.name} is currently ${ctx.bloomStatus}. The seasons shape its rhythm.`,
+    });
+  }
+  if (ctx.species) {
+    pool.push({
+      kind: "knowledge",
+      message: `${ctx.species} trees share deep connections across the grove. Explore their kin.`,
+      action: { label: "Explore species", emoji: "🌿", onClick: () => onAction("species") },
+    });
+  }
+  if (ctx.offeringCount && ctx.offeringCount > 0) {
+    pool.push({
+      kind: "journey",
+      message: `${ctx.offeringCount} offerings have been left at ${ctx.name}. Songs, stories, and images gather here.`,
+    });
+  }
+  return pool;
+}
+
+function buildHarvestPageWhispers(ctx: NonNullable<PageContext["harvest"]>, onAction: (type: string) => void): Whisper[] {
+  const pool: Whisper[] = [];
+  if (ctx.produceName) {
+    pool.push({
+      kind: "landscape",
+      message: `${ctx.produceName} — a gift from the living landscape. Discover its seasonal rhythm.`,
+      action: { label: "Season guide", emoji: "📅", onClick: () => onAction("open-guide") },
+    });
+  }
+  if (ctx.treeId) {
+    pool.push({
+      kind: "tree",
+      message: "This harvest is linked to a living tree. Visit the source of this abundance.",
+      action: { label: "View tree", emoji: "🌳", onClick: () => onAction("view-tree") },
+    });
+  }
+  pool.push({
+    kind: "journey",
+    message: "The Harvest Exchange connects guardians and foragers through seasonal abundance.",
+  });
+  return pool;
+}
+
+function buildStaffPageWhispers(ctx: NonNullable<PageContext["staff"]>): Whisper[] {
+  return [
+    {
+      kind: "journey",
+      message: `The Walking Staff "${ctx.staffName || ctx.code}" carries the memory of its bearer's journey.`,
+    },
+    {
+      kind: "knowledge",
+      message: `${ctx.species || "This wood"} holds stories older than words. Each grain is a year remembered.`,
+    },
+  ];
+}
+
 function buildGenericWhispers(): Whisper[] {
   return [
     { kind: "landscape", message: "The roots remember what the branches dream…" },
