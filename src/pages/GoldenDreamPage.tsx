@@ -14,7 +14,17 @@ import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
 const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
 
-const goldenDreamRooms = [
+interface GoldenDreamRoom {
+  id: string;
+  title: string;
+  description: string;
+  icon: typeof Map;
+  internal?: boolean;
+  notionUrl?: string;
+  externalUrl?: string;
+}
+
+const goldenDreamRooms: GoldenDreamRoom[] = [
   {
     id: "roadmap",
     title: "Living Roadmap",
