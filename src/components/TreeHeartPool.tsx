@@ -101,7 +101,7 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           <p className="font-serif text-lg tabular-nums" style={{ color: "hsl(120 45% 55%)" }}>
             {pool.total_hearts}
           </p>
-          <p className="text-[10px] text-muted-foreground font-serif">🌳 Hearts</p>
+          <p className="text-[10px] text-muted-foreground font-serif">🌳 S33D Hearts</p>
         </div>
       </div>
 
