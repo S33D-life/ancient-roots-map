@@ -12,7 +12,7 @@ import { usePhenology, getPhaseDisplay } from "@/hooks/use-phenology";
 import { useMarkets } from "@/hooks/use-markets";
 import { useSeasonalEvents } from "@/hooks/use-seasonal-events";
 import { getTzolkinDay, formatTzolkinLabel } from "@/utils/mayanTzolkin";
-import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Flower2, Settings, Leaf, Activity, TreeDeciduous, MapPin, Calendar, ArrowRight } from "lucide-react";
 import CosmicClock from "@/components/CosmicClock";
