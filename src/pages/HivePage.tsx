@@ -26,6 +26,7 @@ import BloomingClock from "@/components/BloomingClock";
 import { useHiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 import HiveActivityOrb from "@/components/hive/HiveActivityOrb";
 import HiveUserBalance from "@/components/hive/HiveUserBalance";
+import HiveLeaderboardCard from "@/components/growth/HiveLeaderboardCard";
 
 interface TreeRow {
   id: string;
