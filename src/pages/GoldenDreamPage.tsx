@@ -14,7 +14,17 @@ import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
 const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
 
-const goldenDreamRooms = [
+interface GoldenDreamRoom {
+  id: string;
+  title: string;
+  description: string;
+  icon: typeof Map;
+  internal?: boolean;
+  notionUrl?: string;
+  externalUrl?: string;
+}
+
+const goldenDreamRooms: GoldenDreamRoom[] = [
   {
     id: "roadmap",
     title: "Living Roadmap",
@@ -76,7 +86,7 @@ const GoldenDreamPage = () => {
           src={room?.notionUrl}
           width="100%"
           height="100%"
-          frameBorder="0"
+          style={{ border: 0 }}
           allowFullScreen
           title={room?.title}
         />
@@ -152,7 +162,7 @@ const GoldenDreamPage = () => {
                 src={room?.notionUrl}
                 width="100%"
                 height="800"
-                frameBorder="0"
+                style={{ border: 0 }}
                 allowFullScreen
                 title={room?.title}
               />

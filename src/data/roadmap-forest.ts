@@ -40,14 +40,14 @@ export interface RoadmapFeature {
 }
 
 export const STAGE_META: Record<RoadmapStage, { emoji: string; label: string; color: string }> = {
-  seed:    { emoji: "🌱", label: "Seed — planned",             color: "hsl(var(--muted-foreground))" },
+  seed:    { emoji: "🌱", label: "Seed — planned",             color: "hsl(0 0% 55%)" },
   sprout:  { emoji: "🌿", label: "Sprout — building",          color: "hsl(90 55% 45%)" },
-  rooted:  { emoji: "🌳", label: "Growth — live",              color: "hsl(var(--primary))" },
-  ancient: { emoji: "✨", label: "Canopy — mature pillar",     color: "hsl(var(--sacred-gold))" },
+  rooted:  { emoji: "🌳", label: "Growth — live",              color: "hsl(42 88% 45%)" },
+  ancient: { emoji: "✨", label: "Canopy — mature pillar",     color: "hsl(42 88% 55%)" },
 };
 
 export const STATUS_META: Record<RoadmapStatus, { emoji: string; label: string; color: string }> = {
-  planned:  { emoji: "🌱", label: "Planned",  color: "hsl(var(--muted-foreground))" },
+  planned:  { emoji: "🌱", label: "Planned",  color: "hsl(0 0% 55%)" },
   building: { emoji: "🔨", label: "Building", color: "hsl(42 90% 55%)" },
   live:     { emoji: "✅", label: "Live",     color: "hsl(120 55% 45%)" },
 };

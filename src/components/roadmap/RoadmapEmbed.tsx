@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Leaf, TreeDeciduous, Sparkles, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
@@ -15,16 +15,7 @@ import {
   type RoadmapStage,
   type RoadmapCategory,
 } from "@/data/roadmap-forest";
-
-const StageIcon = ({ stage, className = "" }: { stage: RoadmapStage; className?: string }) => {
-  const base = `shrink-0 ${className}`;
-  switch (stage) {
-    case "seed":    return <Sprout className={base} />;
-    case "sprout":  return <Leaf className={base} />;
-    case "rooted":  return <TreeDeciduous className={base} />;
-    case "ancient": return <Sparkles className={base} />;
-  }
-};
+import StageIcon from "@/components/roadmap/StageIcon";
 
 /** Milestone card */
 const MilestoneCard = ({ feature }: { feature: RoadmapFeature }) => {

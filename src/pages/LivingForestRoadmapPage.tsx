@@ -1,10 +1,11 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, TreeDeciduous, Sprout, Leaf, ExternalLink } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
+import StageIcon from "@/components/roadmap/StageIcon";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
@@ -17,17 +18,6 @@ import {
   type RoadmapStatus,
   type RoadmapCategory,
 } from "@/data/roadmap-forest";
-
-/* ── stage icon helper ── */
-const StageIcon = ({ stage, className = "" }: { stage: RoadmapStage; className?: string }) => {
-  const base = `shrink-0 ${className}`;
-  switch (stage) {
-    case "seed":    return <Sprout className={base} />;
-    case "sprout":  return <Leaf className={base} />;
-    case "rooted":  return <TreeDeciduous className={base} />;
-    case "ancient": return <Sparkles className={base} />;
-  }
-};
 
 /* ── mycelial SVG connections ── */
 const MycelialLines = ({
@@ -94,7 +84,12 @@ const FeatureNode = ({
   onSelect: (f: RoadmapFeature) => void;
 }) => {
   const meta = STAGE_META[feature.stage];
-  const stageScale = { seed: 0.85, sprout: 0.95, rooted: 1, ancient: 1.1 }[feature.stage];
+  const sizeClass = {
+    seed: "scale-[0.85]",
+    sprout: "scale-95",
+    rooted: "scale-100",
+    ancient: "scale-110",
+  }[feature.stage];
 
   return (
     <motion.button
@@ -104,9 +99,9 @@ const FeatureNode = ({
       className={`
         group relative flex flex-col items-center gap-1.5 p-2 rounded-xl
         transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-ring
+        ${sizeClass}
         ${isActive ? "z-20" : "z-10"}
       `}
-      style={{ transform: `scale(${stageScale})` }}
       aria-label={`${feature.name} — ${meta.label}`}
     >
       {feature.stage === "ancient" && (
@@ -212,7 +207,7 @@ const DetailPanel = ({
           </p>
           <div className="flex flex-wrap gap-1.5">
             {connected.map((c) => (
-              <span key={c.id} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/8 text-primary/80 border border-primary/15 font-sans">
+              <span key={c.id} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary/80 border border-primary/15 font-sans">
                 {STAGE_META[c.stage].emoji} {c.name}
               </span>
             ))}
