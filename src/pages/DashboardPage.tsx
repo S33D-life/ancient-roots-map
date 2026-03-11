@@ -434,26 +434,13 @@ const DashboardPage = () => {
 
             <TabsContent value="hearth">
               {user && (
-                <div className="space-y-8">
-                  <FirstEncounterFunnel userId={user.id} />
-                  <GroveIdentityCard userId={user.id} userName={profile?.full_name} />
-                  <PresenceSpiralCard userId={user.id} />
-                  <HearthWarmth userId={user.id} />
-                  <EarnableToday userId={user.id} />
-                  <SeedTrailPanel userId={user.id} />
-                  <ActiveCampaigns />
-                  <HearthCrossLinks />
-                </div>
+                <GrowthEngineHearth userId={user.id} profile={profile} />
               )}
             </TabsContent>
 
             <TabsContent value="journey">
               {user && (
-                <div className="space-y-8">
-                  <PersonalLegend userId={user.id} />
-                  <AncientFriendPassport userId={user.id} />
-                  <DashboardActivity userId={user.id} />
-                </div>
+                <GrowthEngineJourney userId={user.id} />
               )}
             </TabsContent>
 
