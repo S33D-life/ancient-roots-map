@@ -63,6 +63,7 @@ const DOUBLE_TAP_MS = 350;
 
 const FireflyFAB = () => {
   const navigate = useNavigate();
+  const { activeLens, lensConfig } = useSeasonalLens();
   const [panelOpen, setPanelOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
