@@ -277,6 +277,7 @@ const App = () => {
                 <Route path="/cosmic" element={<CosmicCalendarPage />} />
                 <Route path="/cosmic/settings" element={<CalendarSettingsPage />} />
                 <Route path="/wanderer/:id" element={<WandererProfilePage />} />
+                <Route path="/roadmap" element={<LivingForestRoadmapPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
