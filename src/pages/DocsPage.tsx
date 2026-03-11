@@ -160,7 +160,7 @@ const DocsPage = () => (
                 icon={<Heart className="h-4 w-4" />}
                 name="S33D Hearts"
                 tag="Global Currency"
-                description="Earned for every contribution. Used across the entire ecosystem — the universal heartbeat of S33D."
+                description="The commons currency of S33D. Earned for every stewardship contribution — mapping trees, sharing offerings, attending councils, and more."
               />
               <TokenLayer
                 icon={<Leaf className="h-4 w-4" />}

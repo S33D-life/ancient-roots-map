@@ -111,7 +111,7 @@ const HowHeartsWorkPage = () => (
 
         <div className="text-center pt-4">
           <p className="text-[10px] font-serif text-muted-foreground/40">
-            Hearts are sacred infrastructure. They represent real care, not casual points.
+            S33D Hearts are commons currency — sacred infrastructure for ecological stewardship, not casual points.
           </p>
         </div>
       </main>

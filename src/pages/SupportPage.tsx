@@ -336,7 +336,7 @@ const SupportPage = () => {
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
             Validated bug reports, UX refinements, tree suggestions, and insights may earn Hearts —
-            the living currency of S33D.
+            the commons currency of the S33D ecosystem.
           </p>
           <Link
             to={ROUTES.VALUE_TREE_EARN}

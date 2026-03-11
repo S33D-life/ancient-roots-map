@@ -253,10 +253,15 @@ const RootsPanel = () => (
         </motion.div>
       );
     })}
-    <div className="pt-2 flex items-start gap-2 px-1">
-      <AlertTriangle className="w-3 h-3 text-muted-foreground/40 mt-0.5 shrink-0" />
-      <p className="text-[9px] text-muted-foreground/50 font-serif leading-relaxed">
-        Anti-spam: GPS validation for mapping, daily caps on check-ins (3/tree/day), duplicate detection on media uploads. All Heart issuance is logged in an immutable ledger.
+    <div className="pt-2 space-y-2">
+      <div className="flex items-start gap-2 px-1">
+        <AlertTriangle className="w-3 h-3 text-muted-foreground/40 mt-0.5 shrink-0" />
+        <p className="text-[9px] text-muted-foreground/50 font-serif leading-relaxed">
+          Anti-spam: GPS validation for mapping, daily caps on check-ins (3/tree/day), duplicate detection on media uploads. All Heart issuance is logged in an immutable ledger.
+        </p>
+      </div>
+      <p className="text-[9px] text-muted-foreground/40 font-serif leading-relaxed px-1 italic">
+        Additional earning pathways — including staking, NFT rewards, and sapling nurturing — are planned for future chapters.
       </p>
     </div>
   </div>

@@ -62,7 +62,7 @@ const VaultLotteryTracker = ({ userId }: Props) => {
       <div className="p-5">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles className="w-4 h-4 text-accent" />
-          <h3 className="text-sm font-serif tracking-wide text-foreground">Windfall Lottery</h3>
+          <h3 className="text-sm font-serif tracking-wide text-foreground">Windfall Lottery <span className="text-[9px] text-muted-foreground font-normal ml-1">Current</span></h3>
         </div>
 
         {/* Status beacon */}

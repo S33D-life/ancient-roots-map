@@ -56,8 +56,8 @@ const EarnableToday = ({ userId }: Props) => {
 
   const items = [
     { icon: Sprout, label: "Seeds available", value: `${seedsRemaining}/33`, tip: "Plant up to 33 seeds per day, max 3 per tree. Resets at midnight." },
-    { icon: TreeDeciduous, label: "Check-ins today", value: `${checkins}`, tip: "Visit trees to earn S33D Hearts. Max 3 per tree per day." },
-    { icon: Heart, label: "Hearts earned", value: `${heartBalance}`, tip: "Total S33D Hearts across all actions." },
+    { icon: TreeDeciduous, label: "Check-ins today", value: `${checkins}`, tip: "Visit trees to earn S33D Hearts — the commons currency. Max 3 per tree per day." },
+    { icon: Heart, label: "Hearts earned", value: `${heartBalance}`, tip: "Total S33D Hearts earned through active stewardship." },
   ];
 
   return (
