@@ -84,7 +84,6 @@ const FeatureNode = ({
   onSelect: (f: RoadmapFeature) => void;
 }) => {
   const meta = STAGE_META[feature.stage];
-  const stageScale = { seed: 0.85, sprout: 0.95, rooted: 1, ancient: 1.1 }[feature.stage];
   const sizeClass = {
     seed: "scale-[0.85]",
     sprout: "scale-95",
