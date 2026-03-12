@@ -330,7 +330,7 @@ const BugReportDialog = ({ open = false, onOpenChange, initialReportType }: BugR
         return;
       }
 
-      console.info("[Spark] spark_submit_success", { type: form.report_type });
+      if (import.meta.env.DEV) console.info("[Spark] spark_submit_success", { type: form.report_type });
       setSubmitted(true);
     } catch (err: any) {
       console.warn("[Spark] spark_submit_error", err?.message);
