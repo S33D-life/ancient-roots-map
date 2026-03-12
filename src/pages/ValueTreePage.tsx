@@ -743,6 +743,9 @@ const ValueTreePage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-secondary/30 border border-border/50 mb-8 flex-wrap h-auto gap-1 p-1.5 w-full justify-start">
+            <TabsTrigger value="economy" className="font-serif text-xs tracking-wider gap-1.5">
+              <Coins className="w-3.5 h-3.5" /> Living Economy
+            </TabsTrigger>
             <TabsTrigger value="earn" className="font-serif text-xs tracking-wider gap-1.5">
               <Flame className="w-3.5 h-3.5" /> Earn & Grow
             </TabsTrigger>
