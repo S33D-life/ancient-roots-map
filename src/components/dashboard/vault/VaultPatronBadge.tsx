@@ -100,6 +100,18 @@ const VaultPatronBadge = ({ staff }: Props) => (
           <ArrowRight className="w-3 h-3 text-muted-foreground/30 group-hover:text-primary transition-colors" />
         </Link>
         <Link
+          to="/patron-offering"
+          className="group flex-1 flex items-center justify-between px-3 py-2 rounded-xl border border-border/20 bg-card/20 hover:border-primary/20 transition-all"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm">👑</span>
+            <span className="text-[10px] font-serif text-muted-foreground group-hover:text-foreground transition-colors">
+              Patron Offering
+            </span>
+          </div>
+          <ArrowRight className="w-3 h-3 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+        </Link>
+        <Link
           to="/library/staff-room"
           className="group flex-1 flex items-center justify-between px-3 py-2 rounded-xl border border-border/20 bg-card/20 hover:border-primary/20 transition-all"
         >

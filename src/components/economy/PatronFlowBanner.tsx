@@ -60,16 +60,27 @@ const PatronFlowBanner = () => (
         ))}
       </div>
 
-      {/* CTA to Staff Room */}
-      <Link
-        to="/library/staff-room"
-        className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all"
-      >
-        <span className="text-xs font-serif text-foreground group-hover:text-primary transition-colors">
-          Enter the Staff Room
-        </span>
-        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-      </Link>
+      {/* CTAs */}
+      <div className="flex flex-wrap gap-2">
+        <Link
+          to="/patron-offering"
+          className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all"
+        >
+          <span className="text-xs font-serif text-foreground group-hover:text-primary transition-colors">
+            Founding Patron Offering
+          </span>
+          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+        </Link>
+        <Link
+          to="/library/staff-room"
+          className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-border/20 bg-card/20 hover:border-primary/20 transition-all"
+        >
+          <span className="text-xs font-serif text-muted-foreground group-hover:text-foreground transition-colors">
+            Enter the Staff Room
+          </span>
+          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+        </Link>
+      </div>
     </div>
   </motion.div>
 );
