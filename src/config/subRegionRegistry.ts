@@ -166,7 +166,7 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     countrySlug: "united-kingdom",
     tagline: "Ancient oaks, churchyard yews & royal park veterans",
     icon: "🏰",
-    provinceKey: "England",
+    provinceKey: ["East Midlands", "East of England", "London", "North West England", "Northern England & Lake District", "South East England", "South West England", "West Midlands", "Yorkshire & Humber", "Chapter 16", "Chapter 17", "Chapter 18"],
   },
   {
     name: "Wales",
@@ -182,7 +182,7 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     countrySlug: "united-kingdom",
     tagline: "Highland pines, Caledonian relicts & ancient yews",
     icon: "🦌",
-    provinceKey: "Scotland",
+    provinceKey: ["Scotland — East & Edinburgh", "Scotland — Highlands & Islands", "Scotland — West & Glasgow"],
   },
   {
     name: "Northern Ireland",
