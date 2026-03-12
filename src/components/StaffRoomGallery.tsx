@@ -682,6 +682,11 @@ export default function StaffRoomGallery() {
           )}
         </AnimatePresence>
 
+        {/* ═══ Staff Spiral Navigator — Full 144-staff navigable structure ═══ */}
+        <Suspense fallback={null}>
+          <LazyStaffSpiralNavigator />
+        </Suspense>
+
         {/* ═══ Ceremonial Circle — 36 Founding Staffs ═══ */}
         <Suspense fallback={null}>
           <LazyCeremonialCircle />
