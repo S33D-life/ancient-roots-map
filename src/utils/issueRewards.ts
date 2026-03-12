@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { matchSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import { toast } from "sonner";
+import { earnHearts } from "@/lib/heartService";
+import { ACTION_TO_TXN_TYPE } from "@/lib/heart-economy-types";
 
 const DAILY_CHECKIN_CAP = 3;
 
