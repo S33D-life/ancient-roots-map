@@ -327,8 +327,6 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
         .from("chain_anchors").select("id")
         .eq("asset_id", id).eq("status", "confirmed")
         .limit(1).maybeSingle(),
-      // Get staff linkage — ceremony_logs currently has no tree_id,
-      // so we look for any binding ceremony by the tree's creator
       supabase
         .from("ceremony_logs")
         .select("staff_code, staff_name, staff_species")
@@ -336,6 +334,12 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
         .order("created_at", { ascending: false })
         .limit(1).maybeSingle(),
     ]);
+
+    // Ensure photo URLs are absolute
+    let photoUrl = photoRes.data?.media_url || null;
+    if (photoUrl && !photoUrl.startsWith("http")) {
+      photoUrl = `${APP_URL}${photoUrl.startsWith("/") ? "" : "/"}${photoUrl}`;
+    }
 
     return {
       name: treeRes.data?.name || "Ancient Friend",
@@ -345,7 +349,7 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
       staffCode: staffRes.data?.staff_code || null,
       staffName: staffRes.data?.staff_name || null,
       staffSpecies: staffRes.data?.staff_species || null,
-      photoUrl: photoRes.data?.media_url || null,
+      photoUrl,
     };
   } catch {
     return {

@@ -59,6 +59,9 @@ interface Meta {
 }
 
 function renderHTML(m: Meta): string {
+  // IMPORTANT: og:image content must NOT be HTML-escaped (& must stay &, not &amp;)
+  // because crawlers fetch the URL literally from the content attribute.
+  const safeImage = m.image; // Already a URL, don't escape
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,7 +71,7 @@ function renderHTML(m: Meta): string {
 
   <meta property="og:title" content="${esc(m.title)}">
   <meta property="og:description" content="${esc(m.description)}">
-  <meta property="og:image" content="${esc(m.image)}">
+  <meta property="og:image" content="${safeImage}">
   <meta property="og:image:width" content="${m.imageWidth ?? 1200}">
   <meta property="og:image:height" content="${m.imageHeight ?? 630}">
   <meta property="og:url" content="${esc(m.url)}">
@@ -79,7 +82,9 @@ function renderHTML(m: Meta): string {
   <meta name="twitter:site" content="@s33dlife">
   <meta name="twitter:title" content="${esc(m.title)}">
   <meta name="twitter:description" content="${esc(m.description)}">
-  <meta name="twitter:image" content="${esc(m.image)}">
+  <meta name="twitter:image" content="${safeImage}">
+
+  <link rel="canonical" href="${esc(m.url)}">
 
   ${m.geoLat != null ? `<meta property="place:location:latitude" content="${m.geoLat}">` : ""}
   ${m.geoLon != null ? `<meta property="place:location:longitude" content="${m.geoLon}">` : ""}
@@ -153,18 +158,7 @@ const SPECIES_NAMES: Record<string, string> = {
   PEAR: "Pear", SLOE: "Blackthorn", WITC: "Witch Hazel", ALD: "Alder",
 };
 
-function resolveStaffImage(code: string): string {
-  // Staff images live in /images/staffs/<lower>.jpeg
-  // Circle staffs: code like YEW-C1S11 → /images/staffs/yew-c1-s11.jpeg
-  const lower = code.toLowerCase();
-  if (lower.includes("-c")) {
-    // Circle staff: "YEW-C1S3" → "yew-c1-s3"
-    const normalized = lower.replace(/c(\d+)s(\d+)/, "c$1-s$2");
-    return `${APP_URL}/images/staffs/${normalized}.jpeg`;
-  }
-  // Origin staff: species code → species image
-  return `${APP_URL}/images/staffs/${lower}.jpeg`;
-}
+// resolveStaffImage removed — og:image now uses og-card generated SVG
 
 function resolveStaffSpecies(code: string): string {
   // Extract base species from codes like "YEW-C1S3" or "YEW"

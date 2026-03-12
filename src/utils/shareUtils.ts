@@ -16,9 +16,9 @@
  *   4. Global S33D branded share image
  */
 
-const APP_URL = "https://ancient-roots-map.lovable.app";
+import { APP_URL, DEFAULT_OG_IMAGE } from "@/utils/ogMeta";
+
 const OG_PROXY_BASE = `${APP_URL}/functions/v1/og-proxy`;
-const DEFAULT_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
 
 /* ── Entity types ───────────────────────────────────────── */
 
@@ -260,5 +260,5 @@ export function resolveShareImage(
   for (const c of candidates) {
     if (c && c.trim()) return c;
   }
-  return DEFAULT_IMAGE;
+  return DEFAULT_OG_IMAGE;
 }

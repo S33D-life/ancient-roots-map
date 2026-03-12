@@ -106,8 +106,8 @@ export function treeOG(tree: {
       ? `A staff-linked ${typeLabel} in ${location}. Part of the S33D Living Atlas.`
       : `An ${typeLabel} in ${location}. Visit this tree on the S33D Living Atlas.`;
 
-  // Image: prefer curated, then generated og-card, then hero photo
-  const image = resolveImage(tree.ogImage, treeOgCardUrl(tree.id), tree.heroImage, tree.photoUrl);
+  // Image: prefer curated OG, then hero photo, then generated og-card as reliable fallback
+  const image = resolveImage(tree.ogImage, tree.heroImage, tree.photoUrl, treeOgCardUrl(tree.id));
 
   return {
     ...DEFAULT_OG,
