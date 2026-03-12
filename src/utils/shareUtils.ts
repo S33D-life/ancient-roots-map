@@ -103,7 +103,9 @@ export function buildShareTitle(entity: ShareEntity): string {
     case "tree":
       return `${name} — ${entity.species || "Ancient Friend"} | S33D.life`;
     case "nftree":
-      return `${name} — NFTree | S33D.life`;
+      return entity.mintedByStaff
+        ? `${name} — Minted with ${entity.mintedByStaff} | S33D.life`
+        : `${name} — NFTree | S33D.life`;
     case "research_tree":
       return `${name} — ${entity.species || "Research Tree"} | S33D.life`;
     case "staff":
