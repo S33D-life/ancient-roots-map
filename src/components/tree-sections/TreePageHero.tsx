@@ -4,9 +4,12 @@
  * gold leaf vignette, and primary CTAs.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import FullscreenShell from "@/components/FullscreenShell";
+import FullscreenToggle from "@/components/FullscreenToggle";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import LeafAtmosphere from "@/components/LeafAtmosphere";
@@ -45,6 +48,7 @@ const TreePageHero = ({
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
+  const { isFullscreen: imageFullscreen, enterFullscreen: openImageFS, exitFullscreen: closeImageFS } = useFullscreen();
   const isAnchor = (tree as any).is_anchor_node;
 
   useEffect(() => {
@@ -67,6 +71,7 @@ const TreePageHero = ({
   const location = [tree.state, tree.nation].filter(Boolean).join(", ");
 
   return (
+    <>
     <motion.div
       ref={heroRef}
       initial={{ opacity: 0 }}
@@ -83,8 +88,11 @@ const TreePageHero = ({
           <img
             src={photoUrl}
             alt={tree.name}
-            className="w-full h-full object-cover opacity-30"
+            className="w-full h-full object-cover opacity-30 cursor-pointer"
             loading="eager"
+            onClick={() => openImageFS()}
+            role="button"
+            aria-label="View image fullscreen"
           />
         ) : (
           <div
@@ -245,6 +253,25 @@ const TreePageHero = ({
         style={{ background: "linear-gradient(transparent, hsl(var(--background)))" }}
       />
     </motion.div>
+
+    {/* Fullscreen image viewer */}
+    <FullscreenShell active={imageFullscreen} tone="dark">
+      {photoUrl && (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <img
+            src={photoUrl}
+            alt={tree.name}
+            className="max-w-full max-h-full object-contain rounded-lg"
+          />
+        </div>
+      )}
+      <div className="absolute bottom-6 left-0 right-0 text-center">
+        <p className="font-serif text-sm text-foreground/60">{tree.name}</p>
+        {tree.species && <p className="text-xs text-muted-foreground mt-0.5">{tree.species}</p>}
+      </div>
+      <FullscreenToggle isFullscreen onToggle={closeImageFS} position="top-right" />
+    </FullscreenShell>
+    </>
   );
 };
 

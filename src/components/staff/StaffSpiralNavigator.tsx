@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Crown, ChevronLeft, TreeDeciduous, ArrowRight } from "lucide-react";
 import { getSpiralStaffs, getGridStaffs, type SpiralStaff, type GridStaff } from "@/utils/staffRoomData";
 import { CIRCLES, SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
+import FullscreenWrapper from "@/components/FullscreenWrapper";
 
 /* ─── Deterministic species hue ───────────────────────────────── */
 const HUE_PALETTE = [42, 120, 150, 30, 280, 200, 60, 340, 90, 170] as const;
@@ -82,6 +83,7 @@ const StaffSpiralNavigator = () => {
   }, [circleGroups]);
 
   return (
+    <FullscreenWrapper tone="dark">
     <div className="rounded-2xl border border-primary/15 bg-card/30 backdrop-blur-sm overflow-hidden">
       {/* Gold accent line */}
       <div
@@ -134,6 +136,7 @@ const StaffSpiralNavigator = () => {
         </div>
       </div>
     </div>
+    </FullscreenWrapper>
   );
 };
 

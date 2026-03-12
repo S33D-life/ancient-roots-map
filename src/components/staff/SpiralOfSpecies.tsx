@@ -24,6 +24,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { SpiralHeartFlow } from "./SpiralHeartFlow";
+import FullscreenWrapper from "@/components/FullscreenWrapper";
 
 /* ─── Types ───────────────────────────────────────────────────── */
 interface EcosystemMetrics {
@@ -201,6 +202,7 @@ const SpiralOfSpecies = () => {
   const [hoveredStaff, setHoveredStaff] = useState<number | null>(null);
 
   return (
+    <FullscreenWrapper tone="dark">
     <div
       className="rounded-2xl overflow-hidden relative"
       style={{
@@ -363,6 +365,7 @@ const SpiralOfSpecies = () => {
         </div>
       </div>
     </div>
+    </FullscreenWrapper>
   );
 };
 
