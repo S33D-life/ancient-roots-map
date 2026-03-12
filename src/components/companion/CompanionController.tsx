@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { WifiOff, Wifi, Smartphone } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanionSession } from "@/hooks/use-companion-session";
@@ -13,16 +14,29 @@ import LedgerController from "./controllers/LedgerController";
 /**
  * CompanionController — the full mobile controller page.
  * Handles joining a session and rendering room-specific controls.
+ * Reads ?code= from URL params for QR-scan auto-join.
  */
 
 export default function CompanionController() {
-  const [codeInput, setCodeInput] = useState("");
+  const [searchParams] = useSearchParams();
+  const urlCode = searchParams.get("code") ?? "";
+  const [codeInput, setCodeInput] = useState(urlCode);
   const [error, setError] = useState("");
+  const [autoJoinAttempted, setAutoJoinAttempted] = useState(false);
 
-  const { session, paired, roomState, joinSession, sendCommand, disconnect } =
+  const { session, paired, pairTimedOut, roomState, joinSession, sendCommand, disconnect } =
     useCompanionSession({
       role: "controller",
     });
+
+  // Auto-join if ?code= is present in URL
+  useEffect(() => {
+    if (urlCode && urlCode.length === 6 && !autoJoinAttempted && !session) {
+      setAutoJoinAttempted(true);
+      setCodeInput(urlCode.toUpperCase());
+      joinSession(urlCode);
+    }
+  }, [urlCode, autoJoinAttempted, session, joinSession]);
 
   const handleJoin = () => {
     setError("");
@@ -32,6 +46,11 @@ export default function CompanionController() {
       return;
     }
     joinSession(normalized);
+  };
+
+  const handleRetry = () => {
+    disconnect();
+    setError("");
   };
 
   const fallbackState: CompanionRoomState = roomState ?? {
@@ -74,15 +93,18 @@ export default function CompanionController() {
           <Smartphone className="w-5 h-5 text-primary" />
           <span className="text-sm font-serif text-foreground">S33D Companion</span>
         </div>
-        {paired && (
+        {(paired || session) && (
           <button
             onClick={disconnect}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif
-              bg-destructive/10 border border-destructive/20 text-destructive
-              hover:bg-destructive/20 transition-colors"
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif transition-colors min-h-[36px]",
+              paired
+                ? "bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/20"
+                : "bg-muted/30 border border-border/30 text-muted-foreground hover:text-foreground",
+            )}
           >
             <WifiOff className="w-3.5 h-3.5" />
-            Disconnect
+            {paired ? "Disconnect" : "Cancel"}
           </button>
         )}
       </header>
@@ -117,6 +139,9 @@ export default function CompanionController() {
                   placeholder="ABCD23"
                   className="text-center text-2xl font-mono tracking-[0.3em] h-14 uppercase"
                   autoFocus
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  autoComplete="off"
                   onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                 />
                 {error && (
@@ -124,7 +149,7 @@ export default function CompanionController() {
                 )}
                 <button
                   onClick={handleJoin}
-                  className="w-full py-3 rounded-xl text-sm font-serif
+                  className="w-full py-3 rounded-xl text-sm font-serif min-h-[48px]
                     bg-primary text-primary-foreground
                     hover:bg-primary/90 active:scale-[0.98] transition-all"
                 >
@@ -133,7 +158,7 @@ export default function CompanionController() {
               </div>
             </motion.div>
           ) : !paired ? (
-            /* Connecting */
+            /* Connecting / timeout state */
             <motion.div
               key="connecting"
               initial={{ opacity: 0 }}
@@ -141,20 +166,48 @@ export default function CompanionController() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center gap-4"
             >
-              <div className="relative">
-                <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
+              <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
+                {pairTimedOut ? (
+                  <AlertCircle className="w-8 h-8 text-destructive" />
+                ) : (
                   <Wifi className="w-8 h-8 text-primary animate-pulse" />
-                </div>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground font-serif">
-                Connecting to <span className="text-primary font-mono">{session.code}</span>…
-              </p>
-              <button
-                onClick={disconnect}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Cancel
-              </button>
+
+              {pairTimedOut ? (
+                <>
+                  <div className="text-center">
+                    <p className="text-sm text-foreground font-serif">
+                      Could not connect
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Code <span className="font-mono text-primary">{session.code}</span> may
+                      be expired or incorrect.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleRetry}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-serif min-h-[44px]
+                      bg-secondary/40 border border-border/30 text-foreground
+                      hover:bg-secondary/60 transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Try again
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground font-serif">
+                    Connecting to <span className="text-primary font-mono">{session.code}</span>…
+                  </p>
+                  <button
+                    onClick={disconnect}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[36px]"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
             </motion.div>
           ) : (
             /* Controller surface */

@@ -4,13 +4,19 @@ import {
   type CompanionCommand,
   type CompanionRoomState,
   type CompanionSession,
-  type CompanionRoom,
   generatePairingCode,
   channelFromCode,
   SESSION_TTL_MS,
+  VALID_COMMAND_TYPES,
 } from "@/lib/companion-types";
 
 type RealtimeChannel = ReturnType<typeof supabase.channel>;
+
+/** How long to wait for pair_ack before giving up (ms) */
+const PAIR_TIMEOUT_MS = 12_000;
+
+/** Minimum interval between outgoing commands (ms) — prevents flooding */
+const COMMAND_THROTTLE_MS = 60;
 
 interface UseCompanionSessionOptions {
   role: "display" | "controller";
@@ -24,8 +30,11 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
   const { role, onCommand, onRoomState } = options;
   const [session, setSession] = useState<CompanionSession | null>(null);
   const [roomState, setRoomState] = useState<CompanionRoomState | null>(null);
+  const [pairTimedOut, setPairTimedOut] = useState(false);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const expiryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pairTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastCommandAt = useRef(0);
   const onCommandRef = useRef(onCommand);
   const onRoomStateRef = useRef(onRoomState);
   onCommandRef.current = onCommand;
@@ -40,8 +49,21 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
       clearTimeout(expiryRef.current);
       expiryRef.current = null;
     }
+    if (pairTimeoutRef.current) {
+      clearTimeout(pairTimeoutRef.current);
+      pairTimeoutRef.current = null;
+    }
     setSession(null);
     setRoomState(null);
+    setPairTimedOut(false);
+  }, []);
+
+  const clearPairTimeout = useCallback(() => {
+    if (pairTimeoutRef.current) {
+      clearTimeout(pairTimeoutRef.current);
+      pairTimeoutRef.current = null;
+    }
+    setPairTimedOut(false);
   }, []);
 
   /** Display: start a session and wait for controller */
@@ -57,11 +79,16 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
     channel
       .on("broadcast", { event: "pair" }, () => {
         setSession((s) => s ? { ...s, paired: true, connectedAt: Date.now() } : s);
+        clearPairTimeout();
         // Acknowledge pairing
         channel.send({ type: "broadcast", event: "pair_ack", payload: {} });
       })
       .on("broadcast", { event: "command" }, ({ payload }) => {
-        onCommandRef.current?.(payload as CompanionCommand);
+        // Validate command type before dispatching
+        const cmd = payload as CompanionCommand;
+        if (cmd && VALID_COMMAND_TYPES.has(cmd.type)) {
+          onCommandRef.current?.(cmd);
+        }
       })
       .on("broadcast", { event: "disconnect" }, () => {
         cleanup();
@@ -71,13 +98,13 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
     channelRef.current = channel;
     setSession({ code, channelName, role: "display", paired: false });
 
-    // Auto-expire
+    // Auto-expire session after TTL
     expiryRef.current = setTimeout(cleanup, SESSION_TTL_MS);
-  }, [cleanup]);
+  }, [cleanup, clearPairTimeout]);
 
   /** Controller: join a session by code */
   const joinSession = useCallback(
-    (code: string) => {
+    (code: string): boolean => {
       cleanup();
       const normalized = code.toUpperCase().replace(/[^A-Z0-9]/g, "");
       if (normalized.length !== 6) return false;
@@ -90,6 +117,7 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
       channel
         .on("broadcast", { event: "pair_ack" }, () => {
           setSession((s) => s ? { ...s, paired: true, connectedAt: Date.now() } : s);
+          clearPairTimeout();
         })
         .on("broadcast", { event: "room_state" }, ({ payload }) => {
           const state = payload as CompanionRoomState;
@@ -106,15 +134,26 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
 
       channelRef.current = channel;
       setSession({ code: normalized, channelName, role: "controller", paired: false });
+      setPairTimedOut(false);
 
+      // Pairing timeout — if no ack received
+      pairTimeoutRef.current = setTimeout(() => {
+        setPairTimedOut(true);
+      }, PAIR_TIMEOUT_MS);
+
+      // Session TTL
       expiryRef.current = setTimeout(cleanup, SESSION_TTL_MS);
       return true;
     },
-    [cleanup],
+    [cleanup, clearPairTimeout],
   );
 
-  /** Send a command (controller → display) */
+  /** Send a command (controller → display) with throttling */
   const sendCommand = useCallback((cmd: CompanionCommand) => {
+    const now = Date.now();
+    if (now - lastCommandAt.current < COMMAND_THROTTLE_MS) return;
+    lastCommandAt.current = now;
+
     channelRef.current?.send({
       type: "broadcast",
       event: "command",
@@ -150,6 +189,7 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
     session,
     roomState,
     paired: session?.paired ?? false,
+    pairTimedOut,
     startSession,
     joinSession,
     sendCommand,

@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { QrCode, Smartphone, X, Wifi, WifiOff } from "lucide-react";
+import { Smartphone, X, Wifi, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanion } from "@/contexts/CompanionContext";
-import StaffQRCode from "@/components/StaffQRCode";
 
 /**
  * CompanionPairDialog — desktop overlay that shows a pairing code + QR.
@@ -46,11 +45,11 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
       {/* Trigger button */}
       <motion.button
         whileTap={{ scale: 0.93 }}
-        onClick={paired ? handleClose : handleOpen}
+        onClick={handleOpen}
         className={cn(
           "flex items-center gap-1.5 rounded-full backdrop-blur-md transition-all duration-200",
           "bg-card/65 border border-border/20 text-foreground/80",
-          "hover:brightness-125 active:scale-95 px-3 py-1.5",
+          "hover:brightness-125 active:scale-95 px-3 py-1.5 min-h-[36px]",
           paired && "border-primary/40 bg-primary/10",
           className,
         )}
@@ -88,7 +87,7 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
               {/* Close button */}
               <button
                 onClick={handleClose}
-                className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute top-3 right-3 p-1.5 rounded-full text-muted-foreground hover:text-foreground transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
@@ -120,6 +119,7 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
                         width={180}
                         height={180}
                         className="rounded-lg"
+                        loading="eager"
                       />
                     </div>
 
@@ -141,7 +141,7 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
                 {paired && (
                   <button
                     onClick={handleDisconnect}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-serif
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-serif min-h-[44px]
                       bg-destructive/10 border border-destructive/20 text-destructive
                       hover:bg-destructive/20 transition-colors"
                   >

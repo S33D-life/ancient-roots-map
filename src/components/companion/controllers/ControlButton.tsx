@@ -29,7 +29,7 @@ export default function ControlButton({
         "flex flex-col items-center justify-center rounded-xl transition-all",
         "bg-secondary/30 border border-border/30 text-foreground/80",
         "hover:bg-secondary/50 hover:border-primary/30 active:scale-90 active:bg-primary/20",
-        size === "sm" ? "w-11 h-11" : large ? "w-16 h-16" : "w-13 h-13",
+        size === "sm" ? "w-11 h-11" : large ? "w-16 h-16" : "w-[52px] h-[52px]",
         "min-w-[44px] min-h-[44px]",
         className,
       )}
