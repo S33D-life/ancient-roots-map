@@ -242,6 +242,12 @@ export default function CoWitnessPanel({
                   />
                 </div>
 
+                {/* Environment Capture — optional sensors */}
+                <EnvironmentCapture
+                  onLightCaptured={setLightReading}
+                  onSoundCaptured={setSoundReading}
+                />
+
                 {/* Data capture hints */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
                   <Camera className="w-3.5 h-3.5 shrink-0" />
