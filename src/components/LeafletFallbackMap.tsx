@@ -4125,6 +4125,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 >
                   {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
                 </button>
+                {/* Add tree button — desktop only (mobile uses bottom nav FAB) */}
                 <button
                   onClick={() => {
                     const map = mapRef.current;
@@ -4136,7 +4137,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     }
                     setAddDialogOpen(true);
                   }}
-                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
+                  className={`hidden md:flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
                   style={{
                     ...btnBase,
                     color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
