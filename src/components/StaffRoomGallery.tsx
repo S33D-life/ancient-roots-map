@@ -799,6 +799,14 @@ export default function StaffRoomGallery() {
           <Suspense fallback={<div className="h-64 rounded-2xl bg-card/20 animate-pulse" />}>
             <LazyStaffSpiralNavigator />
           </Suspense>
+
+          {/* Activity Feed */}
+          <div className="space-y-2 mt-6">
+            <h4 className="text-xs font-serif text-muted-foreground uppercase tracking-wider text-center">Recent Ecosystem Activity</h4>
+            <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+              <LazyActivityFeed limit={6} compact />
+            </Suspense>
+          </div>
         </motion.section>
       </div>
 
