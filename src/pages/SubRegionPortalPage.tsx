@@ -154,11 +154,12 @@ const SubRegionPortalPage = () => {
     let cancelled = false;
     const fetchTrees = async () => {
       setLoading(true);
+      const keys = Array.isArray(region.provinceKey) ? region.provinceKey : [region.provinceKey];
       const { data, error } = await supabase
         .from("research_trees")
         .select("*")
         .eq("country", country.country)
-        .eq("province", region.provinceKey)
+        .in("province", keys)
         .order("tree_name");
       if (!cancelled && !error && data) setTrees(data as ResearchTree[]);
       if (!cancelled) setLoading(false);

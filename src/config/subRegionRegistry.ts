@@ -18,8 +18,9 @@ export interface SubRegionEntry {
   tagline: string;
   /** Emoji or icon prefix */
   icon: string;
-  /** Province value in research_trees.province (for DB counts) */
-  provinceKey: string;
+  /** Province value in research_trees.province (for DB counts).
+   *  Can be a single string (exact match) or an array of strings (OR match). */
+  provinceKey: string | string[];
 }
 
 /** Geographic vocabulary label per country */
