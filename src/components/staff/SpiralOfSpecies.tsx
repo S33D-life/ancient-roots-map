@@ -414,8 +414,8 @@ function ConstellationMap({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="relative mx-auto"
-      style={{ width: "min(100%, 560px)", aspectRatio: "1" }}
+      className="relative mx-auto touch-pan-y"
+      style={{ width: "min(100%, 560px)", maxHeight: "85vh", aspectRatio: "1" }}
     >
       {/* ── Canvas heart flow layer ── */}
       <SpiralHeartFlow
