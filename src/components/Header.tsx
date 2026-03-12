@@ -17,6 +17,9 @@ import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
 import DailySeedCounter from "./DailySeedCounter";
 import HeartJar from "./economy/HeartJar";
+import CompanionPairDialog from "./companion/CompanionPairDialog";
+import CompanionIndicator from "./companion/CompanionIndicator";
+import { useCompanion } from "@/contexts/CompanionContext";
 
 const TetolMenu = lazy(() => import("./TetolMenu"));
 const TeotagGuide = lazy(() => import("./TeotagGuide"));
