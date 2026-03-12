@@ -20,6 +20,8 @@ import VaultInfluence from "./vault/VaultInfluence";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
 import VaultValueTree from "./vault/VaultValueTree";
 import CosmicClock from "@/components/CosmicClock";
+import VaultEconomyBridge from "@/components/economy/VaultEconomyBridge";
+import HeartFlowLedger from "@/components/economy/HeartFlowLedger";
 interface Props {
   userId: string;
 }
