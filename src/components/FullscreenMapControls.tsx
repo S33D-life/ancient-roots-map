@@ -64,6 +64,7 @@ const FullscreenMapControls = ({ onExit }: FullscreenMapControlsProps) => {
           />
         </div>
       </motion.div>
+      <FullscreenCompanionHint />
     </AnimatePresence>
   );
 };
