@@ -1,7 +1,7 @@
 import { useState, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Map from "@/components/Map";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
