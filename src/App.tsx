@@ -118,6 +118,7 @@ const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"),
 const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/BioregionCalendarPage"), "bio-calendar");
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
+const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
 const HarvestDetailPage = lazyImportWithRetry(() => import("./pages/HarvestDetailPage"), "harvest-detail");
 const HowHeartsWorkPage = lazyImportWithRetry(() => import("./pages/HowHeartsWorkPage"), "how-hearts");
@@ -257,6 +258,7 @@ const App = () => {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/add-tree" element={<AddTreePage />} />
                 <Route path="/atlas" element={<WorldAtlasPage />} />
+                <Route path="/tree/research/:id" element={<ResearchTreeDetailPage />} />
                 <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
