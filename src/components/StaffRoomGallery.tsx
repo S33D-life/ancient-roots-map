@@ -273,7 +273,7 @@ function StaffRoomEntrance({ onComplete }: { onComplete: () => void }) {
 export default function StaffRoomGallery() {
   const routerNavigate = useRouterNavigate();
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<StaffTab>("spiral");
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ explorer: false });
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [filter, setFilter] = useState<StaffFilter>("all");
   const [activeIndex, setActiveIndex] = useState(0);
