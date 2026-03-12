@@ -177,7 +177,7 @@ const BugReportDialog = ({ open = false, onOpenChange, initialReportType }: BugR
 
   useEffect(() => {
     if (open) {
-      console.info("[Spark] spark_open_success", { route: location.pathname, liteMode });
+      if (import.meta.env.DEV) console.info("[Spark] spark_open_success", { route: location.pathname, liteMode });
     }
   }, [open, location.pathname, liteMode]);
 
