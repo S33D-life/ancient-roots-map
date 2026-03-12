@@ -704,7 +704,7 @@ const EarnBranch = () => {
 
 const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "how";
+  const initialTab = searchParams.get("tab") || "economy";
   const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
