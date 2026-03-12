@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous, ExternalLink } from "lucide-react";
 import LivingCensus from "@/components/LivingCensus";
+import WelcomeJourney from "@/components/WelcomeJourney";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
