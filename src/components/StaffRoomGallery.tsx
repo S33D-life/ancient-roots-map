@@ -107,14 +107,14 @@ const handleShare = async (title: string, text: string) => {
   }
 };
 
-// ── Tab Configuration ────────────────────────────────────────────
-const TABS: { id: StaffTab; label: string; icon: React.ReactNode }[] = [
-  { id: "spiral", label: "Spiral", icon: <Sparkles className="w-3.5 h-3.5" /> },
-  { id: "founding", label: "Founding Circle", icon: <Crown className="w-3.5 h-3.5" /> },
-  { id: "patron", label: "Become a Patron", icon: <Heart className="w-3.5 h-3.5" /> },
-  { id: "staffs", label: "Staffs", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
-  { id: "impact", label: "Impact", icon: <Shield className="w-3.5 h-3.5" /> },
-];
+// ── Section Divider ───────────────────────────────────────────────
+function SectionDivider({ className }: { className?: string }) {
+  return (
+    <div className={cn("py-2", className)}>
+      <div className="h-px max-w-md mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(42 85% 55% / 0.3), transparent)" }} />
+    </div>
+  );
+}
 
 // ── Spiral Mini-Map ──────────────────────────────────────────────
 function SpiralMiniMap({ currentIndex, totalOrigin, onSelect }: {
