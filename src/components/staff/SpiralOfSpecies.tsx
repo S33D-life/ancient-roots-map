@@ -202,6 +202,7 @@ const SpiralOfSpecies = () => {
   const [hoveredStaff, setHoveredStaff] = useState<number | null>(null);
 
   return (
+    <FullscreenWrapper tone="dark">
     <div
       className="rounded-2xl overflow-hidden relative"
       style={{
