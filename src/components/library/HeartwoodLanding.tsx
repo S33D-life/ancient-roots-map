@@ -1,6 +1,6 @@
 /**
  * HeartwoodLanding — the atmospheric entrance to the Heartwood Library.
- * Extracted from GalleryPage for maintainability.
+ * Now navigates to standalone room routes instead of setting internal tab state.
  */
 import { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,16 +8,34 @@ import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import LibraryRoomGrid, { EmberDrift } from "@/components/LibraryRoomGrid";
 import LibraryVaultPreview from "@/components/LibraryVaultPreview";
-import heartwoodLanding from "@/assets/hearth-cave.png";
+import Footer from "@/components/Footer";
+import TetolBridge from "@/components/TetolBridge";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
-interface HeartwoodLandingProps {
-  onRoomSelect: (key: string) => void;
-}
-
-const HeartwoodLanding = ({ onRoomSelect }: HeartwoodLandingProps) => {
+const HeartwoodLanding = () => {
   const navigate = useNavigate();
+
+  const handleRoomSelect = (key: string) => {
+    // Map room grid keys to routes
+    const routeMap: Record<string, string> = {
+      "staff-room": "/library/staff-room",
+      "gallery": "/library/gallery",
+      "music-room": "/library/music-room",
+      "greenhouse": "/library/greenhouse",
+      "wishlist": "/library/wishlist",
+      "seed-cellar": "/library/seed-cellar",
+      "creators-path": "/library/creators-path",
+      "ledger": "/library/scrolls",
+      "scrolls": "/library/scrolls",
+      "rhythms": "/library/rhythms",
+      "vault": "/library/vault",
+      "bookshelf": "/library/bookshelf",
+      "press": "/press",
+      "tree-resources": "/ledger",
+    };
+    navigate(routeMap[key] || `/library/${key}`);
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -149,11 +167,11 @@ const HeartwoodLanding = ({ onRoomSelect }: HeartwoodLandingProps) => {
         </div>
 
         {/* Room Grid */}
-        <LibraryRoomGrid onRoomSelect={(key) => {
-          if (key === 'press') { navigate('/press'); return; }
-          onRoomSelect(key);
-        }} />
+        <LibraryRoomGrid onRoomSelect={handleRoomSelect} />
       </div>
+
+      <TetolBridge />
+      <Footer />
     </div>
   );
 };
