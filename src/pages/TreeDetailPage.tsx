@@ -86,6 +86,8 @@ const PhenologyObservationButton = lazy(() => import("@/components/PhenologyObse
 const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
 const CoWitnessPanel = lazy(() => import("@/components/witness/CoWitnessPanel"));
 const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"));
+const TreeRelationshipCard = lazy(() => import("@/components/tree-sections/TreeRelationshipCard"));
+import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
