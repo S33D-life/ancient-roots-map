@@ -18,6 +18,8 @@ import { useHeartBalance } from "@/hooks/use-heart-balance";
 import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
+const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
+const HeartFlowLedger = lazy(() => import("@/components/economy/HeartFlowLedger"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
@@ -706,6 +708,13 @@ const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "economy";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -765,7 +774,19 @@ const ValueTreePage = () => {
 
           <TabsContent value="economy">
             <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+              {/* Your Roots — personal economy position */}
+              {currentUserId && (
+                <div className="mb-8 space-y-4">
+                  <YourRootsPanel userId={currentUserId} />
+                </div>
+              )}
               <EconomyOverview />
+              {/* Heart Flow Ledger */}
+              {currentUserId && (
+                <div className="mt-8" id="ledger">
+                  <HeartFlowLedger userId={currentUserId} />
+                </div>
+              )}
             </Suspense>
           </TabsContent>
 

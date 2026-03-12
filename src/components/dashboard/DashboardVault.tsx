@@ -20,6 +20,8 @@ import VaultInfluence from "./vault/VaultInfluence";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
 import VaultValueTree from "./vault/VaultValueTree";
 import CosmicClock from "@/components/CosmicClock";
+import VaultEconomyBridge from "@/components/economy/VaultEconomyBridge";
+import HeartFlowLedger from "@/components/economy/HeartFlowLedger";
 interface Props {
   userId: string;
 }
@@ -187,21 +189,17 @@ const DashboardVault = ({ userId }: Props) => {
         history={speciesTokens.history}
       />
 
+      {/* Living Economy Bridge — connects Vault to Value Tree */}
+      <VaultEconomyBridge userId={userId} />
+
       {/* S33D Hearts — The Value Tree */}
       <VaultValueTree userId={userId} totalHearts={totalHearts} />
 
-      {/* Two-column layout for mid sections on desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Heart Ledger */}
-        <VaultHeartLedger
-          userId={userId}
-          externalFilter={heartFilter}
-          onFilterChange={(f) => setHeartFilter(f || null)}
-        />
+      {/* Heart Flow Ledger */}
+      <HeartFlowLedger userId={userId} compact />
 
-        {/* Lottery Tracker */}
-        <VaultLotteryTracker userId={userId} />
-      </div>
+      {/* Lottery Tracker */}
+      <VaultLotteryTracker userId={userId} />
 
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />
