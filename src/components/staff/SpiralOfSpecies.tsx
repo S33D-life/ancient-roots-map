@@ -24,6 +24,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { SpiralHeartFlow } from "./SpiralHeartFlow";
+import FullscreenWrapper from "@/components/FullscreenWrapper";
 
 /* ─── Types ───────────────────────────────────────────────────── */
 interface EcosystemMetrics {
