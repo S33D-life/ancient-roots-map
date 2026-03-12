@@ -74,7 +74,7 @@ const TrunkSection = () => (
         where your journey is remembered and the grove grows from every heart.
       </p>
 
-      {/* Staggered card reveals */}
+      {/* Library rooms */}
       <div className="grid grid-cols-2 gap-3 pt-2 max-w-md mx-auto">
         {LIBRARY_ROOMS.map((room, i) => {
           const Icon = room.icon;
@@ -82,6 +82,35 @@ const TrunkSection = () => (
             <motion.div
               key={room.title}
               custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={cardVariants}
+            >
+              <Link
+                to={room.to}
+                className="group flex flex-col items-center gap-2.5 px-4 py-5 rounded-xl border border-border/15 bg-card/15 backdrop-blur-sm hover:border-primary/25 hover:bg-card/30 transition-all duration-500"
+              >
+                <Icon className="w-4.5 h-4.5 text-primary/50 group-hover:text-primary/80 transition-colors duration-300" />
+                <p className="font-serif text-[13px] text-foreground/75 tracking-wide">{room.title}</p>
+                <p className="text-[9px] text-muted-foreground/40 leading-relaxed">{room.description}</p>
+              </Link>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Personal spaces */}
+      <p className="text-[9px] uppercase tracking-[0.3em] font-serif text-muted-foreground/30 pt-6">
+        Personal Spaces
+      </p>
+      <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+        {PERSONAL_SPACES.map((room, i) => {
+          const Icon = room.icon;
+          return (
+            <motion.div
+              key={room.title}
+              custom={i + LIBRARY_ROOMS.length}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
