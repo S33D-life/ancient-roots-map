@@ -355,12 +355,12 @@ function buildStaffMeta(code: string): Meta {
     ? `A ${species} circle staff from the S33D Staff Room. Explore its lineage and lore.`
     : `The ${species} Origin Staff — one of 36 founding staffs in the S33D collection.`;
 
+  // Use generated og-card for staff images
+  const image = `${OG_CARD_BASE}?type=staff&id=${encodeURIComponent(code)}`;
+
   return {
     title,
     description,
-    // Staff images are local assets served from the app domain
-    // If the image doesn't exist, crawlers will get a 404 and platforms
-    // fall back gracefully — but most staffs have images
     image,
     url: `${APP_URL}/staff/${code}`,
     imageWidth: 1200,
