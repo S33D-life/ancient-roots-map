@@ -1,10 +1,13 @@
+/**
+ * VaultTokenWallet — Three-layer token wallet with "Explore the Living Economy" CTA.
+ * Single source for S33D Hearts, Species Hearts, and Influence balances in the Vault.
+ */
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Shield, Sparkles, Layers, Clock, ChevronRight } from "lucide-react";
+import { Heart, Shield, Sparkles, Layers, Clock, ChevronRight, ArrowRight, TreePine } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { getHiveInfo } from "@/utils/hiveUtils";
 import type { SpeciesBalance, TokenHistoryEntry } from "@/hooks/use-species-tokens";
 
@@ -21,7 +24,7 @@ interface Props {
 
 const TABS: { id: Layer; label: string; icon: typeof Heart; accent: string }[] = [
   { id: "global", label: "S33D Hearts", icon: Heart, accent: "42 95% 55%" },
-  { id: "species", label: "Species", icon: Sparkles, accent: "150 50% 45%" },
+  { id: "species", label: "Species Hearts", icon: Sparkles, accent: "150 50% 45%" },
   { id: "influence", label: "Influence", icon: Shield, accent: "42 80% 50%" },
 ];
 
@@ -85,7 +88,7 @@ const VaultTokenWallet = ({
       {/* Header */}
       <div className="px-5 pt-5 pb-2 flex items-center gap-2">
         <Layers className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-serif tracking-wide text-foreground">Token Wallet</h3>
+        <h3 className="text-sm font-serif tracking-wide text-foreground">Your Living Economy</h3>
         <Badge variant="outline" className="text-[9px] font-serif ml-auto border-primary/20">
           3 layers
         </Badge>
@@ -163,7 +166,7 @@ const VaultTokenWallet = ({
 
       {/* Inline history feed */}
       {history.length > 0 && (
-        <div className="px-5 pb-4 pt-2">
+        <div className="px-5 pb-3 pt-2">
           <div className="flex items-center gap-1.5 mb-2">
             <Clock className="w-3 h-3 text-muted-foreground" />
             <span className="text-[10px] font-serif text-muted-foreground uppercase tracking-wider">
@@ -219,6 +222,27 @@ const VaultTokenWallet = ({
           </div>
         </div>
       )}
+
+      {/* ═══ Explore the Living Economy CTA ═══ */}
+      <div className="px-5 pb-5 pt-1">
+        <Link
+          to="/value-tree?tab=economy"
+          className="group flex items-center justify-between px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-base">🌳</span>
+            <div>
+              <p className="text-xs font-serif text-foreground group-hover:text-primary transition-colors">
+                Explore the Living Economy
+              </p>
+              <p className="text-[9px] font-serif text-muted-foreground">
+                See the full Value Tree — 777,777,777 S33D Hearts supply model
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+      </div>
     </div>
   );
 };
@@ -240,7 +264,7 @@ const GlobalDetail = ({ total }: { total: number }) => (
         {total.toLocaleString()}
       </p>
       <p className="text-[9px] text-muted-foreground font-serif">
-        Global currency · mapping, offerings, milestones & seeds
+        S33D Hearts · Commons currency · mapping, offerings, milestones & seeds
       </p>
     </div>
   </div>
@@ -258,7 +282,7 @@ const SpeciesDetail = ({
       <div className="py-3 text-center">
         <span className="text-2xl">🌿</span>
         <p className="text-[10px] text-muted-foreground font-serif mt-1">
-          Map trees and make offerings to earn Species Hearts — fractal S33D Hearts within each hive
+          Map trees and make offerings to earn Species Hearts — fractal tokens within each hive
         </p>
       </div>
     );
@@ -267,7 +291,7 @@ const SpeciesDetail = ({
   return (
     <div className="space-y-2">
       <p className="text-[9px] text-muted-foreground font-serif">
-        {total} fractal hearts · {balances.length} {balances.length === 1 ? "lineage" : "lineages"}
+        {total} Species Hearts · {balances.length} {balances.length === 1 ? "lineage" : "lineages"}
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-[180px] overflow-y-auto pr-1">
         {balances.map((b, i) => {
@@ -332,11 +356,11 @@ const InfluenceDetail = ({
       <div className="min-w-0">
         <p className="text-sm font-serif text-foreground">{tier}</p>
         <p className="text-[9px] text-muted-foreground font-serif">
-          Soulbound · {global} global{hiveEntries.length > 0 && `, ${total - global} hive`}
+          Influence · Soulbound · {global} global{hiveEntries.length > 0 && `, ${total - global} hive`}
         </p>
       </div>
       <Badge variant="outline" className="text-[8px] font-serif ml-auto shrink-0 border-amber-500/30">
-        Soulbound
+        Non-transferable
       </Badge>
     </div>
 
