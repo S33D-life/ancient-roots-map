@@ -27,6 +27,8 @@ export const SUB_REGION_LABELS: Record<string, string> = {
   switzerland: "Cantons",
   indonesia: "Islands",
   "united-states": "States",
+  "united-kingdom": "Regions",
+  italy: "Regions",
 };
 
 const SUB_REGION_REGISTRY: SubRegionEntry[] = [
