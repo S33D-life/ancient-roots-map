@@ -1,12 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * Unified fullscreen hook for S33D immersive experiences.
  *
- * Uses the browser Fullscreen API when available, falls back to
- * CSS-based "visual fullscreen" (fixed overlay + body scroll lock).
+ * Uses CSS-based "visual fullscreen" (fixed overlay + body scroll lock)
+ * by default. Optionally delegates to the browser Fullscreen API.
  *
- * Works across desktop Chrome/Firefox/Safari and mobile browsers.
+ * Features:
+ *   - ESC key exit
+ *   - Route-change auto-exit
+ *   - Rapid-toggle debounce
+ *   - Safari / iOS compatibility
+ *   - Cleanup on unmount
  */
 
 function getFullscreenElement(): Element | null {
@@ -30,7 +36,7 @@ function exitFS() {
 }
 
 export interface UseFullscreenOptions {
-  /** Use native Fullscreen API when available (default: false — CSS-only mode is more reliable across rooms) */
+  /** Use native Fullscreen API when available (default: false — CSS-only is more reliable) */
   useNativeAPI?: boolean;
   /** Called after entering fullscreen */
   onEnter?: () => void;
@@ -42,15 +48,18 @@ export function useFullscreen(options: UseFullscreenOptions = {}) {
   const { useNativeAPI = false, onEnter, onExit } = options;
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
+  const lastToggle = useRef(0);
 
   const enterFullscreen = useCallback(
     (element?: HTMLElement) => {
-      const el = element ?? containerRef.current;
+      // Rapid-toggle guard (250ms)
+      const now = Date.now();
+      if (now - lastToggle.current < 250) return;
+      lastToggle.current = now;
 
+      const el = element ?? containerRef.current;
       if (useNativeAPI && el) {
-        requestFS(el).catch(() => {
-          // Fallback: CSS-only fullscreen
-        });
+        requestFS(el).catch(() => {});
       }
 
       setIsFullscreen(true);
@@ -61,6 +70,10 @@ export function useFullscreen(options: UseFullscreenOptions = {}) {
   );
 
   const exitFullscreen = useCallback(() => {
+    const now = Date.now();
+    if (now - lastToggle.current < 250) return;
+    lastToggle.current = now;
+
     if (useNativeAPI && getFullscreenElement()) {
       exitFS().catch(() => {});
     }
@@ -87,6 +100,19 @@ export function useFullscreen(options: UseFullscreenOptions = {}) {
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [isFullscreen, exitFullscreen]);
+
+  // Route-change auto-exit
+  const location = useLocation();
+  useEffect(() => {
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      document.body.style.overflow = "";
+      if (useNativeAPI && getFullscreenElement()) exitFS().catch(() => {});
+      onExit?.();
+    }
+    // Only fire when the pathname actually changes — not on every isFullscreen change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   // Sync with native fullscreenchange events
   useEffect(() => {
