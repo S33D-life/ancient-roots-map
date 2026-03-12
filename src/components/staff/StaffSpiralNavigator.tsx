@@ -136,6 +136,7 @@ const StaffSpiralNavigator = () => {
         </div>
       </div>
     </div>
+    </FullscreenWrapper>
   );
 };
 
