@@ -37,7 +37,6 @@ const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPa
 
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
-type StaffTab = "spiral" | "founding" | "patron" | "staffs" | "impact";
 
 /** Unified staff item for all views */
 interface StaffItem {
@@ -108,14 +107,14 @@ const handleShare = async (title: string, text: string) => {
   }
 };
 
-// ── Tab Configuration ────────────────────────────────────────────
-const TABS: { id: StaffTab; label: string; icon: React.ReactNode }[] = [
-  { id: "spiral", label: "Spiral", icon: <Sparkles className="w-3.5 h-3.5" /> },
-  { id: "founding", label: "Founding Circle", icon: <Crown className="w-3.5 h-3.5" /> },
-  { id: "patron", label: "Become a Patron", icon: <Heart className="w-3.5 h-3.5" /> },
-  { id: "staffs", label: "Staffs", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
-  { id: "impact", label: "Impact", icon: <Shield className="w-3.5 h-3.5" /> },
-];
+// ── Section Divider ───────────────────────────────────────────────
+function SectionDivider({ className }: { className?: string }) {
+  return (
+    <div className={cn("py-2", className)}>
+      <div className="h-px max-w-md mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(42 85% 55% / 0.3), transparent)" }} />
+    </div>
+  );
+}
 
 // ── Spiral Mini-Map ──────────────────────────────────────────────
 function SpiralMiniMap({ currentIndex, totalOrigin, onSelect }: {
@@ -274,7 +273,7 @@ function StaffRoomEntrance({ onComplete }: { onComplete: () => void }) {
 export default function StaffRoomGallery() {
   const routerNavigate = useRouterNavigate();
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<StaffTab>("spiral");
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ explorer: false });
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [filter, setFilter] = useState<StaffFilter>("all");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -288,7 +287,7 @@ export default function StaffRoomGallery() {
   const [showMinting, setShowMinting] = useState(false);
   const [showCeremony, setShowCeremony] = useState(false);
   const [hasLinkedStaff, setHasLinkedStaff] = useState(() => !!localStorage.getItem("linked_staff_code"));
-  const tabsRef = useRef<HTMLDivElement>(null);
+  
 
   const allStaffs = useMemo(() => buildStaffItems(), []);
   const filteredStaffs = useMemo(() => filterStaffs(allStaffs, filter), [allStaffs, filter]);
@@ -303,7 +302,7 @@ export default function StaffRoomGallery() {
     if (idx >= 0) {
       setFilter("all");
       setActiveIndex(idx);
-      setActiveTab("staffs");
+      setExpandedSections(prev => ({ ...prev, explorer: true }));
       setDetailOpen(true);
       const url = new URL(window.location.href);
       url.searchParams.delete("staff");
@@ -557,179 +556,236 @@ export default function StaffRoomGallery() {
           )}
         </AnimatePresence>
 
-        {/* ═══ 2. SPIRAL OF SPECIES — Always visible above tabs ═══ */}
+        {/* ═══ 2. SPIRAL OF SPECIES — Primary visual navigation ═══ */}
         <Suspense fallback={<div className="h-64 rounded-2xl bg-card/20 animate-pulse" />}>
           <LazySpiralOfSpecies />
         </Suspense>
 
-        {/* ═══ 3. TAB NAVIGATION — Sticky segmented tabs ═══ */}
-        <div ref={tabsRef} className="sticky top-16 z-30 -mx-1 px-1 py-2 backdrop-blur-md bg-background/80 border-b border-border/20">
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "relative flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-serif whitespace-nowrap transition-all",
-                  activeTab === tab.id
-                    ? "text-foreground bg-card border border-primary/30 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                )}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="staff-tab-indicator"
-                    className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-primary"
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-              </button>
-            ))}
+        <SectionDivider />
+
+        {/* ═══ 3. FOUNDING CIRCLE ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5 }}
+          className="space-y-5"
+        >
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <Crown className="w-4 h-4 text-primary" />
+              <h3 className="font-serif text-lg text-foreground tracking-wide">The 36 Origin Staffs</h3>
+            </div>
+            <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
+              The founding spiral — each hand-crafted from a distinct fallen branch. Together they form the ceremonial heart from which the entire ecosystem grows.
+            </p>
           </div>
-        </div>
 
-        {/* ═══ TAB CONTENT ═══ */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-          >
-            {/* ── Spiral Tab ── */}
-            {activeTab === "spiral" && (
-              <div className="space-y-6">
-                <Suspense fallback={<div className="h-64 rounded-2xl bg-card/20 animate-pulse" />}>
-                  <LazyStaffSpiralNavigator />
-                </Suspense>
+          {/* Claim progress */}
+          <div className="max-w-sm mx-auto">
+            <div className="flex items-center justify-between text-xs font-serif text-muted-foreground mb-1.5">
+              <span>Staffs Claimed</span>
+              <span className="text-foreground font-bold">
+                {allStaffs.filter(s => s.isOrigin).length} / 36
+              </span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden bg-secondary/50">
+              <motion.div
+                className="h-full rounded-full bg-primary"
+                initial={{ width: 0 }}
+                whileInView={{ width: "100%" }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+
+          <Suspense fallback={<div className="h-48 rounded-2xl bg-card/20 animate-pulse" />}>
+            <LazyCeremonialCircle />
+          </Suspense>
+        </motion.section>
+
+        <SectionDivider />
+
+        {/* ═══ 4. STAFF CEREMONY ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5 }}
+          className="space-y-4"
+        >
+          <div className="rounded-2xl border border-primary/15 bg-card/30 backdrop-blur-sm p-5 space-y-3">
+            <div className="text-center space-y-2">
+              <Wand2 className="w-5 h-5 text-primary mx-auto" style={{ filter: "drop-shadow(0 0 8px hsl(var(--primary) / 0.4))" }} />
+              <h3 className="font-serif text-base text-foreground">The Staff Ceremony</h3>
+              <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
+                Claiming a staff is a ceremonial act. You choose your species, receive your staff code, and map your first Ancient Friend tree — planting the seed of your presence in the living network.
+              </p>
+            </div>
+            {hasLinkedStaff ? (
+              <div className="text-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs font-serif gap-1.5"
+                  onClick={() => setShowCeremony(!showCeremony)}
+                  style={{ borderColor: "hsla(42, 60%, 50%, 0.3)", color: "hsl(42, 80%, 60%)" }}
+                >
+                  <Wand2 className="w-3.5 h-3.5" />
+                  {showCeremony ? "Close Ceremony" : "Begin Ceremony"}
+                </Button>
               </div>
+            ) : (
+              <p className="text-center text-[10px] font-serif text-muted-foreground italic">
+                Connect a staff above to begin your ceremony.
+              </p>
             )}
+          </div>
+        </motion.section>
 
-            {/* ── Founding Circle Tab ── */}
-            {activeTab === "founding" && (
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <h3 className="font-serif text-lg text-foreground">The 36 Origin Staffs</h3>
-                  <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto">
-                    The founding spiral of 36 staffs — each hand-crafted from a distinct fallen branch. Together they form the ceremonial heart from which the entire ecosystem grows.
-                  </p>
-                </div>
+        <SectionDivider />
 
-                {/* Claim progress */}
-                <div className="max-w-sm mx-auto">
-                  <div className="flex items-center justify-between text-xs font-serif text-muted-foreground mb-1.5">
-                    <span>Staffs Claimed</span>
-                    <span className="text-foreground font-bold">
-                      {allStaffs.filter(s => s.isOrigin).length} / 36
-                    </span>
+        {/* ═══ 5. FOUNDING PATRON OFFERING ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 space-y-4">
+            <div className="text-center space-y-2">
+              <Crown className="w-6 h-6 text-primary mx-auto" style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.4))" }} />
+              <h3 className="text-lg font-serif text-foreground">The Founding Patron Offering</h3>
+              <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
+                Claim a handcrafted staff and enter a living role in the Ancient Friends ecosystem. Each patron receives 3,333 S33D Hearts, 33 Species Hearts, and 33 Influence — seeds to grow your presence across the network.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+              {[
+                { icon: <Heart className="w-3.5 h-3.5" />, label: "3,333 S33D Hearts", color: "hsl(0, 65%, 55%)" },
+                { icon: <Sparkles className="w-3.5 h-3.5" />, label: "33 Species Hearts", color: "hsl(var(--primary))" },
+                { icon: <Shield className="w-3.5 h-3.5" />, label: "33 Influence", color: "hsl(42, 80%, 50%)" },
+              ].map((item) => (
+                <div key={item.label} className="text-center p-2.5 rounded-xl border border-border/20 bg-card/20">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center mx-auto mb-1" style={{ backgroundColor: `${item.color}15`, color: item.color }}>
+                    {item.icon}
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden bg-secondary/50">
-                    <motion.div
-                      className="h-full rounded-full bg-primary"
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 1.2, ease: "easeOut" }}
-                    />
-                  </div>
+                  <p className="text-[9px] font-serif text-muted-foreground leading-tight">{item.label}</p>
                 </div>
+              ))}
+            </div>
 
-                <Suspense fallback={<div className="h-48 rounded-2xl bg-card/20 animate-pulse" />}>
-                  <LazyCeremonialCircle />
-                </Suspense>
-              </div>
+            <Suspense fallback={<div className="h-32 bg-card/20 animate-pulse rounded-xl" />}>
+              <LazyStaffPatronValueCard />
+            </Suspense>
+
+            <div className="text-center pt-2">
+              <Button
+                className="font-serif text-sm gap-2 px-6"
+                onClick={() => {
+                  if (!hasLinkedStaff) {
+                    setShowCeremony(true);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  } else {
+                    routerNavigate("/vault");
+                  }
+                }}
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(42 80% 45%))" }}
+              >
+                <Crown className="w-4 h-4" />
+                {hasLinkedStaff ? "View Your Vault" : "Claim a Staff"}
+              </Button>
+            </div>
+          </div>
+        </motion.section>
+
+        <SectionDivider />
+
+        {/* ═══ 6. STAFF EXPLORER ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5 }}
+          className="space-y-4"
+        >
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <LayoutGrid className="w-4 h-4 text-primary" />
+              <h3 className="font-serif text-lg text-foreground tracking-wide">Staff Explorer</h3>
+            </div>
+            <p className="text-xs font-serif text-muted-foreground">
+              Browse all 144 staffs by species and status.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <ViewToggle />
+            <div className="flex items-center gap-2">
+              <Select value={filter} onValueChange={(v) => { setFilter(v as StaffFilter); setActiveIndex(0); }}>
+                <SelectTrigger className="w-[160px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FILTER_OPTIONS.map((f) => (
+                    <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" className="text-xs font-serif" onClick={() => setShowMinting(!showMinting)}>
+                {showMinting ? "Hide" : "Show"} Minting
+              </Button>
+            </div>
+          </div>
+
+          {viewMode === "list" && <ListView />}
+          {viewMode === "gallery" && <GalleryView />}
+
+          <AnimatePresence>
+            {viewMode === "fullscreen" && <FullScreenView />}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showMinting && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                <MintingStatusDashboard />
+              </motion.div>
             )}
+          </AnimatePresence>
+        </motion.section>
 
-            {/* ── Become a Patron Tab ── */}
-            {activeTab === "patron" && (
-              <div className="space-y-6">
-                <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 space-y-4">
-                  <div className="text-center space-y-2">
-                    <Crown className="w-6 h-6 text-primary mx-auto" style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.4))" }} />
-                    <h3 className="text-lg font-serif text-foreground">The Founding Patron Offering</h3>
-                    <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
-                      Claim a handcrafted staff and enter a living role in the Ancient Friends ecosystem. Each patron receives S33D Hearts, Species Hearts, and Influence — seeds to grow your presence across the network.
-                    </p>
-                  </div>
-                  <Suspense fallback={<div className="h-32 bg-card/20 animate-pulse rounded-xl" />}>
-                    <LazyStaffPatronValueCard />
-                  </Suspense>
-                </div>
+        <SectionDivider />
 
-                {hasLinkedStaff && (
-                  <div className="text-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs font-serif gap-1.5"
-                      onClick={() => setShowCeremony(!showCeremony)}
-                      style={{ borderColor: "hsla(42, 60%, 50%, 0.3)", color: "hsl(42, 80%, 60%)" }}
-                    >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      {showCeremony ? "Close Ceremony" : "Staff Ceremony"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
+        {/* ═══ 7. STAFF IMPACT ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5 }}
+          className="space-y-5"
+        >
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <TreeDeciduous className="w-4 h-4 text-primary" />
+              <h3 className="font-serif text-lg text-foreground tracking-wide">Ecosystem Impact</h3>
+            </div>
+            <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto">
+              The living effect of staffs on the Ancient Friends network — hearts flowing, trees mapped, offerings recorded, and species circles forming.
+            </p>
+          </div>
 
-            {/* ── Staffs Tab ── */}
-            {activeTab === "staffs" && (
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <ViewToggle />
-                  <div className="flex items-center gap-2">
-                    <Select value={filter} onValueChange={(v) => { setFilter(v as StaffFilter); setActiveIndex(0); }}>
-                      <SelectTrigger className="w-[160px] text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FILTER_OPTIONS.map((f) => (
-                          <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="sm" className="text-xs font-serif" onClick={() => setShowMinting(!showMinting)}>
-                      {showMinting ? "Hide" : "Show"} Minting
-                    </Button>
-                  </div>
-                </div>
+          {/* ═══ 8. VAULT INTEGRATION — Personal staff panel ═══ */}
+          <Suspense fallback={<div className="h-48 rounded-2xl bg-card/20 animate-pulse" />}>
+            <LazyStaffImpactPanel />
+          </Suspense>
 
-                {viewMode === "list" && <ListView />}
-                {viewMode === "gallery" && <GalleryView />}
-
-                <AnimatePresence>
-                  {viewMode === "fullscreen" && <FullScreenView />}
-                </AnimatePresence>
-
-                <AnimatePresence>
-                  {showMinting && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                      <MintingStatusDashboard />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-
-            {/* ── Impact Tab ── */}
-            {activeTab === "impact" && (
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <h3 className="font-serif text-lg text-foreground">Ecosystem Impact</h3>
-                  <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto">
-                    The living effect of staffs on the Ancient Friends network — hearts flowing, trees mapped, offerings recorded, and species circles forming.
-                  </p>
-                </div>
-                <Suspense fallback={<div className="h-48 rounded-2xl bg-card/20 animate-pulse" />}>
-                  <LazyStaffImpactPanel />
-                </Suspense>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
+          {/* Spiral Navigator — detailed 144-staff structure */}
+          <Suspense fallback={<div className="h-64 rounded-2xl bg-card/20 animate-pulse" />}>
+            <LazyStaffSpiralNavigator />
+          </Suspense>
+        </motion.section>
       </div>
 
       {/* Detail drawer */}
