@@ -599,14 +599,14 @@ export default function StaffRoomGallery() {
             <div className="flex items-center justify-between text-xs font-serif text-muted-foreground mb-1.5">
               <span>Staffs Claimed</span>
               <span className="text-foreground font-bold">
-                {allStaffs.filter(s => s.isOrigin).length} / 36
+                {claimedCount} / 36
               </span>
             </div>
             <div className="h-2 rounded-full overflow-hidden bg-secondary/50">
               <motion.div
                 className="h-full rounded-full bg-primary"
                 initial={{ width: 0 }}
-                whileInView={{ width: "100%" }}
+                whileInView={{ width: `${Math.min((claimedCount / 36) * 100, 100)}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
               />
