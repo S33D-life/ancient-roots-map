@@ -42,7 +42,7 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
   const { seedsRemaining } = useSeedEconomy(userId);
 
   const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean }) => {
-    console.info("[Firefly] firefly_action_selected", { type });
+    if (import.meta.env.DEV) console.info("[Firefly] firefly_action_selected", { type });
     onOpenChange(false);
     if (flags?.isSearch) {
       setTimeout(() => setSearchOpen(true), 150);

@@ -177,7 +177,7 @@ const BugReportDialog = ({ open = false, onOpenChange, initialReportType }: BugR
 
   useEffect(() => {
     if (open) {
-      console.info("[Spark] spark_open_success", { route: location.pathname, liteMode });
+      if (import.meta.env.DEV) console.info("[Spark] spark_open_success", { route: location.pathname, liteMode });
     }
   }, [open, location.pathname, liteMode]);
 
@@ -284,7 +284,7 @@ const BugReportDialog = ({ open = false, onOpenChange, initialReportType }: BugR
       update("feature_area", "map");
     }
     setSubmitting(true);
-    console.info("[Spark] spark_submit_attempt", { type: form.report_type, route: location.pathname, liteMode });
+    if (import.meta.env.DEV) console.info("[Spark] spark_submit_attempt", { type: form.report_type, route: location.pathname, liteMode });
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!mountedRef.current) return;
@@ -330,7 +330,7 @@ const BugReportDialog = ({ open = false, onOpenChange, initialReportType }: BugR
         return;
       }
 
-      console.info("[Spark] spark_submit_success", { type: form.report_type });
+      if (import.meta.env.DEV) console.info("[Spark] spark_submit_success", { type: form.report_type });
       setSubmitted(true);
     } catch (err: any) {
       console.warn("[Spark] spark_submit_error", err?.message);
