@@ -5,7 +5,7 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, Map, Sparkles, Share2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Loader2, Map, Share2, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
