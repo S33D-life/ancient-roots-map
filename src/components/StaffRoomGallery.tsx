@@ -324,15 +324,17 @@ export default function StaffRoomGallery() {
     }
   }, [allStaffs]);
 
-  // Prefetch adjacent images in fullscreen
+  // Body scroll lock + prefetch for fullscreen mode
   useEffect(() => {
     if (viewMode !== "fullscreen") return;
+    document.body.style.overflow = "hidden";
     const prefetch = (idx: number) => {
       const s = filteredStaffs[idx];
       if (s) { const img = new Image(); img.src = s.image; }
     };
     prefetch(activeIndex - 1);
     prefetch(activeIndex + 1);
+    return () => { document.body.style.overflow = ""; };
   }, [activeIndex, filteredStaffs, viewMode]);
 
   const navigate = useCallback((dir: 1 | -1) => {
