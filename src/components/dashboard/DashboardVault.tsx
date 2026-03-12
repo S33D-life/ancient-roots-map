@@ -17,6 +17,7 @@ import VaultParticles from "./vault/VaultParticles";
 import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
 import VaultValueTree from "./vault/VaultValueTree";
+import VaultPatronBadge from "./vault/VaultPatronBadge";
 import CosmicClock from "@/components/CosmicClock";
 
 interface Props {
