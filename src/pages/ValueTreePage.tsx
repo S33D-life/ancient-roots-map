@@ -20,6 +20,7 @@ import GovernanceProposalsList from "@/components/governance/GovernanceProposals
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
 const VaultHeartLedger = lazy(() => import("@/components/dashboard/vault/VaultHeartLedger"));
+const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
@@ -781,6 +782,11 @@ const ValueTreePage = () => {
                 </div>
               )}
               <EconomyOverview />
+              {/* Recent ecosystem heart activity */}
+              <div className="mt-8 space-y-3">
+                <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Heart Activity</h3>
+                <ActivityFeed limit={8} compact />
+              </div>
               {/* Heart Flow Ledger — unified, same component as Vault */}
               {currentUserId && (
                 <div className="mt-8" id="ledger">
