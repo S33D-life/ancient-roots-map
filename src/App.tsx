@@ -258,8 +258,8 @@ const App = () => {
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/add-tree" element={<AddTreePage />} />
                 <Route path="/atlas" element={<WorldAtlasPage />} />
-                <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/tree/research/:id" element={<ResearchTreeDetailPage />} />
+                <Route path="/tree/:id" element={<TreeDetailPage />} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
                 <Route path="/library" element={<GalleryPage />} />
