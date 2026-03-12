@@ -88,8 +88,11 @@ const TreePageHero = ({
           <img
             src={photoUrl}
             alt={tree.name}
-            className="w-full h-full object-cover opacity-30"
+            className="w-full h-full object-cover opacity-30 cursor-pointer"
             loading="eager"
+            onClick={openImageFS}
+            role="button"
+            aria-label="View image fullscreen"
           />
         ) : (
           <div
