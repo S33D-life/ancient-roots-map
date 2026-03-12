@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { CHANNELS, TOTAL_SUPPLY, VALUE_BRANCHES, type DistributionChannel } from "@/data/s33dEconomy";
 import DistributionCompass from "./DistributionCompass";
 import EmissionCurve from "./EmissionCurve";
+import PatronFlowBanner from "./PatronFlowBanner";
 
 interface LiveStats {
   totalHeartsMinted: number;
