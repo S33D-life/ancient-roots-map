@@ -76,15 +76,8 @@ const GoldenDreamPage = () => {
   if (isFullscreen && activeRoom && activeRoom !== "roadmap") {
     const room = goldenDreamRooms.find((r) => r.id === activeRoom);
     return (
-      <div className="fixed inset-0 z-50 bg-background">
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute top-4 right-4 z-50 bg-background/80 backdrop-blur"
-          onClick={() => setIsFullscreen(false)}
-        >
-          <Minimize2 className="h-4 w-4" />
-        </Button>
+      <FullscreenShell active tone="page">
+        <FullscreenToggle isFullscreen onToggle={exitFullscreen} />
         <iframe
           src={room?.notionUrl}
           width="100%"
@@ -93,7 +86,7 @@ const GoldenDreamPage = () => {
           allowFullScreen
           title={room?.title}
         />
-      </div>
+      </FullscreenShell>
     );
   }
 
