@@ -210,6 +210,13 @@ export default function CoWitnessPanel({
                   {session?.hearts_awarded || WITNESS_BONUS_HEARTS} S33D Hearts
                   each
                 </Badge>
+                {/* Show snapshot badge if env data was captured */}
+                {(session as any)?.env_snapshot && (
+                  <SnapshotBadge
+                    snapshot={(session as any).env_snapshot as TreeHealthSnapshot}
+                    quality={((session as any).snapshot_quality || "basic") as SnapshotQuality}
+                  />
+                )}
               </motion.div>
             )}
 
