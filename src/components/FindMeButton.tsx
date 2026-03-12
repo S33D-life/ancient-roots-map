@@ -11,6 +11,7 @@ import { Loader2, Crosshair, MapPin, AlertTriangle, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { useGeolocation, GEO_ERROR_CONFIG } from "@/hooks/use-geolocation";
 import AddTreeDialog from "./AddTreeDialog";
+import DiscoveryNudge from "./DiscoveryNudge";
 
 interface FindMeButtonProps {
   onLocationFound?: (lat: number, lng: number) => void;
@@ -144,6 +145,17 @@ const FindMeButton = ({ onLocationFound, autoOpen }: FindMeButtonProps) => {
           </Card>
         )}
       </div>
+
+      {/* Discovery Nudge — shows when location found but no nearby trees */}
+      {location && !dialogOpen && (
+        <div className="absolute bottom-full mb-2 left-0 w-80 z-50">
+          <DiscoveryNudge
+            lat={location.lat}
+            lng={location.lng}
+            onCreateTree={() => setDialogOpen(true)}
+          />
+        </div>
+      )}
 
       <AddTreeDialog
         open={dialogOpen}

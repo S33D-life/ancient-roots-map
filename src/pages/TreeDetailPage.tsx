@@ -86,6 +86,8 @@ const PhenologyObservationButton = lazy(() => import("@/components/PhenologyObse
 const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
 const CoWitnessPanel = lazy(() => import("@/components/witness/CoWitnessPanel"));
 const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"));
+const TreeRelationshipCard = lazy(() => import("@/components/tree-sections/TreeRelationshipCard"));
+import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -164,6 +166,7 @@ const TreeDetailPage = () => {
     treeLng: tree?.longitude,
   });
   const presenceCount = useTreePresenceCount(userId, id);
+  const { progress: relationship } = useTreeRelationship(id, userId);
 
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
@@ -478,6 +481,20 @@ const TreeDetailPage = () => {
                   </Suspense>
                 )}
               </div>
+            )}
+
+            {/* Relationship Journey Card */}
+            {userId && relationship && (
+              <Suspense fallback={null}>
+                <TreeRelationshipCard
+                  progress={relationship}
+                  treeName={tree.name}
+                  onCoWitness={() => {
+                    // Trigger co-witness panel — the CoWitnessPanel button handles this
+                  }}
+                  onMakeOffering={() => setAddOfferingOpen(true)}
+                />
+              </Suspense>
             )}
 
             {/* Story + Structured Data (two-column) */}
