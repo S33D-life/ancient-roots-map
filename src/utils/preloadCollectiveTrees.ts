@@ -52,7 +52,7 @@ export async function preloadCollectiveTrees() {
       
     }
 
-    console.log(`Successfully preloaded ${totalInserted} collective trees`);
+    
     return { success: true, inserted: totalInserted };
   } catch (error) {
     console.error('Preload error:', error);
