@@ -18,6 +18,8 @@ import { useHeartBalance } from "@/hooks/use-heart-balance";
 import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
+const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
+const HeartFlowLedger = lazy(() => import("@/components/economy/HeartFlowLedger"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
