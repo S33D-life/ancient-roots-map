@@ -3,12 +3,15 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, BookOpen, Cherry, Archive, Map } from "lucide-react";
+import { BookOpen, Cherry, Archive, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
+import { useFullscreen } from "@/hooks/use-fullscreen";
+import FullscreenShell from "@/components/FullscreenShell";
+import FullscreenToggle from "@/components/FullscreenToggle";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
@@ -57,7 +60,7 @@ const goldenDreamRooms: GoldenDreamRoom[] = [
 
 const GoldenDreamPage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("golden-dream");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen();
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const { resolvedTheme } = useTheme();
@@ -73,15 +76,8 @@ const GoldenDreamPage = () => {
   if (isFullscreen && activeRoom && activeRoom !== "roadmap") {
     const room = goldenDreamRooms.find((r) => r.id === activeRoom);
     return (
-      <div className="fixed inset-0 z-50 bg-background">
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute top-4 right-4 z-50 bg-background/80 backdrop-blur"
-          onClick={() => setIsFullscreen(false)}
-        >
-          <Minimize2 className="h-4 w-4" />
-        </Button>
+      <FullscreenShell active tone="page">
+        <FullscreenToggle isFullscreen onToggle={exitFullscreen} />
         <iframe
           src={room?.notionUrl}
           width="100%"
@@ -90,7 +86,7 @@ const GoldenDreamPage = () => {
           allowFullScreen
           title={room?.title}
         />
-      </div>
+      </FullscreenShell>
     );
   }
 
@@ -146,15 +142,12 @@ const GoldenDreamPage = () => {
               >
                 ← Back to Golden Dream
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => setIsFullscreen(true)}
-              >
-                <Maximize2 className="h-4 w-4" />
-                Full Screen
-              </Button>
+              <FullscreenToggle
+                isFullscreen={false}
+                onToggle={enterFullscreen}
+                position="top-right"
+                className="relative top-auto right-auto"
+              />
             </div>
 
             <div className="relative rounded-xl border border-border/40 overflow-hidden">
