@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import JourneyBridge from "@/components/JourneyBridge";
 import { useNavigate as useRouterNavigate } from "react-router-dom";
@@ -29,6 +29,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
@@ -678,6 +679,19 @@ export default function StaffRoomGallery() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ═══ Founding Patron Offering — Value Explainer ═══ */}
+        <Suspense fallback={null}>
+          <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-5 space-y-3">
+            <div className="text-center">
+              <h3 className="text-base font-serif text-foreground">The Founding Patron Offering</h3>
+              <p className="text-[10px] font-serif text-muted-foreground mt-1">
+                Claim a handcrafted staff and enter a living role in the Ancient Friends ecosystem.
+              </p>
+            </div>
+            <LazyStaffPatronValueCard />
+          </div>
+        </Suspense>
 
         {/* Controls bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

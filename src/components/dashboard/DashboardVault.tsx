@@ -17,6 +17,7 @@ import VaultParticles from "./vault/VaultParticles";
 import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
 import VaultValueTree from "./vault/VaultValueTree";
+import VaultPatronBadge from "./vault/VaultPatronBadge";
 import CosmicClock from "@/components/CosmicClock";
 
 interface Props {
@@ -121,6 +122,11 @@ const DashboardVault = ({ userId }: Props) => {
 
       {/* Wallet & Staff Identity Card */}
       <VaultWalletCard wallet={wallet} />
+
+      {/* Founding Patron Badge — only if staff holder */}
+      {wallet.activeStaff && (
+        <VaultPatronBadge staff={wallet.activeStaff} />
+      )}
 
       {/* Re-awaken Staff */}
       {wallet.activeStaff && (
