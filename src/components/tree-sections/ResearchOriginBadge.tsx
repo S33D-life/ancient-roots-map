@@ -36,7 +36,7 @@ const ResearchOriginBadge = ({ origin }: Props) => {
       <div className="flex flex-wrap items-center gap-2">
         <Badge
           variant="outline"
-          className="font-serif text-xs tracking-wider border-amber-500/30 bg-amber-500/10 text-amber-400"
+          className="font-serif text-xs tracking-wider border-accent/30 bg-accent/10 text-accent-foreground"
         >
           🌱 Research Grove
         </Badge>
