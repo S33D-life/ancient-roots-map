@@ -121,6 +121,24 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     icon: "🌴",
     provinceKey: "Papua",
   },
+
+  // United States — States
+  {
+    name: "Hawaii",
+    slug: "hawaii",
+    countrySlug: "united-states",
+    tagline: "Volcanic groves, sacred ʻōhiʻa lehua & tropical elders",
+    icon: "🌺",
+    provinceKey: "Hawaii",
+  },
+  {
+    name: "New York",
+    slug: "new-york",
+    countrySlug: "united-states",
+    tagline: "Urban oaks, Hudson Valley elders & Adirondack giants",
+    icon: "🗽",
+    provinceKey: "New York",
+  },
 ];
 
 export default SUB_REGION_REGISTRY;

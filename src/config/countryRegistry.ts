@@ -168,7 +168,22 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     portalTitle: "United States — Champion Trees",
     portalSubtitle: "The largest known individuals by species, scored by the National Champion Tree formula.",
     sourceLabel: "American Forests register",
+    isoCode: "US",
     bbox: [24.5, -125, 49.4, -66.9],
+    defaultMapFocus: {
+      center: { lat: 39.8, lng: -98.5 },
+      zoom: 4,
+    },
+    defaultFilters: {
+      tags: ["ancient", "champion", "research"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "American Forests National Champion Trees", url: "https://www.americanforests.org/champion-trees/" },
+      { label: "National Register of Champion Trees", url: "https://www.americanforests.org/get-involved/americas-biggest-trees/champion-trees-database/" },
+    ],
+    isCommunitySeeded: true,
+    provenanceText: "Research records drawn from champion tree registries and heritage surveys. Verification comes through presence.",
   },
   {
     country: "Brazil",
