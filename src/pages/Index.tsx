@@ -88,6 +88,7 @@ const Index = () => {
             <SupportDiscoveryRow />
             <div className="section-divider max-w-xl mx-auto" />
             <EcosystemOverview />
+            <EcosystemPulse />
             <div className="section-divider max-w-xl mx-auto" />
             {/* Global Activity Feed */}
             <div className="max-w-2xl mx-auto px-4 py-6">
