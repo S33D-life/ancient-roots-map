@@ -58,4 +58,10 @@ export const ROUTES = {
   BIO_REGION: (slug: string) => `/atlas/bio-regions/${slug}` as const,
   /** Patron Offering */
   PATRON_OFFERING: "/patron-offering",
+  /** Staff Room */
+  STAFF_ROOM: "/library/staff-room",
+  /** Staff Detail */
+  STAFF: (code: string) => `/staff/${code}` as const,
+  /** Value Tree — Living Economy */
+  VALUE_TREE_ECONOMY: "/value-tree?tab=economy",
 } as const;
