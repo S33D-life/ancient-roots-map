@@ -201,10 +201,11 @@ function SpiralOverview({
             <Link to={`/staff/${staff.code}`} className="block relative">
               {/* Pulse */}
               <div
-                className="absolute inset-[-3px] rounded-full animate-pulse"
+            className="absolute inset-[-3px] rounded-full"
                 style={{
                   background: `radial-gradient(circle, ${color}12, transparent 70%)`,
-                  animationDuration: `${3 + (i % 5)}s`,
+                  animation: `pulse ${3 + (i % 5)}s ease-in-out infinite`,
+                  willChange: "opacity",
                 }}
               />
               <div
