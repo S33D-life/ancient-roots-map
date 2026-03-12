@@ -302,7 +302,7 @@ export default function StaffRoomGallery() {
     if (idx >= 0) {
       setFilter("all");
       setActiveIndex(idx);
-      setActiveTab("staffs");
+      setExpandedSections(prev => ({ ...prev, explorer: true }));
       setDetailOpen(true);
       const url = new URL(window.location.href);
       url.searchParams.delete("staff");
