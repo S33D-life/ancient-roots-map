@@ -28,6 +28,7 @@ const SUPABASE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY")!;
 const APP_URL = "https://ancient-roots-map.lovable.app";
 const DEFAULT_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
+const OG_CARD_BASE = `${SUPABASE_URL}/functions/v1/og-card`;
 
 /* ── Route matchers ─────────────────────────────────────── */
 
