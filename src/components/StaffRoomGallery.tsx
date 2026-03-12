@@ -29,6 +29,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
