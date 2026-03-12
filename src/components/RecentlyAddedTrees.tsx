@@ -62,7 +62,7 @@ export default function RecentlyAddedTrees({ onTreeClick }: { onTreeClick?: (tre
               <button
                 key={t.id}
                 onClick={() => onTreeClick?.(t.id)}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-secondary/30 transition-colors"
+                className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-secondary/30 active:bg-secondary/40 transition-colors min-h-[44px]"
               >
                 <p className="text-[11px] font-serif text-foreground/85 truncate">{t.name}</p>
                 <div className="flex items-center gap-2 text-[9px] text-muted-foreground/60 font-mono">

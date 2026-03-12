@@ -142,7 +142,7 @@ export default function ActivityFeed({ limit = 8, userId, compact }: Props) {
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.04, duration: 0.3 }}
-            className="flex items-start gap-2.5 px-3 py-2 rounded-lg bg-card/30 border border-border/20 hover:bg-card/50 transition-colors group"
+            className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-card/30 border border-border/20 hover:bg-card/50 active:bg-card/60 transition-colors group min-h-[44px]"
           >
             <div className="mt-0.5 flex-shrink-0">{ICONS[item.type]}</div>
             <div className="flex-1 min-w-0">
