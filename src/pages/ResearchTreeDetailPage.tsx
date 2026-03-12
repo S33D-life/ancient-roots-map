@@ -134,8 +134,22 @@ const ResearchTreeDetailPage = () => {
     });
   };
 
-  const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
+  const handleShare = async () => {
+    if (!tree) return;
+    const { buildShareUrl, copyShareLink } = await import("@/utils/shareUtils");
+    const entity: import("@/utils/shareUtils").ShareEntity = {
+      type: "research_tree",
+      id: tree.id,
+      name: tree.name || "Research Tree",
+      species: tree.species || undefined,
+      location: tree.country || undefined,
+    };
+    if (navigator.share) {
+      const { nativeShare } = await import("@/utils/shareUtils");
+      await nativeShare({ entity });
+    } else {
+      await copyShareLink({ entity });
+    }
   };
 
   return (

@@ -108,12 +108,25 @@ const DiscoveryPage = () => {
     navigate(`/tree/${tree.id}`);
   };
 
-  const handleShare = (name: string, description: string, url: string) => {
-    if (navigator.share) {
-      navigator.share({ title: name, text: description, url });
+  const handleShare = async (name: string, description: string, url: string) => {
+    // Extract tree ID from URL to build og-proxy share link
+    const treeIdMatch = url.match(/\/tree\/([a-f0-9-]+)/i);
+    if (treeIdMatch) {
+      const { buildShareUrl } = await import("@/utils/shareUtils");
+      const shareUrl = buildShareUrl("tree", treeIdMatch[1]);
+      if (navigator.share) {
+        navigator.share({ title: name, text: description, url: shareUrl });
+      } else {
+        navigator.clipboard.writeText(shareUrl);
+        toast.success("Link copied");
+      }
     } else {
-      navigator.clipboard.writeText(url);
-      toast.success("Link copied");
+      if (navigator.share) {
+        navigator.share({ title: name, text: description, url });
+      } else {
+        navigator.clipboard.writeText(url);
+        toast.success("Link copied");
+      }
     }
   };
 
