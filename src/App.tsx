@@ -72,6 +72,7 @@ const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page")
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
 const GalleryPage = lazyImportWithRetry(() => import("./pages/GalleryPage"), "gallery");
+const HeartwoodRoomPage = lazyImportWithRetry(() => import("./pages/library/HeartwoodRoomPage"), "heartwood-room");
 const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"), "dashboard");
 const TreeDetailPage = lazyImportWithRetry(() => import("./pages/TreeDetailPage"), "tree-detail");
 const GoldenDreamPage = lazyImportWithRetry(() => import("./pages/GoldenDreamPage"), "golden-dream");
