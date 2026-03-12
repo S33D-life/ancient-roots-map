@@ -19,23 +19,21 @@ export default function PersonalJourneySummary({ userId }: { userId: string }) {
 
   useEffect(() => {
     const load = async () => {
-      const [treesRes, offeringsRes, heartRes, speciesRes, staffRes] = await Promise.all([
-        supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
-        supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
-        supabase.from("heart_transactions").select("amount").eq("user_id", userId),
-        supabase.from("trees").select("species").eq("created_by", userId),
-        supabase.from("staffs").select("*", { count: "exact", head: true }).eq("owner_id", userId),
-      ]);
+      const treesRes = await supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId);
+      const offeringsRes = await supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId);
+      const heartRes = await supabase.from("heart_transactions").select("amount").eq("user_id", userId);
+      const speciesRes = await supabase.from("trees").select("species").eq("created_by", userId);
+      const staffRes = await supabase.from("staffs").select("*", { count: "exact", head: true }).eq("owner_id", userId);
 
-      const hearts = (heartData || []).reduce((s, r) => s + (r.amount || 0), 0);
-      const uniqueSpecies = new Set((speciesData || []).map(t => t.species)).size;
+      const hearts = (heartRes.data || []).reduce((s: number, r: { amount: number }) => s + (r.amount || 0), 0);
+      const uniqueSpecies = new Set((speciesRes.data || []).map((t: { species: string | null }) => t.species).filter(Boolean)).size;
 
       setStats({
-        treesMapped: treesMapped || 0,
-        offeringsMade: offeringsMade || 0,
+        treesMapped: treesRes.count || 0,
+        offeringsMade: offeringsRes.count || 0,
         heartsEarned: hearts,
         speciesContributed: uniqueSpecies,
-        staffOwned: staffOwned || 0,
+        staffOwned: staffRes.count || 0,
       });
     };
     load();
