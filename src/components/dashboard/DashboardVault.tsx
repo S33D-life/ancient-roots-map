@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Archive, Loader2, Wand2, RotateCcw } from "lucide-react";
+import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useSpeciesTokens } from "@/hooks/use-species-tokens";
 import { useWallet } from "@/hooks/use-wallet";
