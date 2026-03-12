@@ -19,7 +19,7 @@ import GovernanceProposalsList from "@/components/governance/GovernanceProposals
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
-const HeartFlowLedger = lazy(() => import("@/components/economy/HeartFlowLedger"));
+const VaultHeartLedger = lazy(() => import("@/components/dashboard/vault/VaultHeartLedger"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
