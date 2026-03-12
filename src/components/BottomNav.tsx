@@ -73,7 +73,7 @@ const NavItem = ({ item, pathname }: NavItemProps) => {
   return (
     <Link
       to={to}
-      className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] justify-center"
+      className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[48px] min-h-[48px] justify-center active:scale-95"
       style={{
         color: active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.5)",
       }}
