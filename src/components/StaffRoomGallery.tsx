@@ -34,6 +34,7 @@ const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCir
 const LazyStaffSpiralNavigator = lazy(() => import("@/components/staff/StaffSpiralNavigator"));
 const LazySpiralOfSpecies = lazy(() => import("@/components/staff/SpiralOfSpecies"));
 const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPanel"));
+const LazyActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
