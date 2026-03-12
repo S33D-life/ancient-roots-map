@@ -1,6 +1,7 @@
 /**
  * CoWitnessPanel — full flow for co-witness tree scanning.
  * Start a session, invite a second warden, confirm together.
+ * Includes optional environmental sensing for Tree Health Snapshots.
  */
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +17,7 @@ import {
   Heart,
   Camera,
   Eye,
+  Leaf,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +30,9 @@ import {
 import { useWitnessSession } from "@/hooks/use-witness-session";
 import { useToast } from "@/hooks/use-toast";
 import { WITNESS_BONUS_HEARTS } from "@/lib/witness-types";
+import EnvironmentCapture from "./EnvironmentCapture";
+import SnapshotBadge from "./SnapshotBadge";
+import type { TreeHealthSnapshot, SnapshotQuality } from "@/lib/env-snapshot-types";
 
 interface CoWitnessPanelProps {
   treeId: string;
@@ -51,6 +56,10 @@ export default function CoWitnessPanel({
     confirmWitness,
     cancelSession,
     clearError,
+    lightReading,
+    soundReading,
+    setLightReading,
+    setSoundReading,
   } = useWitnessSession(treeId);
   const { toast } = useToast();
   const [nearbySession, setNearbySession] = useState<any | null>(null);
@@ -201,6 +210,13 @@ export default function CoWitnessPanel({
                   {session?.hearts_awarded || WITNESS_BONUS_HEARTS} S33D Hearts
                   each
                 </Badge>
+                {/* Show snapshot badge if env data was captured */}
+                {(session as any)?.env_snapshot && (
+                  <SnapshotBadge
+                    snapshot={(session as any).env_snapshot as TreeHealthSnapshot}
+                    quality={((session as any).snapshot_quality || "basic") as SnapshotQuality}
+                  />
+                )}
               </motion.div>
             )}
 
@@ -232,6 +248,12 @@ export default function CoWitnessPanel({
                     isYou={myRole === "joiner"}
                   />
                 </div>
+
+                {/* Environment Capture — optional sensors */}
+                <EnvironmentCapture
+                  onLightCaptured={setLightReading}
+                  onSoundCaptured={setSoundReading}
+                />
 
                 {/* Data capture hints */}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">

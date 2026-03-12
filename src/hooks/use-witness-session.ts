@@ -3,13 +3,21 @@
  *
  * Supports both initiating and joining sessions, with real-time sync via
  * the existing Companion broadcast channel and Supabase Realtime on the
- * witness_sessions table.
+ * witness_sessions table. Includes environmental snapshot capture.
  */
 import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanion } from "@/contexts/CompanionContext";
 import type { WitnessSession, WitnessSessionStatus } from "@/lib/witness-types";
 import { WITNESS_PROXIMITY_M, WITNESS_BONUS_HEARTS } from "@/lib/witness-types";
+import type {
+  TreeHealthSnapshot,
+  CanopyLightReading,
+  AmbientSoundReading,
+  SnapshotQuality,
+} from "@/lib/env-snapshot-types";
+import { computeSnapshotQuality, getSeasonHint, getDeviceLabel } from "@/lib/env-snapshot-types";
+import { computeDualGPS } from "@/lib/env-sensors";
 
 const haversineMeters = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371000;
@@ -48,6 +56,10 @@ export function useWitnessSession(treeId: string) {
   const [error, setError] = useState<string | null>(null);
   const { session: companionSession, paired: companionPaired } = useCompanion();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  // Environmental snapshot state
+  const [lightReading, setLightReading] = useState<CanopyLightReading | null>(null);
+  const [soundReading, setSoundReading] = useState<AmbientSoundReading | null>(null);
 
   // Subscribe to realtime changes on the session
   useEffect(() => {
@@ -88,20 +100,81 @@ export function useWitnessSession(treeId: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.initiator_confirmed, session?.joiner_confirmed, session?.status]);
 
+  /** Build and persist the environmental snapshot before finalizing */
+  const buildSnapshot = useCallback(
+    (ws: WitnessSession): { snapshot: TreeHealthSnapshot; quality: SnapshotQuality } | null => {
+      try {
+        const gps =
+          ws.initiator_lat != null &&
+          ws.joiner_lat != null &&
+          ws.initiator_lng != null &&
+          ws.joiner_lng != null
+            ? computeDualGPS(
+                ws.initiator_lat,
+                ws.initiator_lng,
+                ws.initiator_accuracy_m ?? 30,
+                ws.joiner_lat,
+                ws.joiner_lng,
+                ws.joiner_accuracy_m ?? 30
+              )
+            : undefined;
+
+        const photos =
+          ws.initiator_photos.length > 0 || ws.joiner_photos.length > 0
+            ? {
+                initiatorCount: ws.initiator_photos.length,
+                joinerCount: ws.joiner_photos.length,
+                hasCanopyShot: false,
+                hasTrunkShot: false,
+              }
+            : undefined;
+
+        const snapshot: TreeHealthSnapshot = {
+          version: 1,
+          capturedAt: new Date().toISOString(),
+          light: lightReading ?? undefined,
+          sound: soundReading ?? undefined,
+          gps,
+          photos,
+          seasonHint: getSeasonHint(ws.initiator_lat ?? undefined),
+          devices: {
+            initiator: getDeviceLabel(),
+            joiner: getDeviceLabel(),
+          },
+        };
+
+        const quality = computeSnapshotQuality(snapshot);
+        return { snapshot, quality };
+      } catch {
+        return null;
+      }
+    },
+    [lightReading, soundReading]
+  );
+
   const finalizeSession = useCallback(
     async (sessionId: string) => {
       try {
+        // Build snapshot from current state
+        const snapData = session ? buildSnapshot(session) : null;
+
         await supabase
           .from("witness_sessions" as any)
           .update({
             status: "witnessed",
             verified_at: new Date().toISOString(),
             hearts_awarded: WITNESS_BONUS_HEARTS,
+            ...(snapData
+              ? {
+                  env_snapshot: snapData.snapshot,
+                  snapshot_quality: snapData.quality,
+                }
+              : {}),
           } as any)
           .eq("id", sessionId);
       } catch {}
     },
-    []
+    [session, buildSnapshot]
   );
 
   /** Initiator starts a new session at a tree */
@@ -275,5 +348,10 @@ export function useWitnessSession(treeId: string) {
     cancelSession,
     companionPaired,
     clearError: () => setError(null),
+    // Environmental sensing
+    lightReading,
+    soundReading,
+    setLightReading,
+    setSoundReading,
   };
 }
