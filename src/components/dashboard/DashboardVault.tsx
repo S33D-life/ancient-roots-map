@@ -123,6 +123,11 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Wallet & Staff Identity Card */}
       <VaultWalletCard wallet={wallet} />
 
+      {/* Founding Patron Badge — only if staff holder */}
+      {wallet.activeStaff && (
+        <VaultPatronBadge staff={wallet.activeStaff} />
+      )}
+
       {/* Re-awaken Staff */}
       {wallet.activeStaff && (
         <Button
