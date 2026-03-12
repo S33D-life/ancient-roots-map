@@ -307,6 +307,9 @@ const Hero = () => {
               </Link>
             </Button>
           </div>
+
+          {/* Welcome Journey — gentle onboarding for new visitors */}
+          <WelcomeJourney isLoggedIn={visitorNumber !== null} />
         </div>
 
         {/* Bottom stack: Ancient Friend card — simplified */}
