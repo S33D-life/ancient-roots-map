@@ -638,22 +638,7 @@ function ConstellationMap({
                   {/* Orbiting activity indicators */}
                   {metrics.totalHearts > 0 && i < 12 && (
                     <motion.div
-                      className="absolute w-1.5 h-1.5 rounded-full"
-                      style={{
-                        backgroundColor: "hsl(0, 65%, 55%)",
-                        boxShadow: "0 0 4px hsl(0, 65%, 55%)",
-                        top: "-3px",
-                        left: "50%",
-                        marginLeft: "-3px",
-                      }}
-                      animate={{
-                        rotate: 360,
-                      }}
-                      transition={{
-                        duration: 12 + i * 2,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
+                      className="absolute"
                       style={{
                         transformOrigin: `3px ${8 + i % 3}px`,
                         backgroundColor: "hsl(0, 65%, 55%)",
@@ -661,7 +646,15 @@ function ConstellationMap({
                         width: "3px",
                         height: "3px",
                         borderRadius: "50%",
-                        position: "absolute",
+                        top: "-3px",
+                        left: "50%",
+                        marginLeft: "-3px",
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 12 + i * 2,
+                        repeat: Infinity,
+                        ease: "linear",
                       }}
                     />
                   )}
