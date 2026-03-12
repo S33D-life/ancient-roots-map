@@ -166,6 +166,7 @@ const TreeDetailPage = () => {
     treeLng: tree?.longitude,
   });
   const presenceCount = useTreePresenceCount(userId, id);
+  const { progress: relationship } = useTreeRelationship(id, userId);
 
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
