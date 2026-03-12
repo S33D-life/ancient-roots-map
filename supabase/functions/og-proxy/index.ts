@@ -343,7 +343,6 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
 
 function buildStaffMeta(code: string): Meta {
   const species = resolveStaffSpecies(code);
-  const image = resolveStaffImage(code);
   const isCircle = isCircleStaff(code);
 
   const displayCode = code.toUpperCase();
@@ -355,7 +354,6 @@ function buildStaffMeta(code: string): Meta {
     ? `A ${species} circle staff from the S33D Staff Room. Explore its lineage and lore.`
     : `The ${species} Origin Staff — one of 36 founding staffs in the S33D collection.`;
 
-  // Use generated og-card for staff images
   const image = `${OG_CARD_BASE}?type=staff&id=${encodeURIComponent(code)}`;
 
   return {
