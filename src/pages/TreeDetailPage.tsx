@@ -483,6 +483,20 @@ const TreeDetailPage = () => {
               </div>
             )}
 
+            {/* Relationship Journey Card */}
+            {userId && relationship && (
+              <Suspense fallback={null}>
+                <TreeRelationshipCard
+                  progress={relationship}
+                  treeName={tree.name}
+                  onCoWitness={() => {
+                    // Trigger co-witness panel — the CoWitnessPanel button handles this
+                  }}
+                  onMakeOffering={() => setAddOfferingOpen(true)}
+                />
+              </Suspense>
+            )}
+
             {/* Story + Structured Data (two-column) */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
 
