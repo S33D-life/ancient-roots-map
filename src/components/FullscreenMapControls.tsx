@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FullscreenToggle from "@/components/FullscreenToggle";
+import FullscreenCompanionHint from "@/components/FullscreenCompanionHint";
 
 interface FullscreenMapControlsProps {
   onExit: () => void;
@@ -63,6 +64,7 @@ const FullscreenMapControls = ({ onExit }: FullscreenMapControlsProps) => {
           />
         </div>
       </motion.div>
+      <FullscreenCompanionHint />
     </AnimatePresence>
   );
 };

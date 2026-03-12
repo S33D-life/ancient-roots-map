@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import FullscreenCompanionHint from "@/components/FullscreenCompanionHint";
 
 interface FullscreenShellProps {
   active: boolean;
@@ -45,6 +46,7 @@ const FullscreenShell = ({
           }}
         >
           {children}
+          <FullscreenCompanionHint />
         </motion.div>
       )}
     </AnimatePresence>
