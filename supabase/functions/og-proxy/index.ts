@@ -257,8 +257,9 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
       // Check if tree has a staff-linked ceremony
       supabase
         .from("ceremony_logs")
-        .select("staff_name, staff_species")
+        .select("staff_name, staff_species, staff_code")
         .eq("ceremony_type", "binding")
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
     ]);
