@@ -37,7 +37,6 @@ const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPa
 
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
-type StaffTab = "spiral" | "founding" | "patron" | "staffs" | "impact";
 
 /** Unified staff item for all views */
 interface StaffItem {
