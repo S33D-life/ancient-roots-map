@@ -244,6 +244,16 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />
 
+      {/* Personal Journey Summary */}
+      <Suspense fallback={null}>
+        <PersonalJourneySummary userId={userId} />
+      </Suspense>
+
+      {/* This Week in the Forest */}
+      <Suspense fallback={null}>
+        <EcosystemMomentum showDiscovery compact={false} />
+      </Suspense>
+
       {/* Recent Activity Feed */}
       <div className="space-y-2">
         <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Activity</h3>
