@@ -6162,6 +6162,7 @@ export type Database = {
         Row: {
           companion_channel: string | null
           created_at: string
+          env_snapshot: Json | null
           expires_at: string
           hearts_awarded: number
           id: string
@@ -6181,6 +6182,7 @@ export type Database = {
           joiner_lng: number | null
           joiner_offerings: string[] | null
           joiner_photos: string[] | null
+          snapshot_quality: string | null
           status: string
           tree_id: string
           updated_at: string
@@ -6189,6 +6191,7 @@ export type Database = {
         Insert: {
           companion_channel?: string | null
           created_at?: string
+          env_snapshot?: Json | null
           expires_at?: string
           hearts_awarded?: number
           id?: string
@@ -6208,6 +6211,7 @@ export type Database = {
           joiner_lng?: number | null
           joiner_offerings?: string[] | null
           joiner_photos?: string[] | null
+          snapshot_quality?: string | null
           status?: string
           tree_id: string
           updated_at?: string
@@ -6216,6 +6220,7 @@ export type Database = {
         Update: {
           companion_channel?: string | null
           created_at?: string
+          env_snapshot?: Json | null
           expires_at?: string
           hearts_awarded?: number
           id?: string
@@ -6235,6 +6240,7 @@ export type Database = {
           joiner_lng?: number | null
           joiner_offerings?: string[] | null
           joiner_photos?: string[] | null
+          snapshot_quality?: string | null
           status?: string
           tree_id?: string
           updated_at?: string
