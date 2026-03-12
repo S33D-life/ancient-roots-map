@@ -197,6 +197,9 @@ const EconomyOverview = () => {
         ))}
       </motion.section>
 
+      {/* ═══ 4b. Founding Patron Flow ═══ */}
+      <PatronFlowBanner />
+
       {/* ═══ 5. Emission Curve ═══ */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
