@@ -242,6 +242,14 @@ const DashboardVault = ({ userId }: Props) => {
 
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />
+
+      {/* Recent Activity Feed */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Activity</h3>
+        <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+          <ActivityFeed userId={userId} limit={6} compact />
+        </Suspense>
+      </div>
     </motion.div>
   );
 };
