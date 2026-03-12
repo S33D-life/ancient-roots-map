@@ -56,4 +56,6 @@ export const ROUTES = {
   BIO_REGIONS: "/atlas/bio-regions",
   /** Bio-region detail */
   BIO_REGION: (slug: string) => `/atlas/bio-regions/${slug}` as const,
+  /** Patron Offering */
+  PATRON_OFFERING: "/patron-offering",
 } as const;
