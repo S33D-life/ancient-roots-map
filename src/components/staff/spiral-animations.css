@@ -1,0 +1,94 @@
+/**
+ * Spiral constellation ambient animations.
+ * Lightweight CSS-only transforms for breathing, rotation, and ripple.
+ */
+
+/* Ambient rotation — extremely slow, pauses on user interaction */
+@keyframes spiral-drift {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spiral-ambient {
+  animation: spiral-drift 240s linear infinite;
+  will-change: transform;
+}
+
+.spiral-ambient.is-interacting {
+  animation-play-state: paused;
+}
+
+/* Node breathing — subtle scale pulse with randomised phase via --delay */
+@keyframes node-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.025); }
+}
+
+.node-breathe {
+  animation: node-breathe var(--breathe-dur, 5s) ease-in-out infinite;
+  animation-delay: var(--breathe-delay, 0s);
+  will-change: transform;
+}
+
+/* Focus ripple — expanding ring on selection */
+@keyframes focus-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+
+.focus-ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: focus-ripple 0.8s ease-out forwards;
+}
+
+/* Constellation highlight — dim unrelated nodes */
+.constellation-dimmed {
+  opacity: 0.2 !important;
+  filter: grayscale(0.4);
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.constellation-highlighted {
+  opacity: 1 !important;
+  filter: none;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Species halo ring */
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.55; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+.species-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: halo-pulse var(--halo-dur, 6s) ease-in-out infinite;
+  animation-delay: var(--halo-delay, 0s);
+}
+
+/* Connection line glow on focus */
+@keyframes line-glow-travel {
+  0% { stroke-dashoffset: 20; stroke-opacity: 0.06; }
+  50% { stroke-dashoffset: 0; stroke-opacity: 0.25; }
+  100% { stroke-dashoffset: -20; stroke-opacity: 0.06; }
+}
+
+.line-glow-active {
+  animation: line-glow-travel 1.2s ease-in-out forwards;
+}

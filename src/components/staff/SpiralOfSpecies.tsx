@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/hover-card";
 import { SpiralHeartFlow } from "./SpiralHeartFlow";
 import FullscreenWrapper from "@/components/FullscreenWrapper";
+import { useSpiralInteraction } from "@/hooks/use-spiral-interaction";
+import "./spiral-animations.css";
 
 /* ─── Types ───────────────────────────────────────────────────── */
 interface EcosystemMetrics {
@@ -388,6 +390,17 @@ function ConstellationMap({
   userStaff: string | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const { isInteracting, interactionProps } = useSpiralInteraction();
+
+  // Track which species is being highlighted for constellation mode
+  const [highlightedSpecies, setHighlightedSpecies] = useState<string | null>(null);
+
+  // Focus ripple state
+  const [ripple, setRipple] = useState<{ x: number; y: number; color: string; key: number } | null>(null);
+
+  const triggerRipple = useCallback((x: number, y: number, color: string) => {
+    setRipple({ x, y, color, key: Date.now() });
+  }, []);
 
   // Pre-compute spiral positions
   const originPositions = useMemo(() => {
@@ -419,7 +432,27 @@ function ConstellationMap({
       exit={{ opacity: 0 }}
       className="relative mx-auto touch-pan-y"
       style={{ width: "min(100%, 560px)", maxHeight: "85vh", aspectRatio: "1" }}
+      {...interactionProps}
     >
+      {/* Ambient rotation wrapper */}
+      <div className={`absolute inset-0 spiral-ambient ${isInteracting ? "is-interacting" : ""}`}>
+
+      {/* Focus ripple overlay */}
+      <AnimatePresence>
+        {ripple && (
+          <div
+            key={ripple.key}
+            className="focus-ripple"
+            style={{
+              left: `${ripple.x}%`,
+              top: `${ripple.y}%`,
+              border: `2px solid ${ripple.color}`,
+              boxShadow: `0 0 12px ${ripple.color}`,
+            }}
+            onAnimationEnd={() => setRipple(null)}
+          />
+        )}
+      </AnimatePresence>
       {/* ── Canvas heart flow layer ── */}
       <SpiralHeartFlow
         containerRef={mapRef}
@@ -601,17 +634,40 @@ function ConstellationMap({
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + i * 0.025, type: "spring", stiffness: 200 }}
-                className="absolute"
+                className={`absolute node-breathe ${
+                  highlightedSpecies && highlightedSpecies !== (staff.code as string).slice(0, 3)
+                    ? "constellation-dimmed"
+                    : highlightedSpecies ? "constellation-highlighted" : ""
+                }`}
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
-                  transform: "translate(-50%, -50%)",
                   zIndex: isHovered || isOwned ? 25 : 2,
+                  ["--breathe-dur" as string]: `${4.5 + (i % 5) * 0.8}s`,
+                  ["--breathe-delay" as string]: `${(i * 0.37) % 4}s`,
                 }}
-                onMouseEnter={() => onHoverStaff(i)}
-                onMouseLeave={() => onHoverStaff(null)}
+                onMouseEnter={() => {
+                  onHoverStaff(i);
+                  setHighlightedSpecies((staff.code as string).slice(0, 3));
+                }}
+                onMouseLeave={() => {
+                  onHoverStaff(null);
+                  setHighlightedSpecies(null);
+                }}
+                onClick={() => triggerRipple(pos.x, pos.y, colors.core)}
               >
                 <Link to={ROUTES.STAFF(staff.code)} className="block relative">
+                  {/* Species halo */}
+                  <div
+                    className="species-halo"
+                    style={{
+                      width: "22px",
+                      height: "22px",
+                      background: `radial-gradient(circle, ${colors.glow}20, transparent 70%)`,
+                      ["--halo-dur" as string]: `${5 + (i % 4)}s`,
+                      ["--halo-delay" as string]: `${(i * 0.5) % 3}s`,
+                    }}
+                  />
                   {/* Owner halo */}
                   {isOwned && (
                     <motion.div
@@ -766,11 +822,25 @@ function ConstellationMap({
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.3 + gi * 0.1, type: "spring", stiffness: 130 }}
-            className="absolute group"
-            style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%, -50%)" }}
+            className={`absolute group node-breathe ${
+              highlightedSpecies && highlightedSpecies !== group.speciesCode
+                ? "constellation-dimmed"
+                : highlightedSpecies === group.speciesCode ? "constellation-highlighted" : ""
+            }`}
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              ["--breathe-dur" as string]: `${6 + gi}s`,
+              ["--breathe-delay" as string]: `${gi * 0.7}s`,
+            }}
+            onMouseEnter={() => setHighlightedSpecies(group.speciesCode)}
+            onMouseLeave={() => setHighlightedSpecies(null)}
           >
             <button
-              onClick={() => onSelectSpecies(group)}
+              onClick={() => {
+                triggerRipple(pos.x, pos.y, colors.core);
+                onSelectSpecies(group);
+              }}
               className="block relative focus:outline-none"
             >
               {/* Nebula glow */}
@@ -860,6 +930,8 @@ function ConstellationMap({
           </motion.div>
         );
       })}
+
+      </div>{/* end ambient rotation wrapper */}
     </motion.div>
   );
 }
