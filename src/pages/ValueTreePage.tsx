@@ -11,7 +11,7 @@ import {
   Heart, Shield, TreePine, Sprout, GitBranch, Vote,
   ChevronDown, ChevronRight, Clock, Check, Zap, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
-  Bug, UserPlus, Megaphone, Flame, ArrowRight, Coins,
+  Bug, UserPlus, Megaphone, Flame, ArrowRight, Coins, Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
