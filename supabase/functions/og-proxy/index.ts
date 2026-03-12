@@ -2,21 +2,26 @@
  * og-proxy — Universal Open Graph meta-tag proxy for S33D.
  *
  * Social-media crawlers (Telegram, WhatsApp, Discord, X/Twitter, iMessage)
- * fetch the raw HTML of a URL and cannot execute JavaScript. Because S33D
- * is a client-rendered SPA, crawlers only see the static index.html tags.
+ * fetch the raw HTML and cannot execute JavaScript. This edge function
+ * returns a lightweight HTML page with correct OG tags then redirects
+ * browsers to the SPA.
  *
- * This edge function intercepts crawler requests and returns a lightweight
- * HTML page with the correct OG tags for the requested route, then
- * redirects real browsers to the SPA.
- *
- * Usage (via rewrite rule or direct):
- *   GET /functions/v1/og-proxy?path=/tree/<id>
- *   GET /functions/v1/og-proxy?path=/library/staff-room
- *
- * For tree-specific previews it delegates to the existing tree-og function
- * logic (inlined here so one function handles all routes).
+ * Supported routes:
+ *   /                        → homepage defaults
+ *   /library/staff-room      → Staff Room landing
+ *   /map                     → Atlas landing
+ *   /tree/<uuid>             → Ancient Friend page (DB lookup)
+ *   /tree/research/<uuid>    → Research tree page (DB lookup)
+ *   /staff/<code>            → Staff detail page (static data)
+ *   *                        → fallback with S33D branding
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_KEY =
@@ -28,8 +33,9 @@ const DEFAULT_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
 
 const TREE_RE = /^\/tree\/([a-f0-9-]{36})$/i;
 const RESEARCH_TREE_RE = /^\/tree\/research\/([a-f0-9-]{36})$/i;
+const STAFF_RE = /^\/staff\/([A-Za-z0-9_-]+)$/;
 
-/* ── Helpers ────────────────────────────────────────────── */
+/* ── HTML helpers ───────────────────────────────────────── */
 
 function esc(s: string): string {
   return s
@@ -111,44 +117,106 @@ const STATIC_ROUTES: Record<string, Partial<Meta>> = {
       "Explore the global map of ancient trees. Discover Ancient Friends near you.",
     url: `${APP_URL}/map`,
   },
+  "/library": {
+    title: "The Library — S33D.life",
+    description:
+      "Browse the living library of Ancient Friends — staffs, songs, seeds, and stories.",
+    url: `${APP_URL}/library`,
+  },
+  "/council-of-life": {
+    title: "Council of Life — S33D.life",
+    description:
+      "Join the Council of Life. Participate in governance, cast influence, and shape the future of S33D.",
+    url: `${APP_URL}/council-of-life`,
+  },
+  "/hives": {
+    title: "Species Hives — S33D.life",
+    description:
+      "Explore species-heart economies and hive stewardship across the Ancient Friends network.",
+    url: `${APP_URL}/hives`,
+  },
 };
+
+/* ── Staff species data (mirrors staffContract config) ──── */
+
+const SPECIES_NAMES: Record<string, string> = {
+  GOA: "Goat Willow", PLUM: "Plum", BEE: "Beech", RHOD: "Rhododendron",
+  CHERRY: "Wild Cherry", CHER: "Wild Cherry", ROW: "Rowan", PINE: "Scots Pine",
+  BOX: "Box", OAK: "Oak", PRIVET: "Privet", PRIV: "Privet",
+  WILLOW: "Willow", WIL: "Willow", SYC: "Sycamore", HAZ: "Hazel",
+  HORN: "Hornbeam", YEW: "Yew", ASH: "Ash", HOL: "Holly",
+  SWE: "Sweet Chestnut", APP: "Apple", IVY: "Ivy", ELD: "Elder",
+  HAW: "Hawthorn", PLA: "Plane", BUCK: "Buckthorn", BIR: "Silver Birch",
+  ROSE: "Dog Rose", BUD: "Buddleja", CRAB: "Crab Apple", DAWN: "Dawn Redwood",
+  HORS: "Horse Chestnut", JAPA: "Japanese Maple", MED: "Medlar",
+  PEAR: "Pear", SLOE: "Blackthorn", WITC: "Witch Hazel", ALD: "Alder",
+};
+
+function resolveStaffImage(code: string): string {
+  // Staff images live in /images/staffs/<lower>.jpeg
+  // Circle staffs: code like YEW-C1S11 → /images/staffs/yew-c1-s11.jpeg
+  const lower = code.toLowerCase();
+  if (lower.includes("-c")) {
+    // Circle staff: "YEW-C1S3" → "yew-c1-s3"
+    const normalized = lower.replace(/c(\d+)s(\d+)/, "c$1-s$2");
+    return `${APP_URL}/images/staffs/${normalized}.jpeg`;
+  }
+  // Origin staff: species code → species image
+  return `${APP_URL}/images/staffs/${lower}.jpeg`;
+}
+
+function resolveStaffSpecies(code: string): string {
+  // Extract base species from codes like "YEW-C1S3" or "YEW"
+  const base = code.split("-")[0].toUpperCase();
+  return SPECIES_NAMES[base] || code;
+}
+
+function isCircleStaff(code: string): boolean {
+  return code.includes("-C") || code.includes("-c");
+}
 
 /* ── Main handler ───────────────────────────────────────── */
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   const url = new URL(req.url);
   const path = url.searchParams.get("path") || "/";
 
-  // 1. Check static routes
+  // 1. Static routes
   const staticOverride = STATIC_ROUTES[path];
   if (staticOverride !== undefined) {
-    const meta = { ...DEFAULT_META, ...staticOverride };
-    return respond(meta);
+    return respond({ ...DEFAULT_META, ...staticOverride });
   }
 
   // 2. Tree detail page
   const treeMatch = path.match(TREE_RE);
   if (treeMatch) {
-    const treeId = treeMatch[1];
-    const meta = await fetchTreeMeta(treeId);
-    return respond(meta);
+    return respond(await fetchTreeMeta(treeMatch[1]));
   }
 
   // 3. Research tree page
   const researchMatch = path.match(RESEARCH_TREE_RE);
   if (researchMatch) {
-    const treeId = researchMatch[1];
-    const meta = await fetchResearchTreeMeta(treeId);
-    return respond(meta);
+    return respond(await fetchResearchTreeMeta(researchMatch[1]));
   }
 
-  // 4. Fallback — use defaults with the requested path
+  // 4. Staff detail page
+  const staffMatch = path.match(STAFF_RE);
+  if (staffMatch) {
+    return respond(buildStaffMeta(staffMatch[1]));
+  }
+
+  // 5. Fallback
   return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
 });
 
 function respond(meta: Meta): Response {
   return new Response(renderHTML(meta), {
     headers: {
+      ...corsHeaders,
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=3600, s-maxage=3600",
     },
@@ -160,33 +228,44 @@ function respond(meta: Meta): Response {
 async function fetchTreeMeta(id: string): Promise<Meta> {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    const { data: tree } = await supabase
-      .from("trees")
-      .select("id, name, species, nation, latitude, longitude")
-      .eq("id", id)
-      .maybeSingle();
 
+    // Fetch tree + its best photo in parallel
+    const [treeRes, photoRes] = await Promise.all([
+      supabase
+        .from("trees")
+        .select("id, name, species, nation, latitude, longitude, description")
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("offerings")
+        .select("media_url")
+        .eq("tree_id", id)
+        .eq("type", "photo")
+        .not("media_url", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
+    const tree = treeRes.data;
     if (!tree) return { ...DEFAULT_META, url: `${APP_URL}/tree/${id}` };
-
-    // Try to find a photo
-    const { data: photo } = await supabase
-      .from("offerings")
-      .select("media_url")
-      .eq("tree_id", id)
-      .eq("type", "photo")
-      .not("media_url", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
 
     const treeName = tree.name || "Ancient Friend";
     const species = tree.species || "Unknown species";
     const location = tree.nation || "Unknown location";
 
+    // Image fallback: photo offering → global default
+    const image = photoRes.data?.media_url || DEFAULT_IMAGE;
+
+    // Description fallback: tree description → generated
+    const desc = tree.description
+      ? tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "")
+      : `An Ancient Friend in ${location}. Visit this tree on the S33D Living Atlas.`;
+
     return {
-      title: `${treeName} — ${species}`,
-      description: `An Ancient Friend in ${location}. Visit this tree on the S33D Living Atlas.`,
-      image: photo?.media_url || DEFAULT_IMAGE,
+      title: `${treeName} — ${species} | S33D.life`,
+      description: desc,
+      image,
       url: `${APP_URL}/tree/${tree.id}`,
       imageWidth: 1200,
       imageHeight: 630,
@@ -203,7 +282,7 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data: tree } = await supabase
       .from("research_trees")
-      .select("id, name, species, country, latitude, longitude, significance")
+      .select("id, name, species, country, latitude, longitude, significance, image_url")
       .eq("id", id)
       .maybeSingle();
 
@@ -213,12 +292,15 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const species = tree.species || "Unknown species";
     const location = tree.country || "Unknown location";
 
+    // Image fallback: research image → global default
+    const image = tree.image_url || DEFAULT_IMAGE;
+
     return {
-      title: `${treeName} — ${species}`,
+      title: `${treeName} — ${species} | S33D.life`,
       description: tree.significance
-        ? tree.significance.slice(0, 155) + "…"
+        ? tree.significance.slice(0, 155).trim() + (tree.significance.length > 155 ? "…" : "")
         : `A research-layer tree in ${location}. Discover it on the S33D Living Atlas.`,
-      image: DEFAULT_IMAGE,
+      image,
       url: `${APP_URL}/tree/research/${tree.id}`,
       imageWidth: 1200,
       imageHeight: 630,
@@ -228,4 +310,31 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
   } catch {
     return { ...DEFAULT_META, url: `${APP_URL}/tree/research/${id}` };
   }
+}
+
+function buildStaffMeta(code: string): Meta {
+  const species = resolveStaffSpecies(code);
+  const image = resolveStaffImage(code);
+  const isCircle = isCircleStaff(code);
+
+  const displayCode = code.toUpperCase();
+  const title = isCircle
+    ? `${displayCode} — ${species} Staff | S33D.life`
+    : `${species} — Origin Staff | S33D.life`;
+
+  const description = isCircle
+    ? `A ${species} circle staff from the S33D Staff Room. Explore its lineage and lore.`
+    : `The ${species} Origin Staff — one of 36 founding staffs in the S33D collection.`;
+
+  return {
+    title,
+    description,
+    // Staff images are local assets served from the app domain
+    // If the image doesn't exist, crawlers will get a 404 and platforms
+    // fall back gracefully — but most staffs have images
+    image,
+    url: `${APP_URL}/staff/${code}`,
+    imageWidth: 1200,
+    imageHeight: 630,
+  };
 }
