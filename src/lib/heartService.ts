@@ -107,7 +107,7 @@ export async function earnHearts(params: {
         chain_state: "offchain",
         idempotency_key: key,
         metadata: params.metadata || {},
-      })
+      } as any)
       .select()
       .single();
 
