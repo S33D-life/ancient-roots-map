@@ -46,6 +46,7 @@ const FullscreenShell = ({
           }}
         >
           {children}
+          <FullscreenCompanionHint />
         </motion.div>
       )}
     </AnimatePresence>
