@@ -9,6 +9,7 @@ import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-re
 import { Button } from "@/components/ui/button";
 import FullscreenShell from "@/components/FullscreenShell";
 import FullscreenToggle from "@/components/FullscreenToggle";
+import ZoomPanLayer from "@/components/ZoomPanLayer";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
