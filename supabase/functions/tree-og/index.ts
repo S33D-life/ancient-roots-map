@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  const imageUrl = photoOffering?.media_url || `${APP_URL}/pwa-icon-512.png`;
+  const imageUrl = photoOffering?.media_url || `${APP_URL}/og/s33d-share-default.jpg`;
   const treeName = tree.name || "Ancient Friend";
   const species = tree.species || "Unknown species";
   const location = tree.nation || "Unknown location";
