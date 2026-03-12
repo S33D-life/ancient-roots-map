@@ -126,6 +126,7 @@ const CalendarSettingsPage = lazyImportWithRetry(() => import("./pages/CalendarS
 const RootstoneImporterPage = lazyImportWithRetry(() => import("./pages/RootstoneImporterPage"), "rootstone-importer");
 const WandererProfilePage = lazyImportWithRetry(() => import("./pages/WandererProfilePage"), "wanderer-profile");
 const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/LivingForestRoadmapPage"), "roadmap");
+const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -313,6 +314,7 @@ const App = () => {
                 <Route path="/cosmic/settings" element={<CalendarSettingsPage />} />
                 <Route path="/wanderer/:id" element={<WandererProfilePage />} />
                 <Route path="/roadmap" element={<LivingForestRoadmapPage />} />
+                <Route path="/patron-offering" element={<PatronOfferingPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
