@@ -199,7 +199,7 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
         }}
       />
 
-      <div className="p-5 pb-2">
+      <div className="p-3 sm:p-5 pb-2">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-primary" />
