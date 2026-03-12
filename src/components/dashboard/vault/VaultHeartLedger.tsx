@@ -231,7 +231,7 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
       </div>
 
       {/* Transaction list */}
-      <div className={`${compact ? "max-h-64" : "max-h-96"} overflow-y-auto px-5 pb-4 space-y-1`}>
+      <div className={`${compact ? "max-h-64" : "max-h-[70vh] sm:max-h-96"} overflow-y-auto px-3 sm:px-5 pb-4 space-y-1`}>
         <AnimatePresence mode="popLayout">
           {filtered.slice(0, maxItems).map((tx, i) => {
             const config = tx.token_type === "s33d"
