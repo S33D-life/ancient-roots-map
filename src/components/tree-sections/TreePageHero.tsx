@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import FullscreenShell from "@/components/FullscreenShell";
 import FullscreenToggle from "@/components/FullscreenToggle";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import LeafAtmosphere from "@/components/LeafAtmosphere";
