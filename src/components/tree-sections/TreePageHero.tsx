@@ -3,7 +3,7 @@
  * Full-width immersive layout with soft parallax, pulsing tree-ring halo,
  * gold leaf vignette, and primary CTAs.
  */
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
