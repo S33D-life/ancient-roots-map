@@ -321,6 +321,7 @@ const HivePage = () => {
           <HiveContributionCTA
             hive={hive}
             onMapTrees={() => focusMap({ type: "area", id: hive.family, source: "hive", hiveSlug: family })}
+            treeCount={trees.length}
           />
         </div>
 
