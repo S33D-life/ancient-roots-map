@@ -158,18 +158,7 @@ const SPECIES_NAMES: Record<string, string> = {
   PEAR: "Pear", SLOE: "Blackthorn", WITC: "Witch Hazel", ALD: "Alder",
 };
 
-function resolveStaffImage(code: string): string {
-  // Staff images live in /images/staffs/<lower>.jpeg
-  // Circle staffs: code like YEW-C1S11 → /images/staffs/yew-c1-s11.jpeg
-  const lower = code.toLowerCase();
-  if (lower.includes("-c")) {
-    // Circle staff: "YEW-C1S3" → "yew-c1-s3"
-    const normalized = lower.replace(/c(\d+)s(\d+)/, "c$1-s$2");
-    return `${APP_URL}/images/staffs/${normalized}.jpeg`;
-  }
-  // Origin staff: species code → species image
-  return `${APP_URL}/images/staffs/${lower}.jpeg`;
-}
+// resolveStaffImage removed — og:image now uses og-card generated SVG
 
 function resolveStaffSpecies(code: string): string {
   // Extract base species from codes like "YEW-C1S3" or "YEW"
