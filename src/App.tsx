@@ -149,6 +149,10 @@ const App = () => {
   const [authReady, setAuthReady] = useState(false);
   const [authInitError, setAuthInitError] = useState<string | null>(null);
 
+  // Global connection resilience — shows reconnection toasts
+  const { useConnectionResilience } = require("@/hooks/use-connection-resilience");
+  useConnectionResilience();
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       // Listener kept active so auth SDK can process token refresh/sign-out updates.
