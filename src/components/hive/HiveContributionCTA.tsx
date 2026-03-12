@@ -30,6 +30,13 @@ const HiveContributionCTA = ({ hive, onMapTrees, treeCount }: Props) => {
         style={{ background: `linear-gradient(90deg, transparent, hsl(${hive.accentHsl}), transparent)` }}
       />
       <CardContent className="p-4 space-y-3">
+        {showInvitation && (
+          <div className="rounded-lg bg-primary/5 border border-primary/15 p-3 mb-1">
+            <p className="text-[11px] font-serif text-foreground/70 italic">
+              Few {hive.displayName} trees are mapped yet. Would you like to add one?
+            </p>
+          </div>
+        )}
         <p className="text-sm font-serif text-foreground tracking-wide">
           Help the {hive.displayName} grow
         </p>

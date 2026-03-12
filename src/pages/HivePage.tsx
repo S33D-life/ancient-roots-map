@@ -717,9 +717,9 @@ const HivePage = () => {
               </span>
               <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find {hive.displayName} trees</p>
             </button>
-            <Link to="/blooming-clock" className="loop-card font-serif text-left">
+            <Link to="/cosmic" className="loop-card font-serif text-left">
               <span className="text-primary flex items-center gap-1.5">
-                🕰️ Blooming Clock
+                🕰️ Cosmic Calendar
               </span>
               <p className="text-[10px] text-muted-foreground/50 mt-0.5">See seasonal rhythms</p>
             </Link>
