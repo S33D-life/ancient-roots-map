@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, TreeDeciduous, ExternalLink } from "lucide-react";
 import LivingCensus from "@/components/LivingCensus";
+import WelcomeJourney from "@/components/WelcomeJourney";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -181,6 +182,7 @@ const Hero = () => {
   
   const [isHovering, setIsHovering] = useState(false);
   const [visitorNumber, setVisitorNumber] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [friendIndex, setFriendIndex] = useState(0);
   const visitRecorded = useRef(false);
   const lastShownIndex = useRef<number | null>(null);
@@ -191,6 +193,7 @@ const Hero = () => {
     visitRecorded.current = true;
     const recordVisit = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
       const { data, error } = await supabase.rpc('record_visit', {
         p_user_id: user?.id ?? null,
       });
@@ -306,6 +309,9 @@ const Hero = () => {
               </Link>
             </Button>
           </div>
+
+          {/* Welcome Journey — gentle onboarding for new visitors */}
+          <WelcomeJourney isLoggedIn={isLoggedIn} />
         </div>
 
         {/* Bottom stack: Ancient Friend card — simplified */}

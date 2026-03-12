@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense, type ComponentType } from "react";
+import { useConnectionResilience } from "@/hooks/use-connection-resilience";
 import { Navigate } from "react-router-dom";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
@@ -148,6 +149,9 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 const App = () => {
   const [authReady, setAuthReady] = useState(false);
   const [authInitError, setAuthInitError] = useState<string | null>(null);
+
+  // Global connection resilience — shows reconnection toasts
+  useConnectionResilience();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
