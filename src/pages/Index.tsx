@@ -21,6 +21,7 @@ const TrunkSection = lazy(() => import("@/components/tree-sections/TrunkSection"
 const GroundSection = lazy(() => import("@/components/tree-sections/GroundSection"));
 const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionAtmosphere"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
+const EcosystemPulse = lazy(() => import("@/components/EcosystemPulse"));
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
 const WisdomOfTheGrove = lazy(() => import("@/components/WisdomOfTheGrove").then(m => ({ default: m.WisdomOfTheGrove })));
