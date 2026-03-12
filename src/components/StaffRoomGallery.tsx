@@ -679,6 +679,11 @@ export default function StaffRoomGallery() {
           )}
         </AnimatePresence>
 
+        {/* ═══ Founding Patron Offering — Value Explainer ═══ */}
+        <Suspense fallback={null}>
+          <PatronValueSection />
+        </Suspense>
+
         {/* Controls bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <ViewToggle />
