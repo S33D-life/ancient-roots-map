@@ -16,6 +16,7 @@ import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
 import DailySeedCounter from "./DailySeedCounter";
+import HeartJar from "./economy/HeartJar";
 
 const TetolMenu = lazy(() => import("./TetolMenu"));
 const TeotagGuide = lazy(() => import("./TeotagGuide"));
