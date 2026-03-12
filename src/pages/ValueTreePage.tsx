@@ -763,6 +763,12 @@ const ValueTreePage = () => {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="economy">
+            <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+              <EconomyOverview />
+            </Suspense>
+          </TabsContent>
+
           <TabsContent value="earn">
             <EarnBranch />
           </TabsContent>
