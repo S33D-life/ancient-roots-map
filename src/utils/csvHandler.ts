@@ -136,7 +136,7 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
     }
   }
 
-  console.log(`Parsed ${trees.length} trees from CSV`);
+  
   return trees;
 };
 
