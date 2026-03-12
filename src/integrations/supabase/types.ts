@@ -2081,6 +2081,116 @@ export type Database = {
         }
         Relationships: []
       }
+      heart_claims: {
+        Row: {
+          amount: number
+          chain: string | null
+          chain_tx_hash: string | null
+          claim_type: string
+          claimed_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          source_ledger_id: string | null
+          status: string
+          user_id: string
+          wallet_address: string | null
+        }
+        Insert: {
+          amount?: number
+          chain?: string | null
+          chain_tx_hash?: string | null
+          claim_type: string
+          claimed_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          source_ledger_id?: string | null
+          status?: string
+          user_id: string
+          wallet_address?: string | null
+        }
+        Update: {
+          amount?: number
+          chain?: string | null
+          chain_tx_hash?: string | null
+          claim_type?: string
+          claimed_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          source_ledger_id?: string | null
+          status?: string
+          user_id?: string
+          wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heart_claims_source_ledger_id_fkey"
+            columns: ["source_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "heart_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      heart_ledger: {
+        Row: {
+          amount: number
+          chain_state: string
+          chain_tx_hash: string | null
+          created_at: string
+          currency_type: string
+          destination: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          idempotency_key: string | null
+          metadata: Json | null
+          source: string | null
+          status: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          chain_state?: string
+          chain_tx_hash?: string | null
+          created_at?: string
+          currency_type?: string
+          destination?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json | null
+          source?: string | null
+          status?: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          chain_state?: string
+          chain_tx_hash?: string | null
+          created_at?: string
+          currency_type?: string
+          destination?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          idempotency_key?: string | null
+          metadata?: Json | null
+          source?: string | null
+          status?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       heart_transactions: {
         Row: {
           amount: number
@@ -5915,6 +6025,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wallet_links: {
+        Row: {
+          chain: string
+          created_at: string
+          id: string
+          is_primary: boolean | null
+          label: string | null
+          nonce: string | null
+          user_id: string
+          verified_at: string | null
+          wallet_address: string
+        }
+        Insert: {
+          chain?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          label?: string | null
+          nonce?: string | null
+          user_id: string
+          verified_at?: string | null
+          wallet_address: string
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          id?: string
+          is_primary?: boolean | null
+          label?: string | null
+          nonce?: string | null
+          user_id?: string
+          verified_at?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
       }
       wanderer_streaks: {
         Row: {
