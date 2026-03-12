@@ -199,7 +199,7 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
         }}
       />
 
-      <div className="p-5 pb-2">
+      <div className="p-3 sm:p-5 pb-2">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-primary" />
@@ -210,14 +210,14 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
           </span>
         </div>
 
-        {/* Filter chips */}
-        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+        {/* Filter chips — horizontal scroll on mobile */}
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
           {FILTERS.map(f => (
             <Button
               key={f.value}
               variant={filter === f.value ? "default" : "ghost"}
               size="sm"
-              className={`text-[10px] h-7 px-2.5 font-serif tracking-wide rounded-full shrink-0 ${
+              className={`text-[10px] h-8 sm:h-7 px-3 sm:px-2.5 font-serif tracking-wide rounded-full shrink-0 active:scale-95 transition-transform ${
                 filter === f.value
                   ? "bg-primary/15 text-primary border border-primary/30"
                   : "text-muted-foreground"
@@ -231,7 +231,7 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
       </div>
 
       {/* Transaction list */}
-      <div className={`${compact ? "max-h-64" : "max-h-96"} overflow-y-auto px-5 pb-4 space-y-1`}>
+      <div className={`${compact ? "max-h-64" : "max-h-[70vh] sm:max-h-96"} overflow-y-auto px-3 sm:px-5 pb-4 space-y-1`}>
         <AnimatePresence mode="popLayout">
           {filtered.slice(0, maxItems).map((tx, i) => {
             const config = tx.token_type === "s33d"
@@ -248,7 +248,7 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ delay: i * 0.015 }}
                 onClick={() => setExpanded(isExpanded ? null : tx.id)}
-                className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl border border-transparent hover:border-border/40 hover:bg-card/60 transition-all group"
+                className="w-full text-left flex items-center gap-2.5 sm:gap-3 px-2.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-transparent hover:border-border/40 active:bg-card/60 hover:bg-card/60 transition-all group min-h-[44px]"
               >
                 <span
                   className="text-sm shrink-0 transition-transform group-hover:scale-110"

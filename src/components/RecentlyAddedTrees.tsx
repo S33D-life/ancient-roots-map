@@ -30,7 +30,7 @@ export default function RecentlyAddedTrees({ onTreeClick }: { onTreeClick?: (tre
   if (!trees.length) return null;
 
   return (
-    <div className="absolute bottom-20 left-3 z-[15] max-w-[220px]">
+    <div className="absolute bottom-24 sm:bottom-20 left-3 z-[15] max-w-[220px]">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-serif backdrop-blur-md border transition-colors"
@@ -62,7 +62,7 @@ export default function RecentlyAddedTrees({ onTreeClick }: { onTreeClick?: (tre
               <button
                 key={t.id}
                 onClick={() => onTreeClick?.(t.id)}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-secondary/30 transition-colors"
+                className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-secondary/30 active:bg-secondary/40 transition-colors min-h-[44px]"
               >
                 <p className="text-[11px] font-serif text-foreground/85 truncate">{t.name}</p>
                 <div className="flex items-center gap-2 text-[9px] text-muted-foreground/60 font-mono">

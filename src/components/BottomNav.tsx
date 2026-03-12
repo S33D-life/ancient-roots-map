@@ -27,7 +27,7 @@ const BottomNav = () => {
         transform: "translate3d(0,0,0)",
       }}
     >
-      <div className="flex items-center justify-around py-1.5">
+      <div className="flex items-center justify-around py-1">
         {/* First two nav items */}
         {NAV_ITEMS.slice(0, 2).map((item) => (
           <NavItem key={item.to} item={item} pathname={pathname} />
@@ -36,7 +36,7 @@ const BottomNav = () => {
         {/* Center: Add Tree FAB */}
         <Link
           to="/add-tree"
-          className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[44px] min-h-[44px]"
+          className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[48px] min-h-[48px] active:scale-95"
           aria-label="Add a tree"
         >
           <div
@@ -73,7 +73,7 @@ const NavItem = ({ item, pathname }: NavItemProps) => {
   return (
     <Link
       to={to}
-      className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] justify-center"
+      className="relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[48px] min-h-[48px] justify-center active:scale-95"
       style={{
         color: active ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.5)",
       }}

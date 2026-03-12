@@ -214,7 +214,7 @@ const SpiralOfSpecies = () => {
         style={{ background: "linear-gradient(90deg, transparent, hsl(42 85% 55% / 0.5), hsl(42 85% 55% / 0.15), transparent)" }}
       />
 
-      <div className="p-5 sm:p-8 space-y-5">
+      <div className="p-4 sm:p-8 space-y-4 sm:space-y-5">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2">
@@ -339,7 +339,7 @@ const SpiralOfSpecies = () => {
         )}
 
         {/* Cross-navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {[
             { label: "Value Tree", route: ROUTES.VALUE_TREE_ECONOMY, icon: "🌳" },
             { label: "Heartwood Vault", route: ROUTES.VAULT, icon: "🏛" },
@@ -414,8 +414,8 @@ function ConstellationMap({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="relative mx-auto"
-      style={{ width: "min(100%, 560px)", aspectRatio: "1" }}
+      className="relative mx-auto touch-pan-y"
+      style={{ width: "min(100%, 560px)", maxHeight: "85vh", aspectRatio: "1" }}
     >
       {/* ── Canvas heart flow layer ── */}
       <SpiralHeartFlow
