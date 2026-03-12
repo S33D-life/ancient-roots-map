@@ -59,6 +59,9 @@ interface Meta {
 }
 
 function renderHTML(m: Meta): string {
+  // IMPORTANT: og:image content must NOT be HTML-escaped (& must stay &, not &amp;)
+  // because crawlers fetch the URL literally from the content attribute.
+  const safeImage = m.image; // Already a URL, don't escape
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,7 +71,7 @@ function renderHTML(m: Meta): string {
 
   <meta property="og:title" content="${esc(m.title)}">
   <meta property="og:description" content="${esc(m.description)}">
-  <meta property="og:image" content="${esc(m.image)}">
+  <meta property="og:image" content="${safeImage}">
   <meta property="og:image:width" content="${m.imageWidth ?? 1200}">
   <meta property="og:image:height" content="${m.imageHeight ?? 630}">
   <meta property="og:url" content="${esc(m.url)}">
@@ -79,7 +82,9 @@ function renderHTML(m: Meta): string {
   <meta name="twitter:site" content="@s33dlife">
   <meta name="twitter:title" content="${esc(m.title)}">
   <meta name="twitter:description" content="${esc(m.description)}">
-  <meta name="twitter:image" content="${esc(m.image)}">
+  <meta name="twitter:image" content="${safeImage}">
+
+  <link rel="canonical" href="${esc(m.url)}">
 
   ${m.geoLat != null ? `<meta property="place:location:latitude" content="${m.geoLat}">` : ""}
   ${m.geoLon != null ? `<meta property="place:location:longitude" content="${m.geoLon}">` : ""}
