@@ -641,7 +641,17 @@ const TreeDetailPage = () => {
               onRefresh={refetchCheckins}
             />
 
-            {/* Seed Economy */}
+            {/* Co-Witness Scan */}
+            {userId && tree && (
+              <Suspense fallback={null}>
+                <CoWitnessPanel
+                  treeId={id!}
+                  treeName={tree.name}
+                  userId={userId}
+                />
+              </Suspense>
+            )}
+
             <SeedPlanter
               treeId={id!}
               treeLat={tree.latitude}
