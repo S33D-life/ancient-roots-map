@@ -5,7 +5,7 @@
  * Usage: GET /functions/v1/tree-og?id=<tree-uuid>
  * Returns: HTML with OG tags + redirect to the app's /tree/:id page
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY")!;
