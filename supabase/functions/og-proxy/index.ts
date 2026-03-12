@@ -322,7 +322,7 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const location = tree.country || "Unknown location";
 
     // Image fallback: research image → global default
-    const image = tree.image_url || DEFAULT_IMAGE;
+    const image = tree.image_url ? `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}` : DEFAULT_IMAGE;
 
     return {
       title: `${treeName} — ${species} | S33D.life`,
