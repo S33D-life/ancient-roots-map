@@ -23,6 +23,7 @@ import DistributionCompass from "./DistributionCompass";
 import EmissionCurve from "./EmissionCurve";
 import PatronFlowBanner from "./PatronFlowBanner";
 import FoundingStaffRoots from "./FoundingStaffRoots";
+import FlowOfValue from "./FlowOfValue";
 
 interface LiveStats {
   totalHeartsMinted: number;
