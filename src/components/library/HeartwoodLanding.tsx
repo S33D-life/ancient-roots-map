@@ -2,14 +2,18 @@
  * HeartwoodLanding — the atmospheric entrance to the Heartwood Library.
  * Now navigates to standalone room routes instead of setting internal tab state.
  */
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Smartphone, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import LibraryRoomGrid, { EmberDrift } from "@/components/LibraryRoomGrid";
 import LibraryVaultPreview from "@/components/LibraryVaultPreview";
 import Footer from "@/components/Footer";
 import TetolBridge from "@/components/TetolBridge";
+import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
@@ -113,6 +117,9 @@ const HeartwoodLanding = () => {
           </div>
         </div>
 
+        {/* First-time Companion hint — desktop only */}
+        <CompanionHint />
+
         {/* CTAs */}
         <div className="flex flex-wrap justify-center gap-3 mb-10">
           <button
@@ -137,6 +144,9 @@ const HeartwoodLanding = () => {
           >
             Your Hearth
           </button>
+          <CompanionPairDialog
+            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+          />
           <button
             onClick={() => navigate("/value-tree?tab=earn")}
             className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
@@ -175,5 +185,48 @@ const HeartwoodLanding = () => {
     </div>
   );
 };
+
+/** Dismissible first-time companion hint — desktop only */
+function CompanionHint() {
+  const isMobile = useIsMobile();
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem("s33d_companion_hint_dismissed") === "1"; } catch { return false; }
+  });
+
+  if (isMobile || dismissed) return null;
+
+  const dismiss = () => {
+    setDismissed(true);
+    try { localStorage.setItem("s33d_companion_hint_dismissed", "1"); } catch {}
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl border mb-6 max-w-md"
+        style={{
+          background: 'hsl(var(--primary) / 0.06)',
+          borderColor: 'hsl(var(--primary) / 0.2)',
+        }}
+      >
+        <Smartphone className="w-4 h-4 shrink-0" style={{ color: 'hsl(var(--primary))' }} />
+        <p className="text-xs font-serif" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
+          Try connecting your phone as a <span style={{ color: 'hsl(var(--primary))' }}>Companion</span> — use it to explore S33D hands-free.
+        </p>
+        <button
+          onClick={dismiss}
+          className="p-1 rounded-full shrink-0 min-w-[28px] min-h-[28px] flex items-center justify-center transition-colors"
+          style={{ color: 'hsl(var(--muted-foreground))' }}
+          aria-label="Dismiss hint"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 export default HeartwoodLanding;

@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import TetolBridge from "@/components/TetolBridge";
 import Footer from "@/components/Footer";
+import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 
 interface HeartwoodRoomShellProps {
   roomLabel: string;
@@ -23,21 +24,24 @@ const HeartwoodRoomShell = ({ roomLabel, children }: HeartwoodRoomShellProps) =>
 
       <main className="relative z-10 container mx-auto px-4 pt-28 pb-12">
         {/* Breadcrumb — calm, contextual */}
-        <nav
-          aria-label="Library breadcrumb"
-          className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground/70 mb-6 select-none"
-        >
-          <Link
-            to="/library"
-            className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded px-1"
+        <div className="flex items-center justify-between mb-6">
+          <nav
+            aria-label="Library breadcrumb"
+            className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground/70 select-none"
           >
-            Heartwood Library
-          </Link>
-          <span className="text-border/50" aria-hidden>›</span>
-          <span className="text-foreground/60 truncate max-w-[200px]" aria-current="page">
-            {roomLabel}
-          </span>
-        </nav>
+            <Link
+              to="/library"
+              className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded px-1"
+            >
+              Heartwood Library
+            </Link>
+            <span className="text-border/50" aria-hidden>›</span>
+            <span className="text-foreground/60 truncate max-w-[200px]" aria-current="page">
+              {roomLabel}
+            </span>
+          </nav>
+          <CompanionPairDialog />
+        </div>
 
         {/* Room content */}
         {children}
