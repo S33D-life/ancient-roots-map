@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
 
 const NAV_ITEMS = [
-  { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/", "/tree/", "/discovery"] },
-  { to: "/atlas", icon: Globe, label: "Atlas", matchPrefixes: ["/atlas", "/harvest", "/cosmic", "/value-tree"] },
+  { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree"] },
+  { to: "/value-tree", icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/harvest", "/cosmic", "/how-hearts-work", "/patron-offering"] },
   // Center slot reserved for Add button
-  { to: "/library", icon: BookOpen, label: "Library", matchPrefixes: ["/library", "/vault", "/heartwood", "/dashboard", "/wanderer/"] },
-  { to: "/council-of-life", icon: Leaf, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap"] },
+  { to: "/library", icon: BookOpen, label: "Heartwood", matchPrefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger"] },
+  { to: "/council-of-life", icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas"] },
 ] as const;
 
 const BottomNav = () => {
