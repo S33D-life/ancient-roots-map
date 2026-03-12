@@ -22,6 +22,7 @@ import { CHANNELS, TOTAL_SUPPLY, VALUE_BRANCHES, type DistributionChannel } from
 import DistributionCompass from "./DistributionCompass";
 import EmissionCurve from "./EmissionCurve";
 import PatronFlowBanner from "./PatronFlowBanner";
+import FoundingStaffRoots from "./FoundingStaffRoots";
 
 interface LiveStats {
   totalHeartsMinted: number;
@@ -199,6 +200,9 @@ const EconomyOverview = () => {
 
       {/* ═══ 4b. Founding Patron Flow ═══ */}
       <PatronFlowBanner />
+
+      {/* ═══ 4c. Founding Staff Roots ═══ */}
+      <FoundingStaffRoots />
 
       {/* ═══ 5. Emission Curve ═══ */}
       <motion.section

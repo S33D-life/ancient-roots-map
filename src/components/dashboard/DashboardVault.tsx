@@ -125,7 +125,7 @@ const DashboardVault = ({ userId }: Props) => {
 
       {/* Founding Patron Badge — only if staff holder */}
       {wallet.activeStaff && (
-        <VaultPatronBadge staff={wallet.activeStaff} />
+        <VaultPatronBadge staff={wallet.activeStaff} userId={userId} />
       )}
 
       {/* Re-awaken Staff */}

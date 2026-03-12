@@ -3,7 +3,7 @@
  * Full-width immersive layout with soft parallax, pulsing tree-ring halo,
  * gold leaf vignette, and primary CTAs.
  */
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import LeafAtmosphere from "@/components/LeafAtmosphere";
 import PhenologyBadge from "@/components/PhenologyBadge";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
+
+const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -177,6 +179,13 @@ const TreePageHero = ({
                 {hive.icon} {hive.displayName}
               </button>
             )}
+          </div>
+
+          {/* Staff patron badge if mapped by patron */}
+          <div className="flex justify-center mb-4">
+            <Suspense fallback={null}>
+              <StaffPatronMapperBadge mapperId={tree.created_by} />
+            </Suspense>
           </div>
 
           {/* Phenology */}

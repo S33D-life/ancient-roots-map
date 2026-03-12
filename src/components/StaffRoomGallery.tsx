@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
+const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
@@ -679,6 +680,11 @@ export default function StaffRoomGallery() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ═══ Ceremonial Circle — 36 Founding Staffs ═══ */}
+        <Suspense fallback={null}>
+          <LazyCeremonialCircle />
+        </Suspense>
 
         {/* ═══ Founding Patron Offering — Value Explainer ═══ */}
         <Suspense fallback={null}>
