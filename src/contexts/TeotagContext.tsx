@@ -67,6 +67,8 @@ export interface StaffPageContext {
   heartBalance?: number;
   treesMapped?: number;
   influenceEarned?: number;
+  speciesHeartsEarned?: number;
+  councilSessions?: number;
 }
 
 export interface VaultPageContext {
@@ -80,11 +82,28 @@ export interface VaultPageContext {
   councilParticipation?: number;
 }
 
+export interface HivePageContext {
+  family?: string;
+  speciesName?: string;
+  treeCount?: number;
+  speciesHearts?: number;
+  memberCount?: number;
+  vitalityLevel?: string;
+}
+
+export interface SpiralContext {
+  viewMode?: "overview" | "species-circle";
+  selectedSpecies?: string;
+  staffCount?: number;
+}
+
 export interface PageContext {
   tree?: TreePageContext;
   harvest?: HarvestPageContext;
   staff?: StaffPageContext;
   vault?: VaultPageContext;
+  hive?: HivePageContext;
+  spiral?: SpiralContext;
 }
 
 /* ── Quick actions ──────────────────────────────── */
