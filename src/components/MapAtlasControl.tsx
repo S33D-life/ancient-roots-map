@@ -27,7 +27,7 @@ const MapAtlasControl = () => {
   const handleClick = useCallback(() => {
     if (guardRef.current) return;
     guardRef.current = true;
-    console.info("[Atlas] atlas_click_attempt", { route: window.location.pathname });
+    
 
     try {
       navigate("/atlas");
