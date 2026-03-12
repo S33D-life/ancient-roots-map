@@ -32,6 +32,7 @@ import { toast } from "sonner";
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
 const LazyStaffSpiralNavigator = lazy(() => import("@/components/staff/StaffSpiralNavigator"));
+const LazySpiralOfSpecies = lazy(() => import("@/components/staff/SpiralOfSpecies"));
 const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPanel"));
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
