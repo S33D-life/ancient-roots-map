@@ -1050,8 +1050,6 @@ function ConstellationDetail({
         </Link>
       </div>
     </motion.div>
-    </div>
-    </FullscreenWrapper>
   );
 }
 
