@@ -253,6 +253,25 @@ const TreePageHero = ({
         style={{ background: "linear-gradient(transparent, hsl(var(--background)))" }}
       />
     </motion.div>
+
+    {/* Fullscreen image viewer */}
+    <FullscreenShell active={imageFullscreen} tone="dark">
+      {photoUrl && (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <img
+            src={photoUrl}
+            alt={tree.name}
+            className="max-w-full max-h-full object-contain rounded-lg"
+          />
+        </div>
+      )}
+      <div className="absolute bottom-6 left-0 right-0 text-center">
+        <p className="font-serif text-sm text-foreground/60">{tree.name}</p>
+        {tree.species && <p className="text-xs text-muted-foreground mt-0.5">{tree.species}</p>}
+      </div>
+      <FullscreenToggle isFullscreen onToggle={closeImageFS} position="top-right" />
+    </FullscreenShell>
+    </>
   );
 };
 
