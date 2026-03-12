@@ -9,6 +9,7 @@ import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-re
 import { Button } from "@/components/ui/button";
 import FullscreenShell from "@/components/FullscreenShell";
 import FullscreenToggle from "@/components/FullscreenToggle";
+import ZoomPanLayer from "@/components/ZoomPanLayer";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
@@ -257,15 +258,17 @@ const TreePageHero = ({
     {/* Fullscreen image viewer */}
     <FullscreenShell active={imageFullscreen} tone="dark">
       {photoUrl && (
-        <div className="flex-1 flex items-center justify-center p-4">
-          <img
-            src={photoUrl}
-            alt={tree.name}
-            className="max-w-full max-h-full object-contain rounded-lg"
-          />
-        </div>
+        <ZoomPanLayer className="flex-1 flex items-center justify-center">
+          <div className="p-4">
+            <img
+              src={photoUrl}
+              alt={tree.name}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
+            />
+          </div>
+        </ZoomPanLayer>
       )}
-      <div className="absolute bottom-6 left-0 right-0 text-center">
+      <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none" data-capture-exclude>
         <p className="font-serif text-sm text-foreground/60">{tree.name}</p>
         {tree.species && <p className="text-xs text-muted-foreground mt-0.5">{tree.species}</p>}
       </div>
