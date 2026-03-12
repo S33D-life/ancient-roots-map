@@ -23,6 +23,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/* ── Input validation ──────────────────────────────────── */
+
+const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+const STAFF_CODE_RE = /^[A-Za-z0-9_-]{1,30}$/;
+
 /* ── Palette ────────────────────────────────────────────── */
 const BG_DARK = "#0f1309";
 const BG = "#1a1f14";
@@ -121,7 +126,6 @@ function treeCardSVG(d: TreeCardData): string {
   const badgeText = d.isMinted ? "NFTREE" : "ANCIENT FRIEND";
   const badgeColor = d.isMinted ? "#c9a227" : GOLD;
   const textX = hasPhoto ? 680 : 120;
-  const textMaxW = hasPhoto ? 460 : 960;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   ${svgDefs({ hasTreePhoto: hasPhoto })}
@@ -141,7 +145,7 @@ function treeCardSVG(d: TreeCardData): string {
     ${esc(truncate(d.species, 40))}
   </text>` : ""}
 
-  <rect x="${textX}" y="${hasPhoto ? 250 : 270}" width="${Math.min(280, textMaxW)}" height="1" rx="0.5" fill="url(#goldLine)"/>
+  <rect x="${textX}" y="${hasPhoto ? 250 : 270}" width="280" height="1" rx="0.5" fill="url(#goldLine)"/>
 
   ${d.location !== "Unknown location" ? `
   <text x="${textX}" y="${hasPhoto ? 290 : 310}" fill="${MUTED}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="16" letter-spacing="0.5">
@@ -160,21 +164,12 @@ function treeCardSVG(d: TreeCardData): string {
 
 /* ── Staff-linked Lineage Card ──────────────────────────── */
 
-/**
- * The lineage card is a premium variant that visually connects
- * tree + staff + S33D ecosystem. It uses:
- * - Tree photo as primary (left half)
- * - Staff inset medallion (gold enzo ring, top-right)
- * - Dual-badge system (NFTree + Staff identity)
- * - Lineage footer strip
- */
 function lineageCardSVG(d: TreeCardData): string {
   const hasPhoto = !!d.photoUrl;
   const staffImgUrl = d.staffCode ? resolveStaffImageUrl(d.staffCode) : null;
   const hasStaffInset = !!staffImgUrl;
   const textX = hasPhoto ? 680 : 120;
 
-  // Staff display
   const staffDisplay = d.staffName || d.staffCode || "";
   const staffSpeciesDisplay = d.staffSpecies
     ? SPECIES_NAMES[d.staffSpecies.split("-")[0]?.toUpperCase()] || d.staffSpecies
@@ -185,10 +180,8 @@ function lineageCardSVG(d: TreeCardData): string {
   <rect width="1200" height="630" fill="url(#bgGrad)"/>
   ${hasPhoto ? photoBlock(d.photoUrl!) : noPhotoBlock("🌳")}
 
-  <!-- Outer frame -->
   <rect x="16" y="16" width="1168" height="598" rx="20" fill="none" stroke="${GOLD}" stroke-opacity="0.1" stroke-width="0.5"/>
 
-  <!-- Staff inset medallion (top-right enzo ring) -->
   ${hasStaffInset ? `
   <circle cx="1100" cy="100" r="56" fill="none" stroke="${GOLD}" stroke-width="1.5" stroke-opacity="0.3"/>
   <circle cx="1100" cy="100" r="53" fill="${BG}" fill-opacity="0.6"/>
@@ -196,54 +189,36 @@ function lineageCardSVG(d: TreeCardData): string {
   <circle cx="1100" cy="100" r="54" fill="none" stroke="${GOLD}" stroke-width="1" stroke-opacity="0.5"/>
   ` : ""}
 
-  <!-- Primary badge: NFTREE -->
   ${badge("NFTREE", textX, 85, "#c9a227")}
 
-  <!-- Tree name -->
   <text x="${textX}" y="170" fill="${WHITE}" font-family="'Georgia','Times New Roman',serif" font-size="${d.name.length > 20 ? 34 : 42}" font-weight="600" letter-spacing="0.5">
     ${esc(truncate(d.name, 26))}
   </text>
 
-  <!-- Species -->
   ${d.species !== "Unknown species" ? `
   <text x="${textX}" y="210" fill="${GOLD_LIGHT}" font-family="'Georgia','Times New Roman',serif" font-size="21" font-style="italic" opacity="0.85">
     ${esc(truncate(d.species, 40))}
   </text>` : ""}
 
-  <!-- Gold divider -->
   <rect x="${textX}" y="232" width="280" height="1" rx="0.5" fill="url(#goldLine)"/>
 
-  <!-- Location -->
   ${d.location !== "Unknown location" ? `
   <text x="${textX}" y="268" fill="${MUTED}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="15" letter-spacing="0.5">
     ${esc(truncate(d.location, 44))}
   </text>` : ""}
 
-  <!-- ═══ Staff lineage strip ═══ -->
-  <!-- Subtle background shelf -->
   <rect x="${textX}" y="320" width="440" height="72" rx="12" fill="${GOLD}" fill-opacity="0.04" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.1"/>
-
-  <!-- Lineage label -->
   <text x="${textX + 20}" y="344" fill="${GOLD}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="10" font-weight="600" letter-spacing="2.5" opacity="0.5">STAFF LINEAGE</text>
-
-  <!-- Staff name / code -->
   <text x="${textX + 20}" y="370" fill="${GOLD_LIGHT}" font-family="'Georgia','Times New Roman',serif" font-size="20" font-weight="600" letter-spacing="0.5">
     ${esc(truncate(staffDisplay, 28))}
   </text>
-
-  <!-- Staff species -->
   ${staffSpeciesDisplay ? `
   <text x="${textX + 20}" y="385" fill="${MUTED}" font-family="'Georgia','Times New Roman',serif" font-size="13" font-style="italic" opacity="0.7">
     ${esc(staffSpeciesDisplay)}
   </text>` : ""}
-
-  <!-- Small key icon near staff name -->
   <text x="${textX + 410}" y="370" text-anchor="end" fill="${GOLD}" font-family="serif" font-size="20" opacity="0.25">⚷</text>
 
-  <!-- S33D branding -->
   ${brandingBlock(textX, 510)}
-
-  <!-- Lineage footer accent (double gold line) -->
   <rect x="${textX}" y="570" width="200" height="1" rx="0.5" fill="url(#goldLine)" opacity="0.6"/>
   <rect x="${textX}" y="575" width="120" height="1" rx="0.5" fill="url(#goldLine)" opacity="0.3"/>
 </svg>`;
@@ -351,7 +326,8 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
       staffSpecies: staffRes.data?.staff_species || null,
       photoUrl,
     };
-  } catch {
+  } catch (err) {
+    console.error(`[og-card] fetchTreeData error for ${id}:`, err);
     return {
       name: "Ancient Friend", species: "Unknown species",
       location: "Unknown location", isMinted: false,
@@ -388,31 +364,45 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const url = new URL(req.url);
-  const type = url.searchParams.get("type") || "tree";
-  const id = url.searchParams.get("id");
+  try {
+    const url = new URL(req.url);
+    const type = url.searchParams.get("type") || "tree";
+    const id = url.searchParams.get("id");
 
-  if (!id) {
-    return new Response("Missing id parameter", { status: 400, headers: corsHeaders });
+    if (!id) {
+      console.warn("[og-card] Missing id parameter");
+      return new Response("Missing id parameter", { status: 400, headers: corsHeaders });
+    }
+
+    // Validate inputs
+    if ((type === "tree" || type === "lineage") && !UUID_RE.test(id)) {
+      console.warn(`[og-card] Invalid UUID: ${id}`);
+      return new Response("Invalid id format", { status: 400, headers: corsHeaders });
+    }
+    if (type === "staff" && !STAFF_CODE_RE.test(id)) {
+      console.warn(`[og-card] Invalid staff code: ${id}`);
+      return new Response("Invalid staff code", { status: 400, headers: corsHeaders });
+    }
+
+    let svg: string;
+    if (type === "staff") {
+      svg = staffCardSVG(resolveStaffData(id));
+    } else if (type === "lineage") {
+      const data = await fetchTreeData(id);
+      svg = lineageCardSVG(data);
+    } else {
+      svg = selectCardSVG(await fetchTreeData(id));
+    }
+
+    return new Response(svg, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      },
+    });
+  } catch (err) {
+    console.error("[og-card] Unhandled error:", err);
+    return new Response("Internal error", { status: 500, headers: corsHeaders });
   }
-
-  let svg: string;
-  if (type === "staff") {
-    svg = staffCardSVG(resolveStaffData(id));
-  } else if (type === "lineage") {
-    // Force lineage card even if not fully minted
-    const data = await fetchTreeData(id);
-    svg = lineageCardSVG(data);
-  } else {
-    // "tree" — auto-selects between tree / lineage based on data
-    svg = selectCardSVG(await fetchTreeData(id));
-  }
-
-  return new Response(svg, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=86400, s-maxage=86400",
-    },
-  });
 });
