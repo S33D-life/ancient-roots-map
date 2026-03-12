@@ -7,6 +7,7 @@ import { UIFlowProvider } from "@/contexts/UIFlowContext";
 import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
+import { CompanionProvider } from "@/contexts/CompanionContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
@@ -129,6 +130,7 @@ const RootstoneImporterPage = lazyImportWithRetry(() => import("./pages/Rootston
 const WandererProfilePage = lazyImportWithRetry(() => import("./pages/WandererProfilePage"), "wanderer-profile");
 const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/LivingForestRoadmapPage"), "roadmap");
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
+const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -243,6 +245,7 @@ const App = () => {
           <MapFilterProvider>
           <UIFlowProvider>
           <SeasonalLensProvider>
+          <CompanionProvider>
           <TeotagProvider>
             <BottomNav />
             <FireflyFAB />
@@ -318,11 +321,13 @@ const App = () => {
                 <Route path="/wanderer/:id" element={<WandererProfilePage />} />
                 <Route path="/roadmap" element={<LivingForestRoadmapPage />} />
                 <Route path="/patron-offering" element={<PatronOfferingPage />} />
+                <Route path="/companion" element={<CompanionPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </TeotagProvider>
+          </CompanionProvider>
           </SeasonalLensProvider>
           </UIFlowProvider>
           </MapFilterProvider>
