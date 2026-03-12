@@ -65,7 +65,7 @@ export function mapResearchTreeToTreeRow(rt: ResearchTreeRow): TreeRow & { __res
     elemental_signature: null,
     estimated_age: null,
     girth_cm: rt.girth_or_stem ? parseGirthToCm(rt.girth_or_stem) : null,
-    grove_scale: rt.record_kind === "grove" ? "small" : null,
+    grove_scale: rt.record_kind === "grove" ? "local" : null,
     is_anchor_node: false,
     is_churchyard_tree: false,
     lineage: null,

@@ -208,15 +208,10 @@ const ResearchTreeDetailPage = () => {
           {/* ── Map Tab ── */}
           <TabsContent value="map">
             <TreeMapJourneyAnchor
-              tree={tree}
-              onViewMap={() => {
-                goToTreeOnMap(navigate, {
-                  treeId: tree.id,
-                  lat: tree.latitude,
-                  lng: tree.longitude,
-                  source: "tree",
-                });
-              }}
+              treeId={tree.id}
+              treeName={tree.name}
+              lat={tree.latitude}
+              lng={tree.longitude}
             />
           </TabsContent>
         </Tabs>
