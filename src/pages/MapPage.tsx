@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
@@ -20,10 +21,12 @@ const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const TeotagWhisper = lazy(() => import("@/components/TeotagWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
+const RecentlyAddedTrees = lazy(() => import("@/components/RecentlyAddedTrees"));
 
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
 const MapPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mapFocus = parseMapFocusParams(searchParams);
   const paramW3w = searchParams.get("w3w") || undefined;
@@ -89,6 +92,13 @@ const MapPage = () => {
       {isFullscreen && (
         <Suspense fallback={null}>
           <FullscreenMapControls onExit={exitFullscreen} />
+        </Suspense>
+      )}
+
+      {/* Recently Added Trees — floating panel */}
+      {!showBlessing && !isFullscreen && (
+        <Suspense fallback={null}>
+          <RecentlyAddedTrees onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
         </Suspense>
       )}
 

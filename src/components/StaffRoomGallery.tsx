@@ -34,6 +34,7 @@ const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCir
 const LazyStaffSpiralNavigator = lazy(() => import("@/components/staff/StaffSpiralNavigator"));
 const LazySpiralOfSpecies = lazy(() => import("@/components/staff/SpiralOfSpecies"));
 const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPanel"));
+const LazyActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
@@ -287,11 +288,24 @@ export default function StaffRoomGallery() {
   const [showMinting, setShowMinting] = useState(false);
   const [showCeremony, setShowCeremony] = useState(false);
   const [hasLinkedStaff, setHasLinkedStaff] = useState(() => !!localStorage.getItem("linked_staff_code"));
+  const [claimedCount, setClaimedCount] = useState(0);
   
 
   const allStaffs = useMemo(() => buildStaffItems(), []);
   const filteredStaffs = useMemo(() => filterStaffs(allStaffs, filter), [allStaffs, filter]);
   const activeStaff = filteredStaffs[activeIndex] || filteredStaffs[0];
+
+  // Fetch actual claimed staff count from ceremony_logs
+  useEffect(() => {
+    supabase
+      .from("ceremony_logs" as any)
+      .select("staff_code", { count: "exact", head: false })
+      .eq("ceremony_type", "awakening")
+      .then(({ data }) => {
+        const unique = new Set((data || []).map((d: any) => d.staff_code));
+        setClaimedCount(unique.size);
+      });
+  }, []);
 
   // Deep-link: open a specific staff from ?staff=CODE
   useEffect(() => {
@@ -586,14 +600,14 @@ export default function StaffRoomGallery() {
             <div className="flex items-center justify-between text-xs font-serif text-muted-foreground mb-1.5">
               <span>Staffs Claimed</span>
               <span className="text-foreground font-bold">
-                {allStaffs.filter(s => s.isOrigin).length} / 36
+                {claimedCount} / 36
               </span>
             </div>
             <div className="h-2 rounded-full overflow-hidden bg-secondary/50">
               <motion.div
                 className="h-full rounded-full bg-primary"
                 initial={{ width: 0 }}
-                whileInView={{ width: "100%" }}
+                whileInView={{ width: `${Math.min((claimedCount / 36) * 100, 100)}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
               />
@@ -785,6 +799,14 @@ export default function StaffRoomGallery() {
           <Suspense fallback={<div className="h-64 rounded-2xl bg-card/20 animate-pulse" />}>
             <LazyStaffSpiralNavigator />
           </Suspense>
+
+          {/* Activity Feed */}
+          <div className="space-y-2 mt-6">
+            <h4 className="text-xs font-serif text-muted-foreground uppercase tracking-wider text-center">Recent Ecosystem Activity</h4>
+            <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+              <LazyActivityFeed limit={6} compact />
+            </Suspense>
+          </div>
         </motion.section>
       </div>
 

@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Archive, Loader2, Wand2, RotateCcw } from "lucide-react";
+import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useSpeciesTokens } from "@/hooks/use-species-tokens";
 import { useWallet } from "@/hooks/use-wallet";
@@ -32,6 +34,7 @@ const DashboardVault = ({ userId }: Props) => {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [heartFilter, setHeartFilter] = useState<string | null>(null);
   const [showReawaken, setShowReawaken] = useState(false);
+  const [councilCount, setCouncilCount] = useState(0);
   const wallet = useWallet(userId);
   const speciesTokens = useSpeciesTokens(userId);
 
@@ -61,6 +64,14 @@ const DashboardVault = ({ userId }: Props) => {
       setLoading(false);
     };
     fetchCounts();
+  }, [userId]);
+
+  useEffect(() => {
+    supabase
+      .from("council_participation_rewards")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .then(({ count }) => setCouncilCount(count || 0));
   }, [userId]);
 
   if (loading) {
@@ -93,6 +104,27 @@ const DashboardVault = ({ userId }: Props) => {
       transition={{ duration: 0.4 }}
     >
       <VaultParticles />
+
+      {/* Personal Contribution Summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {[
+          { icon: <TreeDeciduous className="w-3.5 h-3.5" />, value: treeCount, label: "Trees Mapped", color: "hsl(120 40% 45%)" },
+          { icon: <Music className="w-3.5 h-3.5" />, value: offeringCount, label: "Offerings", color: "hsl(var(--primary))" },
+          { icon: <Heart className="w-3.5 h-3.5" />, value: totalHearts, label: "Hearts Earned", color: "hsl(0 65% 55%)" },
+          { icon: <Users className="w-3.5 h-3.5" />, value: councilCount, label: "Councils", color: "hsl(42 80% 50%)" },
+        ].map((m) => (
+          <div
+            key={m.label}
+            className="rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm p-3 text-center"
+          >
+            <div className="flex items-center justify-center gap-1 mb-1" style={{ color: m.color }}>
+              {m.icon}
+            </div>
+            <p className="text-lg font-serif text-foreground">{m.value}</p>
+            <p className="text-[9px] text-muted-foreground font-serif">{m.label}</p>
+          </div>
+        ))}
+      </div>
       {/* Section header with Staff identity + wallet status */}
       <div className="flex items-center gap-2.5">
         <Archive className="w-5 h-5 text-primary" />
@@ -209,6 +241,14 @@ const DashboardVault = ({ userId }: Props) => {
 
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />
+
+      {/* Recent Activity Feed */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Activity</h3>
+        <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+          <ActivityFeed userId={userId} limit={6} compact />
+        </Suspense>
+      </div>
     </motion.div>
   );
 };
