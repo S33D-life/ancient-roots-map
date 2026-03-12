@@ -15,7 +15,7 @@ export async function preloadCollectiveTrees() {
       return { success: false, error: 'No trees found' };
     }
 
-    console.log(`Parsed ${csvRows.length} trees from collective CSV`);
+    
 
     // Get current user (or use system user if no user logged in)
     const { data: { user } } = await supabase.auth.getUser();
