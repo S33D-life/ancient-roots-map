@@ -62,11 +62,22 @@ export interface StaffPageContext {
   code?: string;
   staffName?: string;
   species?: string;
+  tokenId?: number;
+  isOriginSpiral?: boolean;
+  heartBalance?: number;
+  treesMapped?: number;
+  influenceEarned?: number;
 }
 
 export interface VaultPageContext {
   section?: string;
   assetCount?: number;
+  heartBalance?: number;
+  speciesHeartsBalance?: number;
+  influenceBalance?: number;
+  staffCode?: string;
+  hiveParticipation?: string[];
+  councilParticipation?: number;
 }
 
 export interface PageContext {
