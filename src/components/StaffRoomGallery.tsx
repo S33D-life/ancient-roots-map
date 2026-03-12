@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import JourneyBridge from "@/components/JourneyBridge";
 import { useNavigate as useRouterNavigate } from "react-router-dom";
