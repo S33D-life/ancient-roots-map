@@ -893,6 +893,8 @@ function ConstellationMap({
           </motion.div>
         );
       })}
+
+      </div>{/* end ambient rotation wrapper */}
     </motion.div>
   );
 }
