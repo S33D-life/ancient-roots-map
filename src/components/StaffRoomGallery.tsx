@@ -287,7 +287,7 @@ export default function StaffRoomGallery() {
   const [showMinting, setShowMinting] = useState(false);
   const [showCeremony, setShowCeremony] = useState(false);
   const [hasLinkedStaff, setHasLinkedStaff] = useState(() => !!localStorage.getItem("linked_staff_code"));
-  const tabsRef = useRef<HTMLDivElement>(null);
+  
 
   const allStaffs = useMemo(() => buildStaffItems(), []);
   const filteredStaffs = useMemo(() => filterStaffs(allStaffs, filter), [allStaffs, filter]);
