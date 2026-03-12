@@ -115,6 +115,16 @@ async function _issueRewardsInner(params: IssueParams): Promise<RewardResult | n
       heart_type: actionType,
       amount: s33dAmt,
     });
+    // Dual-write to rich ledger
+    earnHearts({
+      userId,
+      amount: s33dAmt,
+      transactionType: ACTION_TO_TXN_TYPE[actionType] || "earn_checkin",
+      currencyType: "S33D",
+      entityType: "tree",
+      entityId: treeId,
+      source: actionType,
+    }).catch(() => {}); // non-blocking
   }
 
   // ── Layer 2: Species Hearts (fractal per-hive) ──
