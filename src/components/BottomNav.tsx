@@ -36,7 +36,7 @@ const BottomNav = () => {
         {/* Center: Add Tree FAB */}
         <Link
           to="/add-tree"
-          className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[44px] min-h-[44px]"
+          className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[48px] min-h-[48px] active:scale-95"
           aria-label="Add a tree"
         >
           <div

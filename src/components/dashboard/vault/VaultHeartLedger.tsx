@@ -248,7 +248,7 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ delay: i * 0.015 }}
                 onClick={() => setExpanded(isExpanded ? null : tx.id)}
-                className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-xl border border-transparent hover:border-border/40 hover:bg-card/60 transition-all group"
+                className="w-full text-left flex items-center gap-2.5 sm:gap-3 px-2.5 sm:px-3 py-2.5 sm:py-2 rounded-xl border border-transparent hover:border-border/40 active:bg-card/60 hover:bg-card/60 transition-all group min-h-[44px]"
               >
                 <span
                   className="text-sm shrink-0 transition-transform group-hover:scale-110"

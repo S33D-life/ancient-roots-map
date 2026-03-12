@@ -339,7 +339,7 @@ const SpiralOfSpecies = () => {
         )}
 
         {/* Cross-navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {[
             { label: "Value Tree", route: ROUTES.VALUE_TREE_ECONOMY, icon: "🌳" },
             { label: "Heartwood Vault", route: ROUTES.VAULT, icon: "🏛" },
