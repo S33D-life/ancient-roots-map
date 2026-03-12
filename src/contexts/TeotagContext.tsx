@@ -256,7 +256,9 @@ function getQuickActions(
   if (pageCtx.vault || route.startsWith("/vault")) {
     return [
       { label: "My vault", prompt: "What assets and anchored records do I have in my vault?", emoji: "🔐" },
-      { label: "What is anchoring?", prompt: "Explain how content anchoring and CID preservation works in S33D.", emoji: "⚓" },
+      { label: "My hearts", prompt: "How many S33D Hearts, Species Hearts, and Influence do I have? Show me a breakdown.", emoji: "❤️" },
+      { label: "Earn more", prompt: "What actions can I take right now to earn more hearts? Show me the Value Tree.", emoji: "💚" },
+      { label: "My staff", prompt: "Do I hold a Staff Room patron staff? What activity has it generated?", emoji: "🪄" },
     ];
   }
 
