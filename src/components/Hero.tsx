@@ -193,6 +193,7 @@ const Hero = () => {
     visitRecorded.current = true;
     const recordVisit = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      setIsLoggedIn(!!user);
       const { data, error } = await supabase.rpc('record_visit', {
         p_user_id: user?.id ?? null,
       });
