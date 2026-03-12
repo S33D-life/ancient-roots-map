@@ -253,12 +253,6 @@ export async function shareByPlatform(
 
 /**
  * Resolve the best share image from a priority list of candidates.
+ * Re-exports resolveImage from ogMeta for backward compatibility.
  */
-export function resolveShareImage(
-  ...candidates: (string | null | undefined)[]
-): string {
-  for (const c of candidates) {
-    if (c && c.trim()) return c;
-  }
-  return DEFAULT_OG_IMAGE;
-}
+export { resolveImage as resolveShareImage } from "@/utils/ogMeta";

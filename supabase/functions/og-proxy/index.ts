@@ -30,6 +30,26 @@ const APP_URL = "https://ancient-roots-map.lovable.app";
 const DEFAULT_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
 const OG_CARD_BASE = `${SUPABASE_URL}/functions/v1/og-card`;
 
+/* ── Input validation ──────────────────────────────────── */
+
+const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+const STAFF_CODE_RE = /^[A-Za-z0-9_-]{1,30}$/;
+
+function isValidUUID(s: string): boolean {
+  return UUID_RE.test(s);
+}
+
+function isValidStaffCode(s: string): boolean {
+  return STAFF_CODE_RE.test(s);
+}
+
+/** Sanitize path input — strip control chars, limit length */
+function sanitizePath(raw: string): string {
+  const cleaned = raw.replace(/[\x00-\x1f\x7f]/g, "").slice(0, 200);
+  // Must start with /
+  return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
+}
+
 /* ── Route matchers ─────────────────────────────────────── */
 
 const TREE_RE = /^\/tree\/([a-f0-9-]{36})$/i;
@@ -61,7 +81,7 @@ interface Meta {
 function renderHTML(m: Meta): string {
   // IMPORTANT: og:image content must NOT be HTML-escaped (& must stay &, not &amp;)
   // because crawlers fetch the URL literally from the content attribute.
-  const safeImage = m.image; // Already a URL, don't escape
+  const safeImage = m.image;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -158,10 +178,7 @@ const SPECIES_NAMES: Record<string, string> = {
   PEAR: "Pear", SLOE: "Blackthorn", WITC: "Witch Hazel", ALD: "Alder",
 };
 
-// resolveStaffImage removed — og:image now uses og-card generated SVG
-
 function resolveStaffSpecies(code: string): string {
-  // Extract base species from codes like "YEW-C1S3" or "YEW"
   const base = code.split("-")[0].toUpperCase();
   return SPECIES_NAMES[base] || code;
 }
@@ -178,34 +195,46 @@ Deno.serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const path = url.searchParams.get("path") || "/";
+  const rawPath = url.searchParams.get("path") || "/";
+  const path = sanitizePath(rawPath);
 
-  // 1. Static routes
-  const staticOverride = STATIC_ROUTES[path];
-  if (staticOverride !== undefined) {
-    return respond({ ...DEFAULT_META, ...staticOverride });
+  try {
+    // 1. Static routes
+    const staticOverride = STATIC_ROUTES[path];
+    if (staticOverride !== undefined) {
+      return respond({ ...DEFAULT_META, ...staticOverride });
+    }
+
+    // 2. Research tree page (must match before tree — longer prefix)
+    const researchMatch = path.match(RESEARCH_TREE_RE);
+    if (researchMatch) {
+      const id = researchMatch[1];
+      if (!isValidUUID(id)) return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
+      return respond(await fetchResearchTreeMeta(id));
+    }
+
+    // 3. Tree detail page
+    const treeMatch = path.match(TREE_RE);
+    if (treeMatch) {
+      const id = treeMatch[1];
+      if (!isValidUUID(id)) return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
+      return respond(await fetchTreeMeta(id));
+    }
+
+    // 4. Staff detail page
+    const staffMatch = path.match(STAFF_RE);
+    if (staffMatch) {
+      const code = staffMatch[1];
+      if (!isValidStaffCode(code)) return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
+      return respond(buildStaffMeta(code));
+    }
+
+    // 5. Fallback
+    return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
+  } catch (err) {
+    console.error("[og-proxy] Unhandled error:", err);
+    return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
   }
-
-  // 2. Tree detail page
-  const treeMatch = path.match(TREE_RE);
-  if (treeMatch) {
-    return respond(await fetchTreeMeta(treeMatch[1]));
-  }
-
-  // 3. Research tree page
-  const researchMatch = path.match(RESEARCH_TREE_RE);
-  if (researchMatch) {
-    return respond(await fetchResearchTreeMeta(researchMatch[1]));
-  }
-
-  // 4. Staff detail page
-  const staffMatch = path.match(STAFF_RE);
-  if (staffMatch) {
-    return respond(buildStaffMeta(staffMatch[1]));
-  }
-
-  // 5. Fallback
-  return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
 });
 
 function respond(meta: Meta): Response {
@@ -224,23 +253,12 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Fetch tree, best photo, and NFTree/minted status in parallel
-    const [treeRes, photoRes, mintedRes, staffRes] = await Promise.all([
+    const [treeRes, mintedRes, staffRes] = await Promise.all([
       supabase
         .from("trees")
         .select("id, name, species, nation, latitude, longitude, description")
         .eq("id", id)
         .maybeSingle(),
-      supabase
-        .from("offerings")
-        .select("media_url")
-        .eq("tree_id", id)
-        .eq("type", "photo")
-        .not("media_url", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      // Check if tree has been minted (has chain anchor)
       supabase
         .from("chain_anchors")
         .select("id, status")
@@ -248,7 +266,6 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
         .eq("status", "confirmed")
         .limit(1)
         .maybeSingle(),
-      // Check if tree has a staff-linked ceremony
       supabase
         .from("ceremony_logs")
         .select("staff_name, staff_species, staff_code")
@@ -259,7 +276,10 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     ]);
 
     const tree = treeRes.data;
-    if (!tree) return { ...DEFAULT_META, url: `${APP_URL}/tree/${id}` };
+    if (!tree) {
+      console.warn(`[og-proxy] Tree not found: ${id}`);
+      return { ...DEFAULT_META, url: `${APP_URL}/tree/${id}` };
+    }
 
     const treeName = tree.name || "Ancient Friend";
     const species = tree.species || "Unknown species";
@@ -268,7 +288,7 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const staffName = staffRes.data?.staff_name || staffRes.data?.staff_code || null;
     const hasStaff = !!staffName;
 
-    // Image: og-card auto-selects tree vs lineage variant
+    // Image: always use og-card which auto-selects variant and fetches its own photo
     const image = `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}`;
 
     // Title: staff-linked NFTree > NFTree > Ancient Friend
@@ -302,7 +322,8 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
       geoLat: tree.latitude,
       geoLon: tree.longitude,
     };
-  } catch {
+  } catch (err) {
+    console.error(`[og-proxy] fetchTreeMeta error for ${id}:`, err);
     return { ...DEFAULT_META, url: `${APP_URL}/tree/${id}` };
   }
 }
@@ -316,14 +337,17 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
       .eq("id", id)
       .maybeSingle();
 
-    if (!tree) return { ...DEFAULT_META, url: `${APP_URL}/tree/research/${id}` };
+    if (!tree) {
+      console.warn(`[og-proxy] Research tree not found: ${id}`);
+      return { ...DEFAULT_META, url: `${APP_URL}/tree/research/${id}` };
+    }
 
     const treeName = tree.name || "Research Tree";
     const species = tree.species || "Unknown species";
     const location = tree.country || "Unknown location";
 
-    // Image fallback: research image → global default
-    const image = tree.image_url ? `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}` : DEFAULT_IMAGE;
+    // Research trees don't have og-card support yet — use image_url or default
+    const image = tree.image_url || DEFAULT_IMAGE;
 
     return {
       title: `${treeName} — ${species} | S33D.life`,
@@ -337,7 +361,8 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
       geoLat: tree.latitude,
       geoLon: tree.longitude,
     };
-  } catch {
+  } catch (err) {
+    console.error(`[og-proxy] fetchResearchTreeMeta error for ${id}:`, err);
     return { ...DEFAULT_META, url: `${APP_URL}/tree/research/${id}` };
   }
 }
