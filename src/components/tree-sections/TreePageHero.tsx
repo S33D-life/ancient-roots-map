@@ -49,6 +49,7 @@ const TreePageHero = ({
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
+  const { isFullscreen: imageFullscreen, enterFullscreen: openImageFS, exitFullscreen: closeImageFS } = useFullscreen();
   const isAnchor = (tree as any).is_anchor_node;
 
   useEffect(() => {
