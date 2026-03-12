@@ -311,7 +311,7 @@ const Hero = () => {
           </div>
 
           {/* Welcome Journey — gentle onboarding for new visitors */}
-          <WelcomeJourney isLoggedIn={visitorNumber !== null} />
+          <WelcomeJourney isLoggedIn={isLoggedIn} />
         </div>
 
         {/* Bottom stack: Ancient Friend card — simplified */}
