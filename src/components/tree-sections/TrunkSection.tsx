@@ -4,7 +4,7 @@
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Music, Wand2, ScrollText, Lock, ArrowRight } from "lucide-react";
+import { BookOpen, Music, Wand2, ScrollText, Sprout, Lock, ArrowRight } from "lucide-react";
 import LeafAtmosphere from "../LeafAtmosphere";
 import SectionAtmosphere from "./SectionAtmosphere";
 
