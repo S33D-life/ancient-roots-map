@@ -634,15 +634,27 @@ function ConstellationMap({
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + i * 0.025, type: "spring", stiffness: 200 }}
-                className="absolute"
+                className={`absolute node-breathe ${
+                  highlightedSpecies && highlightedSpecies !== (staff.code as string).slice(0, 3)
+                    ? "constellation-dimmed"
+                    : highlightedSpecies ? "constellation-highlighted" : ""
+                }`}
                 style={{
                   left: `${pos.x}%`,
                   top: `${pos.y}%`,
-                  transform: "translate(-50%, -50%)",
                   zIndex: isHovered || isOwned ? 25 : 2,
+                  ["--breathe-dur" as string]: `${4.5 + (i % 5) * 0.8}s`,
+                  ["--breathe-delay" as string]: `${(i * 0.37) % 4}s`,
                 }}
-                onMouseEnter={() => onHoverStaff(i)}
-                onMouseLeave={() => onHoverStaff(null)}
+                onMouseEnter={() => {
+                  onHoverStaff(i);
+                  setHighlightedSpecies((staff.code as string).slice(0, 3));
+                }}
+                onMouseLeave={() => {
+                  onHoverStaff(null);
+                  setHighlightedSpecies(null);
+                }}
+                onClick={() => triggerRipple(pos.x, pos.y, colors.core)}
               >
                 <Link to={ROUTES.STAFF(staff.code)} className="block relative">
                   {/* Owner halo */}
