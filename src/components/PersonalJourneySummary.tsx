@@ -19,7 +19,7 @@ export default function PersonalJourneySummary({ userId }: { userId: string }) {
 
   useEffect(() => {
     const load = async () => {
-      const treesRes = await supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId);
+      const treesRes = await (supabase.from("trees").select("*", { count: "exact", head: true }) as any).eq("created_by", userId);
       const offeringsRes = await supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId);
       const heartRes = await supabase.from("heart_transactions").select("amount").eq("user_id", userId);
       const speciesRes = await supabase.from("trees").select("species").eq("created_by", userId);
