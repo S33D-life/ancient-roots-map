@@ -191,7 +191,17 @@ const TreeDetailPage = () => {
     return () => clearTimeout(timer);
   }, [tree?.lore_text]);
 
-  // Listen for successful whisper sends to trigger ripple
+  // Fetch witness count for this tree
+  useEffect(() => {
+    if (!id) return;
+    supabase
+      .from("witness_sessions" as any)
+      .select("id", { count: "exact", head: true })
+      .eq("tree_id", id)
+      .eq("status", "witnessed")
+      .then(({ count }) => setWitnessCount(count || 0));
+  }, [id]);
+
   useEffect(() => {
     const handler = () => {
       setWhisperRippleVisible(true);
