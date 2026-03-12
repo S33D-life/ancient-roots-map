@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Minimize2, TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import FullscreenToggle from "@/components/FullscreenToggle";
 
 interface FullscreenMapControlsProps {
   onExit: () => void;
@@ -53,22 +54,13 @@ const FullscreenMapControls = ({ onExit }: FullscreenMapControlsProps) => {
             ))}
           </div>
 
-          {/* Exit fullscreen button */}
-          <button
-            onClick={onExit}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif transition-all hover:brightness-125 active:scale-95"
-            style={{
-              background: "hsl(var(--card) / 0.65)",
-              color: "hsl(var(--foreground) / 0.8)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid hsl(var(--border) / 0.2)",
-            }}
-            title="Exit Full Screen (ESC)"
-          >
-            <Minimize2 className="w-4 h-4" />
-            <span className="hidden md:inline">Exit</span>
-          </button>
+          {/* Exit fullscreen — uses unified toggle */}
+          <FullscreenToggle
+            isFullscreen
+            onToggle={onExit}
+            position="top-right"
+            className="relative top-auto right-auto"
+          />
         </div>
       </motion.div>
     </AnimatePresence>
