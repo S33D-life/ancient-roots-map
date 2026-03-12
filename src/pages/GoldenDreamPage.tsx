@@ -142,15 +142,12 @@ const GoldenDreamPage = () => {
               >
                 ← Back to Golden Dream
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => setIsFullscreen(true)}
-              >
-                <Maximize2 className="h-4 w-4" />
-                Full Screen
-              </Button>
+              <FullscreenToggle
+                isFullscreen={false}
+                onToggle={enterFullscreen}
+                position="top-right"
+                className="relative top-auto right-auto"
+              />
             </div>
 
             <div className="relative rounded-xl border border-border/40 overflow-hidden">
