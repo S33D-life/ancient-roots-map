@@ -141,6 +141,82 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     icon: "🗽",
     provinceKey: "New York",
   },
+  {
+    name: "California",
+    slug: "california",
+    countrySlug: "united-states",
+    tagline: "Redwood cathedrals, desert Joshuas & coastal live oaks",
+    icon: "🌲",
+    provinceKey: "California",
+  },
+  {
+    name: "Washington",
+    slug: "washington",
+    countrySlug: "united-states",
+    tagline: "Olympic rainforest giants, Cascadian firs & urban cedars",
+    icon: "🏔️",
+    provinceKey: "Washington",
+  },
+
+  // United Kingdom — Regions
+  {
+    name: "England",
+    slug: "england",
+    countrySlug: "united-kingdom",
+    tagline: "Ancient oaks, churchyard yews & royal park veterans",
+    icon: "🏰",
+    provinceKey: "England",
+  },
+  {
+    name: "Wales",
+    slug: "wales",
+    countrySlug: "united-kingdom",
+    tagline: "Sacred yews, Celtic sessile oaks & valley ash elders",
+    icon: "🐉",
+    provinceKey: "Wales",
+  },
+  {
+    name: "Scotland",
+    slug: "scotland",
+    countrySlug: "united-kingdom",
+    tagline: "Highland pines, Caledonian relicts & ancient yews",
+    icon: "🦌",
+    provinceKey: "Scotland",
+  },
+  {
+    name: "Northern Ireland",
+    slug: "northern-ireland",
+    countrySlug: "united-kingdom",
+    tagline: "Dark Hedges beeches, lakeland oaks & ancient ash",
+    icon: "☘️",
+    provinceKey: "Northern Ireland",
+  },
+
+  // Italy — Regions
+  {
+    name: "Tuscany",
+    slug: "tuscany",
+    countrySlug: "italy",
+    tagline: "Renaissance cypresses, Chianti oaks & sacred olive groves",
+    icon: "🏛️",
+    provinceKey: "Tuscany",
+  },
+  {
+    name: "Umbria",
+    slug: "umbria",
+    countrySlug: "italy",
+    tagline: "Franciscan olives, valley oaks & Apennine beeches",
+    icon: "⛪",
+    provinceKey: "Umbria",
+  },
+  {
+    name: "Sicily",
+    slug: "sicily",
+    countrySlug: "italy",
+    tagline: "Etna chestnuts, ancient olives & Hundred Horse Giant",
+    icon: "🌋",
+    provinceKey: "Sicily",
+  },
 ];
 
 export default SUB_REGION_REGISTRY;
