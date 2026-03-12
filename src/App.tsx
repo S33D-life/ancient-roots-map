@@ -151,7 +151,6 @@ const App = () => {
   const [authInitError, setAuthInitError] = useState<string | null>(null);
 
   // Global connection resilience — shows reconnection toasts
-  const { useConnectionResilience } = require("@/hooks/use-connection-resilience");
   useConnectionResilience();
 
   useEffect(() => {
