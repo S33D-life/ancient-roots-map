@@ -49,7 +49,7 @@ const ResearchOriginBadge = ({ origin }: Props) => {
         {origin.verifiedBy && (
           <Badge
             variant="outline"
-            className="font-serif text-xs tracking-wider border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+            className="font-serif text-xs tracking-wider border-primary/30 bg-primary/10 text-primary"
           >
             ✓ Verified
           </Badge>
