@@ -683,6 +683,11 @@ export default function StaffRoomGallery() {
           )}
         </AnimatePresence>
 
+        {/* ═══ Your Staff Impact — Personal stats panel ═══ */}
+        <Suspense fallback={null}>
+          <LazyStaffImpactPanel />
+        </Suspense>
+
         {/* ═══ Staff Spiral Navigator — Full 144-staff navigable structure ═══ */}
         <Suspense fallback={null}>
           <LazyStaffSpiralNavigator />
