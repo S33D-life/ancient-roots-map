@@ -12,6 +12,7 @@ const LIBRARY_ROOMS = [
   { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
   { icon: Music, title: "Music Room", description: "Songs offered to trees", to: "/library/music-room" },
   { icon: ScrollText, title: "Scrolls & Records", description: "Community ledger", to: "/library/ledger" },
+  { icon: Sprout, title: "Seed Cellar", description: "Living data archive", to: "/library/seed-cellar" },
   { icon: Lock, title: "Vault", description: "Your personal archive", to: "/vault" },
 ];
 
