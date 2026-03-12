@@ -366,6 +366,14 @@ const Header = () => {
                     <Leaf className="w-4 h-4 shrink-0" />
                     <span>Council Portal</span>
                   </Link>
+                  <Link to="/bug-garden" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Search className="w-4 h-4 shrink-0" />
+                    <span>Bug Garden</span>
+                  </Link>
+                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Globe className="w-4 h-4 shrink-0" />
+                    <span>World Atlas</span>
+                  </Link>
                 </div>
               </div>
             </div>
