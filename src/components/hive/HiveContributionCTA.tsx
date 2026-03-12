@@ -10,6 +10,7 @@ import type { HiveInfo } from "@/utils/hiveUtils";
 interface Props {
   hive: HiveInfo;
   onMapTrees: () => void;
+  treeCount?: number;
 }
 
 const ACTIONS = [
@@ -20,7 +21,8 @@ const ACTIONS = [
   { icon: Eye, label: "Seasonal observation", desc: "Note what's happening right now", key: "season" },
 ] as const;
 
-const HiveContributionCTA = ({ hive, onMapTrees }: Props) => {
+const HiveContributionCTA = ({ hive, onMapTrees, treeCount }: Props) => {
+  const showInvitation = typeof treeCount === "number" && treeCount < 5;
   return (
     <Card className="bg-card/60 backdrop-blur border-border/40 overflow-hidden">
       <div
@@ -28,6 +30,13 @@ const HiveContributionCTA = ({ hive, onMapTrees }: Props) => {
         style={{ background: `linear-gradient(90deg, transparent, hsl(${hive.accentHsl}), transparent)` }}
       />
       <CardContent className="p-4 space-y-3">
+        {showInvitation && (
+          <div className="rounded-lg bg-primary/5 border border-primary/15 p-3 mb-1">
+            <p className="text-[11px] font-serif text-foreground/70 italic">
+              Few {hive.displayName} trees are mapped yet. Would you like to add one?
+            </p>
+          </div>
+        )}
         <p className="text-sm font-serif text-foreground tracking-wide">
           Help the {hive.displayName} grow
         </p>

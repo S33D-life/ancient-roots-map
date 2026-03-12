@@ -64,7 +64,7 @@ const ARRIVAL_PROFILES: Record<ArrivalOrigin, ArrivalMeta> = {
     label: "Time → Place",
     accentHsl: "30 60% 50%",
     feeling: "From season to soil",
-    returnTo: "/blooming-clock",
+    returnTo: "/cosmic",
     returnLabel: "Clock",
   },
   search: {
