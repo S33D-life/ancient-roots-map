@@ -365,6 +365,7 @@ const SpiralOfSpecies = () => {
         </div>
       </div>
     </div>
+    </FullscreenWrapper>
   );
 };
 
