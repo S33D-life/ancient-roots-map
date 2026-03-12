@@ -10,6 +10,7 @@ import type { HiveInfo } from "@/utils/hiveUtils";
 interface Props {
   hive: HiveInfo;
   onMapTrees: () => void;
+  treeCount?: number;
 }
 
 const ACTIONS = [
