@@ -7,6 +7,7 @@ import { UIFlowProvider } from "@/contexts/UIFlowContext";
 import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
+import { CompanionProvider } from "@/contexts/CompanionContext";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
