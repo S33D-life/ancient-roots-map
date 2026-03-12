@@ -142,7 +142,7 @@ const ResearchTreeDetailPage = () => {
       id: tree.id,
       name: tree.name || "Research Tree",
       species: tree.species || undefined,
-      location: tree.country || undefined,
+      location: tree.nation || undefined,
     };
     if (navigator.share) {
       const { nativeShare } = await import("@/utils/shareUtils");
