@@ -32,6 +32,7 @@ import { toast } from "sonner";
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
 const LazyStaffSpiralNavigator = lazy(() => import("@/components/staff/StaffSpiralNavigator"));
+const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPanel"));
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
@@ -681,6 +682,11 @@ export default function StaffRoomGallery() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ═══ Your Staff Impact — Personal stats panel ═══ */}
+        <Suspense fallback={null}>
+          <LazyStaffImpactPanel />
+        </Suspense>
 
         {/* ═══ Staff Spiral Navigator — Full 144-staff navigable structure ═══ */}
         <Suspense fallback={null}>

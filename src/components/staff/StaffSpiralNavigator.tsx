@@ -194,17 +194,18 @@ function SpiralOverview({
             key={`origin-${staff.code}`}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 + i * 0.02, type: "spring", stiffness: 200 }}
+            transition={{ delay: Math.min(0.1 + i * 0.015, 0.7), type: "spring", stiffness: 200 }}
             className="absolute group"
             style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
           >
             <Link to={`/staff/${staff.code}`} className="block relative">
               {/* Pulse */}
               <div
-                className="absolute inset-[-3px] rounded-full animate-pulse"
+            className="absolute inset-[-3px] rounded-full"
                 style={{
                   background: `radial-gradient(circle, ${color}12, transparent 70%)`,
-                  animationDuration: `${3 + (i % 5)}s`,
+                  animation: `pulse ${3 + (i % 5)}s ease-in-out infinite`,
+                  willChange: "opacity",
                 }}
               />
               <div

@@ -23,6 +23,7 @@ import DistributionCompass from "./DistributionCompass";
 import EmissionCurve from "./EmissionCurve";
 import PatronFlowBanner from "./PatronFlowBanner";
 import FoundingStaffRoots from "./FoundingStaffRoots";
+import FlowOfValue from "./FlowOfValue";
 
 interface LiveStats {
   totalHeartsMinted: number;
@@ -203,6 +204,15 @@ const EconomyOverview = () => {
 
       {/* ═══ 4c. Founding Staff Roots ═══ */}
       <FoundingStaffRoots />
+
+      {/* ═══ 4d. Flow of Value — Animated sap-flow visualization ═══ */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.18 }}
+      >
+        <FlowOfValue />
+      </motion.section>
 
       {/* ═══ 5. Emission Curve ═══ */}
       <motion.section
