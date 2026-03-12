@@ -62,6 +62,8 @@ Deno.serve(async (req) => {
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:url" content="${escapeHtml(pageUrl)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="S33D.life — The Living Atlas of Ancient Friends">
