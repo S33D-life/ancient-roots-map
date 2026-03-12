@@ -30,7 +30,7 @@ export default function RecentlyAddedTrees({ onTreeClick }: { onTreeClick?: (tre
   if (!trees.length) return null;
 
   return (
-    <div className="absolute bottom-20 left-3 z-[15] max-w-[220px]">
+    <div className="absolute bottom-24 sm:bottom-20 left-3 z-[15] max-w-[220px]">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-serif backdrop-blur-md border transition-colors"
