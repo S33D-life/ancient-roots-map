@@ -50,7 +50,7 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
       const notes = values[2] || '';
       
       if (!species || !what3wordsAddress || !what3wordsAddress.startsWith('///')) {
-        console.log(`Skipping invalid row ${i}: ${lines[i]}`);
+        
         continue;
       }
 
