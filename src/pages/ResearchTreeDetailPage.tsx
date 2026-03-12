@@ -175,8 +175,8 @@ const ResearchTreeDetailPage = () => {
 
             {/* Hive connections */}
             <TreeHiveConnections
-              tree={tree}
-              onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
+              species={tree.species}
+              ecoBelonging={[]}
             />
 
             {/* Phenology */}
