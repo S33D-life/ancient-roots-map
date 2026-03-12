@@ -42,9 +42,9 @@ export default function PointerOrb({ x, y, visible }: PointerOrbProps) {
           className="fixed top-0 left-0 z-[9999] pointer-events-none -translate-x-1/2 -translate-y-1/2"
         >
           {/* Outer glow */}
-          <div className="w-10 h-10 rounded-full bg-primary/20 blur-md absolute inset-0" />
+          <div className="absolute inset-0 w-10 h-10 rounded-full bg-primary/20 blur-md" />
           {/* Inner dot */}
-          <div className="w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.6)] mx-auto mt-3" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.6)]" />
         </motion.div>
       )}
     </AnimatePresence>

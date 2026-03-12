@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw, Send } from "lucide-react";
+import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanionSession } from "@/hooks/use-companion-session";
