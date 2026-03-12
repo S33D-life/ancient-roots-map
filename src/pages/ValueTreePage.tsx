@@ -21,6 +21,7 @@ const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
 const VaultHeartLedger = lazy(() => import("@/components/dashboard/vault/VaultHeartLedger"));
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
+const EcosystemMomentum = lazy(() => import("@/components/EcosystemMomentum"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
@@ -782,8 +783,15 @@ const ValueTreePage = () => {
                 </div>
               )}
               <EconomyOverview />
+              {/* This week in the forest */}
+              <div className="mt-6">
+                <Suspense fallback={null}>
+                  <EcosystemMomentum showDiscovery />
+                </Suspense>
+              </div>
+
               {/* Recent ecosystem heart activity */}
-              <div className="mt-8 space-y-3">
+              <div className="mt-6 space-y-3">
                 <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Heart Activity</h3>
                 <ActivityFeed limit={8} compact />
               </div>

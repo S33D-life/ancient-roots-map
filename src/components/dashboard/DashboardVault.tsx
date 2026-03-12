@@ -4,6 +4,8 @@ import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users 
 import { motion, AnimatePresence } from "framer-motion";
 
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
+const EcosystemMomentum = lazy(() => import("@/components/EcosystemMomentum"));
+const PersonalJourneySummary = lazy(() => import("@/components/PersonalJourneySummary"));
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useSpeciesTokens } from "@/hooks/use-species-tokens";
 import { useWallet } from "@/hooks/use-wallet";
@@ -241,6 +243,16 @@ const DashboardVault = ({ userId }: Props) => {
 
       {/* Tree Reservoirs */}
       <VaultTreeReservoirs />
+
+      {/* Personal Journey Summary */}
+      <Suspense fallback={null}>
+        <PersonalJourneySummary userId={userId} />
+      </Suspense>
+
+      {/* This Week in the Forest */}
+      <Suspense fallback={null}>
+        <EcosystemMomentum showDiscovery compact={false} />
+      </Suspense>
 
       {/* Recent Activity Feed */}
       <div className="space-y-2">
