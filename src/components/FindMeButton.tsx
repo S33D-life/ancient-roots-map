@@ -146,6 +146,17 @@ const FindMeButton = ({ onLocationFound, autoOpen }: FindMeButtonProps) => {
         )}
       </div>
 
+      {/* Discovery Nudge — shows when location found but no nearby trees */}
+      {location && !dialogOpen && (
+        <div className="absolute bottom-full mb-2 left-0 w-80 z-50">
+          <DiscoveryNudge
+            lat={location.lat}
+            lng={location.lng}
+            onCreateTree={() => setDialogOpen(true)}
+          />
+        </div>
+      )}
+
       <AddTreeDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
