@@ -4,7 +4,7 @@
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Music, Wand2, ScrollText, Lock, ArrowRight } from "lucide-react";
+import { BookOpen, Music, Wand2, ScrollText, Sprout, Lock, ArrowRight } from "lucide-react";
 import LeafAtmosphere from "../LeafAtmosphere";
 import SectionAtmosphere from "./SectionAtmosphere";
 
@@ -12,6 +12,7 @@ const LIBRARY_ROOMS = [
   { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
   { icon: Music, title: "Music Room", description: "Songs offered to trees", to: "/library/music-room" },
   { icon: ScrollText, title: "Scrolls & Records", description: "Community ledger", to: "/library/ledger" },
+  { icon: Sprout, title: "Seed Cellar", description: "Living data archive", to: "/library/seed-cellar" },
   { icon: Lock, title: "Vault", description: "Your personal archive", to: "/vault" },
 ];
 
