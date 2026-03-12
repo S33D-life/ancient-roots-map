@@ -200,7 +200,7 @@ const YourRootsPanel = ({ userId }: Props) => {
               <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary transition-colors" />
             </Link>
             <Link
-              to="/ledger"
+              to="/value-tree?tab=economy#ledger"
               className="group flex-1 flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-border/20 bg-card/20 hover:border-primary/20 transition-all"
             >
               <div className="flex items-center gap-2">
