@@ -260,5 +260,5 @@ export function resolveShareImage(
   for (const c of candidates) {
     if (c && c.trim()) return c;
   }
-  return DEFAULT_IMAGE;
+  return DEFAULT_OG_IMAGE;
 }
