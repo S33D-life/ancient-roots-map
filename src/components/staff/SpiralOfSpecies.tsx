@@ -214,7 +214,7 @@ const SpiralOfSpecies = () => {
         style={{ background: "linear-gradient(90deg, transparent, hsl(42 85% 55% / 0.5), hsl(42 85% 55% / 0.15), transparent)" }}
       />
 
-      <div className="p-5 sm:p-8 space-y-5">
+      <div className="p-4 sm:p-8 space-y-4 sm:space-y-5">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2">
