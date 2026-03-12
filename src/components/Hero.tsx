@@ -182,6 +182,7 @@ const Hero = () => {
   
   const [isHovering, setIsHovering] = useState(false);
   const [visitorNumber, setVisitorNumber] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [friendIndex, setFriendIndex] = useState(0);
   const visitRecorded = useRef(false);
   const lastShownIndex = useRef<number | null>(null);
