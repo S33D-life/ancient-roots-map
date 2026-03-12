@@ -386,8 +386,9 @@ function buildResearchPopupHtml(rt: ResearchTree): string {
         </p>
       </div>
     </div>
-    <div style="padding:0 14px 12px;">
-      <a href="/map?tree=${encodeURIComponent(rt.id)}&treeId=${encodeURIComponent(rt.id)}&lat=${rt.latitude}&lng=${rt.longitude}&zoom=18&arrival=tree&journey=1&research=on" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(25,15%,8%);background:linear-gradient(135deg,hsl(35,70%,45%),hsl(40,80%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🔍 Verify This Tree In Person</a>
+    <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:6px;">
+      <a href="/tree/research/${encodeURIComponent(rt.id)}" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(25,15%,8%);background:linear-gradient(135deg,hsl(35,70%,45%),hsl(40,80%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌳 View Ancient Friend Page</a>
+      <a href="/map?tree=${encodeURIComponent(rt.id)}&treeId=${encodeURIComponent(rt.id)}&lat=${rt.latitude}&lng=${rt.longitude}&zoom=18&arrival=tree&journey=1&research=on" style="display:flex;align-items:center;justify-content:center;padding:7px 0;font-size:11px;color:hsl(35,60%,55%);background:hsla(35,40%,20%,0.3);border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:600;font-family:sans-serif;border:1px solid hsla(35,60%,40%,0.3);">🔍 Verify This Tree In Person</a>
     </div>
   </div>`;
 }
