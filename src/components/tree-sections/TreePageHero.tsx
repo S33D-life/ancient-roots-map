@@ -72,6 +72,7 @@ const TreePageHero = ({
   const location = [tree.state, tree.nation].filter(Boolean).join(", ");
 
   return (
+    <>
     <motion.div
       ref={heroRef}
       initial={{ opacity: 0 }}
