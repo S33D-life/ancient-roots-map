@@ -3,13 +3,21 @@
  *
  * Supports both initiating and joining sessions, with real-time sync via
  * the existing Companion broadcast channel and Supabase Realtime on the
- * witness_sessions table.
+ * witness_sessions table. Includes environmental snapshot capture.
  */
 import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompanion } from "@/contexts/CompanionContext";
 import type { WitnessSession, WitnessSessionStatus } from "@/lib/witness-types";
 import { WITNESS_PROXIMITY_M, WITNESS_BONUS_HEARTS } from "@/lib/witness-types";
+import type {
+  TreeHealthSnapshot,
+  CanopyLightReading,
+  AmbientSoundReading,
+  SnapshotQuality,
+} from "@/lib/env-snapshot-types";
+import { computeSnapshotQuality, getSeasonHint, getDeviceLabel } from "@/lib/env-snapshot-types";
+import { computeDualGPS } from "@/lib/env-sensors";
 
 const haversineMeters = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371000;
