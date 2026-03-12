@@ -28,6 +28,7 @@ const SUPABASE_KEY =
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY")!;
 const APP_URL = "https://ancient-roots-map.lovable.app";
 const DEFAULT_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
+const OG_CARD_BASE = `${SUPABASE_URL}/functions/v1/og-card`;
 
 /* ── Route matchers ─────────────────────────────────────── */
 
@@ -271,8 +272,8 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const isMinted = !!mintedRes.data;
     const staffName = staffRes.data?.staff_name || null;
 
-    // Image fallback: photo offering → global default
-    const image = photoRes.data?.media_url || DEFAULT_IMAGE;
+    // Image: use generated og-card SVG (dynamic card with photo/branding)
+    const image = `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}`;
 
     // Title: distinguish NFTree vs Ancient Friend
     const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
@@ -321,7 +322,7 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const location = tree.country || "Unknown location";
 
     // Image fallback: research image → global default
-    const image = tree.image_url || DEFAULT_IMAGE;
+    const image = tree.image_url ? `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}` : DEFAULT_IMAGE;
 
     return {
       title: `${treeName} — ${species} | S33D.life`,
@@ -342,7 +343,6 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
 
 function buildStaffMeta(code: string): Meta {
   const species = resolveStaffSpecies(code);
-  const image = resolveStaffImage(code);
   const isCircle = isCircleStaff(code);
 
   const displayCode = code.toUpperCase();
@@ -354,12 +354,11 @@ function buildStaffMeta(code: string): Meta {
     ? `A ${species} circle staff from the S33D Staff Room. Explore its lineage and lore.`
     : `The ${species} Origin Staff — one of 36 founding staffs in the S33D collection.`;
 
+  const image = `${OG_CARD_BASE}?type=staff&id=${encodeURIComponent(code)}`;
+
   return {
     title,
     description,
-    // Staff images are local assets served from the app domain
-    // If the image doesn't exist, crawlers will get a 404 and platforms
-    // fall back gracefully — but most staffs have images
     image,
     url: `${APP_URL}/staff/${code}`,
     imageWidth: 1200,

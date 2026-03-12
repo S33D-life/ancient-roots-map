@@ -16,6 +16,17 @@
 
 export const APP_URL = "https://ancient-roots-map.lovable.app";
 export const DEFAULT_OG_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
+export const OG_CARD_BASE = `${APP_URL}/functions/v1/og-card`;
+
+/** Build a generated OG card image URL for a tree */
+export function treeOgCardUrl(treeId: string): string {
+  return `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(treeId)}`;
+}
+
+/** Build a generated OG card image URL for a staff */
+export function staffOgCardUrl(staffCode: string): string {
+  return `${OG_CARD_BASE}?type=staff&id=${encodeURIComponent(staffCode)}`;
+}
 
 export interface OGMeta {
   title: string;
