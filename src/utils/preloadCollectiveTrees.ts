@@ -49,7 +49,7 @@ export async function preloadCollectiveTrees() {
       }
       
       totalInserted += batch.length;
-      console.log(`Inserted batch ${i / batchSize + 1}: ${totalInserted}/${treesToInsert.length} trees`);
+      
     }
 
     console.log(`Successfully preloaded ${totalInserted} collective trees`);
