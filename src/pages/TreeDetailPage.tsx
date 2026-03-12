@@ -84,6 +84,8 @@ const OfferingSortControls = lazy(() => import("@/components/OfferingSortControl
 const PhenologyBadge = lazy(() => import("@/components/PhenologyBadge"));
 const PhenologyObservationButton = lazy(() => import("@/components/PhenologyObservationButton"));
 const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
+const CoWitnessPanel = lazy(() => import("@/components/witness/CoWitnessPanel"));
+const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"));
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
