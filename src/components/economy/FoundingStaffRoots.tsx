@@ -13,12 +13,14 @@ import {
   PATRON_STARTING_HEARTS,
 } from "@/data/staffPatronValue";
 
+/** Assign a deterministic hue based on species index for visual variety */
+const speciesHue = (code: string, i: number) => {
+  const hues = [42, 120, 150, 30, 280, 200, 60, 340, 90, 170];
+  return `hsl(${hues[i % hues.length]}, 70%, 50%)`;
+};
+
 const FoundingStaffRoots = () => {
-  const staffs = useMemo(() => {
-    const spiral = getSpiralStaffs();
-    // Take first 36 (Origin Spiral staffs)
-    return spiral.slice(0, 36);
-  }, []);
+  const staffs = useMemo(() => getSpiralStaffs(), []);
 
   return (
     <motion.div
@@ -69,11 +71,10 @@ const FoundingStaffRoots = () => {
           {/* Staff nodes in a circle */}
           {staffs.map((staff, i) => {
             const angle = (i / 36) * Math.PI * 2 - Math.PI / 2;
-            const radius = 42; // % from center
+            const radius = 42;
             const x = 50 + radius * Math.cos(angle);
             const y = 50 + radius * Math.sin(angle);
-            const speciesInfo = SPECIES_MAP[staff.speciesCode as SpeciesCode];
-            const color = speciesInfo?.accent || "hsl(42, 85%, 55%)";
+            const color = speciesHue(staff.code, i);
 
             return (
               <motion.div
@@ -99,15 +100,15 @@ const FoundingStaffRoots = () => {
                     }}
                   >
                     <span className="text-[6px] sm:text-[7px] font-mono" style={{ color }}>
-                      {staff.isOriginSpiral ? "◈" : "·"}
+                      {i < 12 ? "◈" : "·"}
                     </span>
                   </div>
                 </Link>
                 {/* Tooltip on hover */}
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 hidden group-hover:block z-20 pointer-events-none">
                   <div className="bg-card border border-border rounded-lg px-2 py-1 whitespace-nowrap shadow-lg">
-                    <p className="text-[8px] font-serif text-foreground">{staff.code}</p>
-                    <p className="text-[7px] font-serif text-muted-foreground">{staff.speciesName}</p>
+                    <p className="text-[8px] font-serif text-foreground">{staff.displayCode}</p>
+                    <p className="text-[7px] font-serif text-muted-foreground">{staff.species}</p>
                   </div>
                 </div>
               </motion.div>

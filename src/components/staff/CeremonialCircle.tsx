@@ -7,10 +7,15 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Crown } from "lucide-react";
 import { getSpiralStaffs } from "@/utils/staffRoomData";
-import { SPECIES_MAP, type SpeciesCode } from "@/config/staffContract";
+
+/** Assign a deterministic hue based on index for visual variety */
+const nodeHue = (i: number) => {
+  const hues = [42, 120, 150, 30, 280, 200, 60, 340, 90, 170];
+  return `hsl(${hues[i % hues.length]}, 70%, 50%)`;
+};
 
 const CeremonialCircle = () => {
-  const staffs = useMemo(() => getSpiralStaffs().slice(0, 36), []);
+  const staffs = useMemo(() => getSpiralStaffs(), []);
 
   return (
     <div className="rounded-2xl border border-primary/15 bg-card/30 backdrop-blur-sm overflow-hidden">
@@ -65,8 +70,7 @@ const CeremonialCircle = () => {
             const radius = 40;
             const x = 50 + radius * Math.cos(angle);
             const y = 50 + radius * Math.sin(angle);
-            const speciesInfo = SPECIES_MAP[staff.speciesCode as SpeciesCode];
-            const color = speciesInfo?.accent || "hsl(42, 85%, 55%)";
+            const color = nodeHue(i);
 
             return (
               <motion.div
@@ -99,16 +103,16 @@ const CeremonialCircle = () => {
                     }}
                   >
                     <span className="text-[7px] sm:text-[8px] font-serif font-bold" style={{ color }}>
-                      {staff.isOriginSpiral ? "◈" : String(i + 1)}
+                      {i < 12 ? "◈" : String(i + 1)}
                     </span>
                   </div>
                 </Link>
                 {/* Hover tooltip */}
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block z-20 pointer-events-none">
                   <div className="bg-card/95 border border-border rounded-xl px-3 py-2 whitespace-nowrap shadow-xl text-center">
-                    <p className="text-[9px] font-serif text-foreground font-medium">{staff.code}</p>
-                    <p className="text-[8px] font-serif text-muted-foreground">{staff.speciesName}</p>
-                    {staff.isOriginSpiral && (
+                    <p className="text-[9px] font-serif text-foreground font-medium">{staff.displayCode}</p>
+                    <p className="text-[8px] font-serif text-muted-foreground">{staff.species}</p>
+                    {i < 12 && (
                       <p className="text-[7px] font-serif text-primary/60 mt-0.5">Origin Spiral</p>
                     )}
                   </div>
