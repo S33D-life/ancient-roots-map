@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,11 +11,13 @@ import {
   Heart, Shield, TreePine, Sprout, GitBranch, Vote,
   ChevronDown, ChevronRight, Clock, Check, Zap, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
-  Bug, UserPlus, Megaphone, Flame, ArrowRight,
+  Bug, UserPlus, Megaphone, Flame, ArrowRight, Coins, Loader2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
+
+const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
@@ -702,7 +704,7 @@ const EarnBranch = () => {
 
 const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "how";
+  const initialTab = searchParams.get("tab") || "economy";
   const [activeTab, setActiveTab] = useState(initialTab);
 
   return (
@@ -741,6 +743,9 @@ const ValueTreePage = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-secondary/30 border border-border/50 mb-8 flex-wrap h-auto gap-1 p-1.5 w-full justify-start">
+            <TabsTrigger value="economy" className="font-serif text-xs tracking-wider gap-1.5">
+              <Coins className="w-3.5 h-3.5" /> Living Economy
+            </TabsTrigger>
             <TabsTrigger value="earn" className="font-serif text-xs tracking-wider gap-1.5">
               <Flame className="w-3.5 h-3.5" /> Earn & Grow
             </TabsTrigger>
@@ -757,6 +762,12 @@ const ValueTreePage = () => {
               <Vote className="w-3.5 h-3.5" /> Proposed Branches
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="economy">
+            <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+              <EconomyOverview />
+            </Suspense>
+          </TabsContent>
 
           <TabsContent value="earn">
             <EarnBranch />
