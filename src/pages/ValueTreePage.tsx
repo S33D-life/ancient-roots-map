@@ -708,6 +708,13 @@ const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "economy";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id ?? null);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
