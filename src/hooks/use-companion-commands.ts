@@ -24,6 +24,10 @@ export interface RoomHandlers {
   onHighlightNode?: (nodeId: string) => void;
   onExportView?: () => void;
   onSelectChart?: (chartId: string) => void;
+  onPointerMove?: (x: number, y: number) => void;
+  onPointerHide?: () => void;
+  onNavigateRoom?: (room: string) => void;
+  onSendToDesktop?: (entityType: string, entityId: string, label?: string) => void;
 }
 
 export function useCompanionDisplay() {
