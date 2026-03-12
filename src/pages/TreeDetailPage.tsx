@@ -472,6 +472,11 @@ const TreeDetailPage = () => {
                     Last: {new Date(checkinStats.lastVisit).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                   </span>
                 )}
+                {witnessCount > 0 && (
+                  <Suspense fallback={null}>
+                    <WitnessedBadge witnessCount={witnessCount} />
+                  </Suspense>
+                )}
               </div>
             )}
 
