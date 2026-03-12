@@ -261,7 +261,7 @@ const App = () => {
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={<GrovesPage />} />
                 <Route path="/library" element={<GalleryPage />} />
-                <Route path="/library/:room" element={<GalleryPage />} />
+                <Route path="/library/:room" element={<HeartwoodRoomPage />} />
                 <Route path="/ledger" element={<TreeLedgerPage />} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
