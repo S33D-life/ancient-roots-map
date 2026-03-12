@@ -26,7 +26,7 @@ export interface SubRegionEntry {
 export const SUB_REGION_LABELS: Record<string, string> = {
   switzerland: "Cantons",
   indonesia: "Islands",
-  // Future: "united-kingdom": "Counties", "united-states": "States", etc.
+  "united-states": "States",
 };
 
 const SUB_REGION_REGISTRY: SubRegionEntry[] = [
@@ -120,6 +120,24 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     tagline: "Montane forests & lowland giants",
     icon: "🌴",
     provinceKey: "Papua",
+  },
+
+  // United States — States
+  {
+    name: "Hawaii",
+    slug: "hawaii",
+    countrySlug: "united-states",
+    tagline: "Volcanic groves, sacred ʻōhiʻa lehua & tropical elders",
+    icon: "🌺",
+    provinceKey: "Hawaii",
+  },
+  {
+    name: "New York",
+    slug: "new-york",
+    countrySlug: "united-states",
+    tagline: "Urban oaks, Hudson Valley elders & Adirondack giants",
+    icon: "🗽",
+    provinceKey: "New York",
   },
 ];
 
