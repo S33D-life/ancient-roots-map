@@ -389,6 +389,26 @@ const EconomyOverview = () => {
         transition={{ delay: 0.35 }}
         className="space-y-4 pb-4"
       >
+        {/* ═══ Cross-links: Vault + Ledger + Hives + Staff Room ═══ */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-xl mx-auto">
+          {[
+            { to: "/vault", icon: "🔐", label: "Heartwood Vault", sub: "Your living treasury" },
+            { to: "/library/staff-room", icon: "🪄", label: "Staff Room", sub: "Founding patron circle" },
+            { to: "/hives", icon: "🐝", label: "Species Hives", sub: "Species-heart economies" },
+            { to: "/council-of-life", icon: "🏛️", label: "Council of Life", sub: "Governance & influence" },
+          ].map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="group flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/20 bg-card/20 hover:border-primary/20 hover:bg-card/40 transition-all text-center"
+            >
+              <span className="text-lg">{link.icon}</span>
+              <span className="text-[10px] font-serif text-foreground group-hover:text-primary transition-colors">{link.label}</span>
+              <span className="text-[8px] font-serif text-muted-foreground/60">{link.sub}</span>
+            </Link>
+          ))}
+        </div>
+
         <div className="rounded-xl border border-border/15 bg-card/20 backdrop-blur-sm px-5 py-4 max-w-lg mx-auto">
           <p className="text-[10px] font-serif text-muted-foreground/70 leading-relaxed text-center">
             The total S33D Hearts model is currently defined as a canonical economic blueprint, while live circulation counters reflect real activity already recorded in the ecosystem.

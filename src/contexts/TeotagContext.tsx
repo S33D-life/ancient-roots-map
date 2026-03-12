@@ -269,7 +269,29 @@ function getQuickActions(
       { label: "Earning actions", prompt: "What specific actions earn hearts today? Show me the rewards table.", emoji: "💚" },
       { label: "Species Hearts", prompt: "How do Species Hearts differ from S33D Hearts? How are they earned?", emoji: "🐝" },
       { label: "Influence tokens", prompt: "What are influence tokens and how do they affect governance?", emoji: "🛡️" },
+      { label: "Distribution Compass", prompt: "How are the 777 million S33D Hearts distributed across the four channels?", emoji: "🧭" },
+      { label: "Proof of Flow", prompt: "Explain Proof of Flow — how does the emission curve work?", emoji: "🌊" },
     ]);
+  }
+
+  // ── Patron Offering page ──────────────────────
+  if (route.startsWith("/patron-offering")) {
+    return [
+      { label: "Staff Patron role", prompt: "What does it mean to be a founding patron of the Ancient Friends Staff Room?", emoji: "👑" },
+      { label: "What do I receive?", prompt: "What do I receive when I claim a staff for £3,300? List the benefits.", emoji: "🪄" },
+      { label: "How it seeds", prompt: "How does my donation flow through the S33D economy?", emoji: "🌱" },
+      { label: "Founding circle", prompt: "Tell me about the 36 founding staffs and the Origin Spiral.", emoji: "🌀" },
+    ];
+  }
+
+  // ── Staff Room page (library/staff-room) ──────
+  if (route.includes("/staff-room") || route.includes("/library/staff-room")) {
+    return [
+      { label: "Staff Room guide", prompt: "Guide me through the Ancient Friends Staff Room — what am I seeing?", emoji: "🪄" },
+      { label: "Origin Spiral", prompt: "What is the Origin Spiral and why are there 36 founding staffs?", emoji: "🌀" },
+      { label: "Species Circles", prompt: "Explain the 9 species circles and the 108 expansion staffs.", emoji: "🔵" },
+      { label: "Claim a staff", prompt: "How do I become a founding patron and claim a staff?", emoji: "👑" },
+    ];
   }
 
   // ── Roadmap page ─────────────────────────────
