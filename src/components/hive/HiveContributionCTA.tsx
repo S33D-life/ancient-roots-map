@@ -21,7 +21,8 @@ const ACTIONS = [
   { icon: Eye, label: "Seasonal observation", desc: "Note what's happening right now", key: "season" },
 ] as const;
 
-const HiveContributionCTA = ({ hive, onMapTrees }: Props) => {
+const HiveContributionCTA = ({ hive, onMapTrees, treeCount }: Props) => {
+  const showInvitation = typeof treeCount === "number" && treeCount < 5;
   return (
     <Card className="bg-card/60 backdrop-blur border-border/40 overflow-hidden">
       <div
