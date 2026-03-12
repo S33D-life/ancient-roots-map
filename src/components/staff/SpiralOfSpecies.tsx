@@ -390,6 +390,17 @@ function ConstellationMap({
   userStaff: string | null;
 }) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const { isInteracting, interactionProps } = useSpiralInteraction();
+
+  // Track which species is being highlighted for constellation mode
+  const [highlightedSpecies, setHighlightedSpecies] = useState<string | null>(null);
+
+  // Focus ripple state
+  const [ripple, setRipple] = useState<{ x: number; y: number; color: string; key: number } | null>(null);
+
+  const triggerRipple = useCallback((x: number, y: number, color: string) => {
+    setRipple({ x, y, color, key: Date.now() });
+  }, []);
 
   // Pre-compute spiral positions
   const originPositions = useMemo(() => {
