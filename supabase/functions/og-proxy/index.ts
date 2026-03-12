@@ -229,8 +229,8 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Fetch tree + its best photo in parallel
-    const [treeRes, photoRes] = await Promise.all([
+    // Fetch tree, best photo, and NFTree/minted status in parallel
+    const [treeRes, photoRes, mintedRes, staffRes] = await Promise.all([
       supabase
         .from("trees")
         .select("id, name, species, nation, latitude, longitude, description")
@@ -245,6 +245,21 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      // Check if tree has been minted (has chain anchor)
+      supabase
+        .from("chain_anchors")
+        .select("id, status")
+        .eq("asset_id", id)
+        .eq("status", "confirmed")
+        .limit(1)
+        .maybeSingle(),
+      // Check if tree has a staff-linked ceremony
+      supabase
+        .from("ceremony_logs")
+        .select("staff_name, staff_species")
+        .eq("ceremony_type", "binding")
+        .limit(1)
+        .maybeSingle(),
     ]);
 
     const tree = treeRes.data;
@@ -253,17 +268,30 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const treeName = tree.name || "Ancient Friend";
     const species = tree.species || "Unknown species";
     const location = tree.nation || "Unknown location";
+    const isMinted = !!mintedRes.data;
+    const staffName = staffRes.data?.staff_name || null;
 
     // Image fallback: photo offering → global default
     const image = photoRes.data?.media_url || DEFAULT_IMAGE;
 
-    // Description fallback: tree description → generated
-    const desc = tree.description
-      ? tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "")
-      : `An Ancient Friend in ${location}. Visit this tree on the S33D Living Atlas.`;
+    // Title: distinguish NFTree vs Ancient Friend
+    const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
+    const title = `${treeName} — ${species} | S33D.life`;
+
+    // Description with NFTree/staff context
+    let desc: string;
+    if (tree.description) {
+      desc = tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "");
+    } else if (isMinted && staffName) {
+      desc = `A minted ${typeLabel} in ${location}. Bound with ${staffName}. Part of the S33D Living Atlas.`;
+    } else if (isMinted) {
+      desc = `A minted ${typeLabel} in ${location}. Part of the S33D Living Atlas.`;
+    } else {
+      desc = `An ${typeLabel} in ${location}. Visit this tree on the S33D Living Atlas.`;
+    }
 
     return {
-      title: `${treeName} — ${species} | S33D.life`,
+      title,
       description: desc,
       image,
       url: `${APP_URL}/tree/${tree.id}`,

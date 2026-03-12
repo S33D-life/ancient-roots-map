@@ -1,19 +1,26 @@
 /**
  * TreeShareCard — Share an Ancient Friend with referral-aware deep links.
- * Sharing always begins with a specific tree, never generic app promotion.
- * Share links behave exactly like invite links.
+ * Uses the centralised share utility to route through og-proxy for
+ * crawler-safe social previews.
  *
  * Platforms: WhatsApp, Telegram, X, Native Share, Copy Link.
  * Optimised for mobile with thumb-zone button placement and 44px tap targets.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Share2, Copy, Heart, Check, Loader2, MapPin } from "lucide-react";
+import { Share2, Copy, Heart, Check, Loader2, MapPin, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  type ShareEntity,
+  type ShareOptions,
+  shareByPlatform,
+  getShareUrl,
+} from "@/utils/shareUtils";
 
 interface TreeShareCardProps {
   open: boolean;
@@ -27,6 +34,10 @@ interface TreeShareCardProps {
     heartCount?: number;
     city?: string | null;
     country?: string | null;
+    /** If true, shows NFTree badge on preview */
+    isMinted?: boolean;
+    /** Staff code that minted it */
+    mintedByStaff?: string | null;
   };
   /** If provided, shows "invited by" context */
   referrerName?: string | null;
@@ -41,27 +52,36 @@ const SHARE_PLATFORMS = [
 
 const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCardProps) => {
   const [caption, setCaption] = useState("I paused here. An ancient friend still standing.");
-  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [sparkle, setSparkle] = useState(false);
   const { toast } = useToast();
 
-  // Generate referral-aware share link when dialog opens
+  // Build the share entity
+  const shareEntity: ShareEntity = {
+    type: tree.isMinted ? "nftree" : "tree",
+    id: tree.id,
+    name: tree.name,
+    species: tree.species,
+    location: tree.city || tree.location || tree.country || undefined,
+    imageUrl: tree.imageUrl,
+    isMinted: tree.isMinted,
+    mintedByStaff: tree.mintedByStaff,
+  };
+
+  // Get or create invite code when dialog opens
   useEffect(() => {
     if (!open) return;
-    const generateLink = async () => {
+    const fetchInviteCode = async () => {
       setGenerating(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          setShareLink(`${window.location.origin}/tree/${tree.id}`);
           setGenerating(false);
           return;
         }
 
-        // Get or create invite code for this user
-        let code: string | null = null;
         const { data: existing } = await supabase
           .from("invite_links")
           .select("code")
@@ -71,105 +91,50 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
           .maybeSingle();
 
         if (existing) {
-          code = existing.code;
+          setInviteCode(existing.code);
         } else {
           const { data: newLink } = await supabase
             .from("invite_links")
             .insert({ created_by: user.id })
             .select("code")
             .single();
-          code = newLink?.code || null;
+          setInviteCode(newLink?.code || null);
         }
-
-        const params = new URLSearchParams();
-        if (code) params.set("invite", code);
-        params.set("from", "share");
-        params.set("tree", tree.id);
-
-        setShareLink(`${window.location.origin}/tree/${tree.id}?${params.toString()}`);
       } catch {
-        setShareLink(`${window.location.origin}/tree/${tree.id}`);
+        // Continue without invite code
       } finally {
         setGenerating(false);
       }
     };
-    generateLink();
-  }, [open, tree.id]);
+    fetchInviteCode();
+  }, [open]);
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand("copy"); } catch {}
-      document.body.removeChild(ta);
-    }
+  const shareOpts: ShareOptions = {
+    entity: shareEntity,
+    caption,
+    inviteCode,
   };
 
-  const buildShareText = () => {
-    const locationPart = tree.city || tree.location || tree.country || "";
-    return `🌳 Meet ${tree.name}${locationPart ? ` in ${locationPart}` : ""} · ${tree.species}\n\n${caption}`;
-  };
-
-  const handleShare = async (platform: string) => {
-    if (!shareLink) return;
-
-    const text = buildShareText();
-    const fullText = `${text}\n\n${shareLink}`;
-
+  const handleShare = useCallback(async (platform: string) => {
     setSparkle(true);
     setTimeout(() => setSparkle(false), 800);
 
-    switch (platform) {
-      case "whatsapp":
-        window.open(
-          `https://wa.me/?text=${encodeURIComponent(fullText)}`,
-          "_blank"
-        );
-        break;
-      case "telegram":
-        window.open(
-          `https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(text)}`,
-          "_blank"
-        );
-        break;
-      case "x":
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareLink)}`,
-          "_blank"
-        );
-        break;
-      case "copy":
-        await copyToClipboard(fullText);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        toast({ title: "Link copied!" });
-        break;
+    const success = await shareByPlatform(platform, shareOpts);
+    if (platform === "copy" && success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({ title: "Link copied!" });
     }
-  };
+  }, [shareOpts, toast]);
 
-  // Native share (preferred on mobile — surfaces WhatsApp, iMessage, Telegram etc.)
-  const handleNativeShare = async () => {
-    if (!shareLink || !navigator.share) return;
-    try {
-      await navigator.share({
-        title: `${tree.name} · ${tree.species}`,
-        text: buildShareText(),
-        url: shareLink,
-      });
-      setSparkle(true);
-      setTimeout(() => setSparkle(false), 800);
-    } catch {
-      // User cancelled or not supported
-    }
-  };
+  const handleNativeShare = useCallback(async () => {
+    setSparkle(true);
+    setTimeout(() => setSparkle(false), 800);
+    await shareByPlatform("native", shareOpts);
+  }, [shareOpts]);
 
   const hasNativeShare = typeof navigator !== "undefined" && "share" in navigator;
+  const shareUrl = getShareUrl(shareEntity);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -177,25 +142,44 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
         <DialogHeader>
           <DialogTitle className="font-serif text-lg flex items-center gap-2">
             <Share2 className="w-5 h-5 text-primary" />
-            Share this Ancient Friend
+            Share this {tree.isMinted ? "NFTree" : "Ancient Friend"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Preview card — enhanced with location + hearts */}
+          {/* Preview card */}
           <div className="rounded-xl border border-border/40 bg-secondary/10 overflow-hidden">
             {tree.imageUrl && (
-              <div className="h-32 overflow-hidden">
+              <div className="h-32 overflow-hidden relative">
                 <img
                   src={tree.imageUrl}
                   alt={tree.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
+                {/* NFTree / Minted badge overlay */}
+                {tree.isMinted && (
+                  <Badge
+                    variant="outline"
+                    className="absolute top-2 right-2 bg-card/80 backdrop-blur-sm border-primary/40 text-primary text-[10px] gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" /> NFTree
+                  </Badge>
+                )}
               </div>
             )}
             <div className="p-3 space-y-1.5">
-              <p className="font-serif font-medium text-sm">{tree.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-serif font-medium text-sm flex-1">{tree.name}</p>
+                {!tree.imageUrl && tree.isMinted && (
+                  <Badge
+                    variant="outline"
+                    className="border-primary/40 text-primary text-[10px] gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" /> NFTree
+                  </Badge>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground italic">{tree.species}</p>
               <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
                 {(tree.city || tree.location || tree.country) && (
@@ -211,6 +195,11 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
                   </span>
                 )}
               </div>
+              {tree.mintedByStaff && (
+                <p className="text-[10px] text-primary/70 font-serif">
+                  Minted with {tree.mintedByStaff}
+                </p>
+              )}
               {referrerName && (
                 <p className="text-[10px] text-primary/70 font-serif">
                   Shared by {referrerName}
@@ -219,7 +208,7 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
             </div>
           </div>
 
-          {/* Editable caption — shorter on mobile */}
+          {/* Editable caption */}
           <div className="space-y-1">
             <Textarea
               value={caption}
@@ -239,7 +228,7 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Native share first on mobile — single prominent button */}
+              {/* Native share first on mobile */}
               {hasNativeShare && (
                 <Button
                   onClick={handleNativeShare}
@@ -256,12 +245,12 @@ const TreeShareCard = ({ open, onOpenChange, tree, referrerName }: TreeShareCard
                   <button
                     key={p.key}
                     onClick={() => handleShare(p.key)}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/30 bg-card/50 hover:bg-primary/5 hover:border-primary/30 transition-all min-h-[56px] active:scale-95"
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/30 bg-card/50 hover:bg-primary/5 hover:border-primary/30 transition-all min-h-[56px] active:scale-95 relative"
                   >
                     <span className="text-lg">{p.icon}</span>
                     <span className="text-[10px] font-serif text-muted-foreground">{p.label}</span>
                     {p.key === "copy" && copied && (
-                      <Check className="w-3 h-3 text-primary absolute" />
+                      <Check className="w-3 h-3 text-primary absolute top-1 right-1" />
                     )}
                   </button>
                 ))}

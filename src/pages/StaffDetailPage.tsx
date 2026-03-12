@@ -262,20 +262,29 @@ export default function StaffDetailPage() {
 
   /* ── Share handler ─────────────────────────────────────────── */
   const handleShare = async () => {
-    const url = window.location.href;
-    const text = staff
-      ? `${staff.speciesName} Staff (${staff.code}) — a walking vessel in the Ancient Friends grove.`
-      : "Ancient Friends Staff";
+    const entity: import("@/utils/shareUtils").ShareEntity = {
+      type: "staff",
+      id: code || "",
+      name: staff?.speciesName,
+      species: staff?.speciesName,
+    };
+    const opts: import("@/utils/shareUtils").ShareOptions = {
+      entity,
+      caption: `${staff?.speciesName || "A"} Staff — a walking vessel in the Ancient Friends grove.`,
+    };
     try {
       if (navigator.share) {
-        await navigator.share({ title: `${staff?.speciesName} Staff`, text, url });
+        const { nativeShare } = await import("@/utils/shareUtils");
+        await nativeShare(opts);
       } else {
-        await navigator.clipboard.writeText(`${text} ${url}`);
+        const { copyShareLink } = await import("@/utils/shareUtils");
+        await copyShareLink(opts);
         toast.success("Link copied to clipboard!");
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
-        await navigator.clipboard.writeText(`${text} ${url}`);
+        const { copyShareLink } = await import("@/utils/shareUtils");
+        await copyShareLink(opts);
         toast.success("Link copied to clipboard!");
       }
     }
