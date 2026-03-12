@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,11 +11,13 @@ import {
   Heart, Shield, TreePine, Sprout, GitBranch, Vote,
   ChevronDown, ChevronRight, Clock, Check, Zap, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
-  Bug, UserPlus, Megaphone, Flame, ArrowRight,
+  Bug, UserPlus, Megaphone, Flame, ArrowRight, Coins,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
+
+const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
