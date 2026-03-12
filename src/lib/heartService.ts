@@ -173,7 +173,7 @@ export async function spendHearts(params: {
         chain_state: "offchain",
         idempotency_key: key,
         metadata: params.metadata || {},
-      })
+      } as any)
       .select()
       .single();
 
