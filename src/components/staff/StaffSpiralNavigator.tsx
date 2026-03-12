@@ -83,7 +83,7 @@ const StaffSpiralNavigator = () => {
   }, [circleGroups]);
 
   return (
-    <FullscreenWrapper tone="dark">
+    <FullscreenWrapper tone="dark" captureFilename="s33d-staff-spiral">
     <div className="rounded-2xl border border-primary/15 bg-card/30 backdrop-blur-sm overflow-hidden">
       {/* Gold accent line */}
       <div
