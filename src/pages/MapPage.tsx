@@ -26,6 +26,7 @@ const RecentlyAddedTrees = lazy(() => import("@/components/RecentlyAddedTrees"))
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
 const MapPage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mapFocus = parseMapFocusParams(searchParams);
   const paramW3w = searchParams.get("w3w") || undefined;
