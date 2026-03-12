@@ -1,13 +1,15 @@
 /**
  * HeartJar — Glass jar of glowing hearts. Primary balance UI.
  * Tapping opens a sliding panel with balance, ledger, earn/spend options.
+ * Shows a gentle skeleton while loading — never blank.
  */
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import { Heart, ChevronDown, Sparkles, ShoppingCart, Gift, ArrowRight, X, Wallet } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Sparkles, ArrowRight, X } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
 import HeartLedgerPanel from "./HeartLedgerPanel";
 import HeartClaimsPanel from "./HeartClaimsPanel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   userId: string | null;
@@ -33,6 +35,16 @@ const HeartJar = ({ userId, className = "" }: Props) => {
 
   if (!userId) return null;
 
+  // Skeleton state while loading — matches jar shape
+  if (isLoading) {
+    return (
+      <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border/20 bg-card/60 ${className}`}>
+        <Skeleton className="w-6 h-7 rounded-b-lg rounded-t-sm" />
+        <Skeleton className="w-8 h-3 rounded" />
+      </div>
+    );
+  }
+
   const fillPct = Math.min(100, Math.max(8, (balance.s33d / Math.max(balance.s33d, 100)) * 100));
 
   return (
@@ -49,13 +61,13 @@ const HeartJar = ({ userId, className = "" }: Props) => {
             className="absolute bottom-0 left-0 right-0"
             style={{
               height: `${fillPct}%`,
-              background: "linear-gradient(to top, hsl(42 95% 55% / 0.6), hsl(45 100% 70% / 0.3))",
+              background: "linear-gradient(to top, hsl(var(--primary) / 0.6), hsl(var(--primary) / 0.3))",
             }}
             animate={{
               opacity: pulse ? [1, 0.5, 1] : 1,
               boxShadow: pulse
-                ? ["0 0 8px hsl(42 95% 55% / 0.5)", "0 0 16px hsl(42 95% 55% / 0.8)", "0 0 8px hsl(42 95% 55% / 0.5)"]
-                : "0 0 4px hsl(42 95% 55% / 0.2)",
+                ? ["0 0 8px hsl(var(--primary) / 0.5)", "0 0 16px hsl(var(--primary) / 0.8)", "0 0 8px hsl(var(--primary) / 0.5)"]
+                : "0 0 4px hsl(var(--primary) / 0.2)",
             }}
             transition={{ duration: 0.6 }}
           />
@@ -63,14 +75,14 @@ const HeartJar = ({ userId, className = "" }: Props) => {
           {balance.s33d > 0 && (
             <>
               <motion.div
-                className="absolute w-1.5 h-1.5 rounded-full"
-                style={{ background: "hsl(42 95% 65%)", left: "30%", bottom: `${fillPct * 0.4}%` }}
+                className="absolute w-1.5 h-1.5 rounded-full bg-primary/60"
+                style={{ left: "30%", bottom: `${fillPct * 0.4}%` }}
                 animate={{ y: [-1, 1, -1], opacity: [0.4, 0.8, 0.4] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
-                className="absolute w-1 h-1 rounded-full"
-                style={{ background: "hsl(45 100% 70%)", left: "60%", bottom: `${fillPct * 0.6}%` }}
+                className="absolute w-1 h-1 rounded-full bg-primary/50"
+                style={{ left: "60%", bottom: `${fillPct * 0.6}%` }}
                 animate={{ y: [1, -1, 1], opacity: [0.3, 0.7, 0.3] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               />
@@ -78,7 +90,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
           )}
         </div>
         <span className="text-xs font-serif font-bold tabular-nums text-primary">
-          {isLoading ? "…" : balance.s33d.toLocaleString()}
+          {balance.s33d.toLocaleString()}
         </span>
       </button>
 
@@ -143,12 +155,12 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                   )}
                   {tab === "ledger" && (
                     <motion.div key="ledger" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <HeartLedgerPanel userId={userId} />
+                      <HeartLedgerPanel userId={userId!} />
                     </motion.div>
                   )}
                   {tab === "claims" && (
                     <motion.div key="claims" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <HeartClaimsPanel userId={userId} />
+                      <HeartClaimsPanel userId={userId!} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -176,17 +188,17 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
           animate={{ height: `${Math.min(95, Math.max(5, (balance.s33d / Math.max(balance.s33d, 100)) * 95))}%` }}
           transition={{ type: "spring", damping: 20, stiffness: 100 }}
           style={{
-            background: "linear-gradient(to top, hsl(42 95% 50% / 0.7), hsl(45 100% 65% / 0.4))",
-            boxShadow: "inset 0 -4px 12px hsl(42 95% 55% / 0.3)",
+            background: "linear-gradient(to top, hsl(var(--primary) / 0.7), hsl(var(--primary) / 0.3))",
+            boxShadow: "inset 0 -4px 12px hsl(var(--primary) / 0.3)",
           }}
         />
         {/* Floating particles */}
         {[0, 1, 2, 3, 4].map(i => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 rounded-full"
+            className="absolute w-2 h-2 rounded-full bg-primary"
             style={{
-              background: `hsl(${42 + i * 3} ${90 - i * 5}% ${55 + i * 3}%)`,
+              opacity: 0.4 + i * 0.1,
               left: `${15 + i * 15}%`,
             }}
             animate={{
@@ -213,13 +225,13 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
 
     {/* Balance grid */}
     <div className="grid grid-cols-2 gap-2">
-      <BalanceCard label="Species Hearts" value={balance.species} icon="🌿" accent="150 50% 45%" />
-      <BalanceCard label="Influence" value={balance.influence} icon="🛡️" accent="42 80% 50%" />
+      <BalanceCard label="Species Hearts" value={balance.species} icon="🌿" />
+      <BalanceCard label="Influence" value={balance.influence} icon="🛡️" />
       {balance.locked > 0 && (
-        <BalanceCard label="Locked (Staking)" value={balance.locked} icon="🔒" accent="220 50% 55%" />
+        <BalanceCard label="Locked (Staking)" value={balance.locked} icon="🔒" />
       )}
       {balance.claimable > 0 && (
-        <BalanceCard label="Claimable" value={balance.claimable} icon="✨" accent="280 60% 55%" />
+        <BalanceCard label="Claimable" value={balance.claimable} icon="✨" />
       )}
     </div>
 
@@ -249,14 +261,13 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
   </div>
 );
 
-const BalanceCard = ({ label, value, icon, accent }: { label: string; value: number; icon: string; accent: string }) => (
+const BalanceCard = ({ label, value, icon }: { label: string; value: number; icon: string }) => (
   <div
-    className="flex items-center gap-2 p-3 rounded-xl border"
-    style={{ borderColor: `hsl(${accent} / 0.2)`, background: `hsl(${accent} / 0.05)` }}
+    className="flex items-center gap-2 p-3 rounded-xl border border-border/20 bg-secondary/5"
   >
     <span className="text-base">{icon}</span>
     <div className="min-w-0">
-      <p className="text-sm font-serif font-bold tabular-nums" style={{ color: `hsl(${accent})` }}>
+      <p className="text-sm font-serif font-bold tabular-nums text-foreground">
         {value.toLocaleString()}
       </p>
       <p className="text-[9px] font-serif text-muted-foreground truncate">{label}</p>

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, User, Sunrise, Stars, Sparkles, Leaf, Search, Heart, Flame, Globe, Hexagon, Wand2, Music, Sprout, ScrollText, TreePine, Palette, Lock, BarChart3 } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Sunrise, Stars, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag-small.webp";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
@@ -21,13 +21,37 @@ import HeartJar from "./economy/HeartJar";
 const TetolMenu = lazy(() => import("./TetolMenu"));
 const TeotagGuide = lazy(() => import("./TeotagGuide"));
 
+/** Desktop nav: 3 clear destinations matching the TETOL tree metaphor */
+const DESKTOP_NAV = [
+  {
+    to: "/map",
+    label: "Atlas",
+    subtitle: "The Roots",
+    icon: TreeDeciduous,
+    prefixes: ["/map", "/tree/", "/hive/", "/hives", "/add-tree", "/discovery", "/harvest", "/cosmic", "/atlas"],
+  },
+  {
+    to: "/library",
+    label: "Heartwood",
+    subtitle: "The Trunk",
+    icon: BookOpen,
+    prefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger", "/value-tree"],
+  },
+  {
+    to: "/council-of-life",
+    label: "Council",
+    subtitle: "The Canopy",
+    icon: Leaf,
+    prefixes: ["/council", "/bug-garden", "/roadmap", "/support", "/golden-dream", "/press"],
+  },
+] as const;
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  
+
   const [tetolOpen, setTetolOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
@@ -51,8 +75,6 @@ const Header = () => {
     window.addEventListener("open-tetol", handler);
     return () => window.removeEventListener("open-tetol", handler);
   }, [user, navigate, location.pathname]);
-
-  // Hover no longer opens search automatically — it was too aggressive and obscured the header
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -86,14 +108,12 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    // Only set dark if no theme preference already exists
     if (!document.documentElement.classList.contains('light')) {
       document.documentElement.classList.add('dark');
     }
   }, []);
 
   useEffect(() => {
-    // Set up listener BEFORE getSession to avoid race conditions
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
@@ -117,16 +137,14 @@ const Header = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Use unified heart balance hook
   const heartBalance = useHeartBalance(user?.id ?? null);
   const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
   const { seedsRemaining } = useSeedEconomy(user?.id ?? null);
 
-  // Realtime heart toast — listen for new heart_transactions, group duplicates
+  // Realtime heart toast
   useEffect(() => {
     if (!user) return;
 
-    // Accumulator for grouping rapid heart events
     let pendingHearts: { amount: number; count: number; type: string } = { amount: 0, count: 0, type: '' };
     let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -153,7 +171,6 @@ const Header = () => {
           const amount = payload.new?.amount || 0;
           const heartType = payload.new?.heart_type || 'heart';
           if (amount > 0) {
-            // If same type, accumulate; otherwise flush previous and start new
             if (pendingHearts.count > 0 && pendingHearts.type !== heartType) {
               flushToast();
             }
@@ -161,7 +178,6 @@ const Header = () => {
             pendingHearts.count += 1;
             pendingHearts.type = heartType;
 
-            // Debounce: flush after 3s of no new events
             if (flushTimer) clearTimeout(flushTimer);
             flushTimer = setTimeout(flushToast, 3000);
           }
@@ -171,13 +187,12 @@ const Header = () => {
 
     return () => {
       if (flushTimer) clearTimeout(flushTimer);
-      flushToast(); // flush any pending
+      flushToast();
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
   const checkPendingActivity = async (userId: string) => {
-    // Check for bloomed seeds not yet collected
     const { count: bloomedSeeds } = await supabase
       .from("planted_seeds")
       .select("*", { count: "exact", head: true })
@@ -186,8 +201,6 @@ const Header = () => {
       .lte("blooms_at", new Date().toISOString());
     setHasPendingActivity((bloomedSeeds || 0) > 0);
   };
-
-  // fetchHearts removed — unified useHeartBalance hook handles this
 
   const fetchAvatar = async (userId: string) => {
     const { data } = await supabase.from("profiles").select("avatar_url").eq("id", userId).maybeSingle();
@@ -220,12 +233,11 @@ const Header = () => {
           background: 'linear-gradient(180deg, hsl(var(--card) / 0.85), hsl(var(--card) / 0.95))',
         }}
       />
-      {/* Light mode styles + emberPulse moved to index.css header-theme layer */}
       <div className="relative z-[2] px-0 py-2">
         <div className="flex items-center justify-between relative min-w-0">
-          {/* Left side: Mobile TEOTAG / Desktop TEOTAG logo */}
+          {/* Left: Mobile TEOTAG / Desktop TEOTAG logo */}
           <div className="flex items-center gap-2">
-            {/* Mobile TEOTAG logo — top left, navigates to Hearth */}
+            {/* Mobile TEOTAG logo */}
             <button type="button" className="md:hidden bg-transparent border-none p-0" onClick={handleTeotagClick}>
               <img 
                 src={teotagLogo} 
@@ -233,7 +245,7 @@ const Header = () => {
                 className="w-10 h-10 rounded-full cursor-pointer hover:shadow-[0_0_20px_hsla(42,95%,55%,0.3)] transition-all duration-300"
               />
             </button>
-            {/* Desktop TEOTAG logo — navigates to Hearth */}
+            {/* Desktop TEOTAG logo */}
             <div className="relative group hidden md:block">
               <button type="button" className="flex items-center gap-3 bg-transparent border-none p-0" onClick={handleTeotagClick}>
                 <img 
@@ -253,7 +265,7 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Center: S33D logo — absolute centered on mobile, opens TETOL nav */}
+          {/* Center: S33D logo — mobile only, opens TETOL nav */}
           <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
             <button
               type="button"
@@ -276,146 +288,44 @@ const Header = () => {
             </button>
           </div>
           
-          <nav className="hidden md:flex items-center gap-3 lg:gap-5">
-            <div className="relative group focus-within:z-[100]">
-              <Link to="/map" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
-                <TreeDeciduous className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-                <div className="flex flex-col leading-tight">
-                  <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">Ancient Friends </span>Atlas</span>
-                  <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Roots</span>
-                </div>
-              </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
-                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/map" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <TreeDeciduous className="w-4 h-4 shrink-0" />
-                    <span>Map</span>
-                  </Link>
-                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Globe className="w-4 h-4 shrink-0" />
-                    <span>Countries</span>
-                  </Link>
-                  <Link to="/hives" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Hexagon className="w-4 h-4 shrink-0" />
-                    <span>Hives</span>
-                  </Link>
-                  <div className="my-1 mx-2 h-px" style={{ background: 'hsl(var(--border) / 0.3)' }} />
-                  <Link to="/harvest" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Sprout className="w-4 h-4 shrink-0" />
-                    <span>Harvest Exchange</span>
-                  </Link>
-                  <Link to="/cosmic" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Stars className="w-4 h-4 shrink-0" />
-                    <span>Cosmic Calendar</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <div className="relative group focus-within:z-[100]">
-              <Link to="/library" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
-              <BookOpen className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-              <div className="flex flex-col leading-tight">
-                <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">HeARTwood </span>Library</span>
-                <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Heartwood</span>
-              </div>
-            </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
-                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[200px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Heart className="w-4 h-4 shrink-0" />
-                    <span>The Hearth</span>
-                  </Link>
-                  <Link to="/dashboard?tab=journey" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <BarChart3 className="w-4 h-4 shrink-0" />
-                    <span>Journey</span>
-                  </Link>
-                  <Link to="/vault" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Lock className="w-4 h-4 shrink-0" />
-                    <span>Heartwood Vault</span>
-                  </Link>
-                  <div className="my-1 mx-2 h-px" style={{ background: 'hsl(var(--border) / 0.3)' }} />
-                  <Link to="/library/staff-room" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Wand2 className="w-4 h-4 shrink-0" />
-                    <span>Staff Room</span>
-                  </Link>
-                  <Link to="/library/gallery" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <TreeDeciduous className="w-4 h-4 shrink-0" />
-                    <span>Ancient Friends</span>
-                  </Link>
-                  <Link to="/library/music-room" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Music className="w-4 h-4 shrink-0" />
-                    <span>Music Room</span>
-                  </Link>
-                  <Link to="/library/ledger" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <ScrollText className="w-4 h-4 shrink-0" />
-                    <span>Scrolls & Records</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <div className="relative group focus-within:z-[100]">
-              <Link to="/council-of-life" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
-                <Leaf className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-                <div className="flex flex-col leading-tight">
-                  <span className="font-serif text-sm lg:text-base">Council<span className="hidden lg:inline"> of Life</span></span>
-                  <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Canopy</span>
-                </div>
-              </Link>
-              <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
-                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/council-of-life" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Leaf className="w-4 h-4 shrink-0" />
-                    <span>Council Portal</span>
-                  </Link>
-                  <Link to="/bug-garden" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Search className="w-4 h-4 shrink-0" />
-                    <span>Bug Garden</span>
-                  </Link>
-                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Globe className="w-4 h-4 shrink-0" />
-                    <span>World Atlas</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            <div className="relative group focus-within:z-[100]">
-              <Link to="/golden-dream" className="text-foreground hover:text-primary transition-mystical flex items-center gap-1.5 lg:gap-2 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded">
-                <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
-                <div className="flex flex-col leading-tight">
-                  <span className="font-serif text-sm lg:text-base"><span className="hidden lg:inline">yOur </span>Golden Dream</span>
-                  <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">The Crown</span>
-                </div>
-              </Link>
-              <div className="absolute top-full right-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-[100]">
-                <div className="bg-popover border border-border rounded-lg shadow-xl py-1.5 min-w-[180px]" style={{ background: 'hsl(var(--popover))' }}>
-                  <Link to="/golden-dream" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Sparkles className="w-4 h-4 shrink-0" />
-                    <span>Vision</span>
-                  </Link>
-                  <Link to="/value-tree" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <TreePine className="w-4 h-4 shrink-0" />
-                    <span>Value Tree</span>
-                  </Link>
-                  <Link to="/support" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
-                    <Heart className="w-4 h-4 shrink-0" />
-                    <span>Support S33D</span>
-                  </Link>
-                  <div className="my-1 mx-2 h-px" style={{ background: 'hsl(var(--border) / 0.3)' }} />
-                  <Link to="/docs" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <ScrollText className="w-4 h-4 shrink-0" />
-                    <span>Rewards Guide</span>
-                  </Link>
-                  <Link to="/roadmap" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <Leaf className="w-4 h-4 shrink-0" />
-                    <span>Roadmap</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {/* Desktop nav — 3 clear destinations */}
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+            {DESKTOP_NAV.map((item) => {
+              const Icon = item.icon;
+              const active = item.prefixes.some(p => location.pathname === p || location.pathname.startsWith(p + "/") || location.pathname.startsWith(p));
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`flex items-center gap-1.5 lg:gap-2 transition-all duration-200 rounded focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 group ${
+                    active ? "text-primary" : "text-foreground hover:text-primary"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
+                  <div className="flex flex-col leading-tight">
+                    <span className="font-serif text-sm lg:text-base">{item.label}</span>
+                    <span className="text-[9px] lg:text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground group-hover:text-primary/70 transition-colors">
+                      {item.subtitle}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </nav>
 
+          {/* Right actions */}
           <div className="flex items-center gap-1 md:gap-2 shrink-0">
             <OfflineIndicator />
+            {/* Search button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setGlobalSearchOpen(true)}
+              title="Search (⌘K)"
+              className="h-8 w-8 md:h-10 md:w-10 hidden md:inline-flex"
+            >
+              <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            </Button>
             {user && <DailySeedCounter remaining={seedsRemaining} compact />}
             {user && <NotificationBell />}
             <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden h-8 w-8 md:h-10 md:w-10">
