@@ -689,7 +689,12 @@ export default function StaffRoomGallery() {
           <LazyStaffImpactPanel />
         </Suspense>
 
-        {/* ═══ Staff Spiral Navigator — Full 144-staff navigable structure ═══ */}
+        {/* ═══ Spiral of Species — Living navigation hub ═══ */}
+        <Suspense fallback={null}>
+          <LazySpiralOfSpecies />
+        </Suspense>
+
+        {/* ═══ Staff Spiral Navigator — Detailed 144-staff structure ═══ */}
         <Suspense fallback={null}>
           <LazyStaffSpiralNavigator />
         </Suspense>
