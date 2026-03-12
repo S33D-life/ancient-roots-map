@@ -294,6 +294,18 @@ export default function StaffRoomGallery() {
   const filteredStaffs = useMemo(() => filterStaffs(allStaffs, filter), [allStaffs, filter]);
   const activeStaff = filteredStaffs[activeIndex] || filteredStaffs[0];
 
+  // Fetch actual claimed staff count from ceremony_logs
+  useEffect(() => {
+    supabase
+      .from("ceremony_logs" as any)
+      .select("staff_code", { count: "exact", head: false })
+      .eq("ceremony_type", "awakening")
+      .then(({ data }) => {
+        const unique = new Set((data || []).map((d: any) => d.staff_code));
+        setClaimedCount(unique.size);
+      });
+  }, []);
+
   // Deep-link: open a specific staff from ?staff=CODE
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
