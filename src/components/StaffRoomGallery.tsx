@@ -681,6 +681,11 @@ export default function StaffRoomGallery() {
           )}
         </AnimatePresence>
 
+        {/* ═══ Ceremonial Circle — 36 Founding Staffs ═══ */}
+        <Suspense fallback={null}>
+          <LazyCeremonialCircle />
+        </Suspense>
+
         {/* ═══ Founding Patron Offering — Value Explainer ═══ */}
         <Suspense fallback={null}>
           <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-5 space-y-3">
