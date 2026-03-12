@@ -181,6 +181,13 @@ const TreePageHero = ({
             )}
           </div>
 
+          {/* Staff patron badge if mapped by patron */}
+          <div className="flex justify-center mb-4">
+            <Suspense fallback={null}>
+              <StaffPatronMapperBadge mapperId={tree.created_by} />
+            </Suspense>
+          </div>
+
           {/* Phenology */}
           {tree.species && (
             <div className="flex justify-center mb-6">
