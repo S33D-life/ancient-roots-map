@@ -18,8 +18,9 @@ export interface SubRegionEntry {
   tagline: string;
   /** Emoji or icon prefix */
   icon: string;
-  /** Province value in research_trees.province (for DB counts) */
-  provinceKey: string;
+  /** Province value in research_trees.province (for DB counts).
+   *  Can be a single string (exact match) or an array of strings (OR match). */
+  provinceKey: string | string[];
 }
 
 /** Geographic vocabulary label per country */
@@ -27,6 +28,8 @@ export const SUB_REGION_LABELS: Record<string, string> = {
   switzerland: "Cantons",
   indonesia: "Islands",
   "united-states": "States",
+  "united-kingdom": "Regions",
+  italy: "Regions",
 };
 
 const SUB_REGION_REGISTRY: SubRegionEntry[] = [
@@ -138,6 +141,82 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     tagline: "Urban oaks, Hudson Valley elders & Adirondack giants",
     icon: "🗽",
     provinceKey: "New York",
+  },
+  {
+    name: "California",
+    slug: "california",
+    countrySlug: "united-states",
+    tagline: "Redwood cathedrals, desert Joshuas & coastal live oaks",
+    icon: "🌲",
+    provinceKey: "California",
+  },
+  {
+    name: "Washington",
+    slug: "washington",
+    countrySlug: "united-states",
+    tagline: "Olympic rainforest giants, Cascadian firs & urban cedars",
+    icon: "🏔️",
+    provinceKey: "Washington",
+  },
+
+  // United Kingdom — Regions
+  {
+    name: "England",
+    slug: "england",
+    countrySlug: "united-kingdom",
+    tagline: "Ancient oaks, churchyard yews & royal park veterans",
+    icon: "🏰",
+    provinceKey: ["East Midlands", "East of England", "London", "North West England", "Northern England & Lake District", "South East England", "South West England", "West Midlands", "Yorkshire & Humber", "Chapter 16", "Chapter 17", "Chapter 18"],
+  },
+  {
+    name: "Wales",
+    slug: "wales",
+    countrySlug: "united-kingdom",
+    tagline: "Sacred yews, Celtic sessile oaks & valley ash elders",
+    icon: "🐉",
+    provinceKey: "Wales",
+  },
+  {
+    name: "Scotland",
+    slug: "scotland",
+    countrySlug: "united-kingdom",
+    tagline: "Highland pines, Caledonian relicts & ancient yews",
+    icon: "🦌",
+    provinceKey: ["Scotland — East & Edinburgh", "Scotland — Highlands & Islands", "Scotland — West & Glasgow"],
+  },
+  {
+    name: "Northern Ireland",
+    slug: "northern-ireland",
+    countrySlug: "united-kingdom",
+    tagline: "Dark Hedges beeches, lakeland oaks & ancient ash",
+    icon: "☘️",
+    provinceKey: "Northern Ireland",
+  },
+
+  // Italy — Regions
+  {
+    name: "Tuscany",
+    slug: "tuscany",
+    countrySlug: "italy",
+    tagline: "Renaissance cypresses, Chianti oaks & sacred olive groves",
+    icon: "🏛️",
+    provinceKey: "Tuscany",
+  },
+  {
+    name: "Umbria",
+    slug: "umbria",
+    countrySlug: "italy",
+    tagline: "Franciscan olives, valley oaks & Apennine beeches",
+    icon: "⛪",
+    provinceKey: "Umbria",
+  },
+  {
+    name: "Sicily",
+    slug: "sicily",
+    countrySlug: "italy",
+    tagline: "Etna chestnuts, ancient olives & Hundred Horse Giant",
+    icon: "🌋",
+    provinceKey: "Sicily",
   },
 ];
 
