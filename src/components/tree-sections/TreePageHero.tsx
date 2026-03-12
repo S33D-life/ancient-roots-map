@@ -90,7 +90,7 @@ const TreePageHero = ({
             alt={tree.name}
             className="w-full h-full object-cover opacity-30 cursor-pointer"
             loading="eager"
-            onClick={openImageFS}
+            onClick={() => openImageFS()}
             role="button"
             aria-label="View image fullscreen"
           />
