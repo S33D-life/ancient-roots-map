@@ -2,14 +2,18 @@
  * HeartwoodLanding — the atmospheric entrance to the Heartwood Library.
  * Now navigates to standalone room routes instead of setting internal tab state.
  */
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Smartphone, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import LibraryRoomGrid, { EmberDrift } from "@/components/LibraryRoomGrid";
 import LibraryVaultPreview from "@/components/LibraryVaultPreview";
 import Footer from "@/components/Footer";
 import TetolBridge from "@/components/TetolBridge";
+import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MantleClock = lazy(() => import("@/components/MantleClock"));
 
