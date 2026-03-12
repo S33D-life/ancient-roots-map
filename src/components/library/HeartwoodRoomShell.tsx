@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import TetolBridge from "@/components/TetolBridge";
 import Footer from "@/components/Footer";
+import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 
 interface HeartwoodRoomShellProps {
   roomLabel: string;
