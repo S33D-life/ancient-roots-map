@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     .limit(1)
     .maybeSingle();
 
-  const imageUrl = photoOffering?.media_url || `${APP_URL}/pwa-icon-512.png`;
+  const imageUrl = photoOffering?.media_url || `${APP_URL}/og/s33d-share-default.jpg`;
   const treeName = tree.name || "Ancient Friend";
   const species = tree.species || "Unknown species";
   const location = tree.nation || "Unknown location";
@@ -62,6 +62,8 @@ Deno.serve(async (req) => {
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:image" content="${escapeHtml(imageUrl)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:url" content="${escapeHtml(pageUrl)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="S33D.life — The Living Atlas of Ancient Friends">
