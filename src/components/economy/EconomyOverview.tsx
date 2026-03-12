@@ -102,60 +102,21 @@ const EconomyOverview = () => {
         </p>
       </motion.div>
 
-      {/* ═══ 2. Live Circulation Stats ═══ */}
+      {/* ═══ 2. Live Circulation Stats — Unified EconomySignals ═══ */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
       >
-        <div className="flex flex-wrap justify-center gap-3">
-          {[
-            {
-              icon: <Heart className="w-4 h-4" />,
-              label: "S33D Hearts",
-              sublabel: "currently minted",
-              value: stats?.totalHeartsMinted.toLocaleString() || "0",
-              color: "hsl(0, 65%, 55%)",
-            },
-            {
-              icon: <Sprout className="w-4 h-4" />,
-              label: "Species Hearts",
-              sublabel: "currently recorded",
-              value: stats?.totalSpeciesHearts.toLocaleString() || "0",
-              color: "hsl(var(--primary))",
-            },
-            {
-              icon: <Shield className="w-4 h-4" />,
-              label: "Influence",
-              sublabel: "currently earned",
-              value: stats?.totalInfluence.toLocaleString() || "0",
-              color: "hsl(42, 80%, 50%)",
-            },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border/30 bg-card/40 backdrop-blur-sm min-w-[140px]"
-            >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${item.color}15` }}
-              >
-                <span style={{ color: item.color }}>{item.icon}</span>
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-serif font-bold tabular-nums text-foreground">
-                  {item.value}
-                </p>
-                <p className="text-[9px] font-serif text-muted-foreground leading-tight">
-                  {item.label}
-                </p>
-                <p className="text-[8px] font-serif text-muted-foreground/50">
-                  {item.sublabel}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <EconomySignals
+          balances={{
+            s33dHearts: stats?.totalHeartsMinted || 0,
+            speciesHearts: stats?.totalSpeciesHearts || 0,
+            influence: stats?.totalInfluence || 0,
+          }}
+          variant="minted"
+          size="md"
+        />
       </motion.div>
 
       {/* ═══ 3. Distribution Compass ═══ */}
