@@ -366,6 +366,14 @@ const Header = () => {
                     <Leaf className="w-4 h-4 shrink-0" />
                     <span>Council Portal</span>
                   </Link>
+                  <Link to="/bug-garden" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Search className="w-4 h-4 shrink-0" />
+                    <span>Bug Garden</span>
+                  </Link>
+                  <Link to="/atlas" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Globe className="w-4 h-4 shrink-0" />
+                    <span>World Atlas</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -383,9 +391,22 @@ const Header = () => {
                     <Sparkles className="w-4 h-4 shrink-0" />
                     <span>Vision</span>
                   </Link>
+                  <Link to="/value-tree" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <TreePine className="w-4 h-4 shrink-0" />
+                    <span>Value Tree</span>
+                  </Link>
+                  <Link to="/support" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none">
+                    <Heart className="w-4 h-4 shrink-0" />
+                    <span>Support S33D</span>
+                  </Link>
+                  <div className="my-1 mx-2 h-px" style={{ background: 'hsl(var(--border) / 0.3)' }} />
                   <Link to="/docs" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
                     <ScrollText className="w-4 h-4 shrink-0" />
                     <span>Rewards Guide</span>
+                  </Link>
+                  <Link to="/roadmap" className="flex items-center gap-2 px-4 py-2 text-sm font-serif text-popover-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Leaf className="w-4 h-4 shrink-0" />
+                    <span>Roadmap</span>
                   </Link>
                 </div>
               </div>

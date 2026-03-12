@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { to: "/value-tree", icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/harvest", "/cosmic", "/how-hearts-work", "/patron-offering"] },
   // Center slot reserved for Add button
   { to: "/library", icon: BookOpen, label: "Heartwood", matchPrefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger"] },
-  { to: "/council-of-life", icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas"] },
+  { to: "/council-of-life", icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas", "/support", "/press"] },
 ] as const;
 
 const BottomNav = () => {
