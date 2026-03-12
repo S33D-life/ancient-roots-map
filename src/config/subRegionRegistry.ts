@@ -26,7 +26,7 @@ export interface SubRegionEntry {
 export const SUB_REGION_LABELS: Record<string, string> = {
   switzerland: "Cantons",
   indonesia: "Islands",
-  // Future: "united-kingdom": "Counties", "united-states": "States", etc.
+  "united-states": "States",
 };
 
 const SUB_REGION_REGISTRY: SubRegionEntry[] = [
