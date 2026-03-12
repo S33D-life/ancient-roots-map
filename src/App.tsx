@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense, type ComponentType } from "react";
+import { useConnectionResilience } from "@/hooks/use-connection-resilience";
 import { Navigate } from "react-router-dom";
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
