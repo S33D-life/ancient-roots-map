@@ -22,6 +22,7 @@ import { CHANNELS, TOTAL_SUPPLY, VALUE_BRANCHES, type DistributionChannel } from
 import DistributionCompass from "./DistributionCompass";
 import EmissionCurve from "./EmissionCurve";
 import PatronFlowBanner from "./PatronFlowBanner";
+import FoundingStaffRoots from "./FoundingStaffRoots";
 
 interface LiveStats {
   totalHeartsMinted: number;
