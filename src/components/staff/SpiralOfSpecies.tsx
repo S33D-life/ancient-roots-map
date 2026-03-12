@@ -822,11 +822,25 @@ function ConstellationMap({
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.3 + gi * 0.1, type: "spring", stiffness: 130 }}
-            className="absolute group"
-            style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%, -50%)" }}
+            className={`absolute group node-breathe ${
+              highlightedSpecies && highlightedSpecies !== group.speciesCode
+                ? "constellation-dimmed"
+                : highlightedSpecies === group.speciesCode ? "constellation-highlighted" : ""
+            }`}
+            style={{
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              ["--breathe-dur" as string]: `${6 + gi}s`,
+              ["--breathe-delay" as string]: `${gi * 0.7}s`,
+            }}
+            onMouseEnter={() => setHighlightedSpecies(group.speciesCode)}
+            onMouseLeave={() => setHighlightedSpecies(null)}
           >
             <button
-              onClick={() => onSelectSpecies(group)}
+              onClick={() => {
+                triggerRipple(pos.x, pos.y, colors.core);
+                onSelectSpecies(group);
+              }}
               className="block relative focus:outline-none"
             >
               {/* Nebula glow */}
