@@ -131,8 +131,9 @@ const TreeDetailPage = () => {
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
   const [showLoreWhisper, setShowLoreWhisper] = useState(true);
+  const [witnessCount, setWitnessCount] = useState(0);
+  const witnessSessionId = searchParams.get("witness") || undefined;
 
-  // Capture referral params from shared tree links
   useEffect(() => {
     const invite = searchParams.get("invite");
     const from = searchParams.get("from");
