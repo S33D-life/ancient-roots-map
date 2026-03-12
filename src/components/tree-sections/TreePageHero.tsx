@@ -14,6 +14,8 @@ import PhenologyBadge from "@/components/PhenologyBadge";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 
+const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
+
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 interface TreePageHeroProps {
