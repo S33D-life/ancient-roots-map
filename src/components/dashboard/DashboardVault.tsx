@@ -66,6 +66,14 @@ const DashboardVault = ({ userId }: Props) => {
     fetchCounts();
   }, [userId]);
 
+  useEffect(() => {
+    supabase
+      .from("council_participation_rewards")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .then(({ count }) => setCouncilCount(count || 0));
+  }, [userId]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -87,16 +95,6 @@ const DashboardVault = ({ userId }: Props) => {
   const milestoneHearts = milestones.reduce((sum, [count, threshold, hearts]) =>
     count >= threshold ? sum + hearts : sum, 0);
   const totalHearts = baseHearts + milestoneHearts + totalSeedHeartsEarned;
-
-  // Fetch council participation count
-  const [councilCount, setCouncilCount] = useState(0);
-  useEffect(() => {
-    supabase
-      .from("council_participation_rewards")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .then(({ count }) => setCouncilCount(count || 0));
-  }, [userId]);
 
   return (
     <motion.div
