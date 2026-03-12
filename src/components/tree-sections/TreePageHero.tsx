@@ -4,8 +4,12 @@
  * gold leaf vignette, and primary CTAs.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import FullscreenShell from "@/components/FullscreenShell";
+import FullscreenToggle from "@/components/FullscreenToggle";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
