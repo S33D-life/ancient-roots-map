@@ -34,6 +34,7 @@ const DashboardVault = ({ userId }: Props) => {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [heartFilter, setHeartFilter] = useState<string | null>(null);
   const [showReawaken, setShowReawaken] = useState(false);
+  const [councilCount, setCouncilCount] = useState(0);
   const wallet = useWallet(userId);
   const speciesTokens = useSpeciesTokens(userId);
 
