@@ -15,7 +15,7 @@ export async function preloadCollectiveTrees() {
       return { success: false, error: 'No trees found' };
     }
 
-    console.log(`Parsed ${csvRows.length} trees from collective CSV`);
+    
 
     // Get current user (or use system user if no user logged in)
     const { data: { user } } = await supabase.auth.getUser();
@@ -49,10 +49,10 @@ export async function preloadCollectiveTrees() {
       }
       
       totalInserted += batch.length;
-      console.log(`Inserted batch ${i / batchSize + 1}: ${totalInserted}/${treesToInsert.length} trees`);
+      
     }
 
-    console.log(`Successfully preloaded ${totalInserted} collective trees`);
+    
     return { success: true, inserted: totalInserted };
   } catch (error) {
     console.error('Preload error:', error);

@@ -332,7 +332,6 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   // Initialize map — default to Leaflet
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
-    console.log('[Atlas] Defaulting to Leaflet — WebGL rendering under investigation');
     setMapStatus("leaflet");
   }, []);
 

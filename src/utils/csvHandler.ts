@@ -40,7 +40,7 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
 
   if (firstLineHasWhat3words) {
     // Headerless format: species, what3words, notes
-    console.log('Detected headerless CSV format (species, what3words, notes)');
+    
     
     for (let i = 0; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim());
@@ -50,7 +50,7 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
       const notes = values[2] || '';
       
       if (!species || !what3wordsAddress || !what3wordsAddress.startsWith('///')) {
-        console.log(`Skipping invalid row ${i}: ${lines[i]}`);
+        
         continue;
       }
 
@@ -136,7 +136,7 @@ export const parseCSV = (csvText: string): TreeCSVRow[] => {
     }
   }
 
-  console.log(`Parsed ${trees.length} trees from CSV`);
+  
   return trees;
 };
 
