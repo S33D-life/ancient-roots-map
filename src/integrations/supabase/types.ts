@@ -3617,6 +3617,12 @@ export type Database = {
         Row: {
           anchor_chain: string | null
           anchored_at: string | null
+          completeness_score: number | null
+          conversion_notes: string | null
+          conversion_status: string
+          converted_at: string | null
+          converted_by: string | null
+          converted_tree_id: string | null
           country: string
           created_at: string
           crown_spread: string | null
@@ -3654,6 +3660,12 @@ export type Database = {
         Insert: {
           anchor_chain?: string | null
           anchored_at?: string | null
+          completeness_score?: number | null
+          conversion_notes?: string | null
+          conversion_status?: string
+          converted_at?: string | null
+          converted_by?: string | null
+          converted_tree_id?: string | null
           country?: string
           created_at?: string
           crown_spread?: string | null
@@ -3691,6 +3703,12 @@ export type Database = {
         Update: {
           anchor_chain?: string | null
           anchored_at?: string | null
+          completeness_score?: number | null
+          conversion_notes?: string | null
+          conversion_status?: string
+          converted_at?: string | null
+          converted_by?: string | null
+          converted_tree_id?: string | null
           country?: string
           created_at?: string
           crown_spread?: string | null
@@ -3726,6 +3744,13 @@ export type Database = {
           verified_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "research_trees_converted_tree_id_fkey"
+            columns: ["converted_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "research_trees_linked_tree_id_fkey"
             columns: ["linked_tree_id"]
