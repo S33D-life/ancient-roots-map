@@ -130,6 +130,7 @@ const RootstoneImporterPage = lazyImportWithRetry(() => import("./pages/Rootston
 const WandererProfilePage = lazyImportWithRetry(() => import("./pages/WandererProfilePage"), "wanderer-profile");
 const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/LivingForestRoadmapPage"), "roadmap");
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
+const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
 
 const queryClient = new QueryClient({
   defaultOptions: {
