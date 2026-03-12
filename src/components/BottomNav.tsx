@@ -27,7 +27,7 @@ const BottomNav = () => {
         transform: "translate3d(0,0,0)",
       }}
     >
-      <div className="flex items-center justify-around py-1.5">
+      <div className="flex items-center justify-around py-1">
         {/* First two nav items */}
         {NAV_ITEMS.slice(0, 2).map((item) => (
           <NavItem key={item.to} item={item} pathname={pathname} />
