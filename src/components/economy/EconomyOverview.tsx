@@ -200,6 +200,9 @@ const EconomyOverview = () => {
       {/* ═══ 4b. Founding Patron Flow ═══ */}
       <PatronFlowBanner />
 
+      {/* ═══ 4c. Founding Staff Roots ═══ */}
+      <FoundingStaffRoots />
+
       {/* ═══ 5. Emission Curve ═══ */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
