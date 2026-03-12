@@ -317,8 +317,12 @@ const Header = () => {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1 md:gap-2 shrink-0">
+            <div className="flex items-center gap-1 md:gap-2 shrink-0">
             <OfflineIndicator />
+            {/* Desktop companion: pair button or connected indicator */}
+            <span className="hidden md:flex items-center">
+              <CompanionPairDialog />
+            </span>
             {/* Search button */}
             <Button
               variant="ghost"

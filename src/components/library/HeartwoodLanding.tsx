@@ -186,4 +186,47 @@ const HeartwoodLanding = () => {
   );
 };
 
+/** Dismissible first-time companion hint — desktop only */
+function CompanionHint() {
+  const isMobile = useIsMobile();
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem("s33d_companion_hint_dismissed") === "1"; } catch { return false; }
+  });
+
+  if (isMobile || dismissed) return null;
+
+  const dismiss = () => {
+    setDismissed(true);
+    try { localStorage.setItem("s33d_companion_hint_dismissed", "1"); } catch {}
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        className="flex items-center gap-3 px-4 py-2.5 rounded-xl border mb-6 max-w-md"
+        style={{
+          background: 'hsl(var(--primary) / 0.06)',
+          borderColor: 'hsl(var(--primary) / 0.2)',
+        }}
+      >
+        <Smartphone className="w-4 h-4 shrink-0" style={{ color: 'hsl(var(--primary))' }} />
+        <p className="text-xs font-serif" style={{ color: 'hsl(var(--foreground) / 0.7)' }}>
+          Try connecting your phone as a <span style={{ color: 'hsl(var(--primary))' }}>Companion</span> — use it to explore S33D hands-free.
+        </p>
+        <button
+          onClick={dismiss}
+          className="p-1 rounded-full shrink-0 min-w-[28px] min-h-[28px] flex items-center justify-center transition-colors"
+          style={{ color: 'hsl(var(--muted-foreground))' }}
+          aria-label="Dismiss hint"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 export default HeartwoodLanding;
