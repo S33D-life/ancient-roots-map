@@ -31,6 +31,7 @@ import { toast } from "sonner";
 
 const LazyStaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const LazyCeremonialCircle = lazy(() => import("@/components/staff/CeremonialCircle"));
+const LazyStaffSpiralNavigator = lazy(() => import("@/components/staff/StaffSpiralNavigator"));
 type ViewMode = "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
@@ -680,6 +681,11 @@ export default function StaffRoomGallery() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ═══ Staff Spiral Navigator — Full 144-staff navigable structure ═══ */}
+        <Suspense fallback={null}>
+          <LazyStaffSpiralNavigator />
+        </Suspense>
 
         {/* ═══ Ceremonial Circle — 36 Founding Staffs ═══ */}
         <Suspense fallback={null}>
