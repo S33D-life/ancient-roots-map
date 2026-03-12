@@ -781,10 +781,10 @@ const ValueTreePage = () => {
                 </div>
               )}
               <EconomyOverview />
-              {/* Heart Flow Ledger */}
+              {/* Heart Flow Ledger — unified, same component as Vault */}
               {currentUserId && (
                 <div className="mt-8" id="ledger">
-                  <HeartFlowLedger userId={currentUserId} />
+                  <VaultHeartLedger userId={currentUserId} />
                 </div>
               )}
             </Suspense>
