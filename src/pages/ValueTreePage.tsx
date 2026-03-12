@@ -21,6 +21,7 @@ const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
 const VaultHeartLedger = lazy(() => import("@/components/dashboard/vault/VaultHeartLedger"));
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
+const EcosystemMomentum = lazy(() => import("@/components/EcosystemMomentum"));
 
 /* ─── Value-node data model ────────────────────────────────── */
 
