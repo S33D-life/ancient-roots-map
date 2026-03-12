@@ -432,7 +432,27 @@ function ConstellationMap({
       exit={{ opacity: 0 }}
       className="relative mx-auto touch-pan-y"
       style={{ width: "min(100%, 560px)", maxHeight: "85vh", aspectRatio: "1" }}
+      {...interactionProps}
     >
+      {/* Ambient rotation wrapper */}
+      <div className={`absolute inset-0 spiral-ambient ${isInteracting ? "is-interacting" : ""}`}>
+
+      {/* Focus ripple overlay */}
+      <AnimatePresence>
+        {ripple && (
+          <div
+            key={ripple.key}
+            className="focus-ripple"
+            style={{
+              left: `${ripple.x}%`,
+              top: `${ripple.y}%`,
+              border: `2px solid ${ripple.color}`,
+              boxShadow: `0 0 12px ${ripple.color}`,
+            }}
+            onAnimationEnd={() => setRipple(null)}
+          />
+        )}
+      </AnimatePresence>
       {/* ── Canvas heart flow layer ── */}
       <SpiralHeartFlow
         containerRef={mapRef}
