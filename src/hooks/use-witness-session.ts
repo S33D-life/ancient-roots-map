@@ -348,5 +348,10 @@ export function useWitnessSession(treeId: string) {
     cancelSession,
     companionPaired,
     clearError: () => setError(null),
+    // Environmental sensing
+    lightReading,
+    soundReading,
+    setLightReading,
+    setSoundReading,
   };
 }
