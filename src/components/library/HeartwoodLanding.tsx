@@ -117,6 +117,9 @@ const HeartwoodLanding = () => {
           </div>
         </div>
 
+        {/* First-time Companion hint — desktop only */}
+        <CompanionHint />
+
         {/* CTAs */}
         <div className="flex flex-wrap justify-center gap-3 mb-10">
           <button
@@ -141,6 +144,9 @@ const HeartwoodLanding = () => {
           >
             Your Hearth
           </button>
+          <CompanionPairDialog
+            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
+          />
           <button
             onClick={() => navigate("/value-tree?tab=earn")}
             className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
