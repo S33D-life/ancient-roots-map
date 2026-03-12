@@ -84,6 +84,8 @@ const OfferingSortControls = lazy(() => import("@/components/OfferingSortControl
 const PhenologyBadge = lazy(() => import("@/components/PhenologyBadge"));
 const PhenologyObservationButton = lazy(() => import("@/components/PhenologyObservationButton"));
 const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
+const CoWitnessPanel = lazy(() => import("@/components/witness/CoWitnessPanel"));
+const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"));
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -129,8 +131,9 @@ const TreeDetailPage = () => {
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
   const [showLoreWhisper, setShowLoreWhisper] = useState(true);
+  const [witnessCount, setWitnessCount] = useState(0);
+  const witnessSessionId = searchParams.get("witness") || undefined;
 
-  // Capture referral params from shared tree links
   useEffect(() => {
     const invite = searchParams.get("invite");
     const from = searchParams.get("from");
@@ -188,7 +191,17 @@ const TreeDetailPage = () => {
     return () => clearTimeout(timer);
   }, [tree?.lore_text]);
 
-  // Listen for successful whisper sends to trigger ripple
+  // Fetch witness count for this tree
+  useEffect(() => {
+    if (!id) return;
+    supabase
+      .from("witness_sessions" as any)
+      .select("id", { count: "exact", head: true })
+      .eq("tree_id", id)
+      .eq("status", "witnessed")
+      .then(({ count }) => setWitnessCount(count || 0));
+  }, [id]);
+
   useEffect(() => {
     const handler = () => {
       setWhisperRippleVisible(true);
@@ -459,6 +472,11 @@ const TreeDetailPage = () => {
                     Last: {new Date(checkinStats.lastVisit).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                   </span>
                 )}
+                {witnessCount > 0 && (
+                  <Suspense fallback={null}>
+                    <WitnessedBadge witnessCount={witnessCount} />
+                  </Suspense>
+                )}
               </div>
             )}
 
@@ -623,7 +641,17 @@ const TreeDetailPage = () => {
               onRefresh={refetchCheckins}
             />
 
-            {/* Seed Economy */}
+            {/* Co-Witness Scan */}
+            {userId && tree && (
+              <Suspense fallback={null}>
+                <CoWitnessPanel
+                  treeId={id!}
+                  treeName={tree.name}
+                  userId={userId}
+                />
+              </Suspense>
+            )}
+
             <SeedPlanter
               treeId={id!}
               treeLat={tree.latitude}

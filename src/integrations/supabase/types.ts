@@ -6158,6 +6158,112 @@ export type Database = {
         }
         Relationships: []
       }
+      witness_sessions: {
+        Row: {
+          companion_channel: string | null
+          created_at: string
+          expires_at: string
+          hearts_awarded: number
+          id: string
+          initiator_accuracy_m: number | null
+          initiator_checkin_id: string | null
+          initiator_confirmed: boolean
+          initiator_id: string
+          initiator_lat: number | null
+          initiator_lng: number | null
+          initiator_offerings: string[] | null
+          initiator_photos: string[] | null
+          joiner_accuracy_m: number | null
+          joiner_checkin_id: string | null
+          joiner_confirmed: boolean
+          joiner_id: string | null
+          joiner_lat: number | null
+          joiner_lng: number | null
+          joiner_offerings: string[] | null
+          joiner_photos: string[] | null
+          status: string
+          tree_id: string
+          updated_at: string
+          verified_at: string | null
+        }
+        Insert: {
+          companion_channel?: string | null
+          created_at?: string
+          expires_at?: string
+          hearts_awarded?: number
+          id?: string
+          initiator_accuracy_m?: number | null
+          initiator_checkin_id?: string | null
+          initiator_confirmed?: boolean
+          initiator_id: string
+          initiator_lat?: number | null
+          initiator_lng?: number | null
+          initiator_offerings?: string[] | null
+          initiator_photos?: string[] | null
+          joiner_accuracy_m?: number | null
+          joiner_checkin_id?: string | null
+          joiner_confirmed?: boolean
+          joiner_id?: string | null
+          joiner_lat?: number | null
+          joiner_lng?: number | null
+          joiner_offerings?: string[] | null
+          joiner_photos?: string[] | null
+          status?: string
+          tree_id: string
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Update: {
+          companion_channel?: string | null
+          created_at?: string
+          expires_at?: string
+          hearts_awarded?: number
+          id?: string
+          initiator_accuracy_m?: number | null
+          initiator_checkin_id?: string | null
+          initiator_confirmed?: boolean
+          initiator_id?: string
+          initiator_lat?: number | null
+          initiator_lng?: number | null
+          initiator_offerings?: string[] | null
+          initiator_photos?: string[] | null
+          joiner_accuracy_m?: number | null
+          joiner_checkin_id?: string | null
+          joiner_confirmed?: boolean
+          joiner_id?: string | null
+          joiner_lat?: number | null
+          joiner_lng?: number | null
+          joiner_offerings?: string[] | null
+          joiner_photos?: string[] | null
+          status?: string
+          tree_id?: string
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "witness_sessions_initiator_checkin_id_fkey"
+            columns: ["initiator_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "witness_sessions_joiner_checkin_id_fkey"
+            columns: ["joiner_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "witness_sessions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       tree_sources_public: {
