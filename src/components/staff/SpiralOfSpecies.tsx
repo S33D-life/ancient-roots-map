@@ -657,6 +657,17 @@ function ConstellationMap({
                 onClick={() => triggerRipple(pos.x, pos.y, colors.core)}
               >
                 <Link to={ROUTES.STAFF(staff.code)} className="block relative">
+                  {/* Species halo */}
+                  <div
+                    className="species-halo"
+                    style={{
+                      width: "22px",
+                      height: "22px",
+                      background: `radial-gradient(circle, ${colors.glow}20, transparent 70%)`,
+                      ["--halo-dur" as string]: `${5 + (i % 4)}s`,
+                      ["--halo-delay" as string]: `${(i * 0.5) % 3}s`,
+                    }}
+                  />
                   {/* Owner halo */}
                   {isOwned && (
                     <motion.div
