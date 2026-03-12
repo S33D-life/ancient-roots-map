@@ -210,14 +210,14 @@ const VaultHeartLedger = ({ userId, externalFilter, onFilterChange, compact = fa
           </span>
         </div>
 
-        {/* Filter chips */}
-        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+        {/* Filter chips — horizontal scroll on mobile */}
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
           {FILTERS.map(f => (
             <Button
               key={f.value}
               variant={filter === f.value ? "default" : "ghost"}
               size="sm"
-              className={`text-[10px] h-7 px-2.5 font-serif tracking-wide rounded-full shrink-0 ${
+              className={`text-[10px] h-8 sm:h-7 px-3 sm:px-2.5 font-serif tracking-wide rounded-full shrink-0 active:scale-95 transition-transform ${
                 filter === f.value
                   ? "bg-primary/15 text-primary border border-primary/30"
                   : "text-muted-foreground"
