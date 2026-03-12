@@ -60,7 +60,7 @@ const goldenDreamRooms: GoldenDreamRoom[] = [
 
 const GoldenDreamPage = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("golden-dream");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen();
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
   const { resolvedTheme } = useTheme();
