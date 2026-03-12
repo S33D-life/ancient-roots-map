@@ -1,5 +1,6 @@
 import { type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hapticTap } from "@/lib/haptics";
 
 interface ControlButtonProps {
   icon: LucideIcon;
@@ -11,7 +12,7 @@ interface ControlButtonProps {
 }
 
 /**
- * Touch-friendly control button for the companion controller surface.
+ * Touch-friendly control button with haptic feedback.
  * Minimum 44px tap target for mobile ergonomics.
  */
 export default function ControlButton({
@@ -22,9 +23,14 @@ export default function ControlButton({
   large = false,
   className,
 }: ControlButtonProps) {
+  const handlePress = () => {
+    hapticTap();
+    onPress();
+  };
+
   return (
     <button
-      onClick={onPress}
+      onClick={handlePress}
       className={cn(
         "flex flex-col items-center justify-center rounded-xl transition-all",
         "bg-secondary/30 border border-border/30 text-foreground/80",

@@ -24,6 +24,10 @@ export interface RoomHandlers {
   onHighlightNode?: (nodeId: string) => void;
   onExportView?: () => void;
   onSelectChart?: (chartId: string) => void;
+  onPointerMove?: (x: number, y: number) => void;
+  onPointerHide?: () => void;
+  onNavigateRoom?: (room: string) => void;
+  onSendToDesktop?: (entityType: string, entityId: string, label?: string) => void;
 }
 
 export function useCompanionDisplay() {
@@ -48,6 +52,10 @@ export function useCompanionDisplay() {
       case "highlight_node": h.onHighlightNode?.(cmd.nodeId); break;
       case "export_view": h.onExportView?.(); break;
       case "select_chart": h.onSelectChart?.(cmd.chartId); break;
+      case "pointer_move": h.onPointerMove?.(cmd.x, cmd.y); break;
+      case "pointer_hide": h.onPointerHide?.(); break;
+      case "navigate_room": h.onNavigateRoom?.(cmd.room); break;
+      case "send_to_desktop": h.onSendToDesktop?.(cmd.entityType, cmd.entityId, cmd.label); break;
     }
   }, []);
 

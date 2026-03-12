@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw } from "lucide-react";
+import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanionSession } from "@/hooks/use-companion-session";
 import type { CompanionRoomState } from "@/lib/companion-types";
 import { Input } from "@/components/ui/input";
+import { hapticSuccess } from "@/lib/haptics";
 import MapController from "./controllers/MapController";
 import StaffController from "./controllers/StaffController";
 import GalleryController from "./controllers/GalleryController";
 import LedgerController from "./controllers/LedgerController";
-
-/**
- * CompanionController — the full mobile controller page.
- * Handles joining a session and rendering room-specific controls.
- * Reads ?code= from URL params for QR-scan auto-join.
- */
+import RoomNav from "./controllers/RoomNav";
+import PointerPad from "./controllers/PointerPad";
+import FullscreenToggle from "./controllers/FullscreenToggle";
 
 export default function CompanionController() {
   const [searchParams] = useSearchParams();
@@ -25,11 +23,8 @@ export default function CompanionController() {
   const [autoJoinAttempted, setAutoJoinAttempted] = useState(false);
 
   const { session, paired, pairTimedOut, roomState, joinSession, sendCommand, disconnect } =
-    useCompanionSession({
-      role: "controller",
-    });
+    useCompanionSession({ role: "controller" });
 
-  // Auto-join if ?code= is present in URL
   useEffect(() => {
     if (urlCode && urlCode.length === 6 && !autoJoinAttempted && !session) {
       setAutoJoinAttempted(true);
@@ -37,6 +32,11 @@ export default function CompanionController() {
       joinSession(urlCode);
     }
   }, [urlCode, autoJoinAttempted, session, joinSession]);
+
+  // Haptic on successful pair
+  useEffect(() => {
+    if (paired) hapticSuccess();
+  }, [paired]);
 
   const handleJoin = () => {
     setError("");
@@ -53,12 +53,8 @@ export default function CompanionController() {
     setError("");
   };
 
-  const fallbackState: CompanionRoomState = roomState ?? {
-    room: "unknown",
-    isFullscreen: false,
-  };
+  const fallbackState: CompanionRoomState = roomState ?? { room: "unknown", isFullscreen: false };
 
-  // Render the room-specific controller
   const renderController = () => {
     switch (fallbackState.room) {
       case "map":
@@ -78,7 +74,7 @@ export default function CompanionController() {
               Waiting for desktop to enter a room…
             </p>
             <p className="text-xs text-muted-foreground/60 mt-2">
-              Open a fullscreen view on desktop to see controls here.
+              Use the room buttons above to navigate, or open a fullscreen view on desktop.
             </p>
           </div>
         );
@@ -109,117 +105,106 @@ export default function CompanionController() {
         )}
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6">
+      <main className="flex-1 flex flex-col">
         <AnimatePresence mode="wait">
           {!session ? (
-            /* Pairing form */
             <motion.div
               key="join"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="w-full max-w-xs flex flex-col items-center gap-5"
+              className="flex-1 flex flex-col items-center justify-center p-6"
             >
-              <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
-                <Wifi className="w-8 h-8 text-primary" />
-              </div>
-
-              <div className="text-center">
-                <h2 className="text-lg font-serif text-foreground">Pair with Desktop</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Enter the 6-character code shown on your desktop screen.
-                </p>
-              </div>
-
-              <div className="w-full flex flex-col gap-3">
-                <Input
-                  value={codeInput}
-                  onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
-                  maxLength={6}
-                  placeholder="ABCD23"
-                  className="text-center text-2xl font-mono tracking-[0.3em] h-14 uppercase"
-                  autoFocus
-                  inputMode="text"
-                  autoCapitalize="characters"
-                  autoComplete="off"
-                  onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-                />
-                {error && (
-                  <p className="text-xs text-destructive text-center">{error}</p>
-                )}
-                <button
-                  onClick={handleJoin}
-                  className="w-full py-3 rounded-xl text-sm font-serif min-h-[48px]
-                    bg-primary text-primary-foreground
-                    hover:bg-primary/90 active:scale-[0.98] transition-all"
-                >
-                  Connect
-                </button>
+              <div className="w-full max-w-xs flex flex-col items-center gap-5">
+                <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
+                  <Wifi className="w-8 h-8 text-primary" />
+                </div>
+                <div className="text-center">
+                  <h2 className="text-lg font-serif text-foreground">Pair with Desktop</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Enter the 6-character code shown on your desktop screen.
+                  </p>
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  <Input
+                    value={codeInput}
+                    onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                    maxLength={6}
+                    placeholder="ABCD23"
+                    className="text-center text-2xl font-mono tracking-[0.3em] h-14 uppercase"
+                    autoFocus
+                    inputMode="text"
+                    autoCapitalize="characters"
+                    autoComplete="off"
+                    onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                  />
+                  {error && <p className="text-xs text-destructive text-center">{error}</p>}
+                  <button
+                    onClick={handleJoin}
+                    className="w-full py-3 rounded-xl text-sm font-serif min-h-[48px] bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all"
+                  >
+                    Connect
+                  </button>
+                </div>
               </div>
             </motion.div>
           ) : !paired ? (
-            /* Connecting / timeout state */
             <motion.div
               key="connecting"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4"
+              className="flex-1 flex flex-col items-center justify-center p-6"
             >
-              <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
+                  {pairTimedOut ? (
+                    <AlertCircle className="w-8 h-8 text-destructive" />
+                  ) : (
+                    <Wifi className="w-8 h-8 text-primary animate-pulse" />
+                  )}
+                </div>
                 {pairTimedOut ? (
-                  <AlertCircle className="w-8 h-8 text-destructive" />
+                  <>
+                    <div className="text-center">
+                      <p className="text-sm text-foreground font-serif">Could not connect</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Code <span className="font-mono text-primary">{session.code}</span> may be expired or incorrect.
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleRetry}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-serif min-h-[44px] bg-secondary/40 border border-border/30 text-foreground hover:bg-secondary/60 transition-colors"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Try again
+                    </button>
+                  </>
                 ) : (
-                  <Wifi className="w-8 h-8 text-primary animate-pulse" />
+                  <>
+                    <p className="text-sm text-muted-foreground font-serif">
+                      Connecting to <span className="text-primary font-mono">{session.code}</span>…
+                    </p>
+                    <button
+                      onClick={disconnect}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[36px]"
+                    >
+                      Cancel
+                    </button>
+                  </>
                 )}
               </div>
-
-              {pairTimedOut ? (
-                <>
-                  <div className="text-center">
-                    <p className="text-sm text-foreground font-serif">
-                      Could not connect
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Code <span className="font-mono text-primary">{session.code}</span> may
-                      be expired or incorrect.
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleRetry}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-serif min-h-[44px]
-                      bg-secondary/40 border border-border/30 text-foreground
-                      hover:bg-secondary/60 transition-colors"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Try again
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-muted-foreground font-serif">
-                    Connecting to <span className="text-primary font-mono">{session.code}</span>…
-                  </p>
-                  <button
-                    onClick={disconnect}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors min-h-[36px]"
-                  >
-                    Cancel
-                  </button>
-                </>
-              )}
             </motion.div>
           ) : (
-            /* Controller surface */
             <motion.div
               key="controller"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="w-full max-w-xs"
+              className="flex-1 flex flex-col"
             >
               {/* Connected indicator */}
-              <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="flex items-center justify-center gap-2 py-2">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/40" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
@@ -227,7 +212,23 @@ export default function CompanionController() {
                 <span className="text-xs text-primary font-serif">Connected</span>
               </div>
 
-              {renderController()}
+              {/* Quick room navigation */}
+              <RoomNav currentRoom={fallbackState.room} send={sendCommand} />
+
+              {/* Room-specific controls */}
+              <div className="flex-1 flex flex-col items-center justify-center max-w-xs mx-auto w-full">
+                {renderController()}
+              </div>
+
+              {/* Pointer pad */}
+              <div className="px-4 pb-2">
+                <PointerPad send={sendCommand} />
+              </div>
+
+              {/* Fullscreen toggle */}
+              <div className="px-4 pb-4">
+                <FullscreenToggle isFullscreen={fallbackState.isFullscreen} send={sendCommand} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

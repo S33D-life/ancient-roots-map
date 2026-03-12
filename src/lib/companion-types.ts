@@ -27,7 +27,11 @@ export type CompanionCommand =
   | { type: "close_panel" }
   | { type: "highlight_node"; nodeId: string }
   | { type: "export_view" }
-  | { type: "select_chart"; chartId: string };
+  | { type: "select_chart"; chartId: string }
+  | { type: "pointer_move"; x: number; y: number }
+  | { type: "pointer_hide" }
+  | { type: "navigate_room"; room: CompanionRoom }
+  | { type: "send_to_desktop"; entityType: string; entityId: string; label?: string };
 
 /** Whitelist of valid command types for input validation */
 export const VALID_COMMAND_TYPES = new Set<string>([
@@ -36,6 +40,8 @@ export const VALID_COMMAND_TYPES = new Set<string>([
   "toggle_fullscreen", "enter_fullscreen", "exit_fullscreen",
   "open_panel", "close_panel", "highlight_node",
   "export_view", "select_chart",
+  "pointer_move", "pointer_hide",
+  "navigate_room", "send_to_desktop",
 ]);
 
 /** Sent from desktop → mobile to sync room state */
