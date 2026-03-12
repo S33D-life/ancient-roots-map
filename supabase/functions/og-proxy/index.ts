@@ -272,8 +272,8 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const isMinted = !!mintedRes.data;
     const staffName = staffRes.data?.staff_name || null;
 
-    // Image fallback: photo offering → global default
-    const image = photoRes.data?.media_url || DEFAULT_IMAGE;
+    // Image: use generated og-card SVG (dynamic card with photo/branding)
+    const image = `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}`;
 
     // Title: distinguish NFTree vs Ancient Friend
     const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
