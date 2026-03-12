@@ -57,6 +57,10 @@ export function useWitnessSession(treeId: string) {
   const { session: companionSession, paired: companionPaired } = useCompanion();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  // Environmental snapshot state
+  const [lightReading, setLightReading] = useState<CanopyLightReading | null>(null);
+  const [soundReading, setSoundReading] = useState<AmbientSoundReading | null>(null);
+
   // Subscribe to realtime changes on the session
   useEffect(() => {
     if (!session?.id) return;
