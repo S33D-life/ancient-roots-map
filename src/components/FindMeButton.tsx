@@ -11,6 +11,7 @@ import { Loader2, Crosshair, MapPin, AlertTriangle, Search } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { useGeolocation, GEO_ERROR_CONFIG } from "@/hooks/use-geolocation";
 import AddTreeDialog from "./AddTreeDialog";
+import DiscoveryNudge from "./DiscoveryNudge";
 
 interface FindMeButtonProps {
   onLocationFound?: (lat: number, lng: number) => void;
