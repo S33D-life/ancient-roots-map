@@ -443,12 +443,7 @@ const Header = () => {
                 </div>
                 <span className="font-serif">S33D</span>
                 <LivingStreak streak={heartBalance.streak} />
-                {heartsCount !== null && heartsCount > 0 && (
-                  <span className="flex items-center gap-0.5 text-xs font-serif text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
-                    <Heart className="w-3 h-3 fill-primary/40" />
-                    {heartsCount}
-                  </span>
-                )}
+                <HeartJar userId={user?.id ?? null} />
               </button>
             ) : (
               <Button
