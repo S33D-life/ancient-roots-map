@@ -257,22 +257,58 @@ export async function unlinkWallet(userId: string, walletId: string): Promise<bo
   return !error;
 }
 
-// ── Purchase (stub for Stripe integration) ─────────────────
+// ── Purchase (hardened — server-only confirmation) ──────────
+/**
+ * purchaseHearts is a CLIENT STUB only.
+ * In production, hearts from purchases MUST be credited server-side
+ * (e.g. via a Stripe webhook → Edge Function) to prevent spoofing.
+ *
+ * This stub creates a PENDING ledger entry. A server-side function
+ * must update it to 'confirmed' after verifying payment.
+ */
 export async function purchaseHearts(params: {
   userId: string;
   bundleId: string;
   amount: number;
   paymentIntentId?: string;
 }): Promise<HeartLedgerEntry | null> {
-  // Write ledger entry as pending until payment confirmed
-  return earnHearts({
-    userId: params.userId,
-    amount: params.amount,
-    transactionType: "purchase_bundle",
-    source: "stripe",
-    metadata: {
-      bundle_id: params.bundleId,
-      payment_intent: params.paymentIntentId,
-    },
-  });
+  if (!params.paymentIntentId) {
+    console.warn("[heartService.purchaseHearts] No paymentIntentId — refusing client-only credit");
+    return null;
+  }
+
+  const key = `purchase:${params.userId}:${params.paymentIntentId}`;
+  if (_inflight.has(key)) return null;
+  _inflight.add(key);
+
+  try {
+    // Create as PENDING — server webhook confirms
+    const { data, error } = await supabase
+      .from("heart_ledger")
+      .insert({
+        user_id: params.userId,
+        amount: Math.abs(params.amount),
+        transaction_type: "purchase_bundle",
+        currency_type: "S33D",
+        source: "stripe",
+        status: "pending", // NOT confirmed — awaits webhook
+        chain_state: "offchain",
+        idempotency_key: key,
+        metadata: {
+          bundle_id: params.bundleId,
+          payment_intent: params.paymentIntentId,
+        },
+      } as any)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === "23505") return null; // duplicate
+      console.warn("[heartService.purchaseHearts]", error.message);
+      return null;
+    }
+    return data as unknown as HeartLedgerEntry;
+  } finally {
+    _inflight.delete(key);
+  }
 }
