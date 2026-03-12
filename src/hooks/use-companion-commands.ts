@@ -1,5 +1,5 @@
-import { useCallback, useRef, useEffect } from "react";
-import type { CompanionCommand, CompanionRoom, CompanionRoomState } from "@/lib/companion-types";
+import { useCallback, useRef } from "react";
+import type { CompanionCommand } from "@/lib/companion-types";
 import { useCompanionSession } from "./use-companion-session";
 
 /**

@@ -29,6 +29,15 @@ export type CompanionCommand =
   | { type: "export_view" }
   | { type: "select_chart"; chartId: string };
 
+/** Whitelist of valid command types for input validation */
+export const VALID_COMMAND_TYPES = new Set<string>([
+  "zoom_in", "zoom_out", "zoom_reset", "pan",
+  "focus_tree", "focus_staff", "next", "previous",
+  "toggle_fullscreen", "enter_fullscreen", "exit_fullscreen",
+  "open_panel", "close_panel", "highlight_node",
+  "export_view", "select_chart",
+]);
+
 /** Sent from desktop → mobile to sync room state */
 export interface CompanionRoomState {
   room: CompanionRoom;
@@ -48,12 +57,14 @@ export interface CompanionSession {
   connectedAt?: number;
 }
 
-/** Generate a 6-char alphanumeric code */
+/** Generate a 6-char alphanumeric code (no ambiguous chars) */
 export function generatePairingCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
+  const array = new Uint8Array(6);
+  crypto.getRandomValues(array);
   for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+    code += chars[array[i] % chars.length];
   }
   return code;
 }
