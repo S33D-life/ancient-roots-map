@@ -257,8 +257,9 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
       // Check if tree has a staff-linked ceremony
       supabase
         .from("ceremony_logs")
-        .select("staff_name, staff_species")
+        .select("staff_name, staff_species, staff_code")
         .eq("ceremony_type", "binding")
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
     ]);
@@ -270,21 +271,27 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const species = tree.species || "Unknown species";
     const location = tree.nation || "Unknown location";
     const isMinted = !!mintedRes.data;
-    const staffName = staffRes.data?.staff_name || null;
+    const staffName = staffRes.data?.staff_name || staffRes.data?.staff_code || null;
+    const hasStaff = !!staffName;
 
-    // Image: use generated og-card SVG (dynamic card with photo/branding)
+    // Image: og-card auto-selects tree vs lineage variant
     const image = `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}`;
 
-    // Title: distinguish NFTree vs Ancient Friend
-    const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
-    const title = `${treeName} — ${species} | S33D.life`;
+    // Title: staff-linked NFTree > NFTree > Ancient Friend
+    let title: string;
+    if (isMinted && hasStaff) {
+      title = `${treeName} — Minted with ${staffName} | S33D.life`;
+    } else {
+      title = `${treeName} — ${species} | S33D.life`;
+    }
 
-    // Description with NFTree/staff context
+    // Description
+    const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
     let desc: string;
     if (tree.description) {
       desc = tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "");
-    } else if (isMinted && staffName) {
-      desc = `A minted ${typeLabel} in ${location}. Bound with ${staffName}. Part of the S33D Living Atlas.`;
+    } else if (isMinted && hasStaff) {
+      desc = `A staff-linked ${typeLabel} in ${location}. Part of the S33D Living Atlas.`;
     } else if (isMinted) {
       desc = `A minted ${typeLabel} in ${location}. Part of the S33D Living Atlas.`;
     } else {

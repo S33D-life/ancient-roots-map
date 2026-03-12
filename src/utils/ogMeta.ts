@@ -78,26 +78,42 @@ export function treeOG(tree: {
   species?: string | null;
   nation?: string | null;
   description?: string | null;
-  /** Curated OG image (highest priority) */
   ogImage?: string | null;
-  /** Hero / featured photo */
   heroImage?: string | null;
-  /** Any available photo from offerings */
   photoUrl?: string | null;
+  isMinted?: boolean;
+  staffCode?: string | null;
+  staffName?: string | null;
 }): OGMeta {
   const treeName = tree.name || "Ancient Friend";
   const species = tree.species || "Unknown species";
   const location = tree.nation || "Unknown location";
+  const hasStaff = !!(tree.staffCode || tree.staffName);
+  const isMinted = tree.isMinted ?? false;
 
+  // Title: staff-linked NFTree > NFTree > Ancient Friend
+  let title: string;
+  if (isMinted && hasStaff) {
+    title = `${treeName} — Minted with ${tree.staffName || tree.staffCode} | S33D.life`;
+  } else {
+    title = `${treeName} — ${species} | S33D.life`;
+  }
+
+  const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
   const desc = tree.description
     ? tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "")
-    : `An Ancient Friend in ${location}. Visit this tree on the S33D Living Atlas.`;
+    : isMinted && hasStaff
+      ? `A staff-linked ${typeLabel} in ${location}. Part of the S33D Living Atlas.`
+      : `An ${typeLabel} in ${location}. Visit this tree on the S33D Living Atlas.`;
+
+  // Image: prefer curated, then generated og-card, then hero photo
+  const image = resolveImage(tree.ogImage, treeOgCardUrl(tree.id), tree.heroImage, tree.photoUrl);
 
   return {
     ...DEFAULT_OG,
-    title: `${treeName} — ${species} | S33D.life`,
+    title,
     description: desc,
-    image: resolveImage(tree.ogImage, tree.heroImage, tree.photoUrl),
+    image,
     url: `${APP_URL}/tree/${tree.id}`,
   };
 }
