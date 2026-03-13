@@ -69,7 +69,8 @@ const lazyImportWithRetry = <T extends ComponentType<any>>(
   });
 
 // Lazy-load all route pages for code splitting
-const Index = lazyImportWithRetry(() => import("./pages/Index"), "index");
+const TetolHomePage = lazyImportWithRetry(() => import("./pages/TetolHomePage"), "tetol-home");
+const S33dGatewayPage = lazyImportWithRetry(() => import("./pages/Index"), "s33d-gateway");
 const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page");
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
