@@ -89,11 +89,16 @@ export function buildPopupHtml(
 
   const whisperHref = `/tree/${encodeURIComponent(tree.id)}?whisper=1&context=map`;
 
+  const wishBtnId = `wish-${tree.id}`;
+
   const html = `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.4);overflow:hidden;animation:popIn .2s ease-out;">
     ${thumbnail}
     <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;position:relative;">
-      <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.35);background:hsla(42,25%,14%,0.75);color:hsl(42,70%,62%);text-decoration:none;font-size:12px;backdrop-filter:blur(4px);">🌬️</a>
-      <h3 style="margin:0;padding-right:34px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
+      <div style="position:absolute;top:0;right:0;display:flex;gap:4px;">
+        <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Save to wishes" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.25);background:hsla(42,25%,14%,0.75);color:hsl(42,50%,55%);font-size:14px;cursor:pointer;backdrop-filter:blur(4px);transition:all .2s;">⭐</button>
+        <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.35);background:hsla(42,25%,14%,0.75);color:hsl(42,70%,62%);text-decoration:none;font-size:12px;backdrop-filter:blur(4px);">🌬️</a>
+      </div>
+      <h3 style="margin:0;padding-right:68px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},45%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>
       <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
         ${ageText ? `<span>${ageText}</span>` : ""}
