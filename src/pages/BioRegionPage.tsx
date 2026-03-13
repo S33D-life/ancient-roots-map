@@ -174,7 +174,6 @@ const BioRegionPage = () => {
         <div className="min-h-screen flex items-center justify-center">
           <p className="text-muted-foreground text-sm font-serif">Loading bio-region…</p>
         </div>
-        <BottomNav />
       </PageShell>
     );
   }
