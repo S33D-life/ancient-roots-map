@@ -42,13 +42,13 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
 
   const { seedsRemaining } = useSeedEconomy(userId);
 
-  const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean }) => {
+  const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean; navTo?: string }) => {
     if (import.meta.env.DEV) console.info("[Firefly] firefly_action_selected", { type });
     onOpenChange(false);
     if (flags?.isSearch) {
       setTimeout(() => setSearchOpen(true), 150);
-    } else if (flags?.isNav && type === "whisper") {
-      setTimeout(() => navigate("/whispers"), 150);
+    } else if (flags?.isNav && flags?.navTo) {
+      setTimeout(() => navigate(flags.navTo!), 150);
     } else {
       setTimeout(() => onSelectAction(type), 150);
     }
