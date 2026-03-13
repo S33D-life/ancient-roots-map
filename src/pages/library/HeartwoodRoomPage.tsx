@@ -67,6 +67,7 @@ const ROOM_SEQUENCE = [
   "vault",
   "creators-path",
   "rhythms",
+  "tap-root",
 ];
 
 const VALID_ROOMS = Object.keys(ROOM_LABELS);
