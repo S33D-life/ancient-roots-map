@@ -717,7 +717,7 @@ const AgentGardenPage = () => {
                               <Badge variant="outline" className="text-xs capitalize">{c.contribution_type.replace(/_/g, " ")}</Badge>
                             </TableCell>
                             <TableCell className="text-xs text-foreground">
-                              {agent ? `${agent.avatar_emoji} ${agent.agent_name}` : "Unknown"}
+                              {agent ? `${agent.avatar_emoji || "🤖"} ${agent.agent_name}` : "Unknown"}
                             </TableCell>
                             <TableCell><StatusBadge status={c.status} /></TableCell>
                             <TableCell className="text-sm font-serif font-bold text-primary">
