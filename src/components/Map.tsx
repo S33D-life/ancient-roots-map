@@ -652,7 +652,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   // Leaflet fallback mode
   if (mapStatus === "leaflet") {
     return (
-      <div className="fixed inset-0 z-[1]" style={{ height: '100dvh' }}>
+      <div className="absolute inset-0 z-[1]" style={{ height: '100dvh' }}>
         <Suspense fallback={
           <div className="absolute inset-0 flex items-center justify-center">
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
