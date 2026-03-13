@@ -4,6 +4,7 @@
  */
 import { escapeHtml } from "@/utils/escapeHtml";
 import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/treeCardTypes";
+import { haversineKm } from "@/utils/mapGeometry";
 import type { ExternalTreeCandidate } from "@/utils/externalTreeSources";
 import { getSourceById } from "@/utils/externalTreeSources";
 import type { Rootstone } from "@/data/rootstones";
