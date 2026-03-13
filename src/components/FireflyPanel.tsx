@@ -93,9 +93,9 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
                 <button
                   key={a.type}
                   type="button"
-                  onClick={() => handleAction(a.type, { isNav: 'isNav' in a ? a.isNav : false })}
-                  className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-border/15 bg-secondary/10
-                    hover:border-primary/25 hover:bg-primary/5 active:scale-[0.97] transition-all duration-300 text-left group"
+                  onClick={() => handleAction(a.type, { isNav: 'isNav' in a ? a.isNav : false, navTo: 'navTo' in a ? a.navTo : undefined })}
+                  className="flex flex-col items-start gap-2 p-3 rounded-xl border border-border/15 bg-secondary/10
+                    hover:border-primary/25 hover:bg-primary/5 active:scale-[0.97] transition-all duration-300 text-left group min-h-[80px]"
                 >
                   <span className="text-lg">{a.emoji}</span>
                   <span className="text-xs font-serif text-foreground/80 group-hover:text-primary/90 transition-colors duration-300">

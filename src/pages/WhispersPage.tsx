@@ -128,6 +128,13 @@ export default function WhispersPage() {
             </div>
           </div>
 
+          {/* Whisper explanation */}
+          <div className="mb-6 p-4 rounded-xl border border-primary/15 bg-primary/5">
+            <p className="text-xs font-serif text-foreground/70 leading-relaxed">
+              Whispers are messages left beneath Ancient Friend trees. To send a whisper, you must be near a mapped tree — they are location-based offerings tied to place, carried through the mycelial network.
+            </p>
+          </div>
+
           {!userId ? (
             <Card className="border-border/40">
               <CardContent className="p-8 text-center">
