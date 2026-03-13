@@ -534,10 +534,13 @@ const AgentGardenPage = () => {
             {agents.length > 0 && (
               <Card className="border-primary/15 bg-card/60">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-serif flex items-center gap-2">
-                    <Sprout className="w-4 h-4 text-primary" /> Active Agents
-                  </CardTitle>
-                </CardHeader>
+              <CardTitle className="text-sm font-serif flex items-center justify-between">
+                  <span className="flex items-center gap-2"><Sprout className="w-4 h-4 text-primary" /> Active Agents</span>
+                  <Button variant="link" size="sm" className="text-xs text-primary p-0 h-auto" onClick={() => setActiveTab("rewards")}>
+                    View all →
+                  </Button>
+                </CardTitle>
+              </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {agents.slice(0, 6).map(agent => {
