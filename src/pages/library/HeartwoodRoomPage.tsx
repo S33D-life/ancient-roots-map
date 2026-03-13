@@ -22,6 +22,7 @@ const PersonalBookshelf = lazy(() => import("@/components/PersonalBookshelf"));
 const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
 const TreeResources = lazy(() => import("@/components/TreeResources"));
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
+const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 
 // Room aliases for backward compatibility
 const ROOM_ALIASES: Record<string, string> = {
