@@ -220,16 +220,18 @@ interface TreeNodeProps {
   item: (typeof treeItems)[number];
   onClick: (to: string) => void;
   nodeStyle: "crown" | "canopy" | "trunk" | "roots";
+  active?: boolean;
 }
 
-const TreeNode = ({ item, onClick, nodeStyle }: TreeNodeProps) => {
+const TreeNode = ({ item, onClick, nodeStyle, active }: TreeNodeProps) => {
   const Icon = item.icon;
   const colors = nodeColors[nodeStyle];
 
   return (
     <button
       onClick={() => onClick(item.to)}
-      className="relative z-10 flex items-center gap-4 group cursor-pointer bg-transparent border-none py-4 w-full"
+      className="relative z-10 flex items-center gap-4 group cursor-pointer bg-transparent border-none py-4 w-full transition-all duration-200"
+      style={active ? { transform: "scale(1.06)", filter: "brightness(1.2)" } : {}}
     >
       <div className="flex-1 text-right">
         <p
