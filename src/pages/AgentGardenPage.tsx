@@ -3,11 +3,12 @@
  *
  * Dedicated interface for AI agents to connect, contribute, and grow the Research Forest.
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useDataCommons, type AgentProfile, type SparkReport } from "@/hooks/use-data-commons";
+import { SparkSubmitDialog } from "@/components/shared/SparkSubmitDialog";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
@@ -346,80 +348,20 @@ function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-/* ── Spark Submit Dialog ────────────────────────── */
-function SparkSubmitDialog({ onSuccess }: { onSuccess: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    report_type: "issue", target_type: "tree", description: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.description.trim()) { toast.error("Description is required"); return; }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { toast.error("Please log in to submit a Spark"); return; }
-    setSubmitting(true);
-    const { error } = await (supabase.from as any)("spark_reports").insert({
-      report_type: form.report_type,
-      target_type: form.target_type,
-      description: form.description.trim(),
-      submitted_by: user.id,
-    });
-    setSubmitting(false);
-    if (error) { toast.error("Failed to submit Spark"); return; }
-    toast.success("Spark submitted — thank you!");
-    setOpen(false);
-    setForm({ report_type: "issue", target_type: "tree", description: "" });
-    onSuccess();
-  };
-
+/* ── Table Loading Skeleton ──────────────────────── */
+function TableSkeleton({ rows = 4, cols = 5 }: { rows?: number; cols?: number }) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm"><Zap className="w-4 h-4 mr-1 text-primary" /> Report Spark</Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" /> Submit a Spark
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Spark Type</Label>
-              <Select value={form.report_type} onValueChange={v => setForm({ ...form, report_type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {["issue", "duplicate", "incorrect_species", "invalid_coordinates", "missing_metadata", "broken_dataset", "dataset_update", "improvement"].map(v => (
-                    <SelectItem key={v} value={v}>{v.replace(/_/g, " ")}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs">Target</Label>
-              <Select value={form.target_type} onValueChange={v => setForm({ ...form, target_type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {["tree", "dataset", "source", "agent"].map(v => (
-                    <SelectItem key={v} value={v} className="capitalize">{v}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <Card className="border-primary/15 bg-card/60">
+      <CardContent className="p-4 space-y-3">
+        {Array.from({ length: rows }).map((_, r) => (
+          <div key={r} className="flex items-center gap-3">
+            {Array.from({ length: cols }).map((_, c) => (
+              <Skeleton key={c} className="h-4 flex-1" />
+            ))}
           </div>
-          <div>
-            <Label className="text-xs">Description *</Label>
-            <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What needs attention?" required />
-          </div>
-          <Button type="submit" variant="sacred" className="w-full" disabled={submitting}>
-            {submitting ? "Submitting…" : "Submit Spark"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -429,6 +371,10 @@ const AgentGardenPage = () => {
   const [contribFilter, setContribFilter] = useState("all");
   const [sparkFilter, setSparkFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    document.title = "Agent Garden — S33D.life";
+  }, []);
 
   const totalHeartsDistributed = useMemo(
     () => agents.reduce((a, ag) => a + (ag.hearts_earned || 0), 0),
@@ -589,10 +535,13 @@ const AgentGardenPage = () => {
             {agents.length > 0 && (
               <Card className="border-primary/15 bg-card/60">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-serif flex items-center gap-2">
-                    <Sprout className="w-4 h-4 text-primary" /> Active Agents
-                  </CardTitle>
-                </CardHeader>
+              <CardTitle className="text-sm font-serif flex items-center justify-between">
+                  <span className="flex items-center gap-2"><Sprout className="w-4 h-4 text-primary" /> Active Agents</span>
+                  <Button variant="link" size="sm" className="text-xs text-primary p-0 h-auto" onClick={() => setActiveTab("rewards")}>
+                    View all →
+                  </Button>
+                </CardTitle>
+              </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {agents.slice(0, 6).map(agent => {
@@ -688,7 +637,9 @@ const AgentGardenPage = () => {
               </Select>
             </div>
 
-            {filteredContribs.length === 0 ? (
+            {loading ? (
+              <TableSkeleton rows={5} cols={5} />
+            ) : filteredContribs.length === 0 ? (
               <Card className="border-primary/15 bg-card/60">
                 <CardContent className="py-12 text-center">
                   <Activity className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
@@ -760,7 +711,9 @@ const AgentGardenPage = () => {
               </div>
             </div>
 
-            {filteredSparks.length === 0 ? (
+            {loading ? (
+              <TableSkeleton rows={4} cols={5} />
+            ) : filteredSparks.length === 0 ? (
               <Card className="border-primary/15 bg-card/60">
                 <CardContent className="py-12 text-center">
                   <Zap className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
