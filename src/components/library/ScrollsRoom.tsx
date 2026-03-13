@@ -1,7 +1,6 @@
 /**
  * ScrollsRoom — Standalone room for Scrolls & Records.
- * Contains: Heart Reservoir Rankings, Council embed, Tree Ledger link, Collaborator Volumes.
- * Extracted from GalleryPage.
+ * Contains: Tree Ledger link, Heart Reservoir Rankings, Council embed, Collaborator Volumes.
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -23,6 +22,22 @@ const ScrollsRoom = () => {
 
   return (
     <div className="space-y-6">
+      {/* Tree Ledger Link — primary entry */}
+      <Link
+        to="/ledger"
+        className="relative block rounded-xl overflow-hidden group border border-primary/30 hover:border-primary/60 transition-all duration-500"
+      >
+        <img
+          src={councilLedgerWindow}
+          alt="Tree Ledger"
+          className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
+          <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
+          <p className="text-sm text-foreground/70 mt-1">Open the transparency explorer →</p>
+        </div>
+      </Link>
+
       {/* Heart Reservoir Rankings */}
       <TreeReservoirLeaderboard />
 
@@ -56,22 +71,6 @@ const ScrollsRoom = () => {
           />
         </div>
       )}
-
-      {/* Tree Ledger Link */}
-      <Link
-        to="/ledger"
-        className="relative block rounded-xl overflow-hidden group border border-primary/30 hover:border-primary/60 transition-all duration-500"
-      >
-        <img
-          src={councilLedgerWindow}
-          alt="Tree Ledger"
-          className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
-          <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">Tree Ledger</h3>
-          <p className="text-sm text-foreground/70 mt-1">Open the transparency explorer →</p>
-        </div>
-      </Link>
 
       {/* Collaborator Volumes */}
       <div className="pt-4">
