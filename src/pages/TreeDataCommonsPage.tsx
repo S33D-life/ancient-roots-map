@@ -60,7 +60,7 @@ function CanopyOverview({ stats }: { stats: ReturnType<typeof useDataCommons>["s
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       {metrics.map((m, i) => (
         <motion.div
           key={m.label}
