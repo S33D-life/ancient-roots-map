@@ -1,0 +1,262 @@
+/**
+ * Map popup HTML builders — extracted from LeafletFallbackMap for
+ * maintainability and to allow caching/memoization.
+ */
+import { escapeHtml } from "@/utils/escapeHtml";
+import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/treeCardTypes";
+import type { ExternalTreeCandidate } from "@/utils/externalTreeSources";
+import { getSourceById } from "@/utils/externalTreeSources";
+import type { Rootstone } from "@/data/rootstones";
+
+/* ── Popup HTML cache — avoids rebuilding for the same tree state ── */
+const POPUP_CACHE = new Map<string, string>();
+const MAX_POPUP_CACHE = 200;
+
+function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean): string {
+  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}`;
+}
+
+export interface PopupTree {
+  id: string;
+  name: string;
+  species: string;
+  latitude: number;
+  longitude: number;
+  what3words: string;
+  description?: string;
+  estimated_age?: number | null;
+}
+
+export function buildPopupHtml(
+  tree: PopupTree,
+  offerings: number,
+  age: number,
+  photoUrl?: string,
+  birdsongCount?: number,
+  whisperCount?: number,
+): string {
+  if (!tree?.name && !tree?.species)
+    return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
+
+  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl);
+  const cached = POPUP_CACHE.get(key);
+  if (cached) return cached;
+
+  const tier = getTreeTier(age, offerings);
+  const tierLabel = TIER_LABELS[tier];
+  const tierBg =
+    tier === "ancient"
+      ? "hsla(42,80%,55%,0.15)"
+      : tier === "storied"
+        ? "hsla(42,60%,50%,0.1)"
+        : "hsla(0,0%,50%,0.08)";
+  const tierColor =
+    tier === "ancient"
+      ? "hsl(42,80%,60%)"
+      : tier === "storied"
+        ? "hsl(42,60%,55%)"
+        : "hsl(0,0%,55%)";
+  const speciesHue = getSpeciesHue(tree.species);
+
+  const ageText = age > 0 ? `🌿 ~${age}y` : "";
+  const offeringText =
+    offerings > 0 ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span>` : "";
+  const birdsongLine =
+    (birdsongCount ?? 0) > 0 ? `<span>🐦 ${birdsongCount}</span>` : "";
+  const whisperLine =
+    (whisperCount ?? 0) > 0
+      ? `<span style="color:hsl(200,30%,55%);">🌬️ ${whisperCount}</span>`
+      : "";
+  const desc = tree.description
+    ? `<p style="margin:0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escapeHtml(tree.description.substring(0, 120))}${tree.description.length > 120 ? "…" : ""}</p>`
+    : "";
+
+  const thumbnail = photoUrl
+    ? `<div style="position:relative;width:100%;height:100px;overflow:hidden;border-radius:12px 12px 0 0;">
+        <img src="${escapeHtml(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" />
+        <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
+        <span style="position:absolute;top:6px;left:6px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}33;backdrop-filter:blur(4px);">${tierLabel}</span>
+      </div>`
+    : `<div style="position:relative;width:100%;height:80px;overflow:hidden;border-radius:12px 12px 0 0;background:linear-gradient(135deg,hsl(30,20%,14%),hsl(25,18%,10%));display:flex;align-items:center;justify-content:center;">
+        <svg width="40" height="40" viewBox="0 0 48 48" fill="none" style="opacity:0.3;"><path d="M24 6C24 6 14 16 14 26a10 10 0 0020 0C34 16 24 6 24 6z" fill="hsl(42,50%,45%)"/><rect x="22" y="30" width="4" height="10" rx="2" fill="hsl(30,30%,35%)"/></svg>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
+        <span style="position:absolute;top:6px;left:6px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}33;">${tierLabel}</span>
+      </div>`;
+
+  const whisperHref = `/tree/${encodeURIComponent(tree.id)}?whisper=1&context=map`;
+
+  const html = `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.4);overflow:hidden;animation:popIn .2s ease-out;">
+    ${thumbnail}
+    <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;position:relative;">
+      <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.35);background:hsla(42,25%,14%,0.75);color:hsl(42,70%,62%);text-decoration:none;font-size:12px;backdrop-filter:blur(4px);">🌬️</a>
+      <h3 style="margin:0;padding-right:34px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
+      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},45%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>
+      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
+        ${ageText ? `<span>${ageText}</span>` : ""}
+        ${offeringText ? `<span>${offeringText}</span>` : ""}
+        ${birdsongLine}
+        ${whisperLine}
+      </div>
+      ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>` : ""}
+      ${desc}
+    </div>
+    <div style="padding:0 14px 10px;display:flex;gap:6px;">
+      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;font-size:11px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">View Details ⟶</a>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;gap:6px;justify-content:center;">
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(120,30%,30%,0.15);border:1px solid hsla(120,40%,40%,0.2);border-radius:8px;" title="Add Photo">📷</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(200,30%,30%,0.15);border:1px solid hsla(200,40%,40%,0.2);border-radius:8px;" title="Add Song">🎵</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=birdsong" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(180,30%,30%,0.15);border:1px solid hsla(180,40%,40%,0.2);border-radius:8px;" title="Record Birdsong">🐦</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=story" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(280,30%,30%,0.15);border:1px solid hsla(280,40%,40%,0.2);border-radius:8px;" title="Add Musing">💭</a>
+    </div>
+  </div>`;
+
+  // Cache the result
+  if (POPUP_CACHE.size >= MAX_POPUP_CACHE) {
+    const firstKey = POPUP_CACHE.keys().next().value;
+    if (firstKey) POPUP_CACHE.delete(firstKey);
+  }
+  POPUP_CACHE.set(key, html);
+
+  return html;
+}
+
+export function buildExternalPopupHtml(tree: ExternalTreeCandidate): string {
+  const displayName = tree.title || tree.species || tree.genus || "Unknown Tree";
+  const source = getSourceById(tree.source);
+  const sourceName = source?.attribution || tree.source;
+  const dotColor = source?.style.color || "hsl(180,60%,50%)";
+  const speciesLine = tree.species
+    ? `<p style="margin:0;font-size:11px;color:hsl(180,40%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>`
+    : tree.genus
+      ? `<p style="margin:0;font-size:11px;color:hsl(180,40%,55%);font-style:italic;">Genus: ${escapeHtml(tree.genus)}</p>`
+      : "";
+  const heightLine = tree.height
+    ? `<span style="display:flex;align-items:center;gap:3px;">📏 ~${tree.height}m tall</span>`
+    : "";
+  const classLine = tree.classification
+    ? `<span style="display:flex;align-items:center;gap:3px;">🏛️ ${escapeHtml(tree.classification)}</span>`
+    : "";
+
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:220px;background:hsl(200,15%,12%);border-radius:12px;border:1px solid hsla(180,40%,30%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+    <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;">
+      <div style="display:flex;align-items:center;gap-6px;">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};margin-right:6px;flex-shrink:0;"></span>
+        <h3 style="margin:0;font-size:14px;color:hsl(180,50%,70%);line-height:1.3;font-weight:700;">${escapeHtml(displayName)}</h3>
+      </div>
+      ${speciesLine}
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
+        ${heightLine}
+        ${classLine}
+        <span style="display:flex;align-items:center;gap:3px;">🗺️ ${escapeHtml(sourceName)}</span>
+      </div>
+    </div>
+    <div style="padding:6px 14px 12px;">
+      <p style="margin:0;font-size:10px;color:hsl(180,30%,45%);font-family:sans-serif;line-height:1.4;">
+        Discover recorded elders nearby. Bloom hearts with this Ancient Friend.
+      </p>
+    </div>
+    <div style="padding:0 14px 12px;">
+      <a href="/map?tree=${encodeURIComponent(tree.id)}&treeId=${encodeURIComponent(tree.id)}&lat=${tree.lat}&lng=${tree.lng}&zoom=18&arrival=tree&journey=1" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(200,15%,12%);background:linear-gradient(135deg,hsl(180,60%,45%),hsl(180,70%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌱 Bloom Hearts Here</a>
+    </div>
+  </div>`;
+}
+
+export interface ResearchTree {
+  id: string;
+  species_scientific: string;
+  species_common: string | null;
+  tree_name: string | null;
+  locality_text: string;
+  province: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  geo_precision: string;
+  description: string | null;
+  height_m: number | null;
+  girth_or_stem: string | null;
+  crown_spread: string | null;
+  designation_type: string;
+  source_doc_title: string;
+  source_doc_url: string;
+  source_doc_year: number;
+  source_program: string;
+  status: string;
+}
+
+export function buildResearchPopupHtml(rt: ResearchTree): string {
+  const name = rt.tree_name || rt.species_common || rt.species_scientific;
+  const precisionBadge =
+    rt.geo_precision === "exact"
+      ? '<span style="color:hsl(120,55%,50%);font-size:9px;">● Exact</span>'
+      : rt.geo_precision === "approx"
+        ? '<span style="color:hsl(45,70%,50%);font-size:9px;">◐ Approx</span>'
+        : '<span style="color:hsl(0,50%,55%);font-size:9px;">○ Unverified</span>';
+
+  const measurements = [
+    rt.height_m ? `📏 ${rt.height_m}m tall` : "",
+    rt.girth_or_stem ? `⊙ ${escapeHtml(rt.girth_or_stem)}` : "",
+    rt.crown_spread ? `🌳 ${escapeHtml(rt.crown_spread)}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const desc = rt.description
+    ? `<p style="margin:4px 0 0;font-size:11px;color:hsl(0,0%,62%);line-height:1.5;font-family:sans-serif;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${escapeHtml(rt.description.substring(0, 200))}${rt.description.length > 200 ? "…" : ""}</p>`
+    : "";
+
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(25,18%,10%);border-radius:12px;border:1px solid hsla(35,60%,40%,0.5);overflow:hidden;animation:popIn .2s ease-out;">
+    <div style="padding:10px 14px 6px;background:linear-gradient(135deg,hsla(35,50%,30%,0.15),hsla(35,60%,20%,0.05));">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span style="font-size:16px;">📜</span>
+        <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(35,60%,40%,0.15);color:hsl(35,70%,60%);border:1px solid hsla(35,60%,40%,0.3);">Research Layer</span>
+        ${precisionBadge}
+      </div>
+      <h3 style="margin:0;font-size:15px;color:hsl(35,70%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(name)}</h3>
+      <p style="margin:2px 0 0;font-size:11px;color:hsl(35,45%,50%);font-style:italic;">${escapeHtml(rt.species_scientific)}</p>
+      ${rt.species_common && rt.species_common !== name ? `<p style="margin:0;font-size:10px;color:hsl(35,40%,45%);">(${escapeHtml(rt.species_common)})</p>` : ""}
+    </div>
+    <div style="padding:6px 14px 8px;display:flex;flex-direction:column;gap:4px;">
+      <p style="margin:0;font-size:10px;color:hsl(35,40%,48%);font-family:sans-serif;">📍 ${escapeHtml(rt.locality_text)}${rt.province ? `, ${escapeHtml(rt.province)}` : ""}</p>
+      ${measurements ? `<p style="margin:0;font-size:10px;color:hsl(0,0%,55%);font-family:sans-serif;">${measurements}</p>` : ""}
+      ${desc}
+      <div style="margin-top:6px;padding:6px 8px;background:hsla(35,40%,20%,0.3);border-radius:6px;border:1px solid hsla(35,40%,30%,0.2);">
+        <p style="margin:0;font-size:9px;color:hsl(35,50%,55%);font-family:sans-serif;line-height:1.4;">
+          <strong>Lineage:</strong> This is a Research Layer record from ${escapeHtml(rt.source_program)}. It becomes an Ancient Friend only after a wanderer verifies it in person.
+        </p>
+        <p style="margin:4px 0 0;font-size:9px;color:hsl(35,40%,48%);font-family:sans-serif;">
+          📄 <a href="${escapeHtml(rt.source_doc_url)}" target="_blank" rel="noopener" style="color:hsl(35,60%,55%);text-decoration:underline;">${escapeHtml(rt.source_doc_title)}</a> (${rt.source_doc_year})
+        </p>
+      </div>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:6px;">
+      <a href="/tree/research/${encodeURIComponent(rt.id)}" style="display:flex;align-items:center;justify-content:center;padding:9px 0;font-size:12px;color:hsl(25,15%,8%);background:linear-gradient(135deg,hsl(35,70%,45%),hsl(40,80%,55%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">🌳 View Ancient Friend Page</a>
+      <a href="/map?tree=${encodeURIComponent(rt.id)}&treeId=${encodeURIComponent(rt.id)}&lat=${rt.latitude}&lng=${rt.longitude}&zoom=18&arrival=tree&journey=1&research=on" style="display:flex;align-items:center;justify-content:center;padding:7px 0;font-size:11px;color:hsl(35,60%,55%);background:hsla(35,40%,20%,0.3);border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:600;font-family:sans-serif;border:1px solid hsla(35,60%,40%,0.3);">🔍 Verify This Tree In Person</a>
+    </div>
+  </div>`;
+}
+
+export function buildRootstonePopupHtml(stone: Rootstone): string {
+  const title = escapeHtml(stone.name);
+  const lore = escapeHtml(stone.lore);
+  const place = escapeHtml(stone.location.place || stone.country);
+  const sourceName = escapeHtml(stone.source.name);
+  const sourceUrl = escapeHtml(stone.source.url);
+  const mapsUrl = stone.location.mapsUrl ? escapeHtml(stone.location.mapsUrl) : "";
+  const tags = stone.tags.slice(0, 5).map((tag) => `#${escapeHtml(tag)}`).join(" ");
+  const badge = stone.type === "tree" ? "🌳 Rootstone Tree" : "🌲 Rootstone Grove";
+
+  return `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(28,16%,10%);border-radius:12px;border:1.5px solid hsla(42,70%,45%,0.45);overflow:hidden;">
+    <div style="padding:10px 14px 6px;background:linear-gradient(135deg,hsla(42,45%,24%,0.18),hsla(42,55%,16%,0.06));">
+      <span style="font-size:9px;font-family:sans-serif;padding:2px 6px;border-radius:4px;background:hsla(42,80%,50%,0.15);color:hsl(42,80%,60%);border:1px solid hsla(42,80%,50%,0.3);">${badge}</span>
+      <h3 style="margin:6px 0 2px;font-size:14px;color:hsl(42,80%,60%);line-height:1.35;">${title}</h3>
+      <p style="margin:0;font-size:11px;color:hsl(42,45%,52%);font-family:sans-serif;">${place}</p>
+    </div>
+    <div style="padding:8px 14px 10px;display:flex;flex-direction:column;gap:6px;">
+      <p style="margin:0;font-size:11px;color:hsl(0,0%,75%);font-family:sans-serif;line-height:1.45;white-space:pre-line;">${lore}</p>
+      <p style="margin:0;font-size:10px;color:hsl(42,45%,52%);font-family:sans-serif;">${tags}</p>
+      <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:hsl(190,60%,65%);text-decoration:none;font-family:sans-serif;">Source: ${sourceName}</a>
+      ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:hsl(145,55%,60%);text-decoration:none;font-family:sans-serif;">Open maps ↗</a>` : ""}
+    </div>
+  </div>`;
+}

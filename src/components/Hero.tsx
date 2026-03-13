@@ -49,6 +49,7 @@ interface Particle {
 
 const FairyDust = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isVisibleRef = useRef(true);
   useEffect(() => {
     // Respect reduced-motion preference
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -60,6 +61,13 @@ const FairyDust = () => {
     let particles: Particle[] = [];
     const isMobile = window.innerWidth < 768;
     const PARTICLE_COUNT = isMobile ? 15 : 60;
+
+    // Pause when off-screen to save CPU
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting; },
+      { threshold: 0.05 },
+    );
+    observer.observe(canvas);
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
@@ -71,6 +79,7 @@ const FairyDust = () => {
     });
     for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(spawnParticle());
     const animate = () => {
+      if (!isVisibleRef.current) { animId = requestAnimationFrame(animate); return; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p, i) => {
         p.x += p.speedX + Math.sin(Date.now() * 0.001 + i) * 0.3;
@@ -91,7 +100,7 @@ const FairyDust = () => {
       animId = requestAnimationFrame(animate);
     };
     animate();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); observer.disconnect(); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[2]" />;
 };
@@ -104,6 +113,7 @@ interface Leaf {
 
 const FallingLeaves = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isVisibleRef = useRef(true);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const canvas = canvasRef.current;
@@ -114,6 +124,13 @@ const FallingLeaves = () => {
     let leaves: Leaf[] = [];
     const isMobile = window.innerWidth < 768;
     const LEAF_COUNT = isMobile ? 10 : 25;
+
+    // Pause when off-screen
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting; },
+      { threshold: 0.05 },
+    );
+    observer.observe(canvas);
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
@@ -155,6 +172,7 @@ const FallingLeaves = () => {
 
     let t = 0;
     const animate = () => {
+      if (!isVisibleRef.current) { animId = requestAnimationFrame(animate); return; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       t += 0.01;
       leaves.forEach((l, i) => {
@@ -169,7 +187,7 @@ const FallingLeaves = () => {
       animId = requestAnimationFrame(animate);
     };
     animate();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); observer.disconnect(); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[2]" />;
 };
