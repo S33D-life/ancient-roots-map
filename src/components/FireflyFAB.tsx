@@ -176,6 +176,11 @@ const FireflyFAB = () => {
 
     if (!dragConfirmed.current && totalMoved.current >= DRAG_THRESHOLD) {
       dragConfirmed.current = true;
+      // Dismiss drag hint on first real drag
+      if (showDragHint) {
+        setShowDragHint(false);
+        try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
+      }
     }
 
     if (dragConfirmed.current) {
