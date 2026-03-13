@@ -893,7 +893,7 @@ const AgentGardenPage = () => {
                 <CardContent>
                   <div className="space-y-2">
                     {agents.slice(0, 10).map((agent, rank) => {
-                      const tier = getAgentTier(agent.trust_score);
+                      const tier = getAgentTier(agent.trust_score ?? 0);
                       return (
                         <div key={agent.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/10 border border-border/20">
                           <span className="text-sm font-serif font-bold text-muted-foreground w-6 text-right shrink-0">#{rank + 1}</span>
