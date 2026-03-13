@@ -60,10 +60,13 @@ const LEAF_SHAPES = ["🍃", "🍂", "🌿", "✦"] as const;
 
 const TetolHomePage = () => {
   const navigate = useNavigate();
+  const [activeNode, setActiveNode] = useState<string | null>(null);
 
-  const handleItemClick = (to: string) => {
-    navigate(to);
-  };
+  const handleItemClick = useCallback((to: string) => {
+    setActiveNode(to);
+    // Brief glow before navigating — keeps it fast
+    setTimeout(() => navigate(to), 120);
+  }, [navigate]);
 
   const leaves = useMemo(
     () =>
