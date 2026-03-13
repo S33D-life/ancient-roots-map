@@ -37,6 +37,7 @@ export function useCanopyCheckIn() {
   const watchIdRef = useRef<number | null>(null);
   const userIdRef = useRef<string | null>(null);
   const processingRef = useRef(false);
+  const dailyCappedRef = useRef(false);
 
   // Load user's trees that qualify for canopy check-in
   const loadTrees = useCallback(async () => {
@@ -63,6 +64,7 @@ export function useCanopyCheckIn() {
     if (pos.coords.accuracy > MIN_ACCURACY_M) return;
     if (!userIdRef.current || treesRef.current.length === 0) return;
     if (processingRef.current) return;
+    if (dailyCappedRef.current) return;
     processingRef.current = true;
 
     try {
@@ -93,7 +95,14 @@ export function useCanopyCheckIn() {
           },
         });
 
-        if (error) continue;
+        if (error) {
+          // Stop retrying if daily cap reached
+          const body = data as { reason?: string } | null;
+          if (body?.reason === 'user_daily_cap' || body?.reason === 'tree_daily_cap') {
+            dailyCappedRef.current = true;
+          }
+          continue;
+        }
 
         const result = (data || {}) as { accepted?: boolean; hearts_awarded?: number };
         if (result.accepted && Number(result.hearts_awarded || 0) > 0) {
