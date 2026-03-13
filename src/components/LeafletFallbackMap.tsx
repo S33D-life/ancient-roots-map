@@ -53,6 +53,13 @@ import NearbyDiscoveryPanel from "./NearbyDiscoveryPanel";
 import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
 import type { Rootstone } from "@/data/rootstones";
 import { consumeQueuedMycelialThreads, onMycelialThread, type MycelialPoint, type MycelialThreadEvent } from "@/lib/mycelial-network";
+import {
+  buildPopupHtml,
+  buildExternalPopupHtml,
+  buildResearchPopupHtml,
+  buildRootstonePopupHtml,
+  type ResearchTree,
+} from "@/utils/mapPopups";
 
 interface Tree {
   id: string;
