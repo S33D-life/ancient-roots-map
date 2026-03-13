@@ -1029,7 +1029,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     mapRef.current = map;
 
     // ── Explicit background so "no tiles" is visually distinct from atmosphere ──
-    containerRef.current.style.backgroundColor = "hsl(30, 15%, 10%)";
+    container.style.backgroundColor = "hsl(30, 15%, 10%)";
 
     // Robust invalidateSize — ensure container is fully laid out before sizing
     requestAnimationFrame(() => map.invalidateSize());
@@ -1038,10 +1038,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     // Extra invalidation for slow mobile renderers / iOS webview
     setTimeout(() => {
       map.invalidateSize();
-      const imgCount = containerRef.current?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
+      const imgCount = container?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
       setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
-      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}, tilePaneImages=${imgCount}`);
+      console.info(`${logPrefix} late invalidateSize, container ${container?.offsetWidth}x${container?.offsetHeight}, tilePaneImages=${imgCount}`);
     }, 1500);
+    // ResizeObserver-based invalidation for dynamic layout changes
+    const sizeObserver = new ResizeObserver(() => map.invalidateSize());
+    sizeObserver.observe(container);
     // Also re-invalidate on window resize
     const onResize = () => map.invalidateSize();
     window.addEventListener('resize', onResize);
