@@ -979,8 +979,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     primaryTileLayer.on("tileerror", (e: any) => {
       tileErrors += 1;
       tileErrorCount += 1;
-      console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 80));
-      if (tileErrors >= TILE_ERROR_THRESHOLD) {
+      setRenderDebug((prev) => ({ ...prev, tileStatus: "failed", tileErrors: tileErrorCount }));
+      console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 160));
+      if (tileErrors >= (SAFE_MAP_DEBUG ? 1 : TILE_ERROR_THRESHOLD)) {
         activateFallbackTiles();
       }
     });
