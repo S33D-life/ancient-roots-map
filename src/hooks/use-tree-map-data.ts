@@ -22,7 +22,7 @@ export interface MapTree {
   created_by?: string;
   nation?: string;
   estimated_age?: number | null;
-  what3words?: string;
+  what3words: string;
   lineage?: string;
   project_name?: string;
 }
