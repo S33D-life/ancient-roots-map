@@ -261,6 +261,7 @@ const App = () => {
           <SeasonalLensProvider>
           <CompanionProvider>
           <TeotagProvider>
+            <CompanionBridge />
             <BottomNav />
             <FireflyFAB />
             <CelebrationOverlay />
