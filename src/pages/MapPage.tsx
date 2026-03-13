@@ -42,12 +42,14 @@ const MapPage = () => {
   const paramJourney = mapFocus.journey;
   const paramBbox = mapFocus.bbox?.join(",") || undefined;
   const [journeyActive, setJourneyActive] = useState(paramJourney);
+  const safeMapDebug = searchParams.get("mapDebug") === "1";
+  const safeDisableNonessentialOverlays = safeMapDebug && searchParams.get("hideOverlays") !== "0";
 
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
-  const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
+  const [showBlessing, setShowBlessing] = useState(() => !safeDisableNonessentialOverlays && !isBlessingDismissed());
   const [blessingJustDismissed, setBlessingJustDismissed] = useState(false);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
@@ -66,17 +68,17 @@ const MapPage = () => {
       <MapJourneyOverlay active={journeyActive} />
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
-      {!showBlessing && !isFullscreen && paramArrival && (
+      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && paramArrival && (
         <MapArrivalBanner arrival={paramArrival} countrySlug={paramCountry} hiveSlug={paramHive} />
       )}
 
       {/* Public Tester Blessing — overlays map, shown once */}
-      {showBlessing && (
-        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); }} />
+      {!safeDisableNonessentialOverlays && showBlessing && (
+        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); window.dispatchEvent(new Event("s33d-map-layout-changed")); }} />
       )}
 
       {/* Standard header — hidden in fullscreen and during blessing */}
-      {!isFullscreen && !showBlessing && (
+      {!safeDisableNonessentialOverlays && !isFullscreen && !showBlessing && (
         <>
           <Header />
            <div className="absolute left-0 right-0 z-[20]" style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px))" }}>
@@ -96,7 +98,7 @@ const MapPage = () => {
       )}
 
       {/* Recently Added Trees — floating panel */}
-      {!showBlessing && !isFullscreen && (
+      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
         <>
           <Suspense fallback={null}>
             <RecentlyAddedTrees onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
@@ -108,7 +110,7 @@ const MapPage = () => {
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
-      {!showBlessing && !blessingJustDismissed && (
+      {!safeDisableNonessentialOverlays && !showBlessing && !blessingJustDismissed && (
         <Suspense fallback={null}>
           <MapOnboardingRitual />
           <ContextualWhisper

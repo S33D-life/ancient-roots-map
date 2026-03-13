@@ -238,14 +238,43 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [discoveryCount, setDiscoveryCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const safeMapFlags = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const SAFE_MAP_DEBUG = import.meta.env.DEV && params.get("mapDebug") === "1";
+    const SAFE_BARE_MAP_MODE = SAFE_MAP_DEBUG && params.get("bareMap") === "1";
+    const SAFE_DISABLE_NONESSENTIAL_OVERLAYS = SAFE_MAP_DEBUG && params.get("hideOverlays") !== "0";
+    return { SAFE_MAP_DEBUG, SAFE_BARE_MAP_MODE, SAFE_DISABLE_NONESSENTIAL_OVERLAYS };
+  }, [location.search]);
+
+  const { SAFE_MAP_DEBUG, SAFE_BARE_MAP_MODE, SAFE_DISABLE_NONESSENTIAL_OVERLAYS } = safeMapFlags;
+
   const debugEnabled = useMemo(() => {
     try {
       const params = new URLSearchParams(location.search);
-      return params.get("debug") === "1";
+      return params.get("debug") === "1" || SAFE_MAP_DEBUG;
     } catch {
-      return false;
+      return SAFE_MAP_DEBUG;
     }
-  }, [location.search]);
+  }, [location.search, SAFE_MAP_DEBUG]);
+
+  const [renderDebug, setRenderDebug] = useState<{
+    mapMounted: boolean;
+    tileStatus: "idle" | "loading" | "loaded" | "failed";
+    provider: "carto" | "osm";
+    tileLoads: number;
+    tileErrors: number;
+    tilePaneImages: number;
+    container: string;
+  }>({
+    mapMounted: false,
+    tileStatus: "idle",
+    provider: "carto",
+    tileLoads: 0,
+    tileErrors: 0,
+    tilePaneImages: 0,
+    container: "0x0",
+  });
+
   const [perfDebug, setPerfDebug] = useState<MapPerfDebugStats>({
     fps: null,
     frameDeltaMs: null,
@@ -263,10 +292,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [projectFilter, setProjectFilter] = useState("all");
 
   // Layer visibility toggles
-  const [showSeeds, setShowSeeds] = useState(true);
+  const [showSeeds, setShowSeeds] = useState(() => !SAFE_BARE_MAP_MODE);
   const [showGroves, setShowGroves] = useState(false);
   const [showRootThreads, setShowRootThreads] = useState(false);
   const [showMycelialNetwork, setShowMycelialNetwork] = useState(() => {
+    if (SAFE_BARE_MAP_MODE) return false;
     try {
       const params = new URLSearchParams(window.location.search);
       return params.get("mycelial") === "on";
@@ -286,6 +316,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
   const [showHiveLayer, setShowHiveLayer] = useState(false);
   const [showResearchLayer, setShowResearchLayer] = useState(() => {
+    if (SAFE_BARE_MAP_MODE) return false;
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get('research') === 'off') return false;
@@ -340,7 +371,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
   // Clear View — hide non-essential UI overlays for distraction-free browsing
-  const [clearView, setClearView] = useState(false);
+  const [clearView, setClearView] = useState(() => SAFE_DISABLE_NONESSENTIAL_OVERLAYS || SAFE_BARE_MAP_MODE);
 
   // GroveView — Living Earth Mode
   const [groveViewActive, setGroveViewActive] = useState(false);
@@ -864,31 +895,37 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       markerZoomAnimation: true,
     } as any);
 
-    // ── Feature flag: set to true to disable all atmosphere for debugging ──
-    const SAFE_MAP_ATMOSPHERE = false;
+    // ── Feature flags for safe map diagnostics ──
+    const SAFE_MAP_ATMOSPHERE = !SAFE_BARE_MAP_MODE;
 
     // ── Atmospheric overlay div (replaces tile-pane CSS filters) ──
     const atmosphereDiv = document.createElement("div");
     atmosphereDiv.className = "map-atmosphere-overlay";
-    if (SAFE_MAP_ATMOSPHERE) {
-      containerRef.current.classList.add("safe-atmosphere");
+    if (!SAFE_MAP_ATMOSPHERE) {
+      containerRef.current.classList.add("safe-atmosphere", "safe-bare-map");
     }
-    // Insert into map container so seasonal classes cascade naturally
-    containerRef.current.appendChild(atmosphereDiv);
+    if (!SAFE_BARE_MAP_MODE) {
+      // Insert into map container so seasonal classes cascade naturally
+      containerRef.current.appendChild(atmosphereDiv);
+    }
 
     // ── Tile debug logging ──
     const logPrefix = "[MapTiles]";
-    console.info(`${logPrefix} Leaflet map instance created, container ${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`);
+    const containerSize = `${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`;
+    console.info(`${logPrefix} Leaflet map instance created, container ${containerSize}`);
+    setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
 
     const isRetina = window.devicePixelRatio > 1;
     const primaryTileLayer = L.tileLayer(
-      isRetina
+      SAFE_BARE_MAP_MODE
+        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        : isRetina
         ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
         : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       {
-        attribution: '&copy; OSM &copy; CARTO',
+        attribution: SAFE_BARE_MAP_MODE ? '&copy; OpenStreetMap contributors' : '&copy; OSM &copy; CARTO',
         maxZoom: 19,
-        subdomains: "abcd",
+        subdomains: SAFE_BARE_MAP_MODE ? "abc" : "abcd",
         keepBuffer: 4,
       }
     ).addTo(map);
@@ -903,8 +940,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     // Tile lifecycle debug events
     let tileLoadCount = 0;
     let tileErrorCount = 0;
-    primaryTileLayer.on("loading", () => console.info(`${logPrefix} tiles loading…`));
-    primaryTileLayer.on("load", () => console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`));
+    primaryTileLayer.on("loading", () => {
+      console.info(`${logPrefix} tiles loading…`);
+      setRenderDebug((prev) => ({ ...prev, tileStatus: "loading" }));
+    });
+    primaryTileLayer.on("load", () => {
+      console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`);
+      setRenderDebug((prev) => ({ ...prev, tileStatus: "loaded", tileLoads: tileLoadCount, tileErrors: tileErrorCount }));
+    });
+    primaryTileLayer.on("tileloadstart", (e: any) => {
+      if (SAFE_MAP_DEBUG && e?.tile?.src) {
+        console.info(`${logPrefix} tileloadstart`, e.tile.src);
+      }
+    });
 
     // Automatic tile provider failover when CARTO is unavailable/throttled.
     let tileErrors = 0;
@@ -931,8 +979,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     primaryTileLayer.on("tileerror", (e: any) => {
       tileErrors += 1;
       tileErrorCount += 1;
-      console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 80));
-      if (tileErrors >= TILE_ERROR_THRESHOLD) {
+      setRenderDebug((prev) => ({ ...prev, tileStatus: "failed", tileErrors: tileErrorCount }));
+      console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 160));
+      if (tileErrors >= (SAFE_MAP_DEBUG ? 1 : TILE_ERROR_THRESHOLD)) {
         activateFallbackTiles();
       }
     });
@@ -952,7 +1001,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     // Extra invalidation for slow mobile renderers / iOS webview
     setTimeout(() => {
       map.invalidateSize();
-      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}`);
+      const imgCount = containerRef.current?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
+      setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
+      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}, tilePaneImages=${imgCount}`);
     }, 1500);
     // Also re-invalidate on window resize
     const onResize = () => map.invalidateSize();
