@@ -21,11 +21,12 @@ import {
   Heart, Activity, GitBranch, FileCode, BookOpen, Map, Settings,
   Zap, Globe, Eye, CheckCircle, Clock, AlertTriangle, Sprout,
   Flower, Leaf, ChevronRight, ExternalLink, Package, Server,
-  Code, FileText, Telescope, Users, Scroll, Archive
+  Code, FileText, Telescope, Users, Scroll, Archive,
+  RefreshCw, Bug, Wrench, Import, Share2, PenTool, Crown
 } from "lucide-react";
 
 /* ── Types ── */
-type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "settings";
+type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "settings";
 
 interface SystemNode {
   id: string;
@@ -46,6 +47,7 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "code-grove",      label: "Code Grove",  icon: <Code className="w-3.5 h-3.5" /> },
   { key: "contract-shelf",  label: "Contracts",   icon: <FileText className="w-3.5 h-3.5" /> },
   { key: "roadmap",         label: "Roadmap",     icon: <Sprout className="w-3.5 h-3.5" /> },
+  { key: "toolshed",        label: "Toolshed",    icon: <Wrench className="w-3.5 h-3.5" /> },
   { key: "settings",        label: "Settings",    icon: <Settings className="w-3.5 h-3.5" /> },
 ];
 
@@ -186,6 +188,7 @@ const DevRoom = () => {
           {section === "code-grove" && <CodeGroveSection />}
           {section === "contract-shelf" && <ContractShelfSection />}
           {section === "roadmap" && <RoadmapSection />}
+          {section === "toolshed" && <ToolshedSection />}
           {section === "settings" && <SettingsSection />}
         </motion.div>
       </AnimatePresence>
@@ -256,7 +259,11 @@ function OverviewSection({ stats }: { stats: Record<string, number> }) {
           { label: "Ecosystem Map", route: "/ecosystem", icon: <Globe className="w-3.5 h-3.5" /> },
           { label: "API Docs", route: "/api-docs", icon: <FileCode className="w-3.5 h-3.5" /> },
           { label: "Roadmap", route: "/roadmap", icon: <Sprout className="w-3.5 h-3.5" /> },
-          { label: "Bug Garden", route: "/bug-garden", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+          { label: "Bug Garden", route: "/bug-garden", icon: <Bug className="w-3.5 h-3.5" /> },
+          { label: "Sync Dashboard", route: "/sync", icon: <RefreshCw className="w-3.5 h-3.5" /> },
+          { label: "Test Lab", route: "/test-lab", icon: <Wrench className="w-3.5 h-3.5" /> },
+          { label: "Curator Tools", route: "/curator", icon: <Crown className="w-3.5 h-3.5" /> },
+          { label: "Admin Evolution", route: "/admin-evolution", icon: <Settings className="w-3.5 h-3.5" /> },
         ].map(l => (
           <Link key={l.label} to={l.route}>
             <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-card/20 border-border/20 text-xs">
@@ -751,6 +758,89 @@ function SettingsSection() {
           ))}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   TOOLSHED — Dev tools gathered from across the ecosystem
+   ═══════════════════════════════════════════════════ */
+function ToolshedSection() {
+  const tools = [
+    {
+      category: "Infrastructure",
+      items: [
+        { label: "Sync Dashboard", desc: "CID pinning, chain anchoring, asset reconciliation", route: "/sync", icon: <RefreshCw className="w-4 h-4" />, status: "live" },
+        { label: "Ecosystem Map", desc: "TETOL living infrastructure map with resilience mode", route: "/ecosystem", icon: <Globe className="w-4 h-4" />, status: "live" },
+      ],
+    },
+    {
+      category: "Quality & Testing",
+      items: [
+        { label: "Test Lab", desc: "Feature checklists, edge case testing, smoke tests", route: "/test-lab", icon: <Wrench className="w-4 h-4" />, status: "live" },
+        { label: "Bug Garden", desc: "Bug reports, triage, community upvotes", route: "/bug-garden", icon: <Bug className="w-4 h-4" />, status: "live" },
+        { label: "Share Simulator", desc: "Test sharing flows and incoming share parsing", route: "/share-simulator", icon: <Share2 className="w-4 h-4" />, status: "live" },
+      ],
+    },
+    {
+      category: "Data & Curation",
+      items: [
+        { label: "Curator Tools", desc: "Staff management, tree verification, moderation", route: "/curator", icon: <Crown className="w-4 h-4" />, status: "live" },
+        { label: "Rootstone Importer", desc: "Bulk CSV/JSON import for tree records", route: "/curator/rootstones-import", icon: <Import className="w-4 h-4" />, status: "live" },
+        { label: "Edit Review", desc: "Review pending community edits and contributions", route: "/edit-review", icon: <PenTool className="w-4 h-4" />, status: "live" },
+      ],
+    },
+    {
+      category: "API & Contracts",
+      items: [
+        { label: "API Docs", desc: "REST endpoint reference, health checks, auth info", route: "/api-docs", icon: <FileCode className="w-4 h-4" />, status: "live" },
+        { label: "Agent Garden Portal", desc: "Agent registration, capabilities, contribution tracking", route: "/agent-garden", icon: <Bot className="w-4 h-4" />, status: "live" },
+      ],
+    },
+    {
+      category: "Administration",
+      items: [
+        { label: "Admin Evolution", desc: "Growth panels, system evolution controls", route: "/admin-evolution", icon: <Settings className="w-4 h-4" />, status: "live" },
+        { label: "Calendar Settings", desc: "Seasonal lens configuration, calendar markers", route: "/calendar-settings", icon: <Clock className="w-4 h-4" />, status: "live" },
+        { label: "Install Guide", desc: "PWA installation instructions for all platforms", route: "/install", icon: <Package className="w-4 h-4" />, status: "live" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="space-y-5">
+      <p className="text-xs text-muted-foreground/50 text-center font-serif">
+        Developer tools and utilities gathered from across the ecosystem into one root system.
+      </p>
+
+      {tools.map(group => (
+        <div key={group.category} className="space-y-2">
+          <h3 className="text-[11px] font-mono font-semibold text-muted-foreground/60 uppercase tracking-wider px-1">
+            {group.category}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {group.items.map(tool => (
+              <Link key={tool.label} to={tool.route}>
+                <Card className="bg-card/20 border-border/20 hover:bg-card/40 hover:border-primary/20 transition-all group cursor-pointer h-full">
+                  <CardContent className="p-3 flex items-start gap-3">
+                    <span className="text-muted-foreground/50 group-hover:text-primary/70 transition-colors mt-0.5 shrink-0">
+                      {tool.icon}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-foreground/80">{tool.label}</span>
+                        <Badge variant="outline" className={`text-[7px] ${statusColors[tool.status]}`}>{tool.status}</Badge>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/50 leading-relaxed mt-0.5">{tool.desc}</p>
+                    </div>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors mt-1 shrink-0" />
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
