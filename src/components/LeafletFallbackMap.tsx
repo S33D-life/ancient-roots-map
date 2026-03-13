@@ -911,17 +911,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     // ── Tile debug logging ──
     const logPrefix = "[MapTiles]";
-    console.info(`${logPrefix} Leaflet map instance created, container ${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`);
+    const containerSize = `${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`;
+    console.info(`${logPrefix} Leaflet map instance created, container ${containerSize}`);
+    setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
 
     const isRetina = window.devicePixelRatio > 1;
     const primaryTileLayer = L.tileLayer(
-      isRetina
+      SAFE_BARE_MAP_MODE
+        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        : isRetina
         ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
         : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       {
-        attribution: '&copy; OSM &copy; CARTO',
+        attribution: SAFE_BARE_MAP_MODE ? '&copy; OpenStreetMap contributors' : '&copy; OSM &copy; CARTO',
         maxZoom: 19,
-        subdomains: "abcd",
+        subdomains: SAFE_BARE_MAP_MODE ? "abc" : "abcd",
         keepBuffer: 4,
       }
     ).addTo(map);
@@ -936,8 +940,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     // Tile lifecycle debug events
     let tileLoadCount = 0;
     let tileErrorCount = 0;
-    primaryTileLayer.on("loading", () => console.info(`${logPrefix} tiles loading…`));
-    primaryTileLayer.on("load", () => console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`));
+    primaryTileLayer.on("loading", () => {
+      console.info(`${logPrefix} tiles loading…`);
+      setRenderDebug((prev) => ({ ...prev, tileStatus: "loading" }));
+    });
+    primaryTileLayer.on("load", () => {
+      console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`);
+      setRenderDebug((prev) => ({ ...prev, tileStatus: "loaded", tileLoads: tileLoadCount, tileErrors: tileErrorCount }));
+    });
+    primaryTileLayer.on("tileloadstart", (e: any) => {
+      if (SAFE_MAP_DEBUG && e?.tile?.src) {
+        console.info(`${logPrefix} tileloadstart`, e.tile.src);
+      }
+    });
 
     // Automatic tile provider failover when CARTO is unavailable/throttled.
     let tileErrors = 0;
