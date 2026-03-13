@@ -596,7 +596,7 @@ const AgentGardenPage = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {agents.slice(0, 6).map(agent => {
-                      const tier = getAgentTier(agent.trust_score);
+                      const tier = getAgentTier(agent.trust_score ?? 0);
                       return (
                         <div key={agent.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/10 border border-border/20">
                           <span className="text-2xl">{agent.avatar_emoji || "🤖"}</span>
