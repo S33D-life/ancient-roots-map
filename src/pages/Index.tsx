@@ -63,7 +63,7 @@ const Index = () => {
         onNavigate={scrollToSection}
       />
 
-      <main className="flex-1">
+      <main className="flex-1" style={{ paddingTop: 'var(--content-top)' }}>
         {/* ── Discovery Row — Countries & Hives (moved up for fast access) ── */}
         <DiscoveryRow />
 
