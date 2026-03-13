@@ -4,7 +4,7 @@
  * Each room is a distinct chamber — not a tab in a monolith.
  */
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +50,21 @@ const ROOM_LABELS: Record<string, string> = {
   "bookshelf": "Bookshelf",
   "rhythms": "Rhythms",
 };
+
+/** Ordered room sequence for swipe navigation */
+const ROOM_SEQUENCE = [
+  "gallery",
+  "staff-room",
+  "bookshelf",
+  "seed-cellar",
+  "music-room",
+  "greenhouse",
+  "wishlist",
+  "scrolls",
+  "vault",
+  "creators-path",
+  "rhythms",
+];
 
 const VALID_ROOMS = Object.keys(ROOM_LABELS);
 
@@ -149,6 +164,7 @@ function BookshelfWrapper() {
 
 const HeartwoodRoomPage = () => {
   const { room: rawRoom } = useParams<{ room: string }>();
+  const navigate = useNavigate();
   const resolvedRoom = rawRoom ? (ROOM_ALIASES[rawRoom] || rawRoom) : null;
 
   if (!resolvedRoom || !VALID_ROOMS.includes(resolvedRoom)) {
@@ -157,8 +173,18 @@ const HeartwoodRoomPage = () => {
 
   const label = ROOM_LABELS[resolvedRoom] || resolvedRoom;
 
+  const handleRoomNavigate = (room: string) => {
+    navigate(`/library/${room}`, { replace: true });
+  };
+
   return (
-    <HeartwoodRoomShell roomLabel={label}>
+    <HeartwoodRoomShell
+      roomLabel={label}
+      currentRoom={resolvedRoom}
+      roomSequence={ROOM_SEQUENCE}
+      roomLabels={ROOM_LABELS}
+      onNavigateRoom={handleRoomNavigate}
+    >
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
         {resolvedRoom === "music-room" && <EarthRadioRoom />}
