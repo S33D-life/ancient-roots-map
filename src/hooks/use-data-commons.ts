@@ -45,22 +45,57 @@ export interface CrawlTask {
   created_at: string;
 }
 
+export interface AgentProfile {
+  id: string;
+  agent_name: string;
+  creator: string;
+  agent_type: string;
+  description: string | null;
+  connected_datasets: string[];
+  trees_added: number;
+  contributions: number;
+  hearts_earned: number;
+  trust_score: number;
+  last_active: string | null;
+  status: string;
+  avatar_emoji: string;
+  created_at: string;
+}
+
+export interface AgentContribution {
+  id: string;
+  agent_id: string;
+  contribution_type: string;
+  source_id: string | null;
+  tree_id: string | null;
+  status: string;
+  verification_notes: string | null;
+  hearts_awarded: number;
+  created_at: string;
+}
+
 export function useDataCommons() {
   const [sources, setSources] = useState<DataSource[]>([]);
   const [datasets, setDatasets] = useState<DataDataset[]>([]);
   const [crawlTasks, setCrawlTasks] = useState<CrawlTask[]>([]);
+  const [agents, setAgents] = useState<AgentProfile[]>([]);
+  const [agentContributions, setAgentContributions] = useState<AgentContribution[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [srcRes, dsRes, taskRes] = await Promise.all([
+    const [srcRes, dsRes, taskRes, agentRes, contribRes] = await Promise.all([
       (supabase.from as any)("tree_data_sources").select("*").order("name"),
       (supabase.from as any)("tree_datasets").select("*").order("name"),
       (supabase.from as any)("tree_crawl_tasks").select("*").order("priority", { ascending: true }),
+      (supabase.from as any)("agent_profiles").select("*").order("trust_score", { ascending: false }),
+      (supabase.from as any)("agent_contributions").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
     setSources((srcRes.data as DataSource[]) || []);
     setDatasets((dsRes.data as DataDataset[]) || []);
     setCrawlTasks((taskRes.data as CrawlTask[]) || []);
+    setAgents((agentRes.data as AgentProfile[]) || []);
+    setAgentContributions((contribRes.data as AgentContribution[]) || []);
     setLoading(false);
   }, []);
 
@@ -72,13 +107,14 @@ export function useDataCommons() {
   const integrated = sources.filter(s => s.integration_status === "published");
 
   return {
-    sources, datasets, crawlTasks, loading, refetch: fetchAll,
+    sources, datasets, crawlTasks, agents, agentContributions, loading, refetch: fetchAll,
     stats: {
       totalSources: sources.length,
       totalRecords,
       countriesCovered: countries.size,
       speciesRepresented: allSpecies.size,
       datasetsIntegrated: integrated.length,
+      activeAgents: agents.filter(a => a.status === "active").length,
     },
   };
 }
