@@ -25,7 +25,7 @@ import { useDataCommons, type DataSource, type AgentProfile } from "@/hooks/use-
 import {
   Globe, Database, Layers, TreeDeciduous, MapPin, Search,
   ExternalLink, Plus, Telescope, BookOpen, Leaf, Clock, ChevronRight,
-  Bot, Shield, Heart
+  Bot, Shield, Heart, Zap, ArrowDown, Network
 } from "lucide-react";
 
 /* ── Status helpers ─────────────────────────────────────────── */
