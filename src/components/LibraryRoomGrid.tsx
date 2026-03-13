@@ -19,7 +19,8 @@ const YOUR_SPACES: Room[] = [
 ];
 
 const COMMUNITY: Room[] = [
-  { key: "gallery",       label: "🗺 Map Room",         desc: "Ancient Friends Atlas",    accentH: 200, particle: "compass"    },
+  { key: "ancient-friends", label: "🌳 Ancient Friends",  desc: "Gallery of Ancient Trees", accentH: 140, particle: "leaf"       },
+  { key: "atlas",           label: "🗺 Map Room",         desc: "Atlas · Countries · Bio Regions", accentH: 200, particle: "compass" },
   { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",               accentH: 260, particle: "wave"       },
   { key: "seed-cellar",   label: "📦 Seed Cellar",      desc: "Living Data Archive",      accentH: 30,  particle: "seed"       },
   { key: "rhythms",       label: "🌿 Rhythms",          desc: "Seasonal Cycle Markets",   accentH: 150, particle: "leaf"       },
