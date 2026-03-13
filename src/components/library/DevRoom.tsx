@@ -188,6 +188,7 @@ const DevRoom = () => {
           {section === "code-grove" && <CodeGroveSection />}
           {section === "contract-shelf" && <ContractShelfSection />}
           {section === "roadmap" && <RoadmapSection />}
+          {section === "toolshed" && <ToolshedSection />}
           {section === "settings" && <SettingsSection />}
         </motion.div>
       </AnimatePresence>
