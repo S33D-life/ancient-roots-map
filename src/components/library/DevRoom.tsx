@@ -21,11 +21,12 @@ import {
   Heart, Activity, GitBranch, FileCode, BookOpen, Map, Settings,
   Zap, Globe, Eye, CheckCircle, Clock, AlertTriangle, Sprout,
   Flower, Leaf, ChevronRight, ExternalLink, Package, Server,
-  Code, FileText, Telescope, Users, Scroll, Archive
+  Code, FileText, Telescope, Users, Scroll, Archive,
+  RefreshCw, Bug, Wrench, Import, Share2, PenTool, Crown
 } from "lucide-react";
 
 /* ── Types ── */
-type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "settings";
+type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "settings";
 
 interface SystemNode {
   id: string;
