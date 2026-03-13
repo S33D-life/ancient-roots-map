@@ -16,6 +16,7 @@ import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
 import { CompanionProvider } from "@/contexts/CompanionContext";
+import CompanionBridge from "@/components/companion/CompanionBridge";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
@@ -261,6 +262,7 @@ const App = () => {
           <SeasonalLensProvider>
           <CompanionProvider>
           <TeotagProvider>
+            <CompanionBridge />
             <BottomNav />
             <FireflyFAB />
             <CelebrationOverlay />
