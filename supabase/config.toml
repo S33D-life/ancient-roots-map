@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.teotag-guide]
 verify_jwt = false
+
+[functions.canopy-checkin]
+verify_jwt = false
