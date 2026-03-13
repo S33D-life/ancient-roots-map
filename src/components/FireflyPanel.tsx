@@ -5,7 +5,7 @@
  */
 import { useCallback, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search, Sprout } from "lucide-react";
+import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search, Sprout, Smartphone, Camera, TreeDeciduous, Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import {
@@ -18,10 +18,11 @@ import GlobalSearch from "@/components/GlobalSearch";
 
 const ACTIONS = [
   { type: "search", icon: Search, emoji: "🔍", label: "Search Everything", desc: "Trees, places, rooms, wanderers", reward: null, isSearch: true },
-  { type: "whisper", icon: Wind, emoji: "🌬️", label: "Send a Whisper", desc: "Message through the trees", reward: null, isNav: true },
-  { type: "bug", icon: Bug, emoji: "🐞", label: "Report a Bug", desc: "Something isn't working", reward: "3–20" },
-  { type: "ux_improvement", icon: Sparkles, emoji: "✨", label: "Improve the Flow", desc: "UX refinement idea", reward: "5–15" },
-  { type: "insight", icon: Lightbulb, emoji: "💡", label: "Share an Insight", desc: "Propose an evolution", reward: "variable" },
+  { type: "whisper", icon: Wind, emoji: "🌬️", label: "Send a Whisper", desc: "Location-bound tree messages", reward: null, isNav: true, navTo: "/whispers" },
+  { type: "companion", icon: Smartphone, emoji: "📱", label: "Companion", desc: "Link device, co-witness, scan", reward: null, isNav: true, navTo: "/companion" },
+  { type: "add_tree", icon: TreeDeciduous, emoji: "🌳", label: "Add Tree", desc: "Register an Ancient Friend", reward: null, isNav: true, navTo: "/add-tree" },
+  { type: "capture", icon: Camera, emoji: "📸", label: "Quick Capture", desc: "Photo, offering, or memory", reward: null, isNav: true, navTo: "/map?action=capture" },
+  { type: "bug", icon: Bug, emoji: "🐞", label: "Spark Report", desc: "Bug, idea, or insight", reward: "3–20" },
 ] as const;
 
 interface FireflyPanelProps {
@@ -41,13 +42,13 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
 
   const { seedsRemaining } = useSeedEconomy(userId);
 
-  const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean }) => {
+  const handleAction = useCallback((type: string, flags?: { isNav?: boolean; isSearch?: boolean; navTo?: string }) => {
     if (import.meta.env.DEV) console.info("[Firefly] firefly_action_selected", { type });
     onOpenChange(false);
     if (flags?.isSearch) {
       setTimeout(() => setSearchOpen(true), 150);
-    } else if (flags?.isNav && type === "whisper") {
-      setTimeout(() => navigate("/whispers"), 150);
+    } else if (flags?.isNav && flags?.navTo) {
+      setTimeout(() => navigate(flags.navTo!), 150);
     } else {
       setTimeout(() => onSelectAction(type), 150);
     }
@@ -92,9 +93,9 @@ const FireflyPanel = ({ open, onOpenChange, onSelectAction }: FireflyPanelProps)
                 <button
                   key={a.type}
                   type="button"
-                  onClick={() => handleAction(a.type, { isNav: 'isNav' in a ? a.isNav : false })}
-                  className="flex flex-col items-start gap-2 p-3.5 rounded-xl border border-border/15 bg-secondary/10
-                    hover:border-primary/25 hover:bg-primary/5 active:scale-[0.97] transition-all duration-300 text-left group"
+                  onClick={() => handleAction(a.type, { isNav: 'isNav' in a ? a.isNav : false, navTo: 'navTo' in a ? a.navTo : undefined })}
+                  className="flex flex-col items-start gap-2 p-3 rounded-xl border border-border/15 bg-secondary/10
+                    hover:border-primary/25 hover:bg-primary/5 active:scale-[0.97] transition-all duration-300 text-left group min-h-[80px]"
                 >
                   <span className="text-lg">{a.emoji}</span>
                   <span className="text-xs font-serif text-foreground/80 group-hover:text-primary/90 transition-colors duration-300">
