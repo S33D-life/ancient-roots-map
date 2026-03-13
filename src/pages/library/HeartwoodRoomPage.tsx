@@ -164,6 +164,7 @@ function BookshelfWrapper() {
 
 const HeartwoodRoomPage = () => {
   const { room: rawRoom } = useParams<{ room: string }>();
+  const navigate = useNavigate();
   const resolvedRoom = rawRoom ? (ROOM_ALIASES[rawRoom] || rawRoom) : null;
 
   if (!resolvedRoom || !VALID_ROOMS.includes(resolvedRoom)) {
@@ -172,8 +173,18 @@ const HeartwoodRoomPage = () => {
 
   const label = ROOM_LABELS[resolvedRoom] || resolvedRoom;
 
+  const handleRoomNavigate = (room: string) => {
+    navigate(`/library/${room}`, { replace: true });
+  };
+
   return (
-    <HeartwoodRoomShell roomLabel={label}>
+    <HeartwoodRoomShell
+      roomLabel={label}
+      currentRoom={resolvedRoom}
+      roomSequence={ROOM_SEQUENCE}
+      roomLabels={ROOM_LABELS}
+      onNavigateRoom={handleRoomNavigate}
+    >
       <Suspense fallback={<PageSkeleton variant="default" />}>
         {resolvedRoom === "staff-room" && <StaffRoomGallery />}
         {resolvedRoom === "music-room" && <EarthRadioRoom />}
