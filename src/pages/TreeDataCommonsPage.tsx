@@ -499,7 +499,7 @@ const TreeDataCommonsPage = () => {
           </div>
         </motion.div>
       </main>
-    </PageShell>
+    </>
   );
 };
 
