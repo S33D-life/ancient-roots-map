@@ -145,10 +145,17 @@ interface MapPerfDebugStats {
   activeFilters: string[];
 }
 
-/* ── Shared tier & species logic ── */
-import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue, SPECIES_HUE } from "@/utils/treeCardTypes";
-
-type Tier = TreeTier;
+/* ── Shared tier & species logic — now from extracted module ── */
+import {
+  type Tier,
+  getTreeTier,
+  getSpeciesHue,
+  getVisibleTrees,
+  getOrCreateIcon,
+  hslStringToHue,
+  MARKER_SIZES,
+} from "@/components/map/mapMarkerUtils";
+import { TIER_LABELS } from "@/utils/treeCardTypes";
 
 /** Viewport-cull helper — returns only trees within current map bounds + padding */
 function getVisibleTrees(map: L.Map, trees: Tree[], pad = 0.1): Tree[] {
