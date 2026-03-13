@@ -72,6 +72,26 @@ const FireflyFAB = () => {
   const [xy, setXY] = useState(() => posToXY(pos));
   const [hovered, setHovered] = useState(false);
 
+  // One-time drag hint
+  const DRAG_HINT_KEY = "s33d_orb_drag_hint_seen";
+  const [showDragHint, setShowDragHint] = useState(() => {
+    try { return !localStorage.getItem(DRAG_HINT_KEY); } catch { return false; }
+  });
+
+  useEffect(() => {
+    if (!showDragHint) return;
+    const timer = setTimeout(() => {
+      setShowDragHint(false);
+      try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
+    }, 6000);
+    const dismiss = () => {
+      setShowDragHint(false);
+      try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
+    };
+    window.addEventListener("pointerdown", dismiss, { once: true });
+    return () => { clearTimeout(timer); window.removeEventListener("pointerdown", dismiss); };
+  }, [showDragHint]);
+
   const isDragging = useRef(false);
   const dragConfirmed = useRef(false);
   const dragStart = useRef({ px: 0, py: 0, ox: 0, oy: 0 });
