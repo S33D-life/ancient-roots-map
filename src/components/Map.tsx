@@ -900,7 +900,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             autoOpen={autoAddTree}
             onLocationFound={(lat, lng) => {
               setUserLocation({ lat, lng });
-              map.current?.flyTo({ center: [lng, lat], zoom: 18, duration: 2000 });
+              map.current?.flyTo({ center: [lng, lat], zoom: 19, duration: 2000 });
             }}
           />
         </Suspense>
