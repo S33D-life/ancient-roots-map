@@ -316,6 +316,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
   const [showHiveLayer, setShowHiveLayer] = useState(false);
   const [showResearchLayer, setShowResearchLayer] = useState(() => {
+    if (SAFE_BARE_MAP_MODE) return false;
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get('research') === 'off') return false;
