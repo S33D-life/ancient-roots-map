@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
-import BottomNav from "@/components/BottomNav";
+
 
 /* ─── Types ─── */
 interface ResearchTree {
