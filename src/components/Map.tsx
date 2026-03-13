@@ -5,6 +5,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToCoordinates } from "@/utils/what3words";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
+import { useTreeMapData } from "@/hooks/use-tree-map-data";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -110,14 +111,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
-  const [trees, setTrees] = useState<Tree[]>([]);
+  // Tree data via React Query — cached, realtime-invalidated
+  const {
+    trees,
+    birdsongCounts,
+    birdsongHeatPoints,
+    bloomedSeeds,
+  } = useTreeMapData();
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [treePhotos, setTreePhotos] = useState<TreePhotos>({});
   // Unified offering counts from shared hook
   const { counts: sharedOfferingCounts, photos: sharedOfferingPhotos } = useOfferingCounts();
-  const [birdsongCounts, setBirdsongCounts] = useState<BirdsongCounts>({});
-  const [birdsongHeatPoints, setBirdsongHeatPoints] = useState<BirdsongHeatPoint[]>([]);
-  const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const mapStatusRef = useRef(mapStatus);
@@ -160,79 +164,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     setTreePhotos(sharedOfferingPhotos);
   }, [sharedOfferingCounts, sharedOfferingPhotos]);
 
-  // Fetch trees and birdsong from database (offerings handled by shared hook)
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchTrees = async () => {
-      try {
-        const [treesResult, birdsongResult] = await Promise.all([
-          supabase.from('trees').select('id,name,species,latitude,longitude,created_by,nation,estimated_age,what3words,lineage,project_name').not('latitude', 'is', null).not('longitude', 'is', null),
-          supabase.from('birdsong_offerings').select('tree_id, season'),
-        ]);
-
-        if (cancelled) return;
-
-        if (treesResult.error) {
-          console.error('Error fetching trees:', treesResult.error);
-          toast({ title: "Error loading trees", description: "Failed to load tree data", variant: "destructive" });
-        } else {
-          setTrees(treesResult.data || []);
-        }
-
-        const { data: seedData } = await supabase
-          .from('planted_seeds')
-          .select('id, tree_id, latitude, longitude, blooms_at, planter_id')
-          .is('collected_by', null)
-          .lte('blooms_at', new Date().toISOString());
-        if (!cancelled) setBloomedSeeds(seedData || []);
-
-        if (!birdsongResult.error && birdsongResult.data && !cancelled) {
-          const bCounts: BirdsongCounts = {};
-          birdsongResult.data.forEach((b: any) => {
-            bCounts[b.tree_id] = (bCounts[b.tree_id] || 0) + 1;
-          });
-          setBirdsongCounts(bCounts);
-
-          const treeMap: Record<string, any> = {};
-          (treesResult.data || []).forEach((t: any) => { treeMap[t.id] = t; });
-          const heatPts: BirdsongHeatPoint[] = [];
-          birdsongResult.data.forEach((b: any) => {
-            const tree = treeMap[b.tree_id];
-            if (tree?.latitude && tree?.longitude) {
-              heatPts.push({ tree_id: b.tree_id, season: b.season, latitude: tree.latitude, longitude: tree.longitude });
-            }
-          });
-          setBirdsongHeatPoints(heatPts);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error('[Map] fetchTrees failed:', err);
-          toast({ title: "Connection issue", description: "Some tree data may be missing", variant: "destructive" });
-        }
-      }
-    };
-
-    fetchTrees();
-
-    let realtimeDebounce: ReturnType<typeof setTimeout>;
-    const debouncedFetch = () => {
-      clearTimeout(realtimeDebounce);
-      realtimeDebounce = setTimeout(fetchTrees, 2000);
-    };
-
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'trees' }, debouncedFetch)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'planted_seeds' }, debouncedFetch)
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(realtimeDebounce);
-      supabase.removeChannel(channel);
-    };
-  }, [toast]);
+  // Tree data now fetched via useTreeMapData (React Query) — no manual fetch needed
 
   // Species counts for filter panel
   const treeCounts = useMemo(() => {
