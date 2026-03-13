@@ -206,6 +206,7 @@ const HeartwoodRoomPage = () => {
         {resolvedRoom === "bookshelf" && <BookshelfWrapper />}
         {resolvedRoom === "creators-path" && <CreatorsPathWrapper />}
         {resolvedRoom === "rhythms" && <CycleMarketRoom />}
+        {resolvedRoom === "tap-root" && <DevRoom />}
       </Suspense>
     </HeartwoodRoomShell>
   );
