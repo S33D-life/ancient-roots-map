@@ -25,7 +25,7 @@ const BRIDGES: Record<string, BridgeTarget[]> = {
     { level: "crown", label: "The Crown", prompt: "Reach for the Golden Dream — shape the vision", route: "/golden-dream", icon: Sparkles },
   ],
   crown: [
-    { level: "s33d", label: "S33D", prompt: "Return to the seed — the cycle begins again", route: "/", icon: Sprout },
+    { level: "s33d", label: "S33D", prompt: "Return to the seed — the cycle begins again", route: "/s33d", icon: Sprout },
   ],
 };
 

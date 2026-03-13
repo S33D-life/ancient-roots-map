@@ -26,6 +26,7 @@ function routeToLevel(pathname: string): TetolLevel {
   if (pathname.startsWith("/council")) return "canopy";
   if (pathname.startsWith("/golden-dream")) return "crown";
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/auth")) return "hearth";
+  if (pathname === "/s33d") return "s33d";
   return "s33d";
 }
 

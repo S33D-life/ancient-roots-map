@@ -236,7 +236,7 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
 
         {/* S33D home link — just above the roots */}
         <button
-          onClick={(e) => handleItemClick("/", e)}
+          onClick={(e) => handleItemClick("/s33d", e)}
           className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full"
           style={{
             opacity: visible ? 1 : 0,

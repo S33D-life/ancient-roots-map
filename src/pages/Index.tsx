@@ -1,4 +1,6 @@
 import { useCallback, lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
+import { TreeDeciduous } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import S33dEntrance from "@/components/S33dEntrance";
@@ -114,6 +116,18 @@ const Index = () => {
           position="bottom-center"
         />
       </Suspense>
+      {/* Gateway return CTA */}
+      <div className="flex justify-center py-10">
+        <Link
+          to="/"
+          className="group flex items-center gap-3 px-8 py-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
+        >
+          <TreeDeciduous className="w-5 h-5 text-primary" />
+          <span className="font-serif text-base text-foreground group-hover:text-primary transition-colors">
+            Enter the Tree
+          </span>
+        </Link>
+      </div>
       <Footer />
     </div>
   );

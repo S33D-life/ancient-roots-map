@@ -69,7 +69,8 @@ const lazyImportWithRetry = <T extends ComponentType<any>>(
   });
 
 // Lazy-load all route pages for code splitting
-const Index = lazyImportWithRetry(() => import("./pages/Index"), "index");
+const TetolHomePage = lazyImportWithRetry(() => import("./pages/TetolHomePage"), "tetol-home");
+const S33dGatewayPage = lazyImportWithRetry(() => import("./pages/Index"), "s33d-gateway");
 const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page");
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
@@ -261,7 +262,11 @@ const App = () => {
             </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<TetolHomePage />} />
+                <Route path="/s33d" element={<S33dGatewayPage />} />
+                <Route path="/ancient-friends" element={<Navigate to="/map" replace />} />
+                <Route path="/heartwood" element={<Navigate to="/library" replace />} />
+                <Route path="/your-golden-dream" element={<Navigate to="/golden-dream" replace />} />
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/add-tree" element={<AddTreePage />} />
                 <Route path="/atlas" element={<WorldAtlasPage />} />

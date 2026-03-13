@@ -268,12 +268,11 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Center: S33D logo — mobile only, opens TETOL nav */}
+          {/* Center: S33D logo — mobile only, navigates to TETOL home */}
           <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
-            <button
-              type="button"
+            <Link
+              to="/"
               className="flex items-center bg-transparent border-none p-0 relative"
-              onClick={(e) => { e.stopPropagation(); setTetolOpen(true); }}
             >
               <div className="relative pulse-heart">
                 <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-11 h-11 rounded-full object-cover border-2 border-primary/40 shadow-[0_0_12px_hsla(42,90%,55%,0.25)] hover:shadow-[0_0_20px_hsla(42,90%,55%,0.4)] transition-all duration-300 hover:scale-105" />
@@ -288,7 +287,7 @@ const Header = () => {
                   />
                 )}
               </div>
-            </button>
+            </Link>
           </div>
           
           {/* Desktop nav — 3 clear destinations */}
@@ -340,10 +339,9 @@ const Header = () => {
               <Stars className={`w-3.5 h-3.5 md:w-4 md:h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
             </Button>
             {user ? (
-              <button
-                type="button"
-                onClick={() => setTetolOpen(true)}
-                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer group"
+              <Link
+                to="/"
+                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical p-0 cursor-pointer group no-underline"
               >
                 <div className="relative pulse-heart">
                   <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
@@ -361,7 +359,7 @@ const Header = () => {
                 <span className="font-serif">S33D</span>
                 <LivingStreak streak={heartBalance.streak} />
                 <HeartJar userId={user?.id ?? null} />
-              </button>
+              </Link>
             ) : (
               <Button
                 variant="sacred"
