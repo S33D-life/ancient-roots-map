@@ -18,10 +18,11 @@ import GlobalSearch from "@/components/GlobalSearch";
 
 const ACTIONS = [
   { type: "search", icon: Search, emoji: "🔍", label: "Search Everything", desc: "Trees, places, rooms, wanderers", reward: null, isSearch: true },
-  { type: "whisper", icon: Wind, emoji: "🌬️", label: "Send a Whisper", desc: "Message through the trees", reward: null, isNav: true },
-  { type: "bug", icon: Bug, emoji: "🐞", label: "Report a Bug", desc: "Something isn't working", reward: "3–20" },
-  { type: "ux_improvement", icon: Sparkles, emoji: "✨", label: "Improve the Flow", desc: "UX refinement idea", reward: "5–15" },
-  { type: "insight", icon: Lightbulb, emoji: "💡", label: "Share an Insight", desc: "Propose an evolution", reward: "variable" },
+  { type: "whisper", icon: Wind, emoji: "🌬️", label: "Send a Whisper", desc: "Location-bound tree messages", reward: null, isNav: true, navTo: "/whispers" },
+  { type: "companion", icon: Smartphone, emoji: "📱", label: "Companion", desc: "Link device, co-witness, scan", reward: null, isNav: true, navTo: "/companion" },
+  { type: "add_tree", icon: TreeDeciduous, emoji: "🌳", label: "Add Tree", desc: "Register an Ancient Friend", reward: null, isNav: true, navTo: "/add-tree" },
+  { type: "capture", icon: Camera, emoji: "📸", label: "Quick Capture", desc: "Photo, offering, or memory", reward: null, isNav: true, navTo: "/map?action=capture" },
+  { type: "bug", icon: Bug, emoji: "🐞", label: "Spark Report", desc: "Bug, idea, or insight", reward: "3–20" },
 ] as const;
 
 interface FireflyPanelProps {
