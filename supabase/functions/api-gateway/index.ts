@@ -436,6 +436,100 @@ route("GET", "/api/v1/openapi.json", async () => {
 });
 
 /* ================================================================== */
+/*  AGENT GARDEN ROUTES                                                */
+/* ================================================================== */
+
+function agentGardenHandler(handlerFn: Function, needsBody = false, needsParams = false) {
+  return async (req: Request, auth: AuthResult, params: Record<string, string>, url: URL) => {
+    let body: any = {};
+    if (needsBody) {
+      try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+    }
+    const result = needsParams
+      ? await handlerFn(req, auth, params, needsBody ? body : url)
+      : await handlerFn(req, auth, body);
+    return json(result.data ?? { error: result.error }, result.status);
+  };
+}
+
+// Agent registration & profile
+route("POST", "/api/v1/agent-garden/agents/register", agentGardenHandler(registerAgent, true));
+route("GET", "/api/v1/agent-garden/agents/:agentId", async (req, auth, params, url) => {
+  const result = await getAgent(req, auth, params);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+// Capabilities
+route("POST", "/api/v1/agent-garden/agents/:agentId/capabilities", async (req, auth, params) => {
+  let body: any = {};
+  try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+  const result = await updateCapabilities(req, auth, params, body);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+// Sources & Datasets
+route("POST", "/api/v1/agent-garden/sources", agentGardenHandler(submitSource, true));
+route("POST", "/api/v1/agent-garden/datasets", agentGardenHandler(submitDataset, true));
+
+// Research Trees
+route("POST", "/api/v1/agent-garden/research-trees/bulk", agentGardenHandler(submitResearchTreesBulk, true));
+
+route("POST", "/api/v1/agent-garden/research-trees/:recordId/species-classification", async (req, auth, params) => {
+  let body: any = {};
+  try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+  const result = await submitSpeciesClassification(req, auth, params, body);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+route("POST", "/api/v1/agent-garden/research-trees/:recordId/geocode", async (req, auth, params) => {
+  let body: any = {};
+  try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+  const result = await submitGeocode(req, auth, params, body);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+route("POST", "/api/v1/agent-garden/research-trees/:recordId/enrich", async (req, auth, params) => {
+  let body: any = {};
+  try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+  const result = await submitEnrichment(req, auth, params, body);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+route("POST", "/api/v1/agent-garden/research-trees/:recordId/duplicate-check", async (req, auth, params) => {
+  let body: any = {};
+  try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+  const result = await submitDuplicateCheck(req, auth, params, body);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+route("POST", "/api/v1/agent-garden/research-trees/:recordId/candidate", async (req, auth, params) => {
+  let body: any = {};
+  try { body = await req.json(); } catch { return err("INVALID_REQUEST", "Body must be valid JSON", 400); }
+  const result = await submitCandidate(req, auth, params, body);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+// Sparks
+route("POST", "/api/v1/agent-garden/sparks", agentGardenHandler(submitSpark, true));
+
+// Tasks
+route("GET", "/api/v1/agent-garden/tasks", async (req, auth, params, url) => {
+  const result = await getTasks(req, auth, params, url);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+// Agent contributions & rewards
+route("GET", "/api/v1/agent-garden/agents/:agentId/contributions", async (req, auth, params, url) => {
+  const result = await getContributions(req, auth, params, url);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+route("GET", "/api/v1/agent-garden/agents/:agentId/rewards", async (req, auth, params) => {
+  const result = await getRewards(req, auth, params);
+  return json(result.data ?? { error: result.error }, result.status);
+});
+
+/* ================================================================== */
 /*  MAIN HANDLER                                                       */
 /* ================================================================== */
 
