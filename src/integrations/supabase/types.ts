@@ -14,6 +14,124 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_contributions: {
+        Row: {
+          agent_id: string
+          contribution_type: string
+          created_at: string
+          hearts_awarded: number | null
+          id: string
+          metadata: Json | null
+          source_id: string | null
+          status: string
+          tree_id: string | null
+          updated_at: string
+          verification_notes: string | null
+        }
+        Insert: {
+          agent_id: string
+          contribution_type?: string
+          created_at?: string
+          hearts_awarded?: number | null
+          id?: string
+          metadata?: Json | null
+          source_id?: string | null
+          status?: string
+          tree_id?: string | null
+          updated_at?: string
+          verification_notes?: string | null
+        }
+        Update: {
+          agent_id?: string
+          contribution_type?: string
+          created_at?: string
+          hearts_awarded?: number | null
+          id?: string
+          metadata?: Json | null
+          source_id?: string | null
+          status?: string
+          tree_id?: string | null
+          updated_at?: string
+          verification_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_contributions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_contributions_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_contributions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_profiles: {
+        Row: {
+          agent_name: string
+          agent_type: string
+          avatar_emoji: string | null
+          connected_datasets: string[] | null
+          contributions: number | null
+          created_at: string
+          creator: string
+          description: string | null
+          hearts_earned: number | null
+          id: string
+          last_active: string | null
+          status: string
+          trees_added: number | null
+          trust_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          agent_name: string
+          agent_type?: string
+          avatar_emoji?: string | null
+          connected_datasets?: string[] | null
+          contributions?: number | null
+          created_at?: string
+          creator: string
+          description?: string | null
+          hearts_earned?: number | null
+          id?: string
+          last_active?: string | null
+          status?: string
+          trees_added?: number | null
+          trust_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          agent_type?: string
+          avatar_emoji?: string | null
+          connected_datasets?: string[] | null
+          contributions?: number | null
+          created_at?: string
+          creator?: string
+          description?: string | null
+          hearts_earned?: number | null
+          id?: string
+          last_active?: string | null
+          status?: string
+          trees_added?: number | null
+          trust_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_tokens: {
         Row: {
           created_at: string
