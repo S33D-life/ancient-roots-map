@@ -68,13 +68,13 @@ const MapPage = () => {
       <MapJourneyOverlay active={journeyActive} />
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
-      {!showBlessing && !isFullscreen && paramArrival && (
+      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && paramArrival && (
         <MapArrivalBanner arrival={paramArrival} countrySlug={paramCountry} hiveSlug={paramHive} />
       )}
 
       {/* Public Tester Blessing — overlays map, shown once */}
-      {showBlessing && (
-        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); }} />
+      {!safeDisableNonessentialOverlays && showBlessing && (
+        <PublicTesterBlessing onComplete={() => { setShowBlessing(false); setBlessingJustDismissed(true); setTimeout(() => setBlessingJustDismissed(false), 15000); window.dispatchEvent(new Event("s33d-map-layout-changed")); }} />
       )}
 
       {/* Standard header — hidden in fullscreen and during blessing */}
