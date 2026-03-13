@@ -98,4 +98,4 @@ const NavItem = ({ item, pathname }: NavItemProps) => {
   );
 };
 
-export default BottomNav;
+export default memo(BottomNav);

@@ -70,6 +70,8 @@ const Index = () => {
       />
 
       <main className="flex-1" style={{ paddingTop: 'var(--content-top)' }}>
+        {/* Beta garden tone-setter */}
+        <BetaGardenBanner />
         {/* Welcome orientation for first-time visitors */}
         <WelcomeBanner />
 
