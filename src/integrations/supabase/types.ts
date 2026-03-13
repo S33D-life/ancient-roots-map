@@ -5483,12 +5483,52 @@ export type Database = {
           },
         ]
       }
+      tree_checkin_witnesses: {
+        Row: {
+          accuracy_m: number | null
+          checkin_id: string
+          created_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          witness_user_id: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          checkin_id: string
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          witness_user_id: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          checkin_id?: string
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          witness_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_checkin_witnesses_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_checkins: {
         Row: {
+          accuracy_m: number | null
           birdsong_heard: boolean | null
           canopy_proof: boolean
           checked_in_at: string
           checkin_method: string
+          confidence_score: number | null
           created_at: string
           fungi_present: boolean | null
           health_notes: string | null
@@ -5499,6 +5539,7 @@ export type Database = {
           minted_status: string
           mood_score: number | null
           privacy: string
+          proof_types: string[] | null
           reflection: string | null
           season_stage: string
           sky_stamp_id: string | null
@@ -5509,10 +5550,12 @@ export type Database = {
           weather_snapshot_id: string | null
         }
         Insert: {
+          accuracy_m?: number | null
           birdsong_heard?: boolean | null
           canopy_proof?: boolean
           checked_in_at?: string
           checkin_method?: string
+          confidence_score?: number | null
           created_at?: string
           fungi_present?: boolean | null
           health_notes?: string | null
@@ -5523,6 +5566,7 @@ export type Database = {
           minted_status?: string
           mood_score?: number | null
           privacy?: string
+          proof_types?: string[] | null
           reflection?: string | null
           season_stage?: string
           sky_stamp_id?: string | null
@@ -5533,10 +5577,12 @@ export type Database = {
           weather_snapshot_id?: string | null
         }
         Update: {
+          accuracy_m?: number | null
           birdsong_heard?: boolean | null
           canopy_proof?: boolean
           checked_in_at?: string
           checkin_method?: string
+          confidence_score?: number | null
           created_at?: string
           fungi_present?: boolean | null
           health_notes?: string | null
@@ -5547,6 +5593,7 @@ export type Database = {
           minted_status?: string
           mood_score?: number | null
           privacy?: string
+          proof_types?: string[] | null
           reflection?: string | null
           season_stage?: string
           sky_stamp_id?: string | null
