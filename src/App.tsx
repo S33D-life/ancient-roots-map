@@ -341,6 +341,7 @@ const App = () => {
                 <Route path="/patron-offering" element={<PatronOfferingPage />} />
                 <Route path="/companion" element={<CompanionPage />} />
                 <Route path="/tree-data-commons" element={<TreeDataCommonsPage />} />
+                <Route path="/agent-garden" element={<AgentGardenPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
