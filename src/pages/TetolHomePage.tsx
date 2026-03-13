@@ -184,7 +184,7 @@ const TetolHomePage = () => {
             </button>
 
             {/* Roots — Ancient Friends */}
-            <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" />
+            <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} />
           </div>
 
           {/* Quick links */}
