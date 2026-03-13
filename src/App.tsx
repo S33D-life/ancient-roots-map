@@ -302,8 +302,8 @@ const App = () => {
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/curator" element={<CuratorPage />} />
                 <Route path="/curator/rootstones-import" element={<RootstoneImporterPage />} />
-                <Route path="/sync" element={<SyncDashboardPage />} />
-                <Route path="/edit-review" element={<EditReviewPage />} />
+                {ShowDevPanel && <Route path="/sync" element={<SyncDashboardPage />} />}
+                {ShowDevPanel && <Route path="/edit-review" element={<EditReviewPage />} />}
                 <Route path="/hives" element={<HivesIndexPage />} />
                 <Route path="/hive/:family" element={<HivePage />} />
                 <Route path="/hive/:family/treasury" element={<HiveTreasuryPage />} />
