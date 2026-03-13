@@ -287,7 +287,7 @@ const Header = () => {
                   />
                 )}
               </div>
-            </button>
+            </Link>
           </div>
           
           {/* Desktop nav — 3 clear destinations */}
