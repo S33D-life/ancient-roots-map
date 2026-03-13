@@ -477,7 +477,7 @@ const AgentGardenPage = () => {
         </motion.div>
 
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="mt-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="bg-card/50 border border-primary/20 flex-wrap h-auto py-1">
             <TabsTrigger value="overview"><Eye className="w-3.5 h-3.5 mr-1.5" /> Overview</TabsTrigger>
             <TabsTrigger value="connect"><Plus className="w-3.5 h-3.5 mr-1.5" /> Connect Agent</TabsTrigger>
