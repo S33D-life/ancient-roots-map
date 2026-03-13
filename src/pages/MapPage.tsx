@@ -42,12 +42,14 @@ const MapPage = () => {
   const paramJourney = mapFocus.journey;
   const paramBbox = mapFocus.bbox?.join(",") || undefined;
   const [journeyActive, setJourneyActive] = useState(paramJourney);
+  const safeMapDebug = searchParams.get("mapDebug") === "1";
+  const safeDisableNonessentialOverlays = safeMapDebug && searchParams.get("hideOverlays") !== "0";
 
   const [selectedView, setSelectedView] = useState("collective");
   const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
-  const [showBlessing, setShowBlessing] = useState(() => !isBlessingDismissed());
+  const [showBlessing, setShowBlessing] = useState(() => !safeDisableNonessentialOverlays && !isBlessingDismissed());
   const [blessingJustDismissed, setBlessingJustDismissed] = useState(false);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
