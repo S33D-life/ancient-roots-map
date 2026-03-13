@@ -599,7 +599,7 @@ const AgentGardenPage = () => {
                       const tier = getAgentTier(agent.trust_score);
                       return (
                         <div key={agent.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/10 border border-border/20">
-                          <span className="text-2xl">{agent.avatar_emoji}</span>
+                          <span className="text-2xl">{agent.avatar_emoji || "🤖"}</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-serif font-semibold text-foreground truncate">{agent.agent_name}</p>
                             <div className="flex items-center gap-1 mt-0.5">
