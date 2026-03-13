@@ -707,13 +707,13 @@ const TreeDataCommonsPage = () => {
                   <Card key={agent.id} className="border-primary/15 bg-card/40">
                     <CardContent className="p-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{agent.avatar_emoji}</span>
+                        <span className="text-2xl">{agent.avatar_emoji || "🤖"}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-serif font-semibold text-foreground truncate">{agent.agent_name}</p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-0.5"><TreeDeciduous className="w-3 h-3" /> {agent.trees_added}</span>
-                            <span className="flex items-center gap-0.5"><Heart className="w-3 h-3 text-primary" /> {agent.hearts_earned}</span>
-                            <span className="flex items-center gap-0.5"><Shield className="w-3 h-3" /> {agent.trust_score}</span>
+                            <span className="flex items-center gap-0.5"><TreeDeciduous className="w-3 h-3" /> {agent.trees_added || 0}</span>
+                            <span className="flex items-center gap-0.5"><Heart className="w-3 h-3 text-primary" /> {agent.hearts_earned || 0}</span>
+                            <span className="flex items-center gap-0.5"><Shield className="w-3 h-3" /> {agent.trust_score ?? 0}</span>
                           </div>
                         </div>
                       </div>
