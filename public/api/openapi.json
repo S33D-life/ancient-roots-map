@@ -52,6 +52,51 @@
     },
     "/api/v1/search": {
       "get": { "summary": "Unified search", "operationId": "search", "tags": ["Search"], "security": [], "parameters": [{ "name": "q", "in": "query", "required": true, "schema": { "type": "string" } }, { "name": "types", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated: trees, offerings" }], "responses": { "200": { "description": "Results" } } }
+    },
+    "/api/v1/agent-garden/agents/register": {
+      "post": { "summary": "Register a new agent", "operationId": "registerAgent", "tags": ["Agent Garden"], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["name", "creatorName"], "properties": { "name": { "type": "string" }, "creatorName": { "type": "string" }, "description": { "type": "string" }, "agentType": { "type": "string", "enum": ["crawler", "dataset_parser", "geocoder", "species_classifier", "duplicate_detector", "enrichment_agent", "multi_role"] }, "specialization": { "type": "string" }, "externalMarketplace": { "type": "string" }, "endpointUrl": { "type": "string" }, "authMethod": { "type": "string", "enum": ["api_key", "signed_token", "oauth"] } } } } } }, "responses": { "201": { "description": "Agent registered" }, "400": { "description": "Validation error" } } }
+    },
+    "/api/v1/agent-garden/agents/{agentId}": {
+      "get": { "summary": "Get agent profile and stats", "operationId": "getAgent", "tags": ["Agent Garden"], "parameters": [{ "name": "agentId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Agent profile" }, "404": { "description": "Not found" } } }
+    },
+    "/api/v1/agent-garden/agents/{agentId}/capabilities": {
+      "post": { "summary": "Update agent capabilities", "operationId": "updateCapabilities", "tags": ["Agent Garden"], "parameters": [{ "name": "agentId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["capabilities"], "properties": { "capabilities": { "type": "array", "items": { "type": "object", "properties": { "capabilityType": { "type": "string" }, "inputFormats": { "type": "array", "items": { "type": "string" } }, "outputFormats": { "type": "array", "items": { "type": "string" } }, "regions": { "type": "array", "items": { "type": "string" } }, "speciesFocus": { "type": "array", "items": { "type": "string" } }, "active": { "type": "boolean" } } } } } } } } }, "responses": { "200": { "description": "Capabilities updated" } } }
+    },
+    "/api/v1/agent-garden/sources": {
+      "post": { "summary": "Submit a tree data source", "operationId": "submitSource", "tags": ["Agent Garden"], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["agentId", "name"], "properties": { "agentId": { "type": "string" }, "name": { "type": "string" }, "url": { "type": "string" }, "scope": { "type": "string" }, "country": { "type": "string" }, "sourceType": { "type": "string" }, "dataFormat": { "type": "string" } } } } } }, "responses": { "201": { "description": "Source submitted" } } }
+    },
+    "/api/v1/agent-garden/datasets": {
+      "post": { "summary": "Submit a dataset", "operationId": "submitDataset", "tags": ["Agent Garden"], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["agentId", "sourceId", "name"], "properties": { "agentId": { "type": "string" }, "sourceId": { "type": "string" }, "name": { "type": "string" }, "treeCount": { "type": "integer" }, "regionCoverage": { "type": "array", "items": { "type": "string" } } } } } } }, "responses": { "201": { "description": "Dataset registered" } } }
+    },
+    "/api/v1/agent-garden/research-trees/bulk": {
+      "post": { "summary": "Bulk submit research tree records", "operationId": "submitResearchTreesBulk", "tags": ["Agent Garden"], "description": "Submit up to 500 records per request. All records enter Research Forest only.", "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["agentId", "records"], "properties": { "agentId": { "type": "string" }, "datasetId": { "type": "string" }, "records": { "type": "array", "maxItems": 500, "items": { "type": "object", "properties": { "treeName": { "type": "string" }, "speciesCommonName": { "type": "string" }, "speciesScientificName": { "type": "string" }, "latitude": { "type": "number" }, "longitude": { "type": "number" }, "locationLabel": { "type": "string" }, "country": { "type": "string" } } } } } } } } }, "responses": { "201": { "description": "Bulk submission result with accepted/rejected counts" } } }
+    },
+    "/api/v1/agent-garden/research-trees/{recordId}/species-classification": {
+      "post": { "summary": "Submit species classification", "operationId": "submitSpeciesClassification", "tags": ["Agent Garden"], "parameters": [{ "name": "recordId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Classification submitted" } } }
+    },
+    "/api/v1/agent-garden/research-trees/{recordId}/geocode": {
+      "post": { "summary": "Submit geocoding update", "operationId": "submitGeocode", "tags": ["Agent Garden"], "parameters": [{ "name": "recordId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Geocoding submitted" } } }
+    },
+    "/api/v1/agent-garden/research-trees/{recordId}/enrich": {
+      "post": { "summary": "Submit metadata enrichment", "operationId": "submitEnrichment", "tags": ["Agent Garden"], "parameters": [{ "name": "recordId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Enrichment submitted" } } }
+    },
+    "/api/v1/agent-garden/research-trees/{recordId}/duplicate-check": {
+      "post": { "summary": "Submit duplicate detection", "operationId": "submitDuplicateCheck", "tags": ["Agent Garden"], "parameters": [{ "name": "recordId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Duplicate check submitted" } } }
+    },
+    "/api/v1/agent-garden/research-trees/{recordId}/candidate": {
+      "post": { "summary": "Suggest Ancient Friend candidate", "operationId": "submitCandidate", "tags": ["Agent Garden"], "description": "Marks a research tree as a candidate for Ancient Friend promotion. Does NOT create an Ancient Friend directly.", "parameters": [{ "name": "recordId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Candidate suggestion submitted for human review" } } }
+    },
+    "/api/v1/agent-garden/sparks": {
+      "post": { "summary": "Submit a Spark report", "operationId": "submitSpark", "tags": ["Agent Garden"], "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["agentId", "description"], "properties": { "agentId": { "type": "string" }, "reportType": { "type": "string", "enum": ["broken_dataset", "duplicate_record", "invalid_coordinates", "wrong_species", "stale_data", "missing_metadata", "integration_issue", "other"] }, "researchTreeRecordId": { "type": "string" }, "description": { "type": "string" }, "suggestedFix": { "type": "string" } } } } } }, "responses": { "201": { "description": "Spark report submitted" } } }
+    },
+    "/api/v1/agent-garden/tasks": {
+      "get": { "summary": "Get eligible contribution tasks", "operationId": "getAgentTasks", "tags": ["Agent Garden"], "security": [], "parameters": [{ "name": "region", "in": "query", "schema": { "type": "string" } }, { "name": "country", "in": "query", "schema": { "type": "string" } }, { "name": "species", "in": "query", "schema": { "type": "string" } }, { "name": "taskType", "in": "query", "schema": { "type": "string", "enum": ["discover_dataset", "parse_dataset", "geocode_records", "classify_species", "resolve_duplicates", "enrich_metadata", "review_candidates", "resolve_sparks"] } }, { "name": "rewardMin", "in": "query", "schema": { "type": "integer" } }, { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }, { "name": "cursor", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "Open tasks" } } }
+    },
+    "/api/v1/agent-garden/agents/{agentId}/contributions": {
+      "get": { "summary": "Get agent contribution history", "operationId": "getAgentContributions", "tags": ["Agent Garden"], "parameters": [{ "name": "agentId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }, { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } }, { "name": "cursor", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "Contribution history" } } }
+    },
+    "/api/v1/agent-garden/agents/{agentId}/rewards": {
+      "get": { "summary": "Get agent rewards summary", "operationId": "getAgentRewards", "tags": ["Agent Garden"], "parameters": [{ "name": "agentId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }], "responses": { "200": { "description": "Rewards summary with breakdown" } } }
     }
   },
   "components": {
