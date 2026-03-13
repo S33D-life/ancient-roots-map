@@ -4,7 +4,7 @@
  * Each room is a distinct chamber — not a tab in a monolith.
  */
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import HeartwoodRoomShell from "@/components/library/HeartwoodRoomShell";
 import { supabase } from "@/integrations/supabase/client";
