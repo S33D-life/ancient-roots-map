@@ -17,7 +17,8 @@ import {
 import type { GroveScale } from "./MapFilters";
 
 // ── Lazy-loaded modules ──
-// Core map renderers
+// Core map renderers — MapLibre recovery is the current active path
+const MapLibreRecoveryMap = lazy(() => import("./MapLibreRecoveryMap"));
 const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
 const BareLeafletRecoveryMap = lazy(() => import("./BareLeafletRecoveryMap"));
 const MapSearch = lazy(() => import("./MapSearch"));
