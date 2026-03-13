@@ -21,10 +21,11 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useDataCommons, type DataSource } from "@/hooks/use-data-commons";
+import { useDataCommons, type DataSource, type AgentProfile } from "@/hooks/use-data-commons";
 import {
   Globe, Database, Layers, TreeDeciduous, MapPin, Search,
-  ExternalLink, Plus, Telescope, BookOpen, Leaf, Clock, ChevronRight
+  ExternalLink, Plus, Telescope, BookOpen, Leaf, Clock, ChevronRight,
+  Bot, Shield, Heart
 } from "lucide-react";
 
 /* ── Status helpers ─────────────────────────────────────────── */
