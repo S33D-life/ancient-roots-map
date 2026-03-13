@@ -3355,6 +3355,39 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [geo]);
 
+  // Guided first tap — after onboarding dismissal, auto-locate and pulse nearest markers
+  useEffect(() => {
+    const handler = () => {
+      // Trigger locate
+      handleFindMe().then(() => {
+        // After locate completes, pulse the 3 nearest markers
+        setTimeout(() => {
+          const map = mapRef.current;
+          const cluster = clusterRef.current;
+          if (!map || !cluster || !userLatLng) return;
+
+          const nearest = [...filteredTrees]
+            .map(t => ({ ...t, dist: haversineKm(userLatLng[0], userLatLng[1], t.latitude, t.longitude) }))
+            .sort((a, b) => a.dist - b.dist)
+            .slice(0, 3);
+
+          cluster.eachLayer((layer: any) => {
+            if (nearest.some(t => t.id === layer._treeId)) {
+              const el = layer._icon;
+              if (el) {
+                const wrap = el.closest(".leaflet-tree-marker") || el;
+                wrap.classList.add("marker-guided");
+                setTimeout(() => wrap.classList.remove("marker-guided"), 6000);
+              }
+            }
+          });
+        }, 2000);
+      });
+    };
+    window.addEventListener("s33d-onboarding-complete", handler);
+    return () => window.removeEventListener("s33d-onboarding-complete", handler);
+  }, [handleFindMe, filteredTrees, userLatLng]);
+
   const handleCompassReset = useCallback(() => {
     if (!mapRef.current) return;
     if (filteredTrees.length > 0) {
