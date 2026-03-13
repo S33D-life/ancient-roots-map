@@ -29,6 +29,39 @@ interface CanopyEvent {
   timestamp: number;
 }
 
+const parseReasonFromText = (text: string): string | null => {
+  const match = text.match(/"reason"\s*:\s*"([^"]+)"/i);
+  return match?.[1] ?? null;
+};
+
+const getRejectReason = async (data: unknown, error: unknown): Promise<string | null> => {
+  if (data && typeof data === "object" && "reason" in data) {
+    const reason = (data as { reason?: unknown }).reason;
+    if (typeof reason === "string") return reason;
+  }
+
+  const context = (error as { context?: unknown } | null)?.context;
+  if (context instanceof Response) {
+    try {
+      const body = await context.clone().json() as { reason?: unknown };
+      if (typeof body.reason === "string") return body.reason;
+    } catch {
+      try {
+        const text = await context.clone().text();
+        const reason = parseReasonFromText(text);
+        if (reason) return reason;
+      } catch {
+        // no-op
+      }
+    }
+  }
+
+  const message = typeof (error as { message?: unknown } | null)?.message === "string"
+    ? (error as { message: string }).message
+    : "";
+  return parseReasonFromText(message);
+};
+
 export function useCanopyCheckIn() {
   const [lastEvent, setLastEvent] = useState<CanopyEvent | null>(null);
   const [active, setActive] = useState(false);
