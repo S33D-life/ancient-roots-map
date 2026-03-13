@@ -56,6 +56,7 @@ function CanopyOverview({ stats }: { stats: ReturnType<typeof useDataCommons>["s
     { label: "Countries Covered", value: stats.countriesCovered, icon: Globe },
     { label: "Species Represented", value: stats.speciesRepresented, icon: Leaf },
     { label: "Total Records", value: stats.totalRecords.toLocaleString(), icon: TreeDeciduous },
+    { label: "Active Agents", value: stats.activeAgents, icon: Bot },
   ];
 
   return (
