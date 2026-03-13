@@ -359,7 +359,7 @@ const Header = () => {
                 <span className="font-serif">S33D</span>
                 <LivingStreak streak={heartBalance.streak} />
                 <HeartJar userId={user?.id ?? null} />
-              </button>
+              </Link>
             ) : (
               <Button
                 variant="sacred"

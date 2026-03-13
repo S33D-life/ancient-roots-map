@@ -1,4 +1,6 @@
 import { useCallback, lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
+import { TreeDeciduous } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import S33dEntrance from "@/components/S33dEntrance";

@@ -262,7 +262,11 @@ const App = () => {
             </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<TetolHomePage />} />
+                <Route path="/s33d" element={<S33dGatewayPage />} />
+                <Route path="/ancient-friends" element={<Navigate to="/map" replace />} />
+                <Route path="/heartwood" element={<Navigate to="/library" replace />} />
+                <Route path="/your-golden-dream" element={<Navigate to="/golden-dream" replace />} />
                 <Route path="/map" element={<MapPage />} />
                 <Route path="/add-tree" element={<AddTreePage />} />
                 <Route path="/atlas" element={<WorldAtlasPage />} />

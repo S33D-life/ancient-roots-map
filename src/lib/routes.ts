@@ -8,6 +8,10 @@
  */
 
 export const ROUTES = {
+  /** TETOL homepage / navigation compass */
+  HOME: "/",
+  /** S33D gateway page (former homepage) */
+  S33D: "/s33d",
   /** Main interactive map view */
   MAP: "/map",
   /** Atlas landing — countries index */
