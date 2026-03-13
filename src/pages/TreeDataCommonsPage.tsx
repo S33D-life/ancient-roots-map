@@ -472,6 +472,154 @@ const TreeDataCommonsPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* ── Agent Garden Tab ── */}
+          <TabsContent value="agents" className="mt-6 space-y-4">
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <Bot className="w-4 h-4 text-primary" /> Registered Agents
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  AI agents that discover, parse, and enrich tree data for the Research Forest.
+                  Agents populate research records — humans curate Ancient Friends.
+                </p>
+              </CardHeader>
+              <CardContent>
+                {agents.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground text-sm">
+                    No agents registered yet. The garden awaits its first seedlings.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {agents.map(agent => (
+                      <Card key={agent.id} className="border-primary/15 hover:border-primary/30 transition-all bg-card/40">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <span className="text-3xl">{agent.avatar_emoji}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-sm font-serif font-semibold text-foreground">{agent.agent_name}</h3>
+                                <Badge variant="outline" className={`text-xs capitalize ${agent.status === "active" ? "bg-primary/20 text-primary border-primary/40" : "bg-muted text-muted-foreground"}`}>
+                                  {agent.status}
+                                </Badge>
+                              </div>
+                              <Badge variant="outline" className="text-xs capitalize mb-2">{agent.agent_type}</Badge>
+                              {agent.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{agent.description}</p>
+                              )}
+                              <div className="grid grid-cols-4 gap-2 mt-3">
+                                <div className="text-center">
+                                  <p className="text-sm font-serif font-bold text-primary">{agent.trees_added.toLocaleString()}</p>
+                                  <p className="text-[10px] text-muted-foreground">Trees</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm font-serif font-bold text-foreground">{agent.contributions}</p>
+                                  <p className="text-[10px] text-muted-foreground">Actions</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm font-serif font-bold text-foreground flex items-center justify-center gap-0.5">
+                                    <Heart className="w-3 h-3 text-primary" /> {agent.hearts_earned}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground">Hearts</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm font-serif font-bold text-foreground flex items-center justify-center gap-0.5">
+                                    <Shield className="w-3 h-3 text-primary/70" /> {agent.trust_score}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground">Trust</p>
+                                </div>
+                              </div>
+                              {agent.connected_datasets.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {agent.connected_datasets.slice(0, 3).map(ds => (
+                                    <Badge key={ds} variant="secondary" className="text-[10px]">{ds}</Badge>
+                                  ))}
+                                  {agent.connected_datasets.length > 3 && (
+                                    <Badge variant="secondary" className="text-[10px]">+{agent.connected_datasets.length - 3}</Badge>
+                                  )}
+                                </div>
+                              )}
+                              <p className="text-[10px] text-muted-foreground mt-2">
+                                by {agent.creator} · {agent.last_active ? `active ${new Date(agent.last_active).toLocaleDateString()}` : "—"}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Record Status Pipeline */}
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <TreeDeciduous className="w-4 h-4 text-primary" /> Record Lifecycle
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  How tree records flow from agent discovery to Ancient Friend status.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-stretch gap-2">
+                  {[
+                    { label: "Research", desc: "Agent-populated or imported", icon: "🔬", color: "bg-muted/40" },
+                    { label: "Verified", desc: "Coordinates & species confirmed", icon: "✅", color: "bg-secondary/40" },
+                    { label: "AF Candidate", desc: "Nominated for Ancient Friends", icon: "🌟", color: "bg-accent/20" },
+                    { label: "Ancient Friend", desc: "Ceremonially sanctified", icon: "🌳", color: "bg-primary/15" },
+                  ].map((step, i) => (
+                    <div key={step.label} className="flex items-center gap-2 flex-1">
+                      <div className={`flex-1 p-3 rounded-lg border border-border/30 ${step.color} text-center`}>
+                        <span className="text-xl">{step.icon}</span>
+                        <p className="text-xs font-medium text-foreground mt-1">{step.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{step.desc}</p>
+                      </div>
+                      {i < 3 && <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 hidden sm:block" />}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Heart Reward Table */}
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-primary" /> Agent Heart Rewards
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Action</TableHead>
+                      <TableHead>Hearts</TableHead>
+                      <TableHead>Requires</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { action: "Dataset Discovered", hearts: "+3", requires: "Valid source URL" },
+                      { action: "Dataset Parsed", hearts: "+5", requires: "Structured output" },
+                      { action: "Valid Tree Record", hearts: "+1", requires: "Coordinates + species" },
+                      { action: "Species Classified", hearts: "+2", requires: "Verified match" },
+                      { action: "Duplicate Detected", hearts: "+1", requires: "Haversine confirmation" },
+                      { action: "AF Candidate Suggested", hearts: "+5", requires: "Moderation approval" },
+                    ].map(row => (
+                      <TableRow key={row.action}>
+                        <TableCell className="text-sm">{row.action}</TableCell>
+                        <TableCell className="text-sm font-serif font-bold text-primary">{row.hearts}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{row.requires}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
 
         {/* ── Connected Systems ── */}
