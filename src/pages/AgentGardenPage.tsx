@@ -710,7 +710,9 @@ const AgentGardenPage = () => {
               </div>
             </div>
 
-            {filteredSparks.length === 0 ? (
+            {loading ? (
+              <TableSkeleton rows={4} cols={5} />
+            ) : filteredSparks.length === 0 ? (
               <Card className="border-primary/15 bg-card/60">
                 <CardContent className="py-12 text-center">
                   <Zap className="w-8 h-8 text-muted-foreground mx-auto mb-3" />

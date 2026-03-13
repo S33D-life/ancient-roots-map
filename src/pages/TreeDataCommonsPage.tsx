@@ -354,6 +354,10 @@ const TreeDataCommonsPage = () => {
   const { sources, crawlTasks, agents, sparkReports, loading, stats, refetch } = useDataCommons();
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    document.title = "Tree Data Commons — S33D.life";
+  }, []);
+
   const filteredSources = sources.filter(s => {
     if (!search) return true;
     const q = search.toLowerCase();

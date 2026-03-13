@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2 } from "lucide-react";
+import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2, Bot } from "lucide-react";
 
 const links = [
   { to: "/map", icon: Map, label: "Map", sub: "Explore the map" },
@@ -9,6 +9,7 @@ const links = [
   { to: "/council-of-life", icon: Leaf, label: "Council", sub: "Join the gathering" },
   { to: "/vault?from=hearth", icon: Archive, label: "Vault", sub: "Your treasury" },
   { to: "/library/staff-room", icon: Wand2, label: "Staff Room", sub: "Founding circle" },
+  { to: "/agent-garden", icon: Bot, label: "Agent Garden", sub: "AI contributors" },
   { to: "/support", icon: Heart, label: "Support", sub: "Nurture S33D" },
 ];
 
