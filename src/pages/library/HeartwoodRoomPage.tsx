@@ -51,6 +51,21 @@ const ROOM_LABELS: Record<string, string> = {
   "rhythms": "Rhythms",
 };
 
+/** Ordered room sequence for swipe navigation */
+const ROOM_SEQUENCE = [
+  "gallery",
+  "staff-room",
+  "bookshelf",
+  "seed-cellar",
+  "music-room",
+  "greenhouse",
+  "wishlist",
+  "scrolls",
+  "vault",
+  "creators-path",
+  "rhythms",
+];
+
 const VALID_ROOMS = Object.keys(ROOM_LABELS);
 
 /**
