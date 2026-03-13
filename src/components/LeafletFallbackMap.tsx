@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState, useMemo } from "react";
+import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
 import MapContextIndicator from "./MapContextIndicator";
@@ -9,6 +9,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "@/styles/map-markers.css";
 import { escapeHtml } from "@/utils/escapeHtml";
 import {
   fetchLandscapePOIs,
