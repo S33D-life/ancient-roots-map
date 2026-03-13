@@ -895,17 +895,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       markerZoomAnimation: true,
     } as any);
 
-    // ── Feature flag: set to true to disable all atmosphere for debugging ──
-    const SAFE_MAP_ATMOSPHERE = false;
+    // ── Feature flags for safe map diagnostics ──
+    const SAFE_MAP_ATMOSPHERE = !SAFE_BARE_MAP_MODE;
 
     // ── Atmospheric overlay div (replaces tile-pane CSS filters) ──
     const atmosphereDiv = document.createElement("div");
     atmosphereDiv.className = "map-atmosphere-overlay";
-    if (SAFE_MAP_ATMOSPHERE) {
-      containerRef.current.classList.add("safe-atmosphere");
+    if (!SAFE_MAP_ATMOSPHERE) {
+      containerRef.current.classList.add("safe-atmosphere", "safe-bare-map");
     }
-    // Insert into map container so seasonal classes cascade naturally
-    containerRef.current.appendChild(atmosphereDiv);
+    if (!SAFE_BARE_MAP_MODE) {
+      // Insert into map container so seasonal classes cascade naturally
+      containerRef.current.appendChild(atmosphereDiv);
+    }
 
     // ── Tile debug logging ──
     const logPrefix = "[MapTiles]";
