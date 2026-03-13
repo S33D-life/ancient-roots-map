@@ -894,6 +894,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     window.addEventListener('resize', onResize);
     const originalCleanup = () => window.removeEventListener('resize', onResize);
 
+    // Seasonal atmosphere tint (CSS-only, zero perf cost)
+    const cleanupSeasonalTint = containerRef.current ? applySeasonalTint(containerRef.current) : () => {};
+
+    // Popup action delegation (wish ⭐ + share ↗️)
+    const cleanupPopupActions = containerRef.current ? setupPopupActions(containerRef.current) : () => {};
+
+    // Track visited markers on popup open
+    map.on("popupopen", (e: any) => {
+      const marker = e.popup?._source;
+      if (marker?._treeId) {
+        markTreeVisited(marker._treeId, marker._icon);
+      }
+    });
+
+    // Apply visited class when markers are added to the map
+    map.on("layeradd", (e: any) => {
+      const layer = e.layer;
+      if (layer?._treeId && layer._icon) {
+        applyVisitedClass(layer._treeId, layer._icon);
+      }
+    });
+
     // Deep-link: fly to coordinates or w3w if provided
     let deepLinked = false;
     if (initialLat !== undefined && initialLng !== undefined) {
