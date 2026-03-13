@@ -89,7 +89,7 @@ const TetolHomePage = () => {
       <Header />
 
       <main
-        className="flex-1 flex flex-col items-center relative overflow-hidden"
+        className="flex-1 flex flex-col items-center relative overflow-hidden pt-content"
         style={{
           background:
             "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))",
