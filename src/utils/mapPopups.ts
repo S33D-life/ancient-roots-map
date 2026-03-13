@@ -36,11 +36,13 @@ export function buildPopupHtml(
   photoUrl?: string,
   birdsongCount?: number,
   whisperCount?: number,
+  userLatLng?: [number, number] | null,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
 
-  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl);
+  const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
+  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
