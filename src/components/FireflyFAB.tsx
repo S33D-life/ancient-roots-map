@@ -25,7 +25,7 @@ import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
 const STORAGE_KEY = "s33d-firefly-fab-pos";
-const EDGE_PAD = 12;
+const EDGE_PAD = 72;
 const FAB_SIZE = 48;
 const DRAG_THRESHOLD = 8;
 const TAP_DEBOUNCE_MS = 800;
