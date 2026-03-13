@@ -238,14 +238,43 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [discoveryCount, setDiscoveryCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const safeMapFlags = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const SAFE_MAP_DEBUG = import.meta.env.DEV && params.get("mapDebug") === "1";
+    const SAFE_BARE_MAP_MODE = SAFE_MAP_DEBUG && params.get("bareMap") === "1";
+    const SAFE_DISABLE_NONESSENTIAL_OVERLAYS = SAFE_MAP_DEBUG && params.get("hideOverlays") !== "0";
+    return { SAFE_MAP_DEBUG, SAFE_BARE_MAP_MODE, SAFE_DISABLE_NONESSENTIAL_OVERLAYS };
+  }, [location.search]);
+
+  const { SAFE_MAP_DEBUG, SAFE_BARE_MAP_MODE, SAFE_DISABLE_NONESSENTIAL_OVERLAYS } = safeMapFlags;
+
   const debugEnabled = useMemo(() => {
     try {
       const params = new URLSearchParams(location.search);
-      return params.get("debug") === "1";
+      return params.get("debug") === "1" || SAFE_MAP_DEBUG;
     } catch {
-      return false;
+      return SAFE_MAP_DEBUG;
     }
-  }, [location.search]);
+  }, [location.search, SAFE_MAP_DEBUG]);
+
+  const [renderDebug, setRenderDebug] = useState<{
+    mapMounted: boolean;
+    tileStatus: "idle" | "loading" | "loaded" | "failed";
+    provider: "carto" | "osm";
+    tileLoads: number;
+    tileErrors: number;
+    tilePaneImages: number;
+    container: string;
+  }>({
+    mapMounted: false,
+    tileStatus: "idle",
+    provider: "carto",
+    tileLoads: 0,
+    tileErrors: 0,
+    tilePaneImages: 0,
+    container: "0x0",
+  });
+
   const [perfDebug, setPerfDebug] = useState<MapPerfDebugStats>({
     fps: null,
     frameDeltaMs: null,
