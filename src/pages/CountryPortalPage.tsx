@@ -16,7 +16,7 @@ import {
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
+
 import { SLUG_MAP } from "@/config/countryRegistry";
 import { getCitiesByCountry } from "@/config/cityRegistry";
 import { getSubRegionsByCountry, getSubRegionLabel } from "@/config/subRegionRegistry";
@@ -402,7 +402,6 @@ const CountryPortalPage = () => {
             <Link to="/atlas">← Back to World Atlas</Link>
           </Button>
         </div>
-        <BottomNav />
       </PageShell>
     );
   }
@@ -946,7 +945,7 @@ const CountryPortalPage = () => {
           </div>
         </section>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

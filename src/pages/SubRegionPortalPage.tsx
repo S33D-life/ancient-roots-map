@@ -16,7 +16,7 @@ import {
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
+
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
 import PlaceMapPreview from "@/components/atlas/PlaceMapPreview";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
@@ -436,7 +436,7 @@ const SubRegionPortalPage = () => {
           </div>
         </section>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

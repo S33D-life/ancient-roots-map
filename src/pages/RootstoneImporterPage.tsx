@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -297,7 +297,7 @@ const RootstoneImporterPage = () => {
           </CardContent>
         </Card>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

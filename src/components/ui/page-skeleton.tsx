@@ -25,7 +25,7 @@ const DefaultSkeleton = () => (
 const MapSkeleton = () => (
   <div className="min-h-screen bg-background">
     <Skeleton className="h-14 w-full" />
-    <Skeleton className="h-[calc(100vh-3.5rem)] w-full rounded-none" />
+    <Skeleton className="h-[calc(100dvh-3.5rem)] w-full rounded-none" />
   </div>
 );
 

@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import AtlasBreadcrumb from "@/components/AtlasBreadcrumb";
-import BottomNav from "@/components/BottomNav";
+
 
 /* ━━━ Types ━━━ */
 interface BioRegion {
@@ -174,7 +174,6 @@ const BioRegionPage = () => {
         <div className="min-h-screen flex items-center justify-center">
           <p className="text-muted-foreground text-sm font-serif">Loading bio-region…</p>
         </div>
-        <BottomNav />
       </PageShell>
     );
   }
@@ -187,7 +186,6 @@ const BioRegionPage = () => {
           <p className="text-muted-foreground text-sm">Bio-region not found.</p>
           <Button variant="sacred" asChild><Link to="/atlas/bio-regions">All Bio-Regions</Link></Button>
         </div>
-        <BottomNav />
       </PageShell>
     );
   }
@@ -606,7 +604,7 @@ const BioRegionPage = () => {
         </section>
       </div>
 
-      <BottomNav />
+      
     </PageShell>
   );
 };
