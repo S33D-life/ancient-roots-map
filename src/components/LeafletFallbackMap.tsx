@@ -865,19 +865,50 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     } as any);
 
     const isRetina = window.devicePixelRatio > 1;
-    L.tileLayer(
+    const primaryTileLayer = L.tileLayer(
       isRetina
         ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
         : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      { attribution: '&copy; OSM &copy; CARTO', maxZoom: 19, subdomains: "abcd", keepBuffer: 4 }
+      {
+        attribution: '&copy; OSM &copy; CARTO',
+        maxZoom: 19,
+        subdomains: "abcd",
+        keepBuffer: 4,
+      }
     ).addTo(map);
 
-    // Tile error handling — show toast-style overlay on sustained failure
+    const fallbackTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+      subdomains: "abc",
+      keepBuffer: 4,
+    });
+
+    // Automatic tile provider failover when CARTO is unavailable/throttled.
     let tileErrors = 0;
-    map.on('tileerror', () => {
-      tileErrors++;
-      if (tileErrors > 10) {
-        console.warn('[Lite] Sustained tile errors:', tileErrors);
+    let usingFallbackTiles = false;
+    const TILE_ERROR_THRESHOLD = 8;
+
+    const activateFallbackTiles = () => {
+      if (usingFallbackTiles) return;
+      usingFallbackTiles = true;
+      try {
+        if (map.hasLayer(primaryTileLayer)) map.removeLayer(primaryTileLayer);
+        fallbackTileLayer.addTo(map);
+        console.warn("[Lite] Switched to OSM fallback tiles after repeated CARTO tile errors");
+      } catch {
+        // Ignore fallback swap errors and keep map interactive
+      }
+    };
+
+    primaryTileLayer.on("tileload", () => {
+      if (tileErrors > 0) tileErrors -= 1;
+    });
+
+    primaryTileLayer.on("tileerror", () => {
+      tileErrors += 1;
+      if (tileErrors >= TILE_ERROR_THRESHOLD) {
+        activateFallbackTiles();
       }
     });
 
