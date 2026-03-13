@@ -49,6 +49,7 @@ interface Particle {
 
 const FairyDust = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isVisibleRef = useRef(true);
   useEffect(() => {
     // Respect reduced-motion preference
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -60,6 +61,13 @@ const FairyDust = () => {
     let particles: Particle[] = [];
     const isMobile = window.innerWidth < 768;
     const PARTICLE_COUNT = isMobile ? 15 : 60;
+
+    // Pause when off-screen to save CPU
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting; },
+      { threshold: 0.05 },
+    );
+    observer.observe(canvas);
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
