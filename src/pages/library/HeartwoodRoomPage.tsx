@@ -22,6 +22,7 @@ const PersonalBookshelf = lazy(() => import("@/components/PersonalBookshelf"));
 const CreatorsPath = lazy(() => import("@/components/CreatorsPath"));
 const TreeResources = lazy(() => import("@/components/TreeResources"));
 const CycleMarketRoom = lazy(() => import("@/components/CycleMarketRoom"));
+const DevRoom = lazy(() => import("@/components/library/DevRoom"));
 
 // Room aliases for backward compatibility
 const ROOM_ALIASES: Record<string, string> = {
@@ -50,6 +51,7 @@ const ROOM_LABELS: Record<string, string> = {
   "vault": "Vaults",
   "bookshelf": "Bookshelf",
   "rhythms": "Rhythms",
+  "tap-root": "Dev Room",
 };
 
 /** Ordered room sequence for swipe navigation */
@@ -65,6 +67,7 @@ const ROOM_SEQUENCE = [
   "vault",
   "creators-path",
   "rhythms",
+  "tap-root",
 ];
 
 const VALID_ROOMS = Object.keys(ROOM_LABELS);
@@ -203,6 +206,7 @@ const HeartwoodRoomPage = () => {
         {resolvedRoom === "bookshelf" && <BookshelfWrapper />}
         {resolvedRoom === "creators-path" && <CreatorsPathWrapper />}
         {resolvedRoom === "rhythms" && <CycleMarketRoom />}
+        {resolvedRoom === "tap-root" && <DevRoom />}
       </Suspense>
     </HeartwoodRoomShell>
   );

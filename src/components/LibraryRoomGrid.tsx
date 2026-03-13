@@ -27,6 +27,7 @@ const COMMUNITY: Room[] = [
   { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory", accentH: 160, particle: "page" },
   { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",          accentH: 42,  particle: "shimmer"    },
   { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
+  { key: "tap-root",      label: "⚙️ Dev Room",          desc: "Tap Root · Infrastructure",  accentH: 210, particle: "spark"     },
 ];
 
 const ALL_ROOMS = [...YOUR_SPACES, ...COMMUNITY];
