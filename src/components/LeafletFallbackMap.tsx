@@ -1039,6 +1039,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       cleanupSeasonalTint();
       cleanupPopupActions();
       originalCleanup();
+      // Remove atmospheric overlay
+      try { atmosphereDiv.remove(); } catch {}
       map.remove();
       mapRef.current = null;
       clusterRef.current = null;
