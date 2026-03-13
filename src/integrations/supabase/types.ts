@@ -14,6 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_capabilities: {
+        Row: {
+          active: boolean
+          agent_id: string
+          capability_type: string
+          created_at: string
+          id: string
+          input_formats: string[]
+          output_formats: string[]
+          regions: string[]
+          species_focus: string[]
+        }
+        Insert: {
+          active?: boolean
+          agent_id: string
+          capability_type?: string
+          created_at?: string
+          id?: string
+          input_formats?: string[]
+          output_formats?: string[]
+          regions?: string[]
+          species_focus?: string[]
+        }
+        Update: {
+          active?: boolean
+          agent_id?: string
+          capability_type?: string
+          created_at?: string
+          id?: string
+          input_formats?: string[]
+          output_formats?: string[]
+          regions?: string[]
+          species_focus?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_capabilities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_contribution_events: {
+        Row: {
+          agent_id: string
+          contribution_type: string
+          created_at: string
+          dataset_id: string | null
+          hearts_awarded: number
+          id: string
+          payload_json: Json | null
+          research_tree_record_id: string | null
+          reward_status: string
+          rewarded_at: string | null
+          source_id: string | null
+          spark_report_id: string | null
+          validated_at: string | null
+          validation_status: string
+        }
+        Insert: {
+          agent_id: string
+          contribution_type?: string
+          created_at?: string
+          dataset_id?: string | null
+          hearts_awarded?: number
+          id?: string
+          payload_json?: Json | null
+          research_tree_record_id?: string | null
+          reward_status?: string
+          rewarded_at?: string | null
+          source_id?: string | null
+          spark_report_id?: string | null
+          validated_at?: string | null
+          validation_status?: string
+        }
+        Update: {
+          agent_id?: string
+          contribution_type?: string
+          created_at?: string
+          dataset_id?: string | null
+          hearts_awarded?: number
+          id?: string
+          payload_json?: Json | null
+          research_tree_record_id?: string | null
+          reward_status?: string
+          rewarded_at?: string | null
+          source_id?: string | null
+          spark_report_id?: string | null
+          validated_at?: string | null
+          validation_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_contribution_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_contribution_events_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "tree_datasets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_contribution_events_research_tree_record_id_fkey"
+            columns: ["research_tree_record_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_contribution_events_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_contribution_events_spark_report_id_fkey"
+            columns: ["spark_report_id"]
+            isOneToOne: false
+            referencedRelation: "spark_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_contributions: {
         Row: {
           agent_id: string
@@ -78,11 +209,88 @@ export type Database = {
           },
         ]
       }
+      agent_garden_tasks: {
+        Row: {
+          claimed_by_agent_id: string | null
+          country: string | null
+          created_at: string
+          dataset_id: string | null
+          description: string | null
+          id: string
+          region: string | null
+          reward_max: number
+          reward_min: number
+          source_id: string | null
+          species: string | null
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_by_agent_id?: string | null
+          country?: string | null
+          created_at?: string
+          dataset_id?: string | null
+          description?: string | null
+          id?: string
+          region?: string | null
+          reward_max?: number
+          reward_min?: number
+          source_id?: string | null
+          species?: string | null
+          status?: string
+          task_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_by_agent_id?: string | null
+          country?: string | null
+          created_at?: string
+          dataset_id?: string | null
+          description?: string | null
+          id?: string
+          region?: string | null
+          reward_max?: number
+          reward_min?: number
+          source_id?: string | null
+          species?: string | null
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_garden_tasks_claimed_by_agent_id_fkey"
+            columns: ["claimed_by_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_garden_tasks_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "tree_datasets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_garden_tasks_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_profiles: {
         Row: {
           agent_name: string
           agent_type: string
           api_endpoint: string | null
+          auth_method: string
           avatar_emoji: string | null
           connected_datasets: string[] | null
           contributions: number | null
@@ -90,20 +298,25 @@ export type Database = {
           creator: string
           datasets_discovered: number | null
           description: string | null
+          external_marketplace: string | null
           hearts_earned: number | null
           id: string
           last_active: string | null
           registration_source: string | null
+          rejected_contributions: number
           specialization: string | null
           status: string
+          tier: string
           trees_added: number | null
           trust_score: number | null
           updated_at: string
+          verified_contributions: number
         }
         Insert: {
           agent_name: string
           agent_type?: string
           api_endpoint?: string | null
+          auth_method?: string
           avatar_emoji?: string | null
           connected_datasets?: string[] | null
           contributions?: number | null
@@ -111,20 +324,25 @@ export type Database = {
           creator: string
           datasets_discovered?: number | null
           description?: string | null
+          external_marketplace?: string | null
           hearts_earned?: number | null
           id?: string
           last_active?: string | null
           registration_source?: string | null
+          rejected_contributions?: number
           specialization?: string | null
           status?: string
+          tier?: string
           trees_added?: number | null
           trust_score?: number | null
           updated_at?: string
+          verified_contributions?: number
         }
         Update: {
           agent_name?: string
           agent_type?: string
           api_endpoint?: string | null
+          auth_method?: string
           avatar_emoji?: string | null
           connected_datasets?: string[] | null
           contributions?: number | null
@@ -132,17 +350,72 @@ export type Database = {
           creator?: string
           datasets_discovered?: number | null
           description?: string | null
+          external_marketplace?: string | null
           hearts_earned?: number | null
           id?: string
           last_active?: string | null
           registration_source?: string | null
+          rejected_contributions?: number
           specialization?: string | null
           status?: string
+          tier?: string
           trees_added?: number | null
           trust_score?: number | null
           updated_at?: string
+          verified_contributions?: number
         }
         Relationships: []
+      }
+      agent_reward_ledger: {
+        Row: {
+          agent_id: string
+          contribution_event_id: string | null
+          created_at: string
+          hearts_amount: number
+          id: string
+          issued_at: string | null
+          reason: string | null
+          reward_type: string
+          status: string
+        }
+        Insert: {
+          agent_id: string
+          contribution_event_id?: string | null
+          created_at?: string
+          hearts_amount?: number
+          id?: string
+          issued_at?: string | null
+          reason?: string | null
+          reward_type?: string
+          status?: string
+        }
+        Update: {
+          agent_id?: string
+          contribution_event_id?: string | null
+          created_at?: string
+          hearts_amount?: number
+          id?: string
+          issued_at?: string | null
+          reason?: string | null
+          reward_type?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_reward_ledger_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_reward_ledger_contribution_event_id_fkey"
+            columns: ["contribution_event_id"]
+            isOneToOne: false
+            referencedRelation: "agent_contribution_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agent_tokens: {
         Row: {
@@ -3855,9 +4128,12 @@ export type Database = {
       }
       research_trees: {
         Row: {
+          age_estimate: string | null
           anchor_chain: string | null
           anchored_at: string | null
+          city: string | null
           completeness_score: number | null
+          confidence_score: number | null
           conversion_notes: string | null
           conversion_status: string
           converted_at: string | null
@@ -3866,12 +4142,16 @@ export type Database = {
           country: string
           created_at: string
           crown_spread: string | null
+          dataset_id: string | null
           description: string | null
           designation_type: string
+          duplicate_of_record_id: string | null
           geo_precision: string
           girth_or_stem: string | null
           height_m: number | null
+          heritage_status: string | null
           id: string
+          images_json: Json | null
           immutable_anchor_reference: string | null
           immutable_record_id: string | null
           latitude: number | null
@@ -3891,6 +4171,7 @@ export type Database = {
           species_common: string | null
           species_scientific: string
           status: string
+          submitted_by_agent_id: string | null
           tree_name: string | null
           updated_at: string
           user_annotations: Json | null
@@ -3898,9 +4179,12 @@ export type Database = {
           verified_by: string | null
         }
         Insert: {
+          age_estimate?: string | null
           anchor_chain?: string | null
           anchored_at?: string | null
+          city?: string | null
           completeness_score?: number | null
+          confidence_score?: number | null
           conversion_notes?: string | null
           conversion_status?: string
           converted_at?: string | null
@@ -3909,12 +4193,16 @@ export type Database = {
           country?: string
           created_at?: string
           crown_spread?: string | null
+          dataset_id?: string | null
           description?: string | null
           designation_type?: string
+          duplicate_of_record_id?: string | null
           geo_precision?: string
           girth_or_stem?: string | null
           height_m?: number | null
+          heritage_status?: string | null
           id?: string
+          images_json?: Json | null
           immutable_anchor_reference?: string | null
           immutable_record_id?: string | null
           latitude?: number | null
@@ -3934,6 +4222,7 @@ export type Database = {
           species_common?: string | null
           species_scientific: string
           status?: string
+          submitted_by_agent_id?: string | null
           tree_name?: string | null
           updated_at?: string
           user_annotations?: Json | null
@@ -3941,9 +4230,12 @@ export type Database = {
           verified_by?: string | null
         }
         Update: {
+          age_estimate?: string | null
           anchor_chain?: string | null
           anchored_at?: string | null
+          city?: string | null
           completeness_score?: number | null
+          confidence_score?: number | null
           conversion_notes?: string | null
           conversion_status?: string
           converted_at?: string | null
@@ -3952,12 +4244,16 @@ export type Database = {
           country?: string
           created_at?: string
           crown_spread?: string | null
+          dataset_id?: string | null
           description?: string | null
           designation_type?: string
+          duplicate_of_record_id?: string | null
           geo_precision?: string
           girth_or_stem?: string | null
           height_m?: number | null
+          heritage_status?: string | null
           id?: string
+          images_json?: Json | null
           immutable_anchor_reference?: string | null
           immutable_record_id?: string | null
           latitude?: number | null
@@ -3977,6 +4273,7 @@ export type Database = {
           species_common?: string | null
           species_scientific?: string
           status?: string
+          submitted_by_agent_id?: string | null
           tree_name?: string | null
           updated_at?: string
           user_annotations?: Json | null
@@ -3992,10 +4289,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "research_trees_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "tree_datasets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_trees_duplicate_of_record_id_fkey"
+            columns: ["duplicate_of_record_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "research_trees_linked_tree_id_fkey"
             columns: ["linked_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_trees_submitted_by_agent_id_fkey"
+            columns: ["submitted_by_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4378,10 +4696,14 @@ export type Database = {
           hearts_rewarded: number | null
           id: string
           report_type: string
+          research_tree_record_id: string | null
           resolution_notes: string | null
+          resolved_at: string | null
           resolved_by: string | null
+          status: string
           submitted_by: string | null
           submitted_by_agent: string | null
+          suggested_fix: string | null
           target_id: string | null
           target_type: string
           updated_at: string
@@ -4394,10 +4716,14 @@ export type Database = {
           hearts_rewarded?: number | null
           id?: string
           report_type?: string
+          research_tree_record_id?: string | null
           resolution_notes?: string | null
+          resolved_at?: string | null
           resolved_by?: string | null
+          status?: string
           submitted_by?: string | null
           submitted_by_agent?: string | null
+          suggested_fix?: string | null
           target_id?: string | null
           target_type?: string
           updated_at?: string
@@ -4410,10 +4736,14 @@ export type Database = {
           hearts_rewarded?: number | null
           id?: string
           report_type?: string
+          research_tree_record_id?: string | null
           resolution_notes?: string | null
+          resolved_at?: string | null
           resolved_by?: string | null
+          status?: string
           submitted_by?: string | null
           submitted_by_agent?: string | null
+          suggested_fix?: string | null
           target_id?: string | null
           target_type?: string
           updated_at?: string
@@ -4425,6 +4755,13 @@ export type Database = {
             columns: ["dataset_id"]
             isOneToOne: false
             referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spark_reports_research_tree_record_id_fkey"
+            columns: ["research_tree_record_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
             referencedColumns: ["id"]
           },
           {
@@ -5355,6 +5692,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_format: string
+          discovered_by_agent_id: string | null
           id: string
           integration_status: string
           last_checked: string | null
@@ -5362,6 +5700,7 @@ export type Database = {
           name: string
           notes: string | null
           record_count: number | null
+          region: string | null
           scope: string
           source_type: string
           species_keys: string[] | null
@@ -5374,6 +5713,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_format?: string
+          discovered_by_agent_id?: string | null
           id?: string
           integration_status?: string
           last_checked?: string | null
@@ -5381,6 +5721,7 @@ export type Database = {
           name: string
           notes?: string | null
           record_count?: number | null
+          region?: string | null
           scope?: string
           source_type?: string
           species_keys?: string[] | null
@@ -5393,6 +5734,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_format?: string
+          discovered_by_agent_id?: string | null
           id?: string
           integration_status?: string
           last_checked?: string | null
@@ -5400,6 +5742,7 @@ export type Database = {
           name?: string
           notes?: string | null
           record_count?: number | null
+          region?: string | null
           scope?: string
           source_type?: string
           species_keys?: string[] | null
@@ -5407,12 +5750,23 @@ export type Database = {
           updated_at?: string
           url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tree_data_sources_discovered_by_agent_id_fkey"
+            columns: ["discovered_by_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tree_datasets: {
         Row: {
           created_at: string
+          created_by_agent_id: string | null
+          description: string | null
           id: string
+          ingestion_status: string
           last_update: string | null
           ledger_linked: boolean | null
           map_layer_enabled: boolean | null
@@ -5426,7 +5780,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by_agent_id?: string | null
+          description?: string | null
           id?: string
+          ingestion_status?: string
           last_update?: string | null
           ledger_linked?: boolean | null
           map_layer_enabled?: boolean | null
@@ -5440,7 +5797,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by_agent_id?: string | null
+          description?: string | null
           id?: string
+          ingestion_status?: string
           last_update?: string | null
           ledger_linked?: boolean | null
           map_layer_enabled?: boolean | null
@@ -5453,6 +5813,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tree_datasets_created_by_agent_id_fkey"
+            columns: ["created_by_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tree_datasets_source_id_fkey"
             columns: ["source_id"]
@@ -6943,6 +7310,10 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      update_agent_trust_score: {
+        Args: { p_agent_id: string }
+        Returns: undefined
+      }
       validate_invite_code: {
         Args: { p_code: string }
         Returns: {
