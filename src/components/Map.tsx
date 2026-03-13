@@ -651,20 +651,16 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
     }
   };
 
-  // Leaflet fallback mode
+  // ── Recovery mode: MapLibre takes priority for visible map ──
   if (mapStatus === "leaflet") {
     return (
       <div className="absolute inset-0 z-[1]" style={{ height: '100dvh' }}>
         <Suspense fallback={
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
+          <div className="absolute inset-0 flex items-center justify-center bg-background">
+            <p className="font-serif text-sm text-foreground">Loading map…</p>
           </div>
         }>
-          {ENABLE_ADVANCED_MAP_EFFECTS ? (
-            <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} initialCountry={initialCountry} initialHive={initialHive} initialOrigin={initialOrigin} initialJourney={initialJourney} initialBbox={initialBbox} onFullscreenToggle={onFullscreenToggle} isFullscreen={isFullscreen} onJourneyEnd={onJourneyEnd} />
-          ) : (
-            <BareLeafletRecoveryMap initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} />
-          )}
+          <MapLibreRecoveryMap initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} />
         </Suspense>
       </div>
     );
