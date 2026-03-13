@@ -246,9 +246,189 @@ function ContributeSourceDialog({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+/* ── Register Agent Dialog ──────────────────────────────────── */
+function RegisterAgentDialog({ onSuccess }: { onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    agent_name: "", creator: "", agent_type: "general", specialization: "",
+    description: "", api_endpoint: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.agent_name.trim() || !form.creator.trim()) {
+      toast.error("Agent name and creator are required"); return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error("Please log in to register an agent"); return; }
+    setSubmitting(true);
+    const { error } = await (supabase.from as any)("agent_profiles").insert({
+      agent_name: form.agent_name.trim(),
+      creator: form.creator.trim(),
+      agent_type: form.agent_type,
+      specialization: form.specialization.trim() || null,
+      description: form.description.trim() || null,
+      api_endpoint: form.api_endpoint.trim() || null,
+      registration_source: "marketplace",
+    });
+    setSubmitting(false);
+    if (error) { toast.error("Failed to register agent"); return; }
+    toast.success("Agent registered successfully");
+    setOpen(false);
+    setForm({ agent_name: "", creator: "", agent_type: "general", specialization: "", description: "", api_endpoint: "" });
+    onSuccess();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="sacred" size="sm"><Bot className="w-4 h-4 mr-1" /> Register Agent</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl">Register an Agent</DialogTitle>
+          <p className="text-xs text-muted-foreground">
+            Connect your AI agent to S33D's Research Forest. Agents earn Hearts for verified contributions.
+          </p>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Agent Name *</Label>
+              <Input value={form.agent_name} onChange={e => setForm({ ...form, agent_name: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Creator / Org *</Label>
+              <Input value={form.creator} onChange={e => setForm({ ...form, creator: e.target.value })} required />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Agent Type</Label>
+              <Select value={form.agent_type} onValueChange={v => setForm({ ...form, agent_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="crawler">Crawler</SelectItem>
+                  <SelectItem value="parser">Dataset Parser</SelectItem>
+                  <SelectItem value="geocoder">Geocoder</SelectItem>
+                  <SelectItem value="classifier">Species Classifier</SelectItem>
+                  <SelectItem value="deduplicator">Duplicate Detector</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Specialization</Label>
+              <Input value={form.specialization} onChange={e => setForm({ ...form, specialization: e.target.value })} placeholder="e.g. UK tree registers" />
+            </div>
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What does this agent do?" />
+          </div>
+          <div>
+            <Label>API Endpoint (optional)</Label>
+            <Input type="url" value={form.api_endpoint} onChange={e => setForm({ ...form, api_endpoint: e.target.value })} placeholder="https://..." />
+          </div>
+          <Button type="submit" variant="sacred" className="w-full" disabled={submitting}>
+            {submitting ? "Registering…" : "Register Agent"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── Submit Spark Dialog ────────────────────────────────────── */
+function SubmitSparkDialog({ onSuccess }: { onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    report_type: "issue", target_type: "tree", description: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.description.trim()) { toast.error("Description is required"); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error("Please log in to submit a Spark"); return; }
+    setSubmitting(true);
+    const { error } = await (supabase.from as any)("spark_reports").insert({
+      report_type: form.report_type,
+      target_type: form.target_type,
+      description: form.description.trim(),
+      submitted_by: user.id,
+    });
+    setSubmitting(false);
+    if (error) { toast.error("Failed to submit Spark"); return; }
+    toast.success("Spark submitted — thank you!");
+    setOpen(false);
+    setForm({ report_type: "issue", target_type: "tree", description: "" });
+    onSuccess();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm"><Zap className="w-4 h-4 mr-1 text-primary" /> Report Spark</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl flex items-center gap-2">
+            <Zap className="w-5 h-5 text-primary" /> Submit a Spark
+          </DialogTitle>
+          <p className="text-xs text-muted-foreground">
+            Report issues, duplicates, or improvements. Confirmed Sparks earn Hearts.
+          </p>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Report Type</Label>
+              <Select value={form.report_type} onValueChange={v => setForm({ ...form, report_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="issue">Issue</SelectItem>
+                  <SelectItem value="duplicate">Duplicate</SelectItem>
+                  <SelectItem value="incorrect_species">Incorrect Species</SelectItem>
+                  <SelectItem value="invalid_coordinates">Invalid Coordinates</SelectItem>
+                  <SelectItem value="missing_metadata">Missing Metadata</SelectItem>
+                  <SelectItem value="broken_dataset">Broken Dataset</SelectItem>
+                  <SelectItem value="dataset_update">Dataset Update</SelectItem>
+                  <SelectItem value="improvement">Improvement</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Target</Label>
+              <Select value={form.target_type} onValueChange={v => setForm({ ...form, target_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tree">Tree</SelectItem>
+                  <SelectItem value="dataset">Dataset</SelectItem>
+                  <SelectItem value="source">Source</SelectItem>
+                  <SelectItem value="agent">Agent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label>Description *</Label>
+            <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What needs attention?" required />
+          </div>
+          <Button type="submit" variant="sacred" className="w-full" disabled={submitting}>
+            {submitting ? "Submitting…" : "Submit Spark"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ── Main Page ──────────────────────────────────────────────── */
 const TreeDataCommonsPage = () => {
-  const { sources, crawlTasks, agents, loading, stats, refetch } = useDataCommons();
+  const { sources, crawlTasks, agents, sparkReports, loading, stats, refetch } = useDataCommons();
   const [search, setSearch] = useState("");
 
   const filteredSources = sources.filter(s => {
