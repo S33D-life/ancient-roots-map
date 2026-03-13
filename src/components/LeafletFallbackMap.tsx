@@ -292,10 +292,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [projectFilter, setProjectFilter] = useState("all");
 
   // Layer visibility toggles
-  const [showSeeds, setShowSeeds] = useState(true);
+  const [showSeeds, setShowSeeds] = useState(() => !SAFE_BARE_MAP_MODE);
   const [showGroves, setShowGroves] = useState(false);
   const [showRootThreads, setShowRootThreads] = useState(false);
   const [showMycelialNetwork, setShowMycelialNetwork] = useState(() => {
+    if (SAFE_BARE_MAP_MODE) return false;
     try {
       const params = new URLSearchParams(window.location.search);
       return params.get("mycelial") === "on";
