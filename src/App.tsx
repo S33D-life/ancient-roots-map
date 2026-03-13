@@ -1,6 +1,13 @@
-import { useState, useEffect, lazy, Suspense, type ComponentType } from "react";
+import { useState, useEffect, lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { useConnectionResilience } from "@/hooks/use-connection-resilience";
 import { Navigate } from "react-router-dom";
+import RealmTransition from "@/components/RealmTransition";
+import type { RealmDirection } from "@/components/RealmTransition";
+
+/** Wrap a page element with a directional tree-zoom transition */
+const realm = (element: ReactNode, direction: RealmDirection) => (
+  <RealmTransition direction={direction}>{element}</RealmTransition>
+);
 import GlobalErrorBoundary from "@/components/GlobalErrorBoundary";
 import { TetolLevelProvider } from "@/contexts/TetolLevelContext";
 import { MapFilterProvider } from "@/contexts/MapFilterContext";
