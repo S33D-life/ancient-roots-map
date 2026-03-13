@@ -62,50 +62,58 @@ export function useCanopyCheckIn() {
   const handlePosition = useCallback(async (pos: GeolocationPosition) => {
     if (pos.coords.accuracy > MIN_ACCURACY_M) return;
     if (!userIdRef.current || treesRef.current.length === 0) return;
+    if (processingRef.current) return;
+    processingRef.current = true;
 
-    const { latitude, longitude } = pos.coords;
-    const now = Date.now();
+    try {
+      const { latitude, longitude } = pos.coords;
+      const now = Date.now();
 
-    for (const tree of treesRef.current) {
-      const dist = haversineKm(latitude, longitude, tree.latitude, tree.longitude);
-      if (dist > CANOPY_RADIUS_KM) continue;
+      for (const tree of treesRef.current) {
+        const dist = haversineKm(latitude, longitude, tree.latitude, tree.longitude);
+        if (dist > CANOPY_RADIUS_KM) continue;
 
-      // Check cooldown
-      const lastCheckin = cooldownMapRef.current.get(tree.id) || 0;
-      if (now - lastCheckin < COOLDOWN_MS) continue;
+        // Check cooldown
+        const lastCheckin = cooldownMapRef.current.get(tree.id) || 0;
+        if (now - lastCheckin < COOLDOWN_MS) continue;
 
-      const { data, error } = await supabase.functions.invoke("canopy-checkin", {
-        body: {
-          action: "checkin",
-          tree_id: tree.id,
-          season_stage: "other",
-          soft_mode: false,
-          has_offering: false,
-          latitude,
-          longitude,
-          accuracy_m: pos.coords.accuracy,
-        },
-      });
-
-      if (error) continue;
-
-      const result = (data || {}) as { accepted?: boolean; hearts_awarded?: number };
-      if (result.accepted && Number(result.hearts_awarded || 0) > 0) {
+        // Set cooldown immediately to prevent duplicate calls
         cooldownMapRef.current.set(tree.id, now);
-        const hearts = Math.max(0, Number(result.hearts_awarded || 0));
-        setLastEvent({
-          tree,
-          reward: {
-            s33dHearts: hearts,
-            speciesHearts: 0,
-            influence: 0,
-            speciesFamily: tree.species || "Unknown",
-            hiveName: "Canopy",
-            capped: hearts === 0,
-          } as RewardResult,
-          timestamp: now,
+
+        const { data, error } = await supabase.functions.invoke("canopy-checkin", {
+          body: {
+            action: "checkin",
+            tree_id: tree.id,
+            season_stage: "other",
+            soft_mode: false,
+            has_offering: false,
+            latitude,
+            longitude,
+            accuracy_m: pos.coords.accuracy,
+          },
         });
+
+        if (error) continue;
+
+        const result = (data || {}) as { accepted?: boolean; hearts_awarded?: number };
+        if (result.accepted && Number(result.hearts_awarded || 0) > 0) {
+          const hearts = Math.max(0, Number(result.hearts_awarded || 0));
+          setLastEvent({
+            tree,
+            reward: {
+              s33dHearts: hearts,
+              speciesHearts: 0,
+              influence: 0,
+              speciesFamily: tree.species || "Unknown",
+              hiveName: "Canopy",
+              capped: hearts === 0,
+            } as RewardResult,
+            timestamp: now,
+          });
+        }
       }
+    } finally {
+      processingRef.current = false;
     }
   }, []);
 
