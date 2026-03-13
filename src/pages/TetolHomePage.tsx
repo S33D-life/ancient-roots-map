@@ -3,7 +3,7 @@
  * Users navigate the ecosystem by clicking tree nodes.
  */
 import { useNavigate, Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf,
   Search, Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
@@ -60,10 +60,13 @@ const LEAF_SHAPES = ["🍃", "🍂", "🌿", "✦"] as const;
 
 const TetolHomePage = () => {
   const navigate = useNavigate();
+  const [activeNode, setActiveNode] = useState<string | null>(null);
 
-  const handleItemClick = (to: string) => {
-    navigate(to);
-  };
+  const handleItemClick = useCallback((to: string) => {
+    setActiveNode(to);
+    // Brief glow before navigating — keeps it fast
+    setTimeout(() => navigate(to), 120);
+  }, [navigate]);
 
   const leaves = useMemo(
     () =>
@@ -142,16 +145,16 @@ const TetolHomePage = () => {
             />
 
             {/* Crown — Golden Dream */}
-            <TreeNode item={treeItems[3]} onClick={handleItemClick} nodeStyle="crown" />
+            <TreeNode item={treeItems[3]} onClick={handleItemClick} nodeStyle="crown" active={activeNode === treeItems[3].to} />
 
             {/* Branch connectors */}
             <BranchLines side="both" />
 
             {/* Canopy — Council of Life */}
-            <TreeNode item={treeItems[2]} onClick={handleItemClick} nodeStyle="canopy" />
+            <TreeNode item={treeItems[2]} onClick={handleItemClick} nodeStyle="canopy" active={activeNode === treeItems[2].to} />
 
             {/* Trunk — Heartwood Library */}
-            <TreeNode item={treeItems[1]} onClick={handleItemClick} nodeStyle="trunk" />
+            <TreeNode item={treeItems[1]} onClick={handleItemClick} nodeStyle="trunk" active={activeNode === treeItems[1].to} />
 
             {/* Root tendrils */}
             <BranchLines side="roots" />
@@ -159,7 +162,8 @@ const TetolHomePage = () => {
             {/* S33D gateway node */}
             <button
               onClick={() => handleItemClick("/s33d")}
-              className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full"
+              className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full transition-all duration-200"
+              style={activeNode === "/s33d" ? { transform: "scale(1.08)", filter: "brightness(1.3)" } : {}}
             >
               <Sprout
                 className="w-7 h-7 transition-all duration-300 group-hover:scale-110"
@@ -180,7 +184,7 @@ const TetolHomePage = () => {
             </button>
 
             {/* Roots — Ancient Friends */}
-            <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" />
+            <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} />
           </div>
 
           {/* Quick links */}
@@ -216,16 +220,18 @@ interface TreeNodeProps {
   item: (typeof treeItems)[number];
   onClick: (to: string) => void;
   nodeStyle: "crown" | "canopy" | "trunk" | "roots";
+  active?: boolean;
 }
 
-const TreeNode = ({ item, onClick, nodeStyle }: TreeNodeProps) => {
+const TreeNode = ({ item, onClick, nodeStyle, active }: TreeNodeProps) => {
   const Icon = item.icon;
   const colors = nodeColors[nodeStyle];
 
   return (
     <button
       onClick={() => onClick(item.to)}
-      className="relative z-10 flex items-center gap-4 group cursor-pointer bg-transparent border-none py-4 w-full"
+      className="relative z-10 flex items-center gap-4 group cursor-pointer bg-transparent border-none py-4 w-full transition-all duration-200"
+      style={active ? { transform: "scale(1.06)", filter: "brightness(1.2)" } : {}}
     >
       <div className="flex-1 text-right">
         <p
