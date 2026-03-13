@@ -51,6 +51,7 @@ const ROOM_LABELS: Record<string, string> = {
   "vault": "Vaults",
   "bookshelf": "Bookshelf",
   "rhythms": "Rhythms",
+  "tap-root": "Dev Room",
 };
 
 /** Ordered room sequence for swipe navigation */
