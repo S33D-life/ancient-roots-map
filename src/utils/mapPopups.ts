@@ -101,7 +101,17 @@ export function buildPopupHtml(
         ${birdsongLine}
         ${whisperLine}
       </div>
-      ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>` : ""}
+      ${distKm != null
+        ? `<p style="margin:0;font-size:10px;color:hsl(120,35%,55%);font-family:sans-serif;display:flex;align-items:center;gap:4px;">
+            <span>📍</span>
+            <span>~${distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
+            <span style="color:hsl(0,0%,48%);">·</span>
+            <span style="color:hsl(0,0%,48%);">~${distKm < 1 ? `${Math.max(1, Math.round(distKm * 1000 / 80))} min walk` : `${Math.round(distKm * 12)} min walk`}</span>
+          </p>`
+        : tree.what3words
+          ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>`
+          : ""
+      }
       ${desc}
     </div>
     <div style="padding:0 14px 10px;display:flex;gap:6px;">
