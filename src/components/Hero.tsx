@@ -113,6 +113,7 @@ interface Leaf {
 
 const FallingLeaves = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isVisibleRef = useRef(true);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const canvas = canvasRef.current;
@@ -123,6 +124,13 @@ const FallingLeaves = () => {
     let leaves: Leaf[] = [];
     const isMobile = window.innerWidth < 768;
     const LEAF_COUNT = isMobile ? 10 : 25;
+
+    // Pause when off-screen
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting; },
+      { threshold: 0.05 },
+    );
+    observer.observe(canvas);
     const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
     resize();
     window.addEventListener('resize', resize);
