@@ -145,16 +145,16 @@ const TetolHomePage = () => {
             />
 
             {/* Crown — Golden Dream */}
-            <TreeNode item={treeItems[3]} onClick={handleItemClick} nodeStyle="crown" />
+            <TreeNode item={treeItems[3]} onClick={handleItemClick} nodeStyle="crown" active={activeNode === treeItems[3].to} />
 
             {/* Branch connectors */}
             <BranchLines side="both" />
 
             {/* Canopy — Council of Life */}
-            <TreeNode item={treeItems[2]} onClick={handleItemClick} nodeStyle="canopy" />
+            <TreeNode item={treeItems[2]} onClick={handleItemClick} nodeStyle="canopy" active={activeNode === treeItems[2].to} />
 
             {/* Trunk — Heartwood Library */}
-            <TreeNode item={treeItems[1]} onClick={handleItemClick} nodeStyle="trunk" />
+            <TreeNode item={treeItems[1]} onClick={handleItemClick} nodeStyle="trunk" active={activeNode === treeItems[1].to} />
 
             {/* Root tendrils */}
             <BranchLines side="roots" />
