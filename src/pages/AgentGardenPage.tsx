@@ -371,6 +371,10 @@ const AgentGardenPage = () => {
   const [sparkFilter, setSparkFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("overview");
 
+  useEffect(() => {
+    document.title = "Agent Garden — S33D.life";
+  }, []);
+
   const totalHeartsDistributed = useMemo(
     () => agents.reduce((a, ag) => a + (ag.hearts_earned || 0), 0),
     [agents]
