@@ -14,6 +14,7 @@
  * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
