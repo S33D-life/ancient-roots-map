@@ -896,33 +896,29 @@ const AgentGardenPage = () => {
                       const tier = getAgentTier(agent.trust_score);
                       return (
                         <div key={agent.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/10 border border-border/20">
-                          <span className="text-sm font-serif font-bold text-muted-foreground w-6 text-right">#{rank + 1}</span>
-                          <span className="text-2xl">{agent.avatar_emoji}</span>
+                          <span className="text-sm font-serif font-bold text-muted-foreground w-6 text-right shrink-0">#{rank + 1}</span>
+                          <span className="text-2xl shrink-0">{agent.avatar_emoji || "🤖"}</span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-serif font-semibold text-foreground truncate">{agent.agent_name}</p>
-                              <span className="text-xs text-muted-foreground">{tier.emoji} {tier.name}</span>
+                              <span className="text-xs text-muted-foreground hidden sm:inline">{tier.emoji} {tier.name}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">by {agent.creator}</p>
                           </div>
-                          <div className="flex items-center gap-4 shrink-0 text-xs">
-                            <div className="text-center">
-                              <p className="font-serif font-bold text-foreground">{agent.trees_added}</p>
+                          <div className="flex items-center gap-3 sm:gap-4 shrink-0 text-xs">
+                            <div className="text-center hidden sm:block">
+                              <p className="font-serif font-bold text-foreground">{agent.trees_added || 0}</p>
                               <p className="text-[10px] text-muted-foreground">Trees</p>
                             </div>
                             <div className="text-center">
-                              <p className="font-serif font-bold text-foreground">{agent.contributions}</p>
-                              <p className="text-[10px] text-muted-foreground">Actions</p>
-                            </div>
-                            <div className="text-center">
                               <p className="font-serif font-bold text-primary flex items-center gap-0.5 justify-center">
-                                <Heart className="w-3 h-3" /> {agent.hearts_earned}
+                                <Heart className="w-3 h-3" /> {agent.hearts_earned || 0}
                               </p>
                               <p className="text-[10px] text-muted-foreground">Hearts</p>
                             </div>
                             <div className="text-center">
                               <p className="font-serif font-bold text-foreground flex items-center gap-0.5 justify-center">
-                                <Shield className="w-3 h-3" /> {agent.trust_score}
+                                <Shield className="w-3 h-3" /> {agent.trust_score ?? 0}
                               </p>
                               <p className="text-[10px] text-muted-foreground">Trust</p>
                             </div>
