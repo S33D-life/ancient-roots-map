@@ -872,48 +872,85 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const whisperCountsRef = useRef(whisperCountsMap);
   whisperCountsRef.current = whisperCountsMap;
 
-  // Initialize map once
+  // Track whether atmosphere overlay should show (as React state, not DOM injection)
+  const [atmosphereReady, setAtmosphereReady] = useState(false);
+  const [seasonClass, setSeasonClass] = useState("");
+
+  // Initialize map once — deferred until container has measurable dimensions
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Use higher zoom on tall/mobile viewports so tiles fill the screen
-    const isTall = window.innerHeight > window.innerWidth;
-    const defaultZoom = isTall ? 3 : 2;
+    const container = containerRef.current;
 
-    const map = L.map(containerRef.current, {
-      center: [25, 10],
-      zoom: defaultZoom,
-      minZoom: isTall ? 3 : 2,
-      maxBounds: [[-85, -200], [85, 200]],
-      maxBoundsViscosity: 0.8,
-      attributionControl: false,
-      zoomControl: false,
-      preferCanvas: true,
-      tap: true,
-      tapTolerance: 15,
-      zoomAnimation: true,
-      markerZoomAnimation: true,
-    } as any);
+    // ── Guard: wait for container to be measurable ──
+    // On mobile/iOS, the container may have 0 height during route transitions
+    const initMap = () => {
+      if (!container || mapRef.current) return;
+      const w = container.offsetWidth;
+      const h = container.offsetHeight;
+      if (w === 0 || h === 0) {
+        console.warn("[MapInit] Container has zero dimensions, deferring init…", w, h);
+        return false;
+      }
+      console.info("[MapInit] Container measurable:", w, "x", h);
+      return true;
+    };
 
-    // ── Feature flags for safe map diagnostics ──
-    const SAFE_MAP_ATMOSPHERE = !SAFE_BARE_MAP_MODE;
-
-    // ── Atmospheric overlay div (replaces tile-pane CSS filters) ──
-    const atmosphereDiv = document.createElement("div");
-    atmosphereDiv.className = "map-atmosphere-overlay";
-    if (!SAFE_MAP_ATMOSPHERE) {
-      containerRef.current.classList.add("safe-atmosphere", "safe-bare-map");
+    if (!initMap()) {
+      // Use ResizeObserver to wait for layout
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          if (width > 0 && height > 0) {
+            ro.disconnect();
+            doMapInit();
+          }
+        }
+      });
+      ro.observe(container);
+      // Fallback: try again after 2s even without resize event
+      const fallback = setTimeout(() => { ro.disconnect(); doMapInit(); }, 2000);
+      return () => { ro.disconnect(); clearTimeout(fallback); };
+    } else {
+      doMapInit();
     }
-    if (!SAFE_BARE_MAP_MODE) {
-      // Insert into map container so seasonal classes cascade naturally
-      containerRef.current.appendChild(atmosphereDiv);
-    }
 
-    // ── Tile debug logging ──
-    const logPrefix = "[MapTiles]";
-    const containerSize = `${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`;
-    console.info(`${logPrefix} Leaflet map instance created, container ${containerSize}`);
-    setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
+    function doMapInit() {
+      if (!container || mapRef.current) return;
+
+      // Use higher zoom on tall/mobile viewports so tiles fill the screen
+      const isTall = window.innerHeight > window.innerWidth;
+      const defaultZoom = isTall ? 3 : 2;
+
+      const map = L.map(container, {
+        center: [25, 10],
+        zoom: defaultZoom,
+        minZoom: isTall ? 3 : 2,
+        maxBounds: [[-85, -200], [85, 200]],
+        maxBoundsViscosity: 0.8,
+        attributionControl: false,
+        zoomControl: false,
+        preferCanvas: true,
+        tap: true,
+        tapTolerance: 15,
+        zoomAnimation: true,
+        markerZoomAnimation: true,
+      } as any);
+
+      // ── Atmosphere is now rendered via React, not DOM-injected ──
+      // Enable the React-rendered overlay (sibling div, NOT inside Leaflet container)
+      if (!SAFE_BARE_MAP_MODE) {
+        setAtmosphereReady(true);
+      }
+      if (SAFE_BARE_MAP_MODE) {
+        container.classList.add("safe-bare-map");
+      }
+
+      // ── Tile debug logging ──
+      const logPrefix = "[MapTiles]";
+      const containerSize = `${container.offsetWidth}x${container.offsetHeight}`;
+      console.info(`${logPrefix} Leaflet map instance created, container ${containerSize}`);
+      setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
 
     const isRetina = window.devicePixelRatio > 1;
     const primaryTileLayer = L.tileLayer(
