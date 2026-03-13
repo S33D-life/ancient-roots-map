@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
@@ -97,4 +98,4 @@ const NavItem = ({ item, pathname }: NavItemProps) => {
   );
 };
 
-export default BottomNav;
+export default memo(BottomNav);
