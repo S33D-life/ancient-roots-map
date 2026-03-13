@@ -1676,7 +1676,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       (marker as any)._treeId = tree.id;
       (marker as any)._treeName = tree.name;
       (marker as any)._whisperCount = wCount;
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0), {
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0, userLatLng), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,

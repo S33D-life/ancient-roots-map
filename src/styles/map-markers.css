@@ -56,11 +56,29 @@
 .seed-heart-leaflet{background:transparent!important;border:none!important;display:flex;align-items:center;justify-content:center;position:relative;animation:seedHeartGlow 2s ease-in-out infinite;cursor:pointer}
 .seed-heart-leaflet .seed-count{position:absolute;top:-4px;right:-6px;background:hsl(120,50%,40%);color:#fff;font-size:9px;font-weight:700;font-family:sans-serif;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:99px;border:1.5px solid hsl(120,40%,15%)}
 
-/* Tile filters */
+/* Tile filters — seasonal atmosphere */
 .leaflet-tile-pane{filter:sepia(0.25) saturate(0.85) brightness(0.9);transition:filter 1.2s ease-in-out}
+.season-spring .leaflet-tile-pane{filter:sepia(0.15) saturate(1.05) brightness(0.92) hue-rotate(5deg)}
+.season-summer .leaflet-tile-pane{filter:sepia(0.2) saturate(0.95) brightness(0.92)}
+.season-autumn .leaflet-tile-pane{filter:sepia(0.35) saturate(0.8) brightness(0.88) hue-rotate(-8deg)}
+.season-winter .leaflet-tile-pane{filter:sepia(0.1) saturate(0.7) brightness(0.85) hue-rotate(10deg)}
+.golden-hour .leaflet-tile-pane{filter:sepia(0.35) saturate(0.9) brightness(0.88) hue-rotate(-5deg)!important}
 .grove-view-active .leaflet-tile-pane{filter:sepia(0.35) saturate(0.7) brightness(0.65) hue-rotate(-10deg)}
 @media(max-width:768px){.leaflet-tile-pane{filter:sepia(0.1) brightness(0.95)}}
 @media(max-width:768px){.grove-view-active .leaflet-tile-pane{filter:sepia(0.3) saturate(0.7) brightness(0.7) hue-rotate(-10deg)}}
+
+/* Visited marker styling */
+.marker-visited .marker-wrap::after{content:'✓';position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:hsla(120,40%,25%,0.9);color:hsl(120,50%,65%);font-size:8px;line-height:14px;text-align:center;border:1px solid hsla(120,40%,40%,0.4);pointer-events:none}
+.marker-visited .marker-wrap{opacity:0.8}
+
+/* Proximity glow for nearby markers */
+@keyframes proximityPulse{0%,100%{filter:drop-shadow(0 0 4px hsla(120,60%,50%,0.3)) brightness(1)}50%{filter:drop-shadow(0 0 12px hsla(120,60%,50%,0.6)) brightness(1.08)}}
+.marker-nearby .marker-wrap{animation:proximityPulse 3s ease-in-out infinite!important}
+@media(prefers-reduced-motion:reduce){.marker-nearby .marker-wrap{animation:none!important;filter:drop-shadow(0 0 6px hsla(120,60%,50%,0.4)) brightness(1.05)}}
+
+/* First-tap guided pulse */
+@keyframes guidedPulse{0%{box-shadow:0 0 0 0 hsla(42,90%,55%,0.6)}50%{box-shadow:0 0 0 12px hsla(42,90%,55%,0)}100%{box-shadow:0 0 0 0 hsla(42,90%,55%,0)}}
+.marker-guided .marker-wrap{animation:guidedPulse 2s ease-in-out 3!important}
 
 /* Grove view overrides */
 @keyframes groveBreath{0%,100%{filter:drop-shadow(0 0 3px hsla(120,40%,40%,0.15)) brightness(1)}50%{filter:drop-shadow(0 0 6px hsla(120,40%,40%,0.3)) brightness(1.03)}}
