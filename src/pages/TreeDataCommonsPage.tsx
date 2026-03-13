@@ -298,6 +298,9 @@ const TreeDataCommonsPage = () => {
             <TabsTrigger value="layers">
               <Layers className="w-3.5 h-3.5 mr-1.5" /> Map Layers
             </TabsTrigger>
+            <TabsTrigger value="agents">
+              <Bot className="w-3.5 h-3.5 mr-1.5" /> Agent Garden
+            </TabsTrigger>
           </TabsList>
 
           {/* ── Source Registry Tab ── */}
