@@ -111,14 +111,17 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
-  const [trees, setTrees] = useState<Tree[]>([]);
+  // Tree data via React Query — cached, realtime-invalidated
+  const {
+    trees,
+    birdsongCounts,
+    birdsongHeatPoints,
+    bloomedSeeds,
+  } = useTreeMapData();
   const [offeringCounts, setOfferingCounts] = useState<TreeOfferings>({});
   const [treePhotos, setTreePhotos] = useState<TreePhotos>({});
   // Unified offering counts from shared hook
   const { counts: sharedOfferingCounts, photos: sharedOfferingPhotos } = useOfferingCounts();
-  const [birdsongCounts, setBirdsongCounts] = useState<BirdsongCounts>({});
-  const [birdsongHeatPoints, setBirdsongHeatPoints] = useState<BirdsongHeatPoint[]>([]);
-  const [bloomedSeeds, setBloomedSeeds] = useState<BloomedSeed[]>([]);
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const mapStatusRef = useRef(mapStatus);
