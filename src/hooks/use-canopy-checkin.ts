@@ -95,7 +95,14 @@ export function useCanopyCheckIn() {
           },
         });
 
-        if (error) continue;
+        if (error) {
+          // Stop retrying if daily cap reached
+          const body = data as { reason?: string } | null;
+          if (body?.reason === 'user_daily_cap' || body?.reason === 'tree_daily_cap') {
+            dailyCappedRef.current = true;
+          }
+          continue;
+        }
 
         const result = (data || {}) as { accepted?: boolean; hearts_awarded?: number };
         if (result.accepted && Number(result.hearts_awarded || 0) > 0) {
