@@ -64,6 +64,7 @@ export function useCanopyCheckIn() {
     if (pos.coords.accuracy > MIN_ACCURACY_M) return;
     if (!userIdRef.current || treesRef.current.length === 0) return;
     if (processingRef.current) return;
+    if (dailyCappedRef.current) return;
     processingRef.current = true;
 
     try {
