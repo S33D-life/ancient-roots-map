@@ -38,6 +38,12 @@ const STATUS_COLORS: Record<string, string> = {
   parsed: "bg-secondary text-secondary-foreground border-border",
   normalised: "bg-primary/15 text-primary/80 border-primary/30",
   geocoded: "bg-primary/20 text-primary border-primary/40",
+  pending: "bg-accent/20 text-accent border-accent/40",
+  confirmed: "bg-primary/20 text-primary border-primary/40",
+  rejected: "bg-destructive/20 text-destructive border-destructive/40",
+  resolved: "bg-primary/15 text-primary/80 border-primary/30",
+  verified: "bg-primary/20 text-primary border-primary/40",
+  rewarded: "bg-primary/20 text-primary border-primary/40",
 };
 
 function StatusBadge({ status }: { status: string }) {
