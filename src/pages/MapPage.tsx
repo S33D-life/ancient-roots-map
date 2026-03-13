@@ -78,7 +78,7 @@ const MapPage = () => {
       )}
 
       {/* Standard header — hidden in fullscreen and during blessing */}
-      {!isFullscreen && !showBlessing && (
+      {!safeDisableNonessentialOverlays && !isFullscreen && !showBlessing && (
         <>
           <Header />
            <div className="absolute left-0 right-0 z-[20]" style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px))" }}>
@@ -98,7 +98,7 @@ const MapPage = () => {
       )}
 
       {/* Recently Added Trees — floating panel */}
-      {!showBlessing && !isFullscreen && (
+      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
         <>
           <Suspense fallback={null}>
             <RecentlyAddedTrees onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
@@ -110,7 +110,7 @@ const MapPage = () => {
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
-      {!showBlessing && !blessingJustDismissed && (
+      {!safeDisableNonessentialOverlays && !showBlessing && !blessingJustDismissed && (
         <Suspense fallback={null}>
           <MapOnboardingRitual />
           <ContextualWhisper
