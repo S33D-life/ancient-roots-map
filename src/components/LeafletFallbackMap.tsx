@@ -1001,7 +1001,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     // Extra invalidation for slow mobile renderers / iOS webview
     setTimeout(() => {
       map.invalidateSize();
-      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}`);
+      const imgCount = containerRef.current?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
+      setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
+      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}, tilePaneImages=${imgCount}`);
     }, 1500);
     // Also re-invalidate on window resize
     const onResize = () => map.invalidateSize();
