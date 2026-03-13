@@ -29,7 +29,7 @@ const YourPlaceInCycle = ({ userId }: Props) => {
     { icon: <Music className="w-3.5 h-3.5" />, label: "Offerings Shared", value: heartBalance.counts.offerings, color: "hsl(30 70% 50%)" },
     { icon: <TreePine className="w-3.5 h-3.5" />, label: "Trees Mapped", value: heartBalance.counts.trees, color: "hsl(var(--primary))" },
     { icon: <Shield className="w-3.5 h-3.5" />, label: "Trees Verified", value: verifiedCount, color: "hsl(42 80% 50%)" },
-    { icon: <Heart className="w-3.5 h-3.5" />, label: "Hearts Earned", value: heartBalance.total, color: "hsl(0 65% 55%)" },
+    { icon: <Heart className="w-3.5 h-3.5" />, label: "Hearts Earned", value: heartBalance.totalHearts, color: "hsl(0 65% 55%)" },
     { icon: <ArrowLeftRight className="w-3.5 h-3.5" />, label: "Vault Rewards", value: "→", color: "hsl(280 40% 55%)", link: "/vault" },
   ];
 
