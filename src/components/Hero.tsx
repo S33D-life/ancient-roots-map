@@ -79,6 +79,7 @@ const FairyDust = () => {
     });
     for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(spawnParticle());
     const animate = () => {
+      if (!isVisibleRef.current) { animId = requestAnimationFrame(animate); return; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p, i) => {
         p.x += p.speedX + Math.sin(Date.now() * 0.001 + i) * 0.3;
@@ -99,7 +100,7 @@ const FairyDust = () => {
       animId = requestAnimationFrame(animate);
     };
     animate();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); observer.disconnect(); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[2]" />;
 };
