@@ -47,6 +47,7 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "code-grove",      label: "Code Grove",  icon: <Code className="w-3.5 h-3.5" /> },
   { key: "contract-shelf",  label: "Contracts",   icon: <FileText className="w-3.5 h-3.5" /> },
   { key: "roadmap",         label: "Roadmap",     icon: <Sprout className="w-3.5 h-3.5" /> },
+  { key: "toolshed",        label: "Toolshed",    icon: <Wrench className="w-3.5 h-3.5" /> },
   { key: "settings",        label: "Settings",    icon: <Settings className="w-3.5 h-3.5" /> },
 ];
 
