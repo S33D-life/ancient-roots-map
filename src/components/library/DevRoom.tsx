@@ -259,7 +259,11 @@ function OverviewSection({ stats }: { stats: Record<string, number> }) {
           { label: "Ecosystem Map", route: "/ecosystem", icon: <Globe className="w-3.5 h-3.5" /> },
           { label: "API Docs", route: "/api-docs", icon: <FileCode className="w-3.5 h-3.5" /> },
           { label: "Roadmap", route: "/roadmap", icon: <Sprout className="w-3.5 h-3.5" /> },
-          { label: "Bug Garden", route: "/bug-garden", icon: <AlertTriangle className="w-3.5 h-3.5" /> },
+          { label: "Bug Garden", route: "/bug-garden", icon: <Bug className="w-3.5 h-3.5" /> },
+          { label: "Sync Dashboard", route: "/sync", icon: <RefreshCw className="w-3.5 h-3.5" /> },
+          { label: "Test Lab", route: "/test-lab", icon: <Wrench className="w-3.5 h-3.5" /> },
+          { label: "Curator Tools", route: "/curator", icon: <Crown className="w-3.5 h-3.5" /> },
+          { label: "Admin Evolution", route: "/admin-evolution", icon: <Settings className="w-3.5 h-3.5" /> },
         ].map(l => (
           <Link key={l.label} to={l.route}>
             <Button variant="outline" size="sm" className="w-full justify-start gap-2 bg-card/20 border-border/20 text-xs">
