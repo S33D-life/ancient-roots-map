@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import teotag from "@/assets/teotag-small.webp";
 
 const treeItems = [
   { to: "/map", label: "Ancient Friends", subtitle: "The Roots", icon: TreeDeciduous, zone: "roots" },
