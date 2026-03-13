@@ -98,6 +98,33 @@ const GoldenDreamPage = () => {
     );
   }
 
+  // Encounter Economy room
+  if (activeRoom === "encounter-economy") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header />
+        <main className="pt-28 pb-8 px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveRoom(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ← Back to Golden Dream
+              </Button>
+            </div>
+            <Suspense fallback={<div className="py-12 text-center text-muted-foreground text-sm">Breathing…</div>}>
+              <EncounterEconomyManifesto />
+            </Suspense>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   // Roadmap room
   if (activeRoom === "roadmap") {
     return (

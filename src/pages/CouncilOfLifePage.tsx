@@ -195,8 +195,11 @@ const CouncilOfLifePage = () => {
           <h1 className="text-4xl md:text-5xl font-serif text-center mb-3 tracking-wider drop-shadow-lg">
             Council of Life
           </h1>
-          <p className="text-center text-muted-foreground mb-12 text-lg font-serif italic">
+          <p className="text-center text-muted-foreground mb-4 text-lg font-serif italic">
             Gather around the ancient table
+          </p>
+          <p className="text-center text-muted-foreground/60 mb-12 text-xs font-serif max-w-md mx-auto">
+            Stewardship through collective wisdom — where contributions become harvest and harvest guides the commons.
           </p>
 
           <div className="grid grid-cols-2 gap-4 md:gap-6">
