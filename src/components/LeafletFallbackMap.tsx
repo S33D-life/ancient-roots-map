@@ -3546,7 +3546,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   return (
     <div className={`${className || "absolute inset-0"} ${groveViewActive ? "grove-view-active" : ""}`} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
-      {/* CSS now loaded via @/styles/map-markers.css import */}
+
+      {/* Atmospheric overlay — rendered as React sibling, NOT injected into Leaflet DOM.
+          This avoids mix-blend-mode compositing issues on iOS Safari that hide tiles. */}
+      {atmosphereReady && !SAFE_BARE_MAP_MODE && (
+        <div className="map-atmosphere-overlay" aria-hidden="true" />
+      )}
+
+      {/* Debug badge — visible when SAFE_MAP_DEBUG is active */}
+      {SAFE_MAP_DEBUG && (
+        <div
+          className="absolute top-2 left-2 z-[9999] px-2 py-1 rounded text-[9px] font-mono leading-tight"
+          style={{ background: "hsla(0,0%,0%,0.75)", color: "#0f0" }}
+        >
+          <div>map:{renderDebug.mapMounted ? "✓" : "✗"} tiles:{renderDebug.tileStatus} [{renderDebug.provider}]</div>
+          <div>loads:{renderDebug.tileLoads} errs:{renderDebug.tileErrors} imgs:{renderDebug.tilePaneImages}</div>
+          <div>container:{renderDebug.container}</div>
+        </div>
+      )}
 
       {/* Search */}
       <LiteMapSearch
