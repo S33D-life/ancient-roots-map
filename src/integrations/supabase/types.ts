@@ -5106,6 +5106,166 @@ export type Database = {
           },
         ]
       }
+      tree_crawl_tasks: {
+        Row: {
+          country: string | null
+          crawl_type: string
+          created_at: string
+          id: string
+          last_attempt: string | null
+          next_action: string | null
+          priority: number | null
+          source_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          country?: string | null
+          crawl_type?: string
+          created_at?: string
+          id?: string
+          last_attempt?: string | null
+          next_action?: string | null
+          priority?: number | null
+          source_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string | null
+          crawl_type?: string
+          created_at?: string
+          id?: string
+          last_attempt?: string | null
+          next_action?: string | null
+          priority?: number | null
+          source_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_crawl_tasks_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_data_sources: {
+        Row: {
+          country: string | null
+          created_at: string
+          created_by: string | null
+          data_format: string
+          id: string
+          integration_status: string
+          last_checked: string | null
+          license: string | null
+          name: string
+          notes: string | null
+          record_count: number | null
+          scope: string
+          source_type: string
+          species_keys: string[] | null
+          update_frequency: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_format?: string
+          id?: string
+          integration_status?: string
+          last_checked?: string | null
+          license?: string | null
+          name: string
+          notes?: string | null
+          record_count?: number | null
+          scope?: string
+          source_type?: string
+          species_keys?: string[] | null
+          update_frequency?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          data_format?: string
+          id?: string
+          integration_status?: string
+          last_checked?: string | null
+          license?: string | null
+          name?: string
+          notes?: string | null
+          record_count?: number | null
+          scope?: string
+          source_type?: string
+          species_keys?: string[] | null
+          update_frequency?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      tree_datasets: {
+        Row: {
+          created_at: string
+          id: string
+          last_update: string | null
+          ledger_linked: boolean | null
+          map_layer_enabled: boolean | null
+          map_layer_key: string | null
+          name: string
+          regions_covered: string[] | null
+          source_id: string
+          species_coverage: string[] | null
+          tree_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_update?: string | null
+          ledger_linked?: boolean | null
+          map_layer_enabled?: boolean | null
+          map_layer_key?: string | null
+          name: string
+          regions_covered?: string[] | null
+          source_id: string
+          species_coverage?: string[] | null
+          tree_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_update?: string | null
+          ledger_linked?: boolean | null
+          map_layer_enabled?: boolean | null
+          map_layer_key?: string | null
+          name?: string
+          regions_covered?: string[] | null
+          source_id?: string
+          species_coverage?: string[] | null
+          tree_count?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_datasets_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_edit_proposals: {
         Row: {
           confidence: string
