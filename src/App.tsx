@@ -143,6 +143,7 @@ const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOffer
 const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
 const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCommonsPage"), "tree-data-commons");
 const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPage"), "agent-garden");
+const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapPage"), "ecosystem-map");
 
 const queryClient = new QueryClient({
   defaultOptions: {
