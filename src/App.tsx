@@ -141,6 +141,7 @@ const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/Living
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
 const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
 const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCommonsPage"), "tree-data-commons");
+const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPage"), "agent-garden");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -340,6 +341,7 @@ const App = () => {
                 <Route path="/patron-offering" element={<PatronOfferingPage />} />
                 <Route path="/companion" element={<CompanionPage />} />
                 <Route path="/tree-data-commons" element={<TreeDataCommonsPage />} />
+                <Route path="/agent-garden" element={<AgentGardenPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
