@@ -3,7 +3,7 @@
  *
  * Central registry and control layer for all tree knowledge sources feeding S33D.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
