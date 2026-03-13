@@ -17,10 +17,9 @@ import {
 import type { GroveScale } from "./MapFilters";
 
 // ── Lazy-loaded modules ──
-// Core map renderer
+// Core map renderers
 const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
-
-// Overlay widgets — deferred to keep critical bundle small
+const BareLeafletRecoveryMap = lazy(() => import("./BareLeafletRecoveryMap"));
 const MapSearch = lazy(() => import("./MapSearch"));
 const MapFilters = lazy(() => import("./MapFilters").then(m => ({ default: m.default })));
 const ConversionStatus = lazy(() => import("./ConversionStatus"));
@@ -79,11 +78,13 @@ const ROOT_THREADS_LAYER = 'root-threads-layer';
 const CREATOR_PATHS_SOURCE = 'creator-paths-source';
 const CREATOR_PATHS_LAYER = 'creator-paths-layer';
 const CREATOR_PATHS_GLOW_LAYER = 'creator-paths-glow-layer';
-
-// Max distance (km) for root thread connections
 const ROOT_THREAD_MAX_KM = 80;
 const GROVE_FILL_ID = 'grove-boundary-fill';
 const GROVE_LINE_ID = 'grove-boundary-line';
+
+// Temporary recovery switch: keep advanced Leaflet stack available, but disabled
+// until bare-map reliability is confirmed across iOS/webviews.
+const ENABLE_ADVANCED_MAP_EFFECTS = false;
 
 interface MapProps {
   initialView?: string;
@@ -658,7 +659,11 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
             <p className="font-serif text-sm text-foreground">Loading Lite Mode…</p>
           </div>
         }>
-          <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} initialCountry={initialCountry} initialHive={initialHive} initialOrigin={initialOrigin} initialJourney={initialJourney} initialBbox={initialBbox} onFullscreenToggle={onFullscreenToggle} isFullscreen={isFullscreen} onJourneyEnd={onJourneyEnd} />
+          {ENABLE_ADVANCED_MAP_EFFECTS ? (
+            <LeafletFallbackMap trees={trees} offeringCounts={offeringCounts} treePhotos={treePhotos} birdsongCounts={birdsongCounts} birdsongHeatPoints={birdsongHeatPoints} userId={userId} bloomedSeeds={bloomedSeeds} initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} initialW3w={initialW3w} initialTreeId={initialTreeId} initialCountry={initialCountry} initialHive={initialHive} initialOrigin={initialOrigin} initialJourney={initialJourney} initialBbox={initialBbox} onFullscreenToggle={onFullscreenToggle} isFullscreen={isFullscreen} onJourneyEnd={onJourneyEnd} />
+          ) : (
+            <BareLeafletRecoveryMap initialLat={initialLat} initialLng={initialLng} initialZoom={initialZoom} />
+          )}
         </Suspense>
       </div>
     );
