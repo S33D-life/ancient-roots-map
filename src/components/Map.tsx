@@ -17,10 +17,9 @@ import {
 import type { GroveScale } from "./MapFilters";
 
 // ── Lazy-loaded modules ──
-// Core map renderer
+// Core map renderers
 const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
-
-// Overlay widgets — deferred to keep critical bundle small
+const BareLeafletRecoveryMap = lazy(() => import("./BareLeafletRecoveryMap"));
 const MapSearch = lazy(() => import("./MapSearch"));
 const MapFilters = lazy(() => import("./MapFilters").then(m => ({ default: m.default })));
 const ConversionStatus = lazy(() => import("./ConversionStatus"));
