@@ -36,6 +36,7 @@ export function useCanopyCheckIn() {
   const treesRef = useRef<CanopyTree[]>([]);
   const watchIdRef = useRef<number | null>(null);
   const userIdRef = useRef<string | null>(null);
+  const processingRef = useRef(false);
 
   // Load user's trees that qualify for canopy check-in
   const loadTrees = useCallback(async () => {
