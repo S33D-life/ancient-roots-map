@@ -30,6 +30,13 @@ interface GoldenDreamRoom {
 
 const goldenDreamRooms: GoldenDreamRoom[] = [
   {
+    id: "encounter-economy",
+    title: "Encounter Economy",
+    description: "The deeper philosophy of S33D",
+    icon: Leaf,
+    internal: true,
+  },
+  {
     id: "roadmap",
     title: "Living Roadmap",
     description: "The evolving S33D ecosystem",
