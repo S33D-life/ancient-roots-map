@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { BookOpen, Cherry, Archive, Map } from "lucide-react";
+import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
@@ -16,6 +16,7 @@ import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
 const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
+const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
 
 interface GoldenDreamRoom {
   id: string;
