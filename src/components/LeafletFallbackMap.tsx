@@ -3427,7 +3427,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   return (
     <div className={`${className || "absolute inset-0"} ${groveViewActive ? "grove-view-active" : ""}`} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
-      <style>{LITE_CSS}</style>
+      {/* CSS now loaded via @/styles/map-markers.css import */}
 
       {/* Search */}
       <LiteMapSearch
