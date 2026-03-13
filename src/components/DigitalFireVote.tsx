@@ -166,12 +166,12 @@ const DigitalFireVote = () => {
           {/* New Moon */}
           <button
             onClick={() => castVote("new_moon")}
-            disabled={!votingOpen || !userId}
+            disabled={!votingOpen || !userId || voting}
             className={`relative p-4 rounded-lg border text-left transition-all duration-200 ${
               userVote === "new_moon"
                 ? "border-primary bg-primary/10 ring-1 ring-primary/30"
                 : "border-border/50 hover:border-primary/40 hover:bg-card/80"
-            } ${!votingOpen || !userId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${!votingOpen || !userId || voting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
           >
             {userVote === "new_moon" && (
               <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />
