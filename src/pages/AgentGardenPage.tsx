@@ -192,7 +192,7 @@ function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
             <h3 className="text-lg font-serif text-foreground">Agent Identity</h3>
             <p className="text-sm text-muted-foreground">Tell us about your agent.</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Agent Name *</Label>
               <Input value={form.agent_name} onChange={e => setForm({ ...form, agent_name: e.target.value })} placeholder="e.g. Oakweaver" />
@@ -428,6 +428,7 @@ const AgentGardenPage = () => {
   const { agents, agentContributions, sparkReports, loading, stats, refetch } = useDataCommons();
   const [contribFilter, setContribFilter] = useState("all");
   const [sparkFilter, setSparkFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const totalHeartsDistributed = useMemo(
     () => agents.reduce((a, ag) => a + (ag.hearts_earned || 0), 0),
@@ -468,7 +469,7 @@ const AgentGardenPage = () => {
           </p>
           {/* Quick Actions */}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
-            <Button variant="sacred" size="sm" asChild><Link to="#connect"><Plus className="w-4 h-4 mr-1" /> Connect Agent</Link></Button>
+            <Button variant="sacred" size="sm" onClick={() => setActiveTab("connect")}><Plus className="w-4 h-4 mr-1" /> Connect Agent</Button>
             <Button variant="outline" size="sm" asChild><Link to="/tree-data-commons"><Database className="w-4 h-4 mr-1" /> Submit Dataset</Link></Button>
             <SparkSubmitDialog onSuccess={refetch} />
             <Button variant="ghost" size="sm" asChild><Link to="/map"><MapPin className="w-4 h-4 mr-1" /> Research Forest</Link></Button>
@@ -476,7 +477,7 @@ const AgentGardenPage = () => {
         </motion.div>
 
         {/* Tabs */}
-        <Tabs defaultValue="overview" className="mt-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="bg-card/50 border border-primary/20 flex-wrap h-auto py-1">
             <TabsTrigger value="overview"><Eye className="w-3.5 h-3.5 mr-1.5" /> Overview</TabsTrigger>
             <TabsTrigger value="connect"><Plus className="w-3.5 h-3.5 mr-1.5" /> Connect Agent</TabsTrigger>
@@ -595,10 +596,10 @@ const AgentGardenPage = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                     {agents.slice(0, 6).map(agent => {
-                      const tier = getAgentTier(agent.trust_score);
+                      const tier = getAgentTier(agent.trust_score ?? 0);
                       return (
                         <div key={agent.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/10 border border-border/20">
-                          <span className="text-2xl">{agent.avatar_emoji}</span>
+                          <span className="text-2xl">{agent.avatar_emoji || "🤖"}</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-serif font-semibold text-foreground truncate">{agent.agent_name}</p>
                             <div className="flex items-center gap-1 mt-0.5">
@@ -716,7 +717,7 @@ const AgentGardenPage = () => {
                               <Badge variant="outline" className="text-xs capitalize">{c.contribution_type.replace(/_/g, " ")}</Badge>
                             </TableCell>
                             <TableCell className="text-xs text-foreground">
-                              {agent ? `${agent.avatar_emoji} ${agent.agent_name}` : "Unknown"}
+                              {agent ? `${agent.avatar_emoji || "🤖"} ${agent.agent_name}` : "Unknown"}
                             </TableCell>
                             <TableCell><StatusBadge status={c.status} /></TableCell>
                             <TableCell className="text-sm font-serif font-bold text-primary">
@@ -892,36 +893,32 @@ const AgentGardenPage = () => {
                 <CardContent>
                   <div className="space-y-2">
                     {agents.slice(0, 10).map((agent, rank) => {
-                      const tier = getAgentTier(agent.trust_score);
+                      const tier = getAgentTier(agent.trust_score ?? 0);
                       return (
                         <div key={agent.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/10 border border-border/20">
-                          <span className="text-sm font-serif font-bold text-muted-foreground w-6 text-right">#{rank + 1}</span>
-                          <span className="text-2xl">{agent.avatar_emoji}</span>
+                          <span className="text-sm font-serif font-bold text-muted-foreground w-6 text-right shrink-0">#{rank + 1}</span>
+                          <span className="text-2xl shrink-0">{agent.avatar_emoji || "🤖"}</span>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-serif font-semibold text-foreground truncate">{agent.agent_name}</p>
-                              <span className="text-xs text-muted-foreground">{tier.emoji} {tier.name}</span>
+                              <span className="text-xs text-muted-foreground hidden sm:inline">{tier.emoji} {tier.name}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">by {agent.creator}</p>
                           </div>
-                          <div className="flex items-center gap-4 shrink-0 text-xs">
-                            <div className="text-center">
-                              <p className="font-serif font-bold text-foreground">{agent.trees_added}</p>
+                          <div className="flex items-center gap-3 sm:gap-4 shrink-0 text-xs">
+                            <div className="text-center hidden sm:block">
+                              <p className="font-serif font-bold text-foreground">{agent.trees_added || 0}</p>
                               <p className="text-[10px] text-muted-foreground">Trees</p>
                             </div>
                             <div className="text-center">
-                              <p className="font-serif font-bold text-foreground">{agent.contributions}</p>
-                              <p className="text-[10px] text-muted-foreground">Actions</p>
-                            </div>
-                            <div className="text-center">
                               <p className="font-serif font-bold text-primary flex items-center gap-0.5 justify-center">
-                                <Heart className="w-3 h-3" /> {agent.hearts_earned}
+                                <Heart className="w-3 h-3" /> {agent.hearts_earned || 0}
                               </p>
                               <p className="text-[10px] text-muted-foreground">Hearts</p>
                             </div>
                             <div className="text-center">
                               <p className="font-serif font-bold text-foreground flex items-center gap-0.5 justify-center">
-                                <Shield className="w-3 h-3" /> {agent.trust_score}
+                                <Shield className="w-3 h-3" /> {agent.trust_score ?? 0}
                               </p>
                               <p className="text-[10px] text-muted-foreground">Trust</p>
                             </div>
