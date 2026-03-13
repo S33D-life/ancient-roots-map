@@ -162,7 +162,8 @@ const TetolHomePage = () => {
             {/* S33D gateway node */}
             <button
               onClick={() => handleItemClick("/s33d")}
-              className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full"
+              className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full transition-all duration-200"
+              style={activeNode === "/s33d" ? { transform: "scale(1.08)", filter: "brightness(1.3)" } : {}}
             >
               <Sprout
                 className="w-7 h-7 transition-all duration-300 group-hover:scale-110"
