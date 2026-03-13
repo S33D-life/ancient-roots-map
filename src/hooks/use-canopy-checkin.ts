@@ -167,6 +167,8 @@ export function useCanopyCheckIn() {
           });
         }
       }
+    } catch {
+      // Prevent unhandled async errors from bubbling out of geolocation callback
     } finally {
       processingRef.current = false;
     }
