@@ -21,7 +21,6 @@ const HeartwoodLanding = () => {
   const navigate = useNavigate();
 
   const handleRoomSelect = (key: string) => {
-    // Map room grid keys to routes
     const routeMap: Record<string, string> = {
       "staff-room": "/library/staff-room",
       "gallery": "/library/gallery",
@@ -33,7 +32,7 @@ const HeartwoodLanding = () => {
       "ledger": "/library/scrolls",
       "scrolls": "/library/scrolls",
       "rhythms": "/library/rhythms",
-      "vault": "/library/vault",
+      "vault": "/vault",
       "bookshelf": "/library/bookshelf",
       "press": "/press",
       "tree-resources": "/ledger",
