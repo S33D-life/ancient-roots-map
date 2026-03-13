@@ -115,24 +115,37 @@ export function useCanopyCheckIn() {
         // Set cooldown immediately to prevent duplicate calls
         cooldownMapRef.current.set(tree.id, now);
 
-        const { data, error } = await supabase.functions.invoke("canopy-checkin", {
-          body: {
-            action: "checkin",
-            tree_id: tree.id,
-            season_stage: "other",
-            soft_mode: false,
-            has_offering: false,
-            latitude,
-            longitude,
-            accuracy_m: pos.coords.accuracy,
-          },
-        });
+        let data: unknown = null;
+        let invokeError: unknown = null;
 
-        if (error) {
-          // Stop retrying if daily cap reached
-          const body = data as { reason?: string } | null;
-          if (body?.reason === 'user_daily_cap' || body?.reason === 'tree_daily_cap') {
+        try {
+          const response = await supabase.functions.invoke("canopy-checkin", {
+            body: {
+              action: "checkin",
+              tree_id: tree.id,
+              season_stage: "other",
+              soft_mode: false,
+              has_offering: false,
+              latitude,
+              longitude,
+              accuracy_m: pos.coords.accuracy,
+            },
+          });
+          data = response.data;
+          invokeError = response.error;
+        } catch (error) {
+          invokeError = error;
+        }
+
+        if (invokeError) {
+          const reason = await getRejectReason(data, invokeError);
+          if (reason === "user_daily_cap" || reason === "tree_daily_cap") {
             dailyCappedRef.current = true;
+            if (watchIdRef.current !== null) {
+              navigator.geolocation.clearWatch(watchIdRef.current);
+              watchIdRef.current = null;
+            }
+            setActive(false);
           }
           continue;
         }
