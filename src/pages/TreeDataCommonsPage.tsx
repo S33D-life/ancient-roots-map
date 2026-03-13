@@ -259,7 +259,7 @@ const TreeDataCommonsPage = () => {
   });
 
   return (
-    <PageShell>
+    <>
       <Header />
       <main className="container max-w-6xl mx-auto px-4 pb-32" style={{ paddingTop: "var(--content-top)" }}>
         {/* ── Hero ── */}
