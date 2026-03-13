@@ -78,6 +78,9 @@ const ROOT_THREADS_LAYER = 'root-threads-layer';
 const CREATOR_PATHS_SOURCE = 'creator-paths-source';
 const CREATOR_PATHS_LAYER = 'creator-paths-layer';
 const CREATOR_PATHS_GLOW_LAYER = 'creator-paths-glow-layer';
+const ROOT_THREAD_MAX_KM = 80;
+const GROVE_FILL_ID = 'grove-boundary-fill';
+const GROVE_LINE_ID = 'grove-boundary-line';
 
 // Temporary recovery switch: keep advanced Leaflet stack available, but disabled
 // until bare-map reliability is confirmed across iOS/webviews.
