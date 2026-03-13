@@ -70,4 +70,6 @@ export const ROUTES = {
   VALUE_TREE_ECONOMY: "/value-tree?tab=economy",
   /** Tree Data Commons */
   TREE_DATA_COMMONS: "/tree-data-commons",
+  /** Agent Garden */
+  AGENT_GARDEN: "/agent-garden",
 } as const;
