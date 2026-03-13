@@ -62,7 +62,7 @@ function buildMapWhispers(ctx: MapContext, onAction: (type: string) => void): Wh
 
   // Generic map whispers
   pool.push(
-    { kind: "landscape", message: "Long-press the map to mark a new encounter with an ancient friend." },
+    { kind: "landscape", message: "Use the 'Find Me & Add Tree' button to mark a new encounter with an ancient friend." },
     { kind: "journey", message: "Every journey begins with a single tree. Where will yours lead?" },
   );
 

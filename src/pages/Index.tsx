@@ -129,6 +129,8 @@ const Index = () => {
         </Link>
       </div>
       <Footer />
+      {/* Bottom safe area spacer for standalone PWA mode */}
+      <div style={{ paddingBottom: 'var(--safe-bottom)' }} />
     </div>
   );
 };

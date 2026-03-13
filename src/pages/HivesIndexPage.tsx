@@ -221,7 +221,7 @@ const HivesIndexPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-7xl">
+      <div className="container mx-auto px-4 pb-20 max-w-7xl" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Hero header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="text-3xl md:text-4xl font-serif text-primary tracking-wide mb-2">Species Hives</h1>
