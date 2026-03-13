@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
@@ -395,6 +395,42 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-3 font-serif">Non-Fungible Twig</h3>
         <WalletConnect />
       </div>
+
+      {/* Force Update */}
+      <Card className="border-border/50 bg-card/60 backdrop-blur">
+        <CardContent className="p-6 space-y-3">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-serif">App Version</h3>
+          </div>
+          <p className="text-xs text-muted-foreground font-serif">
+            If the app feels stale or behaves unexpectedly, force a refresh to pull the latest version.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 font-serif text-xs"
+            onClick={() => {
+              // Clear service worker caches and reload
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                  registrations.forEach(r => r.unregister());
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  names.forEach(name => caches.delete(name));
+                });
+              }
+              // Small delay to allow cache clearing before reload
+              setTimeout(() => window.location.reload(), 300);
+            }}
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Get Latest Version
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Sign Out */}
       <div className="pt-4 border-t border-border/30">

@@ -60,6 +60,7 @@ const DigitalFireVote = () => {
   const [userVote, setUserVote] = useState<string | null>(null);
   const [totals, setTotals] = useState({ new_moon: 0, full_moon: 0 });
   const [loading, setLoading] = useState(true);
+  const [voting, setVoting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   // Cutoff: 24h before the earlier event
@@ -115,25 +116,28 @@ const DigitalFireVote = () => {
       return;
     }
 
-    if (userVote) {
-      // Update
-      const { error } = await supabase
-        .from("digital_fire_votes")
-        .update({ moon_event: choice, updated_at: new Date().toISOString() })
-        .eq("user_id", userId)
-        .eq("event_date", eventDate);
-      if (error) { toast.error("Could not update vote"); return; }
-    } else {
-      // Insert
-      const { error } = await supabase
-        .from("digital_fire_votes")
-        .insert({ user_id: userId, moon_event: choice, event_date: eventDate });
-      if (error) { toast.error("Could not cast vote"); return; }
-    }
+    setVoting(true);
+    try {
+      if (userVote) {
+        const { error } = await supabase
+          .from("digital_fire_votes")
+          .update({ moon_event: choice, updated_at: new Date().toISOString() })
+          .eq("user_id", userId)
+          .eq("event_date", eventDate);
+        if (error) { toast.error("Could not update vote"); return; }
+      } else {
+        const { error } = await supabase
+          .from("digital_fire_votes")
+          .insert({ user_id: userId, moon_event: choice, event_date: eventDate });
+        if (error) { toast.error("Could not cast vote"); return; }
+      }
 
-    setUserVote(choice);
-    toast.success("Your voice has been heard 🔥");
-    await fetchVotes(userId);
+      setUserVote(choice);
+      toast.success("Your voice has been heard 🔥");
+      await fetchVotes(userId);
+    } finally {
+      setVoting(false);
+    }
   };
 
   const total = totals.new_moon + totals.full_moon;
@@ -162,12 +166,12 @@ const DigitalFireVote = () => {
           {/* New Moon */}
           <button
             onClick={() => castVote("new_moon")}
-            disabled={!votingOpen || !userId}
+            disabled={!votingOpen || !userId || voting}
             className={`relative p-4 rounded-lg border text-left transition-all duration-200 ${
               userVote === "new_moon"
                 ? "border-primary bg-primary/10 ring-1 ring-primary/30"
                 : "border-border/50 hover:border-primary/40 hover:bg-card/80"
-            } ${!votingOpen || !userId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${!votingOpen || !userId || voting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
           >
             {userVote === "new_moon" && (
               <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />
@@ -182,12 +186,12 @@ const DigitalFireVote = () => {
           {/* Full Moon */}
           <button
             onClick={() => castVote("full_moon")}
-            disabled={!votingOpen || !userId}
+            disabled={!votingOpen || !userId || voting}
             className={`relative p-4 rounded-lg border text-left transition-all duration-200 ${
               userVote === "full_moon"
                 ? "border-primary bg-primary/10 ring-1 ring-primary/30"
                 : "border-border/50 hover:border-primary/40 hover:bg-card/80"
-            } ${!votingOpen || !userId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${!votingOpen || !userId || voting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
           >
             {userVote === "full_moon" && (
               <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />

@@ -13,6 +13,8 @@ All colors MUST be HSL.
     --bottom-nav-height: 3.5rem;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+    /* Computed content offset — use as padding-top for pages below fixed header */
+    --content-top: calc(var(--header-height) + var(--safe-top) + 1rem);
 
     /* Ancient forest mystical theme - deep greens and golden amber */
     --background: 80 15% 10%;
@@ -209,6 +211,11 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Safe content inset below fixed header — use on page <main> elements */
+  .pt-content {
+    padding-top: var(--content-top);
+  }
+
   .text-mystical {
     color: hsl(var(--mystical-glow));
     text-shadow: 0 0 20px hsl(var(--mystical-glow) / 0.5);

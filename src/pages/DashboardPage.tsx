@@ -444,7 +444,7 @@ const DashboardPage = () => {
       `}</style>
       <Header />
 
-      <main className="container mx-auto px-4 pt-24 pb-20 relative z-10">
+      <main className="container mx-auto px-4 pb-20 relative z-10" style={{ paddingTop: 'var(--content-top)' }}>
         <PageShell>
         <div className="max-w-5xl mx-auto">
           {/* Page header */}

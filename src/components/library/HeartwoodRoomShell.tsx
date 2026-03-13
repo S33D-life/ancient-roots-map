@@ -22,7 +22,7 @@ const HeartwoodRoomShell = ({ roomLabel, children }: HeartwoodRoomShellProps) =>
       <HeartwoodBackground />
       <Header />
 
-      <main className="relative z-10 container mx-auto px-4 pt-28 pb-12">
+      <main className="relative z-10 container mx-auto px-4 pb-12" style={{ paddingTop: 'calc(var(--content-top) + 0.5rem)' }}>
         {/* Breadcrumb — calm, contextual */}
         <div className="flex items-center justify-between mb-6">
           <nav
