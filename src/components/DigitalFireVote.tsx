@@ -60,6 +60,7 @@ const DigitalFireVote = () => {
   const [userVote, setUserVote] = useState<string | null>(null);
   const [totals, setTotals] = useState({ new_moon: 0, full_moon: 0 });
   const [loading, setLoading] = useState(true);
+  const [voting, setVoting] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   // Cutoff: 24h before the earlier event
