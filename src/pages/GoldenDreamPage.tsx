@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { BookOpen, Cherry, Archive, Map } from "lucide-react";
+import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTheme } from "next-themes";
@@ -16,6 +16,7 @@ import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
 const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
+const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
 
 interface GoldenDreamRoom {
   id: string;
@@ -28,6 +29,13 @@ interface GoldenDreamRoom {
 }
 
 const goldenDreamRooms: GoldenDreamRoom[] = [
+  {
+    id: "encounter-economy",
+    title: "Encounter Economy",
+    description: "The deeper philosophy of S33D",
+    icon: Leaf,
+    internal: true,
+  },
   {
     id: "roadmap",
     title: "Living Roadmap",
@@ -87,6 +95,33 @@ const GoldenDreamPage = () => {
           title={room?.title}
         />
       </FullscreenShell>
+    );
+  }
+
+  // Encounter Economy room
+  if (activeRoom === "encounter-economy") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header />
+        <main className="pt-28 pb-8 px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setActiveRoom(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ← Back to Golden Dream
+              </Button>
+            </div>
+            <Suspense fallback={<div className="py-12 text-center text-muted-foreground text-sm">Breathing…</div>}>
+              <EncounterEconomyManifesto />
+            </Suspense>
+          </div>
+        </main>
+        <Footer />
+      </div>
     );
   }
 

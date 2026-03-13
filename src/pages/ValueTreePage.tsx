@@ -19,6 +19,8 @@ import GovernanceProposalsList from "@/components/governance/GovernanceProposals
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
+const LivingValueCycle = lazy(() => import("@/components/economy/LivingValueCycle"));
+const YourPlaceInCycle = lazy(() => import("@/components/economy/YourPlaceInCycle"));
 const VaultHeartLedger = lazy(() => import("@/components/dashboard/vault/VaultHeartLedger"));
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 const EcosystemMomentum = lazy(() => import("@/components/EcosystemMomentum"));
@@ -776,6 +778,18 @@ const ValueTreePage = () => {
 
           <TabsContent value="economy">
             <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
+              {/* Living Value Cycle — the encounter economy map */}
+              <div className="mb-10">
+                <LivingValueCycle />
+              </div>
+
+              {/* Your Place in the Cycle — personal progress */}
+              {currentUserId && (
+                <div className="mb-8">
+                  <YourPlaceInCycle userId={currentUserId} />
+                </div>
+              )}
+
               {/* Your Roots — personal economy position */}
               {currentUserId && (
                 <div className="mb-8 space-y-4">

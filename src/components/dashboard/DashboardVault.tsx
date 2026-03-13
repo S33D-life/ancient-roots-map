@@ -135,7 +135,7 @@ const DashboardVault = ({ userId }: Props) => {
           <p className="text-[11px] text-muted-foreground font-serif">
             {wallet.activeStaff
               ? `Anchored to ${wallet.activeStaff.id} · ${wallet.activeStaff.species}`
-              : "Your living treasury of Hearts, Seeds, and Tree Bonds"
+              : "The inner chamber where encounters become lasting value"
             }
           </p>
         </div>
