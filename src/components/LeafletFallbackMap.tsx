@@ -61,6 +61,9 @@ import {
   buildRootstonePopupHtml,
   type ResearchTree,
 } from "@/utils/mapPopups";
+import { applySeasonalTint } from "@/utils/mapSeasonalTint";
+import { markTreeVisited, applyVisitedClass } from "@/utils/mapVisitedTracker";
+import { setupPopupActions } from "@/utils/mapWishHandler";
 
 interface Tree {
   id: string;
@@ -891,6 +894,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     window.addEventListener('resize', onResize);
     const originalCleanup = () => window.removeEventListener('resize', onResize);
 
+    // Seasonal atmosphere tint (CSS-only, zero perf cost)
+    const cleanupSeasonalTint = containerRef.current ? applySeasonalTint(containerRef.current) : () => {};
+
+    // Popup action delegation (wish ⭐ + share ↗️)
+    const cleanupPopupActions = containerRef.current ? setupPopupActions(containerRef.current) : () => {};
+
+    // Track visited markers on popup open
+    map.on("popupopen", (e: any) => {
+      const marker = e.popup?._source;
+      if (marker?._treeId) {
+        markTreeVisited(marker._treeId, marker._icon);
+      }
+    });
+
+    // Apply visited class when markers are added to the map
+    map.on("layeradd", (e: any) => {
+      const layer = e.layer;
+      if (layer?._treeId && layer._icon) {
+        applyVisitedClass(layer._treeId, layer._icon);
+      }
+    });
+
     // Deep-link: fly to coordinates or w3w if provided
     let deepLinked = false;
     if (initialLat !== undefined && initialLng !== undefined) {
@@ -946,6 +971,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return () => {
       clearTimeout(saveTimer);
       map.off("moveend", onMoveEndSave);
+      cleanupSeasonalTint();
+      cleanupPopupActions();
       originalCleanup();
       map.remove();
       mapRef.current = null;
@@ -1676,7 +1703,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       (marker as any)._treeId = tree.id;
       (marker as any)._treeName = tree.name;
       (marker as any)._whisperCount = wCount;
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0), {
+      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0, userLatLng), {
         className: "atlas-leaflet-popup",
         maxWidth: 280,
         closeButton: true,
@@ -3327,6 +3354,39 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       requestAnimationFrame(expandRipple);
     }
   }, [geo]);
+
+  // Guided first tap — after onboarding dismissal, auto-locate and pulse nearest markers
+  useEffect(() => {
+    const handler = () => {
+      // Trigger locate
+      handleFindMe().then(() => {
+        // After locate completes, pulse the 3 nearest markers
+        setTimeout(() => {
+          const map = mapRef.current;
+          const cluster = clusterRef.current;
+          if (!map || !cluster || !userLatLng) return;
+
+          const nearest = [...filteredTrees]
+            .map(t => ({ ...t, dist: haversineKm(userLatLng[0], userLatLng[1], t.latitude, t.longitude) }))
+            .sort((a, b) => a.dist - b.dist)
+            .slice(0, 3);
+
+          cluster.eachLayer((layer: any) => {
+            if (nearest.some(t => t.id === layer._treeId)) {
+              const el = layer._icon;
+              if (el) {
+                const wrap = el.closest(".leaflet-tree-marker") || el;
+                wrap.classList.add("marker-guided");
+                setTimeout(() => wrap.classList.remove("marker-guided"), 6000);
+              }
+            }
+          });
+        }, 2000);
+      });
+    };
+    window.addEventListener("s33d-onboarding-complete", handler);
+    return () => window.removeEventListener("s33d-onboarding-complete", handler);
+  }, [handleFindMe, filteredTrees, userLatLng]);
 
   const handleCompassReset = useCallback(() => {
     if (!mapRef.current) return;

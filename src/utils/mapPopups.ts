@@ -4,6 +4,7 @@
  */
 import { escapeHtml } from "@/utils/escapeHtml";
 import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/treeCardTypes";
+import { haversineKm } from "@/utils/mapGeometry";
 import type { ExternalTreeCandidate } from "@/utils/externalTreeSources";
 import { getSourceById } from "@/utils/externalTreeSources";
 import type { Rootstone } from "@/data/rootstones";
@@ -12,8 +13,9 @@ import type { Rootstone } from "@/data/rootstones";
 const POPUP_CACHE = new Map<string, string>();
 const MAX_POPUP_CACHE = 200;
 
-function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean): string {
-  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}`;
+function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null): string {
+  const dKey = distKm != null ? Math.round(distKm * 10) : "x";
+  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}`;
 }
 
 export interface PopupTree {
@@ -34,11 +36,13 @@ export function buildPopupHtml(
   photoUrl?: string,
   birdsongCount?: number,
   whisperCount?: number,
+  userLatLng?: [number, number] | null,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
 
-  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl);
+  const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
+  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
@@ -85,11 +89,16 @@ export function buildPopupHtml(
 
   const whisperHref = `/tree/${encodeURIComponent(tree.id)}?whisper=1&context=map`;
 
+  const wishBtnId = `wish-${tree.id}`;
+
   const html = `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.4);overflow:hidden;animation:popIn .2s ease-out;">
     ${thumbnail}
     <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;position:relative;">
-      <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="position:absolute;top:0;right:0;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.35);background:hsla(42,25%,14%,0.75);color:hsl(42,70%,62%);text-decoration:none;font-size:12px;backdrop-filter:blur(4px);">🌬️</a>
-      <h3 style="margin:0;padding-right:34px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
+      <div style="position:absolute;top:0;right:0;display:flex;gap:4px;">
+        <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Save to wishes" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.25);background:hsla(42,25%,14%,0.75);color:hsl(42,50%,55%);font-size:14px;cursor:pointer;backdrop-filter:blur(4px);transition:all .2s;">⭐</button>
+        <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.35);background:hsla(42,25%,14%,0.75);color:hsl(42,70%,62%);text-decoration:none;font-size:12px;backdrop-filter:blur(4px);">🌬️</a>
+      </div>
+      <h3 style="margin:0;padding-right:68px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},45%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>
       <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
         ${ageText ? `<span>${ageText}</span>` : ""}
@@ -97,7 +106,17 @@ export function buildPopupHtml(
         ${birdsongLine}
         ${whisperLine}
       </div>
-      ${tree.what3words ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>` : ""}
+      ${distKm != null
+        ? `<p style="margin:0;font-size:10px;color:hsl(120,35%,55%);font-family:sans-serif;display:flex;align-items:center;gap:4px;">
+            <span>📍</span>
+            <span>~${distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
+            <span style="color:hsl(0,0%,48%);">·</span>
+            <span style="color:hsl(0,0%,48%);">~${distKm < 1 ? `${Math.max(1, Math.round(distKm * 1000 / 80))} min walk` : `${Math.round(distKm * 12)} min walk`}</span>
+          </p>`
+        : tree.what3words
+          ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>`
+          : ""
+      }
       ${desc}
     </div>
     <div style="padding:0 14px 10px;display:flex;gap:6px;">
@@ -107,7 +126,7 @@ export function buildPopupHtml(
       <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(120,30%,30%,0.15);border:1px solid hsla(120,40%,40%,0.2);border-radius:8px;" title="Add Photo">📷</a>
       <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(200,30%,30%,0.15);border:1px solid hsla(200,40%,40%,0.2);border-radius:8px;" title="Add Song">🎵</a>
       <a href="/tree/${encodeURIComponent(tree.id)}?add=birdsong" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(180,30%,30%,0.15);border:1px solid hsla(180,40%,40%,0.2);border-radius:8px;" title="Record Birdsong">🐦</a>
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=story" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;text-decoration:none;background:hsla(280,30%,30%,0.15);border:1px solid hsla(280,40%,40%,0.2);border-radius:8px;" title="Add Musing">💭</a>
+      <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;font-size:15px;background:hsla(42,30%,30%,0.15);border:1px solid hsla(42,40%,40%,0.2);border-radius:8px;cursor:pointer;color:inherit;" title="Share tree link">↗️</button>
     </div>
   </div>`;
 

@@ -26,6 +26,8 @@ const MapOnboardingRitual = () => {
   const dismiss = () => {
     setVisible(false);
     try { localStorage.setItem(RITUAL_SEEN_KEY, "1"); } catch {}
+    // Signal the map to auto-locate and pulse nearest markers
+    window.dispatchEvent(new CustomEvent("s33d-onboarding-complete"));
   };
 
   const steps = [
