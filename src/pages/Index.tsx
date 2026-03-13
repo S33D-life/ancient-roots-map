@@ -72,11 +72,11 @@ const Index = () => {
 
         {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
         <Suspense fallback={null}>
-          {/* ── CANOPY — Council of Life ── */}
-          <CanopySection />
-
           {/* ── TRUNK — HeARTwood Library ── */}
           <TrunkSection />
+
+          {/* ── CANOPY — Council of Life ── */}
+          <CanopySection />
 
           {/* ── GROUND — Ancient Friend Landing (scroll anchor) ── */}
           <GroundSection />
