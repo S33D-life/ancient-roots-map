@@ -269,26 +269,26 @@ const App = () => {
             </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<TetolHomePage />} />
-                <Route path="/s33d" element={<S33dGatewayPage />} />
+                <Route path="/" element={realm(<TetolHomePage />, "tetol-out")} />
+                <Route path="/s33d" element={realm(<S33dGatewayPage />, "seed")} />
                 <Route path="/ancient-friends" element={<Navigate to="/map" replace />} />
                 <Route path="/heartwood" element={<Navigate to="/library" replace />} />
                 <Route path="/your-golden-dream" element={<Navigate to="/golden-dream" replace />} />
-                <Route path="/map" element={<MapPage />} />
-                <Route path="/add-tree" element={<AddTreePage />} />
-                <Route path="/atlas" element={<WorldAtlasPage />} />
-                <Route path="/tree/research/:id" element={<ResearchTreeDetailPage />} />
-                <Route path="/tree/:id" element={<TreeDetailPage />} />
+                <Route path="/map" element={realm(<MapPage />, "roots")} />
+                <Route path="/add-tree" element={realm(<AddTreePage />, "roots")} />
+                <Route path="/atlas" element={realm(<WorldAtlasPage />, "roots")} />
+                <Route path="/tree/research/:id" element={realm(<ResearchTreeDetailPage />, "roots")} />
+                <Route path="/tree/:id" element={realm(<TreeDetailPage />, "roots")} />
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
-                <Route path="/groves" element={<GrovesPage />} />
-                <Route path="/library" element={<GalleryPage />} />
-                <Route path="/library/:room" element={<HeartwoodRoomPage />} />
-                <Route path="/ledger" element={<TreeLedgerPage />} />
+                <Route path="/groves" element={realm(<GrovesPage />, "roots")} />
+                <Route path="/library" element={realm(<GalleryPage />, "trunk")} />
+                <Route path="/library/:room" element={realm(<HeartwoodRoomPage />, "trunk")} />
+                <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/golden-dream" element={<GoldenDreamPage />} />
-                <Route path="/council-of-life" element={<CouncilOfLifePage />} />
+                <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
+                <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
                 <Route path="/assets" element={<AssetsPage />} />
                 <Route path="/vault" element={<VaultPage />} />
                 {/* /heartwood/vault removed — consolidated to /vault */}
