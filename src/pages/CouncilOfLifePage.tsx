@@ -338,8 +338,11 @@ const CouncilOfLifePage = () => {
           {/* Loop-closure: cross-links to related features */}
           <div className="mt-10 rounded-xl border border-border/20 bg-card/30 p-4 space-y-3">
             <h3 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">
-              Continue your journey
+              Continue the cycle
             </h3>
+            <p className="text-[10px] text-muted-foreground/40 font-serif">
+              Council → Contribution → Harvest → Exchange → New Encounters
+            </p>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={() => navigate("/value-tree")} className="loop-card font-serif">
                 <span className="text-primary">❤️ Value Tree</span>
