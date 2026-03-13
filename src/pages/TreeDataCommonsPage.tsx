@@ -419,7 +419,7 @@ const TreeDataCommonsPage = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       {layer.active ? (
-                        <Badge variant="outline" className="text-xs bg-emerald-900/30 text-emerald-300 border-emerald-700/40">Active</Badge>
+                        <Badge variant="outline" className="text-xs bg-primary/20 text-primary border-primary/40">Active</Badge>
                       ) : (
                         <Badge variant="outline" className="text-xs">Coming Soon</Badge>
                       )}

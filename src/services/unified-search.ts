@@ -94,7 +94,7 @@ const HEARTWOOD_ROOMS: SearchResult[] = [
   { id: "room-gallery", type: "heartwood_room", title: "🗺 Map Room", subtitle: "Ancient Friends Atlas", url: "/map", keywords: ["map", "atlas", "gallery", "explore"], score: 0, emoji: "🗺" },
   { id: "room-music", type: "heartwood_room", title: "🎵 Music Room", subtitle: "Tree Radio", url: "/library", keywords: ["music", "song", "radio", "listen"], score: 0, emoji: "🎵" },
   { id: "room-seed-cellar", type: "heartwood_room", title: "📦 Seed Cellar", subtitle: "Living Data Archive", url: "/library", keywords: ["seed", "cellar", "data", "archive", "export"], score: 0, emoji: "📦" },
-  { id: "room-resources", type: "heartwood_room", title: "📖 Tree Resources", subtitle: "Project Directory", url: "/library", keywords: ["resource", "directory", "project", "link"], score: 0, emoji: "📖" },
+  { id: "room-resources", type: "heartwood_room", title: "🔭 Tree Data Commons", subtitle: "Knowledge Observatory", url: "/tree-data-commons", keywords: ["resource", "directory", "data", "commons", "observatory", "source", "dataset"], score: 0, emoji: "🔭" },
   { id: "room-ledger", type: "heartwood_room", title: "📜 Scrolls & Ledger", subtitle: "Council Records", url: "/library", keywords: ["ledger", "scroll", "record", "stat"], score: 0, emoji: "📜" },
 ];
 

@@ -24,7 +24,7 @@ const COMMUNITY: Room[] = [
   { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",               accentH: 260, particle: "wave"       },
   { key: "seed-cellar",   label: "📦 Seed Cellar",      desc: "Living Data Archive",      accentH: 30,  particle: "seed"       },
   { key: "rhythms",       label: "🌿 Rhythms",          desc: "Seasonal Cycle Markets",   accentH: 150, particle: "leaf"       },
-  { key: "tree-resources",label: "📖 Tree Resources",   desc: "Project Directory",        accentH: 160, particle: "page"       },
+  { key: "tree-data-commons", label: "🔭 Tree Data Commons", desc: "Knowledge Observatory", accentH: 160, particle: "page" },
   { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",          accentH: 42,  particle: "shimmer"    },
   { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
 ];

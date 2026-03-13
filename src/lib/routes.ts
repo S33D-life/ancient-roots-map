@@ -68,4 +68,6 @@ export const ROUTES = {
   STAFF: (code: string) => `/staff/${code}` as const,
   /** Value Tree — Living Economy */
   VALUE_TREE_ECONOMY: "/value-tree?tab=economy",
+  /** Tree Data Commons */
+  TREE_DATA_COMMONS: "/tree-data-commons",
 } as const;
