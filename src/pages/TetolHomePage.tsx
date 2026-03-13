@@ -88,6 +88,7 @@ const TetolHomePage = () => {
   return (
     <div className="min-h-screen flex flex-col relative">
       <Header />
+      <BetaGardenBanner />
 
       <main
         className="flex-1 flex flex-col items-center relative overflow-hidden pt-content"
