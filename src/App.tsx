@@ -140,6 +140,7 @@ const WandererProfilePage = lazyImportWithRetry(() => import("./pages/WandererPr
 const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/LivingForestRoadmapPage"), "roadmap");
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
 const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"), "companion");
+const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCommonsPage"), "tree-data-commons");
 
 const queryClient = new QueryClient({
   defaultOptions: {
