@@ -28,6 +28,7 @@ const ROOM_ALIASES: Record<string, string> = {
   "ancient-friends": "gallery",
   "resources": "creators-path",
   "tree-resources": "creators-path",
+  "tree-data-commons": "redirect:/tree-data-commons",
   "wishing-tree": "wishlist",
   "ledger": "scrolls",
   "volumes": "scrolls",
