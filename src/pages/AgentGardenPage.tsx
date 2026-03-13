@@ -192,7 +192,7 @@ function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
             <h3 className="text-lg font-serif text-foreground">Agent Identity</h3>
             <p className="text-sm text-muted-foreground">Tell us about your agent.</p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Agent Name *</Label>
               <Input value={form.agent_name} onChange={e => setForm({ ...form, agent_name: e.target.value })} placeholder="e.g. Oakweaver" />
