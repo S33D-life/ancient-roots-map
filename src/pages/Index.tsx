@@ -1,6 +1,4 @@
 import { useCallback, lazy, Suspense } from "react";
-import { Link } from "react-router-dom";
-import { TreeDeciduous } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import S33dEntrance from "@/components/S33dEntrance";
@@ -15,6 +13,7 @@ import { useTimeOfDay } from "@/hooks/use-time-of-day";
 import { useSeasonalTheme } from "@/hooks/use-seasonal-theme";
 import { useNetworkPulse } from "@/hooks/use-network-pulse";
 import { useTreeVitality } from "@/hooks/use-tree-vitality";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
 
 // Lazy-load below-the-fold sections to reduce initial bundle
 const NetworkPulseOverlay = lazy(() => import("@/components/tree-sections/NetworkPulseOverlay"));
@@ -33,6 +32,13 @@ const IdentitySection = lazy(() => import("@/components/HomeSections").then(m =>
 const ParticipationSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.ParticipationSection })));
 const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
+
+/** Minimal loading shimmer for lazy sections */
+const SectionShimmer = () => (
+  <div className="py-16 flex justify-center">
+    <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary/60 animate-spin" />
+  </div>
+);
 
 const Index = () => {
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
@@ -63,23 +69,27 @@ const Index = () => {
       />
 
       <main className="flex-1" style={{ paddingTop: 'var(--content-top)' }}>
+        {/* Welcome orientation for first-time visitors */}
         <WelcomeBanner />
-        {/* ── Discovery Row — Countries & Hives (moved up for fast access) ── */}
+
+        {/* ── GROUND — Ancient Friend Hero (the first thing you see) ── */}
+        <Suspense fallback={<SectionShimmer />}>
+          <GroundSection />
+        </Suspense>
+
+        {/* ── Discovery shortcuts — Countries & Hives ── */}
         <DiscoveryRow />
 
-        {/* ── CROWN — yOur Golden Dream ── */}
-        <CrownSection />
-
         {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
-        <Suspense fallback={null}>
+        <Suspense fallback={<SectionShimmer />}>
           {/* ── TRUNK — HeARTwood Library ── */}
           <TrunkSection />
 
           {/* ── CANOPY — Council of Life ── */}
           <CanopySection />
 
-          {/* ── GROUND — Ancient Friend Landing (scroll anchor) ── */}
-          <GroundSection />
+          {/* ── CROWN — yOur Golden Dream ── */}
+          <CrownSection />
 
           {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
           <div id="atlas-content" className="relative overflow-hidden">
@@ -106,6 +116,7 @@ const Index = () => {
           </div>
         </Suspense>
       </main>
+
       <Suspense fallback={null}>
         <TetolBridge />
         <ContextualWhisper
@@ -116,21 +127,10 @@ const Index = () => {
           position="bottom-center"
         />
       </Suspense>
-      {/* Gateway return CTA */}
-      <div className="flex justify-center py-10">
-        <Link
-          to="/"
-          className="group flex items-center gap-3 px-8 py-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
-        >
-          <TreeDeciduous className="w-5 h-5 text-primary" />
-          <span className="font-serif text-base text-foreground group-hover:text-primary transition-colors">
-            Enter the Tree
-          </span>
-        </Link>
-      </div>
+
       <Footer />
       {/* Bottom safe area spacer for standalone PWA mode */}
-      <div style={{ paddingBottom: 'var(--safe-bottom)' }} />
+      <div className="shrink-0" style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)' }} />
     </div>
   );
 };
