@@ -14,6 +14,7 @@
  * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
@@ -71,6 +72,26 @@ const FireflyFAB = () => {
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
   const [hovered, setHovered] = useState(false);
+
+  // One-time drag hint
+  const DRAG_HINT_KEY = "s33d_orb_drag_hint_seen";
+  const [showDragHint, setShowDragHint] = useState(() => {
+    try { return !localStorage.getItem(DRAG_HINT_KEY); } catch { return false; }
+  });
+
+  useEffect(() => {
+    if (!showDragHint) return;
+    const timer = setTimeout(() => {
+      setShowDragHint(false);
+      try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
+    }, 6000);
+    const dismiss = () => {
+      setShowDragHint(false);
+      try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
+    };
+    window.addEventListener("pointerdown", dismiss, { once: true });
+    return () => { clearTimeout(timer); window.removeEventListener("pointerdown", dismiss); };
+  }, [showDragHint]);
 
   const isDragging = useRef(false);
   const dragConfirmed = useRef(false);
@@ -156,6 +177,11 @@ const FireflyFAB = () => {
 
     if (!dragConfirmed.current && totalMoved.current >= DRAG_THRESHOLD) {
       dragConfirmed.current = true;
+      // Dismiss drag hint on first real drag
+      if (showDragHint) {
+        setShowDragHint(false);
+        try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
+      }
     }
 
     if (dragConfirmed.current) {
@@ -275,6 +301,37 @@ const FireflyFAB = () => {
           }}
         />
       </button>
+
+      {/* One-time drag hint */}
+      <AnimatePresence>
+        {showDragHint && !anyOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed pointer-events-none"
+            style={{
+              left: xy.x - 120,
+              top: xy.y - 44,
+              zIndex: Z.FLOATING - 1,
+            }}
+          >
+            <span
+              className="inline-block text-[10px] font-serif px-3 py-1.5 rounded-lg whitespace-nowrap"
+              style={{
+                background: "hsl(var(--card) / 0.92)",
+                color: "hsl(var(--muted-foreground))",
+                border: "1px solid hsl(var(--border) / 0.3)",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 2px 12px hsl(var(--primary) / 0.08)",
+              }}
+            >
+              Drag the Orb if it covers something 🍃
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Contextual guidance whispers from TEOTAG */}
       <FireflyGuidance
