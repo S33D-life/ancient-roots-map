@@ -186,7 +186,6 @@ const BioRegionPage = () => {
           <p className="text-muted-foreground text-sm">Bio-region not found.</p>
           <Button variant="sacred" asChild><Link to="/atlas/bio-regions">All Bio-Regions</Link></Button>
         </div>
-        <BottomNav />
       </PageShell>
     );
   }
