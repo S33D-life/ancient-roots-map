@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw } from "lucide-react";
+import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanionSession } from "@/hooks/use-companion-session";
@@ -21,6 +21,7 @@ export default function CompanionController() {
   const [codeInput, setCodeInput] = useState(urlCode);
   const [error, setError] = useState("");
   const [autoJoinAttempted, setAutoJoinAttempted] = useState(false);
+  const [lastAction, setLastAction] = useState<string | null>(null);
 
   const { session, paired, pairTimedOut, roomState, joinSession, sendCommand, disconnect } =
     useCompanionSession({ role: "controller" });
@@ -37,6 +38,34 @@ export default function CompanionController() {
   useEffect(() => {
     if (paired) hapticSuccess();
   }, [paired]);
+
+  // Wrap sendCommand to show action feedback on mobile
+  const sendWithFeedback = useCallback(
+    (cmd: Parameters<typeof sendCommand>[0]) => {
+      sendCommand(cmd);
+      const label =
+        cmd.type === "zoom_in" ? "Zoom in" :
+        cmd.type === "zoom_out" ? "Zoom out" :
+        cmd.type === "zoom_reset" ? "Reset view" :
+        cmd.type === "pan" ? "Pan" :
+        cmd.type === "next" ? "Next" :
+        cmd.type === "previous" ? "Previous" :
+        cmd.type === "toggle_fullscreen" ? "Fullscreen" :
+        cmd.type === "navigate_room" ? `→ ${(cmd as any).room}` :
+        cmd.type === "export_view" ? "Capture" :
+        cmd.type === "open_panel" ? "Open" :
+        cmd.type === "close_panel" ? "Close" :
+        cmd.type === "pointer_move" ? null : // silent
+        cmd.type === "pointer_hide" ? null :
+        cmd.type;
+
+      if (label) {
+        setLastAction(label);
+        setTimeout(() => setLastAction(null), 1200);
+      }
+    },
+    [sendCommand],
+  );
 
   const handleJoin = () => {
     setError("");
@@ -58,23 +87,23 @@ export default function CompanionController() {
   const renderController = () => {
     switch (fallbackState.room) {
       case "map":
-        return <MapController roomState={fallbackState} send={sendCommand} />;
+        return <MapController roomState={fallbackState} send={sendWithFeedback} />;
       case "staff":
-        return <StaffController roomState={fallbackState} send={sendCommand} />;
+        return <StaffController roomState={fallbackState} send={sendWithFeedback} />;
       case "gallery":
       case "tree":
       case "card":
-        return <GalleryController roomState={fallbackState} send={sendCommand} />;
+        return <GalleryController roomState={fallbackState} send={sendWithFeedback} />;
       case "ledger":
-        return <LedgerController roomState={fallbackState} send={sendCommand} />;
+        return <LedgerController roomState={fallbackState} send={sendWithFeedback} />;
       default:
         return (
           <div className="p-6 text-center">
             <p className="text-sm text-muted-foreground font-serif">
-              Waiting for desktop to enter a room…
+              Connected — use the room buttons above to navigate your desktop.
             </p>
             <p className="text-xs text-muted-foreground/60 mt-2">
-              Use the room buttons above to navigate, or open a fullscreen view on desktop.
+              Tap a room to switch what's shown on the desktop screen.
             </p>
           </div>
         );
@@ -120,11 +149,23 @@ export default function CompanionController() {
                   <Wifi className="w-8 h-8 text-primary" />
                 </div>
                 <div className="text-center">
-                  <h2 className="text-lg font-serif text-foreground">Pair with Desktop</h2>
+                  <h2 className="text-lg font-serif text-foreground">Connect to Desktop</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Enter the 6-character code shown on your desktop screen.
+                    Enter the 6-character code shown on the desktop screen to pair your phone as a controller.
                   </p>
                 </div>
+
+                {/* How it works */}
+                <div className="w-full rounded-xl border border-border/20 bg-secondary/10 p-3 space-y-1.5">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-serif">How it works</p>
+                  <ul className="text-xs text-muted-foreground space-y-1 list-none">
+                    <li className="flex items-start gap-2"><span className="text-primary">📱</span> Your phone becomes a remote controller</li>
+                    <li className="flex items-start gap-2"><span className="text-primary">🖥️</span> Desktop shows the map, gallery, or staff room</li>
+                    <li className="flex items-start gap-2"><span className="text-primary">🎯</span> Tap controls here — see results on desktop</li>
+                    <li className="flex items-start gap-2"><span className="text-primary">✨</span> Same portal, different roles</li>
+                  </ul>
+                </div>
+
                 <div className="w-full flex flex-col gap-3">
                   <Input
                     value={codeInput}
@@ -169,7 +210,7 @@ export default function CompanionController() {
                     <div className="text-center">
                       <p className="text-sm text-foreground font-serif">Could not connect</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Code <span className="font-mono text-primary">{session.code}</span> may be expired or incorrect.
+                        Check the code on your desktop and try again. The pairing dialog must be open.
                       </p>
                     </div>
                     <button
@@ -203,17 +244,32 @@ export default function CompanionController() {
               exit={{ opacity: 0, y: -10 }}
               className="flex-1 flex flex-col"
             >
-              {/* Connected indicator */}
-              <div className="flex items-center justify-center gap-2 py-2">
+              {/* Connected indicator + action feedback */}
+              <div className="flex items-center justify-center gap-2 py-2 relative">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/40" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                 </span>
                 <span className="text-xs text-primary font-serif">Connected</span>
+
+                {/* Action confirmation pill */}
+                <AnimatePresence>
+                  {lastAction && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="absolute right-3 flex items-center gap-1 text-[10px] font-serif text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5"
+                    >
+                      <Check className="w-3 h-3" />
+                      {lastAction}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Quick room navigation */}
-              <RoomNav currentRoom={fallbackState.room} send={sendCommand} />
+              <RoomNav currentRoom={fallbackState.room} send={sendWithFeedback} />
 
               {/* Room-specific controls */}
               <div className="flex-1 flex flex-col items-center justify-center max-w-xs mx-auto w-full">
@@ -227,7 +283,7 @@ export default function CompanionController() {
 
               {/* Fullscreen toggle */}
               <div className="px-4 pb-4">
-                <FullscreenToggle isFullscreen={fallbackState.isFullscreen} send={sendCommand} />
+                <FullscreenToggle isFullscreen={fallbackState.isFullscreen} send={sendWithFeedback} />
               </div>
             </motion.div>
           )}

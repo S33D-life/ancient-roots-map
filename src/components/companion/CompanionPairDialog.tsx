@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Smartphone, X, Wifi, WifiOff } from "lucide-react";
+import { Smartphone, X, Wifi, WifiOff, Monitor, Scan } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanion } from "@/contexts/CompanionContext";
@@ -81,7 +81,7 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.25 }}
-              className="relative w-[340px] max-w-[90vw] rounded-2xl border border-border/30 bg-card p-6 shadow-2xl"
+              className="relative w-[380px] max-w-[92vw] rounded-2xl border border-border/30 bg-card p-6 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
@@ -104,8 +104,8 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">
                     {paired
-                      ? "Your mobile device is connected as a controller."
-                      : "Scan the QR code or enter the code on your mobile device."}
+                      ? "Your mobile device is controlling this desktop view."
+                      : "Use your phone as a controller for this desktop experience."}
                   </p>
                 </div>
 
@@ -125,29 +125,66 @@ export default function CompanionPairDialog({ className }: CompanionPairDialogPr
 
                     {/* Short code */}
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-xs text-muted-foreground">Or enter this code:</span>
+                      <span className="text-xs text-muted-foreground">Or enter this code on your phone:</span>
                       <span className="text-2xl font-mono font-bold tracking-[0.3em] text-primary select-all">
                         {session.code}
                       </span>
                     </div>
 
+                    {/* How it works */}
+                    <div className="w-full rounded-xl border border-border/20 bg-secondary/10 p-3 text-left space-y-2">
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-serif">One portal, two roles</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-start gap-2">
+                          <Monitor className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-xs font-serif text-foreground">Desktop</p>
+                            <p className="text-[10px] text-muted-foreground">Main display — map, gallery, rooms</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Smartphone className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-xs font-serif text-foreground">Phone</p>
+                            <p className="text-[10px] text-muted-foreground">Controller — navigate, point, explore</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* URL hint */}
-                    <p className="text-[10px] text-muted-foreground/60">
-                      Open <span className="font-mono">/companion</span> on your phone
-                    </p>
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60">
+                      <Scan className="w-3 h-3" />
+                      <span>Scan QR or open <span className="font-mono">/companion</span> on your phone</span>
+                    </div>
                   </>
                 )}
 
                 {paired && (
-                  <button
-                    onClick={handleDisconnect}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-serif min-h-[44px]
-                      bg-destructive/10 border border-destructive/20 text-destructive
-                      hover:bg-destructive/20 transition-colors"
-                  >
-                    <WifiOff className="w-4 h-4" />
-                    Disconnect
-                  </button>
+                  <div className="w-full space-y-3">
+                    {/* Status */}
+                    <div className="flex items-center justify-center gap-2 py-2 rounded-xl bg-primary/5 border border-primary/15">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/40" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+                      </span>
+                      <span className="text-sm font-serif text-primary">Live — actions sync in real-time</span>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      Mobile controls appear on this screen instantly. Use the pointer pad to guide attention.
+                    </p>
+
+                    <button
+                      onClick={handleDisconnect}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full text-sm font-serif min-h-[44px]
+                        bg-destructive/10 border border-destructive/20 text-destructive
+                        hover:bg-destructive/20 transition-colors"
+                    >
+                      <WifiOff className="w-4 h-4" />
+                      Disconnect
+                    </button>
+                  </div>
                 )}
               </div>
             </motion.div>
