@@ -945,7 +945,7 @@ const CountryPortalPage = () => {
           </div>
         </section>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

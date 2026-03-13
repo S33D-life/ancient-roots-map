@@ -297,7 +297,7 @@ const RootstoneImporterPage = () => {
           </CardContent>
         </Card>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

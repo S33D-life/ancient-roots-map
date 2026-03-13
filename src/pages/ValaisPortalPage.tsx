@@ -504,7 +504,7 @@ const ValaisPortalPage = () => {
           </div>
         </section>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

@@ -604,7 +604,7 @@ const BioRegionPage = () => {
         </section>
       </div>
 
-      <BottomNav />
+      
     </PageShell>
   );
 };

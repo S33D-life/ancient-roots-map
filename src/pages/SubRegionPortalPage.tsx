@@ -436,7 +436,7 @@ const SubRegionPortalPage = () => {
           </div>
         </section>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

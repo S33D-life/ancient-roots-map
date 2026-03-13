@@ -668,7 +668,7 @@ const WorldAtlasPage = () => {
           </div>
         </section>
       </div>
-      <BottomNav />
+      
     </PageShell>
   );
 };

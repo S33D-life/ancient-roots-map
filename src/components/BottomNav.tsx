@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
+import { Z, SAFE_ZONES } from "@/lib/z-index";
 
 const NAV_ITEMS = [
   { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree"] },
@@ -17,15 +18,17 @@ const BottomNav = () => {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-[80] md:hidden border-t transition-all duration-300 will-change-transform ${isMap ? "opacity-85 hover:opacity-100 focus-within:opacity-100" : ""}`}
+      className={`fixed bottom-0 left-0 right-0 md:hidden border-t transition-all duration-300 ${isMap ? "opacity-85 hover:opacity-100 focus-within:opacity-100" : ""}`}
       style={{
+        zIndex: Z.BOTTOM_NAV,
         background: isMap ? "hsl(var(--card) / 0.88)" : "hsl(var(--card) / 0.96)",
         borderColor: "hsl(var(--border) / 0.15)",
-        paddingBottom: "max(env(safe-area-inset-bottom, 0px), 6px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
         backdropFilter: "blur(24px) saturate(1.3)",
         WebkitBackdropFilter: "blur(24px) saturate(1.3)",
         boxShadow: "0 -2px 16px hsl(var(--background) / 0.4)",
-        transform: "translate3d(0,0,0)",
+        /* Ensure no parent transform can break fixed positioning */
+        contain: "layout",
       }}
     >
       <div className="flex items-center justify-around py-1">
@@ -97,5 +100,19 @@ const NavItem = ({ item, pathname }: NavItemProps) => {
     </Link>
   );
 };
+
+/**
+ * Spacer component to add at the bottom of scrollable page content
+ * so nothing is hidden behind the fixed bottom nav on mobile.
+ */
+export const BottomNavSpacer = () => (
+  <div
+    className="md:hidden"
+    style={{
+      height: `calc(${SAFE_ZONES.BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))`,
+    }}
+    aria-hidden
+  />
+);
 
 export default memo(BottomNav);
