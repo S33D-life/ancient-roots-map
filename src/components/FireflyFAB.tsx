@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
 import SparkErrorBoundary from "@/components/SparkErrorBoundary";
-import FireflyPanel from "@/components/FireflyPanel";
+import OrbConstellation from "@/components/OrbConstellation";
 import FireflyGuidance from "@/components/FireflyGuidance";
 import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 
@@ -65,7 +65,7 @@ const DOUBLE_TAP_MS = 350;
 const FireflyFAB = () => {
   const navigate = useNavigate();
   const { activeLens, lensConfig } = useSeasonalLens();
-  const [panelOpen, setPanelOpen] = useState(false);
+  const [constellationOpen, setConstellationOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
   const [preselectedType, setPreselectedType] = useState("bug");
@@ -106,7 +106,7 @@ const FireflyFAB = () => {
 
   xyRef.current = xy;
   posRef.current = pos;
-  anyOpenRef.current = panelOpen || dialogOpen;
+  anyOpenRef.current = constellationOpen || dialogOpen;
 
   // Orientation-only: reposition on device rotation
   useEffect(() => {
@@ -146,7 +146,7 @@ const FireflyFAB = () => {
     }
     lastTapTime.current = now;
     debounceRef.current = true;
-    setPanelOpen(true);
+    setConstellationOpen(true);
     setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
   }, [navigate]);
 
@@ -220,7 +220,7 @@ const FireflyFAB = () => {
     setDialogOpen(open);
   }, []);
 
-  const anyOpen = panelOpen || dialogOpen;
+  const anyOpen = constellationOpen || dialogOpen;
 
   return (
     <>
@@ -262,10 +262,10 @@ const FireflyFAB = () => {
           className="absolute inset-0 rounded-full transition-transform duration-300"
           style={{
             background: "radial-gradient(circle at 38% 32%, hsl(48 92% 68% / 0.95), hsl(36 85% 48% / 0.9) 60%, hsl(30 70% 35% / 0.85))",
-            boxShadow: hovered
+            boxShadow: hovered || constellationOpen
               ? "0 0 24px 8px hsl(45 90% 60% / 0.35), inset 0 0 12px hsl(50 95% 80% / 0.4)"
               : "0 0 16px 4px hsl(45 90% 60% / 0.2), inset 0 0 8px hsl(50 95% 80% / 0.3)",
-            transform: hovered ? "scale(1.08)" : "scale(1)",
+            transform: hovered || constellationOpen ? "scale(1.08)" : "scale(1)",
           }}
         />
 
@@ -339,11 +339,13 @@ const FireflyFAB = () => {
         visible={!anyOpen}
       />
 
-      {/* TEOTAG Panel */}
-      <FireflyPanel
-        open={panelOpen}
-        onOpenChange={setPanelOpen}
+      {/* Staff Constellation — radial actions around the Orb */}
+      <OrbConstellation
+        open={constellationOpen}
+        onClose={() => setConstellationOpen(false)}
         onSelectAction={handleSelectAction}
+        cx={xy.x}
+        cy={xy.y}
       />
 
       {/* Heavy dialog — lazy, only after first action selected */}
