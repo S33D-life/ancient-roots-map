@@ -430,24 +430,7 @@ const AgentGardenPage = () => {
   const [sparkFilter, setSparkFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("overview");
 
-  const totalHeartsDistributed = useMemo(
-    () => agents.reduce((a, ag) => a + (ag.hearts_earned || 0), 0),
-    [agents]
-  );
-  const totalTreesAdded = useMemo(
-    () => agents.reduce((a, ag) => a + (ag.trees_added || 0), 0),
-    [agents]
-  );
-
-  const filteredContribs = useMemo(() => {
-    if (contribFilter === "all") return agentContributions;
-    return agentContributions.filter(c => c.status === contribFilter);
-  }, [agentContributions, contribFilter]);
-
-  const filteredSparks = useMemo(() => {
-    if (sparkFilter === "all") return sparkReports;
-    return sparkReports.filter(s => s.verification_status === sparkFilter);
-  }, [sparkReports, sparkFilter]);
+/* removed — moved above */
 
   if (loading) return <PageSkeleton variant="default" />;
 
