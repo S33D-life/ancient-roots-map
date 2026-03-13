@@ -116,25 +116,28 @@ const DigitalFireVote = () => {
       return;
     }
 
-    if (userVote) {
-      // Update
-      const { error } = await supabase
-        .from("digital_fire_votes")
-        .update({ moon_event: choice, updated_at: new Date().toISOString() })
-        .eq("user_id", userId)
-        .eq("event_date", eventDate);
-      if (error) { toast.error("Could not update vote"); return; }
-    } else {
-      // Insert
-      const { error } = await supabase
-        .from("digital_fire_votes")
-        .insert({ user_id: userId, moon_event: choice, event_date: eventDate });
-      if (error) { toast.error("Could not cast vote"); return; }
-    }
+    setVoting(true);
+    try {
+      if (userVote) {
+        const { error } = await supabase
+          .from("digital_fire_votes")
+          .update({ moon_event: choice, updated_at: new Date().toISOString() })
+          .eq("user_id", userId)
+          .eq("event_date", eventDate);
+        if (error) { toast.error("Could not update vote"); return; }
+      } else {
+        const { error } = await supabase
+          .from("digital_fire_votes")
+          .insert({ user_id: userId, moon_event: choice, event_date: eventDate });
+        if (error) { toast.error("Could not cast vote"); return; }
+      }
 
-    setUserVote(choice);
-    toast.success("Your voice has been heard 🔥");
-    await fetchVotes(userId);
+      setUserVote(choice);
+      toast.success("Your voice has been heard 🔥");
+      await fetchVotes(userId);
+    } finally {
+      setVoting(false);
+    }
   };
 
   const total = totals.new_moon + totals.full_moon;
