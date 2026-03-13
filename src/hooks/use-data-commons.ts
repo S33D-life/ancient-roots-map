@@ -51,14 +51,18 @@ export interface AgentProfile {
   creator: string;
   agent_type: string;
   description: string | null;
+  specialization: string | null;
   connected_datasets: string[];
   trees_added: number;
   contributions: number;
+  datasets_discovered: number;
   hearts_earned: number;
   trust_score: number;
   last_active: string | null;
   status: string;
   avatar_emoji: string;
+  api_endpoint: string | null;
+  registration_source: string;
   created_at: string;
 }
 
@@ -74,28 +78,46 @@ export interface AgentContribution {
   created_at: string;
 }
 
+export interface SparkReport {
+  id: string;
+  report_type: string;
+  target_type: string;
+  target_id: string | null;
+  dataset_id: string | null;
+  description: string;
+  submitted_by: string | null;
+  submitted_by_agent: string | null;
+  verification_status: string;
+  hearts_rewarded: number;
+  resolution_notes: string | null;
+  created_at: string;
+}
+
 export function useDataCommons() {
   const [sources, setSources] = useState<DataSource[]>([]);
   const [datasets, setDatasets] = useState<DataDataset[]>([]);
   const [crawlTasks, setCrawlTasks] = useState<CrawlTask[]>([]);
   const [agents, setAgents] = useState<AgentProfile[]>([]);
   const [agentContributions, setAgentContributions] = useState<AgentContribution[]>([]);
+  const [sparkReports, setSparkReports] = useState<SparkReport[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [srcRes, dsRes, taskRes, agentRes, contribRes] = await Promise.all([
+    const [srcRes, dsRes, taskRes, agentRes, contribRes, sparkRes] = await Promise.all([
       (supabase.from as any)("tree_data_sources").select("*").order("name"),
       (supabase.from as any)("tree_datasets").select("*").order("name"),
       (supabase.from as any)("tree_crawl_tasks").select("*").order("priority", { ascending: true }),
       (supabase.from as any)("agent_profiles").select("*").order("trust_score", { ascending: false }),
       (supabase.from as any)("agent_contributions").select("*").order("created_at", { ascending: false }).limit(50),
+      (supabase.from as any)("spark_reports").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
     setSources((srcRes.data as DataSource[]) || []);
     setDatasets((dsRes.data as DataDataset[]) || []);
     setCrawlTasks((taskRes.data as CrawlTask[]) || []);
     setAgents((agentRes.data as AgentProfile[]) || []);
     setAgentContributions((contribRes.data as AgentContribution[]) || []);
+    setSparkReports((sparkRes.data as SparkReport[]) || []);
     setLoading(false);
   }, []);
 
@@ -107,7 +129,7 @@ export function useDataCommons() {
   const integrated = sources.filter(s => s.integration_status === "published");
 
   return {
-    sources, datasets, crawlTasks, agents, agentContributions, loading, refetch: fetchAll,
+    sources, datasets, crawlTasks, agents, agentContributions, sparkReports, loading, refetch: fetchAll,
     stats: {
       totalSources: sources.length,
       totalRecords,
@@ -115,6 +137,7 @@ export function useDataCommons() {
       speciesRepresented: allSpecies.size,
       datasetsIntegrated: integrated.length,
       activeAgents: agents.filter(a => a.status === "active").length,
+      sparkReportsOpen: sparkReports.filter(s => s.verification_status === "pending").length,
     },
   };
 }

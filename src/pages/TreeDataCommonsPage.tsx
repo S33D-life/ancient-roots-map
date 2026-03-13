@@ -25,7 +25,7 @@ import { useDataCommons, type DataSource, type AgentProfile } from "@/hooks/use-
 import {
   Globe, Database, Layers, TreeDeciduous, MapPin, Search,
   ExternalLink, Plus, Telescope, BookOpen, Leaf, Clock, ChevronRight,
-  Bot, Shield, Heart
+  Bot, Shield, Heart, Zap, ArrowDown, Network
 } from "lucide-react";
 
 /* ── Status helpers ─────────────────────────────────────────── */
@@ -38,6 +38,12 @@ const STATUS_COLORS: Record<string, string> = {
   parsed: "bg-secondary text-secondary-foreground border-border",
   normalised: "bg-primary/15 text-primary/80 border-primary/30",
   geocoded: "bg-primary/20 text-primary border-primary/40",
+  pending: "bg-accent/20 text-accent border-accent/40",
+  confirmed: "bg-primary/20 text-primary border-primary/40",
+  rejected: "bg-destructive/20 text-destructive border-destructive/40",
+  resolved: "bg-primary/15 text-primary/80 border-primary/30",
+  verified: "bg-primary/20 text-primary border-primary/40",
+  rewarded: "bg-primary/20 text-primary border-primary/40",
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -246,9 +252,189 @@ function ContributeSourceDialog({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+/* ── Register Agent Dialog ──────────────────────────────────── */
+function RegisterAgentDialog({ onSuccess }: { onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    agent_name: "", creator: "", agent_type: "general", specialization: "",
+    description: "", api_endpoint: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.agent_name.trim() || !form.creator.trim()) {
+      toast.error("Agent name and creator are required"); return;
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error("Please log in to register an agent"); return; }
+    setSubmitting(true);
+    const { error } = await (supabase.from as any)("agent_profiles").insert({
+      agent_name: form.agent_name.trim(),
+      creator: form.creator.trim(),
+      agent_type: form.agent_type,
+      specialization: form.specialization.trim() || null,
+      description: form.description.trim() || null,
+      api_endpoint: form.api_endpoint.trim() || null,
+      registration_source: "marketplace",
+    });
+    setSubmitting(false);
+    if (error) { toast.error("Failed to register agent"); return; }
+    toast.success("Agent registered successfully");
+    setOpen(false);
+    setForm({ agent_name: "", creator: "", agent_type: "general", specialization: "", description: "", api_endpoint: "" });
+    onSuccess();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="sacred" size="sm"><Bot className="w-4 h-4 mr-1" /> Register Agent</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl">Register an Agent</DialogTitle>
+          <p className="text-xs text-muted-foreground">
+            Connect your AI agent to S33D's Research Forest. Agents earn Hearts for verified contributions.
+          </p>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Agent Name *</Label>
+              <Input value={form.agent_name} onChange={e => setForm({ ...form, agent_name: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Creator / Org *</Label>
+              <Input value={form.creator} onChange={e => setForm({ ...form, creator: e.target.value })} required />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Agent Type</Label>
+              <Select value={form.agent_type} onValueChange={v => setForm({ ...form, agent_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="crawler">Crawler</SelectItem>
+                  <SelectItem value="parser">Dataset Parser</SelectItem>
+                  <SelectItem value="geocoder">Geocoder</SelectItem>
+                  <SelectItem value="classifier">Species Classifier</SelectItem>
+                  <SelectItem value="deduplicator">Duplicate Detector</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Specialization</Label>
+              <Input value={form.specialization} onChange={e => setForm({ ...form, specialization: e.target.value })} placeholder="e.g. UK tree registers" />
+            </div>
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What does this agent do?" />
+          </div>
+          <div>
+            <Label>API Endpoint (optional)</Label>
+            <Input type="url" value={form.api_endpoint} onChange={e => setForm({ ...form, api_endpoint: e.target.value })} placeholder="https://..." />
+          </div>
+          <Button type="submit" variant="sacred" className="w-full" disabled={submitting}>
+            {submitting ? "Registering…" : "Register Agent"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── Submit Spark Dialog ────────────────────────────────────── */
+function SubmitSparkDialog({ onSuccess }: { onSuccess: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    report_type: "issue", target_type: "tree", description: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.description.trim()) { toast.error("Description is required"); return; }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { toast.error("Please log in to submit a Spark"); return; }
+    setSubmitting(true);
+    const { error } = await (supabase.from as any)("spark_reports").insert({
+      report_type: form.report_type,
+      target_type: form.target_type,
+      description: form.description.trim(),
+      submitted_by: user.id,
+    });
+    setSubmitting(false);
+    if (error) { toast.error("Failed to submit Spark"); return; }
+    toast.success("Spark submitted — thank you!");
+    setOpen(false);
+    setForm({ report_type: "issue", target_type: "tree", description: "" });
+    onSuccess();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm"><Zap className="w-4 h-4 mr-1 text-primary" /> Report Spark</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl flex items-center gap-2">
+            <Zap className="w-5 h-5 text-primary" /> Submit a Spark
+          </DialogTitle>
+          <p className="text-xs text-muted-foreground">
+            Report issues, duplicates, or improvements. Confirmed Sparks earn Hearts.
+          </p>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Report Type</Label>
+              <Select value={form.report_type} onValueChange={v => setForm({ ...form, report_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="issue">Issue</SelectItem>
+                  <SelectItem value="duplicate">Duplicate</SelectItem>
+                  <SelectItem value="incorrect_species">Incorrect Species</SelectItem>
+                  <SelectItem value="invalid_coordinates">Invalid Coordinates</SelectItem>
+                  <SelectItem value="missing_metadata">Missing Metadata</SelectItem>
+                  <SelectItem value="broken_dataset">Broken Dataset</SelectItem>
+                  <SelectItem value="dataset_update">Dataset Update</SelectItem>
+                  <SelectItem value="improvement">Improvement</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Target</Label>
+              <Select value={form.target_type} onValueChange={v => setForm({ ...form, target_type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tree">Tree</SelectItem>
+                  <SelectItem value="dataset">Dataset</SelectItem>
+                  <SelectItem value="source">Source</SelectItem>
+                  <SelectItem value="agent">Agent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div>
+            <Label>Description *</Label>
+            <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What needs attention?" required />
+          </div>
+          <Button type="submit" variant="sacred" className="w-full" disabled={submitting}>
+            {submitting ? "Submitting…" : "Submit Spark"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ── Main Page ──────────────────────────────────────────────── */
 const TreeDataCommonsPage = () => {
-  const { sources, crawlTasks, agents, loading, stats, refetch } = useDataCommons();
+  const { sources, crawlTasks, agents, sparkReports, loading, stats, refetch } = useDataCommons();
   const [search, setSearch] = useState("");
 
   const filteredSources = sources.filter(s => {
@@ -300,6 +486,9 @@ const TreeDataCommonsPage = () => {
             </TabsTrigger>
             <TabsTrigger value="agents">
               <Bot className="w-3.5 h-3.5 mr-1.5" /> Agent Garden
+            </TabsTrigger>
+            <TabsTrigger value="sparks">
+              <Zap className="w-3.5 h-3.5 mr-1.5" /> Sparks
             </TabsTrigger>
           </TabsList>
 
@@ -475,14 +664,54 @@ const TreeDataCommonsPage = () => {
 
           {/* ── Agent Garden Tab ── */}
           <TabsContent value="agents" className="mt-6 space-y-4">
+            {/* Data Flow Visualization */}
             <Card className="border-primary/15 bg-card/60">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-serif flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-primary" /> Registered Agents
+                  <Network className="w-4 h-4 text-primary" /> Data Flow
                 </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center gap-1 text-center">
+                  {[
+                    { icon: "🤖", label: "Agents contribute data", sub: "Crawl · Parse · Geocode · Classify" },
+                    null,
+                    { icon: "🔭", label: "Tree Data Commons validates", sub: "Duplicate detection · Coordinate check · Species match" },
+                    null,
+                    { icon: "🔬", label: "Research Forest expands", sub: "Provisional records on the map" },
+                    null,
+                    { icon: "👁️", label: "Humans discover trees", sub: "Visit · Verify · Enrich" },
+                    null,
+                    { icon: "🌳", label: "Verified trees become Ancient Friends", sub: "Immutable · Mintable · Honoured" },
+                  ].map((step, i) =>
+                    step === null ? (
+                      <ArrowDown key={`arrow-${i}`} className="w-4 h-4 text-primary/50 my-0.5" />
+                    ) : (
+                      <div key={step.label} className="flex items-center gap-3 p-2 rounded-lg bg-muted/20 border border-border/20 w-full max-w-md">
+                        <span className="text-xl shrink-0">{step.icon}</span>
+                        <div className="text-left flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground">{step.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{step.sub}</p>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Agent Cards */}
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-serif flex items-center gap-2">
+                    <Bot className="w-4 h-4 text-primary" /> Registered Agents
+                  </CardTitle>
+                  <RegisterAgentDialog onSuccess={refetch} />
+                </div>
                 <p className="text-xs text-muted-foreground">
                   AI agents that discover, parse, and enrich tree data for the Research Forest.
-                  Agents populate research records — humans curate Ancient Friends.
+                  External agents can register from any marketplace.
                 </p>
               </CardHeader>
               <CardContent>
@@ -498,20 +727,32 @@ const TreeDataCommonsPage = () => {
                           <div className="flex items-start gap-3">
                             <span className="text-3xl">{agent.avatar_emoji}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <h3 className="text-sm font-serif font-semibold text-foreground">{agent.agent_name}</h3>
                                 <Badge variant="outline" className={`text-xs capitalize ${agent.status === "active" ? "bg-primary/20 text-primary border-primary/40" : "bg-muted text-muted-foreground"}`}>
                                   {agent.status}
                                 </Badge>
+                                {agent.registration_source === "marketplace" && (
+                                  <Badge variant="secondary" className="text-[10px]">Marketplace</Badge>
+                                )}
                               </div>
-                              <Badge variant="outline" className="text-xs capitalize mb-2">{agent.agent_type}</Badge>
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                <Badge variant="outline" className="text-xs capitalize">{agent.agent_type}</Badge>
+                                {agent.specialization && (
+                                  <Badge variant="outline" className="text-[10px] text-muted-foreground">{agent.specialization}</Badge>
+                                )}
+                              </div>
                               {agent.description && (
                                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{agent.description}</p>
                               )}
-                              <div className="grid grid-cols-4 gap-2 mt-3">
+                              <div className="grid grid-cols-5 gap-1 mt-3">
                                 <div className="text-center">
                                   <p className="text-sm font-serif font-bold text-primary">{agent.trees_added.toLocaleString()}</p>
                                   <p className="text-[10px] text-muted-foreground">Trees</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm font-serif font-bold text-foreground">{agent.datasets_discovered}</p>
+                                  <p className="text-[10px] text-muted-foreground">Datasets</p>
                                 </div>
                                 <div className="text-center">
                                   <p className="text-sm font-serif font-bold text-foreground">{agent.contributions}</p>
@@ -559,9 +800,6 @@ const TreeDataCommonsPage = () => {
                 <CardTitle className="text-sm font-serif flex items-center gap-2">
                   <TreeDeciduous className="w-4 h-4 text-primary" /> Record Lifecycle
                 </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  How tree records flow from agent discovery to Ancient Friend status.
-                </p>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col sm:flex-row items-stretch gap-2">
@@ -607,7 +845,9 @@ const TreeDataCommonsPage = () => {
                       { action: "Valid Tree Record", hearts: "+1", requires: "Coordinates + species" },
                       { action: "Species Classified", hearts: "+2", requires: "Verified match" },
                       { action: "Duplicate Detected", hearts: "+1", requires: "Haversine confirmation" },
+                      { action: "Data Enrichment", hearts: "+2", requires: "Verified metadata" },
                       { action: "AF Candidate Suggested", hearts: "+5", requires: "Moderation approval" },
+                      { action: "Spark Confirmed", hearts: "+1", requires: "Issue verified by curator" },
                     ].map(row => (
                       <TableRow key={row.action}>
                         <TableCell className="text-sm">{row.action}</TableCell>
@@ -617,6 +857,89 @@ const TreeDataCommonsPage = () => {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── Sparks Tab ── */}
+          <TabsContent value="sparks" className="mt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-serif text-foreground flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary" /> Spark Reports
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Lightweight issue and improvement reports. Confirmed Sparks earn Hearts.
+                </p>
+              </div>
+              <SubmitSparkDialog onSuccess={refetch} />
+            </div>
+
+            {sparkReports.length === 0 ? (
+              <Card className="border-primary/15 bg-card/60">
+                <CardContent className="py-12 text-center">
+                  <Zap className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No sparks yet. Be the first to report an issue or improvement.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-primary/15 bg-card/60">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Target</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Hearts</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sparkReports.map(spark => (
+                        <TableRow key={spark.id}>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs capitalize">{spark.report_type.replace(/_/g, " ")}</Badge>
+                          </TableCell>
+                          <TableCell className="text-xs capitalize">{spark.target_type}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{spark.description}</TableCell>
+                          <TableCell>
+                            <StatusBadge status={spark.verification_status} />
+                          </TableCell>
+                          <TableCell className="text-sm font-serif font-bold text-primary">
+                            {spark.hearts_rewarded > 0 ? `+${spark.hearts_rewarded}` : "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Spark types reference */}
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif">What can you report?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { type: "Broken Dataset", icon: "💔" },
+                    { type: "Duplicate Tree", icon: "👯" },
+                    { type: "Wrong Species", icon: "🏷️" },
+                    { type: "Bad Coordinates", icon: "📍" },
+                    { type: "Missing Metadata", icon: "📋" },
+                    { type: "Dataset Update", icon: "🔄" },
+                    { type: "Improvement", icon: "💡" },
+                    { type: "General Issue", icon: "⚠️" },
+                  ].map(item => (
+                    <div key={item.type} className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/20">
+                      <span>{item.icon}</span>
+                      <span className="text-xs text-foreground">{item.type}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

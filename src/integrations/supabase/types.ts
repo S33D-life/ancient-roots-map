@@ -82,15 +82,19 @@ export type Database = {
         Row: {
           agent_name: string
           agent_type: string
+          api_endpoint: string | null
           avatar_emoji: string | null
           connected_datasets: string[] | null
           contributions: number | null
           created_at: string
           creator: string
+          datasets_discovered: number | null
           description: string | null
           hearts_earned: number | null
           id: string
           last_active: string | null
+          registration_source: string | null
+          specialization: string | null
           status: string
           trees_added: number | null
           trust_score: number | null
@@ -99,15 +103,19 @@ export type Database = {
         Insert: {
           agent_name: string
           agent_type?: string
+          api_endpoint?: string | null
           avatar_emoji?: string | null
           connected_datasets?: string[] | null
           contributions?: number | null
           created_at?: string
           creator: string
+          datasets_discovered?: number | null
           description?: string | null
           hearts_earned?: number | null
           id?: string
           last_active?: string | null
+          registration_source?: string | null
+          specialization?: string | null
           status?: string
           trees_added?: number | null
           trust_score?: number | null
@@ -116,15 +124,19 @@ export type Database = {
         Update: {
           agent_name?: string
           agent_type?: string
+          api_endpoint?: string | null
           avatar_emoji?: string | null
           connected_datasets?: string[] | null
           contributions?: number | null
           created_at?: string
           creator?: string
+          datasets_discovered?: number | null
           description?: string | null
           hearts_earned?: number | null
           id?: string
           last_active?: string | null
+          registration_source?: string | null
+          specialization?: string | null
           status?: string
           trees_added?: number | null
           trust_score?: number | null
@@ -4357,6 +4369,72 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      spark_reports: {
+        Row: {
+          created_at: string
+          dataset_id: string | null
+          description: string
+          hearts_rewarded: number | null
+          id: string
+          report_type: string
+          resolution_notes: string | null
+          resolved_by: string | null
+          submitted_by: string | null
+          submitted_by_agent: string | null
+          target_id: string | null
+          target_type: string
+          updated_at: string
+          verification_status: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_id?: string | null
+          description: string
+          hearts_rewarded?: number | null
+          id?: string
+          report_type?: string
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          submitted_by?: string | null
+          submitted_by_agent?: string | null
+          target_id?: string | null
+          target_type?: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Update: {
+          created_at?: string
+          dataset_id?: string | null
+          description?: string
+          hearts_rewarded?: number | null
+          id?: string
+          report_type?: string
+          resolution_notes?: string | null
+          resolved_by?: string | null
+          submitted_by?: string | null
+          submitted_by_agent?: string | null
+          target_id?: string | null
+          target_type?: string
+          updated_at?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spark_reports_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spark_reports_submitted_by_agent_fkey"
+            columns: ["submitted_by_agent"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       species_attestations: {
         Row: {
