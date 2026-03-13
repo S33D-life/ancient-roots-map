@@ -872,238 +872,243 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const whisperCountsRef = useRef(whisperCountsMap);
   whisperCountsRef.current = whisperCountsMap;
 
-  // Initialize map once
+  // Track whether atmosphere overlay should show (as React state, not DOM injection)
+  const [atmosphereReady, setAtmosphereReady] = useState(false);
+  const [seasonClass, setSeasonClass] = useState("");
+  const mapCleanupRef = useRef<(() => void) | null>(null);
+
+  // Initialize map once — deferred until container has measurable dimensions
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // Use higher zoom on tall/mobile viewports so tiles fill the screen
-    const isTall = window.innerHeight > window.innerWidth;
-    const defaultZoom = isTall ? 3 : 2;
+    const container = containerRef.current;
+    let disposed = false;
 
-    const map = L.map(containerRef.current, {
-      center: [25, 10],
-      zoom: defaultZoom,
-      minZoom: isTall ? 3 : 2,
-      maxBounds: [[-85, -200], [85, 200]],
-      maxBoundsViscosity: 0.8,
-      attributionControl: false,
-      zoomControl: false,
-      preferCanvas: true,
-      tap: true,
-      tapTolerance: 15,
-      zoomAnimation: true,
-      markerZoomAnimation: true,
-    } as any);
+    const containerReady = () => {
+      const w = container.offsetWidth;
+      const h = container.offsetHeight;
+      if (w === 0 || h === 0) {
+        console.warn("[MapInit] Container zero dimensions, deferring…", w, h);
+        return false;
+      }
+      console.info("[MapInit] Container measurable:", w, "x", h);
+      return true;
+    };
 
-    // ── Feature flags for safe map diagnostics ──
-    const SAFE_MAP_ATMOSPHERE = !SAFE_BARE_MAP_MODE;
+    function doMapInit() {
+      if (disposed || !container || mapRef.current) return;
 
-    // ── Atmospheric overlay div (replaces tile-pane CSS filters) ──
-    const atmosphereDiv = document.createElement("div");
-    atmosphereDiv.className = "map-atmosphere-overlay";
-    if (!SAFE_MAP_ATMOSPHERE) {
-      containerRef.current.classList.add("safe-atmosphere", "safe-bare-map");
-    }
-    if (!SAFE_BARE_MAP_MODE) {
-      // Insert into map container so seasonal classes cascade naturally
-      containerRef.current.appendChild(atmosphereDiv);
-    }
+      const isTall = window.innerHeight > window.innerWidth;
+      const defaultZoom = isTall ? 3 : 2;
 
-    // ── Tile debug logging ──
-    const logPrefix = "[MapTiles]";
-    const containerSize = `${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`;
-    console.info(`${logPrefix} Leaflet map instance created, container ${containerSize}`);
-    setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
+      const map = L.map(container, {
+        center: [25, 10],
+        zoom: defaultZoom,
+        minZoom: isTall ? 3 : 2,
+        maxBounds: [[-85, -200], [85, 200]],
+        maxBoundsViscosity: 0.8,
+        attributionControl: false,
+        zoomControl: false,
+        preferCanvas: true,
+        tap: true,
+        tapTolerance: 15,
+        zoomAnimation: true,
+        markerZoomAnimation: true,
+      } as any);
 
-    const isRetina = window.devicePixelRatio > 1;
-    const primaryTileLayer = L.tileLayer(
-      SAFE_BARE_MAP_MODE
-        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        : isRetina
-        ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
-        : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      {
-        attribution: SAFE_BARE_MAP_MODE ? '&copy; OpenStreetMap contributors' : '&copy; OSM &copy; CARTO',
+      // ── Atmosphere rendered via React overlay, NOT DOM-injected into Leaflet ──
+      if (!SAFE_BARE_MAP_MODE) setAtmosphereReady(true);
+      if (SAFE_BARE_MAP_MODE) container.classList.add("safe-bare-map");
+
+      const logPrefix = "[MapTiles]";
+      const containerSize = `${container.offsetWidth}x${container.offsetHeight}`;
+      console.info(`${logPrefix} Leaflet map created, container ${containerSize}`);
+      setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
+
+      const isRetina = window.devicePixelRatio > 1;
+      const primaryTileLayer = L.tileLayer(
+        SAFE_BARE_MAP_MODE
+          ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          : isRetina
+          ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
+          : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution: SAFE_BARE_MAP_MODE ? '&copy; OpenStreetMap contributors' : '&copy; OSM &copy; CARTO',
+          maxZoom: 19,
+          subdomains: SAFE_BARE_MAP_MODE ? "abc" : "abcd",
+          keepBuffer: 4,
+        }
+      ).addTo(map);
+
+      const fallbackTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19,
-        subdomains: SAFE_BARE_MAP_MODE ? "abc" : "abcd",
+        subdomains: "abc",
         keepBuffer: 4,
-      }
-    ).addTo(map);
-
-    const fallbackTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-      subdomains: "abc",
-      keepBuffer: 4,
-    });
-
-    // Tile lifecycle debug events
-    let tileLoadCount = 0;
-    let tileErrorCount = 0;
-    primaryTileLayer.on("loading", () => {
-      console.info(`${logPrefix} tiles loading…`);
-      setRenderDebug((prev) => ({ ...prev, tileStatus: "loading" }));
-    });
-    primaryTileLayer.on("load", () => {
-      console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`);
-      setRenderDebug((prev) => ({ ...prev, tileStatus: "loaded", tileLoads: tileLoadCount, tileErrors: tileErrorCount }));
-    });
-    primaryTileLayer.on("tileloadstart", (e: any) => {
-      if (SAFE_MAP_DEBUG && e?.tile?.src) {
-        console.info(`${logPrefix} tileloadstart`, e.tile.src);
-      }
-    });
-
-    // Automatic tile provider failover when CARTO is unavailable/throttled.
-    let tileErrors = 0;
-    let usingFallbackTiles = false;
-    const TILE_ERROR_THRESHOLD = 8;
-
-    const activateFallbackTiles = () => {
-      if (usingFallbackTiles) return;
-      usingFallbackTiles = true;
-      try {
-        if (map.hasLayer(primaryTileLayer)) map.removeLayer(primaryTileLayer);
-        fallbackTileLayer.addTo(map);
-        console.warn(`${logPrefix} Switched to OSM fallback tiles after repeated CARTO tile errors`);
-      } catch {
-        // Ignore fallback swap errors and keep map interactive
-      }
-    };
-
-    primaryTileLayer.on("tileload", () => {
-      tileLoadCount += 1;
-      if (tileErrors > 0) tileErrors -= 1;
-    });
-
-    primaryTileLayer.on("tileerror", (e: any) => {
-      tileErrors += 1;
-      tileErrorCount += 1;
-      setRenderDebug((prev) => ({ ...prev, tileStatus: "failed", tileErrors: tileErrorCount }));
-      console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 160));
-      if (tileErrors >= (SAFE_MAP_DEBUG ? 1 : TILE_ERROR_THRESHOLD)) {
-        activateFallbackTiles();
-      }
-    });
-
-    L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-
-    mapRef.current = map;
-
-    // ── Explicit background so "no tiles" is visually distinct from atmosphere ──
-    containerRef.current.style.backgroundColor = "hsl(30, 15%, 10%)";
-
-    // Robust invalidateSize — ensure container is fully laid out before sizing
-    requestAnimationFrame(() => map.invalidateSize());
-    setTimeout(() => map.invalidateSize(), 100);
-    setTimeout(() => map.invalidateSize(), 500);
-    // Extra invalidation for slow mobile renderers / iOS webview
-    setTimeout(() => {
-      map.invalidateSize();
-      const imgCount = containerRef.current?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
-      setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
-      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}, tilePaneImages=${imgCount}`);
-    }, 1500);
-    // Also re-invalidate on window resize
-    const onResize = () => map.invalidateSize();
-    window.addEventListener('resize', onResize);
-    const originalCleanup = () => window.removeEventListener('resize', onResize);
-
-    // Seasonal atmosphere tint (CSS-only, zero perf cost)
-    const cleanupSeasonalTint = containerRef.current ? applySeasonalTint(containerRef.current) : () => {};
-
-    // Popup action delegation (wish ⭐ + share ↗️)
-    const cleanupPopupActions = containerRef.current ? setupPopupActions(containerRef.current) : () => {};
-
-    // Track visited markers on popup open
-    map.on("popupopen", (e: any) => {
-      const marker = e.popup?._source;
-      if (marker?._treeId) {
-        markTreeVisited(marker._treeId, marker._icon);
-      }
-    });
-
-    // Apply visited class when markers are added to the map
-    map.on("layeradd", (e: any) => {
-      const layer = e.layer;
-      if (layer?._treeId && layer._icon) {
-        applyVisitedClass(layer._treeId, layer._icon);
-      }
-    });
-
-    // Deep-link: fly to coordinates or w3w if provided
-    let deepLinked = false;
-    if (initialLat !== undefined && initialLng !== undefined) {
-      deepLinked = true;
-      setTimeout(() => map.setView([initialLat, initialLng], initialZoom ?? 16), 300);
-    } else if (initialW3w) {
-      deepLinked = true;
-      import("@/utils/what3words").then(({ convertToCoordinates }) => {
-        convertToCoordinates(initialW3w).then((result) => {
-          if (result && result.coordinates) {
-            map.setView([result.coordinates.lat, result.coordinates.lng], initialZoom ?? 16);
-          }
-        }).catch(() => {});
       });
-    }
 
-    // Restore MapMemory when no deep-link params — return to where user left off
-    if (!deepLinked) {
-      const memory = restoreMapMemory();
-      if (memory) {
-        setTimeout(() => map.setView([memory.lat, memory.lng], memory.zoom, { animate: true }), 300);
-      }
-    }
-
-    // Save MapMemory on every moveend (debounced) + publish TEOTAG context
-    let saveTimer: ReturnType<typeof setTimeout>;
-    const onMoveEndSave = () => {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(() => {
-        const c = map.getCenter();
-        const z = map.getZoom();
-        saveMapMemory({ lat: c.lat, lng: c.lng, zoom: z });
-        // Publish to TEOTAG context via custom event
-        window.dispatchEvent(new CustomEvent("teotag-map-context", {
-          detail: { center: { lat: c.lat, lng: c.lng }, zoom: z },
-        }));
-      }, 500);
-    };
-    map.on("moveend", onMoveEndSave);
-
-    // Auto-locate on first load (skip if deep-linked or memory-restored)
-    if (!deepLinked && !restoreMapMemory() && navigator.geolocation) {
-      geo.locate("map-auto-init").then((result) => {
-        if (result && mapRef.current) {
-          const latlng: [number, number] = [result.lat, result.lng];
-          setUserLatLng(latlng);
-          setLocated(true);
-          placeUserMarker(mapRef.current, latlng, result.accuracy);
+      let tileLoadCount = 0;
+      let tileErrorCount = 0;
+      primaryTileLayer.on("loading", () => {
+        console.info(`${logPrefix} tiles loading…`);
+        setRenderDebug((prev) => ({ ...prev, tileStatus: "loading" }));
+      });
+      primaryTileLayer.on("load", () => {
+        console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`);
+        setRenderDebug((prev) => ({ ...prev, tileStatus: "loaded", tileLoads: tileLoadCount, tileErrors: tileErrorCount }));
+      });
+      primaryTileLayer.on("tileloadstart", (e: any) => {
+        if (SAFE_MAP_DEBUG && e?.tile?.src) {
+          console.info(`${logPrefix} tileloadstart`, e.tile.src);
         }
       });
+
+      let tileErrors = 0;
+      let usingFallbackTiles = false;
+      const TILE_ERROR_THRESHOLD = 8;
+
+      const activateFallbackTiles = () => {
+        if (usingFallbackTiles) return;
+        usingFallbackTiles = true;
+        try {
+          if (map.hasLayer(primaryTileLayer)) map.removeLayer(primaryTileLayer);
+          fallbackTileLayer.addTo(map);
+          console.warn(`${logPrefix} Switched to OSM fallback tiles`);
+        } catch {}
+      };
+
+      primaryTileLayer.on("tileload", () => {
+        tileLoadCount += 1;
+        if (tileErrors > 0) tileErrors -= 1;
+      });
+
+      primaryTileLayer.on("tileerror", (e: any) => {
+        tileErrors += 1;
+        tileErrorCount += 1;
+        setRenderDebug((prev) => ({ ...prev, tileStatus: "failed", tileErrors: tileErrorCount }));
+        console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 160));
+        if (tileErrors >= (SAFE_MAP_DEBUG ? 1 : TILE_ERROR_THRESHOLD)) {
+          activateFallbackTiles();
+        }
+      });
+
+      L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
+      L.control.zoom({ position: "bottomright" }).addTo(map);
+
+      mapRef.current = map;
+
+      container.style.backgroundColor = "hsl(30, 15%, 10%)";
+
+      requestAnimationFrame(() => map.invalidateSize());
+      setTimeout(() => map.invalidateSize(), 100);
+      setTimeout(() => map.invalidateSize(), 500);
+      setTimeout(() => {
+        map.invalidateSize();
+        const imgCount = container?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
+        setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
+        console.info(`${logPrefix} late invalidateSize, ${container?.offsetWidth}x${container?.offsetHeight}, tiles=${imgCount}`);
+      }, 1500);
+      const sizeObserver = new ResizeObserver(() => map.invalidateSize());
+      sizeObserver.observe(container);
+      const onResize = () => map.invalidateSize();
+      window.addEventListener('resize', onResize);
+
+      const cleanupSeasonalTint = applySeasonalTint(container);
+      const cleanupPopupActions = setupPopupActions(container);
+
+      map.on("popupopen", (e: any) => {
+        const marker = e.popup?._source;
+        if (marker?._treeId) markTreeVisited(marker._treeId, marker._icon);
+      });
+
+      map.on("layeradd", (e: any) => {
+        const layer = e.layer;
+        if (layer?._treeId && layer._icon) applyVisitedClass(layer._treeId, layer._icon);
+      });
+
+      let deepLinked = false;
+      if (initialLat !== undefined && initialLng !== undefined) {
+        deepLinked = true;
+        setTimeout(() => map.setView([initialLat, initialLng], initialZoom ?? 16), 300);
+      } else if (initialW3w) {
+        deepLinked = true;
+        import("@/utils/what3words").then(({ convertToCoordinates }) => {
+          convertToCoordinates(initialW3w).then((result) => {
+            if (result && result.coordinates) {
+              map.setView([result.coordinates.lat, result.coordinates.lng], initialZoom ?? 16);
+            }
+          }).catch(() => {});
+        });
+      }
+
+      if (!deepLinked) {
+        const memory = restoreMapMemory();
+        if (memory) {
+          setTimeout(() => map.setView([memory.lat, memory.lng], memory.zoom, { animate: true }), 300);
+        }
+      }
+
+      let saveTimer: ReturnType<typeof setTimeout>;
+      const onMoveEndSave = () => {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          const c = map.getCenter();
+          const z = map.getZoom();
+          saveMapMemory({ lat: c.lat, lng: c.lng, zoom: z });
+          window.dispatchEvent(new CustomEvent("teotag-map-context", {
+            detail: { center: { lat: c.lat, lng: c.lng }, zoom: z },
+          }));
+        }, 500);
+      };
+      map.on("moveend", onMoveEndSave);
+
+      if (!deepLinked && !restoreMapMemory() && navigator.geolocation) {
+        geo.locate("map-auto-init").then((result) => {
+          if (result && mapRef.current) {
+            const latlng: [number, number] = [result.lat, result.lng];
+            setUserLatLng(latlng);
+            setLocated(true);
+            placeUserMarker(mapRef.current, latlng, result.accuracy);
+          }
+        });
+      }
+
+      mapCleanupRef.current = () => {
+        clearTimeout(saveTimer);
+        map.off("moveend", onMoveEndSave);
+        cleanupSeasonalTint();
+        cleanupPopupActions();
+        sizeObserver.disconnect();
+        window.removeEventListener('resize', onResize);
+        map.remove();
+        mapRef.current = null;
+        clusterRef.current = null;
+        userMarkerRef.current = null;
+        userAccuracyRef.current = null;
+        focusHaloRef.current = null;
+        focusFallbackMarkerRef.current = null;
+        groveLayerRef.current = null;
+        seedLayerRef.current = null;
+        mycelialNetworkLayerRef.current = null;
+        mycelialAnimatedLayerRef.current = null;
+      };
+    } // end doMapInit
+
+    if (containerReady()) {
+      doMapInit();
+    } else {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          if (width > 0 && height > 0) { ro.disconnect(); doMapInit(); }
+        }
+      });
+      ro.observe(container);
+      const fallback = setTimeout(() => { ro.disconnect(); doMapInit(); }, 2000);
+      return () => { disposed = true; ro.disconnect(); clearTimeout(fallback); mapCleanupRef.current?.(); };
     }
 
-    return () => {
-      clearTimeout(saveTimer);
-      map.off("moveend", onMoveEndSave);
-      cleanupSeasonalTint();
-      cleanupPopupActions();
-      originalCleanup();
-      // Remove atmospheric overlay
-      try { atmosphereDiv.remove(); } catch {}
-      map.remove();
-      mapRef.current = null;
-      clusterRef.current = null;
-      userMarkerRef.current = null;
-      userAccuracyRef.current = null;
-      focusHaloRef.current = null;
-      focusFallbackMarkerRef.current = null;
-      groveLayerRef.current = null;
-      seedLayerRef.current = null;
-      mycelialNetworkLayerRef.current = null;
-      mycelialAnimatedLayerRef.current = null;
-    };
+    return () => { disposed = true; mapCleanupRef.current?.(); };
   }, []);
 
   // Deep-link: auto-apply country/hive/species filters and zoom
@@ -3541,7 +3546,24 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   return (
     <div className={`${className || "absolute inset-0"} ${groveViewActive ? "grove-view-active" : ""}`} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
-      {/* CSS now loaded via @/styles/map-markers.css import */}
+
+      {/* Atmospheric overlay — rendered as React sibling, NOT injected into Leaflet DOM.
+          This avoids mix-blend-mode compositing issues on iOS Safari that hide tiles. */}
+      {atmosphereReady && !SAFE_BARE_MAP_MODE && (
+        <div className="map-atmosphere-overlay" aria-hidden="true" />
+      )}
+
+      {/* Debug badge — visible when SAFE_MAP_DEBUG is active */}
+      {SAFE_MAP_DEBUG && (
+        <div
+          className="absolute top-2 left-2 z-[9999] px-2 py-1 rounded text-[9px] font-mono leading-tight"
+          style={{ background: "hsla(0,0%,0%,0.75)", color: "#0f0" }}
+        >
+          <div>map:{renderDebug.mapMounted ? "✓" : "✗"} tiles:{renderDebug.tileStatus} [{renderDebug.provider}]</div>
+          <div>loads:{renderDebug.tileLoads} errs:{renderDebug.tileErrors} imgs:{renderDebug.tilePaneImages}</div>
+          <div>container:{renderDebug.container}</div>
+        </div>
+      )}
 
       {/* Search */}
       <LiteMapSearch

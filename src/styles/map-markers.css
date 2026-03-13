@@ -56,21 +56,21 @@
 .seed-heart-leaflet{background:transparent!important;border:none!important;display:flex;align-items:center;justify-content:center;position:relative;animation:seedHeartGlow 2s ease-in-out infinite;cursor:pointer}
 .seed-heart-leaflet .seed-count{position:absolute;top:-4px;right:-6px;background:hsl(120,50%,40%);color:#fff;font-size:9px;font-weight:700;font-family:sans-serif;min-width:16px;height:16px;line-height:16px;text-align:center;border-radius:99px;border:1.5px solid hsl(120,40%,15%)}
 
-/* ══ Atmospheric overlay — replaces direct tile-pane filters ══
-   The overlay sits above tiles but below markers (z-index between
-   tile-pane ~200 and marker-pane ~600). pointer-events:none keeps
-   map fully interactive. NO filters on .leaflet-tile-pane. */
-.map-atmosphere-overlay{position:absolute;inset:0;pointer-events:none;z-index:250;transition:background 1.2s ease-in-out,opacity 1.2s ease-in-out;mix-blend-mode:multiply;opacity:0.18}
-.season-spring .map-atmosphere-overlay{background:hsla(100,40%,50%,0.12)}
-.season-summer .map-atmosphere-overlay{background:hsla(45,50%,50%,0.10)}
-.season-autumn .map-atmosphere-overlay{background:hsla(30,60%,45%,0.15)}
-.season-winter .map-atmosphere-overlay{background:hsla(210,30%,60%,0.12)}
-.golden-hour .map-atmosphere-overlay{background:hsla(35,70%,50%,0.18)!important;opacity:0.22!important}
-.grove-view-active .map-atmosphere-overlay{background:hsla(120,35%,20%,0.25);opacity:0.30}
-@media(max-width:768px){.map-atmosphere-overlay{opacity:0.12}}
-@media(max-width:768px){.grove-view-active .map-atmosphere-overlay{opacity:0.22}}
+/* ══ Atmospheric overlay — rendered as React sibling, NOT inside Leaflet DOM ══
+   Uses simple opacity tinting — NO mix-blend-mode (causes iOS Safari tile disappearance).
+   pointer-events:none keeps map fully interactive. */
+.map-atmosphere-overlay{position:absolute;inset:0;pointer-events:none;z-index:2;transition:background 1.2s ease-in-out,opacity 1.2s ease-in-out;opacity:0.10}
+.season-spring .map-atmosphere-overlay{background:hsla(100,40%,50%,0.15)}
+.season-summer .map-atmosphere-overlay{background:hsla(45,50%,50%,0.12)}
+.season-autumn .map-atmosphere-overlay{background:hsla(30,60%,45%,0.18)}
+.season-winter .map-atmosphere-overlay{background:hsla(210,30%,60%,0.14)}
+.golden-hour .map-atmosphere-overlay{background:hsla(35,70%,50%,0.20)!important;opacity:0.15!important}
+.grove-view-active .map-atmosphere-overlay{background:hsla(120,35%,20%,0.25);opacity:0.20}
+@media(max-width:768px){.map-atmosphere-overlay{opacity:0.08}}
+@media(max-width:768px){.grove-view-active .map-atmosphere-overlay{opacity:0.15}}
 /* Safe mode — disables atmosphere entirely */
 .safe-atmosphere .map-atmosphere-overlay{display:none!important}
+.safe-bare-map .map-atmosphere-overlay{display:none!important}
 
 /* Visited marker styling */
 .marker-visited .marker-wrap::after{content:'✓';position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:hsla(120,40%,25%,0.9);color:hsl(120,50%,65%);font-size:8px;line-height:14px;text-align:center;border:1px solid hsla(120,40%,40%,0.4);pointer-events:none}
