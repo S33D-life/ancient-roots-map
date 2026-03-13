@@ -658,14 +658,54 @@ const TreeDataCommonsPage = () => {
 
           {/* ── Agent Garden Tab ── */}
           <TabsContent value="agents" className="mt-6 space-y-4">
+            {/* Data Flow Visualization */}
             <Card className="border-primary/15 bg-card/60">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-serif flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-primary" /> Registered Agents
+                  <Network className="w-4 h-4 text-primary" /> Data Flow
                 </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center gap-1 text-center">
+                  {[
+                    { icon: "🤖", label: "Agents contribute data", sub: "Crawl · Parse · Geocode · Classify" },
+                    null,
+                    { icon: "🔭", label: "Tree Data Commons validates", sub: "Duplicate detection · Coordinate check · Species match" },
+                    null,
+                    { icon: "🔬", label: "Research Forest expands", sub: "Provisional records on the map" },
+                    null,
+                    { icon: "👁️", label: "Humans discover trees", sub: "Visit · Verify · Enrich" },
+                    null,
+                    { icon: "🌳", label: "Verified trees become Ancient Friends", sub: "Immutable · Mintable · Honoured" },
+                  ].map((step, i) =>
+                    step === null ? (
+                      <ArrowDown key={`arrow-${i}`} className="w-4 h-4 text-primary/50 my-0.5" />
+                    ) : (
+                      <div key={step.label} className="flex items-center gap-3 p-2 rounded-lg bg-muted/20 border border-border/20 w-full max-w-md">
+                        <span className="text-xl shrink-0">{step.icon}</span>
+                        <div className="text-left flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground">{step.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{step.sub}</p>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Agent Cards */}
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-serif flex items-center gap-2">
+                    <Bot className="w-4 h-4 text-primary" /> Registered Agents
+                  </CardTitle>
+                  <RegisterAgentDialog onSuccess={refetch} />
+                </div>
                 <p className="text-xs text-muted-foreground">
                   AI agents that discover, parse, and enrich tree data for the Research Forest.
-                  Agents populate research records — humans curate Ancient Friends.
+                  External agents can register from any marketplace.
                 </p>
               </CardHeader>
               <CardContent>
@@ -681,20 +721,32 @@ const TreeDataCommonsPage = () => {
                           <div className="flex items-start gap-3">
                             <span className="text-3xl">{agent.avatar_emoji}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <h3 className="text-sm font-serif font-semibold text-foreground">{agent.agent_name}</h3>
                                 <Badge variant="outline" className={`text-xs capitalize ${agent.status === "active" ? "bg-primary/20 text-primary border-primary/40" : "bg-muted text-muted-foreground"}`}>
                                   {agent.status}
                                 </Badge>
+                                {agent.registration_source === "marketplace" && (
+                                  <Badge variant="secondary" className="text-[10px]">Marketplace</Badge>
+                                )}
                               </div>
-                              <Badge variant="outline" className="text-xs capitalize mb-2">{agent.agent_type}</Badge>
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                <Badge variant="outline" className="text-xs capitalize">{agent.agent_type}</Badge>
+                                {agent.specialization && (
+                                  <Badge variant="outline" className="text-[10px] text-muted-foreground">{agent.specialization}</Badge>
+                                )}
+                              </div>
                               {agent.description && (
                                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{agent.description}</p>
                               )}
-                              <div className="grid grid-cols-4 gap-2 mt-3">
+                              <div className="grid grid-cols-5 gap-1 mt-3">
                                 <div className="text-center">
                                   <p className="text-sm font-serif font-bold text-primary">{agent.trees_added.toLocaleString()}</p>
                                   <p className="text-[10px] text-muted-foreground">Trees</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm font-serif font-bold text-foreground">{agent.datasets_discovered}</p>
+                                  <p className="text-[10px] text-muted-foreground">Datasets</p>
                                 </div>
                                 <div className="text-center">
                                   <p className="text-sm font-serif font-bold text-foreground">{agent.contributions}</p>
@@ -742,9 +794,6 @@ const TreeDataCommonsPage = () => {
                 <CardTitle className="text-sm font-serif flex items-center gap-2">
                   <TreeDeciduous className="w-4 h-4 text-primary" /> Record Lifecycle
                 </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  How tree records flow from agent discovery to Ancient Friend status.
-                </p>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col sm:flex-row items-stretch gap-2">
@@ -790,7 +839,9 @@ const TreeDataCommonsPage = () => {
                       { action: "Valid Tree Record", hearts: "+1", requires: "Coordinates + species" },
                       { action: "Species Classified", hearts: "+2", requires: "Verified match" },
                       { action: "Duplicate Detected", hearts: "+1", requires: "Haversine confirmation" },
+                      { action: "Data Enrichment", hearts: "+2", requires: "Verified metadata" },
                       { action: "AF Candidate Suggested", hearts: "+5", requires: "Moderation approval" },
+                      { action: "Spark Confirmed", hearts: "+1", requires: "Issue verified by curator" },
                     ].map(row => (
                       <TableRow key={row.action}>
                         <TableCell className="text-sm">{row.action}</TableCell>
@@ -800,6 +851,89 @@ const TreeDataCommonsPage = () => {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── Sparks Tab ── */}
+          <TabsContent value="sparks" className="mt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-serif text-foreground flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary" /> Spark Reports
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Lightweight issue and improvement reports. Confirmed Sparks earn Hearts.
+                </p>
+              </div>
+              <SubmitSparkDialog onSuccess={refetch} />
+            </div>
+
+            {sparkReports.length === 0 ? (
+              <Card className="border-primary/15 bg-card/60">
+                <CardContent className="py-12 text-center">
+                  <Zap className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No sparks yet. Be the first to report an issue or improvement.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-primary/15 bg-card/60">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Target</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Hearts</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sparkReports.map(spark => (
+                        <TableRow key={spark.id}>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs capitalize">{spark.report_type.replace(/_/g, " ")}</Badge>
+                          </TableCell>
+                          <TableCell className="text-xs capitalize">{spark.target_type}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{spark.description}</TableCell>
+                          <TableCell>
+                            <StatusBadge status={spark.verification_status} />
+                          </TableCell>
+                          <TableCell className="text-sm font-serif font-bold text-primary">
+                            {spark.hearts_rewarded > 0 ? `+${spark.hearts_rewarded}` : "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Spark types reference */}
+            <Card className="border-primary/15 bg-card/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-serif">What can you report?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { type: "Broken Dataset", icon: "💔" },
+                    { type: "Duplicate Tree", icon: "👯" },
+                    { type: "Wrong Species", icon: "🏷️" },
+                    { type: "Bad Coordinates", icon: "📍" },
+                    { type: "Missing Metadata", icon: "📋" },
+                    { type: "Dataset Update", icon: "🔄" },
+                    { type: "Improvement", icon: "💡" },
+                    { type: "General Issue", icon: "⚠️" },
+                  ].map(item => (
+                    <div key={item.type} className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/20">
+                      <span>{item.icon}</span>
+                      <span className="text-xs text-foreground">{item.type}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
