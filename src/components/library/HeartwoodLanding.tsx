@@ -46,7 +46,7 @@ const HeartwoodLanding = () => {
       <Header />
       <HeartwoodBackground />
 
-      <div className="relative z-10 flex flex-col items-center min-h-screen pt-24 pb-12 px-4">
+      <div className="relative z-10 flex flex-col items-center min-h-screen pb-12 px-4" style={{ paddingTop: 'var(--content-top)' }}>
         {/* ── The Hearth — Opening Section ────────────── */}
         <div className="relative flex flex-col items-center mb-10 max-w-xl text-center">
           <div
