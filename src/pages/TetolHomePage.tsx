@@ -3,7 +3,7 @@
  * Users navigate the ecosystem by clicking tree nodes.
  */
 import { useNavigate, Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf,
   Search, Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
