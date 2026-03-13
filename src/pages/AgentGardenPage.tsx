@@ -23,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useDataCommons, type AgentProfile, type SparkReport } from "@/hooks/use-data-commons";
+import { SparkSubmitDialog } from "@/components/shared/SparkSubmitDialog";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
