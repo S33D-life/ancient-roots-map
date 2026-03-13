@@ -864,6 +864,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       markerZoomAnimation: true,
     } as any);
 
+    // ── Feature flag: set to true to disable all atmosphere for debugging ──
+    const SAFE_MAP_ATMOSPHERE = false;
+
+    // ── Atmospheric overlay div (replaces tile-pane CSS filters) ──
+    const atmosphereDiv = document.createElement("div");
+    atmosphereDiv.className = "map-atmosphere-overlay";
+    if (SAFE_MAP_ATMOSPHERE) {
+      containerRef.current.classList.add("safe-atmosphere");
+    }
+    // Insert into map container so seasonal classes cascade naturally
+    containerRef.current.appendChild(atmosphereDiv);
+
+    // ── Tile debug logging ──
+    const logPrefix = "[MapTiles]";
+    console.info(`${logPrefix} Leaflet map instance created, container ${containerRef.current.offsetWidth}x${containerRef.current.offsetHeight}`);
+
     const isRetina = window.devicePixelRatio > 1;
     const primaryTileLayer = L.tileLayer(
       isRetina
@@ -884,6 +900,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       keepBuffer: 4,
     });
 
+    // Tile lifecycle debug events
+    let tileLoadCount = 0;
+    let tileErrorCount = 0;
+    primaryTileLayer.on("loading", () => console.info(`${logPrefix} tiles loading…`));
+    primaryTileLayer.on("load", () => console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`));
+
     // Automatic tile provider failover when CARTO is unavailable/throttled.
     let tileErrors = 0;
     let usingFallbackTiles = false;
@@ -895,18 +917,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       try {
         if (map.hasLayer(primaryTileLayer)) map.removeLayer(primaryTileLayer);
         fallbackTileLayer.addTo(map);
-        console.warn("[Lite] Switched to OSM fallback tiles after repeated CARTO tile errors");
+        console.warn(`${logPrefix} Switched to OSM fallback tiles after repeated CARTO tile errors`);
       } catch {
         // Ignore fallback swap errors and keep map interactive
       }
     };
 
     primaryTileLayer.on("tileload", () => {
+      tileLoadCount += 1;
       if (tileErrors > 0) tileErrors -= 1;
     });
 
-    primaryTileLayer.on("tileerror", () => {
+    primaryTileLayer.on("tileerror", (e: any) => {
       tileErrors += 1;
+      tileErrorCount += 1;
+      console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 80));
       if (tileErrors >= TILE_ERROR_THRESHOLD) {
         activateFallbackTiles();
       }
@@ -916,10 +941,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
     mapRef.current = map;
+
+    // ── Explicit background so "no tiles" is visually distinct from atmosphere ──
+    containerRef.current.style.backgroundColor = "hsl(30, 15%, 10%)";
+
     // Robust invalidateSize — ensure container is fully laid out before sizing
     requestAnimationFrame(() => map.invalidateSize());
     setTimeout(() => map.invalidateSize(), 100);
     setTimeout(() => map.invalidateSize(), 500);
+    // Extra invalidation for slow mobile renderers / iOS webview
+    setTimeout(() => {
+      map.invalidateSize();
+      console.info(`${logPrefix} late invalidateSize, container ${containerRef.current?.offsetWidth}x${containerRef.current?.offsetHeight}`);
+    }, 1500);
     // Also re-invalidate on window resize
     const onResize = () => map.invalidateSize();
     window.addEventListener('resize', onResize);
@@ -1005,6 +1039,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       cleanupSeasonalTint();
       cleanupPopupActions();
       originalCleanup();
+      // Remove atmospheric overlay
+      try { atmosphereDiv.remove(); } catch {}
       map.remove();
       mapRef.current = null;
       clusterRef.current = null;
