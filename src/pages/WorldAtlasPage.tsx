@@ -15,7 +15,7 @@ import { useMapFocus } from "@/hooks/use-map-focus";
 import { motion } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
-import BottomNav from "@/components/BottomNav";
+
 import ContextualWhisper from "@/components/ContextualWhisper";
 import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 
