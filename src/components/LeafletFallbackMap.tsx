@@ -11,6 +11,7 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "@/styles/map-markers.css";
 import { escapeHtml } from "@/utils/escapeHtml";
+import { haversineKm, convexHull } from "@/utils/mapGeometry";
 import {
   fetchLandscapePOIs,
   GUARDIAN_TAGS,
