@@ -72,7 +72,19 @@ const Index = () => {
         {/* Welcome orientation for first-time visitors */}
         <WelcomeBanner />
 
-        {/* ── GROUND — Ancient Friend Hero (the first thing you see) ── */}
+        {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
+        <Suspense fallback={<SectionShimmer />}>
+          {/* ── CROWN — yOur Golden Dream ── */}
+          <CrownSection />
+
+          {/* ── CANOPY — Council of Life ── */}
+          <CanopySection />
+
+          {/* ── TRUNK — HeARTwood Library ── */}
+          <TrunkSection />
+        </Suspense>
+
+        {/* ── SEED — S33D Gateway Hero (the central seed layer) ── */}
         <Suspense fallback={<SectionShimmer />}>
           <GroundSection />
         </Suspense>
@@ -80,18 +92,8 @@ const Index = () => {
         {/* ── Discovery shortcuts — Countries & Hives ── */}
         <DiscoveryRow />
 
-        {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
+        {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
         <Suspense fallback={<SectionShimmer />}>
-          {/* ── TRUNK — HeARTwood Library ── */}
-          <TrunkSection />
-
-          {/* ── CANOPY — Council of Life ── */}
-          <CanopySection />
-
-          {/* ── CROWN — yOur Golden Dream ── */}
-          <CrownSection />
-
-          {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
           <div id="atlas-content" className="relative overflow-hidden">
             <SectionAtmosphere theme="roots" />
             <IdentitySection />
