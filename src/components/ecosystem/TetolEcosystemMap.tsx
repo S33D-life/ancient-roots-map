@@ -1,10 +1,11 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Maximize2, Minimize2, ZoomIn, ZoomOut } from "lucide-react";
+import { X, ExternalLink, ZoomIn, ZoomOut, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
-  TREE_NODES, PARTNER_NODES, ORBIT_NODES, COMMUNITY_NODE,
-  CONNECTIONS, ORBIT_RINGS, getAllNodes,
-  type EcoNode, type EcoConnection, type OrbitRing,
+  TREE_NODES, PARTNER_NODES, ORBIT_NODES, COMMUNITY_NODE, ALTERNATIVE_NODES,
+  CONNECTIONS, RESILIENCE_CONNECTIONS, ORBIT_RINGS, getAllNodes,
+  DEPENDENCY_COLORS, DEPENDENCY_LABELS,
+  type EcoNode, type EcoConnection, type OrbitRing, type DependencyLevel,
 } from "@/data/ecosystemMapData";
 
 // ─── Layout constants ───
@@ -36,32 +37,51 @@ function orbitPos(ring: OrbitRing, angleDeg: number) {
   const rad = (angleDeg * Math.PI) / 180;
   return {
     x: TREE_CX + meta.radius * Math.cos(rad),
-    y: ORBIT_CY + meta.radius * Math.sin(rad) * 0.55, // Elliptical
+    y: ORBIT_CY + meta.radius * Math.sin(rad) * 0.55,
   };
 }
 
-function nodePos(node: EcoNode): { x: number; y: number } {
+/** Position alternative nodes near their primary node, offset outward */
+function alternativePos(altNode: EcoNode, primaryPos: { x: number; y: number }, altIndex: number, altTotal: number) {
+  const baseAngle = Math.atan2(primaryPos.y - ORBIT_CY, primaryPos.x - TREE_CX);
+  const spreadAngle = 0.35;
+  const startAngle = baseAngle - (spreadAngle * (altTotal - 1)) / 2;
+  const angle = startAngle + altIndex * spreadAngle;
+  const dist = 65;
+  return {
+    x: primaryPos.x + Math.cos(angle) * dist,
+    y: primaryPos.y + Math.sin(angle) * dist,
+  };
+}
+
+function nodePos(node: EcoNode, positions?: Record<string, { x: number; y: number }>): { x: number; y: number } {
   if (node.type === "tree") return treePos(node.treeLayer ?? 0);
   if (node.type === "partner") return partnerPos(node.partnerOrder ?? 0, PARTNER_NODES.length);
   if (node.type === "orbit") return orbitPos(node.orbit!, node.orbitAngle ?? 0);
   if (node.id === "community-proposals") return { x: COMMUNITY_X, y: COMMUNITY_Y };
+  if (node.type === "alternative" && node.alternativeFor && positions) {
+    const primaryPos = positions[node.alternativeFor];
+    if (primaryPos) {
+      const siblings = ALTERNATIVE_NODES.filter((a) => a.alternativeFor === node.alternativeFor);
+      const idx = siblings.findIndex((a) => a.id === node.id);
+      return alternativePos(node, primaryPos, idx, siblings.length);
+    }
+  }
   return { x: TREE_CX, y: ORBIT_CY };
 }
 
-// ─── Mycelium path generator ───
+// ─── Path generators ───
 function myceliumPath(from: { x: number; y: number }, to: { x: number; y: number }) {
   const mx = (from.x + to.x) / 2 + (Math.random() - 0.5) * 60;
   const my = (from.y + to.y) / 2 + 30 + Math.random() * 30;
   return `M${from.x},${from.y} Q${mx},${my} ${to.x},${to.y}`;
 }
 
-// ─── Organic trunk path ───
 function trunkPath(from: { x: number; y: number }, to: { x: number; y: number }) {
   const cx = from.x + (Math.random() - 0.5) * 12;
   return `M${from.x},${from.y} C${cx},${from.y + 40} ${cx},${to.y - 40} ${to.x},${to.y}`;
 }
 
-// ─── Orbit link path (curved) ───
 function orbitLinkPath(from: { x: number; y: number }, to: { x: number; y: number }) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -70,14 +90,22 @@ function orbitLinkPath(from: { x: number; y: number }, to: { x: number; y: numbe
   return `M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`;
 }
 
+// ─── Dependency badge (small ring around node) ───
+function DependencyBadge({ cx, cy, r, level }: { cx: number; cy: number; r: number; level: DependencyLevel }) {
+  const color = DEPENDENCY_COLORS[level];
+  return (
+    <circle
+      cx={cx} cy={cy} r={r + 4}
+      fill="none" stroke={color} strokeWidth={2}
+      strokeDasharray={level === "core" ? undefined : level === "important" ? "6 3" : "3 3"}
+      opacity={0.7}
+    />
+  );
+}
+
 // ─── Node component ───
 function EcoNodeCircle({
-  node,
-  pos,
-  selected,
-  highlighted,
-  dimmed,
-  onSelect,
+  node, pos, selected, highlighted, dimmed, onSelect, resilienceMode,
 }: {
   node: EcoNode;
   pos: { x: number; y: number };
@@ -85,15 +113,19 @@ function EcoNodeCircle({
   highlighted: boolean;
   dimmed: boolean;
   onSelect: (id: string) => void;
+  resilienceMode: boolean;
 }) {
   const isTree = node.type === "tree";
   const isPartner = node.type === "partner";
   const isCommunity = node.type === "community";
-  const r = isTree ? 38 : isCommunity ? 34 : isPartner ? 28 : 24;
+  const isAlt = node.type === "alternative";
+  const r = isTree ? 38 : isCommunity ? 34 : isPartner ? 28 : isAlt ? 18 : 24;
 
   const orbitMeta = node.orbit ? ORBIT_RINGS.find((o) => o.id === node.orbit) : null;
 
-  const fillColor = isTree
+  const fillColor = isAlt
+    ? "hsl(160, 20%, 12%)"
+    : isTree
     ? "hsl(42, 45%, 18%)"
     : isPartner
     ? "hsl(270, 25%, 16%)"
@@ -101,7 +133,9 @@ function EcoNodeCircle({
     ? "hsl(42, 50%, 20%)"
     : "hsl(220, 20%, 14%)";
 
-  const strokeColor = isTree
+  const strokeColor = isAlt
+    ? "hsl(160, 40%, 45%)"
+    : isTree
     ? "hsl(42, 60%, 50%)"
     : isPartner
     ? "hsl(270, 40%, 50%)"
@@ -109,18 +143,23 @@ function EcoNodeCircle({
     ? "hsl(42, 55%, 55%)"
     : orbitMeta?.color ?? "hsl(200, 30%, 45%)";
 
+  const showDepBadge = resilienceMode && node.dependencyLevel && node.type === "orbit";
+
   return (
     <motion.g
       className="cursor-pointer"
       onClick={() => onSelect(node.id)}
       initial={{ opacity: 0, scale: 0 }}
       animate={{
-        opacity: dimmed ? 0.25 : 1,
+        opacity: dimmed ? 0.2 : 1,
         scale: selected ? 1.15 : highlighted ? 1.08 : 1,
       }}
       transition={{ type: "spring", stiffness: 200, damping: 20, delay: Math.random() * 0.4 }}
       whileHover={{ scale: 1.12 }}
     >
+      {/* Dependency badge */}
+      {showDepBadge && <DependencyBadge cx={pos.x} cy={pos.y} r={r} level={node.dependencyLevel!} />}
+
       {/* Glow */}
       {(selected || highlighted) && (
         <circle cx={pos.x} cy={pos.y} r={r + 12} fill="none" stroke={strokeColor} strokeWidth={1.5} opacity={0.3}>
@@ -130,21 +169,27 @@ function EcoNodeCircle({
       )}
 
       {/* Background */}
-      <circle cx={pos.x} cy={pos.y} r={r} fill={fillColor} stroke={strokeColor} strokeWidth={selected ? 2.5 : 1.5} />
+      <circle
+        cx={pos.x} cy={pos.y} r={r}
+        fill={fillColor} stroke={strokeColor}
+        strokeWidth={selected ? 2.5 : isAlt ? 1 : 1.5}
+        strokeDasharray={isAlt ? "4 2" : undefined}
+      />
 
       {/* Emoji */}
-      <text x={pos.x} y={pos.y + 1} textAnchor="middle" dominantBaseline="central" fontSize={isTree ? 22 : 18} className="select-none pointer-events-none">
+      <text x={pos.x} y={pos.y + 1} textAnchor="middle" dominantBaseline="central" fontSize={isAlt ? 12 : isTree ? 22 : 18} className="select-none pointer-events-none">
         {node.emoji}
       </text>
 
       {/* Label */}
       <text
         x={pos.x}
-        y={pos.y + r + 14}
+        y={pos.y + r + (isAlt ? 10 : 14)}
         textAnchor="middle"
-        fontSize={isTree ? 11 : 9.5}
-        fill="hsl(42, 30%, 72%)"
+        fontSize={isAlt ? 7.5 : isTree ? 11 : 9.5}
+        fill={isAlt ? "hsl(160, 30%, 55%)" : "hsl(42, 30%, 72%)"}
         fontFamily="serif"
+        fontStyle={isAlt ? "italic" : undefined}
         className="select-none pointer-events-none"
       >
         {node.label}
@@ -155,9 +200,7 @@ function EcoNodeCircle({
 
 // ─── Connection line ───
 function ConnectionLine({
-  conn,
-  positions,
-  highlighted,
+  conn, positions, highlighted,
 }: {
   conn: EcoConnection;
   positions: Record<string, { x: number; y: number }>;
@@ -170,6 +213,7 @@ function ConnectionLine({
   const isTrunk = conn.type === "trunk";
   const isMycelium = conn.type === "mycelium";
   const isProposal = conn.type === "proposal-link";
+  const isResilience = conn.type === "resilience";
 
   const d = isTrunk
     ? trunkPath(from, to)
@@ -183,6 +227,8 @@ function ConnectionLine({
     ? "hsl(270, 30%, 40%)"
     : isProposal
     ? "hsl(42, 45%, 40%)"
+    : isResilience
+    ? "hsl(160, 50%, 45%)"
     : "hsl(200, 30%, 35%)";
 
   return (
@@ -190,10 +236,10 @@ function ConnectionLine({
       d={d}
       fill="none"
       stroke={color}
-      strokeWidth={isTrunk ? 3 : isMycelium ? 1.8 : 1.2}
-      strokeDasharray={isMycelium ? "6 4" : isProposal ? "4 3" : undefined}
+      strokeWidth={isTrunk ? 3 : isMycelium ? 1.8 : isResilience ? 1.2 : 1.2}
+      strokeDasharray={isMycelium ? "6 4" : isProposal ? "4 3" : isResilience ? "3 2" : undefined}
       initial={{ pathLength: 0, opacity: 0 }}
-      animate={{ pathLength: 1, opacity: highlighted ? 0.9 : 0.4 }}
+      animate={{ pathLength: 1, opacity: highlighted ? 0.9 : isResilience ? 0.5 : 0.4 }}
       transition={{ duration: 1.2, delay: Math.random() * 0.5 }}
     />
   );
@@ -203,30 +249,34 @@ function ConnectionLine({
 function OrbitRingEllipse({ ring }: { ring: typeof ORBIT_RINGS[number] }) {
   return (
     <ellipse
-      cx={TREE_CX}
-      cy={ORBIT_CY}
-      rx={ring.radius}
-      ry={ring.radius * 0.55}
-      fill="none"
-      stroke={ring.color}
-      strokeWidth={0.6}
-      opacity={0.15}
-      strokeDasharray="4 6"
+      cx={TREE_CX} cy={ORBIT_CY} rx={ring.radius} ry={ring.radius * 0.55}
+      fill="none" stroke={ring.color} strokeWidth={0.6} opacity={0.15} strokeDasharray="4 6"
     />
   );
 }
 
 // ─── Detail panel ───
-function DetailPanel({ node, onClose }: { node: EcoNode; onClose: () => void }) {
+function DetailPanel({ node, onClose, resilienceMode, allNodes, onSelect }: {
+  node: EcoNode;
+  onClose: () => void;
+  resilienceMode: boolean;
+  allNodes: EcoNode[];
+  onSelect: (id: string) => void;
+}) {
   const orbitMeta = node.orbit ? ORBIT_RINGS.find((o) => o.id === node.orbit) : null;
+  const depLevel = node.dependencyLevel;
+  const altNodes = node.alternatives
+    ? node.alternatives.map((id) => allNodes.find((n) => n.id === id)).filter(Boolean) as EcoNode[]
+    : [];
+  const primaryNode = node.alternativeFor ? allNodes.find((n) => n.id === node.alternativeFor) : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[360px]
-        rounded-2xl border border-border/30 bg-card/95 backdrop-blur-xl p-5 shadow-2xl z-20"
+      className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:bottom-4 sm:w-[380px]
+        rounded-2xl border border-border/30 bg-card/95 backdrop-blur-xl p-5 shadow-2xl z-20 max-h-[70vh] overflow-y-auto"
     >
       <button
         onClick={onClose}
@@ -240,7 +290,7 @@ function DetailPanel({ node, onClose }: { node: EcoNode; onClose: () => void }) 
         <span className="text-3xl">{node.emoji}</span>
         <div className="flex-1 min-w-0">
           <h3 className="text-base font-serif text-foreground">{node.label}</h3>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-serif">
               {node.type === "tree"
                 ? ["Crown", "Canopy", "Trunk", "Roots"][node.treeLayer ?? 0]
@@ -248,14 +298,41 @@ function DetailPanel({ node, onClose }: { node: EcoNode; onClose: () => void }) 
                 ? "Mycelium Partner"
                 : node.type === "community"
                 ? "Community"
+                : node.type === "alternative"
+                ? "Alternative"
                 : orbitMeta?.label ?? "Infrastructure"}
             </span>
+            {depLevel && (
+              <span
+                className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full font-serif border"
+                style={{
+                  color: DEPENDENCY_COLORS[depLevel],
+                  borderColor: DEPENDENCY_COLORS[depLevel] + "40",
+                  background: DEPENDENCY_COLORS[depLevel] + "10",
+                }}
+              >
+                {depLevel}
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{node.description}</p>
 
+      {/* Dependency info */}
+      {depLevel && resilienceMode && (
+        <div className="mt-3 p-2.5 rounded-lg border border-border/20 bg-muted/30">
+          <div className="flex items-center gap-1.5 mb-1">
+            {depLevel === "core" ? <ShieldAlert className="w-3.5 h-3.5" style={{ color: DEPENDENCY_COLORS.core }} /> :
+             depLevel === "important" ? <Shield className="w-3.5 h-3.5" style={{ color: DEPENDENCY_COLORS.important }} /> :
+             <ShieldCheck className="w-3.5 h-3.5" style={{ color: DEPENDENCY_COLORS.optional }} />}
+            <span className="text-[10px] font-serif text-muted-foreground">{DEPENDENCY_LABELS[depLevel]}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Supports */}
       {node.supports && node.supports.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           <span className="text-[10px] text-muted-foreground/60 font-serif mr-1">Supports:</span>
@@ -267,6 +344,39 @@ function DetailPanel({ node, onClose }: { node: EcoNode; onClose: () => void }) 
               </span>
             );
           })}
+        </div>
+      )}
+
+      {/* Alternatives */}
+      {altNodes.length > 0 && (
+        <div className="mt-3">
+          <span className="text-[10px] text-muted-foreground/60 font-serif">Alternatives:</span>
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {altNodes.map((alt) => (
+              <button
+                key={alt.id}
+                onClick={() => onSelect(alt.id)}
+                className="text-[10px] px-2 py-1 rounded-full border font-serif transition-colors hover:bg-muted/50 cursor-pointer"
+                style={{ color: "hsl(160, 40%, 55%)", borderColor: "hsl(160, 30%, 30%)" }}
+              >
+                {alt.emoji} {alt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* If this IS an alternative, link back to primary */}
+      {primaryNode && (
+        <div className="mt-3">
+          <span className="text-[10px] text-muted-foreground/60 font-serif">Alternative for:</span>
+          <button
+            onClick={() => onSelect(primaryNode.id)}
+            className="ml-1.5 text-[10px] px-2 py-1 rounded-full border font-serif transition-colors hover:bg-muted/50 cursor-pointer"
+            style={{ color: "hsl(42, 60%, 55%)", borderColor: "hsl(42, 40%, 30%)" }}
+          >
+            {primaryNode.emoji} {primaryNode.label}
+          </button>
         </div>
       )}
 
@@ -289,9 +399,7 @@ function DetailPanel({ node, onClose }: { node: EcoNode; onClose: () => void }) 
 function UndergroundLayer() {
   return (
     <g>
-      {/* Ground line */}
       <line x1={0} y1={MYCELIUM_Y - 60} x2={SVG_W} y2={MYCELIUM_Y - 60} stroke="hsl(42, 30%, 25%)" strokeWidth={1.5} opacity={0.3} />
-      {/* Underground gradient */}
       <defs>
         <linearGradient id="underground-grad" x1="0" y1={MYCELIUM_Y - 60} x2="0" y2={SVG_H} gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="hsl(270, 15%, 8%)" stopOpacity={0.3} />
@@ -299,8 +407,6 @@ function UndergroundLayer() {
         </linearGradient>
       </defs>
       <rect x={0} y={MYCELIUM_Y - 60} width={SVG_W} height={SVG_H - MYCELIUM_Y + 60} fill="url(#underground-grad)" />
-
-      {/* Mycelium label */}
       <text x={TREE_CX} y={MYCELIUM_Y - 75} textAnchor="middle" fontSize={10} fill="hsl(270, 25%, 45%)" fontFamily="serif" opacity={0.6}>
         ── Mycelium Network ──
       </text>
@@ -339,14 +445,22 @@ export default function TetolEcosystemMap() {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const [resilienceMode, setResilienceMode] = useState(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allNodes = useMemo(() => getAllNodes(), []);
+  const allNodes = useMemo(() => getAllNodes(resilienceMode), [resilienceMode]);
+
+  // Two-pass position calculation: first primary nodes, then alternatives
   const positions = useMemo(() => {
     const map: Record<string, { x: number; y: number }> = {};
-    allNodes.forEach((n) => {
+    // First pass: non-alternative nodes
+    allNodes.filter((n) => n.type !== "alternative").forEach((n) => {
       map[n.id] = nodePos(n);
+    });
+    // Second pass: alternatives (need primary positions)
+    allNodes.filter((n) => n.type === "alternative").forEach((n) => {
+      map[n.id] = nodePos(n, map);
     });
     return map;
   }, [allNodes]);
@@ -358,23 +472,27 @@ export default function TetolEcosystemMap() {
     if (!selected) return new Set<string>();
     const ids = new Set<string>();
     ids.add(selected);
-    CONNECTIONS.forEach((c) => {
+
+    const allConns = resilienceMode ? [...CONNECTIONS, ...RESILIENCE_CONNECTIONS] : CONNECTIONS;
+    allConns.forEach((c) => {
       if (c.from === selected) ids.add(c.to);
       if (c.to === selected) ids.add(c.from);
     });
-    // Orbit support links
+
     const node = allNodes.find((n) => n.id === selected);
     if (node?.supports) node.supports.forEach((s) => ids.add(s));
-    // Reverse: if selected is a tree node, find orbits that support it
+    if (node?.alternatives) node.alternatives.forEach((a) => ids.add(a));
+    if (node?.alternativeFor) ids.add(node.alternativeFor);
+
     if (node?.type === "tree") {
       ORBIT_NODES.forEach((o) => {
         if (o.supports?.includes(selected)) ids.add(o.id);
       });
     }
     return ids;
-  }, [selected, allNodes]);
+  }, [selected, allNodes, resilienceMode]);
 
-  // Orbit support connections (dynamic)
+  // Orbit support connections
   const orbitLinks = useMemo(() => {
     const links: EcoConnection[] = [];
     ORBIT_NODES.forEach((o) => {
@@ -385,7 +503,20 @@ export default function TetolEcosystemMap() {
     return links;
   }, []);
 
-  const allConnections = useMemo(() => [...CONNECTIONS, ...orbitLinks], [orbitLinks]);
+  const allConnections = useMemo(() => {
+    const base = [...CONNECTIONS, ...orbitLinks];
+    return resilienceMode ? [...base, ...RESILIENCE_CONNECTIONS] : base;
+  }, [orbitLinks, resilienceMode]);
+
+  // Single points of failure
+  const singlePointIds = useMemo(() => {
+    if (!resilienceMode) return new Set<string>();
+    return new Set(
+      ORBIT_NODES
+        .filter((n) => n.dependencyLevel === "core" && (!n.alternatives || n.alternatives.length === 0))
+        .map((n) => n.id)
+    );
+  }, [resilienceMode]);
 
   // Pan/zoom handlers
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -410,7 +541,6 @@ export default function TetolEcosystemMap() {
     setZoom((z) => Math.max(0.3, Math.min(2.5, z - e.deltaY * 0.001)));
   }, []);
 
-  // SEO
   useEffect(() => {
     document.title = "TETOL Ecosystem Map — S33D.life";
   }, []);
@@ -440,6 +570,20 @@ export default function TetolEcosystemMap() {
         >
           1:1
         </button>
+
+        {/* Resilience Mode Toggle */}
+        <button
+          onClick={() => setResilienceMode((v) => !v)}
+          className={`w-10 h-10 rounded-xl border backdrop-blur-md flex items-center justify-center transition-colors ${
+            resilienceMode
+              ? "bg-[hsl(160,40%,18%)] border-[hsl(160,40%,35%)] text-[hsl(160,50%,60%)]"
+              : "bg-card/80 border-border/30 text-foreground/70 hover:text-foreground"
+          }`}
+          aria-label="Toggle resilience mode"
+          title="Resilience Mode"
+        >
+          <Shield className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Title */}
@@ -448,7 +592,9 @@ export default function TetolEcosystemMap() {
           🌳 TETOL Living Ecosystem Map
         </h1>
         <p className="text-[10px] sm:text-xs text-muted-foreground/60 font-serif mt-0.5">
-          The Ethereal Tree of Life — tap any node to explore
+          {resilienceMode
+            ? "🛡️ Resilience Mode — showing dependency levels and alternative paths"
+            : "The Ethereal Tree of Life — tap any node to explore"}
         </p>
       </div>
 
@@ -466,6 +612,32 @@ export default function TetolEcosystemMap() {
             <span className="text-[10px] text-muted-foreground/70 font-serif">{item.label}</span>
           </div>
         ))}
+
+        {/* Resilience legend items */}
+        <AnimatePresence>
+          {resilienceMode && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-border/20 mt-1.5 pt-1.5">
+                <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50 font-serif">Dependency</span>
+                {(["core", "important", "optional"] as DependencyLevel[]).map((level) => (
+                  <div key={level} className="flex items-center gap-2 mt-0.5">
+                    <span className="w-2 h-2 rounded-full" style={{ background: DEPENDENCY_COLORS[level] }} />
+                    <span className="text-[10px] text-muted-foreground/70 font-serif capitalize">{level}</span>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="w-2 h-2 rounded-full" style={{ background: "hsl(160, 40%, 45%)" }} />
+                  <span className="text-[10px] text-muted-foreground/70 font-serif italic">Alternative path</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* SVG canvas */}
@@ -487,18 +659,13 @@ export default function TetolEcosystemMap() {
             transformOrigin: "center center",
           }}
         >
-          {/* Underground */}
           <UndergroundLayer />
-
-          {/* Ambient particles */}
           <AmbientParticles />
 
-          {/* Orbit ring ellipses */}
           {ORBIT_RINGS.map((ring) => (
             <OrbitRingEllipse key={ring.id} ring={ring} />
           ))}
 
-          {/* Orbit ring labels */}
           {ORBIT_RINGS.map((ring) => (
             <text
               key={`label-${ring.id}`}
@@ -529,6 +696,7 @@ export default function TetolEcosystemMap() {
           {/* Nodes */}
           {allNodes.map((node) => {
             const pos = positions[node.id];
+            if (!pos) return null;
             const isSelected = selected === node.id;
             const isHighlighted = connectedIds.has(node.id);
             const isDimmed = !!selected && !isHighlighted;
@@ -541,7 +709,25 @@ export default function TetolEcosystemMap() {
                 highlighted={!isSelected && isHighlighted}
                 dimmed={isDimmed}
                 onSelect={setSelected}
+                resilienceMode={resilienceMode}
               />
+            );
+          })}
+
+          {/* Single-point-of-failure warning markers */}
+          {resilienceMode && Array.from(singlePointIds).map((id) => {
+            const pos = positions[id];
+            if (!pos) return null;
+            return (
+              <g key={`spof-${id}`}>
+                <circle cx={pos.x} cy={pos.y} r={42} fill="none" stroke={DEPENDENCY_COLORS.core} strokeWidth={1} opacity={0.4}>
+                  <animate attributeName="r" values="40;46;40" dur="2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.4;0.15;0.4" dur="2s" repeatCount="indefinite" />
+                </circle>
+                <text x={pos.x} y={pos.y - 36} textAnchor="middle" fontSize={8} fill={DEPENDENCY_COLORS.core} fontFamily="serif" opacity={0.7}>
+                  ⚠ SPOF
+                </text>
+              </g>
             );
           })}
         </svg>
@@ -550,7 +736,13 @@ export default function TetolEcosystemMap() {
       {/* Detail panel */}
       <AnimatePresence>
         {selectedNode && (
-          <DetailPanel node={selectedNode} onClose={() => setSelected(null)} />
+          <DetailPanel
+            node={selectedNode}
+            onClose={() => setSelected(null)}
+            resilienceMode={resilienceMode}
+            allNodes={allNodes}
+            onSelect={setSelected}
+          />
         )}
       </AnimatePresence>
 
