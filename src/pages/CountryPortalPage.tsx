@@ -928,8 +928,8 @@ const CountryPortalPage = () => {
         <section className="px-4 max-w-3xl mx-auto mt-12">
           <div className="flex flex-wrap justify-center gap-3">
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/library/resources">
-                <BookOpen className="w-3.5 h-3.5 mr-1" /> Tree Resources
+              <Link to="/tree-data-commons">
+                <BookOpen className="w-3.5 h-3.5 mr-1" /> Tree Data Commons
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>

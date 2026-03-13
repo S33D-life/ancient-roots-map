@@ -36,7 +36,7 @@ const HeartwoodLanding = () => {
       "vault": "/vault",
       "bookshelf": "/library/bookshelf",
       "press": "/press",
-      "tree-resources": "/ledger",
+      "tree-data-commons": "/tree-data-commons",
     };
     navigate(routeMap[key] || `/library/${key}`);
   };

@@ -28,6 +28,7 @@ const ROOM_ALIASES: Record<string, string> = {
   "ancient-friends": "gallery",
   "resources": "creators-path",
   "tree-resources": "creators-path",
+  "tree-data-commons": "redirect:/tree-data-commons",
   "wishing-tree": "wishlist",
   "ledger": "scrolls",
   "volumes": "scrolls",
@@ -166,6 +167,11 @@ const HeartwoodRoomPage = () => {
   const { room: rawRoom } = useParams<{ room: string }>();
   const navigate = useNavigate();
   const resolvedRoom = rawRoom ? (ROOM_ALIASES[rawRoom] || rawRoom) : null;
+
+  // Handle redirect aliases (e.g. tree-data-commons → /tree-data-commons)
+  if (resolvedRoom?.startsWith("redirect:")) {
+    return <Navigate to={resolvedRoom.slice(9)} replace />;
+  }
 
   if (!resolvedRoom || !VALID_ROOMS.includes(resolvedRoom)) {
     return <Navigate to="/library" replace />;
