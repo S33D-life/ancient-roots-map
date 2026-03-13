@@ -23,7 +23,8 @@ const HeartwoodLanding = () => {
   const handleRoomSelect = (key: string) => {
     const routeMap: Record<string, string> = {
       "staff-room": "/library/staff-room",
-      "gallery": "/library/gallery",
+      "ancient-friends": "/library/gallery",
+      "atlas": "/atlas",
       "music-room": "/library/music-room",
       "greenhouse": "/library/greenhouse",
       "wishlist": "/library/wishlist",
