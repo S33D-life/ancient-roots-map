@@ -211,6 +211,11 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Safe content inset below fixed header — use on page <main> elements */
+  .pt-content {
+    padding-top: var(--content-top);
+  }
+
   .text-mystical {
     color: hsl(var(--mystical-glow));
     text-shadow: 0 0 20px hsl(var(--mystical-glow) / 0.5);
