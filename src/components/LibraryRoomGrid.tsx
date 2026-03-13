@@ -13,16 +13,19 @@ const YOUR_SPACES: Room[] = [
   { key: "staff-room",    label: "🪵 Staff Room",      desc: "144 Sacred Staffs",        accentH: 280, particle: "wand"       },
   { key: "greenhouse",    label: "🌱 Greenhouse",       desc: "Houseplants & Saplings",   accentH: 130, particle: "leaf"       },
   { key: "wishlist",      label: "⭐ Wishing Tree",     desc: "Trees you dream to visit",  accentH: 45,  particle: "star"       },
+  { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",     accentH: 25,  particle: "shimmer"    },
   { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",             accentH: 340, particle: "spark"      },
-  { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
+  { key: "vault",         label: "🔐 Vault",            desc: "Staff, Tokens & Treasures", accentH: 270, particle: "shimmer"    },
 ];
 
 const COMMUNITY: Room[] = [
   { key: "gallery",       label: "🗺 Map Room",         desc: "Ancient Friends Atlas",    accentH: 200, particle: "compass"    },
   { key: "music-room",    label: "🎵 Music Room",       desc: "Tree Radio",               accentH: 260, particle: "wave"       },
   { key: "seed-cellar",   label: "📦 Seed Cellar",      desc: "Living Data Archive",      accentH: 30,  particle: "seed"       },
+  { key: "rhythms",       label: "🌿 Rhythms",          desc: "Seasonal Cycle Markets",   accentH: 150, particle: "leaf"       },
   { key: "tree-resources",label: "📖 Tree Resources",   desc: "Project Directory",        accentH: 160, particle: "page"       },
   { key: "ledger",        label: "📜 Scrolls & Ledger", desc: "Council Records",          accentH: 42,  particle: "shimmer"    },
+  { key: "press",         label: "🪶 Printing Press",   desc: "Where reading becomes writing", accentH: 35, particle: "shimmer"  },
 ];
 
 const ALL_ROOMS = [...YOUR_SPACES, ...COMMUNITY];

@@ -21,7 +21,6 @@ const HeartwoodLanding = () => {
   const navigate = useNavigate();
 
   const handleRoomSelect = (key: string) => {
-    // Map room grid keys to routes
     const routeMap: Record<string, string> = {
       "staff-room": "/library/staff-room",
       "gallery": "/library/gallery",
@@ -33,7 +32,7 @@ const HeartwoodLanding = () => {
       "ledger": "/library/scrolls",
       "scrolls": "/library/scrolls",
       "rhythms": "/library/rhythms",
-      "vault": "/library/vault",
+      "vault": "/vault",
       "bookshelf": "/library/bookshelf",
       "press": "/press",
       "tree-resources": "/ledger",
@@ -46,7 +45,7 @@ const HeartwoodLanding = () => {
       <Header />
       <HeartwoodBackground />
 
-      <div className="relative z-10 flex flex-col items-center min-h-screen pt-24 pb-12 px-4">
+      <div className="relative z-10 flex flex-col items-center min-h-screen pb-12 px-4" style={{ paddingTop: 'var(--content-top)' }}>
         {/* ── The Hearth — Opening Section ────────────── */}
         <div className="relative flex flex-col items-center mb-10 max-w-xl text-center">
           <div
@@ -157,17 +156,6 @@ const HeartwoodLanding = () => {
             }}
           >
             Active Opportunities
-          </button>
-          <button
-            onClick={() => navigate("/vault?from=hearth")}
-            className="px-5 py-2.5 rounded-lg font-serif text-sm tracking-wide transition-all duration-300 hover:scale-105"
-            style={{
-              background: 'hsl(25 20% 12% / 0.8)',
-              color: 'hsl(38 50% 70%)',
-              border: '1px solid hsl(38 40% 30% / 0.4)',
-            }}
-          >
-            Your Vault
           </button>
         </div>
 
