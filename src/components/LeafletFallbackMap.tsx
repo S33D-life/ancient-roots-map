@@ -4200,4 +4200,4 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   );
 };
 
-export default LeafletFallbackMap;
+export default memo(LeafletFallbackMap);
