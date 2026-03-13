@@ -5,7 +5,7 @@
  */
 import { useCallback, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search, Sprout } from "lucide-react";
+import { Bug, Sparkles, Lightbulb, ExternalLink, Wind, Search, Sprout, Smartphone, Camera, TreeDeciduous, Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import {
