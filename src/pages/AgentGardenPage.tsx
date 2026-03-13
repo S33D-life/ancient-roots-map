@@ -347,80 +347,20 @@ function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-/* ── Spark Submit Dialog ────────────────────────── */
-function SparkSubmitDialog({ onSuccess }: { onSuccess: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    report_type: "issue", target_type: "tree", description: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.description.trim()) { toast.error("Description is required"); return; }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { toast.error("Please log in to submit a Spark"); return; }
-    setSubmitting(true);
-    const { error } = await (supabase.from as any)("spark_reports").insert({
-      report_type: form.report_type,
-      target_type: form.target_type,
-      description: form.description.trim(),
-      submitted_by: user.id,
-    });
-    setSubmitting(false);
-    if (error) { toast.error("Failed to submit Spark"); return; }
-    toast.success("Spark submitted — thank you!");
-    setOpen(false);
-    setForm({ report_type: "issue", target_type: "tree", description: "" });
-    onSuccess();
-  };
-
+/* ── Table Loading Skeleton ──────────────────────── */
+function TableSkeleton({ rows = 4, cols = 5 }: { rows?: number; cols?: number }) {
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm"><Zap className="w-4 h-4 mr-1 text-primary" /> Report Spark</Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" /> Submit a Spark
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Spark Type</Label>
-              <Select value={form.report_type} onValueChange={v => setForm({ ...form, report_type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {["issue", "duplicate", "incorrect_species", "invalid_coordinates", "missing_metadata", "broken_dataset", "dataset_update", "improvement"].map(v => (
-                    <SelectItem key={v} value={v}>{v.replace(/_/g, " ")}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs">Target</Label>
-              <Select value={form.target_type} onValueChange={v => setForm({ ...form, target_type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {["tree", "dataset", "source", "agent"].map(v => (
-                    <SelectItem key={v} value={v} className="capitalize">{v}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <Card className="border-primary/15 bg-card/60">
+      <CardContent className="p-4 space-y-3">
+        {Array.from({ length: rows }).map((_, r) => (
+          <div key={r} className="flex items-center gap-3">
+            {Array.from({ length: cols }).map((_, c) => (
+              <Skeleton key={c} className="h-4 flex-1" />
+            ))}
           </div>
-          <div>
-            <Label className="text-xs">Description *</Label>
-            <Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What needs attention?" required />
-          </div>
-          <Button type="submit" variant="sacred" className="w-full" disabled={submitting}>
-            {submitting ? "Submitting…" : "Submit Spark"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 
