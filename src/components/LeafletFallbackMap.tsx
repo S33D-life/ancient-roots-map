@@ -371,7 +371,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
   
   // Clear View — hide non-essential UI overlays for distraction-free browsing
-  const [clearView, setClearView] = useState(false);
+  const [clearView, setClearView] = useState(() => SAFE_DISABLE_NONESSENTIAL_OVERLAYS || SAFE_BARE_MAP_MODE);
 
   // GroveView — Living Earth Mode
   const [groveViewActive, setGroveViewActive] = useState(false);
