@@ -172,6 +172,7 @@ const FallingLeaves = () => {
 
     let t = 0;
     const animate = () => {
+      if (!isVisibleRef.current) { animId = requestAnimationFrame(animate); return; }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       t += 0.01;
       leaves.forEach((l, i) => {
