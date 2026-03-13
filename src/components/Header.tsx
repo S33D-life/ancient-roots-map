@@ -339,10 +339,9 @@ const Header = () => {
               <Stars className={`w-3.5 h-3.5 md:w-4 md:h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
             </Button>
             {user ? (
-              <button
-                type="button"
-                onClick={() => setTetolOpen(true)}
-                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical bg-transparent border-none p-0 cursor-pointer group"
+              <Link
+                to="/"
+                className="hidden md:flex items-center gap-2 text-foreground hover:text-primary transition-mystical p-0 cursor-pointer group no-underline"
               >
                 <div className="relative pulse-heart">
                   <img src={s33dHearthLogo} alt="S33D — Open TETOL navigation" className="w-8 h-8 rounded-full object-cover border border-primary/30" />
