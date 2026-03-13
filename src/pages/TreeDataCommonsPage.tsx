@@ -29,14 +29,14 @@ import {
 
 /* ── Status helpers ─────────────────────────────────────────── */
 const STATUS_COLORS: Record<string, string> = {
-  published: "bg-emerald-900/40 text-emerald-300 border-emerald-700/40",
-  queued: "bg-amber-900/40 text-amber-300 border-amber-700/40",
-  crawling: "bg-blue-900/40 text-blue-300 border-blue-700/40",
-  needs_review: "bg-orange-900/40 text-orange-300 border-orange-700/40",
+  published: "bg-primary/20 text-primary border-primary/40",
+  queued: "bg-accent/20 text-accent border-accent/40",
+  crawling: "bg-secondary text-secondary-foreground border-border",
+  needs_review: "bg-destructive/20 text-destructive border-destructive/40",
   not_integrated: "bg-muted text-muted-foreground border-border",
-  parsed: "bg-cyan-900/40 text-cyan-300 border-cyan-700/40",
-  normalised: "bg-teal-900/40 text-teal-300 border-teal-700/40",
-  geocoded: "bg-green-900/40 text-green-300 border-green-700/40",
+  parsed: "bg-secondary text-secondary-foreground border-border",
+  normalised: "bg-primary/15 text-primary/80 border-primary/30",
+  geocoded: "bg-primary/20 text-primary border-primary/40",
 };
 
 function StatusBadge({ status }: { status: string }) {
