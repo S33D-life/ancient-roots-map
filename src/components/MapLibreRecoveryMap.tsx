@@ -90,7 +90,7 @@ const MapLibreRecoveryMap = ({ initialLat, initialLng, initialZoom }: Props) => 
           style: STYLE,
           center,
           zoom,
-          attributionControl: true,
+          attributionControl: {},
         });
 
         mapRef.current = map;
