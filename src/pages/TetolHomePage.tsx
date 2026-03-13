@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import teotag from "@/assets/teotag-small.webp";
 
 const treeItems = [
   { to: "/map", label: "Ancient Friends", subtitle: "The Roots", icon: TreeDeciduous, zone: "roots" },
@@ -88,11 +89,10 @@ const TetolHomePage = () => {
       <Header />
 
       <main
-        className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
+        className="flex-1 flex flex-col items-center relative overflow-hidden"
         style={{
           background:
             "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))",
-          minHeight: "calc(100vh - 120px)",
         }}
       >
         {/* Floating leaves */}
@@ -116,20 +116,42 @@ const TetolHomePage = () => {
           ))}
         </div>
 
-        <div className="flex flex-col items-center relative z-10 py-8 md:py-12">
-          {/* Title */}
-          <h1
-            className="text-4xl md:text-5xl font-serif tracking-[0.25em] mb-0"
-            style={{ color: "hsl(var(--primary))" }}
-          >
-            TETOL
-          </h1>
-          <p
-            className="text-[10px] md:text-xs font-serif tracking-[0.35em] mb-8 text-center uppercase"
-            style={{ color: "hsl(var(--muted-foreground))" }}
-          >
-            The Ethereal Tree of Life
-          </p>
+        <div className="flex flex-col items-center relative z-10 py-12 md:py-16 pb-16 md:pb-20">
+          {/* Title with TEOTAG hover */}
+          <div className="relative group/title flex flex-col items-center">
+            <h1
+              className="text-4xl md:text-5xl font-serif tracking-[0.25em] mb-0 cursor-default"
+              style={{
+                color: "hsl(var(--primary))",
+                textShadow: "0 0 20px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.25)",
+              }}
+            >
+              TETOL
+            </h1>
+            <p
+              className="text-[10px] md:text-xs font-serif tracking-[0.35em] mb-8 text-center uppercase"
+              style={{ color: "hsl(var(--muted-foreground))" }}
+            >
+              The Ethereal Tree of Life
+            </p>
+
+            {/* TEOTAG hover tooltip */}
+            <div className="absolute top-full mt-1 opacity-0 group-hover/title:opacity-100 pointer-events-none group-hover/title:pointer-events-auto transition-all duration-300 z-50 scale-95 group-hover/title:scale-100">
+              <div
+                className="flex items-start gap-3 rounded-xl border p-3 max-w-[260px] backdrop-blur-md"
+                style={{
+                  background: "hsl(var(--card) / 0.95)",
+                  borderColor: "hsl(var(--primary) / 0.3)",
+                  boxShadow: "0 8px 32px hsl(var(--primary) / 0.15)",
+                }}
+              >
+                <img src={teotag} alt="TEOTAG" className="w-10 h-10 rounded-full border border-primary/40 shrink-0" />
+                <p className="text-xs font-serif leading-relaxed" style={{ color: "hsl(var(--foreground) / 0.85)" }}>
+                  I am <span className="text-primary font-bold">TEOTAG</span> — The Echo of the Ancient Groves and your guide around The Ethereal Tree of Life.
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Tree visualization */}
           <div className="relative flex flex-col items-center w-72 md:w-80">
