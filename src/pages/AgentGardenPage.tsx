@@ -428,6 +428,7 @@ const AgentGardenPage = () => {
   const { agents, agentContributions, sparkReports, loading, stats, refetch } = useDataCommons();
   const [contribFilter, setContribFilter] = useState("all");
   const [sparkFilter, setSparkFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const totalHeartsDistributed = useMemo(
     () => agents.reduce((a, ag) => a + (ag.hearts_earned || 0), 0),
@@ -468,7 +469,7 @@ const AgentGardenPage = () => {
           </p>
           {/* Quick Actions */}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
-            <Button variant="sacred" size="sm" asChild><Link to="#connect"><Plus className="w-4 h-4 mr-1" /> Connect Agent</Link></Button>
+            <Button variant="sacred" size="sm" onClick={() => setActiveTab("connect")}><Plus className="w-4 h-4 mr-1" /> Connect Agent</Button>
             <Button variant="outline" size="sm" asChild><Link to="/tree-data-commons"><Database className="w-4 h-4 mr-1" /> Submit Dataset</Link></Button>
             <SparkSubmitDialog onSuccess={refetch} />
             <Button variant="ghost" size="sm" asChild><Link to="/map"><MapPin className="w-4 h-4 mr-1" /> Research Forest</Link></Button>
