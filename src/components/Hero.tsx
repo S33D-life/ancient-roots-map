@@ -187,7 +187,7 @@ const FallingLeaves = () => {
       animId = requestAnimationFrame(animate);
     };
     animate();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); observer.disconnect(); };
   }, []);
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[2]" />;
 };
