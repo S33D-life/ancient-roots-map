@@ -248,7 +248,7 @@ function ContributeSourceDialog({ onSuccess }: { onSuccess: () => void }) {
 
 /* ── Main Page ──────────────────────────────────────────────── */
 const TreeDataCommonsPage = () => {
-  const { sources, crawlTasks, loading, stats, refetch } = useDataCommons();
+  const { sources, crawlTasks, agents, loading, stats, refetch } = useDataCommons();
   const [search, setSearch] = useState("");
 
   const filteredSources = sources.filter(s => {
