@@ -402,7 +402,6 @@ const CountryPortalPage = () => {
             <Link to="/atlas">← Back to World Atlas</Link>
           </Button>
         </div>
-        <BottomNav />
       </PageShell>
     );
   }
