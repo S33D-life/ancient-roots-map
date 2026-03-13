@@ -1,6 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { identifyTreeSpecies } from "./services/speciesVision.ts";
+import {
+  registerAgent, getAgent, updateCapabilities,
+  submitSource, submitDataset, submitResearchTreesBulk,
+  submitSpeciesClassification, submitGeocode, submitEnrichment,
+  submitDuplicateCheck, submitCandidate, submitSpark,
+  getTasks, getContributions, getRewards,
+} from "./services/agentGarden.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
