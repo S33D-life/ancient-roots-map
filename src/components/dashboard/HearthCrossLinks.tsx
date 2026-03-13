@@ -14,7 +14,7 @@ const links = [
 ];
 
 const HearthCrossLinks = () => (
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-9 gap-2">
     {links.map((l) => (
       <Link
         key={l.to}
