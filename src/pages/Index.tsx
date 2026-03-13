@@ -55,7 +55,6 @@ const Index = () => {
         <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
       </Suspense>
       <Header />
-      <WelcomeBanner />
 
       {/* Tree Scroll Indicator — desktop only */}
       <TreeScrollIndicator
@@ -64,6 +63,7 @@ const Index = () => {
       />
 
       <main className="flex-1" style={{ paddingTop: 'var(--content-top)' }}>
+        <WelcomeBanner />
         {/* ── Discovery Row — Countries & Hives (moved up for fast access) ── */}
         <DiscoveryRow />
 
