@@ -29,6 +29,39 @@ interface CanopyEvent {
   timestamp: number;
 }
 
+const parseReasonFromText = (text: string): string | null => {
+  const match = text.match(/"reason"\s*:\s*"([^"]+)"/i);
+  return match?.[1] ?? null;
+};
+
+const getRejectReason = async (data: unknown, error: unknown): Promise<string | null> => {
+  if (data && typeof data === "object" && "reason" in data) {
+    const reason = (data as { reason?: unknown }).reason;
+    if (typeof reason === "string") return reason;
+  }
+
+  const context = (error as { context?: unknown } | null)?.context;
+  if (context instanceof Response) {
+    try {
+      const body = await context.clone().json() as { reason?: unknown };
+      if (typeof body.reason === "string") return body.reason;
+    } catch {
+      try {
+        const text = await context.clone().text();
+        const reason = parseReasonFromText(text);
+        if (reason) return reason;
+      } catch {
+        // no-op
+      }
+    }
+  }
+
+  const message = typeof (error as { message?: unknown } | null)?.message === "string"
+    ? (error as { message: string }).message
+    : "";
+  return parseReasonFromText(message);
+};
+
 export function useCanopyCheckIn() {
   const [lastEvent, setLastEvent] = useState<CanopyEvent | null>(null);
   const [active, setActive] = useState(false);
@@ -82,24 +115,37 @@ export function useCanopyCheckIn() {
         // Set cooldown immediately to prevent duplicate calls
         cooldownMapRef.current.set(tree.id, now);
 
-        const { data, error } = await supabase.functions.invoke("canopy-checkin", {
-          body: {
-            action: "checkin",
-            tree_id: tree.id,
-            season_stage: "other",
-            soft_mode: false,
-            has_offering: false,
-            latitude,
-            longitude,
-            accuracy_m: pos.coords.accuracy,
-          },
-        });
+        let data: unknown = null;
+        let invokeError: unknown = null;
 
-        if (error) {
-          // Stop retrying if daily cap reached
-          const body = data as { reason?: string } | null;
-          if (body?.reason === 'user_daily_cap' || body?.reason === 'tree_daily_cap') {
+        try {
+          const response = await supabase.functions.invoke("canopy-checkin", {
+            body: {
+              action: "checkin",
+              tree_id: tree.id,
+              season_stage: "other",
+              soft_mode: false,
+              has_offering: false,
+              latitude,
+              longitude,
+              accuracy_m: pos.coords.accuracy,
+            },
+          });
+          data = response.data;
+          invokeError = response.error;
+        } catch (error) {
+          invokeError = error;
+        }
+
+        if (invokeError) {
+          const reason = await getRejectReason(data, invokeError);
+          if (reason === "user_daily_cap" || reason === "tree_daily_cap") {
             dailyCappedRef.current = true;
+            if (watchIdRef.current !== null) {
+              navigator.geolocation.clearWatch(watchIdRef.current);
+              watchIdRef.current = null;
+            }
+            setActive(false);
           }
           continue;
         }
@@ -121,6 +167,8 @@ export function useCanopyCheckIn() {
           });
         }
       }
+    } catch {
+      // Prevent unhandled async errors from bubbling out of geolocation callback
     } finally {
       processingRef.current = false;
     }
