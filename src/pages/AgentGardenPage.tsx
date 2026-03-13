@@ -636,7 +636,9 @@ const AgentGardenPage = () => {
               </Select>
             </div>
 
-            {filteredContribs.length === 0 ? (
+            {loading ? (
+              <TableSkeleton rows={5} cols={5} />
+            ) : filteredContribs.length === 0 ? (
               <Card className="border-primary/15 bg-card/60">
                 <CardContent className="py-12 text-center">
                   <Activity className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
