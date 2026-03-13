@@ -61,6 +61,9 @@ import {
   buildRootstonePopupHtml,
   type ResearchTree,
 } from "@/utils/mapPopups";
+import { applySeasonalTint } from "@/utils/mapSeasonalTint";
+import { markTreeVisited, applyVisitedClass } from "@/utils/mapVisitedTracker";
+import { setupPopupActions } from "@/utils/mapWishHandler";
 
 interface Tree {
   id: string;
