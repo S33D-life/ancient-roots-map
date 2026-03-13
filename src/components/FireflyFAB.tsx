@@ -301,6 +301,37 @@ const FireflyFAB = () => {
         />
       </button>
 
+      {/* One-time drag hint */}
+      <AnimatePresence>
+        {showDragHint && !anyOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed pointer-events-none"
+            style={{
+              left: xy.x - 120,
+              top: xy.y - 44,
+              zIndex: Z.FLOATING - 1,
+            }}
+          >
+            <span
+              className="inline-block text-[10px] font-serif px-3 py-1.5 rounded-lg whitespace-nowrap"
+              style={{
+                background: "hsl(var(--card) / 0.92)",
+                color: "hsl(var(--muted-foreground))",
+                border: "1px solid hsl(var(--border) / 0.3)",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 2px 12px hsl(var(--primary) / 0.08)",
+              }}
+            >
+              Drag the Orb if it covers something 🍃
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Contextual guidance whispers from TEOTAG */}
       <FireflyGuidance
         fabPosition={xy}
