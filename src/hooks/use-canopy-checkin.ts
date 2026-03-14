@@ -133,7 +133,22 @@ export function useCanopyCheckIn() {
           });
           data = response.data;
           invokeError = response.error;
+
+          // supabase-js may embed the HTTP response in error.context for non-2xx
+          // Extract the JSON body so getRejectReason can read the reason field
+          if (invokeError && !data) {
+            try {
+              const ctx = (invokeError as { context?: Response }).context;
+              if (ctx instanceof Response) {
+                data = await ctx.clone().json();
+              }
+            } catch {
+              // body not JSON — ignore
+            }
+          }
         } catch (error) {
+          // Network-level or unexpected throw — treat as transient
+          console.debug("[canopy-checkin] invoke threw:", error);
           invokeError = error;
         }
 
