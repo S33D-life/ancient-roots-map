@@ -1,19 +1,29 @@
 /**
  * NFTree contract configuration — on-chain collectible minting on Base.
- * 
+ *
  * The contract address is set via VITE_NFTREE_CONTRACT_ADDRESS env var.
  * Until the contract is deployed, this will be empty and the UI will
  * show "coming soon" instead of the mint button.
  */
 
 import NFTREE_ABI_JSON from "@/contracts/NFTree.abi.json";
+import { ACTIVE_CHAIN_ID, BASE_CHAIN_ID } from "@/config/staffContract";
 
 export const NFTREE_CONTRACT_ADDRESS =
   (import.meta.env.VITE_NFTREE_CONTRACT_ADDRESS as string | undefined) || "";
 
 export const NFTREE_ABI = NFTREE_ABI_JSON;
 
-import { ACTIVE_CHAIN_ID, BASE_CHAIN_ID } from "@/config/staffContract";
+/**
+ * EIP-712 domain for the NFTree contract.
+ * Must match the constructor args: EIP712("NFTree", "1")
+ */
+export const NFTREE_EIP712_DOMAIN = {
+  name: "NFTree",
+  version: "1",
+  chainId: ACTIVE_CHAIN_ID,
+  verifyingContract: NFTREE_CONTRACT_ADDRESS,
+};
 
 /** Transaction explorer link */
 export const getNFTreeBaseScanUrl = (txHash: string) =>

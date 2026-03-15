@@ -1,14 +1,16 @@
 [
   {
     "type": "function",
-    "name": "mint",
+    "name": "mintAuthorized",
     "stateMutability": "nonpayable",
     "inputs": [
-      { "name": "to", "type": "address" },
-      { "name": "uri", "type": "string" },
-      { "name": "treeId", "type": "string" },
-      { "name": "offeringId", "type": "string" },
-      { "name": "staffTokenId", "type": "uint256" }
+      { "name": "metadataURI", "type": "string" },
+      { "name": "staffTokenId", "type": "uint256" },
+      { "name": "treeRef", "type": "bytes32" },
+      { "name": "offeringRef", "type": "bytes32" },
+      { "name": "nonce", "type": "uint256" },
+      { "name": "deadline", "type": "uint256" },
+      { "name": "signature", "type": "bytes" }
     ],
     "outputs": [{ "name": "", "type": "uint256" }]
   },
@@ -25,8 +27,8 @@
     "stateMutability": "view",
     "inputs": [{ "name": "tokenId", "type": "uint256" }],
     "outputs": [
-      { "name": "treeId", "type": "string" },
-      { "name": "offeringId", "type": "string" },
+      { "name": "treeRef", "type": "bytes32" },
+      { "name": "offeringRef", "type": "bytes32" },
       { "name": "staffTokenId", "type": "uint256" },
       { "name": "minter", "type": "address" },
       { "name": "mintedAt", "type": "uint256" }
@@ -54,15 +56,29 @@
     "outputs": [{ "name": "", "type": "uint256" }]
   },
   {
+    "type": "function",
+    "name": "usedNonces",
+    "stateMutability": "view",
+    "inputs": [{ "name": "", "type": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bool" }]
+  },
+  {
+    "type": "function",
+    "name": "staffContract",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
     "type": "event",
     "name": "NFTreeMinted",
     "inputs": [
       { "name": "tokenId", "type": "uint256", "indexed": true },
       { "name": "minter", "type": "address", "indexed": true },
-      { "name": "treeId", "type": "string", "indexed": false },
-      { "name": "offeringId", "type": "string", "indexed": false },
       { "name": "staffTokenId", "type": "uint256", "indexed": false },
-      { "name": "tokenURI", "type": "string", "indexed": false }
+      { "name": "treeRef", "type": "bytes32", "indexed": false },
+      { "name": "offeringRef", "type": "bytes32", "indexed": false },
+      { "name": "metadataURI", "type": "string", "indexed": false }
     ]
   }
 ]
