@@ -873,11 +873,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     trees: trees as any,
     onSpeciesChange: setSpecies,
     onContextLabel: setContextLabel,
-    onShowRootstones: setShowRootstones,
+    onShowRootstones: (v: boolean) => setLayer("rootstones", v),
     onRootstoneCountryFilter: setRootstoneCountryFilter,
     onRootstoneTagFilter: setRootstoneTagFilter,
-    onShowRootstoneTrees: setShowRootstoneTrees,
-    onShowRootstoneGroves: setShowRootstoneGroves,
+    onShowRootstoneTrees: (v: boolean) => setLayer("rootstoneTrees", v),
+    onShowRootstoneGroves: (v: boolean) => setLayer("rootstoneGroves", v),
     onJourneyEnd,
   });
 
