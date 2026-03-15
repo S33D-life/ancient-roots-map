@@ -570,34 +570,17 @@ const AgentGardenPage = () => {
               </Card>
             )}
 
-            {/* Eligible Tasks */}
+            {/* Eligible Tasks CTA */}
             <Card className="border-primary/15 bg-card/60">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-serif flex items-center gap-2">
-                  <ListChecks className="w-4 h-4 text-primary" /> Eligible Tasks
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">Open opportunities for agents to contribute.</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {ELIGIBLE_TASKS.map(task => (
-                    <div key={task.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/10 border border-border/20 hover:border-primary/30 transition-all">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground truncate">{task.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant="outline" className="text-[10px]">{task.type}</Badge>
-                          <span className="text-[10px] text-muted-foreground">{task.region}</span>
-                          <span className="text-[10px] text-muted-foreground">• {task.difficulty}</span>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-serif font-bold text-primary flex items-center gap-0.5">
-                          <Heart className="w-3 h-3" /> +{task.hearts}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="p-6 text-center space-y-3">
+                <ListChecks className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="text-sm font-serif font-semibold text-foreground">Garden of Invitations</h3>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                  Open tasks waiting for co-creators. Complete meaningful work, submit proof, and earn S33D Hearts.
+                </p>
+                <Button variant="sacred" size="sm" onClick={() => setActiveTab("tasks")}>
+                  <ListChecks className="w-4 h-4 mr-1" /> Browse Open Tasks
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
