@@ -451,8 +451,15 @@ export async function fetchSourceTrees(
   bbox: BBox,
   signal?: AbortSignal,
 ): Promise<ExternalTreeCandidate[]> {
+  // Validate bbox at the ingestion boundary
+  const safeBBox = sanitizeBBox(bbox);
+  if (!safeBBox) {
+    console.warn(`[ExternalTrees] ${source.name}: invalid bbox rejected`, bbox);
+    return [];
+  }
+
   // Check cache first
-  const cached = getCached(source.id, bbox, source.cacheTtlMs);
+  const cached = getCached(source.id, safeBBox, source.cacheTtlMs);
   if (cached) return cached;
 
   const fetcher = FETCHER_MAP[source.type];
