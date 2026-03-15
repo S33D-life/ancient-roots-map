@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { TreeDeciduous, Heart, Sparkles, Sprout, Map, BookOpen, ChevronRight, Hexagon, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserOfferingCount } from "@/repositories/offerings";
 
 interface GroveIdentityCardProps {
   userId: string;
@@ -34,10 +35,10 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const [treesRes, checkinsRes, offeringsRes, heartsRes, plantsRes] = await Promise.all([
+      const [treesRes, checkinsRes, offeringsMade, heartsRes, plantsRes] = await Promise.all([
         supabase.from("trees").select("id, created_at", { count: "exact", head: false }).eq("created_by", userId).order("created_at", { ascending: true }).limit(1),
         supabase.from("tree_checkins").select("tree_id", { count: "exact" }).eq("user_id", userId),
-        supabase.from("offerings").select("id", { count: "exact", head: true }).eq("created_by", userId),
+        getUserOfferingCount(userId),
         supabase.from("user_heart_balances").select("s33d_hearts, species_hearts, influence_tokens").eq("user_id", userId).maybeSingle(),
         supabase.from("greenhouse_plants").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
@@ -52,7 +53,7 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
       setStats({
         treesLogged: treesRes.count ?? 0,
         treesVisited: uniqueVisited,
-        offeringsMade: offeringsRes.count ?? 0,
+        offeringsMade,
         heartsBalance: heartsRes.data?.s33d_hearts ?? 0,
         speciesHearts: heartsRes.data?.species_hearts ?? 0,
         influenceTokens: heartsRes.data?.influence_tokens ?? 0,

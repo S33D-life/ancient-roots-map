@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserOfferingCount } from "@/repositories/offerings";
 import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -53,14 +54,14 @@ const DashboardVault = ({ userId }: Props) => {
 
   useEffect(() => {
     const fetchCounts = async () => {
-      const [treesRes, offeringsRes, plantsRes, wishlistRes] = await Promise.all([
+      const [treesRes, offeringsCount, plantsRes, wishlistRes] = await Promise.all([
         supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
-        supabase.from("offerings").select("*", { count: "exact", head: true }).eq("created_by", userId),
+        getUserOfferingCount(userId),
         supabase.from("greenhouse_plants").select("*", { count: "exact", head: true }).eq("user_id", userId),
         supabase.from("tree_wishlist").select("*", { count: "exact", head: true }).eq("user_id", userId),
       ]);
       setTreeCount(treesRes.count || 0);
-      setOfferingCount(offeringsRes.count || 0);
+      setOfferingCount(offeringsCount);
       setPlantCount(plantsRes.count || 0);
       setWishlistCount(wishlistRes.count || 0);
       setLoading(false);
