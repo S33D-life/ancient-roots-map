@@ -127,6 +127,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const mapStatusRef = useRef(mapStatus);
+  const mapRenderCountRef = useRef(0);
   useEffect(() => { mapStatusRef.current = mapStatus; }, [mapStatus]);
   useEffect(() => {
     if (mapStatus === "error") {
@@ -138,6 +139,18 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [debugInfo, setDebugInfo] = useState({ style: false, webgl: false, width: 0, height: 0, error: "" });
   const [showDebug, setShowDebug] = useState(false);
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
+
+  mapRenderCountRef.current += 1;
+  if (mapRenderCountRef.current <= 8) {
+    console.info("[MapDebug] Map component render", {
+      renderCount: mapRenderCountRef.current,
+      route: window.location.pathname,
+      mapStatus,
+      activeBranch: mapStatus === "leaflet" ? "leaflet-recovery" : "map-canvas",
+      hasMapContainerRef: !!mapContainer.current,
+      hasMapInstance: !!map.current,
+    });
+  }
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
   const [lineageFilter, setLineageFilter] = useState<string>("all");
@@ -265,8 +278,38 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   // Initialize map — default to Leaflet
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    console.info("[MapDebug] Map init effect start", {
+      hasContainer: !!mapContainer.current,
+      hasMapInstance: !!map.current,
+      route: window.location.pathname,
+      hidden: document.hidden,
+    });
+
+    if (!mapContainer.current) {
+      console.info("[MapDebug] early return branch", { branch: "Map init skipped: missing containerRef" });
+      return;
+    }
+
+    if (map.current) {
+      console.info("[MapDebug] early return branch", { branch: "Map init skipped: map instance already exists" });
+      return;
+    }
+
+    const rect = mapContainer.current.getBoundingClientRect();
+    const cs = window.getComputedStyle(mapContainer.current);
+    console.info("[MapDebug] Map container probe", {
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+      display: cs.display,
+      visibility: cs.visibility,
+      opacity: cs.opacity,
+      position: cs.position,
+      zIndex: cs.zIndex,
+      overflow: cs.overflow,
+    });
+
     setMapStatus("leaflet");
+    console.info("[MapDebug] branch", { branch: "set mapStatus=leaflet (MapLibreRecoveryMap path)" });
   }, []);
 
   // Resize map on visibility/tab changes
@@ -653,6 +696,11 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   // ── Recovery mode: MapLibre takes priority for visible map ──
   if (mapStatus === "leaflet") {
+    console.info("[MapDebug] early return branch", {
+      branch: "Map -> mapStatus=leaflet -> MapLibreRecoveryMap",
+      route: window.location.pathname,
+    });
+
     return (
       <div className="absolute inset-0 z-[1]" style={{ height: '100dvh' }}>
         <Suspense fallback={

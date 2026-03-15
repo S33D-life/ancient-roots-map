@@ -10,6 +10,7 @@ import "leaflet/dist/leaflet.css";
 
 const HARDCODED_CENTER: [number, number] = [51.5074, -0.1278];
 const HARDCODED_ZOOM = 5;
+const MAP_DEBUG_PREFIX = "[MapDebug]";
 
 interface DiagState {
   phase: string;
@@ -23,6 +24,7 @@ interface DiagState {
   tileCount2000: number;
   hasLeafletContainer: boolean;
   hasControlContainer: boolean;
+  hasMapPane: boolean;
   hasTilePane: boolean;
   error: string;
   // Environment diagnostics
@@ -39,9 +41,17 @@ interface DiagState {
 
 function detectEnv(): string {
   const url = window.location.href;
-  if (url.includes("preview--") || url.includes("lovable.app") && url.includes("preview")) return "preview";
+  if (url.includes("preview--") || (url.includes("lovable.app") && url.includes("preview"))) return "preview";
   if (url.includes("localhost") || url.includes("127.0.0.1")) return "dev";
   return "prod";
+}
+
+function mapDebug(message: string, payload?: unknown) {
+  if (payload === undefined) {
+    console.info(`${MAP_DEBUG_PREFIX} ${message}`);
+    return;
+  }
+  console.info(`${MAP_DEBUG_PREFIX} ${message}`, payload);
 }
 
 const INIT: DiagState = {
@@ -56,6 +66,7 @@ const INIT: DiagState = {
   tileCount2000: -1,
   hasLeafletContainer: false,
   hasControlContainer: false,
+  hasMapPane: false,
   hasTilePane: false,
   error: "",
   env: detectEnv(),
@@ -69,7 +80,7 @@ const INIT: DiagState = {
   mountAttempt: 0,
 };
 
-function inspectParentChain(el: HTMLElement | null, levels = 4): string[] {
+function inspectParentChain(el: HTMLElement | null, levels = 3): string[] {
   const info: string[] = [];
   let current = el?.parentElement ?? null;
   for (let i = 0; i < levels && current; i++) {
@@ -92,54 +103,111 @@ function countTileImages(container: HTMLElement): number {
 const UltraBareLeafletTest = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const renderCountRef = useRef(0);
   const [diag, setDiag] = useState<DiagState>(INIT);
 
+  renderCountRef.current += 1;
+  if (renderCountRef.current <= 6) {
+    mapDebug("UltraBareLeafletTest render", {
+      renderCount: renderCountRef.current,
+      route: window.location.pathname,
+      env: detectEnv(),
+      pageVisible: !document.hidden,
+    });
+  }
+
   useEffect(() => {
+    mapDebug("UltraBareLeafletTest init effect start");
+
     const el = containerRef.current;
-    if (!el) return;
+    if (!el) {
+      mapDebug("early return: containerRef missing");
+      return;
+    }
 
     let cancelled = false;
+    let mapCreatedAt: number | null = null;
     const timers: number[] = [];
-    let mountAttempt = 0;
 
     const logAndSet = (updates: Partial<DiagState>) => {
-      console.info("[UltraBare]", updates);
+      mapDebug("diag update", updates);
       if (!cancelled) setDiag((d) => ({ ...d, ...updates }));
     };
 
-    // Log full environment at mount
-    console.info("[UltraBare] === ENVIRONMENT ===", {
+    const logDomProbe = (stage: string) => {
+      const cs = window.getComputedStyle(el);
+      const rect = el.getBoundingClientRect();
+      const hiddenAncestor = el.closest("[hidden], [aria-hidden='true']");
+      const probe = {
+        stage,
+        route: window.location.pathname,
+        container: {
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          display: cs.display,
+          visibility: cs.visibility,
+          opacity: cs.opacity,
+          position: cs.position,
+          zIndex: cs.zIndex,
+          overflow: cs.overflow,
+        },
+        parentChain: inspectParentChain(el, 3),
+        selectors: {
+          leafletContainer: !!el.querySelector(".leaflet-container") || el.classList.contains("leaflet-container"),
+          controlContainer: !!el.querySelector(".leaflet-control-container"),
+          mapPane: !!el.querySelector(".leaflet-map-pane"),
+          tilePane: !!el.querySelector(".leaflet-tile-pane"),
+          tileImages: el.querySelectorAll(".leaflet-tile-pane img").length,
+        },
+        hiddenAncestor: hiddenAncestor ? `${hiddenAncestor.tagName}.${hiddenAncestor.className}` : null,
+      };
+      mapDebug("DOM probe", probe);
+
+      logAndSet({
+        hasLeafletContainer: probe.selectors.leafletContainer,
+        hasControlContainer: probe.selectors.controlContainer,
+        hasMapPane: probe.selectors.mapPane,
+        hasTilePane: probe.selectors.tilePane,
+      });
+    };
+
+    mapDebug("environment snapshot", {
       env: detectEnv(),
-      url: window.location.href,
-      iframe: window.self !== window.top,
-      ua: navigator.userAgent,
+      currentUrl: window.location.href,
+      isIframe: window.self !== window.top,
+      userAgent: navigator.userAgent,
       dpr: window.devicePixelRatio,
       viewport: `${window.innerWidth}x${window.innerHeight}`,
-      hidden: document.hidden,
+      pageVisible: !document.hidden,
       visibilityState: document.visibilityState,
     });
 
     const tryInit = (attempt: number) => {
-      mountAttempt = attempt;
       const w = el.offsetWidth;
       const h = el.offsetHeight;
       const rect = el.getBoundingClientRect();
       const cs = window.getComputedStyle(el);
       const size = `${w}x${h}`;
 
-      console.info("[UltraBare] container check (attempt " + attempt + "):", {
-        size, rect: { w: rect.width, h: rect.height, t: rect.top, l: rect.left },
-        display: cs.display, visibility: cs.visibility, opacity: cs.opacity,
-        position: cs.position, zIndex: cs.zIndex, overflow: cs.overflow,
-        transform: cs.transform,
+      mapDebug("map init effect start", {
+        attempt,
+        containerRefExists: !!containerRef.current,
+        containerSize: size,
+        rect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left },
+        display: cs.display,
+        visibility: cs.visibility,
+        opacity: cs.opacity,
+        position: cs.position,
+        zIndex: cs.zIndex,
+        overflow: cs.overflow,
       });
 
-      const chain = inspectParentChain(el, 4);
+      const chain = inspectParentChain(el, 3);
       logAndSet({ containerSize: size, parentChain: chain, phase: "measured", mountAttempt: attempt });
 
       if (w === 0 || h === 0) {
+        mapDebug("early return: container-zero-size", { attempt, size });
         logAndSet({ error: `Container is ${size} — cannot init Leaflet (attempt ${attempt})` });
-        // Retry once after delay if first attempt
         if (attempt < 2) {
           timers.push(window.setTimeout(() => {
             if (!cancelled) tryInit(attempt + 1);
@@ -148,13 +216,14 @@ const UltraBareLeafletTest = () => {
         return;
       }
 
-      // Clean up previous map if retrying
       if (mapRef.current) {
+        mapDebug("cleanup previous map instance before retry", { attempt });
         mapRef.current.remove();
         mapRef.current = null;
       }
 
       try {
+        mapDebug("calling L.map(...)", { attempt });
         const map = L.map(el, {
           center: HARDCODED_CENTER,
           zoom: HARDCODED_ZOOM,
@@ -162,35 +231,56 @@ const UltraBareLeafletTest = () => {
           attributionControl: true,
         });
 
+        mapCreatedAt = performance.now();
         mapRef.current = map;
+        mapDebug("L.map(...) succeeded");
         logAndSet({ leafletInited: true, phase: "leaflet-created" });
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        const tileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap contributors",
-        }).addTo(map);
+        });
+
+        tileLayer.on("loading", () => mapDebug("tile event: loading"));
+        tileLayer.on("tileloadstart", (event: any) => {
+          mapDebug("tile event: tileloadstart", {
+            src: event?.tile?.src || null,
+            coords: event?.coords || null,
+          });
+        });
+        tileLayer.on("tileload", (event: any) => {
+          mapDebug("tile event: tileload", { src: event?.tile?.src || null });
+        });
+        tileLayer.on("load", () => mapDebug("tile event: load"));
+        tileLayer.on("tileerror", (event: any) => {
+          mapDebug("tile event: tileerror", {
+            src: event?.tile?.src || null,
+            error: event?.error || null,
+          });
+        });
+
+        tileLayer.addTo(map);
+        mapDebug("tile layer added");
 
         L.marker(HARDCODED_CENTER).addTo(map).bindPopup("🌿 Bare map is alive");
 
         map.whenReady(() => {
           if (cancelled) return;
+          mapDebug("map.whenReady fired", {
+            center: map.getCenter(),
+            zoom: map.getZoom(),
+          });
           logAndSet({ whenReadyFired: true, phase: "ready" });
+          logDomProbe("whenReady");
         });
 
-        const checkDom = () => {
-          logAndSet({
-            hasLeafletContainer: !!el.querySelector(".leaflet-container") || el.classList.contains("leaflet-container"),
-            hasControlContainer: !!el.querySelector(".leaflet-control-container"),
-            hasTilePane: !!el.querySelector(".leaflet-tile-pane"),
-          });
-        };
-        requestAnimationFrame(checkDom);
+        requestAnimationFrame(() => logDomProbe("raf-post-init"));
 
         const countAt = (ms: number, key: keyof DiagState) => {
           const t = window.setTimeout(() => {
             if (cancelled) return;
             const count = countTileImages(el);
-            console.info(`[UltraBare] tile <img> count @${ms}ms:`, count);
+            mapDebug(`tile <img> count @${ms}ms`, { count });
             setDiag((d) => ({ ...d, [key]: count }));
           }, ms);
           timers.push(t);
@@ -201,22 +291,22 @@ const UltraBareLeafletTest = () => {
         countAt(1000, "tileCount1000");
         countAt(2000, "tileCount2000");
 
-        // invalidateSize bursts — critical for iframe/preview environments
         requestAnimationFrame(() => map.invalidateSize());
         [100, 300, 500, 1000, 1500, 3000].forEach((ms) => {
           timers.push(window.setTimeout(() => {
-            if (!cancelled && mapRef.current) mapRef.current.invalidateSize();
+            if (!cancelled && mapRef.current) {
+              mapDebug("invalidateSize()", { atMs: ms });
+              mapRef.current.invalidateSize();
+            }
           }, ms));
         });
-
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.error("[UltraBare] init failed:", msg, err);
+        mapDebug("L.map(...) failed", { error: msg });
         logAndSet({ error: msg, phase: "error" });
       }
     };
 
-    // Preview-safe: delay 300ms before even observing, to let iframe settle
     const isPreview = detectEnv() === "preview" || window.self !== window.top;
     const initDelay = isPreview ? 300 : 0;
 
@@ -228,6 +318,7 @@ const UltraBareLeafletTest = () => {
         if (initDone || cancelled) return;
         for (const entry of entries) {
           const { width, height } = entry.contentRect;
+          mapDebug("ResizeObserver tick", { width, height });
           if (width > 0 && height > 0) {
             initDone = true;
             ro.disconnect();
@@ -238,22 +329,22 @@ const UltraBareLeafletTest = () => {
       });
       ro.observe(el);
 
-      // Fallback: try anyway after 2s
       const fallback = window.setTimeout(() => {
         if (initDone || cancelled) return;
         initDone = true;
         ro.disconnect();
-        console.warn("[UltraBare] ResizeObserver timeout — forcing init");
+        mapDebug("ResizeObserver timeout — forcing init");
         tryInit(1);
       }, 2000);
       timers.push(fallback);
     }, initDelay);
     timers.push(startTimer);
 
-    // Listen for visibility changes (tab switching in preview)
     const onVisChange = () => {
-      logAndSet({ pageVisible: !document.hidden });
-      if (!document.hidden && mapRef.current) {
+      const pageVisible = !document.hidden;
+      logAndSet({ pageVisible });
+      mapDebug("visibilitychange", { pageVisible, state: document.visibilityState });
+      if (pageVisible && mapRef.current) {
         mapRef.current.invalidateSize();
       }
     };
@@ -263,6 +354,14 @@ const UltraBareLeafletTest = () => {
       cancelled = true;
       document.removeEventListener("visibilitychange", onVisChange);
       timers.forEach((t) => window.clearTimeout(t));
+
+      const lifetimeMs = mapCreatedAt ? Math.round(performance.now() - mapCreatedAt) : null;
+      mapDebug("cleanup", {
+        ranImmediately: lifetimeMs !== null && lifetimeMs < 250,
+        lifetimeMs,
+        hadMap: !!mapRef.current,
+      });
+
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -278,7 +377,7 @@ const UltraBareLeafletTest = () => {
         zIndex: 9999,
         display: "flex",
         flexDirection: "column",
-        background: "#1a1a1a",
+        background: "hsl(0 0% 10%)",
       }}
     >
       {/* Diagnostic badge */}
@@ -288,44 +387,45 @@ const UltraBareLeafletTest = () => {
           top: 8,
           left: 8,
           zIndex: 10001,
-          background: "rgba(0,0,0,0.9)",
-          color: "#0f0",
+          background: "hsl(0 0% 0% / 0.9)",
+          color: "hsl(120 100% 50%)",
           fontFamily: "monospace",
           fontSize: 10,
           lineHeight: 1.5,
           padding: "6px 10px",
           borderRadius: 6,
-          border: "2px solid #0f0",
+          border: "2px solid hsl(120 100% 50%)",
           maxWidth: "90vw",
           overflow: "auto",
           maxHeight: "45vh",
           pointerEvents: "none",
         }}
       >
-        <div style={{ color: "#ff0", fontWeight: "bold", marginBottom: 2 }}>
+        <div style={{ color: "hsl(60 100% 50%)", fontWeight: "bold", marginBottom: 2 }}>
           🗺️ UltraBareLeafletTest — DIAGNOSTIC
         </div>
-        <div>ENV: <b style={{ color: diag.env === "preview" ? "#f90" : "#0f0" }}>{diag.env}</b></div>
-        <div>IFRAME: <b style={{ color: diag.isIframe ? "#f90" : "#0f0" }}>{diag.isIframe ? "YES" : "NO"}</b></div>
-        <div>PAGE VISIBLE: <b style={{ color: diag.pageVisible ? "#0f0" : "#f55" }}>{diag.pageVisible ? "YES" : "NO"}</b></div>
+        <div>ENV: <b style={{ color: diag.env === "preview" ? "hsl(30 100% 50%)" : "hsl(120 100% 50%)" }}>{diag.env}</b></div>
+        <div>IFRAME: <b style={{ color: diag.isIframe ? "hsl(30 100% 50%)" : "hsl(120 100% 50%)" }}>{diag.isIframe ? "YES" : "NO"}</b></div>
+        <div>PAGE VISIBLE: <b style={{ color: diag.pageVisible ? "hsl(120 100% 50%)" : "hsl(0 100% 65%)" }}>{diag.pageVisible ? "YES" : "NO"}</b></div>
         <div>VIEWPORT: {diag.viewportW}x{diag.viewportH} @{diag.dpr}x</div>
         <div>CONTAINER: <b>{diag.containerSize}</b></div>
         <div>MOUNT ATTEMPT: {diag.mountAttempt}</div>
         <div>PHASE: {diag.phase}</div>
-        <hr style={{ borderColor: "#333", margin: "3px 0" }} />
+        <hr style={{ borderColor: "hsl(0 0% 20%)", margin: "3px 0" }} />
         <div>LEAFLET INIT: {diag.leafletInited ? "✅" : "❌"}</div>
         <div>WHEN READY: {diag.whenReadyFired ? "✅" : "❌"}</div>
         <div>.leaflet-container: {diag.hasLeafletContainer ? "✅" : "❌"}</div>
         <div>.control-container: {diag.hasControlContainer ? "✅" : "❌"}</div>
+        <div>.map-pane: {diag.hasMapPane ? "✅" : "❌"}</div>
         <div>.tile-pane: {diag.hasTilePane ? "✅" : "❌"}</div>
         <div>TILE IMGS: @0ms={diag.tileCount0} @500={diag.tileCount500} @1k={diag.tileCount1000} @2k={diag.tileCount2000}</div>
-        <hr style={{ borderColor: "#333", margin: "3px 0" }} />
-        <div style={{ color: "#888", fontSize: 9 }}>URL: {diag.currentUrl.slice(0, 60)}</div>
-        <div style={{ color: "#888", fontSize: 9 }}>UA: {diag.userAgent}</div>
+        <hr style={{ borderColor: "hsl(0 0% 20%)", margin: "3px 0" }} />
+        <div style={{ color: "hsl(0 0% 55%)", fontSize: 9 }}>URL: {diag.currentUrl.slice(0, 72)}</div>
+        <div style={{ color: "hsl(0 0% 55%)", fontSize: 9 }}>UA: {diag.userAgent}</div>
         {diag.parentChain.map((p, i) => (
-          <div key={i} style={{ color: "#aaa", fontSize: 9 }}>{p}</div>
+          <div key={i} style={{ color: "hsl(0 0% 66%)", fontSize: 9 }}>{p}</div>
         ))}
-        {diag.error && <div style={{ color: "#f55", fontWeight: "bold" }}>ERROR: {diag.error}</div>}
+        {diag.error && <div style={{ color: "hsl(0 100% 65%)", fontWeight: "bold" }}>ERROR: {diag.error}</div>}
       </div>
 
       {/* Map container */}
@@ -336,8 +436,8 @@ const UltraBareLeafletTest = () => {
           position: "relative",
           minHeight: "60vh",
           width: "100%",
-          background: "#336699",
-          border: "3px solid #ff00ff",
+          background: "hsl(210 45% 40%)",
+          border: "2px solid hsl(330 100% 50%)",
           zIndex: 1,
         }}
       />
