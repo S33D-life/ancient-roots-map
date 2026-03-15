@@ -345,19 +345,19 @@ const CouncilOfLifePage = () => {
               Council → Contribution → Harvest → Exchange → New Encounters
             </p>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => navigate("/value-tree")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.VALUE_TREE)} className="loop-card font-serif">
                 <span className="text-primary">❤️ Value Tree</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">See how Hearts flow</p>
               </button>
-              <button onClick={() => navigate("/support")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.SUPPORT)} className="loop-card font-serif">
                 <span className="text-primary">🌱 Support S33D</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Contribute beyond governance</p>
               </button>
-              <button onClick={() => navigate("/map")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.MAP)} className="loop-card font-serif">
                 <span className="text-primary">🗺️ Atlas</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Map an Ancient Friend</p>
               </button>
-              <button onClick={() => navigate("/library")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.LIBRARY)} className="loop-card font-serif">
                 <span className="text-primary">📚 Library</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Browse offerings & stories</p>
               </button>
