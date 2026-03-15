@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import RoadmapLinker from "@/components/bugs/RoadmapLinker";
+import { ROADMAP_FEATURES, STAGE_META } from "@/data/roadmap-forest";
 
 type BugReport = {
   id: string;

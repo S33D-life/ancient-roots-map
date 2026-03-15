@@ -59,11 +59,6 @@ const Map = ({
     });
   }, []);
 
-  console.info("[MapDebug] Map render → LeafletFallbackMap", {
-    treeCount: trees.length,
-    hasInitialTreeId: !!initialTreeId,
-    hasInitialLat: initialLat !== undefined,
-  });
 
   return (
     <div className="absolute inset-0 z-[1]" style={{ height: "100dvh" }}>
