@@ -3,13 +3,14 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
 import { Z, SAFE_ZONES } from "@/lib/z-index";
+import { ROUTES } from "@/lib/routes";
 
 const NAV_ITEMS = [
-  { to: "/map", icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree"] },
-  { to: "/value-tree", icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/harvest", "/cosmic", "/how-hearts-work", "/patron-offering"] },
+  { to: ROUTES.MAP, icon: TreeDeciduous, label: "Map", matchPrefixes: ["/map", "/hives", "/hive/", "/tree/", "/discovery", "/add-tree"] },
+  { to: ROUTES.VALUE_TREE, icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/harvest", "/cosmic", "/how-hearts-work", "/patron-offering"] },
   // Center slot reserved for Add button
-  { to: "/library", icon: BookOpen, label: "Heartwood", matchPrefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger"] },
-  { to: "/council-of-life", icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas", "/support", "/press"] },
+  { to: ROUTES.LIBRARY, icon: BookOpen, label: "Heartwood", matchPrefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger"] },
+  { to: ROUTES.COUNCIL, icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas", "/support", "/press"] },
 ] as const;
 
 const BottomNav = () => {
