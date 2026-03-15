@@ -310,57 +310,63 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [lineageFilter, setLineageFilter] = useState("all");
   const [projectFilter, setProjectFilter] = useState("all");
 
-  // Layer visibility toggles
-  const [showSeeds, setShowSeeds] = useState(() => !SAFE_BARE_MAP_MODE);
-  const [showGroves, setShowGroves] = useState(false);
-  const [showRootThreads, setShowRootThreads] = useState(false);
-  const [showMycelialNetwork, setShowMycelialNetwork] = useState(() => {
-    if (SAFE_BARE_MAP_MODE) return false;
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("mycelial") === "on";
-    } catch {
-      return false;
+  // Layer visibility toggles — consolidated via useMapLayerState reducer
+  const { layers, toggle, setLayer, batchUpdate } = useMapLayerState();
+
+  // Override initial state for bare-map mode
+  useEffect(() => {
+    if (SAFE_BARE_MAP_MODE) {
+      batchUpdate({ seeds: false, mycelialNetwork: false, researchLayer: false });
     }
-  });
+  }, [SAFE_BARE_MAP_MODE, batchUpdate]);
+
+  // Convenience aliases for readability (zero-cost: just property reads)
+  const showSeeds = layers.seeds;
+  const showGroves = layers.groves;
+  const showRootThreads = layers.rootThreads;
+  const showMycelialNetwork = layers.mycelialNetwork;
+  const showOfferingGlow = layers.offeringGlow;
+  const showHarvestLayer = layers.harvestLayer;
+  const showAncientHighlight = layers.ancientHighlight;
+  const showExternalTrees = layers.externalTrees;
+  const showBirdsongHeat = layers.birdsongHeat;
+  const showHiveLayer = layers.hiveLayer;
+  const showResearchLayer = layers.researchLayer;
+  const showRootstones = layers.rootstones;
+  const showRootstoneTrees = layers.rootstoneTrees;
+  const showRootstoneGroves = layers.rootstoneGroves;
+  const showImmutableLayer = layers.immutableLayer;
+  const showRecentVisits = layers.recentVisits;
+  const showSeedTraces = layers.seedTraces;
+  const showSharedTrees = layers.sharedTrees;
+  const showTribeActivity = layers.tribeActivity;
+  const showBloomedSeeds = layers.bloomedSeeds;
+  const showSeedTrail = layers.seedTrail;
+  const showHeartGlow = layers.heartGlow;
+  const showChurchyards = layers.churchyards;
+  const showWaterways = layers.waterways;
+  const showFootpaths = layers.footpaths;
+  const showHeritage = layers.heritage;
+  const showCastles = layers.castles;
+  const showLibraries = layers.libraries;
+  const showBookshops = layers.bookshops;
+  const showBotanicalGardens = layers.botanicalGardens;
+  const showBloomingClock = layers.bloomingClock;
+  const bloomConstellationMode = layers.bloomConstellationMode;
+  const clearView = layers.clearView;
+  const groveViewActive = layers.groveView;
+
+  // Non-boolean layer state (not part of reducer)
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [showOfferingGlow, setShowOfferingGlow] = useState(false);
-  const [showHarvestLayer, setShowHarvestLayer] = useState(false);
-  const [showAncientHighlight, setShowAncientHighlight] = useState(false);
   const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
   const harvestLayerRef = useRef<L.LayerGroup | null>(null);
   const ancientHighlightLayerRef = useRef<L.LayerGroup | null>(null);
-  const [showExternalTrees, setShowExternalTrees] = useState(false);
-  const [showBirdsongHeat, setShowBirdsongHeat] = useState(false);
-  const [showHiveLayer, setShowHiveLayer] = useState(false);
-  const [showResearchLayer, setShowResearchLayer] = useState(() => {
-    if (SAFE_BARE_MAP_MODE) return false;
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('research') === 'off') return false;
-      return true; // On by default so all country data is visible
-    } catch { return true; }
-  });
-  const [showRootstones, setShowRootstones] = useState(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("rootstones") === "on" || Boolean(params.get("rootstoneId"));
-    } catch { return false; }
-  });
-  const [showRootstoneTrees, setShowRootstoneTrees] = useState(true);
-  const [showRootstoneGroves, setShowRootstoneGroves] = useState(true);
   const [rootstoneCountryFilter, setRootstoneCountryFilter] = useState<string | null>(null);
   const [rootstoneTagFilter, setRootstoneTagFilter] = useState<string[]>([]);
   const [rootstoneCount, setRootstoneCount] = useState(0);
   const [researchTreeCount, setResearchTreeCount] = useState(0);
   const [researchLoading, setResearchLoading] = useState(false);
-  const [showImmutableLayer, setShowImmutableLayer] = useState(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('immutable') === 'on';
-    } catch { return false; }
-  });
   const [immutableTreeCount, setImmutableTreeCount] = useState(0);
   const [immutableLoading, setImmutableLoading] = useState(false);
   const immutableLayerRef = useRef<L.MarkerClusterGroup | null>(null);
@@ -368,39 +374,15 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
   const [atlasFilterOpen, setAtlasFilterOpen] = useState(false);
-  // (collapsed state now managed inside AtlasFilter)
-  const [showRecentVisits, setShowRecentVisits] = useState(false);
-  const [showSeedTraces, setShowSeedTraces] = useState(false);
-  const [showSharedTrees, setShowSharedTrees] = useState(false);
-  const [showTribeActivity, setShowTribeActivity] = useState(false);
-  const [showBloomedSeeds, setShowBloomedSeeds] = useState(false);
-  const [showSeedTrail, setShowSeedTrail] = useState(false);
   const [seedTrailCount, setSeedTrailCount] = useState(0);
   const seedTrailLayerRef = useRef<L.LayerGroup | null>(null);
-  const [showHeartGlow, setShowHeartGlow] = useState(false);
-  const [showChurchyards, setShowChurchyards] = useState(false);
-  const [showWaterways, setShowWaterways] = useState(false);
-  const [showFootpaths, setShowFootpaths] = useState(false);
-  const [showHeritage, setShowHeritage] = useState(false);
-  const [showCastles, setShowCastles] = useState(false);
-  const [showLibraries, setShowLibraries] = useState(false);
-  const [showBookshops, setShowBookshops] = useState(false);
-  const [showBotanicalGardens, setShowBotanicalGardens] = useState(false);
   const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
   const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
-  
-  // Clear View — hide non-essential UI overlays for distraction-free browsing
-  const [clearView, setClearView] = useState(() => SAFE_DISABLE_NONESSENTIAL_OVERLAYS || SAFE_BARE_MAP_MODE);
-
-  // GroveView — Living Earth Mode
-  const [groveViewActive, setGroveViewActive] = useState(false);
 
   // Blooming Clock — Global Seasonal Atlas
   const { foods: foodCycles, loading: foodCyclesLoading } = useFoodCycles();
-  const [showBloomingClock, setShowBloomingClock] = useState(false);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
   const [bloomStageFilter, setBloomStageFilter] = useState<CycleStage | "all">("all");
-  const [bloomConstellationMode, setBloomConstellationMode] = useState(false);
   const [bloomMonth, setBloomMonth] = useState(new Date().getMonth() + 1);
   const [bloomRegionStages, setBloomRegionStages] = useState<RegionStageInfo[]>([]);
 
