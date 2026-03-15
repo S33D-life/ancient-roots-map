@@ -234,6 +234,34 @@ export function TaskBoard() {
                 </div>
               )}
 
+              {/* Learn before contributing */}
+              {(() => {
+                const skillSlugs = CATEGORY_SKILLS[selectedTask.category] || [];
+                const relatedSkills = skillSlugs.map(slug => SKILLS.find(s => s.slug === slug)).filter(Boolean);
+                if (relatedSkills.length === 0) return null;
+                return (
+                  <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
+                    <p className="text-xs font-medium text-primary mb-2 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5" /> Learn before contributing
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {relatedSkills.map(skill => skill && (
+                        <a
+                          key={skill.slug}
+                          href={`/skills/${skill.slug}.md`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-card/60 border border-border/30 text-foreground/80 hover:bg-card hover:border-primary/30 transition-colors"
+                        >
+                          {skill.icon}
+                          <span>{skill.title}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Reward */}
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/15">
