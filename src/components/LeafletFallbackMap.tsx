@@ -671,11 +671,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       title: "Mycelial Whispers",
       icon: "✦",
       layers: [
-        { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => setShowSeeds(v => !v) },
-        { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => setShowHeartGlow(v => !v), accent: "0, 65%, 55%" },
-        { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => setShowBirdsongHeat(v => !v), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
-        { key: "mycelial-network", label: "🕸️ Mycelial Network", active: showMycelialNetwork, toggle: () => setShowMycelialNetwork(v => !v), extra: showMycelialNetwork ? `${mycelialConnections.length}` : "off" },
-        { key: "hive-layer", label: "🐝 Species Hives", active: showHiveLayer, toggle: () => setShowHiveLayer(v => !v), accent: "42, 70%, 55%" },
+        { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => toggle("seeds") },
+        { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => toggle("heartGlow"), accent: "0, 65%, 55%" },
+        { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => toggle("birdsongHeat"), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
+        { key: "mycelial-network", label: "🕸️ Mycelial Network", active: showMycelialNetwork, toggle: () => toggle("mycelialNetwork"), extra: showMycelialNetwork ? `${mycelialConnections.length}` : "off" },
+        { key: "hive-layer", label: "🐝 Species Hives", active: showHiveLayer, toggle: () => toggle("hiveLayer"), accent: "42, 70%, 55%" },
       ],
       subContent: showBirdsongHeat ? (
         <div className="pl-7 pt-1 flex flex-wrap gap-1">
