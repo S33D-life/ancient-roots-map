@@ -127,6 +127,7 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const seedMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mapStatus, setMapStatus] = useState<"loading" | "ready" | "error" | "leaflet">("loading");
   const mapStatusRef = useRef(mapStatus);
+  const mapRenderCountRef = useRef(0);
   useEffect(() => { mapStatusRef.current = mapStatus; }, [mapStatus]);
   useEffect(() => {
     if (mapStatus === "error") {
@@ -138,6 +139,18 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
   const [debugInfo, setDebugInfo] = useState({ style: false, webgl: false, width: 0, height: 0, error: "" });
   const [showDebug, setShowDebug] = useState(false);
   const [viewMode, setViewMode] = useState<string>(initialView || "collective");
+
+  mapRenderCountRef.current += 1;
+  if (mapRenderCountRef.current <= 8) {
+    console.info("[MapDebug] Map component render", {
+      renderCount: mapRenderCountRef.current,
+      route: window.location.pathname,
+      mapStatus,
+      activeBranch: mapStatus === "leaflet" ? "leaflet-recovery" : "map-canvas",
+      hasMapContainerRef: !!mapContainer.current,
+      hasMapInstance: !!map.current,
+    });
+  }
   const [speciesFilter, setSpeciesFilter] = useState<string>(initialSpecies || "all");
   const [groveScale, setGroveScale] = useState<GroveScale>("all");
   const [lineageFilter, setLineageFilter] = useState<string>("all");
