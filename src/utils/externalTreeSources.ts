@@ -469,15 +469,15 @@ export async function fetchSourceTrees(
   }
 
   try {
-    const raw = await fetcher(source, bbox, signal);
+    const raw = await fetcher(source, safeBBox, signal);
     const trees = validateCandidates(raw, source.name);
-    setCache(source.id, bbox, trees);
+    setCache(source.id, safeBBox, trees);
     return trees;
   } catch (err: any) {
     if (err.name === "AbortError") return [];
     console.warn(`[ExternalTrees] ${source.name} error:`, err.message);
     // Return stale cache if available
-    const stale = getCached(source.id, bbox, Infinity);
+    const stale = getCached(source.id, safeBBox, Infinity);
     return stale ?? [];
   }
 }
