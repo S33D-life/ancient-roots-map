@@ -3543,7 +3543,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                       )}
                     </button>
                     <button
-                      onClick={() => setShowMycelialNetwork((v) => !v)}
+                      onClick={() => toggle("mycelialNetwork")}
                       className={`relative flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
                       style={{
                         ...btnBase,
