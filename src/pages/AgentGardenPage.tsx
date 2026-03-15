@@ -868,6 +868,19 @@ const AgentGardenPage = () => {
               </Card>
             )}
           </TabsContent>
+
+          {/* ═══════════════ REVIEW (Curators) ═══════════════ */}
+          <TabsContent value="review" className="mt-6">
+            <Card className="border-primary/15 bg-card/60 mb-4">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Curator Review Panel</strong> — Review proof-of-work submissions. 
+                  Approving automatically awards S33D Hearts to the contributor.
+                </p>
+              </CardContent>
+            </Card>
+            <SubmissionReviewPanel />
+          </TabsContent>
         </Tabs>
 
         {/* Back link */}
