@@ -137,6 +137,28 @@ interface RoadmapEmbedProps {
 
 const RoadmapEmbed = ({ compact = false, category }: RoadmapEmbedProps) => {
   const [activeCategory, setActiveCategory] = useState<RoadmapCategory | null>(category ?? null);
+  const [bugCounts, setBugCounts] = useState<Record<string, number>>({});
+
+  // Fetch linked bug counts
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("bug_reports")
+          .select("roadmap_feature_slug")
+          .not("roadmap_feature_slug", "is", null);
+        if (!data) return;
+        const counts: Record<string, number> = {};
+        for (const row of data) {
+          const slug = (row as any).roadmap_feature_slug as string;
+          if (slug) counts[slug] = (counts[slug] || 0) + 1;
+        }
+        setBugCounts(counts);
+      } catch {
+        // Non-critical
+      }
+    })();
+  }, []);
 
   const filtered = useMemo(() => {
     let items = ROADMAP_FEATURES;
