@@ -79,14 +79,6 @@ const REWARD_TABLE = [
   { action: "Spark Confirmed", hearts: 1, requires: "Issue verified by curator" },
 ];
 
-const ELIGIBLE_TASKS = [
-  { name: "Parse city tree inventory — Portland, OR", type: "Parsing", region: "North America", difficulty: "Medium", hearts: 5 },
-  { name: "Classify oak records from UK register", type: "Species", region: "United Kingdom", difficulty: "Easy", hearts: 2 },
-  { name: "Geocode heritage tree dataset — France", type: "Geocoding", region: "France", difficulty: "Hard", hearts: 8 },
-  { name: "Review duplicate trees — New York", type: "Duplicate", region: "North America", difficulty: "Medium", hearts: 3 },
-  { name: "Enrich olive tree records — Italy", type: "Enrichment", region: "Italy", difficulty: "Medium", hearts: 4 },
-  { name: "Review candidate ancient trees — Hawaii", type: "AF Candidate", region: "Pacific", difficulty: "Hard", hearts: 10 },
-];
 
 /* ── Connect Agent Wizard ──────────────────────── */
 function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
