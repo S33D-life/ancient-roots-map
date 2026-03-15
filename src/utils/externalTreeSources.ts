@@ -154,6 +154,24 @@ export interface BBox {
   east: number;
 }
 
+/**
+ * Clamp and validate a BBox. Returns null if any value is NaN/Infinity
+ * or if the ranges are inverted.
+ */
+export function sanitizeBBox(bbox: BBox): BBox | null {
+  const s = Number(bbox.south);
+  const w = Number(bbox.west);
+  const n = Number(bbox.north);
+  const e = Number(bbox.east);
+  if (!Number.isFinite(s) || !Number.isFinite(w) || !Number.isFinite(n) || !Number.isFinite(e)) return null;
+  const cs = Math.max(-90, Math.min(90, s));
+  const cn = Math.max(-90, Math.min(90, n));
+  const cw = Math.max(-180, Math.min(180, w));
+  const ce = Math.max(-180, Math.min(180, e));
+  if (cs >= cn) return null;
+  return { south: cs, west: cw, north: cn, east: ce };
+}
+
 // ── Cache System ────────────────────────────────────────────────────────────
 
 interface CacheEntry {
