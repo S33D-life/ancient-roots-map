@@ -270,14 +270,16 @@ const NFTreeStudio = ({
     }
   };
 
-  // ── Legacy offering-only mint (when contract not deployed yet) ──
-  const handleLegacyMint = async () => {
+  // ── Legacy offering-only record (when contract not deployed yet) ──
+  // This does NOT mint on-chain. It records the offering in the database
+  // so it can be minted later once the NFTree contract is deployed.
+  const handleLegacyRecord = async () => {
     setUploading(true);
     try {
       const imageUrl = await uploadImage();
       await createOfferingRecord(imageUrl);
-      toast.success("NFTree recorded!", {
-        description: "Your NFTree has been recorded. On-chain minting will be available once the contract is deployed.",
+      toast.info("Offering recorded", {
+        description: "Saved to your tree's history. On-chain minting will be available once the NFTree contract is deployed.",
       });
       refetchOfferings();
       setActiveTab("history");
