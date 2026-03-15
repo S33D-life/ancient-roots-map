@@ -808,8 +808,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       icon: "🌸",
       accent: "hsl(340, 55%, 65%)",
       layers: [
-        { key: "seasonal-foods", label: "🌸 Seasonal Foods", active: showBloomingClock, toggle: () => setShowBloomingClock(v => !v), accent: "340, 55%, 65%" },
-        { key: "constellation", label: "🌾 Constellation Mode", active: bloomConstellationMode, toggle: () => { setBloomConstellationMode(v => !v); if (!showBloomingClock) setShowBloomingClock(true); }, accent: "42, 70%, 55%" },
+        { key: "seasonal-foods", label: "🌸 Seasonal Foods", active: showBloomingClock, toggle: () => toggle("bloomingClock"), accent: "340, 55%, 65%" },
+        { key: "constellation", label: "🌾 Constellation Mode", active: bloomConstellationMode, toggle: () => { toggle("bloomConstellationMode"); if (!showBloomingClock) setLayer("bloomingClock", true); }, accent: "42, 70%, 55%" },
       ],
       subContent: showBloomingClock ? (
         <div className="pt-2 flex flex-col items-center">
