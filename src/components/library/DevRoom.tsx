@@ -848,4 +848,23 @@ function ToolshedSection() {
   );
 }
 
+/* ═══════════════════════════════════════════════════
+   SKILLS
+   ═══════════════════════════════════════════════════ */
+function SkillsSection() {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-primary" /> S33D Skills
+        </h2>
+        <p className="text-xs text-muted-foreground/70">
+          A living field guide for co-creators. Learn how to contribute safely and effectively before taking tasks.
+        </p>
+      </div>
+      <SkillViewer />
+    </div>
+  );
+}
+
 export default DevRoom;
