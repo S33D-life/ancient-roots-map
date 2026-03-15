@@ -26,23 +26,7 @@ const TreesAwaitingVisits = lazy(() => import("@/components/TreesAwaitingVisits"
 
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
-const MapPage = () => {
-  console.info("[MapDebug] MapPage render", {
-    route: window.location.pathname,
-    safeForceBareMap: SAFE_FORCE_BARE_MAP,
-    env: import.meta.env.MODE,
-    hidden: document.hidden,
-  });
-
-  // ── EMERGENCY BARE MAP MODE ──
-  if (SAFE_FORCE_BARE_MAP) {
-    console.info("[MapDebug] early return branch", { branch: "SAFE_FORCE_BARE_MAP -> UltraBareLeafletTest" });
-    return <UltraBareLeafletTest />;
-  }
-
-  console.info("[MapDebug] branch", { branch: "MapPageFull" });
-  return <MapPageFull />;
-};
+const MapPage = () => <MapPageFull />;
 
 const MapPageFull = () => {
   const navigate = useNavigate();
