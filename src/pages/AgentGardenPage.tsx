@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDataCommons, type AgentProfile, type SparkReport } from "@/hooks/use-data-commons";
 import { SparkSubmitDialog } from "@/components/shared/SparkSubmitDialog";
 import { TaskBoard } from "@/components/agent-garden/TaskBoard";
+import { SubmissionReviewPanel } from "@/components/agent-garden/SubmissionReviewPanel";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
@@ -424,6 +425,7 @@ const AgentGardenPage = () => {
             <TabsTrigger value="contributions"><Activity className="w-3.5 h-3.5 mr-1.5" /> Contributions</TabsTrigger>
             <TabsTrigger value="sparks"><Zap className="w-3.5 h-3.5 mr-1.5" /> Sparks</TabsTrigger>
             <TabsTrigger value="rewards"><Heart className="w-3.5 h-3.5 mr-1.5" /> Rewards & Trust</TabsTrigger>
+            <TabsTrigger value="review"><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Review</TabsTrigger>
           </TabsList>
 
           {/* ═══════════════ OVERVIEW ═══════════════ */}
@@ -865,6 +867,19 @@ const AgentGardenPage = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* ═══════════════ REVIEW (Curators) ═══════════════ */}
+          <TabsContent value="review" className="mt-6">
+            <Card className="border-primary/15 bg-card/60 mb-4">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Curator Review Panel</strong> — Review proof-of-work submissions. 
+                  Approving automatically awards S33D Hearts to the contributor.
+                </p>
+              </CardContent>
+            </Card>
+            <SubmissionReviewPanel />
           </TabsContent>
         </Tabs>
 
