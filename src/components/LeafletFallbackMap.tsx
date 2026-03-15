@@ -444,22 +444,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   // Deep-link context state
   const [contextLabel, setContextLabel] = useState<string | null>(null);
-  const deepLinkAppliedRef = useRef<string | null>(null);
-  const deepLinkSignature = useMemo(
-    () =>
-      [
-        initialCountry || "",
-        initialHive || "",
-        initialOrigin || "",
-        initialLat ?? "",
-        initialLng ?? "",
-        initialZoom ?? "",
-        initialBbox || "",
-        initialJourney ? "1" : "0",
-        typeof window !== "undefined" ? window.location.search : "",
-      ].join("|"),
-    [initialCountry, initialHive, initialOrigin, initialLat, initialLng, initialZoom, initialBbox, initialJourney],
-  );
 
   // hiveMap moved after filteredTrees declaration
 
