@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getHeartBalanceFast, getUserTreeCount } from "@/repositories/hearts";
 import { Heart, TreeDeciduous, Flame, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -22,17 +23,15 @@ const LibraryVaultPreview = () => {
       if (!uid) { setLoaded(true); return; }
 
       Promise.all([
-        // Heart balance
-        supabase.from("heart_transactions").select("amount").eq("user_id", uid),
-        // Trees mapped
-        supabase.from("trees").select("id", { count: "exact", head: true }).eq("created_by", uid),
+        getHeartBalanceFast(uid),
+        getUserTreeCount(uid),
         // Top pool nearing 144
         supabase.from("tree_heart_pools").select("tree_id, total_hearts, windfall_count").order("total_hearts", { ascending: false }).limit(1),
         // Active campaigns
         supabase.from("heart_campaigns").select("id", { count: "exact", head: true }).eq("status", "active"),
-      ]).then(async ([hearts, trees, pools, campaigns]) => {
-        setHeartBalance((hearts.data || []).reduce((s, r) => s + r.amount, 0));
-        setTreeCount(trees.count || 0);
+      ]).then(async ([balance, trees, pools, campaigns]) => {
+        setHeartBalance(balance.s33dHearts);
+        setTreeCount(trees);
         setCampaignCount(campaigns.count || 0);
 
         const poolRow = pools.data?.[0];
