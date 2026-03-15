@@ -310,7 +310,7 @@ export function useWallet(userId?: string) {
 
       setState(prev => ({
         ...prev,
-        error: "Could not switch network automatically. Please select Base Sepolia (84532) in MetaMask.",
+        error: `Could not switch network automatically. Please select ${ACTIVE_CHAIN_ID === 8453 ? "Base" : "Base Sepolia"} in MetaMask.`,
       }));
       return false;
     }
