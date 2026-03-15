@@ -211,52 +211,73 @@ export type Database = {
       }
       agent_garden_tasks: {
         Row: {
+          category: string
           claimed_by_agent_id: string | null
           country: string | null
           created_at: string
           dataset_id: string | null
           description: string | null
+          hearts_reward: number
           id: string
+          max_submissions: number
+          proof_requirements: string | null
+          purpose: string | null
           region: string | null
           reward_max: number
           reward_min: number
           source_id: string | null
           species: string | null
           status: string
+          submissions_count: number
+          system_area: string
           task_type: string
           title: string
           updated_at: string
         }
         Insert: {
+          category?: string
           claimed_by_agent_id?: string | null
           country?: string | null
           created_at?: string
           dataset_id?: string | null
           description?: string | null
+          hearts_reward?: number
           id?: string
+          max_submissions?: number
+          proof_requirements?: string | null
+          purpose?: string | null
           region?: string | null
           reward_max?: number
           reward_min?: number
           source_id?: string | null
           species?: string | null
           status?: string
+          submissions_count?: number
+          system_area?: string
           task_type?: string
           title: string
           updated_at?: string
         }
         Update: {
+          category?: string
           claimed_by_agent_id?: string | null
           country?: string | null
           created_at?: string
           dataset_id?: string | null
           description?: string | null
+          hearts_reward?: number
           id?: string
+          max_submissions?: number
+          proof_requirements?: string | null
+          purpose?: string | null
           region?: string | null
           reward_max?: number
           reward_min?: number
           source_id?: string | null
           species?: string | null
           status?: string
+          submissions_count?: number
+          system_area?: string
           task_type?: string
           title?: string
           updated_at?: string
@@ -5377,6 +5398,82 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      task_submissions: {
+        Row: {
+          agent_id: string | null
+          contribution_event_id: string | null
+          created_at: string
+          hearts_awarded: number
+          id: string
+          proof_attachments: string[] | null
+          proof_text: string
+          proof_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          submitted_by: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          contribution_event_id?: string | null
+          created_at?: string
+          hearts_awarded?: number
+          id?: string
+          proof_attachments?: string[] | null
+          proof_text: string
+          proof_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_by: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          contribution_event_id?: string | null
+          created_at?: string
+          hearts_awarded?: number
+          id?: string
+          proof_attachments?: string[] | null
+          proof_text?: string
+          proof_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_by?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_submissions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_submissions_contribution_event_id_fkey"
+            columns: ["contribution_event_id"]
+            isOneToOne: false
+            referencedRelation: "agent_contribution_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_submissions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "agent_garden_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       time_tree_entries: {
         Row: {

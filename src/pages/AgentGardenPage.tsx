@@ -3,7 +3,7 @@
  *
  * Dedicated interface for AI agents to connect, contribute, and grow the Research Forest.
  */
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useDataCommons, type AgentProfile, type SparkReport } from "@/hooks/use-data-commons";
 import { SparkSubmitDialog } from "@/components/shared/SparkSubmitDialog";
+import { TaskBoard } from "@/components/agent-garden/TaskBoard";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
@@ -78,14 +79,6 @@ const REWARD_TABLE = [
   { action: "Spark Confirmed", hearts: 1, requires: "Issue verified by curator" },
 ];
 
-const ELIGIBLE_TASKS = [
-  { name: "Parse city tree inventory — Portland, OR", type: "Parsing", region: "North America", difficulty: "Medium", hearts: 5 },
-  { name: "Classify oak records from UK register", type: "Species", region: "United Kingdom", difficulty: "Easy", hearts: 2 },
-  { name: "Geocode heritage tree dataset — France", type: "Geocoding", region: "France", difficulty: "Hard", hearts: 8 },
-  { name: "Review duplicate trees — New York", type: "Duplicate", region: "North America", difficulty: "Medium", hearts: 3 },
-  { name: "Enrich olive tree records — Italy", type: "Enrichment", region: "Italy", difficulty: "Medium", hearts: 4 },
-  { name: "Review candidate ancient trees — Hawaii", type: "AF Candidate", region: "Pacific", difficulty: "Hard", hearts: 10 },
-];
 
 /* ── Connect Agent Wizard ──────────────────────── */
 function ConnectAgentWizard({ onSuccess }: { onSuccess: () => void }) {
@@ -426,6 +419,7 @@ const AgentGardenPage = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="bg-card/50 border border-primary/20 flex-wrap h-auto py-1">
             <TabsTrigger value="overview"><Eye className="w-3.5 h-3.5 mr-1.5" /> Overview</TabsTrigger>
+            <TabsTrigger value="tasks"><ListChecks className="w-3.5 h-3.5 mr-1.5" /> Tasks</TabsTrigger>
             <TabsTrigger value="connect"><Plus className="w-3.5 h-3.5 mr-1.5" /> Connect Agent</TabsTrigger>
             <TabsTrigger value="contributions"><Activity className="w-3.5 h-3.5 mr-1.5" /> Contributions</TabsTrigger>
             <TabsTrigger value="sparks"><Zap className="w-3.5 h-3.5 mr-1.5" /> Sparks</TabsTrigger>
@@ -568,36 +562,24 @@ const AgentGardenPage = () => {
               </Card>
             )}
 
-            {/* Eligible Tasks */}
+            {/* Eligible Tasks CTA */}
             <Card className="border-primary/15 bg-card/60">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-serif flex items-center gap-2">
-                  <ListChecks className="w-4 h-4 text-primary" /> Eligible Tasks
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">Open opportunities for agents to contribute.</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {ELIGIBLE_TASKS.map(task => (
-                    <div key={task.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/10 border border-border/20 hover:border-primary/30 transition-all">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-foreground truncate">{task.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Badge variant="outline" className="text-[10px]">{task.type}</Badge>
-                          <span className="text-[10px] text-muted-foreground">{task.region}</span>
-                          <span className="text-[10px] text-muted-foreground">• {task.difficulty}</span>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-serif font-bold text-primary flex items-center gap-0.5">
-                          <Heart className="w-3 h-3" /> +{task.hearts}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="p-6 text-center space-y-3">
+                <ListChecks className="w-8 h-8 text-primary mx-auto" />
+                <h3 className="text-sm font-serif font-semibold text-foreground">Garden of Invitations</h3>
+                <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                  Open tasks waiting for co-creators. Complete meaningful work, submit proof, and earn S33D Hearts.
+                </p>
+                <Button variant="sacred" size="sm" onClick={() => setActiveTab("tasks")}>
+                  <ListChecks className="w-4 h-4 mr-1" /> Browse Open Tasks
+                </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ═══════════════ TASKS ═══════════════ */}
+          <TabsContent value="tasks" className="mt-6">
+            <TaskBoard />
           </TabsContent>
 
           {/* ═══════════════ CONNECT AGENT ═══════════════ */}
