@@ -738,7 +738,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       accent: "hsl(42, 75%, 52%)",
       description: "Golden paths, bridleways, and trails across the land.",
       layers: [
-        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { setShowFootpaths(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "42, 75%, 52%" },
+        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { toggle("footpaths"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "42, 75%, 52%" },
       ],
     },
     {
