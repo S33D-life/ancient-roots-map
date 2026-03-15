@@ -49,6 +49,7 @@ type BugReport = {
   user_id: string;
   triage_notes: string | null;
   screenshot_urls: string[] | null;
+  roadmap_feature_slug: string | null;
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
