@@ -20,7 +20,7 @@ import StageIcon from "@/components/roadmap/StageIcon";
 import { hslAlpha } from "@/utils/colorUtils";
 
 /** Milestone card */
-const MilestoneCard = ({ feature, bugCount }: { feature: RoadmapFeature; bugCount?: number }) => {
+const MilestoneCard = ({ feature, bugCount, taskCount }: { feature: RoadmapFeature; bugCount?: number; taskCount?: number }) => {
   const [expanded, setExpanded] = useState(false);
   const stageMeta = STAGE_META[feature.stage];
   const statusMeta = STATUS_META[feature.status];
