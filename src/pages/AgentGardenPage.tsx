@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDataCommons, type AgentProfile, type SparkReport } from "@/hooks/use-data-commons";
 import { SparkSubmitDialog } from "@/components/shared/SparkSubmitDialog";
 import { TaskBoard } from "@/components/agent-garden/TaskBoard";
+import { SubmissionReviewPanel } from "@/components/agent-garden/SubmissionReviewPanel";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
