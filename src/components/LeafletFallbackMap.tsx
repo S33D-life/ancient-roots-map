@@ -259,7 +259,39 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [location.search, SAFE_MAP_DEBUG]);
 
-  // renderDebug is now returned from useMapInit below
+  // Map init — extracted into useMapInit hook
+  const { renderDebug: mapInitDebug, atmosphereReady } = useMapInit({
+    containerRef,
+    mapRef,
+    clusterRef,
+    userMarkerRef,
+    userAccuracyRef,
+    focusHaloRef,
+    focusFallbackMarkerRef,
+    groveLayerRef,
+    seedLayerRef,
+    mycelialNetworkLayerRef,
+    mycelialAnimatedLayerRef,
+    initialLat,
+    initialLng,
+    initialZoom,
+    initialW3w,
+    safeBareMapMode: SAFE_BARE_MAP_MODE,
+    safeMapDebug: SAFE_MAP_DEBUG,
+    onAutoLocate: () => {
+      if (navigator.geolocation) {
+        geo.locate("map-auto-init").then((result) => {
+          if (result && mapRef.current) {
+            const latlng: [number, number] = [result.lat, result.lng];
+            setUserLatLng(latlng);
+            setLocated(true);
+            placeUserMarker(mapRef.current, latlng, result.accuracy);
+          }
+        });
+      }
+    },
+  });
+  const renderDebug = { ...mapInitDebug, container: mapInitDebug.containerSize };
 
   const [perfDebug, setPerfDebug] = useState<MapPerfDebugStats>({
     fps: null,
