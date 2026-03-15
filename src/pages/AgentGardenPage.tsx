@@ -427,6 +427,7 @@ const AgentGardenPage = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
           <TabsList className="bg-card/50 border border-primary/20 flex-wrap h-auto py-1">
             <TabsTrigger value="overview"><Eye className="w-3.5 h-3.5 mr-1.5" /> Overview</TabsTrigger>
+            <TabsTrigger value="tasks"><ListChecks className="w-3.5 h-3.5 mr-1.5" /> Tasks</TabsTrigger>
             <TabsTrigger value="connect"><Plus className="w-3.5 h-3.5 mr-1.5" /> Connect Agent</TabsTrigger>
             <TabsTrigger value="contributions"><Activity className="w-3.5 h-3.5 mr-1.5" /> Contributions</TabsTrigger>
             <TabsTrigger value="sparks"><Zap className="w-3.5 h-3.5 mr-1.5" /> Sparks</TabsTrigger>
