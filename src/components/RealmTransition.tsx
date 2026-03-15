@@ -7,7 +7,8 @@
  */
 import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useLocation } from "react-router-dom";
 
 export type RealmDirection = "roots" | "trunk" | "canopy" | "crown" | "seed" | "tetol-out";
 
@@ -28,8 +29,22 @@ const directionVariants: Record<RealmDirection, { y: number; scale: number }> = 
 
 const RealmTransition = ({ children, direction = "seed" }: RealmTransitionProps) => {
   const prefersReduced = useReducedMotion();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== "/map") return;
+    console.info("[MapDebug] RealmTransition mount", {
+      path: location.pathname,
+      direction,
+      prefersReduced,
+    });
+    return () => console.info("[MapDebug] RealmTransition unmount", { path: location.pathname, direction });
+  }, [direction, location.pathname, prefersReduced]);
 
   if (prefersReduced) {
+    if (location.pathname === "/map") {
+      console.info("[MapDebug] RealmTransition branch", { branch: "prefers-reduced-motion (no motion wrapper)" });
+    }
     return <>{children}</>;
   }
 
@@ -44,6 +59,16 @@ const RealmTransition = ({ children, direction = "seed" }: RealmTransitionProps)
         ease: [0.25, 0.1, 0.25, 1], // smooth cubic
       }}
       style={{ willChange: "opacity, transform" }}
+      onAnimationStart={() => {
+        if (location.pathname === "/map") {
+          console.info("[MapDebug] RealmTransition animation start", { direction, initial: d });
+        }
+      }}
+      onAnimationComplete={() => {
+        if (location.pathname === "/map") {
+          console.info("[MapDebug] RealmTransition animation complete", { direction });
+        }
+      }}
     >
       {children}
     </motion.div>

@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from "react";
+import { useState, useCallback, lazy, Suspense, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
 import Header from "@/components/Header";
@@ -38,11 +38,20 @@ const TreesAwaitingVisits = lazy(() => import("@/components/TreesAwaitingVisits"
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
 const MapPage = () => {
+  console.info("[MapDebug] MapPage render", {
+    route: window.location.pathname,
+    safeForceBareMap: SAFE_FORCE_BARE_MAP,
+    env: import.meta.env.MODE,
+    hidden: document.hidden,
+  });
+
   // ── EMERGENCY BARE MAP MODE ──
   if (SAFE_FORCE_BARE_MAP) {
+    console.info("[MapDebug] early return branch", { branch: "SAFE_FORCE_BARE_MAP -> UltraBareLeafletTest" });
     return <UltraBareLeafletTest />;
   }
 
+  console.info("[MapDebug] branch", { branch: "MapPageFull" });
   return <MapPageFull />;
 };
 
@@ -66,8 +75,8 @@ const MapPageFull = () => {
   const safeMapDebug = searchParams.get("mapDebug") === "1";
   const safeDisableNonessentialOverlays = safeMapDebug && searchParams.get("hideOverlays") !== "0";
 
-  const [selectedView, setSelectedView] = useState("collective");
-  const [selectedSpecies, setSelectedSpecies] = useState(paramSpecies || "all");
+  const [selectedView] = useState("collective");
+  const [selectedSpecies] = useState(paramSpecies || "all");
   const { showEntrance, dismissEntrance } = useEntranceOnce("map");
   const { isFullscreen, toggleFullscreen, exitFullscreen } = useFullscreenMap();
   const [showBlessing, setShowBlessing] = useState(() => !safeDisableNonessentialOverlays && !isBlessingDismissed());
@@ -75,7 +84,19 @@ const MapPageFull = () => {
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
+  useEffect(() => {
+    console.info("[MapDebug] MapPageFull mount", {
+      route: window.location.pathname,
+      safeMapDebug,
+      safeDisableNonessentialOverlays,
+      showEntrance,
+      search: window.location.search,
+    });
+    return () => console.info("[MapDebug] MapPageFull unmount");
+  }, [safeDisableNonessentialOverlays, safeMapDebug, showEntrance]);
+
   if (showEntrance) {
+    console.info("[MapDebug] early return branch", { branch: "showEntrance -> LevelEntrance" });
     return <LevelEntrance phases={[{ src: "/images/hero-trees/ancient-oak-mist.jpeg", alt: "The Roots" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
