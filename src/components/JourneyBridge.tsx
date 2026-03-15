@@ -11,6 +11,7 @@ import {
   ScrollText, Footprints, Wand2, Map as MapIcon,
   ChevronRight, Heart, Lock, TreeDeciduous,
 } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 type JourneyStep = "hearth" | "path" | "staff" | "map";
 
@@ -31,7 +32,7 @@ const STEPS: StepDef[] = [
     label: "Hearth",
     sublabel: "Your Legend & Identity",
     icon: ScrollText,
-    to: "/dashboard",
+    to: ROUTES.HEARTH,
     accentHsl: "15 80% 55%",
   },
   {
@@ -48,7 +49,7 @@ const STEPS: StepDef[] = [
     label: "Staff Room",
     sublabel: "144 Sacred Staffs",
     icon: Wand2,
-    to: "/library/staff-room",
+    to: ROUTES.STAFF_ROOM,
     accentHsl: "280 60% 55%",
     heartsAction: "Bind a Staff to unlock ceremonies",
   },
@@ -57,7 +58,7 @@ const STEPS: StepDef[] = [
     label: "Map Room",
     sublabel: "The Arboreal Atlas",
     icon: MapIcon,
-    to: "/map",
+    to: ROUTES.MAP,
     accentHsl: "120 45% 45%",
     heartsAction: "+10 Hearts per tree mapped",
   },

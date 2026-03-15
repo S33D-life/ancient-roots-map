@@ -299,7 +299,7 @@ const CouncilOfLifePage = () => {
                 <CouncilSparkIcon className="w-3.5 h-3.5" /> Recent Sparks
               </h3>
               <button
-                onClick={() => navigate("/bug-garden")}
+                onClick={() => navigate(ROUTES.BUG_GARDEN)}
                 className="text-[10px] text-primary/60 hover:text-primary transition-colors font-serif"
               >
                 View all →

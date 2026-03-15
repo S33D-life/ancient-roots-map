@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useCompanion } from "@/contexts/CompanionContext";
 import type { CompanionRoom } from "@/lib/companion-types";
 import { toast } from "sonner";
+import { ROUTES } from "@/lib/routes";
 
 /**
  * useCompanionBridge — placed inside BrowserRouter, wires up global
@@ -13,13 +14,13 @@ import { toast } from "sonner";
  */
 
 const ROOM_ROUTES: Record<CompanionRoom, string> = {
-  map: "/map",
-  staff: "/library/staff-room",
-  gallery: "/library",
+  map: ROUTES.MAP,
+  staff: ROUTES.STAFF_ROOM,
+  gallery: ROUTES.LIBRARY,
   ledger: "/ledger",
-  tree: "/map",
-  card: "/library",
-  unknown: "/",
+  tree: ROUTES.MAP,
+  card: ROUTES.LIBRARY,
+  unknown: ROUTES.HOME,
 };
 
 /** Detect which "room" the desktop is currently in based on pathname */
