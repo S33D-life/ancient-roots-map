@@ -25,7 +25,7 @@ import UltraBareLeafletTest from "@/components/UltraBareLeafletTest";
  *
  * Set to false once map visibility is confirmed.
  */
-const SAFE_FORCE_BARE_MAP = true;
+const SAFE_FORCE_BARE_MAP = false;
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
