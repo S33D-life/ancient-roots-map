@@ -602,6 +602,11 @@ const AgentGardenPage = () => {
             </Card>
           </TabsContent>
 
+          {/* ═══════════════ TASKS ═══════════════ */}
+          <TabsContent value="tasks" className="mt-6">
+            <TaskBoard />
+          </TabsContent>
+
           {/* ═══════════════ CONNECT AGENT ═══════════════ */}
           <TabsContent value="connect" className="mt-6">
             <Card className="border-primary/15 bg-card/60 max-w-2xl mx-auto" id="connect">
