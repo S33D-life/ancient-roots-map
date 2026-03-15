@@ -1,10 +1,12 @@
 /**
  * EcosystemPulse — Compact summary of ecosystem vitality metrics.
- * Shows trees mapped, offerings, hearts circulating, hives active, council gatherings.
+ * Shows trees mapped, offerings, hearts circulating, hives active,
+ * council gatherings, and agent contributions.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { TreeDeciduous, Music, Heart, Hexagon, Users } from "lucide-react";
+import { getGlobalHeartTotal } from "@/repositories/hearts";
+import { TreeDeciduous, Music, Heart, Hexagon, Users, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Metrics {
@@ -13,36 +15,39 @@ interface Metrics {
   hearts: number;
   hives: number;
   councils: number;
+  agentContributions: number;
 }
 
 export default function EcosystemPulse() {
   const [m, setM] = useState<Metrics | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       const [
         { count: trees },
         { count: offerings },
-        { data: heartData },
+        hearts,
         { data: hiveData },
         { count: councils },
+        { count: agentContributions },
       ] = await Promise.all([
         supabase.from("trees").select("*", { count: "exact", head: true }),
         supabase.from("offerings").select("*", { count: "exact", head: true }),
-        supabase.from("heart_transactions").select("amount"),
+        getGlobalHeartTotal(),
         supabase.from("species_hives").select("id", { count: "exact", head: false }).limit(200),
         supabase.from("council_participation_rewards").select("*", { count: "exact", head: true }),
+        supabase.from("agent_contribution_events").select("*", { count: "exact", head: true }).eq("validation_status", "verified"),
       ]);
-      const totalHearts = (heartData || []).reduce((s, r) => s + (r.amount || 0), 0);
       setM({
         trees: trees || 0,
         offerings: offerings || 0,
-        hearts: totalHearts,
+        hearts,
         hives: hiveData?.length || 0,
         councils: councils || 0,
+        agentContributions: agentContributions || 0,
       });
     };
-    fetch();
+    load();
   }, []);
 
   if (!m) return null;
@@ -53,6 +58,9 @@ export default function EcosystemPulse() {
     { icon: <Heart className="w-4 h-4" />, value: m.hearts, label: "Hearts", accent: "0 65% 55%" },
     { icon: <Hexagon className="w-4 h-4" />, value: m.hives, label: "Species Hives", accent: "var(--primary)" },
     { icon: <Users className="w-4 h-4" />, value: m.councils, label: "Gatherings", accent: "42 80% 50%" },
+    ...(m.agentContributions > 0 ? [{
+      icon: <Bot className="w-4 h-4" />, value: m.agentContributions, label: "Agent Contributions", accent: "270 50% 55%",
+    }] : []),
   ];
 
   return (
@@ -60,7 +68,7 @@ export default function EcosystemPulse() {
       <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider text-center mb-4">
         Ecosystem Pulse
       </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
         {items.map((item, i) => (
           <motion.div
             key={item.label}

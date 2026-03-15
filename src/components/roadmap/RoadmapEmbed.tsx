@@ -5,7 +5,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ChevronDown, ChevronUp, Bug } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp, Bug, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ROADMAP_FEATURES,
@@ -20,7 +20,7 @@ import StageIcon from "@/components/roadmap/StageIcon";
 import { hslAlpha } from "@/utils/colorUtils";
 
 /** Milestone card */
-const MilestoneCard = ({ feature, bugCount }: { feature: RoadmapFeature; bugCount?: number }) => {
+const MilestoneCard = ({ feature, bugCount, taskCount }: { feature: RoadmapFeature; bugCount?: number; taskCount?: number }) => {
   const [expanded, setExpanded] = useState(false);
   const stageMeta = STAGE_META[feature.stage];
   const statusMeta = STATUS_META[feature.status];
@@ -60,6 +60,12 @@ const MilestoneCard = ({ feature, bugCount }: { feature: RoadmapFeature; bugCoun
                 <Bug className="w-2.5 h-2.5" /> {bugCount}
               </span>
             )}
+            {taskCount !== undefined && taskCount > 0 && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-sans flex items-center gap-0.5 border"
+                style={{ background: "hsl(270 50% 55% / 0.1)", color: "hsl(270 50% 55%)", borderColor: "hsl(270 50% 55% / 0.2)" }}>
+                <Bot className="w-2.5 h-2.5" /> {taskCount}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -96,7 +102,7 @@ const MilestoneCard = ({ feature, bugCount }: { feature: RoadmapFeature; bugCoun
 };
 
 /** Stage section with organic growth line */
-const StageSection = ({ stage, features, bugCounts }: { stage: RoadmapStage; features: RoadmapFeature[]; bugCounts: Record<string, number> }) => {
+const StageSection = ({ stage, features, bugCounts, taskCounts }: { stage: RoadmapStage; features: RoadmapFeature[]; bugCounts: Record<string, number>; taskCounts: Record<string, number> }) => {
   const meta = STAGE_META[stage];
   if (features.length === 0) return null;
 
@@ -121,7 +127,7 @@ const StageSection = ({ stage, features, bugCounts }: { stage: RoadmapStage; fea
       {/* Cards */}
       <div className="space-y-2 pl-5 ml-[14px] border-l border-transparent">
         {features.map((f) => (
-          <MilestoneCard key={f.id} feature={f} bugCount={bugCounts[f.id]} />
+          <MilestoneCard key={f.id} feature={f} bugCount={bugCounts[f.id]} taskCount={taskCounts[f.id]} />
         ))}
       </div>
     </div>
@@ -138,22 +144,37 @@ interface RoadmapEmbedProps {
 const RoadmapEmbed = ({ compact = false, category }: RoadmapEmbedProps) => {
   const [activeCategory, setActiveCategory] = useState<RoadmapCategory | null>(category ?? null);
   const [bugCounts, setBugCounts] = useState<Record<string, number>>({});
+  const [taskCounts, setTaskCounts] = useState<Record<string, number>>({});
 
-  // Fetch linked bug counts
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase
+        // Fetch bug counts linked to roadmap features
+        const { data: bugData } = await supabase
           .from("bug_reports")
           .select("roadmap_feature_slug")
           .not("roadmap_feature_slug", "is", null);
-        if (!data) return;
-        const counts: Record<string, number> = {};
-        for (const row of data) {
-          const slug = (row as any).roadmap_feature_slug as string;
-          if (slug) counts[slug] = (counts[slug] || 0) + 1;
+        if (bugData) {
+          const counts: Record<string, number> = {};
+          for (const row of bugData) {
+            const slug = (row as any).roadmap_feature_slug as string;
+            if (slug) counts[slug] = (counts[slug] || 0) + 1;
+          }
+          setBugCounts(counts);
         }
-        setBugCounts(counts);
+
+        // Fetch agent task counts linked to roadmap features
+        const { data: taskData } = await (supabase.from as any)("agent_garden_tasks")
+          .select("roadmap_feature_slug")
+          .not("roadmap_feature_slug", "is", null);
+        if (taskData) {
+          const counts: Record<string, number> = {};
+          for (const row of taskData) {
+            const slug = row.roadmap_feature_slug as string;
+            if (slug) counts[slug] = (counts[slug] || 0) + 1;
+          }
+          setTaskCounts(counts);
+        }
       } catch {
         // Non-critical
       }
@@ -225,7 +246,7 @@ const RoadmapEmbed = ({ compact = false, category }: RoadmapEmbedProps) => {
       {/* Stages */}
       <div className="space-y-8">
         {grouped.map(({ stage, features }) => (
-          <StageSection key={stage} stage={stage} features={features} bugCounts={bugCounts} />
+          <StageSection key={stage} stage={stage} features={features} bugCounts={bugCounts} taskCounts={taskCounts} />
         ))}
       </div>
 
