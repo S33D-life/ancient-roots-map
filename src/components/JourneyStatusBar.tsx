@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getHeartBalanceFast, getUserTreeCount } from "@/repositories/hearts";
 import { Heart, Wand2, TreeDeciduous, User } from "lucide-react";
 
 interface JourneyState {
@@ -26,13 +27,13 @@ export default function JourneyStatusBar({ className }: { className?: string }) 
       if (!session || cancelled) return;
       const uid = session.user.id;
 
-      const [profileRes, heartsRes, treesRes] = await Promise.all([
+      const [profileRes, balance, treeCount] = await Promise.all([
         supabase.from("profiles").select("full_name, active_staff_id").eq("id", uid).maybeSingle(),
-        supabase.from("heart_transactions").select("amount").eq("user_id", uid),
-        supabase.from("trees").select("id", { count: "exact", head: true }).eq("created_by", uid),
+        getHeartBalanceFast(uid),
+        getUserTreeCount(uid),
       ]);
 
-      const heartTotal = (heartsRes.data || []).reduce((s: number, h: any) => s + (h.amount || 0), 0);
+      const heartTotal = balance.s33dHearts;
       const staffId = profileRes.data?.active_staff_id || localStorage.getItem("linked_staff_code");
 
       let staffSpecies: string | null = null;
