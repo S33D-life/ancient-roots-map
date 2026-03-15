@@ -3520,7 +3520,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 {!atlasFilterOpen && (
                   <>
                     <button
-                      onClick={() => setGroveViewActive(v => !v)}
+                      onClick={() => toggle("groveView")}
                       className={`relative flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full transition-all duration-200 active:scale-90 ${groveViewActive ? 'glow-button--emerald' : ''} glow-button`}
                       style={{
                         ...btnBase,
