@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
+import { useMapInit } from "@/hooks/use-map-init";
 import MapContextIndicator from "./MapContextIndicator";
 import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
 import { getHiveBySlug } from "@/utils/hiveUtils";
@@ -258,23 +259,39 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [location.search, SAFE_MAP_DEBUG]);
 
-  const [renderDebug, setRenderDebug] = useState<{
-    mapMounted: boolean;
-    tileStatus: "idle" | "loading" | "loaded" | "failed";
-    provider: "carto" | "osm";
-    tileLoads: number;
-    tileErrors: number;
-    tilePaneImages: number;
-    container: string;
-  }>({
-    mapMounted: false,
-    tileStatus: "idle",
-    provider: "carto",
-    tileLoads: 0,
-    tileErrors: 0,
-    tilePaneImages: 0,
-    container: "0x0",
+  // Map init — extracted into useMapInit hook
+  const { renderDebug: mapInitDebug, atmosphereReady } = useMapInit({
+    containerRef,
+    mapRef,
+    clusterRef,
+    userMarkerRef,
+    userAccuracyRef,
+    focusHaloRef,
+    focusFallbackMarkerRef,
+    groveLayerRef,
+    seedLayerRef,
+    mycelialNetworkLayerRef,
+    mycelialAnimatedLayerRef,
+    initialLat,
+    initialLng,
+    initialZoom,
+    initialW3w,
+    safeBareMapMode: SAFE_BARE_MAP_MODE,
+    safeMapDebug: SAFE_MAP_DEBUG,
+    onAutoLocate: () => {
+      if (navigator.geolocation) {
+        geo.locate("map-auto-init").then((result) => {
+          if (result && mapRef.current) {
+            const latlng: [number, number] = [result.lat, result.lng];
+            setUserLatLng(latlng);
+            setLocated(true);
+            placeUserMarker(mapRef.current, latlng, result.accuracy);
+          }
+        });
+      }
+    },
   });
+  const renderDebug = { ...mapInitDebug, container: mapInitDebug.containerSize };
 
   const [perfDebug, setPerfDebug] = useState<MapPerfDebugStats>({
     fps: null,
@@ -857,244 +874,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const whisperCountsRef = useRef(whisperCountsMap);
   whisperCountsRef.current = whisperCountsMap;
 
-  // Track whether atmosphere overlay should show (as React state, not DOM injection)
-  const [atmosphereReady, setAtmosphereReady] = useState(false);
+  // atmosphereReady and renderDebug are now provided by useMapInit (declared above)
   const [seasonClass, setSeasonClass] = useState("");
-  const mapCleanupRef = useRef<(() => void) | null>(null);
-
-  // Initialize map once — deferred until container has measurable dimensions
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
-    const container = containerRef.current;
-    let disposed = false;
-
-    const containerReady = () => {
-      const w = container.offsetWidth;
-      const h = container.offsetHeight;
-      if (w === 0 || h === 0) {
-        console.warn("[MapInit] Container zero dimensions, deferring…", w, h);
-        return false;
-      }
-      console.info("[MapInit] Container measurable:", w, "x", h);
-      return true;
-    };
-
-    function doMapInit() {
-      if (disposed || !container || mapRef.current) return;
-
-      const isTall = window.innerHeight > window.innerWidth;
-      const defaultZoom = isTall ? 3 : 2;
-
-      const map = L.map(container, {
-        center: [25, 10],
-        zoom: defaultZoom,
-        minZoom: isTall ? 3 : 2,
-        maxBounds: [[-85, -200], [85, 200]],
-        maxBoundsViscosity: 0.8,
-        attributionControl: false,
-        zoomControl: false,
-        preferCanvas: true,
-        tap: true,
-        tapTolerance: 15,
-        zoomAnimation: true,
-        markerZoomAnimation: true,
-      } as any);
-
-      // ── Atmosphere rendered via React overlay, NOT DOM-injected into Leaflet ──
-      if (!SAFE_BARE_MAP_MODE) setAtmosphereReady(true);
-      if (SAFE_BARE_MAP_MODE) container.classList.add("safe-bare-map");
-
-      const logPrefix = "[MapTiles]";
-      const containerSize = `${container.offsetWidth}x${container.offsetHeight}`;
-      console.info(`${logPrefix} Leaflet map created, container ${containerSize}`);
-      setRenderDebug((prev) => ({ ...prev, mapMounted: true, container: containerSize, provider: SAFE_BARE_MAP_MODE ? "osm" : "carto" }));
-
-      const isRetina = window.devicePixelRatio > 1;
-      const primaryTileLayer = L.tileLayer(
-        SAFE_BARE_MAP_MODE
-          ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          : isRetina
-          ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png"
-          : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        {
-          attribution: SAFE_BARE_MAP_MODE ? '&copy; OpenStreetMap contributors' : '&copy; OSM &copy; CARTO',
-          maxZoom: 19,
-          subdomains: SAFE_BARE_MAP_MODE ? "abc" : "abcd",
-          keepBuffer: 4,
-        }
-      ).addTo(map);
-
-      const fallbackTileLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; OpenStreetMap contributors',
-        maxZoom: 19,
-        subdomains: "abc",
-        keepBuffer: 4,
-      });
-
-      let tileLoadCount = 0;
-      let tileErrorCount = 0;
-      primaryTileLayer.on("loading", () => {
-        console.info(`${logPrefix} tiles loading…`);
-        setRenderDebug((prev) => ({ ...prev, tileStatus: "loading" }));
-      });
-      primaryTileLayer.on("load", () => {
-        console.info(`${logPrefix} tiles loaded (${tileLoadCount} tiles, ${tileErrorCount} errors)`);
-        setRenderDebug((prev) => ({ ...prev, tileStatus: "loaded", tileLoads: tileLoadCount, tileErrors: tileErrorCount }));
-      });
-      primaryTileLayer.on("tileloadstart", (e: any) => {
-        if (SAFE_MAP_DEBUG && e?.tile?.src) {
-          console.info(`${logPrefix} tileloadstart`, e.tile.src);
-        }
-      });
-
-      let tileErrors = 0;
-      let usingFallbackTiles = false;
-      const TILE_ERROR_THRESHOLD = 8;
-
-      const activateFallbackTiles = () => {
-        if (usingFallbackTiles) return;
-        usingFallbackTiles = true;
-        try {
-          if (map.hasLayer(primaryTileLayer)) map.removeLayer(primaryTileLayer);
-          fallbackTileLayer.addTo(map);
-          console.warn(`${logPrefix} Switched to OSM fallback tiles`);
-        } catch {}
-      };
-
-      primaryTileLayer.on("tileload", () => {
-        tileLoadCount += 1;
-        if (tileErrors > 0) tileErrors -= 1;
-      });
-
-      primaryTileLayer.on("tileerror", (e: any) => {
-        tileErrors += 1;
-        tileErrorCount += 1;
-        setRenderDebug((prev) => ({ ...prev, tileStatus: "failed", tileErrors: tileErrorCount }));
-        console.warn(`${logPrefix} tileerror #${tileErrorCount}`, e?.tile?.src?.slice(0, 160));
-        if (tileErrors >= (SAFE_MAP_DEBUG ? 1 : TILE_ERROR_THRESHOLD)) {
-          activateFallbackTiles();
-        }
-      });
-
-      L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-
-      mapRef.current = map;
-
-      container.style.backgroundColor = "hsl(30, 15%, 10%)";
-
-      requestAnimationFrame(() => map.invalidateSize());
-      setTimeout(() => map.invalidateSize(), 100);
-      setTimeout(() => map.invalidateSize(), 500);
-      setTimeout(() => {
-        map.invalidateSize();
-        const imgCount = container?.querySelectorAll(".leaflet-tile-pane img").length ?? 0;
-        setRenderDebug((prev) => ({ ...prev, tilePaneImages: imgCount }));
-        console.info(`${logPrefix} late invalidateSize, ${container?.offsetWidth}x${container?.offsetHeight}, tiles=${imgCount}`);
-      }, 1500);
-      const sizeObserver = new ResizeObserver(() => map.invalidateSize());
-      sizeObserver.observe(container);
-      const onResize = () => map.invalidateSize();
-      window.addEventListener('resize', onResize);
-
-      const cleanupSeasonalTint = applySeasonalTint(container);
-      const cleanupPopupActions = setupPopupActions(container);
-
-      map.on("popupopen", (e: any) => {
-        const marker = e.popup?._source;
-        if (marker?._treeId) markTreeVisited(marker._treeId, marker._icon);
-      });
-
-      map.on("layeradd", (e: any) => {
-        const layer = e.layer;
-        if (layer?._treeId && layer._icon) applyVisitedClass(layer._treeId, layer._icon);
-      });
-
-      let deepLinked = false;
-      if (initialLat !== undefined && initialLng !== undefined) {
-        deepLinked = true;
-        setTimeout(() => map.setView([initialLat, initialLng], initialZoom ?? 16), 300);
-      } else if (initialW3w) {
-        deepLinked = true;
-        import("@/utils/what3words").then(({ convertToCoordinates }) => {
-          convertToCoordinates(initialW3w).then((result) => {
-            if (result && result.coordinates) {
-              map.setView([result.coordinates.lat, result.coordinates.lng], initialZoom ?? 16);
-            }
-          }).catch(() => {});
-        });
-      }
-
-      if (!deepLinked) {
-        const memory = restoreMapMemory();
-        if (memory) {
-          setTimeout(() => map.setView([memory.lat, memory.lng], memory.zoom, { animate: true }), 300);
-        }
-      }
-
-      let saveTimer: ReturnType<typeof setTimeout>;
-      const onMoveEndSave = () => {
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => {
-          const c = map.getCenter();
-          const z = map.getZoom();
-          saveMapMemory({ lat: c.lat, lng: c.lng, zoom: z });
-          window.dispatchEvent(new CustomEvent("teotag-map-context", {
-            detail: { center: { lat: c.lat, lng: c.lng }, zoom: z },
-          }));
-        }, 500);
-      };
-      map.on("moveend", onMoveEndSave);
-
-      if (!deepLinked && !restoreMapMemory() && navigator.geolocation) {
-        geo.locate("map-auto-init").then((result) => {
-          if (result && mapRef.current) {
-            const latlng: [number, number] = [result.lat, result.lng];
-            setUserLatLng(latlng);
-            setLocated(true);
-            placeUserMarker(mapRef.current, latlng, result.accuracy);
-          }
-        });
-      }
-
-      mapCleanupRef.current = () => {
-        clearTimeout(saveTimer);
-        map.off("moveend", onMoveEndSave);
-        cleanupSeasonalTint();
-        cleanupPopupActions();
-        sizeObserver.disconnect();
-        window.removeEventListener('resize', onResize);
-        map.remove();
-        mapRef.current = null;
-        clusterRef.current = null;
-        userMarkerRef.current = null;
-        userAccuracyRef.current = null;
-        focusHaloRef.current = null;
-        focusFallbackMarkerRef.current = null;
-        groveLayerRef.current = null;
-        seedLayerRef.current = null;
-        mycelialNetworkLayerRef.current = null;
-        mycelialAnimatedLayerRef.current = null;
-      };
-    } // end doMapInit
-
-    if (containerReady()) {
-      doMapInit();
-    } else {
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const { width, height } = entry.contentRect;
-          if (width > 0 && height > 0) { ro.disconnect(); doMapInit(); }
-        }
-      });
-      ro.observe(container);
-      const fallback = setTimeout(() => { ro.disconnect(); doMapInit(); }, 2000);
-      return () => { disposed = true; ro.disconnect(); clearTimeout(fallback); mapCleanupRef.current?.(); };
-    }
-
-    return () => { disposed = true; mapCleanupRef.current?.(); };
-  }, []);
 
   // Deep-link: auto-apply country/hive/species filters and zoom (extracted hook)
   useMapDeepLinks({
