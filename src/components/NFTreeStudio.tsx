@@ -250,14 +250,12 @@ const NFTreeStudio = ({
 
       setUploading(false);
 
-      // 3. Build metadata URI (for now use image URL as placeholder metadata)
-      const metadataUri = imageUrl || `s33d://tree/${treeId}`;
-
-      // 4. Execute real on-chain mint
+      // 3. Execute real on-chain mint (metadata is generated server-side)
       const mintResult = await nftreeMint.mint({
         treeId,
         offeringId,
-        metadataUri,
+        title: mintTitle || treeName,
+        description: mintDescription || `NFTree of ${treeName} (${treeSpecies})`,
         imageUri: imageUrl || undefined,
       });
 
