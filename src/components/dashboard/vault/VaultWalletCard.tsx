@@ -190,7 +190,7 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                           void wallet.switchToActiveNetwork?.();
                         }}
                       >
-                        Switch to Base Sepolia
+                        Switch to Base
                       </Button>
                     </div>
                   )}
