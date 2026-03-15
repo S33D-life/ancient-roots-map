@@ -38,7 +38,15 @@ const TreesAwaitingVisits = lazy(() => import("@/components/TreesAwaitingVisits"
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
 const MapPage = () => {
-  const navigate = useNavigate();
+  // ── EMERGENCY BARE MAP MODE ──
+  if (SAFE_FORCE_BARE_MAP) {
+    return <UltraBareLeafletTest />;
+  }
+
+  return <MapPageFull />;
+};
+
+const MapPageFull = () => {
   const [searchParams] = useSearchParams();
   const mapFocus = parseMapFocusParams(searchParams);
   const paramW3w = searchParams.get("w3w") || undefined;
