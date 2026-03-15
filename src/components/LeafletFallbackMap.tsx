@@ -395,9 +395,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     const config = LENS_CONFIGS[activeLens];
     if (!config) return;
     // Auto-enable harvest + offering + blooming clock layers
-    setShowHarvestLayer(true);
-    setShowOfferingGlow(true);
-    setShowBloomingClock(true);
+    batchUpdate({ harvestLayer: true, offeringGlow: true, bloomingClock: true });
     // Set blooming clock to the middle month of the season
     const midMonth = config.months[Math.floor(config.months.length / 2)];
     setBloomMonth(midMonth);
