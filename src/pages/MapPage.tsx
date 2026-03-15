@@ -47,6 +47,7 @@ const MapPage = () => {
 };
 
 const MapPageFull = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mapFocus = parseMapFocusParams(searchParams);
   const paramW3w = searchParams.get("w3w") || undefined;
