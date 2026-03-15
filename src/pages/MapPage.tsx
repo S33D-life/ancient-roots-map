@@ -57,19 +57,7 @@ const MapPageFull = () => {
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
-  useEffect(() => {
-    console.info("[MapDebug] MapPageFull mount", {
-      route: window.location.pathname,
-      safeMapDebug,
-      safeDisableNonessentialOverlays,
-      showEntrance,
-      search: window.location.search,
-    });
-    return () => console.info("[MapDebug] MapPageFull unmount");
-  }, [safeDisableNonessentialOverlays, safeMapDebug, showEntrance]);
-
   if (showEntrance) {
-    console.info("[MapDebug] early return branch", { branch: "showEntrance -> LevelEntrance" });
     return <LevelEntrance phases={[{ src: "/images/hero-trees/ancient-oak-mist.jpeg", alt: "The Roots" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
