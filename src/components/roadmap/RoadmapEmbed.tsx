@@ -55,6 +55,11 @@ const MilestoneCard = ({ feature, bugCount }: { feature: RoadmapFeature; bugCoun
               {statusMeta.emoji} {statusMeta.label}
             </span>
             <StageIcon stage={feature.stage} className="w-3 h-3 text-muted-foreground/50" />
+            {bugCount !== undefined && bugCount > 0 && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-sans flex items-center gap-0.5 bg-destructive/10 text-destructive border border-destructive/20">
+                <Bug className="w-2.5 h-2.5" /> {bugCount}
+              </span>
+            )}
           </div>
         </div>
       </div>
