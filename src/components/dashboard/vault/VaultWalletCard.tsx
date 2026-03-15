@@ -180,7 +180,7 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                   {!wallet.isCorrectNetwork && (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 space-y-2">
                       <p className="text-[11px] text-destructive font-serif">
-                        This wallet is connected, but not on Base Sepolia (84532).
+                        This wallet is connected, but not on the correct network.
                       </p>
                       <Button
                         variant="outline"
