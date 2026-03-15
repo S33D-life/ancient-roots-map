@@ -2,10 +2,11 @@
  * RoadmapEmbed — compact summary of the Living Forest Roadmap.
  * Designed for embedding inside Golden Dream or any overview page.
  */
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp, Bug } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ROADMAP_FEATURES,
   STAGE_META,
