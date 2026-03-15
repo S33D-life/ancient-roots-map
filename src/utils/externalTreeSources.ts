@@ -444,7 +444,8 @@ export async function fetchSourceTrees(
   }
 
   try {
-    const trees = await fetcher(source, bbox, signal);
+    const raw = await fetcher(source, bbox, signal);
+    const trees = validateCandidates(raw, source.name);
     setCache(source.id, bbox, trees);
     return trees;
   } catch (err: any) {
