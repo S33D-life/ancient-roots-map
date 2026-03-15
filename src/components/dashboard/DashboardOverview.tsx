@@ -53,7 +53,7 @@ const DashboardOverview = (props: OverviewProps) => {
         <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-4 font-serif">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
-            to="/map"
+            to={ROUTES.MAP}
             className="flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card/40 hover:border-primary/40 hover:bg-card/60 transition-all group"
           >
             <Map className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
