@@ -740,7 +740,7 @@ const NFTreeStudio = ({
                               </a>
                             ) : (
                               <span className="text-[10px] text-muted-foreground/40 font-serif italic">
-                                Not yet on-chain
+                                Offering recorded — not minted on-chain
                               </span>
                             )}
                           </div>
