@@ -225,6 +225,7 @@ export type Database = {
           region: string | null
           reward_max: number
           reward_min: number
+          roadmap_feature_slug: string | null
           source_id: string | null
           species: string | null
           status: string
@@ -249,6 +250,7 @@ export type Database = {
           region?: string | null
           reward_max?: number
           reward_min?: number
+          roadmap_feature_slug?: string | null
           source_id?: string | null
           species?: string | null
           status?: string
@@ -273,6 +275,7 @@ export type Database = {
           region?: string | null
           reward_max?: number
           reward_min?: number
+          roadmap_feature_slug?: string | null
           source_id?: string | null
           species?: string | null
           status?: string

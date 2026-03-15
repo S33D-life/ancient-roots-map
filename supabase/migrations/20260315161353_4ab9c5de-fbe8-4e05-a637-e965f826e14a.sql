@@ -1,0 +1,1 @@
+ALTER TABLE public.agent_garden_tasks ADD COLUMN IF NOT EXISTS roadmap_feature_slug text DEFAULT NULL;
