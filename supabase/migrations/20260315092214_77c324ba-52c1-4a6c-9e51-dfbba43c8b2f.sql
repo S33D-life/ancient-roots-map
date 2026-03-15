@@ -1,0 +1,1 @@
+ALTER TABLE public.task_submissions ADD COLUMN IF NOT EXISTS skill_category text DEFAULT null;

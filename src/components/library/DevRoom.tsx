@@ -4,6 +4,7 @@
  * "The tap root feeds the entire living tree."
  */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { SkillViewer } from "@/components/library/SkillViewer";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 
 /* ── Types ── */
-type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "settings";
+type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings";
 
 interface SystemNode {
   id: string;
@@ -48,6 +49,7 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "contract-shelf",  label: "Contracts",   icon: <FileText className="w-3.5 h-3.5" /> },
   { key: "roadmap",         label: "Roadmap",     icon: <Sprout className="w-3.5 h-3.5" /> },
   { key: "toolshed",        label: "Toolshed",    icon: <Wrench className="w-3.5 h-3.5" /> },
+  { key: "skills",          label: "Skills",      icon: <BookOpen className="w-3.5 h-3.5" /> },
   { key: "settings",        label: "Settings",    icon: <Settings className="w-3.5 h-3.5" /> },
 ];
 
@@ -189,6 +191,7 @@ const DevRoom = () => {
           {section === "contract-shelf" && <ContractShelfSection />}
           {section === "roadmap" && <RoadmapSection />}
           {section === "toolshed" && <ToolshedSection />}
+          {section === "skills" && <SkillsSection />}
           {section === "settings" && <SettingsSection />}
         </motion.div>
       </AnimatePresence>
@@ -841,6 +844,25 @@ function ToolshedSection() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   SKILLS
+   ═══════════════════════════════════════════════════ */
+function SkillsSection() {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-primary" /> S33D Skills
+        </h2>
+        <p className="text-xs text-muted-foreground/70">
+          A living field guide for co-creators. Learn how to contribute safely and effectively before taking tasks.
+        </p>
+      </div>
+      <SkillViewer />
     </div>
   );
 }

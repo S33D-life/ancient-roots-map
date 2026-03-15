@@ -5412,6 +5412,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           reviewer_notes: string | null
+          skill_category: string | null
           status: string
           submitted_by: string
           task_id: string
@@ -5429,6 +5430,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           reviewer_notes?: string | null
+          skill_category?: string | null
           status?: string
           submitted_by: string
           task_id: string
@@ -5446,6 +5448,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           reviewer_notes?: string | null
+          skill_category?: string | null
           status?: string
           submitted_by?: string
           task_id?: string
