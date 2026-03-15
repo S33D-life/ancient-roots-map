@@ -83,6 +83,32 @@ const FILTER_TYPES: Record<SearchFilter, SearchResultType[]> = {
   support: ["support_page"],
 };
 
+/* ── Query Sanitization ── */
+
+/**
+ * Escape characters that have special meaning in PostgreSQL LIKE/ILIKE patterns.
+ * Prevents user input from being interpreted as wildcards.
+ */
+export function sanitizeLikeQuery(raw: string): string {
+  return raw
+    .replace(/\\/g, "\\\\")  // backslash first
+    .replace(/%/g, "\\%")
+    .replace(/_/g, "\\_");
+}
+
+/**
+ * Sanitize and clamp a search query. Returns null if unusable.
+ * - Trims whitespace
+ * - Enforces max length (200 chars) to prevent abuse
+ * - Escapes LIKE-special characters
+ * - Returns null for empty or too-short queries
+ */
+export function prepareQuery(raw: string, minLength = 2): { original: string; safe: string } | null {
+  const trimmed = raw.trim().slice(0, 200);
+  if (trimmed.length < minLength) return null;
+  return { original: trimmed, safe: sanitizeLikeQuery(trimmed) };
+}
+
 /* ── Static Indices ── */
 
 const HEARTWOOD_ROOMS: SearchResult[] = [
@@ -152,7 +178,7 @@ const ROOTSTONE_RESULTS: SearchResult[] = ALL_ROOTSTONES.map((stone) => {
 });
 
 /* ── Scoring ── */
-function scoreMatch(query: string, item: { title: string; subtitle?: string; keywords?: string[] }): number {
+export function scoreMatch(query: string, item: { title: string; subtitle?: string; keywords?: string[] }): number {
   const q = query.toLowerCase();
   const title = item.title.toLowerCase();
   const subtitle = (item.subtitle || "").toLowerCase();
@@ -188,15 +214,141 @@ const TYPE_BOOST: Record<SearchResultType, number> = {
   support_page: 0,
 };
 
+/* ── DB Search Helpers ── */
+
+async function searchTrees(safe: string, original: string, results: SearchResult[]): Promise<void> {
+  const { data } = await supabase
+    .from("trees")
+    .select("id, name, species, nation, latitude, longitude")
+    .or(`name.ilike.%${safe}%,species.ilike.%${safe}%,what3words.ilike.%${safe}%`)
+    .limit(10);
+  if (!data) return;
+  for (const t of data) {
+    const s = scoreMatch(original, { title: t.name, subtitle: t.species || "", keywords: [t.nation || ""] });
+    results.push({
+      id: `tree-${t.id}`,
+      type: "tree",
+      title: t.name,
+      subtitle: [t.species, t.nation].filter(Boolean).join(" · "),
+      url: `/tree/${t.id}`,
+      mapContext: { lat: t.latitude, lng: t.longitude, treeId: t.id, zoom: 16 },
+      score: s + TYPE_BOOST.tree,
+      emoji: "🌳",
+    });
+  }
+}
+
+async function searchSpecies(safe: string, original: string, results: SearchResult[]): Promise<void> {
+  const { data } = await supabase
+    .from("trees")
+    .select("species")
+    .ilike("species", `%${safe}%`)
+    .limit(10);
+  if (!data) return;
+  const unique = [...new Set(data.map(d => d.species).filter(Boolean))];
+  for (const sp of unique) {
+    results.push({
+      id: `species-${sp}`,
+      type: "species",
+      title: sp!,
+      subtitle: "Species",
+      url: `/map?species=${encodeURIComponent(sp!)}`,
+      mapContext: { species: sp! },
+      score: scoreMatch(original, { title: sp! }) + TYPE_BOOST.species,
+      emoji: "🍃",
+    });
+  }
+}
+
+async function searchBioregions(safe: string, original: string, results: SearchResult[]): Promise<void> {
+  const { data } = await supabase
+    .from("bio_regions")
+    .select("id, name, type, center_lat, center_lon, countries")
+    .or(`name.ilike.%${safe}%,type.ilike.%${safe}%`)
+    .limit(8);
+  if (!data) return;
+  for (const r of data) {
+    results.push({
+      id: `bioregion-${r.id}`,
+      type: "bioregion",
+      title: `🏔 ${r.name}`,
+      subtitle: [r.type, ...(r.countries || [])].filter(Boolean).join(" · "),
+      url: `/atlas/bio-regions/${r.id}`,
+      mapContext: r.center_lat && r.center_lon ? { lat: r.center_lat, lng: r.center_lon, zoom: 8 } : undefined,
+      score: scoreMatch(original, { title: r.name }) + TYPE_BOOST.bioregion,
+      emoji: "🏔",
+    });
+  }
+}
+
+async function searchWanderers(original: string, results: SearchResult[]): Promise<void> {
+  const { data } = await supabase
+    .rpc("search_discoverable_profiles", { search_query: original, result_limit: 6 });
+  if (!data) return;
+  for (const p of data as any[]) {
+    results.push({
+      id: `wanderer-${p.id}`,
+      type: "wanderer_profile",
+      title: p.full_name || "Wanderer",
+      subtitle: p.bio ? p.bio.slice(0, 60) : "Wanderer profile",
+      url: `/wanderer/${p.id}`,
+      score: scoreMatch(original, { title: p.full_name || "" }) + TYPE_BOOST.wanderer_profile,
+      emoji: "🚶",
+    });
+  }
+}
+
+async function searchCouncils(safe: string, original: string, results: SearchResult[]): Promise<void> {
+  const { data } = await supabase
+    .from("councils")
+    .select("id, name, scope, slug, description")
+    .or(`name.ilike.%${safe}%,description.ilike.%${safe}%`)
+    .limit(6);
+  if (!data) return;
+  for (const c of data) {
+    results.push({
+      id: `council-${c.id}`,
+      type: "council_record",
+      title: `🌿 ${c.name}`,
+      subtitle: c.scope,
+      url: `/council-of-life`,
+      score: scoreMatch(original, { title: c.name, subtitle: c.description || "" }) + TYPE_BOOST.council_record,
+      emoji: "🌿",
+    });
+  }
+}
+
+async function searchLibrary(safe: string, original: string, results: SearchResult[]): Promise<void> {
+  const { data } = await supabase
+    .from("bookshelf_entries")
+    .select("id, title, author, genre")
+    .or(`title.ilike.%${safe}%,author.ilike.%${safe}%`)
+    .eq("visibility", "public")
+    .limit(6);
+  if (!data) return;
+  for (const b of data) {
+    results.push({
+      id: `book-${b.id}`,
+      type: "library_item",
+      title: `📖 ${b.title}`,
+      subtitle: b.author,
+      url: `/library`,
+      score: scoreMatch(original, { title: b.title, subtitle: b.author }) + TYPE_BOOST.library_item,
+      emoji: "📖",
+    });
+  }
+}
+
 /* ── Main Search Function ── */
 export async function unifiedSearch(
   query: string,
   filter: SearchFilter = "all",
   limit = 20,
 ): Promise<SearchResult[]> {
-  if (!query || query.length < 2) return [];
+  const prepared = prepareQuery(query);
+  if (!prepared) return [];
 
-  const q = query.trim();
+  const { original, safe } = prepared;
   const results: SearchResult[] = [];
   const filterTypes = FILTER_TYPES[filter];
   const shouldInclude = (type: SearchResultType) =>
@@ -205,195 +357,55 @@ export async function unifiedSearch(
   // 1. Static indices (instant — no DB call)
   if (shouldInclude("heartwood_room")) {
     for (const room of HEARTWOOD_ROOMS) {
-      const s = scoreMatch(q, room);
+      const s = scoreMatch(original, room);
       if (s > 0) results.push({ ...room, score: s + TYPE_BOOST.heartwood_room });
     }
   }
   if (shouldInclude("support_page")) {
     for (const page of SUPPORT_PAGES) {
-      const s = scoreMatch(q, page);
+      const s = scoreMatch(original, page);
       if (s > 0) results.push({ ...page, score: s + TYPE_BOOST.support_page });
     }
   }
   if (shouldInclude("country")) {
     for (const page of COUNTRY_PAGES) {
-      const s = scoreMatch(q, page);
+      const s = scoreMatch(original, page);
       if (s > 0) results.push({ ...page, score: s + TYPE_BOOST.country });
     }
   }
   if (shouldInclude("staff")) {
     for (const staff of STAFF_ENTRIES) {
-      const s = scoreMatch(q, staff);
+      const s = scoreMatch(original, staff);
       if (s > 0) results.push({ ...staff, score: s + TYPE_BOOST.staff });
     }
   }
   if (shouldInclude("rootstone")) {
     for (const stone of ROOTSTONE_RESULTS) {
-      const s = scoreMatch(q, stone);
+      const s = scoreMatch(original, stone);
       if (s > 0) results.push({ ...stone, score: s + TYPE_BOOST.rootstone });
     }
   }
 
-  // 2. Database queries (parallel)
+  // 2. Database queries (parallel, with sanitized input)
   const dbPromises: PromiseLike<void>[] = [];
 
-  // Trees
   if (shouldInclude("tree")) {
-    dbPromises.push(
-      supabase
-        .from("trees")
-        .select("id, name, species, nation, latitude, longitude")
-        .or(`name.ilike.%${q}%,species.ilike.%${q}%,what3words.ilike.%${q}%`)
-        .limit(10)
-        .then(({ data }) => {
-          if (data) {
-            for (const t of data) {
-              const s = scoreMatch(q, { title: t.name, subtitle: t.species || "", keywords: [t.nation || ""] });
-              results.push({
-                id: `tree-${t.id}`,
-                type: "tree",
-                title: t.name,
-                subtitle: [t.species, t.nation].filter(Boolean).join(" · "),
-                url: `/tree/${t.id}`,
-                mapContext: { lat: t.latitude, lng: t.longitude, treeId: t.id, zoom: 16 },
-                score: s + TYPE_BOOST.tree,
-                emoji: "🌳",
-              });
-            }
-          }
-        }),
-    );
+    dbPromises.push(searchTrees(safe, original, results));
   }
-
-  // Species (distinct)
   if (shouldInclude("species") || shouldInclude("tree")) {
-    dbPromises.push(
-      supabase
-        .from("trees")
-        .select("species")
-        .ilike("species", `%${q}%`)
-        .limit(10)
-        .then(({ data }) => {
-          if (data) {
-            const unique = [...new Set(data.map(d => d.species).filter(Boolean))];
-            for (const sp of unique) {
-              results.push({
-                id: `species-${sp}`,
-                type: "species",
-                title: sp!,
-                subtitle: "Species",
-                url: `/map?species=${encodeURIComponent(sp!)}`,
-                mapContext: { species: sp! },
-                score: scoreMatch(q, { title: sp! }) + TYPE_BOOST.species,
-                emoji: "🍃",
-              });
-            }
-          }
-        }),
-    );
+    dbPromises.push(searchSpecies(safe, original, results));
   }
-
-  // Bioregions
   if (shouldInclude("bioregion")) {
-    dbPromises.push(
-      supabase
-        .from("bio_regions")
-        .select("id, name, type, center_lat, center_lon, countries")
-        .or(`name.ilike.%${q}%,type.ilike.%${q}%`)
-        .limit(8)
-        .then(({ data }) => {
-          if (data) {
-            for (const r of data) {
-              results.push({
-                id: `bioregion-${r.id}`,
-                type: "bioregion",
-                title: `🏔 ${r.name}`,
-                subtitle: [r.type, ...(r.countries || [])].filter(Boolean).join(" · "),
-                url: `/atlas/bio-regions/${r.id}`,
-                mapContext: r.center_lat && r.center_lon ? { lat: r.center_lat, lng: r.center_lon, zoom: 8 } : undefined,
-                score: scoreMatch(q, { title: r.name }) + TYPE_BOOST.bioregion,
-                emoji: "🏔",
-              });
-            }
-          }
-        }),
-    );
+    dbPromises.push(searchBioregions(safe, original, results));
   }
-
-  // Wanderer profiles (public only)
   if (shouldInclude("wanderer_profile")) {
-    dbPromises.push(
-      supabase
-        .rpc("search_discoverable_profiles", { search_query: q, result_limit: 6 })
-        .then(({ data }) => {
-          if (data) {
-            for (const p of data as any[]) {
-              results.push({
-                id: `wanderer-${p.id}`,
-                type: "wanderer_profile",
-                title: p.full_name || "Wanderer",
-                subtitle: p.bio ? p.bio.slice(0, 60) : "Wanderer profile",
-                url: `/wanderer/${p.id}`,
-                score: scoreMatch(q, { title: p.full_name || "" }) + TYPE_BOOST.wanderer_profile,
-                emoji: "🚶",
-              });
-            }
-          }
-        }),
-    );
+    dbPromises.push(searchWanderers(original, results));
   }
-
-  // Councils
   if (shouldInclude("council_record")) {
-    dbPromises.push(
-      supabase
-        .from("councils")
-        .select("id, name, scope, slug, description")
-        .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
-        .limit(6)
-        .then(({ data }) => {
-          if (data) {
-            for (const c of data) {
-              results.push({
-                id: `council-${c.id}`,
-                type: "council_record",
-                title: `🌿 ${c.name}`,
-                subtitle: c.scope,
-                url: `/council-of-life`,
-                score: scoreMatch(q, { title: c.name, subtitle: c.description || "" }) + TYPE_BOOST.council_record,
-                emoji: "🌿",
-              });
-            }
-          }
-        }),
-    );
+    dbPromises.push(searchCouncils(safe, original, results));
   }
-
-  // Library — bookshelf entries
   if (shouldInclude("library_item")) {
-    dbPromises.push(
-      supabase
-        .from("bookshelf_entries")
-        .select("id, title, author, genre")
-        .or(`title.ilike.%${q}%,author.ilike.%${q}%`)
-        .eq("visibility", "public")
-        .limit(6)
-        .then(({ data }) => {
-          if (data) {
-            for (const b of data) {
-              results.push({
-                id: `book-${b.id}`,
-                type: "library_item",
-                title: `📖 ${b.title}`,
-                subtitle: b.author,
-                url: `/library`,
-                score: scoreMatch(q, { title: b.title, subtitle: b.author }) + TYPE_BOOST.library_item,
-                emoji: "📖",
-              });
-            }
-          }
-        }),
-    );
+    dbPromises.push(searchLibrary(safe, original, results));
   }
 
   await Promise.all(dbPromises);
