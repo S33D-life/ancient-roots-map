@@ -538,13 +538,13 @@ const NFTreeStudio = ({
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleLegacyMint}
+                    onClick={handleLegacyRecord}
                     disabled={uploading || !mintTitle.trim() || !presenceCompleted}
                     variant="outline"
                     className="w-full gap-2 font-serif"
                   >
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {uploading ? "Recording…" : "Record NFTree (on-chain mint coming soon)"}
+                    {uploading ? "Recording…" : "Record Offering (on-chain mint coming soon)"}
                   </Button>
                 )}
               </>
