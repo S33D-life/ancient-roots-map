@@ -41,6 +41,12 @@ const CHAIN_NAMES: Record<number, string> = {
 };
 
 const CHAIN_PARAMS: Record<number, { chainName: string; rpcUrls: string[]; blockExplorerUrls: string[]; nativeCurrency: { name: string; symbol: string; decimals: number } }> = {
+  8453: {
+    chainName: "Base",
+    rpcUrls: ["https://mainnet.base.org"],
+    blockExplorerUrls: ["https://basescan.org"],
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  },
   84532: {
     chainName: "Base Sepolia",
     rpcUrls: ["https://sepolia.base.org"],
