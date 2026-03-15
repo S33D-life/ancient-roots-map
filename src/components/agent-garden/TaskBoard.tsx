@@ -155,6 +155,7 @@ export function TaskBoard() {
       submitted_by: userId,
       proof_text: proofText.trim(),
       proof_url: proofUrl.trim() || null,
+      skill_category: task.category || null,
     });
     setSubmitting(false);
 
