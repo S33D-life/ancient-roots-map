@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import EcosystemPulseOverlay from "@/components/ecosystem/EcosystemPulseOverlay";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, ZoomIn, ZoomOut, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 import {

@@ -448,6 +448,21 @@ const BugGardenPage = () => {
                     </div>
                   )}
 
+                  {/* Roadmap link */}
+                  {isCurator && (
+                    <div className="mt-3">
+                      <p className="text-xs text-muted-foreground font-medium mb-1.5">Roadmap Link</p>
+                      <RoadmapLinker
+                        bugId={selectedBug.id}
+                        currentSlug={selectedBug.roadmap_feature_slug}
+                        onLinked={(slug) => {
+                          setBugs((prev) => prev.map((b) => b.id === selectedBug.id ? { ...b, roadmap_feature_slug: slug } : b));
+                          setSelectedBug({ ...selectedBug, roadmap_feature_slug: slug });
+                        }}
+                      />
+                    </div>
+                  )}
+
                   {/* Curator tools */}
                   {isCurator && (
                     <div className="border-t border-border/40 pt-3 space-y-3">
