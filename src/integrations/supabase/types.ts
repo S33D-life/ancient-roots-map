@@ -3266,6 +3266,94 @@ export type Database = {
           },
         ]
       }
+      nftree_mints: {
+        Row: {
+          chain_id: number
+          confirmed_at: string | null
+          contract_address: string | null
+          created_at: string
+          error_message: string | null
+          explorer_url: string | null
+          id: string
+          image_uri: string | null
+          marketplace_url: string | null
+          metadata_uri: string | null
+          mint_status: string
+          minter_address: string
+          minter_user_id: string
+          offering_id: string | null
+          staff_id: string | null
+          staff_token_id: number
+          token_id: number | null
+          tree_id: string
+          tx_hash: string | null
+        }
+        Insert: {
+          chain_id?: number
+          confirmed_at?: string | null
+          contract_address?: string | null
+          created_at?: string
+          error_message?: string | null
+          explorer_url?: string | null
+          id?: string
+          image_uri?: string | null
+          marketplace_url?: string | null
+          metadata_uri?: string | null
+          mint_status?: string
+          minter_address: string
+          minter_user_id: string
+          offering_id?: string | null
+          staff_id?: string | null
+          staff_token_id: number
+          token_id?: number | null
+          tree_id: string
+          tx_hash?: string | null
+        }
+        Update: {
+          chain_id?: number
+          confirmed_at?: string | null
+          contract_address?: string | null
+          created_at?: string
+          error_message?: string | null
+          explorer_url?: string | null
+          id?: string
+          image_uri?: string | null
+          marketplace_url?: string | null
+          metadata_uri?: string | null
+          mint_status?: string
+          minter_address?: string
+          minter_user_id?: string
+          offering_id?: string | null
+          staff_id?: string | null
+          staff_token_id?: number
+          token_id?: number | null
+          tree_id?: string
+          tx_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nftree_mints_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nftree_mints_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staffs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nftree_mints_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
