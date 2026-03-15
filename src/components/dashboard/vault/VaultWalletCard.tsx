@@ -180,7 +180,7 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                   {!wallet.isCorrectNetwork && (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 space-y-2">
                       <p className="text-[11px] text-destructive font-serif">
-                        This wallet is connected, but not on Base Sepolia (84532).
+                        This wallet is connected, but not on the correct network.
                       </p>
                       <Button
                         variant="outline"
@@ -190,7 +190,7 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                           void wallet.switchToActiveNetwork?.();
                         }}
                       >
-                        Switch to Base Sepolia
+                        Switch to Base
                       </Button>
                     </div>
                   )}
@@ -296,15 +296,21 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                         !walletSignin.signedIn
                           ? "Sign in required"
                           : staffGate.isStaffHolder
-                            ? "Staff holder verified"
+                            ? "Staff holder verified — mint from any tree page"
                             : "Staff holder required"
                       }
                     >
-                      Mint NFTree (Staff-only)
+                      <Shield className="w-3 h-3 mr-1.5" />
+                      {staffGate.isStaffHolder ? "Staff Verified — Mint from Tree Page" : "Staff Required to Mint"}
                     </Button>
                     {walletSignin.signedIn && !staffGate.isStaffHolder && (
                       <p className="text-[10px] text-muted-foreground font-serif">
-                        Connect a wallet holding a Staff NFT to unlock this action.
+                        Connect a wallet holding a Staff NFT to unlock NFTree minting.
+                      </p>
+                    )}
+                    {walletSignin.signedIn && staffGate.isStaffHolder && (
+                      <p className="text-[10px] text-muted-foreground/70 font-serif">
+                        ✓ Visit any tree page and open NFTree Studio to mint on Base.
                       </p>
                     )}
                   </div>

@@ -7,13 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfferings } from "@/hooks/use-offerings";
+import { useNFTreeMint, type MintStage } from "@/hooks/use-nftree-mint";
+import { NFTREE_CONTRACT_ADDRESS } from "@/config/nftreeContract";
+import type { CachedStaff } from "@/hooks/use-wallet";
 import { toast } from "sonner";
 import {
   Sparkles, Image as ImageIcon, Paintbrush, History, ExternalLink,
   Loader2, Download, RotateCcw, Type, Palette, Layers, ZoomIn, ZoomOut,
+  Wallet, Shield, CheckCircle2, AlertTriangle, ArrowRight,
 } from "lucide-react";
 import IpfsMetadataViewer from "@/components/IpfsMetadataViewer";
 
@@ -23,10 +26,15 @@ interface NFTreeStudioProps {
   treeId: string;
   treeName: string;
   treeSpecies: string;
-  /** URL of a tree photo to use as the starting canvas */
   photoUrl?: string | null;
-  /** If true, mint is blocked until presence is completed */
   presenceCompleted?: boolean;
+  // Wallet integration props
+  walletAddress?: string | null;
+  isCorrectNetwork?: boolean;
+  activeStaff?: CachedStaff | null;
+  isStaffHolder?: boolean;
+  onConnectWallet?: () => void;
+  onSwitchNetwork?: () => Promise<boolean>;
 }
 
 // ── Art Studio Canvas ─────────────────────────────────────────────
@@ -54,11 +62,36 @@ const OVERLAYS = [
   { id: "golden", label: "Golden Glow" },
 ];
 
-const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photoUrl, presenceCompleted = true }: NFTreeStudioProps) => {
+const STAGE_LABELS: Record<MintStage, string> = {
+  idle: "",
+  checking_wallet: "Checking wallet…",
+  checking_staff: "Verifying Staff NFT…",
+  authorizing: "Authorizing mint…",
+  awaiting_signature: "Confirm in MetaMask…",
+  confirming: "Waiting for confirmation…",
+  recording: "Recording provenance…",
+  success: "NFTree sealed on-chain!",
+  error: "Mint failed",
+};
+
+const NFTreeStudio = ({
+  open,
+  onOpenChange,
+  treeId,
+  treeName,
+  treeSpecies,
+  photoUrl,
+  presenceCompleted = true,
+  walletAddress,
+  isCorrectNetwork = false,
+  activeStaff,
+  isStaffHolder = false,
+  onConnectWallet,
+  onSwitchNetwork,
+}: NFTreeStudioProps) => {
   const [activeTab, setActiveTab] = useState<string>("mint");
   const [mintTitle, setMintTitle] = useState(treeName);
   const [mintDescription, setMintDescription] = useState("");
-  const [minting, setMinting] = useState(false);
 
   // Art studio state
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,8 +104,17 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
   });
   const [studioImage, setStudioImage] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [uploading, setUploading] = useState(false);
 
-  // Mint history provided by useOfferings hook below
+  // Real mint hook
+  const nftreeMint = useNFTreeMint({
+    walletAddress: walletAddress || null,
+    isCorrectNetwork,
+    activeStaff: activeStaff || null,
+    switchNetwork: onSwitchNetwork || (async () => false),
+  });
+
+  const isMinting = nftreeMint.stage !== "idle" && nftreeMint.stage !== "success" && nftreeMint.stage !== "error";
 
   // Load tree photo into studio
   useEffect(() => {
@@ -97,19 +139,15 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
     ctx.clearRect(0, 0, size, size);
     ctx.save();
 
-    // Apply filter
     const filterDef = FILTERS.find((f) => f.id === canvasState.filter);
     if (filterDef) ctx.filter = filterDef.css;
 
-    // Draw image centered & zoomed
     const scale = Math.max(size / studioImage.width, size / studioImage.height) * zoom;
     const dx = (size - studioImage.width * scale) / 2;
     const dy = (size - studioImage.height * scale) / 2;
     ctx.drawImage(studioImage, dx, dy, studioImage.width * scale, studioImage.height * scale);
-
     ctx.restore();
 
-    // Apply overlay
     if (canvasState.overlay === "vignette") {
       const grad = ctx.createRadialGradient(size / 2, size / 2, size * 0.25, size / 2, size / 2, size * 0.7);
       grad.addColorStop(0, "transparent");
@@ -135,7 +173,6 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
       ctx.fillRect(0, 0, size, size);
     }
 
-    // Draw text
     if (canvasState.text) {
       ctx.font = `bold ${canvasState.fontSize}px "Playfair Display", serif`;
       ctx.fillStyle = canvasState.textColor;
@@ -151,62 +188,105 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
     drawCanvas();
   }, [drawCanvas]);
 
-  // Use unified offerings hook for NFT history
   const { offerings: allTreeOfferings, refetch: refetchOfferings } = useOfferings({ treeId: open ? treeId : null, realtime: true });
   const mintHistory = useMemo(
     () => allTreeOfferings.filter(o => o.type === "nft"),
     [allTreeOfferings]
   );
-  const historyLoading = false;
 
-  // Mint: save as NFT offering
+  // ── Upload image and get URL ──
+  const uploadImage = async (): Promise<string | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Please sign in to mint");
+
+    let finalUrl = photoUrl || null;
+
+    if (activeTab === "studio" && canvasRef.current) {
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvasRef.current!.toBlob(resolve, "image/jpeg", 0.92)
+      );
+      if (blob) {
+        const fileName = `${user.id}/${treeId}/nftree-${Date.now()}.jpg`;
+        const { error: upErr } = await supabase.storage
+          .from("offerings")
+          .upload(fileName, blob, { cacheControl: "3600" });
+        if (upErr) throw upErr;
+        const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(fileName);
+        finalUrl = urlData.publicUrl;
+      }
+    }
+
+    return finalUrl;
+  };
+
+  // ── Create offering record (for provenance) ──
+  const createOfferingRecord = async (imageUrl: string | null): Promise<string> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Please sign in");
+
+    const { data, error } = await supabase.from("offerings").insert({
+      tree_id: treeId,
+      type: "nft" as const,
+      title: mintTitle || treeName,
+      content: mintDescription || `NFTree of ${treeName} (${treeSpecies})`,
+      media_url: imageUrl,
+      nft_link: null,
+      created_by: user.id,
+    }).select("id").single();
+
+    if (error) throw error;
+    return data.id;
+  };
+
+  // ── Full mint flow ──
   const handleMint = async () => {
-    setMinting(true);
+    setUploading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please sign in to mint");
-        return;
-      }
+      // 1. Upload image
+      const imageUrl = await uploadImage();
 
-      let finalUrl = photoUrl || null;
+      // 2. Create offering record first
+      const offeringId = await createOfferingRecord(imageUrl);
 
-      // If studio canvas has edits, export it
-      if (activeTab === "studio" && canvasRef.current) {
-        const blob = await new Promise<Blob | null>((resolve) =>
-          canvasRef.current!.toBlob(resolve, "image/jpeg", 0.92)
-        );
-        if (blob) {
-          const fileName = `${user.id}/${treeId}/nftree-${Date.now()}.jpg`;
-          const { error: upErr } = await supabase.storage
-            .from("offerings")
-            .upload(fileName, blob, { cacheControl: "3600" });
-          if (upErr) throw upErr;
-          const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(fileName);
-          finalUrl = urlData.publicUrl;
-        }
-      }
+      setUploading(false);
 
-      const { error } = await supabase.from("offerings").insert({
-        tree_id: treeId,
-        type: "nft" as const,
-        title: mintTitle || treeName,
-        content: mintDescription || `NFTree of ${treeName} (${treeSpecies})`,
-        media_url: finalUrl,
-        nft_link: null,
-        created_by: user.id,
+      // 3. Build metadata URI (for now use image URL as placeholder metadata)
+      const metadataUri = imageUrl || `s33d://tree/${treeId}`;
+
+      // 4. Execute real on-chain mint
+      const mintResult = await nftreeMint.mint({
+        treeId,
+        offeringId,
+        metadataUri,
+        imageUri: imageUrl || undefined,
       });
 
-      if (error) throw error;
+      if (mintResult) {
+        // Update offering with the NFT link
+        refetchOfferings();
+        setActiveTab("history");
+      }
+    } catch (err: any) {
+      setUploading(false);
+      toast.error("Preparation failed", { description: err.message });
+    }
+  };
 
-      toast.success("NFTree minted!", { description: `"${mintTitle}" has been sealed on-chain` });
-      // Refresh via unified hook (realtime will also pick it up)
+  // ── Legacy offering-only mint (when contract not deployed yet) ──
+  const handleLegacyMint = async () => {
+    setUploading(true);
+    try {
+      const imageUrl = await uploadImage();
+      await createOfferingRecord(imageUrl);
+      toast.success("NFTree recorded!", {
+        description: "Your NFTree has been recorded. On-chain minting will be available once the contract is deployed.",
+      });
       refetchOfferings();
       setActiveTab("history");
     } catch (err: any) {
-      toast.error("Minting failed", { description: err.message });
+      toast.error("Recording failed", { description: err.message });
     } finally {
-      setMinting(false);
+      setUploading(false);
     }
   };
 
@@ -217,6 +297,127 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
     link.href = canvasRef.current.toDataURL("image/jpeg", 0.92);
     link.click();
   };
+
+  // ── Readiness checks for the staged flow ──
+  const canMintOnchain = walletAddress && isCorrectNetwork && isStaffHolder && activeStaff && NFTREE_CONTRACT_ADDRESS;
+  const contractDeployed = !!NFTREE_CONTRACT_ADDRESS;
+
+  // ── Mint readiness checklist UI ──
+  const MintChecklist = () => (
+    <div className="rounded-xl border border-border/30 bg-secondary/10 p-4 space-y-3">
+      <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-serif">
+        Mint Readiness
+      </p>
+      <ChecklistItem
+        done={!!walletAddress}
+        label="Wallet Connected"
+        action={!walletAddress ? "Connect" : undefined}
+        onAction={onConnectWallet}
+      />
+      <ChecklistItem
+        done={isCorrectNetwork}
+        label="Base Network"
+        action={walletAddress && !isCorrectNetwork ? "Switch" : undefined}
+        onAction={() => onSwitchNetwork?.()}
+      />
+      <ChecklistItem
+        done={isStaffHolder}
+        label="Staff NFT Verified"
+        sublabel={!isStaffHolder && walletAddress ? "No Staff NFT found in this wallet" : undefined}
+      />
+      <ChecklistItem
+        done={!!activeStaff}
+        label={activeStaff ? `Active Staff: ${activeStaff.species}` : "Active Staff Selected"}
+      />
+      <ChecklistItem done={presenceCompleted} label="Presence Ritual Complete" />
+      <ChecklistItem
+        done={contractDeployed}
+        label="NFTree Contract"
+        sublabel={!contractDeployed ? "Coming soon — record now, mint later" : undefined}
+      />
+    </div>
+  );
+
+  // ── Progress display during minting ──
+  const MintProgress = () => (
+    <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 space-y-4 text-center">
+      <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+        {nftreeMint.stage === "success" ? (
+          <CheckCircle2 className="w-8 h-8 text-primary" />
+        ) : nftreeMint.stage === "error" ? (
+          <AlertTriangle className="w-8 h-8 text-destructive" />
+        ) : (
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        )}
+      </div>
+      <div>
+        <p className="text-sm font-serif text-foreground">{STAGE_LABELS[nftreeMint.stage]}</p>
+        {nftreeMint.txHash && (
+          <p className="text-[10px] text-muted-foreground font-mono mt-1 truncate">
+            tx: {nftreeMint.txHash}
+          </p>
+        )}
+        {nftreeMint.error && (
+          <p className="text-xs text-destructive mt-2 font-serif">{nftreeMint.error}</p>
+        )}
+      </div>
+
+      {nftreeMint.stage === "success" && nftreeMint.result && (
+        <div className="space-y-3 pt-2">
+          <div className="grid grid-cols-2 gap-2 text-left">
+            <div className="rounded-lg bg-card/50 p-3">
+              <p className="text-[10px] text-muted-foreground font-serif">Token ID</p>
+              <p className="text-lg font-serif text-primary">#{nftreeMint.result.tokenId}</p>
+            </div>
+            <div className="rounded-lg bg-card/50 p-3">
+              <p className="text-[10px] text-muted-foreground font-serif">Chain</p>
+              <p className="text-sm font-serif text-foreground">Base</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {nftreeMint.result.explorerUrl && (
+              <a
+                href={nftreeMint.result.explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs font-serif">
+                  <ExternalLink className="w-3 h-3" /> BaseScan
+                </Button>
+              </a>
+            )}
+            {nftreeMint.result.marketplaceUrl && (
+              <a
+                href={nftreeMint.result.marketplaceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs font-serif">
+                  <ExternalLink className="w-3 h-3" /> OpenSea
+                </Button>
+              </a>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs font-serif"
+            onClick={() => { nftreeMint.reset(); setActiveTab("history"); }}
+          >
+            View History
+          </Button>
+        </div>
+      )}
+
+      {nftreeMint.stage === "error" && (
+        <Button variant="outline" size="sm" className="text-xs font-serif" onClick={nftreeMint.reset}>
+          Try Again
+        </Button>
+      )}
+    </div>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -254,51 +455,100 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
 
           {/* ── Mint from Photo ─────────────────────────────── */}
           <TabsContent value="mint" className="space-y-4">
-            {photoUrl ? (
-              <div className="rounded-xl overflow-hidden border border-border/40">
-                <img src={photoUrl} alt={treeName} className="w-full aspect-square object-cover" />
-              </div>
+            {/* Show progress if minting */}
+            {isMinting || nftreeMint.stage === "success" || nftreeMint.stage === "error" ? (
+              <MintProgress />
             ) : (
-              <div className="rounded-xl border border-dashed border-border/60 flex items-center justify-center aspect-square bg-muted/20">
-                <p className="text-sm text-muted-foreground font-serif">No photo available — use Studio to create artwork</p>
-              </div>
-            )}
+              <>
+                {photoUrl ? (
+                  <div className="rounded-xl overflow-hidden border border-border/40">
+                    <img src={photoUrl} alt={treeName} className="w-full aspect-square object-cover" />
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border/60 flex items-center justify-center aspect-square bg-muted/20">
+                    <p className="text-sm text-muted-foreground font-serif">No photo available — use Studio to create artwork</p>
+                  </div>
+                )}
 
-            <div className="space-y-3">
-              <div>
-                <Label className="text-xs font-serif text-muted-foreground">Title</Label>
-                <Input
-                  value={mintTitle}
-                  onChange={(e) => setMintTitle(e.target.value)}
-                  placeholder="NFTree title"
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="text-xs font-serif text-muted-foreground">Description</Label>
-                <Textarea
-                  value={mintDescription}
-                  onChange={(e) => setMintDescription(e.target.value)}
-                  placeholder="Tell the story of this NFTree..."
-                  rows={3}
-                  className="mt-1"
-                />
-              </div>
-            </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs font-serif text-muted-foreground">Title</Label>
+                    <Input
+                      value={mintTitle}
+                      onChange={(e) => setMintTitle(e.target.value)}
+                      placeholder="NFTree title"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-serif text-muted-foreground">Description</Label>
+                    <Textarea
+                      value={mintDescription}
+                      onChange={(e) => setMintDescription(e.target.value)}
+                      placeholder="Tell the story of this NFTree..."
+                      rows={3}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
 
-            {!presenceCompleted && (
-              <p className="text-xs text-destructive/80 font-serif text-center py-2">
-                🌿 Complete a 333-second Presence ritual on the tree page to unlock minting.
-              </p>
+                <MintChecklist />
+
+                {/* Active staff indicator */}
+                {activeStaff && (
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5">
+                    {activeStaff.image_url && (
+                      <img src={activeStaff.image_url} alt={activeStaff.species} className="w-8 h-8 rounded-lg object-cover" />
+                    )}
+                    <div className="flex-1">
+                      <p className="text-xs font-serif text-foreground">Sealing with: {activeStaff.species} Staff</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">{activeStaff.id} · Token #{activeStaff.token_id}</p>
+                    </div>
+                    <Shield className="w-4 h-4 text-primary" />
+                  </div>
+                )}
+
+                {/* Primary mint action */}
+                {canMintOnchain ? (
+                  <Button
+                    onClick={handleMint}
+                    disabled={isMinting || uploading || !mintTitle.trim() || !presenceCompleted}
+                    className="w-full gap-2 font-serif"
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-4 h-4" />
+                    )}
+                    {uploading ? "Preparing…" : "Mint NFTree On-Chain"}
+                  </Button>
+                ) : contractDeployed ? (
+                  <Button
+                    disabled
+                    className="w-full gap-2 font-serif opacity-50"
+                  >
+                    <Wallet className="w-4 h-4" />
+                    {!walletAddress
+                      ? "Connect Wallet to Mint"
+                      : !isCorrectNetwork
+                        ? "Switch to Base Network"
+                        : !isStaffHolder
+                          ? "Staff NFT Required"
+                          : "Select an Active Staff"}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleLegacyMint}
+                    disabled={uploading || !mintTitle.trim() || !presenceCompleted}
+                    variant="outline"
+                    className="w-full gap-2 font-serif"
+                  >
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                    {uploading ? "Recording…" : "Record NFTree (on-chain mint coming soon)"}
+                  </Button>
+                )}
+              </>
             )}
-            <Button
-              onClick={handleMint}
-              disabled={minting || !mintTitle.trim() || !presenceCompleted}
-              className="w-full gap-2 font-serif"
-            >
-              {minting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {minting ? "Minting…" : !presenceCompleted ? "Presence Required" : "Mint NFTree"}
-            </Button>
           </TabsContent>
 
           {/* ── Art Studio ──────────────────────────────────── */}
@@ -320,7 +570,6 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
 
             {studioImage && (
               <>
-                {/* Filters */}
                 <div className="space-y-2">
                   <Label className="text-xs font-serif text-muted-foreground flex items-center gap-1.5">
                     <Palette className="w-3.5 h-3.5" /> Filter
@@ -340,7 +589,6 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                   </div>
                 </div>
 
-                {/* Overlays */}
                 <div className="space-y-2">
                   <Label className="text-xs font-serif text-muted-foreground flex items-center gap-1.5">
                     <Layers className="w-3.5 h-3.5" /> Overlay
@@ -360,7 +608,6 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                   </div>
                 </div>
 
-                {/* Text overlay */}
                 <div className="space-y-2">
                   <Label className="text-xs font-serif text-muted-foreground flex items-center gap-1.5">
                     <Type className="w-3.5 h-3.5" /> Text Overlay
@@ -392,7 +639,6 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                   </div>
                 </div>
 
-                {/* Zoom */}
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}>
                     <ZoomOut className="w-3.5 h-3.5" />
@@ -410,7 +656,6 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                   </Button>
                 </div>
 
-                {/* Mint from Studio */}
                 <div className="space-y-3 pt-2 border-t border-border/30">
                   <div>
                     <Label className="text-xs font-serif text-muted-foreground">Title</Label>
@@ -421,14 +666,27 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                       className="mt-1"
                     />
                   </div>
-                  <Button
-                    onClick={handleMint}
-                    disabled={minting || !mintTitle.trim() || !presenceCompleted}
-                    className="w-full gap-2 font-serif"
-                  >
-                    {minting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {minting ? "Minting from Studio…" : !presenceCompleted ? "Presence Required" : "Mint Studio NFTree"}
-                  </Button>
+
+                  {canMintOnchain ? (
+                    <Button
+                      onClick={handleMint}
+                      disabled={isMinting || uploading || !mintTitle.trim() || !presenceCompleted}
+                      className="w-full gap-2 font-serif"
+                    >
+                      {uploading || isMinting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      {uploading ? "Preparing…" : isMinting ? "Minting…" : "Mint Studio NFTree On-Chain"}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleLegacyMint}
+                      disabled={uploading || !mintTitle.trim() || !presenceCompleted}
+                      variant="outline"
+                      className="w-full gap-2 font-serif"
+                    >
+                      {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      {uploading ? "Recording…" : "Record Studio NFTree"}
+                    </Button>
+                  )}
                 </div>
               </>
             )}
@@ -436,11 +694,7 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
 
           {/* ── Mint History ────────────────────────────────── */}
           <TabsContent value="history" className="space-y-4">
-            {historyLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-primary/50" />
-              </div>
-            ) : mintHistory.length === 0 ? (
+            {mintHistory.length === 0 ? (
               <div className="text-center py-12 space-y-2">
                 <Sparkles className="w-8 h-8 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground font-serif">No NFTrees minted for this tree yet</p>
@@ -475,7 +729,7 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                             <span className="text-[10px] text-muted-foreground/60 font-mono">
                               {new Date(item.created_at).toLocaleDateString()}
                             </span>
-                            {item.nft_link && (
+                            {item.nft_link ? (
                               <a
                                 href={item.nft_link}
                                 target="_blank"
@@ -484,6 +738,10 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
                               >
                                 View on-chain <ExternalLink className="w-2.5 h-2.5" />
                               </a>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/40 font-serif italic">
+                                Not yet on-chain
+                              </span>
                             )}
                           </div>
                         </div>
@@ -499,5 +757,45 @@ const NFTreeStudio = ({ open, onOpenChange, treeId, treeName, treeSpecies, photo
     </Dialog>
   );
 };
+
+// ── Checklist helper ──
+const ChecklistItem = ({
+  done,
+  label,
+  sublabel,
+  action,
+  onAction,
+}: {
+  done: boolean;
+  label: string;
+  sublabel?: string;
+  action?: string;
+  onAction?: () => void;
+}) => (
+  <div className="flex items-center gap-2.5">
+    <div
+      className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+        done ? "bg-primary/20 text-primary" : "bg-muted/30 text-muted-foreground/40"
+      }`}
+    >
+      {done ? (
+        <CheckCircle2 className="w-3.5 h-3.5" />
+      ) : (
+        <div className="w-2 h-2 rounded-full bg-current" />
+      )}
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className={`text-xs font-serif ${done ? "text-foreground" : "text-muted-foreground"}`}>
+        {label}
+      </p>
+      {sublabel && <p className="text-[10px] text-muted-foreground/60 font-serif">{sublabel}</p>}
+    </div>
+    {action && onAction && (
+      <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 font-serif" onClick={onAction}>
+        {action} <ArrowRight className="w-2.5 h-2.5 ml-1" />
+      </Button>
+    )}
+  </div>
+);
 
 export default NFTreeStudio;
