@@ -33,12 +33,12 @@ export default function EcosystemMomentum({ showDiscovery = false, compact = fal
     const fetchPulse = async () => {
       const [
         { count: treesThisWeek },
-        { count: offeringsThisWeek },
+        offeringsThisWeek,
         { data: heartData },
         { count: councilsThisWeek },
       ] = await Promise.all([
         supabase.from("trees").select("*", { count: "exact", head: true }).gte("created_at", oneWeekAgo),
-        supabase.from("offerings").select("*", { count: "exact", head: true }).gte("created_at", oneWeekAgo),
+        getOfferingCountSince(oneWeekAgo),
         supabase.from("heart_transactions").select("amount").gte("created_at", oneWeekAgo),
         supabase.from("council_participation_rewards").select("*", { count: "exact", head: true }).gte("created_at", oneWeekAgo),
       ]);
