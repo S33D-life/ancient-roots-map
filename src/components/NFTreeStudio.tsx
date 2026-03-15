@@ -270,14 +270,16 @@ const NFTreeStudio = ({
     }
   };
 
-  // ── Legacy offering-only mint (when contract not deployed yet) ──
-  const handleLegacyMint = async () => {
+  // ── Legacy offering-only record (when contract not deployed yet) ──
+  // This does NOT mint on-chain. It records the offering in the database
+  // so it can be minted later once the NFTree contract is deployed.
+  const handleLegacyRecord = async () => {
     setUploading(true);
     try {
       const imageUrl = await uploadImage();
       await createOfferingRecord(imageUrl);
-      toast.success("NFTree recorded!", {
-        description: "Your NFTree has been recorded. On-chain minting will be available once the contract is deployed.",
+      toast.info("Offering recorded", {
+        description: "Saved to your tree's history. On-chain minting will be available once the NFTree contract is deployed.",
       });
       refetchOfferings();
       setActiveTab("history");
@@ -536,13 +538,13 @@ const NFTreeStudio = ({
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleLegacyMint}
+                    onClick={handleLegacyRecord}
                     disabled={uploading || !mintTitle.trim() || !presenceCompleted}
                     variant="outline"
                     className="w-full gap-2 font-serif"
                   >
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                    {uploading ? "Recording…" : "Record NFTree (on-chain mint coming soon)"}
+                    {uploading ? "Recording…" : "Record Offering (on-chain mint coming soon)"}
                   </Button>
                 )}
               </>
@@ -676,13 +678,13 @@ const NFTreeStudio = ({
                     </Button>
                   ) : (
                     <Button
-                      onClick={handleLegacyMint}
+                      onClick={handleLegacyRecord}
                       disabled={uploading || !mintTitle.trim() || !presenceCompleted}
                       variant="outline"
                       className="w-full gap-2 font-serif"
                     >
                       {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      {uploading ? "Recording…" : "Record Studio NFTree"}
+                      {uploading ? "Recording…" : "Record Studio Offering"}
                     </Button>
                   )}
                 </div>
@@ -738,7 +740,7 @@ const NFTreeStudio = ({
                               </a>
                             ) : (
                               <span className="text-[10px] text-muted-foreground/40 font-serif italic">
-                                Not yet on-chain
+                                Offering recorded — not minted on-chain
                               </span>
                             )}
                           </div>

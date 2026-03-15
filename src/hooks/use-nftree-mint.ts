@@ -12,8 +12,13 @@
  * The user wallet pays gas and sends the transaction, but cannot mint
  * without a fresh backend authorization. The backend cannot force a mint
  * to a wallet that doesn't own the Staff.
+ *
+ * Recovery:
+ *   - Before submitting the tx, mintId + authorization are persisted to
+ *     localStorage so that if the browser closes mid-flow, the mint can
+ *     be reconciled on next load via `reconcilePending()`.
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
 import { ACTIVE_CHAIN_ID } from "@/config/staffContract";
@@ -52,6 +57,37 @@ interface UseMintParams {
   switchNetwork: () => Promise<boolean>;
 }
 
+/* ── localStorage recovery key ── */
+const PENDING_MINT_KEY = "nftree_pending_mint";
+
+interface PendingMint {
+  mintId: string;
+  txHash: string;
+  timestamp: number;
+}
+
+function savePendingMint(pm: PendingMint) {
+  try { localStorage.setItem(PENDING_MINT_KEY, JSON.stringify(pm)); } catch { /* noop */ }
+}
+
+function loadPendingMint(): PendingMint | null {
+  try {
+    const raw = localStorage.getItem(PENDING_MINT_KEY);
+    if (!raw) return null;
+    const pm = JSON.parse(raw) as PendingMint;
+    // Expire after 1 hour — if tx hasn't confirmed by then, it's lost
+    if (Date.now() - pm.timestamp > 3600_000) {
+      localStorage.removeItem(PENDING_MINT_KEY);
+      return null;
+    }
+    return pm;
+  } catch { return null; }
+}
+
+function clearPendingMint() {
+  try { localStorage.removeItem(PENDING_MINT_KEY); } catch { /* noop */ }
+}
+
 export function useNFTreeMint({
   walletAddress,
   isCorrectNetwork,
@@ -62,6 +98,7 @@ export function useNFTreeMint({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MintResult | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const reconcileAttempted = useRef(false);
 
   const reset = useCallback(() => {
     setStage("idle");
@@ -69,6 +106,101 @@ export function useNFTreeMint({
     setResult(null);
     setTxHash(null);
   }, []);
+
+  /**
+   * Reconciliation: attempt to recover a mint whose tx succeeded
+   * but whose DB confirmation was lost (e.g. browser closed mid-flow).
+   */
+  const reconcile = useCallback(
+    async (mintId: string, txHashToCheck: string): Promise<MintResult | null> => {
+      try {
+        const eth = (window as any).ethereum;
+        if (!eth || !NFTREE_CONTRACT_ADDRESS) return null;
+
+        const provider = new ethers.BrowserProvider(eth);
+        const receipt = await provider.getTransactionReceipt(txHashToCheck);
+        if (!receipt) return null; // tx still pending or unknown
+
+        if (receipt.status !== 1) {
+          // tx failed on-chain — mark DB accordingly
+          await supabase
+            .from("nftree_mints" as any)
+            .update({ mint_status: "failed", error_message: "Transaction reverted on-chain" } as any)
+            .eq("id", mintId);
+          clearPendingMint();
+          return null;
+        }
+
+        const contract = new ethers.Contract(
+          NFTREE_CONTRACT_ADDRESS,
+          NFTREE_ABI,
+          provider
+        );
+
+        let tokenId: number | null = null;
+        for (const log of receipt.logs) {
+          try {
+            const parsed = contract.interface.parseLog({
+              topics: [...log.topics],
+              data: log.data,
+            });
+            if (parsed?.name === "NFTreeMinted") {
+              tokenId = Number(parsed.args.tokenId);
+              break;
+            }
+          } catch {
+            // skip
+          }
+        }
+
+        const explorerUrl = getNFTreeBaseScanUrl(txHashToCheck);
+        const marketplaceUrl = tokenId ? getNFTreeOpenSeaUrl(tokenId) : "";
+
+        await supabase
+          .from("nftree_mints" as any)
+          .update({
+            token_id: tokenId,
+            block_number: receipt.blockNumber,
+            mint_status: "confirmed",
+            confirmed_at: new Date().toISOString(),
+            explorer_url: explorerUrl,
+            marketplace_url: marketplaceUrl,
+            tx_hash: txHashToCheck,
+            contract_address: NFTREE_CONTRACT_ADDRESS,
+          } as any)
+          .eq("id", mintId);
+
+        clearPendingMint();
+        return { tokenId: tokenId || 0, txHash: txHashToCheck, explorerUrl, marketplaceUrl, mintId };
+      } catch {
+        return null;
+      }
+    },
+    []
+  );
+
+  /**
+   * Auto-reconcile on mount: if there's a pending mint in localStorage,
+   * try to recover it from chain state.
+   */
+  useEffect(() => {
+    if (reconcileAttempted.current) return;
+    reconcileAttempted.current = true;
+
+    const pending = loadPendingMint();
+    if (!pending) return;
+
+    reconcile(pending.mintId, pending.txHash).then((recovered) => {
+      if (recovered) {
+        setResult(recovered);
+        setTxHash(recovered.txHash);
+        setStage("success");
+        toast.success("Recovered NFTree mint!", {
+          description: `Token #${recovered.tokenId} was confirmed on-chain.`,
+        });
+      }
+    });
+  }, [reconcile]);
 
   const mint = useCallback(
     async (params: {
@@ -169,10 +301,14 @@ export function useNFTreeMint({
           authorization.signature
         );
 
+        // ── CRITICAL: persist tx hash to localStorage BEFORE waiting ──
+        // If the browser closes after this point, we can reconcile on reload.
         setTxHash(tx.hash);
+        savePendingMint({ mintId, txHash: tx.hash, timestamp: Date.now() });
+
         setStage("confirming");
 
-        // Update DB with tx hash immediately
+        // Update DB with tx hash immediately (best-effort, localStorage is the safety net)
         await supabase
           .from("nftree_mints" as any)
           .update({ tx_hash: tx.hash, mint_status: "confirming" } as any)
@@ -180,6 +316,15 @@ export function useNFTreeMint({
 
         // ── Step 5: Wait for confirmation ──
         const receipt = await tx.wait(1);
+
+        if (!receipt || receipt.status !== 1) {
+          clearPendingMint();
+          await supabase
+            .from("nftree_mints" as any)
+            .update({ mint_status: "failed", error_message: "Transaction reverted on-chain" } as any)
+            .eq("id", mintId);
+          throw new Error("Transaction failed on-chain. No NFTree was minted.");
+        }
 
         // Parse token ID from NFTreeMinted event
         let tokenId: number | null = null;
@@ -218,6 +363,9 @@ export function useNFTreeMint({
           } as any)
           .eq("id", mintId);
 
+        // Clear recovery state — mint is fully recorded
+        clearPendingMint();
+
         // Update offering with NFT link
         if (offeringId && explorerUrl) {
           await supabase
@@ -254,67 +402,6 @@ export function useNFTreeMint({
       }
     },
     [walletAddress, isCorrectNetwork, activeStaff, switchNetwork]
-  );
-
-  /**
-   * Reconciliation: attempt to recover a mint whose tx succeeded
-   * but whose DB confirmation was lost (e.g. browser closed mid-flow).
-   */
-  const reconcile = useCallback(
-    async (mintId: string, txHashToCheck: string) => {
-      try {
-        const eth = (window as any).ethereum;
-        if (!eth || !NFTREE_CONTRACT_ADDRESS) return null;
-
-        const provider = new ethers.BrowserProvider(eth);
-        const receipt = await provider.getTransactionReceipt(txHashToCheck);
-        if (!receipt || receipt.status !== 1) return null;
-
-        const contract = new ethers.Contract(
-          NFTREE_CONTRACT_ADDRESS,
-          NFTREE_ABI,
-          provider
-        );
-
-        let tokenId: number | null = null;
-        for (const log of receipt.logs) {
-          try {
-            const parsed = contract.interface.parseLog({
-              topics: [...log.topics],
-              data: log.data,
-            });
-            if (parsed?.name === "NFTreeMinted") {
-              tokenId = Number(parsed.args.tokenId);
-              break;
-            }
-          } catch {
-            // skip
-          }
-        }
-
-        const explorerUrl = getNFTreeBaseScanUrl(txHashToCheck);
-        const marketplaceUrl = tokenId ? getNFTreeOpenSeaUrl(tokenId) : "";
-
-        await supabase
-          .from("nftree_mints" as any)
-          .update({
-            token_id: tokenId,
-            block_number: receipt.blockNumber,
-            mint_status: "confirmed",
-            confirmed_at: new Date().toISOString(),
-            explorer_url: explorerUrl,
-            marketplace_url: marketplaceUrl,
-            tx_hash: txHashToCheck,
-            contract_address: NFTREE_CONTRACT_ADDRESS,
-          } as any)
-          .eq("id", mintId);
-
-        return { tokenId, txHash: txHashToCheck, explorerUrl, marketplaceUrl };
-      } catch {
-        return null;
-      }
-    },
-    []
   );
 
   return { stage, error, result, txHash, mint, reset, reconcile };
