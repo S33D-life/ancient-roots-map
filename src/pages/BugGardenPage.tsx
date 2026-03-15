@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import RoadmapLinker from "@/components/bugs/RoadmapLinker";
+import { ROADMAP_FEATURES, STAGE_META } from "@/data/roadmap-forest";
 
 type BugReport = {
   id: string;
@@ -49,6 +51,7 @@ type BugReport = {
   user_id: string;
   triage_notes: string | null;
   screenshot_urls: string[] | null;
+  roadmap_feature_slug: string | null;
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
@@ -242,6 +245,14 @@ const BugGardenPage = () => {
                   <Heart className="w-2.5 h-2.5 fill-primary/40" /> {bug.hearts_awarded_total}
                 </span>
               )}
+              {bug.roadmap_feature_slug && (() => {
+                const rf = ROADMAP_FEATURES.find(f => f.id === bug.roadmap_feature_slug);
+                return rf ? (
+                  <Badge variant="outline" className="text-[10px] bg-primary/5 border-primary/20 text-primary">
+                    {rf.symbol || STAGE_META[rf.stage].emoji} {rf.name}
+                  </Badge>
+                ) : null;
+              })()}
               {bug.screenshot_urls && bug.screenshot_urls.length > 0 && (
                 <ImageIcon className="w-3 h-3 text-muted-foreground/50" />
               )}
@@ -434,6 +445,21 @@ const BugGardenPage = () => {
                       <Heart className="w-4 h-4 fill-primary/30" />
                       <span className="font-serif">{selectedBug.hearts_awarded_total} Hearts awarded</span>
                       <span className="text-[10px] text-muted-foreground ml-auto">Council Spark</span>
+                    </div>
+                  )}
+
+                  {/* Roadmap link */}
+                  {isCurator && (
+                    <div className="mt-3">
+                      <p className="text-xs text-muted-foreground font-medium mb-1.5">Roadmap Link</p>
+                      <RoadmapLinker
+                        bugId={selectedBug.id}
+                        currentSlug={selectedBug.roadmap_feature_slug}
+                        onLinked={(slug) => {
+                          setBugs((prev) => prev.map((b) => b.id === selectedBug.id ? { ...b, roadmap_feature_slug: slug } : b));
+                          setSelectedBug({ ...selectedBug, roadmap_feature_slug: slug });
+                        }}
+                      />
                     </div>
                   )}
 

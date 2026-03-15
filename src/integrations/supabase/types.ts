@@ -1050,6 +1050,7 @@ export type Database = {
           page_route: string | null
           report_type: string
           reward_state: string
+          roadmap_feature_slug: string | null
           screenshot_urls: string[] | null
           severity: string
           status: string
@@ -1080,6 +1081,7 @@ export type Database = {
           page_route?: string | null
           report_type?: string
           reward_state?: string
+          roadmap_feature_slug?: string | null
           screenshot_urls?: string[] | null
           severity?: string
           status?: string
@@ -1110,6 +1112,7 @@ export type Database = {
           page_route?: string | null
           report_type?: string
           reward_state?: string
+          roadmap_feature_slug?: string | null
           screenshot_urls?: string[] | null
           severity?: string
           status?: string

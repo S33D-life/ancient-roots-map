@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense, useEffect } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
 import Header from "@/components/Header";
@@ -14,18 +14,7 @@ import MapArrivalBanner from "@/components/MapArrivalBanner";
 import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
-import UltraBareLeafletTest from "@/components/UltraBareLeafletTest";
-
-/**
- * SAFE_FORCE_BARE_MAP — Emergency diagnostic flag.
- * When true, /map renders ONLY UltraBareLeafletTest:
- *   - No S33D overlays, banners, whispers, entrance, blessing
- *   - No MapLibre, no advanced Leaflet, no clustering
- *   - Just a plain Leaflet map to prove mounting works
- *
- * Set to false once map visibility is confirmed.
- */
-const SAFE_FORCE_BARE_MAP = false;
+const MapHeartBadge = lazy(() => import("@/components/MapHeartBadge"));
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -37,23 +26,7 @@ const TreesAwaitingVisits = lazy(() => import("@/components/TreesAwaitingVisits"
 
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
-const MapPage = () => {
-  console.info("[MapDebug] MapPage render", {
-    route: window.location.pathname,
-    safeForceBareMap: SAFE_FORCE_BARE_MAP,
-    env: import.meta.env.MODE,
-    hidden: document.hidden,
-  });
-
-  // ── EMERGENCY BARE MAP MODE ──
-  if (SAFE_FORCE_BARE_MAP) {
-    console.info("[MapDebug] early return branch", { branch: "SAFE_FORCE_BARE_MAP -> UltraBareLeafletTest" });
-    return <UltraBareLeafletTest />;
-  }
-
-  console.info("[MapDebug] branch", { branch: "MapPageFull" });
-  return <MapPageFull />;
-};
+const MapPage = () => <MapPageFull />;
 
 const MapPageFull = () => {
   const navigate = useNavigate();
@@ -84,19 +57,7 @@ const MapPageFull = () => {
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
-  useEffect(() => {
-    console.info("[MapDebug] MapPageFull mount", {
-      route: window.location.pathname,
-      safeMapDebug,
-      safeDisableNonessentialOverlays,
-      showEntrance,
-      search: window.location.search,
-    });
-    return () => console.info("[MapDebug] MapPageFull unmount");
-  }, [safeDisableNonessentialOverlays, safeMapDebug, showEntrance]);
-
   if (showEntrance) {
-    console.info("[MapDebug] early return branch", { branch: "showEntrance -> LevelEntrance" });
     return <LevelEntrance phases={[{ src: "/images/hero-trees/ancient-oak-mist.jpeg", alt: "The Roots" }]} phaseDuration={1200} fadeDuration={600} onComplete={handleEntranceComplete} />;
   }
 
@@ -108,6 +69,13 @@ const MapPageFull = () => {
       </MapErrorBoundary>
       <MapOfflineOverlay />
       <MapJourneyOverlay active={journeyActive} />
+      
+      {/* Heart balance badge */}
+      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
+        <Suspense fallback={null}>
+          <MapHeartBadge />
+        </Suspense>
+      )}
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
       {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && paramArrival && (
