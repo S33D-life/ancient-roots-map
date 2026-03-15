@@ -3242,23 +3242,27 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           onFullscreenToggle={onFullscreenToggle}
           isFullscreen={isFullscreen}
           onPerspectivePreset={(preset: PerspectivePreset) => {
-            setShowHiveLayer(preset.hiveEmphasis);
-            if (preset.bloomingClockVisible && !showBloomingClock) setShowBloomingClock(true);
-            const layerMap: Record<string, (v: boolean) => void> = {
-              "seeds": (v) => setShowSeeds(v),
-              "offering-glow": (v) => setShowOfferingGlow(v),
-              "heart-glow": (v) => setShowHeartGlow(v),
-              "hive-layer": (v) => setShowHiveLayer(v),
-              "groves": (v) => setShowGroves(v),
-              "bloomed-seeds": (v) => setShowBloomedSeeds(v),
-              "recent-visits": (v) => setShowRecentVisits(v),
-              "seed-traces": (v) => setShowSeedTraces(v),
-              "seed-trail": (v) => setShowSeedTrail(v),
-              "shared-trees": (v) => setShowSharedTrees(v),
-              "tribe-activity": (v) => setShowTribeActivity(v),
+            setLayer("hiveLayer", preset.hiveEmphasis);
+            if (preset.bloomingClockVisible && !showBloomingClock) setLayer("bloomingClock", true);
+            // Map preset layer keys to LayerKey values
+            const presetKeyMap: Record<string, LayerKey> = {
+              "seeds": "seeds",
+              "offering-glow": "offeringGlow",
+              "heart-glow": "heartGlow",
+              "hive-layer": "hiveLayer",
+              "groves": "groves",
+              "bloomed-seeds": "bloomedSeeds",
+              "recent-visits": "recentVisits",
+              "seed-traces": "seedTraces",
+              "seed-trail": "seedTrail",
+              "shared-trees": "sharedTrees",
+              "tribe-activity": "tribeActivity",
             };
-            Object.values(layerMap).forEach(fn => fn(false));
-            preset.layers.forEach(k => { if (layerMap[k]) layerMap[k](true); });
+            // Reset all preset layers to false, then enable the ones in the preset
+            const updates: Partial<Record<LayerKey, boolean>> = {};
+            Object.values(presetKeyMap).forEach(k => { updates[k] = false; });
+            preset.layers.forEach(k => { if (presetKeyMap[k]) updates[presetKeyMap[k]] = true; });
+            batchUpdate(updates);
           }}
           onAddTree={() => {
             const map = mapRef.current;
