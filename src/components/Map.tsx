@@ -278,8 +278,38 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   // Initialize map — default to Leaflet
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    console.info("[MapDebug] Map init effect start", {
+      hasContainer: !!mapContainer.current,
+      hasMapInstance: !!map.current,
+      route: window.location.pathname,
+      hidden: document.hidden,
+    });
+
+    if (!mapContainer.current) {
+      console.info("[MapDebug] early return branch", { branch: "Map init skipped: missing containerRef" });
+      return;
+    }
+
+    if (map.current) {
+      console.info("[MapDebug] early return branch", { branch: "Map init skipped: map instance already exists" });
+      return;
+    }
+
+    const rect = mapContainer.current.getBoundingClientRect();
+    const cs = window.getComputedStyle(mapContainer.current);
+    console.info("[MapDebug] Map container probe", {
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+      display: cs.display,
+      visibility: cs.visibility,
+      opacity: cs.opacity,
+      position: cs.position,
+      zIndex: cs.zIndex,
+      overflow: cs.overflow,
+    });
+
     setMapStatus("leaflet");
+    console.info("[MapDebug] branch", { branch: "set mapStatus=leaflet (MapLibreRecoveryMap path)" });
   }, []);
 
   // Resize map on visibility/tab changes
