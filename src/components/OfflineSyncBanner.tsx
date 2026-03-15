@@ -1,14 +1,14 @@
 /**
- * OfflineSyncBanner — shows pending offline tree submissions
- * and syncs them when connectivity returns.
+ * OfflineSyncBanner — shows pending offline submissions
+ * and triggers sync when connectivity returns.
+ *
+ * Uses the unified offlineSync queue (pending_actions) as single source of truth.
  */
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { WifiOff, Upload, Loader2, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { isSupabaseConfigured } from "@/config/env";
-import { getPendingTrees, removePendingTree, pendingCount, PendingTree } from "@/utils/offlineQueue";
-import { toast } from "sonner";
+import { WifiOff, Upload, Loader2 } from "lucide-react";
+import { pendingActionCount } from "@/utils/offlineSync";
+import { runSync } from "@/utils/syncEngine";
 
 const OfflineSyncBanner = () => {
   const [count, setCount] = useState(0);
@@ -17,7 +17,7 @@ const OfflineSyncBanner = () => {
 
   const refreshCount = useCallback(async () => {
     try {
-      const c = await pendingCount();
+      const c = await pendingActionCount();
       setCount(c);
     } catch {
       // IndexedDB not available
@@ -29,78 +29,30 @@ const OfflineSyncBanner = () => {
 
     const handleOnline = () => {
       setOnline(true);
-      syncPending();
+      triggerSync();
     };
     const handleOffline = () => setOnline(false);
+    const handleQueueChange = () => refreshCount();
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    window.addEventListener("s33d-queue-change", handleQueueChange);
 
-    // Check periodically
     const interval = setInterval(refreshCount, 10_000);
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("s33d-queue-change", handleQueueChange);
       clearInterval(interval);
     };
   }, [refreshCount]);
 
-  const syncPending = useCallback(async () => {
-    if (syncing || !isSupabaseConfigured) return;
+  const triggerSync = useCallback(async () => {
+    if (syncing) return;
     setSyncing(true);
-
     try {
-      const pending = await getPendingTrees();
-      if (pending.length === 0) {
-        setSyncing(false);
-        return;
-      }
-
-      let synced = 0;
-      for (const tree of pending) {
-        try {
-          // Upload photo if present
-          let photoUrl: string | null = null;
-          if (tree.photo_data_url) {
-            const blob = await fetch(tree.photo_data_url).then(r => r.blob());
-            const fileName = `${tree.created_by || "anon"}/${tree.id}.jpg`;
-            const { data: uploadData } = await supabase.storage
-              .from("offerings")
-              .upload(fileName, blob, { contentType: "image/jpeg" });
-            if (uploadData) {
-              const { data: urlData } = supabase.storage
-                .from("offerings")
-                .getPublicUrl(uploadData.path);
-              photoUrl = urlData.publicUrl;
-            }
-          }
-
-          // Insert tree
-          const { error } = await supabase.from("trees").insert({
-            name: tree.name,
-            species: tree.species,
-            latitude: tree.latitude,
-            longitude: tree.longitude,
-            what3words: tree.what3words,
-            description: tree.description,
-            created_by: tree.created_by,
-          });
-
-          if (!error) {
-            await removePendingTree(tree.id);
-            synced++;
-            // Dispatch celebration event
-            window.dispatchEvent(new CustomEvent("tree-created", { detail: { treeName: tree.name, species: tree.species } }));
-          }
-        } catch (err) {
-          console.error("Sync failed for tree:", tree.id, err);
-        }
-      }
-
-      if (synced > 0) {
-        toast.success(`🌿 Synced ${synced} offline tree${synced !== 1 ? "s" : ""}!`);
-      }
+      await runSync();
       await refreshCount();
     } finally {
       setSyncing(false);
@@ -110,7 +62,7 @@ const OfflineSyncBanner = () => {
   // Auto-sync when coming online
   useEffect(() => {
     if (online && count > 0) {
-      syncPending();
+      triggerSync();
     }
   }, [online, count]);
 
@@ -141,12 +93,12 @@ const OfflineSyncBanner = () => {
             ) : syncing ? (
               <>
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Syncing {count} tree{count !== 1 ? "s" : ""}…</span>
+                <span>Syncing {count} item{count !== 1 ? "s" : ""}…</span>
               </>
             ) : count > 0 ? (
-              <button onClick={syncPending} className="flex items-center gap-2">
+              <button onClick={triggerSync} className="flex items-center gap-2">
                 <Upload className="w-3.5 h-3.5" />
-                <span>{count} tree{count !== 1 ? "s" : ""} ready to sync</span>
+                <span>{count} item{count !== 1 ? "s" : ""} ready to sync</span>
               </button>
             ) : null}
           </div>
