@@ -425,6 +425,7 @@ const AgentGardenPage = () => {
             <TabsTrigger value="contributions"><Activity className="w-3.5 h-3.5 mr-1.5" /> Contributions</TabsTrigger>
             <TabsTrigger value="sparks"><Zap className="w-3.5 h-3.5 mr-1.5" /> Sparks</TabsTrigger>
             <TabsTrigger value="rewards"><Heart className="w-3.5 h-3.5 mr-1.5" /> Rewards & Trust</TabsTrigger>
+            <TabsTrigger value="review"><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Review</TabsTrigger>
           </TabsList>
 
           {/* ═══════════════ OVERVIEW ═══════════════ */}
