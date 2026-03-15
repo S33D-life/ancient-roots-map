@@ -144,6 +144,7 @@ interface RoadmapEmbedProps {
 const RoadmapEmbed = ({ compact = false, category }: RoadmapEmbedProps) => {
   const [activeCategory, setActiveCategory] = useState<RoadmapCategory | null>(category ?? null);
   const [bugCounts, setBugCounts] = useState<Record<string, number>>({});
+  const [taskCounts, setTaskCounts] = useState<Record<string, number>>({});
 
   // Fetch linked bug counts
   useEffect(() => {
