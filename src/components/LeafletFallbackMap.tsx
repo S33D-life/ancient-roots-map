@@ -64,6 +64,7 @@ import {
 import { applySeasonalTint } from "@/utils/mapSeasonalTint";
 import { markTreeVisited, applyVisitedClass } from "@/utils/mapVisitedTracker";
 import { setupPopupActions } from "@/utils/mapWishHandler";
+import { useMapDeepLinks } from "@/hooks/use-map-deep-links";
 
 interface Tree {
   id: string;
