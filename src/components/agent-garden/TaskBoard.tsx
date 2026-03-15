@@ -98,6 +98,18 @@ export function TaskBoard() {
 
   useEffect(() => {
     fetchData();
+
+    // Realtime subscription for live status updates
+    const channel = supabase
+      .channel("task-submissions-live")
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "task_submissions",
+      }, () => fetchData())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   async function fetchData() {
