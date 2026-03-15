@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.canopy-checkin]
 verify_jwt = false
+
+[functions.convert-what3words-reverse]
+verify_jwt = false
+
+[functions.convert-what3words-autosuggest]
+verify_jwt = false
