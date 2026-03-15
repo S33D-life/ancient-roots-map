@@ -154,6 +154,24 @@ export interface BBox {
   east: number;
 }
 
+/**
+ * Clamp and validate a BBox. Returns null if any value is NaN/Infinity
+ * or if the ranges are inverted.
+ */
+export function sanitizeBBox(bbox: BBox): BBox | null {
+  const s = Number(bbox.south);
+  const w = Number(bbox.west);
+  const n = Number(bbox.north);
+  const e = Number(bbox.east);
+  if (!Number.isFinite(s) || !Number.isFinite(w) || !Number.isFinite(n) || !Number.isFinite(e)) return null;
+  const cs = Math.max(-90, Math.min(90, s));
+  const cn = Math.max(-90, Math.min(90, n));
+  const cw = Math.max(-180, Math.min(180, w));
+  const ce = Math.max(-180, Math.min(180, e));
+  if (cs >= cn) return null;
+  return { south: cs, west: cw, north: cn, east: ce };
+}
+
 // ── Cache System ────────────────────────────────────────────────────────────
 
 interface CacheEntry {
@@ -433,8 +451,15 @@ export async function fetchSourceTrees(
   bbox: BBox,
   signal?: AbortSignal,
 ): Promise<ExternalTreeCandidate[]> {
+  // Validate bbox at the ingestion boundary
+  const safeBBox = sanitizeBBox(bbox);
+  if (!safeBBox) {
+    console.warn(`[ExternalTrees] ${source.name}: invalid bbox rejected`, bbox);
+    return [];
+  }
+
   // Check cache first
-  const cached = getCached(source.id, bbox, source.cacheTtlMs);
+  const cached = getCached(source.id, safeBBox, source.cacheTtlMs);
   if (cached) return cached;
 
   const fetcher = FETCHER_MAP[source.type];
@@ -444,15 +469,15 @@ export async function fetchSourceTrees(
   }
 
   try {
-    const raw = await fetcher(source, bbox, signal);
+    const raw = await fetcher(source, safeBBox, signal);
     const trees = validateCandidates(raw, source.name);
-    setCache(source.id, bbox, trees);
+    setCache(source.id, safeBBox, trees);
     return trees;
   } catch (err: any) {
     if (err.name === "AbortError") return [];
     console.warn(`[ExternalTrees] ${source.name} error:`, err.message);
     // Return stale cache if available
-    const stale = getCached(source.id, bbox, Infinity);
+    const stale = getCached(source.id, safeBBox, Infinity);
     return stale ?? [];
   }
 }
