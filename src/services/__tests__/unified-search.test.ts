@@ -65,7 +65,7 @@ describe("scoreMatch", () => {
   });
 
   it("returns 40 for subtitle match", () => {
-    expect(scoreMatch("swiss", { title: "tree", subtitle: "switzerland" })).toBe(40);
+    expect(scoreMatch("zurich", { title: "Ancient Oak", subtitle: "Zurich, Switzerland" })).toBe(40);
   });
 
   it("returns 30 for keyword match", () => {
