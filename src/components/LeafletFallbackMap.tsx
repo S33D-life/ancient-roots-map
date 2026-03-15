@@ -259,23 +259,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [location.search, SAFE_MAP_DEBUG]);
 
-  const [renderDebug, setRenderDebug] = useState<{
-    mapMounted: boolean;
-    tileStatus: "idle" | "loading" | "loaded" | "failed";
-    provider: "carto" | "osm";
-    tileLoads: number;
-    tileErrors: number;
-    tilePaneImages: number;
-    container: string;
-  }>({
-    mapMounted: false,
-    tileStatus: "idle",
-    provider: "carto",
-    tileLoads: 0,
-    tileErrors: 0,
-    tilePaneImages: 0,
-    container: "0x0",
-  });
+  // renderDebug is now returned from useMapInit below
 
   const [perfDebug, setPerfDebug] = useState<MapPerfDebugStats>({
     fps: null,
