@@ -279,7 +279,7 @@ const App = () => {
                 <Route path="/ancient-friends" element={<Navigate to="/map" replace />} />
                 <Route path="/heartwood" element={<Navigate to="/library" replace />} />
                 <Route path="/your-golden-dream" element={<Navigate to="/golden-dream" replace />} />
-                <Route path="/map" element={realm(<MapPage />, "roots")} />
+                <Route path="/map" element={<MapPage />} />
                 <Route path="/add-tree" element={realm(<AddTreePage />, "roots")} />
                 <Route path="/atlas" element={realm(<WorldAtlasPage />, "roots")} />
                 <Route path="/tree/research/:id" element={realm(<ResearchTreeDetailPage />, "roots")} />
