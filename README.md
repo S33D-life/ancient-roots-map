@@ -1,91 +1,95 @@
-# Welcome to your Lovable project
+# 🌳 S33D — Ancient Roots Map
 
-## Project info
+A living atlas of the world's most remarkable trees, built as a participatory stewardship platform.
 
-**URL**: https://lovable.dev/projects/206b4e97-2343-48d0-89b8-f5647bb248f1
+S33D maps **Ancient Friends** — venerable trees verified by human encounters — and weaves them into a shared economy of care powered by **Hearts**, **Staff NFTs**, and community governance.
 
-## How can I edit this code?
+## Key areas
 
-There are several ways of editing your application.
+| Area | Route | Purpose |
+|------|-------|---------|
+| **Map** | `/map` | Interactive Leaflet map with tree markers, deep-links, and species layers |
+| **Atlas** | `/atlas` | Country portals, bio-regions, and pilgrimage pathways |
+| **Library** | `/library` | Heartwood rooms — offerings, stories, staff room, creator's path |
+| **Hearth** | `/dashboard` | Personal dashboard — legend, heart balance, streaks |
+| **Vault** | `/vault` | Wallet, Staff NFTs, NFTree minting |
+| **Council** | `/council-of-life` | Community governance and digital fire votes |
+| **Bug Garden** | `/bug-garden` | Bug reports, improvement sparks, and feature requests |
+| **Agent Garden** | `/agent-garden` | Tasks for AI agents and external co-creators |
+| **Roadmap** | `/roadmap` | Living Forest Roadmap — public development timeline |
 
-**Use Lovable**
+## Tech stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/206b4e97-2343-48d0-89b8-f5647bb248f1) and start prompting.
+- **Frontend:** React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui
+- **Backend:** Supabase (Postgres, Auth, Edge Functions, Storage)
+- **Map:** Leaflet with MarkerCluster
+- **Chain:** Base (ethers.js) — Staff NFTs, NFTree minting
+- **Testing:** Vitest
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local setup
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+cd ancient-roots-map
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Requires Node.js 20+.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Scripts
 
-**Use GitHub Codespaces**
+| Command | What it does |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build (generates version.json) |
+| `npm run typecheck` | TypeScript check |
+| `npm run lint` | ESLint |
+| `npm run test` | Vitest (run once) |
+| `npm run release-check` | **Full pre-publish gate:** typecheck → lint → security → duplicates → test → build |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Contributing
 
-## What technologies are used for this project?
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
-This project is built with:
+**Quick start:**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Pick a task from the [Bug Garden](/bug-garden) or [Agent Garden](/agent-garden)
+2. Read the relevant [Skill](/public/skills/SKILL.md) before contributing
+3. Make small, focused changes
+4. Run `npm run release-check` before opening a PR
 
-## How can I deploy this project?
+## Project structure
 
-Simply open [Lovable](https://lovable.dev/projects/206b4e97-2343-48d0-89b8-f5647bb248f1) and click on Share -> Publish.
+```
+src/
+├── components/     # UI components (map/, tree-sections/, dashboard/, etc.)
+├── config/         # App constants and contract config
+├── contexts/       # React context providers
+├── hooks/          # Custom hooks
+├── integrations/   # Supabase client and types (auto-generated — do not edit)
+├── lib/            # Shared utilities (routes, heart service, etc.)
+├── pages/          # Route page components
+├── styles/         # Global CSS and map styles
+├── test/           # Vitest test files
+└── utils/          # Pure utility functions
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-
-## Version Metadata Check
-
-`public/version.json` is generated during build and must be reachable as a static file at `/version.json`.
-
-Quick verification:
-
-```sh
-# Local
-npm run build
-npm run preview
-curl -i http://localhost:4173/version.json
-
-# Live
-curl -i https://www.s33d.life/version.json
+public/skills/      # S33D Skills knowledge base (markdown)
+supabase/functions/ # Edge Functions
+supabase/migrations/# Database migrations
 ```
 
-Expected result: `HTTP 200` and JSON with `build` and `generated`.
+## Publish
+
+Open [Lovable](https://lovable.dev/projects/206b4e97-2343-48d0-89b8-f5647bb248f1) → Share → Publish.
+
+Run `npm run release-check` locally first.
+
+## Version metadata
+
+`public/version.json` is generated during build. Verify with:
+
+```sh
+npm run build && npm run preview
+curl -i http://localhost:4173/version.json
+```
