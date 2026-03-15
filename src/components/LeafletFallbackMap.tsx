@@ -760,9 +760,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       accent: "hsl(35, 65%, 55%)",
       description: "Churches, castles, heritage buildings, and sacred places.",
       layers: [
-        { key: "churchyards", label: "⛪ Churches & Sacred Sites", active: showChurchyards, toggle: () => { setShowChurchyards(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "35, 65%, 55%" },
-        { key: "heritage", label: "🏛️ Heritage Buildings", active: showHeritage, toggle: () => { setShowHeritage(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "25, 55%, 55%" },
-        { key: "castles", label: "🏰 Castles & Monuments", active: showCastles, toggle: () => { setShowCastles(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, accent: "0, 35%, 55%" },
+        { key: "churchyards", label: "⛪ Churches & Sacred Sites", active: showChurchyards, toggle: () => { toggle("churchyards"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "35, 65%, 55%" },
+        { key: "heritage", label: "🏛️ Heritage Buildings", active: showHeritage, toggle: () => { toggle("heritage"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "25, 55%, 55%" },
+        { key: "castles", label: "🏰 Castles & Monuments", active: showCastles, toggle: () => { toggle("castles"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "0, 35%, 55%" },
       ],
     },
     {
