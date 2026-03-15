@@ -1,0 +1,2 @@
+ALTER TABLE public.bug_reports ADD COLUMN IF NOT EXISTS roadmap_feature_slug text DEFAULT NULL;
+CREATE INDEX IF NOT EXISTS idx_bug_reports_roadmap_slug ON public.bug_reports(roadmap_feature_slug) WHERE roadmap_feature_slug IS NOT NULL;
