@@ -225,7 +225,7 @@ const RoadmapEmbed = ({ compact = false, category }: RoadmapEmbedProps) => {
       {/* Stages */}
       <div className="space-y-8">
         {grouped.map(({ stage, features }) => (
-          <StageSection key={stage} stage={stage} features={features} />
+          <StageSection key={stage} stage={stage} features={features} bugCounts={bugCounts} />
         ))}
       </div>
 
