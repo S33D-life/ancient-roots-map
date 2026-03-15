@@ -60,6 +60,12 @@ const MilestoneCard = ({ feature, bugCount, taskCount }: { feature: RoadmapFeatu
                 <Bug className="w-2.5 h-2.5" /> {bugCount}
               </span>
             )}
+            {taskCount !== undefined && taskCount > 0 && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-sans flex items-center gap-0.5 border"
+                style={{ background: "hsl(270 50% 55% / 0.1)", color: "hsl(270 50% 55%)", borderColor: "hsl(270 50% 55% / 0.2)" }}>
+                <Bot className="w-2.5 h-2.5" /> {taskCount}
+              </span>
+            )}
           </div>
         </div>
       </div>
