@@ -26,14 +26,14 @@ export default function EcosystemPulse() {
     const load = async () => {
       const [
         { count: trees },
-        { count: offerings },
+        offerings,
         hearts,
         { data: hiveData },
         { count: councils },
         { count: agentContributions },
       ] = await Promise.all([
         supabase.from("trees").select("*", { count: "exact", head: true }),
-        supabase.from("offerings").select("*", { count: "exact", head: true }),
+        getGlobalOfferingCount(),
         getGlobalHeartTotal(),
         supabase.from("species_hives").select("id", { count: "exact", head: false }).limit(200),
         supabase.from("council_participation_rewards").select("*", { count: "exact", head: true }),
