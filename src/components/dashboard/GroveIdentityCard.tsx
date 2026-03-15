@@ -53,7 +53,7 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
       setStats({
         treesLogged: treesRes.count ?? 0,
         treesVisited: uniqueVisited,
-        offeringsMade: offeringsRes.count ?? 0,
+        offeringsMade,
         heartsBalance: heartsRes.data?.s33d_hearts ?? 0,
         speciesHearts: heartsRes.data?.species_hearts ?? 0,
         influenceTokens: heartsRes.data?.influence_tokens ?? 0,

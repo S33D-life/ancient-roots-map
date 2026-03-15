@@ -47,7 +47,7 @@ export default function EcosystemMomentum({ showDiscovery = false, compact = fal
 
       setPulse({
         treesThisWeek: treesThisWeek || 0,
-        offeringsThisWeek: offeringsThisWeek || 0,
+        offeringsThisWeek,
         heartsThisWeek: heartsThisWeek,
         councilsThisWeek: councilsThisWeek || 0,
       });

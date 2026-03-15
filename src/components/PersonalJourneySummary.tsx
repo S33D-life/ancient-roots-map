@@ -36,7 +36,7 @@ export default function PersonalJourneySummary({ userId }: { userId: string }) {
 
       setStats({
         treesMapped: treesRes.count || 0,
-        offeringsMade: offeringsRes.count || 0,
+        offeringsMade,
         heartsEarned: hearts,
         speciesContributed: uniqueSpecies,
         staffOwned: staffRes.count || 0,

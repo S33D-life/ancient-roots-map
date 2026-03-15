@@ -41,7 +41,7 @@ export default function EcosystemPulse() {
       ]);
       setM({
         trees: trees || 0,
-        offerings: offerings || 0,
+        offerings,
         hearts,
         hives: hiveData?.length || 0,
         councils: councils || 0,
