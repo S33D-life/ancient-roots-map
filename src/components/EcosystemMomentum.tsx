@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getOfferingCountSince } from "@/repositories/offerings";
 import { TreeDeciduous, Music, Heart, Users, Compass } from "lucide-react";
 import { motion } from "framer-motion";
 
