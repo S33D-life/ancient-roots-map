@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { TreeDeciduous, Heart, Sparkles, Sprout, Map, BookOpen, ChevronRight, Hexagon, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserOfferingCount } from "@/repositories/offerings";
 
 interface GroveIdentityCardProps {
   userId: string;
