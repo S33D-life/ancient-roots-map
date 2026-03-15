@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 
 /**
  * Core reliability regression tests for the S33D Atlas loop.
- * Covers: map module, auth handoff, offline queue.
+ * Covers: map module, route registry, auth handoff, offline queue, what3words.
  */
 
 // ── 1. Map.tsx exports a valid component ──
@@ -113,5 +113,46 @@ describe("syncEngine", () => {
     const mod = await import("@/utils/syncEngine");
     expect(mod.runSync).toBeDefined();
     expect(mod.attachAutoSync).toBeDefined();
+  });
+});
+
+// ── 6. Route registry completeness ──
+
+describe("Route registry (ROUTES)", () => {
+  it("exports all critical route constants", async () => {
+    const { ROUTES } = await import("@/lib/routes");
+    expect(ROUTES.HOME).toBe("/");
+    expect(ROUTES.MAP).toBe("/map");
+    expect(ROUTES.ATLAS).toBe("/atlas");
+    expect(ROUTES.LIBRARY).toBe("/library");
+    expect(ROUTES.HEARTH).toBe("/dashboard");
+    expect(ROUTES.VAULT).toBe("/vault");
+    expect(ROUTES.BUG_GARDEN).toBe("/bug-garden");
+    expect(ROUTES.AGENT_GARDEN).toBe("/agent-garden");
+    expect(ROUTES.ROADMAP).toBe("/roadmap");
+    expect(ROUTES.COUNCIL).toBe("/council-of-life");
+    expect(ROUTES.SUPPORT).toBe("/support");
+  });
+
+  it("dynamic route helpers produce correct paths", async () => {
+    const { ROUTES } = await import("@/lib/routes");
+    expect(ROUTES.COUNTRY("switzerland")).toBe("/atlas/switzerland");
+    expect(ROUTES.TREE("abc-123")).toBe("/tree/abc-123");
+    expect(ROUTES.HIVE("oak")).toBe("/hive/oak");
+    expect(ROUTES.BIO_REGION("alpine")).toBe("/atlas/bio-regions/alpine");
+  });
+});
+
+// ── 7. Release-check script order ──
+
+describe("Release safety", () => {
+  it("release-check runs typecheck before build", async () => {
+    const pkg = await import("../../package.json");
+    const script = (pkg as any).scripts?.["release-check"] ?? "";
+    const typecheckIdx = script.indexOf("typecheck");
+    const buildIdx = script.indexOf("build");
+    expect(typecheckIdx).toBeGreaterThan(-1);
+    expect(buildIdx).toBeGreaterThan(-1);
+    expect(typecheckIdx).toBeLessThan(buildIdx);
   });
 });

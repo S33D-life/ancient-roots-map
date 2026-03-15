@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/lib/routes";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -299,7 +300,7 @@ const CouncilOfLifePage = () => {
                 <CouncilSparkIcon className="w-3.5 h-3.5" /> Recent Sparks
               </h3>
               <button
-                onClick={() => navigate("/bug-garden")}
+                onClick={() => navigate(ROUTES.BUG_GARDEN)}
                 className="text-[10px] text-primary/60 hover:text-primary transition-colors font-serif"
               >
                 View all →
@@ -313,7 +314,7 @@ const CouncilOfLifePage = () => {
                   return (
                     <button
                       key={spark.id}
-                      onClick={() => navigate("/bug-garden")}
+                      onClick={() => navigate(ROUTES.BUG_GARDEN)}
                       className="w-full text-left text-xs font-serif px-3 py-2 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 flex items-center gap-2"
                     >
                       <TypeIcon className="w-3 h-3 text-muted-foreground shrink-0" />
@@ -344,19 +345,19 @@ const CouncilOfLifePage = () => {
               Council → Contribution → Harvest → Exchange → New Encounters
             </p>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => navigate("/value-tree")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.VALUE_TREE)} className="loop-card font-serif">
                 <span className="text-primary">❤️ Value Tree</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">See how Hearts flow</p>
               </button>
-              <button onClick={() => navigate("/support")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.SUPPORT)} className="loop-card font-serif">
                 <span className="text-primary">🌱 Support S33D</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Contribute beyond governance</p>
               </button>
-              <button onClick={() => navigate("/map")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.MAP)} className="loop-card font-serif">
                 <span className="text-primary">🗺️ Atlas</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Map an Ancient Friend</p>
               </button>
-              <button onClick={() => navigate("/library")} className="loop-card font-serif">
+              <button onClick={() => navigate(ROUTES.LIBRARY)} className="loop-card font-serif">
                 <span className="text-primary">📚 Library</span>
                 <p className="text-[10px] text-muted-foreground/50 mt-0.5">Browse offerings & stories</p>
               </button>
