@@ -4,6 +4,7 @@
  * "The tap root feeds the entire living tree."
  */
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { SkillViewer } from "@/components/library/SkillViewer";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
