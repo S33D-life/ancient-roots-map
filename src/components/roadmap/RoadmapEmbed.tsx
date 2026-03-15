@@ -5,7 +5,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ChevronDown, ChevronUp, Bug } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp, Bug, Bot } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ROADMAP_FEATURES,
