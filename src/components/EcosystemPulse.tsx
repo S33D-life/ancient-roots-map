@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getGlobalHeartTotal } from "@/repositories/hearts";
+import { getGlobalOfferingCount } from "@/repositories/offerings";
 import { TreeDeciduous, Music, Heart, Hexagon, Users, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 
