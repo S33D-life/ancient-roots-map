@@ -22,9 +22,10 @@ export default function PersonalJourneySummary({ userId }: { userId: string }) {
     const load = async () => {
       const treesQ = supabase.from("trees").select("id", { count: "exact", head: true });
       const treesRes = await (treesQ as any).eq("created_by", userId);
-      const offeringsQ = supabase.from("offerings").select("id", { count: "exact", head: true });
-      const offeringsRes = await (offeringsQ as any).eq("created_by", userId);
-      const heartRes = await supabase.from("heart_transactions").select("amount").eq("user_id", userId);
+      const [offeringsMade, heartRes] = await Promise.all([
+        getUserOfferingCount(userId),
+        supabase.from("heart_transactions").select("amount").eq("user_id", userId),
+      ]);
       const speciesQ = supabase.from("trees").select("species");
       const speciesRes = await (speciesQ as any).eq("created_by", userId);
       const staffQ = supabase.from("staffs").select("id", { count: "exact", head: true });
