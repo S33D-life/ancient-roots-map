@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserQuickStats } from "@/repositories/hearts";
 import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import { TreeDeciduous, Gift, Heart } from "lucide-react";
 
@@ -19,24 +20,13 @@ const JourneyPulse = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        fetchStats(user.id);
+        const stats = await getUserQuickStats(user.id);
+        setTrees(stats.trees);
+        setHearts(stats.trees * 10 + stats.hearts);
       }
     };
     fetchUser();
   }, []);
-
-  const fetchStats = async (uid: string) => {
-    const [treesRes, heartTxRes] = await Promise.all([
-      supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", uid),
-      supabase.from("heart_transactions").select("amount").eq("user_id", uid),
-    ]);
-
-    const treeCount = treesRes.count || 0;
-    const heartTxTotal = (heartTxRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
-
-    setTrees(treeCount);
-    setHearts(treeCount * 10 + heartTxTotal);
-  };
 
   if (!userId || (trees === 0 && offerings === 0)) return null;
 

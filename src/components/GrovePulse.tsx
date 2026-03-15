@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getUserQuickStats } from "@/repositories/hearts";
 import { useUserOfferingCount } from "@/hooks/use-offering-counts";
 import { motion } from "framer-motion";
 import { Heart, TreeDeciduous, Gift, Sprout } from "lucide-react";
@@ -16,23 +16,10 @@ const GrovePulse = ({ userId }: GrovePulseProps) => {
   const seasonal = useSeasonalSummary();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const [treesRes, heartsRes, seedsRes] = await Promise.all([
-        supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
-        supabase.from("heart_transactions").select("amount").eq("user_id", userId),
-        supabase.from("planted_seeds").select("*", { count: "exact", head: true }).eq("planter_id", userId),
-      ]);
-
-      const heartTotal = (heartsRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
-
-      setStats({
-        trees: treesRes.count || 0,
-        hearts: heartTotal,
-        seeds: seedsRes.count || 0,
-      });
+    getUserQuickStats(userId).then((s) => {
+      setStats(s);
       setLoading(false);
-    };
-    fetchStats();
+    });
   }, [userId]);
 
   const isLoading = loading || offeringsLoading;
