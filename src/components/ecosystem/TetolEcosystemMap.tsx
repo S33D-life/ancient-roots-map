@@ -715,6 +715,9 @@ export default function TetolEcosystemMap() {
             );
           })}
 
+          {/* Live activity pulse counters */}
+          <EcosystemPulseOverlay positions={positions} />
+
           {/* Single-point-of-failure warning markers */}
           {resilienceMode && Array.from(singlePointIds).map((id) => {
             const pos = positions[id];
