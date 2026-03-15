@@ -590,7 +590,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        const pendingTree = {
+        const pendingTree: Record<string, unknown> = {
           name: name.trim() || speciesValue,
           species: speciesValue,
           description: description.trim() || null,
@@ -615,6 +615,23 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
           species_ai_confirmed: aiConfirmed,
           ...(photoDate ? { created_at: photoDate } : {}),
         };
+
+        // Preserve dropped photo as base64 so it survives the auth redirect
+        if (droppedPhotoFile) {
+          try {
+            const reader = new FileReader();
+            const photoBase64 = await new Promise<string>((resolve, reject) => {
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(droppedPhotoFile);
+            });
+            pendingTree._photoBase64 = photoBase64;
+            pendingTree._photoDate = photoDate;
+          } catch {
+            // Photo preservation is best-effort
+          }
+        }
+
         localStorage.setItem("s33d_pending_tree", JSON.stringify(pendingTree));
         onOpenChange(false);
         toast({ title: "Sign in to save your tree", description: "Your encounter has been preserved — sign in to plant it in the Atlas" });
