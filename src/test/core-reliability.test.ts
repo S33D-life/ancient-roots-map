@@ -143,18 +143,16 @@ describe("Route registry (ROUTES)", () => {
   });
 });
 
-// ── 7. Stale debug components removed ──
+// ── 7. Release-check script order ──
 
-describe("Stale debug cleanup", () => {
-  it("BareLeafletRecoveryMap is no longer in the component directory", async () => {
-    // @ts-expect-error — intentionally importing deleted module to verify removal
-    const result = await import("@/components/BareLeafletRecoveryMap").catch(() => null);
-    expect(result).toBeNull();
-  });
-
-  it("UltraBareLeafletTest is no longer in the component directory", async () => {
-    // @ts-expect-error — intentionally importing deleted module to verify removal
-    const result = await import("@/components/UltraBareLeafletTest").catch(() => null);
-    expect(result).toBeNull();
+describe("Release safety", () => {
+  it("release-check runs typecheck before build", async () => {
+    const pkg = await import("../../package.json");
+    const script = (pkg as any).scripts?.["release-check"] ?? "";
+    const typecheckIdx = script.indexOf("typecheck");
+    const buildIdx = script.indexOf("build");
+    expect(typecheckIdx).toBeGreaterThan(-1);
+    expect(buildIdx).toBeGreaterThan(-1);
+    expect(typecheckIdx).toBeLessThan(buildIdx);
   });
 });
