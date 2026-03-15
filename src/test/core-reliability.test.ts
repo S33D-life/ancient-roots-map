@@ -146,22 +146,15 @@ describe("Route registry (ROUTES)", () => {
 // ── 7. Stale debug components removed ──
 
 describe("Stale debug cleanup", () => {
-  it("BareLeafletRecoveryMap is no longer importable", async () => {
-    try {
-      await import("@/components/BareLeafletRecoveryMap");
-      expect.unreachable("Should not resolve");
-    } catch {
-      // Expected — file was deleted
-      expect(true).toBe(true);
-    }
+  it("BareLeafletRecoveryMap is no longer in the component directory", async () => {
+    // @ts-expect-error — intentionally importing deleted module to verify removal
+    const result = await import("@/components/BareLeafletRecoveryMap").catch(() => null);
+    expect(result).toBeNull();
   });
 
-  it("UltraBareLeafletTest is no longer importable", async () => {
-    try {
-      await import("@/components/UltraBareLeafletTest");
-      expect.unreachable("Should not resolve");
-    } catch {
-      expect(true).toBe(true);
-    }
+  it("UltraBareLeafletTest is no longer in the component directory", async () => {
+    // @ts-expect-error — intentionally importing deleted module to verify removal
+    const result = await import("@/components/UltraBareLeafletTest").catch(() => null);
+    expect(result).toBeNull();
   });
 });
