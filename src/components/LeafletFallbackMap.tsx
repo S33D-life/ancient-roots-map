@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
+import { useMapInit } from "@/hooks/use-map-init";
 import MapContextIndicator from "./MapContextIndicator";
 import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
 import { getHiveBySlug } from "@/utils/hiveUtils";
