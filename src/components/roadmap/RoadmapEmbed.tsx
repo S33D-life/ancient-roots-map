@@ -96,7 +96,7 @@ const MilestoneCard = ({ feature, bugCount }: { feature: RoadmapFeature; bugCoun
 };
 
 /** Stage section with organic growth line */
-const StageSection = ({ stage, features }: { stage: RoadmapStage; features: RoadmapFeature[] }) => {
+const StageSection = ({ stage, features, bugCounts }: { stage: RoadmapStage; features: RoadmapFeature[]; bugCounts: Record<string, number> }) => {
   const meta = STAGE_META[stage];
   if (features.length === 0) return null;
 
@@ -121,7 +121,7 @@ const StageSection = ({ stage, features }: { stage: RoadmapStage; features: Road
       {/* Cards */}
       <div className="space-y-2 pl-5 ml-[14px] border-l border-transparent">
         {features.map((f) => (
-          <MilestoneCard key={f.id} feature={f} />
+          <MilestoneCard key={f.id} feature={f} bugCount={bugCounts[f.id]} />
         ))}
       </div>
     </div>
