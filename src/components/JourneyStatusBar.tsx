@@ -46,7 +46,7 @@ export default function JourneyStatusBar({ className }: { className?: string }) 
         setState({
           name: profileRes.data?.full_name || null,
           hearts: heartTotal,
-          trees: treesRes.count || 0,
+          trees: treeCount,
           staffCode: staffId || null,
           staffSpecies,
         });

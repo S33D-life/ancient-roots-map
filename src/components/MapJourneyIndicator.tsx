@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserQuickStats } from "@/repositories/hearts";
 import { Heart, TreeDeciduous, Sprout, Flame } from "lucide-react";
 
 /**
@@ -25,18 +26,7 @@ const MapJourneyIndicator = () => {
   }, []);
 
   const fetchStats = async (uid: string) => {
-    const [treesRes, heartsRes, seedsRes] = await Promise.all([
-      supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", uid),
-      supabase.from("heart_transactions").select("amount").eq("user_id", uid),
-      supabase.from("planted_seeds").select("*", { count: "exact", head: true }).eq("planter_id", uid),
-    ]);
-
-    const heartTotal = (heartsRes.data || []).reduce((sum: number, h: any) => sum + (h.amount || 0), 0);
-    const newStats = {
-      trees: treesRes.count || 0,
-      hearts: heartTotal,
-      seeds: seedsRes.count || 0,
-    };
+    const newStats = await getUserQuickStats(uid);
 
     // Pulse if there's activity
     if (newStats.hearts > 0 || newStats.seeds > 0) {
