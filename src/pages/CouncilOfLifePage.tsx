@@ -314,7 +314,7 @@ const CouncilOfLifePage = () => {
                   return (
                     <button
                       key={spark.id}
-                      onClick={() => navigate("/bug-garden")}
+                      onClick={() => navigate(ROUTES.BUG_GARDEN)}
                       className="w-full text-left text-xs font-serif px-3 py-2 rounded-lg border border-border/30 hover:border-primary/30 transition-colors bg-card/40 flex items-center gap-2"
                     >
                       <TypeIcon className="w-3 h-3 text-muted-foreground shrink-0" />
