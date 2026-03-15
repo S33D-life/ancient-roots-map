@@ -3,6 +3,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserOfferingCount } from "@/repositories/offerings";
 import { TreeDeciduous, Music, Heart, Hexagon, Wand2 } from "lucide-react";
 import { motion } from "framer-motion";
 
