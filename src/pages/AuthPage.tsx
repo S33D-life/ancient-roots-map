@@ -144,13 +144,50 @@ const AuthPage = () => {
         if (pendingTreeJson && session.user) {
           try {
             const pendingTree = JSON.parse(pendingTreeJson);
-            const { error } = await supabase.from("trees").insert({
+            // Extract offline-only fields before inserting
+            const photoBase64 = pendingTree._photoBase64 as string | undefined;
+            const savedPhotoDate = pendingTree._photoDate as string | undefined;
+            delete pendingTree._photoBase64;
+            delete pendingTree._photoDate;
+
+            const { data: treeData, error } = await supabase.from("trees").insert({
               ...pendingTree,
               created_by: session.user.id,
-            });
-            if (!error) {
+            }).select('id').single();
+
+            if (!error && treeData) {
               localStorage.removeItem("s33d_pending_tree");
               toast({ title: "Tree planted! 🌳", description: `${pendingTree.name} has been saved to the Atlas` });
+
+              // Upload the preserved photo as first offering (best-effort)
+              if (photoBase64) {
+                try {
+                  const blob = await fetch(photoBase64).then(r => r.blob());
+                  const filePath = `${session.user.id}/${treeData.id}/photo-${Date.now()}.jpeg`;
+                  const { data: uploadData } = await supabase.storage
+                    .from("offerings")
+                    .upload(filePath, blob, { contentType: "image/jpeg" });
+                  if (uploadData) {
+                    const { data: urlData } = supabase.storage
+                      .from("offerings")
+                      .getPublicUrl(uploadData.path);
+                    await supabase.from("offerings").insert({
+                      tree_id: treeData.id,
+                      title: "First encounter",
+                      type: "photo",
+                      media_url: urlData.publicUrl,
+                      created_by: session.user.id,
+                      visibility: "public",
+                      ...(savedPhotoDate ? { created_at: savedPhotoDate } : {}),
+                    } as any);
+                  }
+                } catch (photoErr) {
+                  console.warn("Photo upload after auth failed (tree was saved):", photoErr);
+                  toast({ title: "Photo upload skipped", description: "Your tree was saved but the photo could not be uploaded. You can add it later.", variant: "destructive" });
+                }
+              }
+            } else if (error) {
+              console.error("Failed to save pending tree:", error);
             }
           } catch (e) {
             console.error("Failed to save pending tree:", e);
