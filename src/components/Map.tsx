@@ -696,6 +696,11 @@ const Map = ({ initialView, initialSpecies, initialW3w, initialLat, initialLng, 
 
   // ── Recovery mode: MapLibre takes priority for visible map ──
   if (mapStatus === "leaflet") {
+    console.info("[MapDebug] early return branch", {
+      branch: "Map -> mapStatus=leaflet -> MapLibreRecoveryMap",
+      route: window.location.pathname,
+    });
+
     return (
       <div className="absolute inset-0 z-[1]" style={{ height: '100dvh' }}>
         <Suspense fallback={
