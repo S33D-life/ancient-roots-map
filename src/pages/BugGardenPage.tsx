@@ -245,6 +245,14 @@ const BugGardenPage = () => {
                   <Heart className="w-2.5 h-2.5 fill-primary/40" /> {bug.hearts_awarded_total}
                 </span>
               )}
+              {bug.roadmap_feature_slug && (() => {
+                const rf = ROADMAP_FEATURES.find(f => f.id === bug.roadmap_feature_slug);
+                return rf ? (
+                  <Badge variant="outline" className="text-[10px] bg-primary/5 border-primary/20 text-primary">
+                    {rf.symbol || STAGE_META[rf.stage].emoji} {rf.name}
+                  </Badge>
+                ) : null;
+              })()}
               {bug.screenshot_urls && bug.screenshot_urls.length > 0 && (
                 <ImageIcon className="w-3 h-3 text-muted-foreground/50" />
               )}
