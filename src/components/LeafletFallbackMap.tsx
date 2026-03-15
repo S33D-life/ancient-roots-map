@@ -3374,7 +3374,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       {/* GroveView Living Earth Mode */}
       <GroveViewOverlay
         active={groveViewActive}
-        onToggle={() => setGroveViewActive(v => !v)}
+        onToggle={() => toggle("groveView")}
         userLat={userLatLng?.[0]}
         treeLookup={treeLookup}
         onEventPulses={setCurrentEventPulses}
