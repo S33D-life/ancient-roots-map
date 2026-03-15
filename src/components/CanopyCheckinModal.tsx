@@ -162,23 +162,41 @@ export default function CanopyCheckinModal({
       },
     });
 
-    if (error) {
-      toast.error(error.message || "Failed to record check-in.");
-      setSubmitting(false);
-      return;
-    }
-
-    const result = (data || {}) as {
+    // supabase-js treats non-2xx (e.g. 429) as error with body in error.context
+    let result: {
       accepted?: boolean;
       message?: string;
       reason?: string;
       canopy_proof?: boolean;
       confidence_score?: number;
       hearts_awarded?: number;
-    };
+    } = (data || {}) as any;
 
-    if (!result.accepted) {
-      toast.error(result.message || "Check-in was rejected.");
+    if (error && !data) {
+      try {
+        const ctx = (error as any)?.context;
+        if (ctx instanceof Response) {
+          result = await ctx.clone().json();
+        }
+      } catch {
+        // body not JSON
+      }
+    }
+
+    if (error || !result.accepted) {
+      const friendlyMessages: Record<string, string> = {
+        user_daily_cap: "You've reached your daily check-in limit. Come back tomorrow 🌿",
+        tree_daily_cap: "This tree has reached its daily check-in limit.",
+        too_soon: "Please wait a bit before checking in again.",
+        too_far: "You're too far from this tree for a verified check-in.",
+        low_accuracy: "GPS accuracy is too low. Try again in a clearer spot.",
+        missing_location: "Location data is required for check-in.",
+      };
+      const msg = (result.reason && friendlyMessages[result.reason])
+        || result.message
+        || error?.message
+        || "Check-in was not accepted.";
+      toast.error(msg);
       setSubmitting(false);
       return;
     }
