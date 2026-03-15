@@ -3268,6 +3268,10 @@ export type Database = {
       }
       nftree_mints: {
         Row: {
+          authorization_deadline: string | null
+          authorization_nonce: string | null
+          authorization_signature: string | null
+          block_number: number | null
           chain_id: number
           confirmed_at: string | null
           contract_address: string | null
@@ -3287,8 +3291,13 @@ export type Database = {
           token_id: number | null
           tree_id: string
           tx_hash: string | null
+          updated_at: string | null
         }
         Insert: {
+          authorization_deadline?: string | null
+          authorization_nonce?: string | null
+          authorization_signature?: string | null
+          block_number?: number | null
           chain_id?: number
           confirmed_at?: string | null
           contract_address?: string | null
@@ -3308,8 +3317,13 @@ export type Database = {
           token_id?: number | null
           tree_id: string
           tx_hash?: string | null
+          updated_at?: string | null
         }
         Update: {
+          authorization_deadline?: string | null
+          authorization_nonce?: string | null
+          authorization_signature?: string | null
+          block_number?: number | null
           chain_id?: number
           confirmed_at?: string | null
           contract_address?: string | null
@@ -3329,6 +3343,7 @@ export type Database = {
           token_id?: number | null
           tree_id?: string
           tx_hash?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
