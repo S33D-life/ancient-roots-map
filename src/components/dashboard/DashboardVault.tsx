@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getUserOfferingCount } from "@/repositories/offerings";
 import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
