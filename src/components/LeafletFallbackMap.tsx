@@ -434,7 +434,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     });
   }, []);
 
-  const [showWatersCommons, setShowWatersCommons] = useState(false);
+  const showWatersCommons = layers.watersCommons;
   const [watersCommonsCollapsed, setWatersCommonsCollapsed] = useState(true);
   const watersCommonsLayerRef = useRef<L.LayerGroup | null>(null);
   const watersCommonsAbortRef = useRef<AbortController | null>(null);
