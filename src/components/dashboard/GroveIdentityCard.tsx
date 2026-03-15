@@ -35,10 +35,10 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const [treesRes, checkinsRes, offeringsRes, heartsRes, plantsRes] = await Promise.all([
+      const [treesRes, checkinsRes, offeringsMade, heartsRes, plantsRes] = await Promise.all([
         supabase.from("trees").select("id, created_at", { count: "exact", head: false }).eq("created_by", userId).order("created_at", { ascending: true }).limit(1),
         supabase.from("tree_checkins").select("tree_id", { count: "exact" }).eq("user_id", userId),
-        supabase.from("offerings").select("id", { count: "exact", head: true }).eq("created_by", userId),
+        getUserOfferingCount(userId),
         supabase.from("user_heart_balances").select("s33d_hearts, species_hearts, influence_tokens").eq("user_id", userId).maybeSingle(),
         supabase.from("greenhouse_plants").select("id", { count: "exact", head: true }).eq("user_id", userId),
       ]);
