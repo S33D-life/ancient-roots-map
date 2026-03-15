@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TreeDeciduous, Leaf, BookOpen, Star, Sprout, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import DashboardRewards from "./DashboardRewards";
+import { ROUTES } from "@/lib/routes";
 
 interface OverviewProps {
   treeCount: number;
@@ -11,10 +12,10 @@ interface OverviewProps {
 }
 
 const stats = (props: OverviewProps) => [
-  { label: "Trees Logged", value: props.treeCount, icon: TreeDeciduous, color: "text-primary", link: "/map" },
+  { label: "Trees Logged", value: props.treeCount, icon: TreeDeciduous, color: "text-primary", link: ROUTES.MAP },
   { label: "Wishlist", value: props.wishlistCount, icon: Star, color: "text-accent", link: null },
   { label: "Seed Pods", value: props.plantCount, icon: Sprout, color: "text-primary", link: null },
-  { label: "Scrolls Read", value: 0, icon: BookOpen, color: "text-accent", link: "/library" },
+  { label: "Scrolls Read", value: 0, icon: BookOpen, color: "text-accent", link: ROUTES.LIBRARY },
 ];
 
 const DashboardOverview = (props: OverviewProps) => {
@@ -52,7 +53,7 @@ const DashboardOverview = (props: OverviewProps) => {
         <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-4 font-serif">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
-            to="/map"
+            to={ROUTES.MAP}
             className="flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card/40 hover:border-primary/40 hover:bg-card/60 transition-all group"
           >
             <Map className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
@@ -62,7 +63,7 @@ const DashboardOverview = (props: OverviewProps) => {
             </div>
           </Link>
           <Link
-            to="/library"
+            to={ROUTES.LIBRARY}
             className="flex items-center gap-3 p-4 rounded-xl border border-border/50 bg-card/40 hover:border-primary/40 hover:bg-card/60 transition-all group"
           >
             <BookOpen className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />

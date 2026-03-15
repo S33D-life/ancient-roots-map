@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTetolLevel } from "@/contexts/TetolLevelContext";
 import { Sprout, TreeDeciduous, BookOpen, Leaf, Sparkles, Flame } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 const LEVEL_ICONS: Record<string, React.ElementType> = {
   s33d: Sprout,
@@ -12,12 +13,12 @@ const LEVEL_ICONS: Record<string, React.ElementType> = {
 };
 
 const LEVEL_ROUTES: Record<string, string> = {
-  s33d: "/",
-  roots: "/map",
-  heartwood: "/library",
-  canopy: "/council-of-life",
+  s33d: ROUTES.HOME,
+  roots: ROUTES.MAP,
+  heartwood: ROUTES.LIBRARY,
+  canopy: ROUTES.COUNCIL,
   crown: "/golden-dream",
-  hearth: "/dashboard",
+  hearth: ROUTES.HEARTH,
 };
 
 interface TetolBreadcrumbProps {

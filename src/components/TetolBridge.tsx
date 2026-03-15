@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { TreeDeciduous, BookOpen, Leaf, Sparkles, Sprout, ArrowRight } from "lucide-react";
 import type { TetolLevel } from "@/contexts/TetolLevelContext";
 import { useTetolLevel } from "@/contexts/TetolLevelContext";
+import { ROUTES } from "@/lib/routes";
 
 interface BridgeTarget {
   level: TetolLevel;
@@ -13,19 +14,19 @@ interface BridgeTarget {
 
 const BRIDGES: Record<string, BridgeTarget[]> = {
   s33d: [
-    { level: "roots", label: "The Roots", prompt: "Begin your journey on the Atlas", route: "/map", icon: TreeDeciduous },
+    { level: "roots", label: "The Roots", prompt: "Begin your journey on the Atlas", route: ROUTES.MAP, icon: TreeDeciduous },
   ],
   roots: [
-    { level: "heartwood", label: "The Heartwood", prompt: "Rise to the Library — explore offerings and lore", route: "/library", icon: BookOpen },
+    { level: "heartwood", label: "The Heartwood", prompt: "Rise to the Library — explore offerings and lore", route: ROUTES.LIBRARY, icon: BookOpen },
   ],
   heartwood: [
-    { level: "canopy", label: "The Canopy", prompt: "Ascend to the Council — gather with the grove", route: "/council-of-life", icon: Leaf },
+    { level: "canopy", label: "The Canopy", prompt: "Ascend to the Council — gather with the grove", route: ROUTES.COUNCIL, icon: Leaf },
   ],
   canopy: [
     { level: "crown", label: "The Crown", prompt: "Reach for the Golden Dream — shape the vision", route: "/golden-dream", icon: Sparkles },
   ],
   crown: [
-    { level: "s33d", label: "S33D", prompt: "Return to the seed — the cycle begins again", route: "/s33d", icon: Sprout },
+    { level: "s33d", label: "S33D", prompt: "Return to the seed — the cycle begins again", route: ROUTES.S33D, icon: Sprout },
   ],
 };
 

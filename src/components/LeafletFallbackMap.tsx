@@ -64,6 +64,7 @@ import {
 import { applySeasonalTint } from "@/utils/mapSeasonalTint";
 import { markTreeVisited, applyVisitedClass } from "@/utils/mapVisitedTracker";
 import { setupPopupActions } from "@/utils/mapWishHandler";
+import { useMapDeepLinks } from "@/hooks/use-map-deep-links";
 
 interface Tree {
   id: string;
@@ -444,22 +445,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   // Deep-link context state
   const [contextLabel, setContextLabel] = useState<string | null>(null);
-  const deepLinkAppliedRef = useRef<string | null>(null);
-  const deepLinkSignature = useMemo(
-    () =>
-      [
-        initialCountry || "",
-        initialHive || "",
-        initialOrigin || "",
-        initialLat ?? "",
-        initialLng ?? "",
-        initialZoom ?? "",
-        initialBbox || "",
-        initialJourney ? "1" : "0",
-        typeof window !== "undefined" ? window.location.search : "",
-      ].join("|"),
-    [initialCountry, initialHive, initialOrigin, initialLat, initialLng, initialZoom, initialBbox, initialJourney],
-  );
 
   // hiveMap moved after filteredTrees declaration
 
@@ -1111,137 +1096,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return () => { disposed = true; mapCleanupRef.current?.(); };
   }, []);
 
-  // Deep-link: auto-apply country/hive/species filters and zoom
-  useEffect(() => {
-    if (deepLinkAppliedRef.current === deepLinkSignature) return;
-    const map = mapRef.current;
-    if (!map) return;
-    // Wait a tick for map to be ready
-    const timer = setTimeout(() => {
-      if (deepLinkAppliedRef.current === deepLinkSignature) return;
-      deepLinkAppliedRef.current = deepLinkSignature;
-
-      let label: string | null = null;
-
-      // Country deep-link: zoom to bounding box with optional area highlight
-      if (initialCountry) {
-        const entry = getEntryBySlug(initialCountry);
-        if (initialLat != null && initialLng != null) {
-          map.flyTo(
-            [initialLat, initialLng],
-            initialZoom ?? 7,
-            { animate: true, duration: initialJourney ? 1.8 : 1.2 },
-          );
-          label = `${entry?.flag || "🌍"} ${entry?.country || initialCountry}`;
-          if (initialJourney) {
-            setTimeout(() => onJourneyEnd?.(), 1800);
-          } else {
-            onJourneyEnd?.();
-          }
-        } else if (entry?.bbox) {
-          const [south, west, north, east] = entry.bbox;
-          const bounds: L.LatLngBoundsExpression = [[south, west], [north, east]];
-          map.fitBounds(bounds, { padding: [20, 20], animate: true, duration: initialJourney ? 1.8 : 1.5 });
-          label = `${entry.flag} ${entry.country}`;
-
-          // Subtle area highlight rectangle — fades out after 4s
-          if (initialJourney) {
-            const rect = L.rectangle(bounds, {
-              color: 'hsl(42, 80%, 55%)',
-              weight: 1.5,
-              fillColor: 'hsl(42, 80%, 55%)',
-              fillOpacity: 0.06,
-              opacity: 0.5,
-              interactive: false,
-            }).addTo(map);
-            setTimeout(() => {
-              try { map.removeLayer(rect); } catch {}
-              onJourneyEnd?.();
-            }, 4000);
-          } else {
-            onJourneyEnd?.();
-          }
-        }
-      } else if (initialBbox) {
-        // Generic bbox from URL params
-        const parts = initialBbox.split(",").map(Number);
-        if (parts.length === 4 && parts.every(n => !isNaN(n))) {
-          const [south, west, north, east] = parts;
-          map.fitBounds([[south, west], [north, east]], { padding: [20, 20], animate: true, duration: 1.5 });
-          onJourneyEnd?.();
-        }
-      }
-
-      // Hive deep-link: auto-apply species filter + fly to densest region
-      if (initialHive) {
-        const hive = getHiveBySlug(initialHive);
-        if (hive) {
-          const speciesNames = hive.representativeSpecies.slice(0, 10);
-          if (speciesNames.length > 0) {
-            setSpecies(speciesNames);
-          }
-          label = label ? `${label} · ${hive.displayName}` : `${hive.icon} ${hive.displayName}`;
-
-          // If arriving from hive origin and no country set, find trees for this hive and fly to them
-          if (initialOrigin === "hive" && !initialCountry && trees.length > 0) {
-            const hiveTrees = trees.filter(t =>
-              speciesNames.some(s => t.species.toLowerCase().includes(s.toLowerCase()))
-            );
-            if (hiveTrees.length > 0) {
-              const bounds = L.latLngBounds(hiveTrees.map(t => [t.latitude, t.longitude] as [number, number]));
-              map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8, animate: true, duration: 1.8 });
-              setTimeout(() => onJourneyEnd?.(), 2000);
-            }
-          }
-        }
-      }
-
-      // Species deep-link (from URL param, single species)
-      const params = new URLSearchParams(window.location.search);
-      if (!initialHive && trees.length > 0) {
-        const speciesParam = params.get("species");
-        if (speciesParam) {
-          setSpecies([speciesParam]);
-          label = label || `🌿 ${speciesParam}`;
-        }
-      }
-
-      const rootstoneId = params.get("rootstoneId");
-      const rootstoneCountry = params.get("rootstoneCountry");
-      const rootstoneType = params.get("rootstoneType");
-      const rootstoneTags = params.get("rootstoneTags");
-
-      if (rootstoneId || rootstoneCountry || rootstoneType || rootstoneTags) {
-        setShowRootstones(true);
-        if (rootstoneCountry) setRootstoneCountryFilter(rootstoneCountry);
-        if (rootstoneTags) setRootstoneTagFilter(rootstoneTags.split(",").filter(Boolean));
-        if (rootstoneType === "tree") {
-          setShowRootstoneTrees(true);
-          setShowRootstoneGroves(false);
-        } else if (rootstoneType === "grove") {
-          setShowRootstoneTrees(false);
-          setShowRootstoneGroves(true);
-        }
-      }
-
-      if (rootstoneId) {
-        const stone = getRootstoneById(rootstoneId);
-        if (stone?.bounds) {
-          map.fitBounds(
-            [[stone.bounds.south, stone.bounds.west], [stone.bounds.north, stone.bounds.east]],
-            { padding: [24, 24], animate: true, duration: 1.4 }
-          );
-        } else if (stone?.location.lat != null && stone.location.lng != null) {
-          map.flyTo([stone.location.lat, stone.location.lng], 10, { duration: 1.2 });
-        }
-      }
-
-      if (label) {
-        setContextLabel(label);
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [deepLinkSignature, initialCountry, initialHive, initialOrigin, trees.length, initialLat, initialLng, initialZoom, initialJourney, initialBbox, onJourneyEnd]);
+  // Deep-link: auto-apply country/hive/species filters and zoom (extracted hook)
+  useMapDeepLinks({
+    mapRef,
+    initialCountry,
+    initialHive,
+    initialOrigin,
+    initialLat,
+    initialLng,
+    initialZoom,
+    initialJourney,
+    initialBbox,
+    treesLength: trees.length,
+    trees: trees as any,
+    onSpeciesChange: setSpecies,
+    onContextLabel: setContextLabel,
+    onShowRootstones: setShowRootstones,
+    onRootstoneCountryFilter: setRootstoneCountryFilter,
+    onRootstoneTagFilter: setRootstoneTagFilter,
+    onShowRootstoneTrees: setShowRootstoneTrees,
+    onShowRootstoneGroves: setShowRootstoneGroves,
+    onJourneyEnd,
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;

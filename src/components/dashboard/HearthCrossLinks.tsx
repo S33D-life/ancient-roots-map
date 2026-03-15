@@ -1,16 +1,17 @@
 import { Link } from "react-router-dom";
 import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2, Bot } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 const links = [
-  { to: "/map", icon: Map, label: "Map", sub: "Explore the map" },
-  { to: "/atlas", icon: Globe, label: "Atlas", sub: "Country portals" },
-  { to: "/library", icon: BookOpen, label: "Library", sub: "Scrolls & records" },
-  { to: "/value-tree", icon: TreePine, label: "Value Tree", sub: "Living economy" },
-  { to: "/council-of-life", icon: Leaf, label: "Council", sub: "Join the gathering" },
+  { to: ROUTES.MAP, icon: Map, label: "Map", sub: "Explore the map" },
+  { to: ROUTES.ATLAS, icon: Globe, label: "Atlas", sub: "Country portals" },
+  { to: ROUTES.LIBRARY, icon: BookOpen, label: "Library", sub: "Scrolls & records" },
+  { to: ROUTES.VALUE_TREE, icon: TreePine, label: "Value Tree", sub: "Living economy" },
+  { to: ROUTES.COUNCIL, icon: Leaf, label: "Council", sub: "Join the gathering" },
   { to: "/vault?from=hearth", icon: Archive, label: "Vault", sub: "Your treasury" },
-  { to: "/library/staff-room", icon: Wand2, label: "Staff Room", sub: "Founding circle" },
-  { to: "/agent-garden", icon: Bot, label: "Agent Garden", sub: "AI contributors" },
-  { to: "/support", icon: Heart, label: "Support", sub: "Nurture S33D" },
+  { to: ROUTES.STAFF_ROOM, icon: Wand2, label: "Staff Room", sub: "Founding circle" },
+  { to: ROUTES.AGENT_GARDEN, icon: Bot, label: "Agent Garden", sub: "AI contributors" },
+  { to: ROUTES.SUPPORT, icon: Heart, label: "Support", sub: "Nurture S33D" },
 ];
 
 const HearthCrossLinks = () => (

@@ -11,6 +11,7 @@ import {
   TreeDeciduous, BookOpen, Leaf, Sparkles, Heart,
   Hexagon, MapPin, Gift, Globe, Music, ArrowRight,
 } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 const LAYERS = [
   {
@@ -20,9 +21,9 @@ const LAYERS = [
     icon: TreeDeciduous,
     accent: "120 45% 45%",
     features: [
-      { name: "Map", icon: MapPin, to: "/map" },
-      { name: "Hives", icon: Hexagon, to: "/hives" },
-      { name: "Bio-Regions", icon: Globe, to: "/atlas/bio-regions" },
+      { name: "Map", icon: MapPin, to: ROUTES.MAP },
+      { name: "Hives", icon: Hexagon, to: ROUTES.HIVES },
+      { name: "Bio-Regions", icon: Globe, to: ROUTES.BIO_REGIONS },
     ],
   },
   {
@@ -32,9 +33,9 @@ const LAYERS = [
     icon: BookOpen,
     accent: "28 70% 50%",
     features: [
-      { name: "Library", icon: BookOpen, to: "/library" },
-      { name: "Offerings", icon: Gift, to: "/library" },
-      { name: "Wisdom", icon: Music, to: "/library" },
+      { name: "Library", icon: BookOpen, to: ROUTES.LIBRARY },
+      { name: "Offerings", icon: Gift, to: ROUTES.LIBRARY },
+      { name: "Wisdom", icon: Music, to: ROUTES.LIBRARY },
     ],
   },
   {
@@ -44,8 +45,8 @@ const LAYERS = [
     icon: Leaf,
     accent: "195 60% 50%",
     features: [
-      { name: "Councils", icon: Leaf, to: "/council-of-life" },
-      { name: "Companions", icon: Heart, to: "/council-of-life" },
+      { name: "Councils", icon: Leaf, to: ROUTES.COUNCIL },
+      { name: "Companions", icon: Heart, to: ROUTES.COUNCIL },
     ],
   },
   {
@@ -56,7 +57,7 @@ const LAYERS = [
     accent: "45 100% 60%",
     features: [
       { name: "Dream", icon: Sparkles, to: "/golden-dream" },
-      { name: "Roadmap", icon: TreeDeciduous, to: "/roadmap" },
+      { name: "Roadmap", icon: TreeDeciduous, to: ROUTES.ROADMAP },
     ],
   },
 ];

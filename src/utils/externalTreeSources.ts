@@ -344,6 +344,76 @@ async function fetchREST(
   }));
 }
 
+// ── Runtime Validation ──────────────────────────────────────────────────────
+
+/**
+ * Validate and sanitize an ExternalTreeCandidate at the ingestion boundary.
+ * Rejects entries with missing/invalid coordinates or IDs.
+ * Returns null for invalid entries so callers can filter them out silently.
+ */
+function validateCandidate(raw: Partial<ExternalTreeCandidate>): ExternalTreeCandidate | null {
+  // Required fields
+  if (!raw.id || typeof raw.id !== "string") return null;
+  if (!raw.source || typeof raw.source !== "string") return null;
+
+  // Coordinates must be finite numbers in valid ranges
+  const lat = Number(raw.lat);
+  const lng = Number(raw.lng);
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) return null;
+  if (!Number.isFinite(lng) || lng < -180 || lng > 180) return null;
+
+  // Title: fallback to "Tree" if missing, truncate excessive length
+  const title = typeof raw.title === "string" && raw.title.trim()
+    ? raw.title.trim().slice(0, 300)
+    : "Tree";
+
+  // Species: sanitize if present
+  const species = typeof raw.species === "string" && raw.species.trim()
+    ? raw.species.trim().slice(0, 200)
+    : undefined;
+
+  // Height: must be a reasonable positive number if present
+  const height = typeof raw.height === "number" && Number.isFinite(raw.height) && raw.height > 0 && raw.height < 200
+    ? raw.height
+    : undefined;
+
+  return {
+    id: raw.id,
+    source: raw.source,
+    source_id: typeof raw.source_id === "string" ? raw.source_id : "",
+    lat,
+    lng,
+    species,
+    genus: typeof raw.genus === "string" ? raw.genus.trim().slice(0, 200) : undefined,
+    title,
+    classification: typeof raw.classification === "string" ? raw.classification.trim().slice(0, 200) : undefined,
+    height,
+    metadata: raw.metadata && typeof raw.metadata === "object" ? raw.metadata : {},
+    bloomable: raw.bloomable === true,
+  };
+}
+
+/**
+ * Validate an array of candidates, silently filtering invalid entries.
+ * Logs a warning if any were dropped.
+ */
+function validateCandidates(candidates: Partial<ExternalTreeCandidate>[], sourceName: string): ExternalTreeCandidate[] {
+  const valid: ExternalTreeCandidate[] = [];
+  let dropped = 0;
+  for (const raw of candidates) {
+    const validated = validateCandidate(raw);
+    if (validated) {
+      valid.push(validated);
+    } else {
+      dropped++;
+    }
+  }
+  if (dropped > 0) {
+    console.warn(`[ExternalTrees] ${sourceName}: dropped ${dropped} invalid candidates out of ${candidates.length}`);
+  }
+  return valid;
+}
+
 // ── Unified Fetch ───────────────────────────────────────────────────────────
 
 const FETCHER_MAP: Record<SourceType, (s: ExternalTreeSource, b: BBox, signal?: AbortSignal) => Promise<ExternalTreeCandidate[]>> = {
@@ -374,7 +444,8 @@ export async function fetchSourceTrees(
   }
 
   try {
-    const trees = await fetcher(source, bbox, signal);
+    const raw = await fetcher(source, bbox, signal);
+    const trees = validateCandidates(raw, source.name);
     setCache(source.id, bbox, trees);
     return trees;
   } catch (err: any) {
