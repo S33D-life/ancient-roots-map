@@ -14,18 +14,7 @@ import MapArrivalBanner from "@/components/MapArrivalBanner";
 import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
-import UltraBareLeafletTest from "@/components/UltraBareLeafletTest";
-
-/**
- * SAFE_FORCE_BARE_MAP — Emergency diagnostic flag.
- * When true, /map renders ONLY UltraBareLeafletTest:
- *   - No S33D overlays, banners, whispers, entrance, blessing
- *   - No MapLibre, no advanced Leaflet, no clustering
- *   - Just a plain Leaflet map to prove mounting works
- *
- * Set to false once map visibility is confirmed.
- */
-const SAFE_FORCE_BARE_MAP = false;
+const MapHeartBadge = lazy(() => import("@/components/MapHeartBadge"));
 
 // Non-critical overlays — lazy-loaded after the map is interactive
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
