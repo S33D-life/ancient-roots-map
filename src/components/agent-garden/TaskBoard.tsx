@@ -13,10 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { CATEGORY_SKILLS, SKILLS } from "@/components/library/SkillViewer";
 import {
   Heart, ListChecks, ChevronRight, ArrowLeft, Send,
   MapPin, Bug, GitBranch, Microscope, CheckCircle,
-  Clock, Eye, Award, Loader2, Sprout
+  Clock, Eye, Award, Loader2, Sprout, BookOpen
 } from "lucide-react";
 
 /* ── Types ── */
