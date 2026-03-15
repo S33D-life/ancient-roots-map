@@ -127,7 +127,7 @@ const StageSection = ({ stage, features, bugCounts, taskCounts }: { stage: Roadm
       {/* Cards */}
       <div className="space-y-2 pl-5 ml-[14px] border-l border-transparent">
         {features.map((f) => (
-          <MilestoneCard key={f.id} feature={f} bugCount={bugCounts[f.id]} />
+          <MilestoneCard key={f.id} feature={f} bugCount={bugCounts[f.id]} taskCount={taskCounts[f.id]} />
         ))}
       </div>
     </div>
