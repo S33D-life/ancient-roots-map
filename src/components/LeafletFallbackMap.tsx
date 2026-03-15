@@ -726,9 +726,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       accent: "hsl(210, 35%, 75%)",
       description: "Silver rivers, streams, and springs that shape the land.",
       layers: [
-        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { setShowWaterways(v => !v); if (!showWatersCommons) setShowWatersCommons(true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "210, 35%, 75%" },
-        { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "145, 50%, 50%" },
-        { key: "commons", label: "🌾 Commons & Greens", active: showWatersCommons, toggle: () => setShowWatersCommons(v => !v), accent: "75, 50%, 50%" },
+        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { toggle("waterways"); if (!showWatersCommons) setLayer("watersCommons", true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "210, 35%, 75%" },
+        { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => toggle("watersCommons"), accent: "145, 50%, 50%" },
+        { key: "commons", label: "🌾 Commons & Greens", active: showWatersCommons, toggle: () => toggle("watersCommons"), accent: "75, 50%, 50%" },
       ],
     },
     {
