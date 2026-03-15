@@ -102,7 +102,7 @@ const MilestoneCard = ({ feature, bugCount, taskCount }: { feature: RoadmapFeatu
 };
 
 /** Stage section with organic growth line */
-const StageSection = ({ stage, features, bugCounts }: { stage: RoadmapStage; features: RoadmapFeature[]; bugCounts: Record<string, number> }) => {
+const StageSection = ({ stage, features, bugCounts, taskCounts }: { stage: RoadmapStage; features: RoadmapFeature[]; bugCounts: Record<string, number>; taskCounts: Record<string, number> }) => {
   const meta = STAGE_META[stage];
   if (features.length === 0) return null;
 
