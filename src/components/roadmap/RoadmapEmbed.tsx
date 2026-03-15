@@ -146,21 +146,35 @@ const RoadmapEmbed = ({ compact = false, category }: RoadmapEmbedProps) => {
   const [bugCounts, setBugCounts] = useState<Record<string, number>>({});
   const [taskCounts, setTaskCounts] = useState<Record<string, number>>({});
 
-  // Fetch linked bug counts
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await supabase
+        // Fetch bug counts linked to roadmap features
+        const { data: bugData } = await supabase
           .from("bug_reports")
           .select("roadmap_feature_slug")
           .not("roadmap_feature_slug", "is", null);
-        if (!data) return;
-        const counts: Record<string, number> = {};
-        for (const row of data) {
-          const slug = (row as any).roadmap_feature_slug as string;
-          if (slug) counts[slug] = (counts[slug] || 0) + 1;
+        if (bugData) {
+          const counts: Record<string, number> = {};
+          for (const row of bugData) {
+            const slug = (row as any).roadmap_feature_slug as string;
+            if (slug) counts[slug] = (counts[slug] || 0) + 1;
+          }
+          setBugCounts(counts);
         }
-        setBugCounts(counts);
+
+        // Fetch agent task counts linked to roadmap features
+        const { data: taskData } = await (supabase.from as any)("agent_garden_tasks")
+          .select("roadmap_feature_slug")
+          .not("roadmap_feature_slug", "is", null);
+        if (taskData) {
+          const counts: Record<string, number> = {};
+          for (const row of taskData) {
+            const slug = row.roadmap_feature_slug as string;
+            if (slug) counts[slug] = (counts[slug] || 0) + 1;
+          }
+          setTaskCounts(counts);
+        }
       } catch {
         // Non-critical
       }
