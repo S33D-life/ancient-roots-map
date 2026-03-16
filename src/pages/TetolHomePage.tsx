@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import {
   Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf,
-  Search, Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
+  Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
