@@ -124,7 +124,7 @@ export function useIsGroveGuardian(groveId: string | undefined) {
 /** Request to become a grove guardian */
 export function useBecomeGuardian() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const currentUser = useCurrentUser();
 
   return useMutation({
     mutationFn: async ({ groveId, role }: { groveId: string; role?: GuardianRole }) => {
