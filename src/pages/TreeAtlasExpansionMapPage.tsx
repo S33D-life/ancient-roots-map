@@ -223,6 +223,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Begin discovery research and manual curation pathway",
     flag_emoji: "🇲🇽",
     lat: 23.6, lng: -102.5,
+    atlas_slug: "mexico", config_exists: true,
   },
 ];
 
