@@ -747,6 +747,7 @@ const TreeDataCommonsPage = () => {
               { label: "Seed-Plan Generator", desc: "Curated starter planting plans", to: "/seed-plan-generator", icon: "🌱" },
               { label: "Canopy Projection", desc: "Future growth scenarios & planning", to: "/canopy-projection", icon: "🔮" },
               { label: "Groves", desc: "Living tree communities & clusters", to: "/groves", icon: "🌳" },
+              { label: "Forest Pulse", desc: "Living activity signals across the ecosystem", to: "/pulse", icon: "💓" },
               { label: "Atlas Map", desc: "Datasets become map layers", to: "/map", icon: "🗺" },
               { label: "Ledger Explorer", desc: "Source & integration records", to: "/ledger", icon: "📜" },
               { label: "Research Trees", desc: "Research imports as datasets", to: "/library/gallery", icon: "🔬" },
