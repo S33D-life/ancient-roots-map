@@ -123,3 +123,17 @@
   margin: 8px 12px;
   color: hsl(var(--foreground));
 }
+
+/* ── Atlas Forest Node layer ── */
+.atlas-forest-node {
+  background: transparent !important;
+  border: none !important;
+}
+
+.atlas-canopy-node {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.atlas-canopy-node:hover {
+  transform: scale(1.15);
+}

@@ -40,7 +40,7 @@ interface CountryStats {
   portalSubtitle?: string;
 }
 
-type ViewMode = "cards" | "hybrid";
+type ViewMode = "cards" | "hybrid" | "map";
 
 /* ─── Pulse label & color helpers ─── */
 const PULSE_LABELS: Record<string, string> = {
