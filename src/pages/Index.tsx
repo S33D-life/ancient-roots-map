@@ -43,6 +43,7 @@ const SectionShimmer = () => (
 );
 
 const Index = () => {
+  useDocumentTitle("S33D Gateway");
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
