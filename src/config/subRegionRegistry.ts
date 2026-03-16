@@ -103,6 +103,40 @@ const SUB_REGION_REGISTRY: SubRegionEntry[] = [
     provinceKey: "Basel-Stadt",
   },
 
+  // Singapore — Planning Areas
+  {
+    name: "Botanic Gardens & Tanglin",
+    slug: "botanic-gardens",
+    countrySlug: "singapore",
+    tagline: "UNESCO World Heritage gardens & Tembusu elders",
+    icon: "🌿",
+    provinceKey: "Tanglin",
+  },
+  {
+    name: "Bukit Timah & Central Catchment",
+    slug: "bukit-timah",
+    countrySlug: "singapore",
+    tagline: "Primary rainforest dipterocarps & canopy giants",
+    icon: "🌲",
+    provinceKey: ["Bukit Timah", "Mandai", "Bishan"],
+  },
+  {
+    name: "Civic & Cultural District",
+    slug: "civic-district",
+    countrySlug: "singapore",
+    tagline: "Temple guardians, colonial Angsana & heritage streetscapes",
+    icon: "🏛️",
+    provinceKey: ["Downtown Core", "Outram", "Rochor", "River Valley"],
+  },
+  {
+    name: "East & Coastal",
+    slug: "east-coast",
+    countrySlug: "singapore",
+    tagline: "Rain Tree corridors, Sea Apples & wetland Kapok",
+    icon: "🏖️",
+    provinceKey: ["Marine Parade", "Changi", "Bukit Merah", "Lim Chu Kang"],
+  },
+
   // Indonesia — Island Regions
   {
     name: "Bali & Nusa Tenggara",
