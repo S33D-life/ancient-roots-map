@@ -2,7 +2,7 @@
  * GrovesPage — discover and explore grove candidates and blessed groves.
  * Natural layer of place-making inside S33D.
  */
-import { lazy, Suspense } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useGroveDetection, useGroves } from "@/hooks/use-grove-detection";
+import GroveNamingRitual from "@/components/GroveNamingRitual";
 import {
   STRENGTH_LABELS,
   STRENGTH_COLORS,
