@@ -6,7 +6,7 @@ import TetolBridge from "@/components/TetolBridge";
 import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreen } from "@/hooks/use-fullscreen";
@@ -71,8 +71,7 @@ const GoldenDreamPage = () => {
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen();
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const isDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 

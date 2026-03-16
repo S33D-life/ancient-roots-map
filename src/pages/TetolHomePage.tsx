@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import {
   Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf,
-  Search, Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
+  Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -27,7 +27,7 @@ const quickLinks = [
   { to: "/value-tree", label: "Value Tree", icon: TreePine },
   { to: "/companion", label: "Companion Mode", icon: Smartphone },
   { to: "/support", label: "Support", icon: Heart },
-  { to: "/vault", label: "Vault", icon: Search },
+  { to: "/vault", label: "Vault", icon: Sparkles },
   { to: "/roadmap", label: "Roadmap", icon: Map },
 ];
 
