@@ -58,6 +58,17 @@ const MapPageFull = () => {
   const [showBlessing, setShowBlessing] = useState(() => !safeDisableNonessentialOverlays && !isBlessingDismissed());
   const [blessingJustDismissed, setBlessingJustDismissed] = useState(false);
 
+  // Innovation #3: Whisper to Research Trees from map popup
+  const [researchWhisper, setResearchWhisper] = useState<{ treeId: string; treeName: string; species: string } | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.treeId) setResearchWhisper({ treeId: detail.treeId, treeName: detail.treeName || "Research Tree", species: detail.species || "" });
+    };
+    window.addEventListener("s33d-whisper-research", handler);
+    return () => window.removeEventListener("s33d-whisper-research", handler);
+  }, []);
+
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
   if (showEntrance) {
