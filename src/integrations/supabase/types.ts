@@ -2524,6 +2524,59 @@ export type Database = {
         }
         Relationships: []
       }
+      grove_guardians: {
+        Row: {
+          contribution_score: number
+          created_at: string
+          grove_id: string
+          id: string
+          offerings_count: number
+          role: string
+          since_date: string
+          stories_count: number
+          trees_added: number
+          updated_at: string
+          user_id: string
+          visits_count: number
+        }
+        Insert: {
+          contribution_score?: number
+          created_at?: string
+          grove_id: string
+          id?: string
+          offerings_count?: number
+          role?: string
+          since_date?: string
+          stories_count?: number
+          trees_added?: number
+          updated_at?: string
+          user_id: string
+          visits_count?: number
+        }
+        Update: {
+          contribution_score?: number
+          created_at?: string
+          grove_id?: string
+          id?: string
+          offerings_count?: number
+          role?: string
+          since_date?: string
+          stories_count?: number
+          trees_added?: number
+          updated_at?: string
+          user_id?: string
+          visits_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grove_guardians_grove_id_fkey"
+            columns: ["grove_id"]
+            isOneToOne: false
+            referencedRelation: "groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grove_quests: {
         Row: {
           companion_id: string
@@ -2617,6 +2670,7 @@ export type Database = {
           grove_strength: string
           grove_strength_score: number
           grove_type: string
+          guardian_count: number
           id: string
           offering_count: number
           radius_m: number | null
@@ -2642,6 +2696,7 @@ export type Database = {
           grove_strength?: string
           grove_strength_score?: number
           grove_type?: string
+          guardian_count?: number
           id?: string
           offering_count?: number
           radius_m?: number | null
@@ -2667,6 +2722,7 @@ export type Database = {
           grove_strength?: string
           grove_strength_score?: number
           grove_type?: string
+          guardian_count?: number
           id?: string
           offering_count?: number
           radius_m?: number | null
