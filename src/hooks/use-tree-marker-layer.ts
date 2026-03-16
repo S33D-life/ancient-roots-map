@@ -557,7 +557,7 @@ function createClusterIcon(cluster: any, isLineageFocused = false) {
     badge = `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:hsl(42,95%,60%);border:1.5px solid hsl(30,15%,10%);"></span>`;
   } else if (speciesDiversity >= 3) {
     badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:8px;line-height:1;opacity:0.7" title="${speciesDiversity} species">🌿</span>`;
-  } else if (dominantLineage && dominantLineage[1] >= 3) {
+  } else if (dominantLineage && dominantLineage[1] >= 3 && !isLineageFocused) {
     badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:9px;line-height:1;" title="${dominantLineage[0]}">🌿</span>`;
   }
 
