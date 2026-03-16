@@ -90,12 +90,10 @@ const HongKongAtlasPage = () => {
       <div className="min-h-screen bg-background pt-20 pb-24 px-4">
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Breadcrumb */}
-          <AtlasBreadcrumb
-            items={[
-              { label: "Atlas", to: "/atlas" },
-              { label: "Hong Kong" },
-            ]}
-          />
+          <AtlasBreadcrumb segments={[
+            { label: "Atlas", to: "/atlas" },
+            { label: "Hong Kong" },
+          ]} />
 
           {/* Hero */}
           <motion.div
