@@ -146,6 +146,7 @@ const CompanionPage = lazyImportWithRetry(() => import("./pages/CompanionPage"),
 const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCommonsPage"), "tree-data-commons");
 const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPage"), "agent-garden");
 const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapPage"), "ecosystem-map");
+const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/DatasetDiscoveryAgentPage"), "discovery-agent");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -349,6 +350,7 @@ const App = () => {
                 <Route path="/companion" element={<CompanionPage />} />
                 <Route path="/tree-data-commons" element={<TreeDataCommonsPage />} />
                 <Route path="/agent-garden" element={<AgentGardenPage />} />
+                <Route path="/discovery-agent" element={<DatasetDiscoveryAgentPage />} />
                 <Route path="/ecosystem" element={<EcosystemMapPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
