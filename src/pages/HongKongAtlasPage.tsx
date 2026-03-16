@@ -58,7 +58,7 @@ const StatTile = ({ label, value, icon: Icon }: { label: string; value: number |
 );
 
 const HongKongAtlasPage = () => {
-  useDocumentTitle("Hong Kong — Living Walls & Heritage Trees", "Stone wall survivors, harbour sentinels & garden elders on the Ancient Friends map.");
+  useDocumentTitle("Hong Kong — Living Walls & Heritage Trees");
   const { focusMap } = useMapFocus();
   const [trees, setTrees] = useState<HKTree[]>([]);
   const [loading, setLoading] = useState(true);
