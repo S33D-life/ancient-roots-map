@@ -55,7 +55,7 @@ function GuardianAvatar({ guardian }: { guardian: GroveGuardian }) {
 }
 
 export default function GroveGuardianSection({ groveId, groveName }: Props) {
-  const { user } = useAuth();
+  const { user } = useCurrentUser();
   const { data: guardians, isLoading } = useGroveGuardians(groveId);
   const { isGuardian, role } = useIsGroveGuardian(groveId);
   const becomeGuardian = useBecomeGuardian();
