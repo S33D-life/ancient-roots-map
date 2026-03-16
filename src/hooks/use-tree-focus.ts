@@ -6,9 +6,9 @@
  * - Popup opening
  * - Fallback marker for filtered-out trees
  *
- * Extracted from LeafletFallbackMap (lines 1822-2029).
+ * Extracted from LeafletFallbackMap.
  */
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,10 @@ interface Tree {
 interface UseTreeFocusOptions {
   mapRef: React.MutableRefObject<L.Map | null>;
   clusterRef: React.MutableRefObject<any>;
+  /** Shared with useMapInit for cleanup */
+  focusHaloRef: React.MutableRefObject<L.Marker | null>;
+  /** Shared with useMapInit for cleanup */
+  focusFallbackMarkerRef: React.MutableRefObject<L.Marker | null>;
   initialTreeId?: string;
   initialZoom?: number;
   initialJourney?: boolean;
@@ -35,6 +39,8 @@ interface UseTreeFocusOptions {
 export function useTreeFocus({
   mapRef,
   clusterRef,
+  focusHaloRef,
+  focusFallbackMarkerRef,
   initialTreeId,
   initialZoom,
   initialJourney,
@@ -43,9 +49,7 @@ export function useTreeFocus({
   onJourneyEnd,
 }: UseTreeFocusOptions) {
   const focusHandledRef = useRef<string | null>(null);
-  const focusHaloRef = useRef<L.Marker | null>(null);
   const focusFetchAttemptRef = useRef<string | null>(null);
-  const focusFallbackMarkerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -215,7 +219,5 @@ export function useTreeFocus({
         }
       }, 3000);
     }
-  }, [filteredTrees, trees, initialTreeId, initialZoom, initialJourney, onJourneyEnd, mapRef, clusterRef]);
-
-  return { focusHandledRef, focusHaloRef };
+  }, [filteredTrees, trees, initialTreeId, initialZoom, initialJourney, onJourneyEnd, mapRef, clusterRef, focusHaloRef, focusFallbackMarkerRef]);
 }
