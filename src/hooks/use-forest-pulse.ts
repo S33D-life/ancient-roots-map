@@ -56,7 +56,7 @@ async function fetchPulseData(range: PulseTimeRange) {
   recentOfferings?.forEach(o => treeOfferingCount.set(o.tree_id, (treeOfferingCount.get(o.tree_id) || 0) + 1));
   recentCheckins?.forEach(c => treeVisitCount.set(c.tree_id, (treeVisitCount.get(c.tree_id) || 0) + 1));
   recentWhispers?.forEach(w => {
-    if (w.origin_tree_id) treeWhisperCount.set(w.origin_tree_id, (treeWhisperCount.get(w.origin_tree_id) || 0) + 1);
+    if (w.tree_anchor_id) treeWhisperCount.set(w.tree_anchor_id, (treeWhisperCount.get(w.tree_anchor_id) || 0) + 1);
   });
 
   // Tree pulses (only active trees)
