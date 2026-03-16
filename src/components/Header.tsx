@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, Leaf, Sunrise, Stars, Search } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag-small.webp";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
@@ -79,24 +79,7 @@ const Header = () => {
     return () => window.removeEventListener("open-tetol", handler);
   }, [user, navigate, location.pathname]);
 
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !document.documentElement.classList.contains('light');
-    }
-    return true;
-  });
-
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    if (isDark) {
-      html.classList.remove('dark');
-      html.classList.add('light');
-    } else {
-      html.classList.remove('light');
-      html.classList.add('dark');
-    }
-    setIsDark(!isDark);
-  };
+  // Theme is always dark — no toggle needed
 
   // ⌘K shortcut opens global search directly
   useEffect(() => {
@@ -330,10 +313,6 @@ const Header = () => {
             </Button>
             {user && <DailySeedCounter remaining={seedsRemaining} compact />}
             {user && <NotificationBell />}
-            <Button variant="ghost" size="icon" onClick={toggleTheme} title={isDark ? "Sunrise" : "Starry Night"} className="relative overflow-hidden h-8 w-8 md:h-10 md:w-10">
-              <Sunrise className={`w-3.5 h-3.5 md:w-4 md:h-4 absolute transition-all duration-300 ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`} />
-              <Stars className={`w-3.5 h-3.5 md:w-4 md:h-4 absolute transition-all duration-300 ${!isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-50'}`} />
-            </Button>
             {user ? (
               <Link
                 to="/"

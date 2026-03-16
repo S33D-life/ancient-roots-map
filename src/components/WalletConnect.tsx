@@ -132,7 +132,7 @@ const WalletConnect = ({ onWalletLinked, compact = false }: WalletConnectProps) 
         ) : (
           <Wallet className="h-4 w-4" />
         )}
-        Connect Wallet — Non-Fungible Twig
+        <span className="truncate">Connect Wallet</span>
       </Button>
     );
   }
