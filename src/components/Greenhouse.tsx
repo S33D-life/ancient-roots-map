@@ -187,7 +187,8 @@ const Greenhouse = () => {
     }
   };
 
-  const displayPlants = viewMode === "mine" ? plants : communityPlants;
+  const forestPlants = plants.filter(p => p.plant_type !== "houseplant");
+  const displayPlants = viewMode === "mine" ? plants : viewMode === "forest" ? forestPlants : communityPlants;
 
   return (
     <div className="relative min-h-[60vh]">
