@@ -194,6 +194,20 @@ const NFTreeStudio = ({
     [allTreeOfferings]
   );
 
+  // Query nftree_mints for this tree to get staff provenance
+  const [mintRecords, setMintRecords] = useState<Array<{ id: string; staff_id: string | null; staff_token_id: number; token_id: number | null; mint_status: string; tx_hash: string | null; confirmed_at: string | null }>>([]);
+  useEffect(() => {
+    if (!open || !treeId) return;
+    supabase
+      .from("nftree_mints")
+      .select("id, staff_id, staff_token_id, token_id, mint_status, tx_hash, confirmed_at")
+      .eq("tree_id", treeId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setMintRecords(data as any);
+      });
+  }, [open, treeId]);
+
   // ── Upload image and get URL ──
   const uploadImage = async (): Promise<string | null> => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -374,6 +388,17 @@ const NFTreeStudio = ({
               <p className="text-sm font-serif text-foreground">Base</p>
             </div>
           </div>
+          {/* Staff provenance in success */}
+          {activeStaff && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/15 bg-primary/5">
+              {activeStaff.image_url && (
+                <img src={activeStaff.image_url} alt={activeStaff.species} className="w-6 h-6 rounded object-cover" />
+              )}
+              <p className="text-[10px] font-serif text-muted-foreground">
+                Minted with <span className="text-foreground font-medium">{activeStaff.species} Staff #{activeStaff.token_id}</span>
+              </p>
+            </div>
+          )}
           <div className="flex gap-2">
             {nftreeMint.result.explorerUrl && (
               <a
@@ -494,15 +519,20 @@ const NFTreeStudio = ({
 
                 <MintChecklist />
 
-                {/* Active staff indicator */}
+                {/* Active staff indicator with verification status */}
                 {activeStaff && (
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5">
+                  <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-primary/20 bg-primary/5">
                     {activeStaff.image_url && (
                       <img src={activeStaff.image_url} alt={activeStaff.species} className="w-8 h-8 rounded-lg object-cover" />
                     )}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-xs font-serif text-foreground">Sealing with: {activeStaff.species} Staff</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{activeStaff.id} · Token #{activeStaff.token_id}</p>
+                      {activeStaff.owner_address && (
+                        <p className="text-[9px] text-primary/70 font-serif mt-0.5">
+                          ✓ Verified owner · {activeStaff.owner_address.slice(0, 6)}…{activeStaff.owner_address.slice(-4)}
+                        </p>
+                      )}
                     </div>
                     <Shield className="w-4 h-4 text-primary" />
                   </div>
@@ -694,7 +724,7 @@ const NFTreeStudio = ({
 
           {/* ── Mint History ────────────────────────────────── */}
           <TabsContent value="history" className="space-y-4">
-            {mintHistory.length === 0 ? (
+            {mintHistory.length === 0 && mintRecords.length === 0 ? (
               <div className="text-center py-12 space-y-2">
                 <Sparkles className="w-8 h-8 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground font-serif">No NFTrees minted for this tree yet</p>
@@ -704,51 +734,100 @@ const NFTreeStudio = ({
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-muted-foreground font-serif">
-                  {mintHistory.length} NFTree{mintHistory.length !== 1 ? "s" : ""} minted
-                </p>
-                {mintHistory.map((item) => (
-                  <Card key={item.id} className="border-border/40 bg-card/50 overflow-hidden">
-                    <CardContent className="p-0">
-                      <div className="flex gap-3">
-                        {item.media_url && (
-                          <img
-                            src={item.media_url}
-                            alt={item.title}
-                            className="w-20 h-20 object-cover shrink-0"
-                          />
-                        )}
-                        <div className="flex-1 py-3 pr-3 space-y-1">
-                          <p className="text-sm font-serif font-medium text-foreground line-clamp-1">
-                            {item.title}
-                          </p>
-                          {item.content && (
-                            <p className="text-xs text-muted-foreground line-clamp-2">{item.content}</p>
+                {/* On-chain mint records with provenance */}
+                {mintRecords.length > 0 && (
+                  <>
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-serif">
+                      On-Chain Records
+                    </p>
+                    {mintRecords.map((record) => (
+                      <div key={record.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border/30 bg-card/30">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          {record.mint_status === "confirmed" ? (
+                            <CheckCircle2 className="w-4 h-4 text-primary" />
+                          ) : (
+                            <Loader2 className="w-4 h-4 text-muted-foreground" />
                           )}
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-muted-foreground/60 font-mono">
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </span>
-                            {item.nft_link ? (
-                              <a
-                                href={item.nft_link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
-                              >
-                                View on-chain <ExternalLink className="w-2.5 h-2.5" />
-                              </a>
-                            ) : (
-                              <span className="text-[10px] text-muted-foreground/40 font-serif italic">
-                                Offering recorded — not minted on-chain
-                              </span>
-                            )}
-                          </div>
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-serif text-foreground">
+                            {record.token_id ? `NFTree #${record.token_id}` : `Mint ${record.mint_status}`}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-serif">
+                            Minted with Staff #{record.staff_token_id}
+                            {record.staff_id && ` · ${record.staff_id}`}
+                          </p>
+                          {record.confirmed_at && (
+                            <p className="text-[9px] text-muted-foreground/60 font-mono">
+                              {new Date(record.confirmed_at).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                        {record.tx_hash && (
+                          <a
+                            href={`https://sepolia.basescan.org/tx/${record.tx_hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-primary hover:underline flex items-center gap-0.5 shrink-0"
+                          >
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    ))}
+                  </>
+                )}
+
+                {/* Offering-based history */}
+                {mintHistory.length > 0 && (
+                  <>
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-serif mt-2">
+                      Offerings ({mintHistory.length})
+                    </p>
+                    {mintHistory.map((item) => (
+                      <Card key={item.id} className="border-border/40 bg-card/50 overflow-hidden">
+                        <CardContent className="p-0">
+                          <div className="flex gap-3">
+                            {item.media_url && (
+                              <img
+                                src={item.media_url}
+                                alt={item.title}
+                                className="w-20 h-20 object-cover shrink-0"
+                              />
+                            )}
+                            <div className="flex-1 py-3 pr-3 space-y-1">
+                              <p className="text-sm font-serif font-medium text-foreground line-clamp-1">
+                                {item.title}
+                              </p>
+                              {item.content && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">{item.content}</p>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-muted-foreground/60 font-mono">
+                                  {new Date(item.created_at).toLocaleDateString()}
+                                </span>
+                                {item.nft_link ? (
+                                  <a
+                                    href={item.nft_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] text-primary hover:underline flex items-center gap-0.5"
+                                  >
+                                    View on-chain <ExternalLink className="w-2.5 h-2.5" />
+                                  </a>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground/40 font-serif italic">
+                                    Offering recorded — not minted on-chain
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </TabsContent>
