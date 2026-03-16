@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
 import { useMapFocus } from "@/hooks/use-map-focus";
@@ -57,6 +58,7 @@ const councilRooms = [
 ];
 
 const CouncilOfLifePage = () => {
+  useDocumentTitle("Council of Life");
   const navigate = useNavigate();
   const { focusMap } = useMapFocus();
   const [isFullscreen, setIsFullscreen] = useState(false);

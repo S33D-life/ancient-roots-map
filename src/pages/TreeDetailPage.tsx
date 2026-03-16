@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
@@ -106,6 +107,7 @@ const TreeDetailPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tree, setTree] = useState<Tree | null>(null);
+  useDocumentTitle(tree ? `${tree.name} — ${tree.species}` : "Tree");
   const [loading, setLoading] = useState(true);
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<OfferingType>("photo");

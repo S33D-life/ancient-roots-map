@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
@@ -249,6 +250,7 @@ const ForestParticles = () => (
 
 /* ── MAIN PAGE ── */
 const LivingForestRoadmapPage = () => {
+  useDocumentTitle("Living Forest Roadmap");
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);

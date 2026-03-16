@@ -3,8 +3,10 @@ import { useEffect } from "react";
 import { TreePine, Map, Home, BookOpen, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 const NotFound = () => {
+  useDocumentTitle("Page Not Found");
   const location = useLocation();
 
   useEffect(() => {

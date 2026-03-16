@@ -3,11 +3,13 @@
  * Individual rooms are handled by HeartwoodRoomPage at /library/:room.
  */
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import LevelEntrance from "@/components/LevelEntrance";
 import HeartwoodLanding from "@/components/library/HeartwoodLanding";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 
 const GalleryPage = () => {
+  useDocumentTitle("Heartwood Library");
   const { showEntrance: showSplash, dismissEntrance: dismissSplash } = useEntranceOnce("gallery", true);
 
   if (showSplash) {

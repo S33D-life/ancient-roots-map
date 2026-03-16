@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -12,6 +13,7 @@ import hearthBg from "@/assets/hearth-bg.jpeg";
 import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
 const VaultPage = () => {
+  useDocumentTitle("Vault");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

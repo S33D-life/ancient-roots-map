@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
@@ -67,6 +68,7 @@ const goldenDreamRooms: GoldenDreamRoom[] = [
 ];
 
 const GoldenDreamPage = () => {
+  useDocumentTitle("yOur Golden Dream");
   const { showEntrance, dismissEntrance } = useEntranceOnce("golden-dream");
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen();
   const [coverDismissed, setCoverDismissed] = useState(false);

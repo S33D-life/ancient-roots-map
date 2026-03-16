@@ -1,4 +1,5 @@
 import { useCallback, lazy, Suspense } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import S33dEntrance from "@/components/S33dEntrance";
@@ -42,6 +43,7 @@ const SectionShimmer = () => (
 );
 
 const Index = () => {
+  useDocumentTitle("S33D Gateway");
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();
