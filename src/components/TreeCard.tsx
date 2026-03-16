@@ -179,16 +179,14 @@ const TreeCard = ({
           </div>
         </div>
       </Card>
-      {!isResearch && (
-        <SendWhisperModal
-          open={whisperOpen}
-          onOpenChange={setWhisperOpen}
-          treeId={tree.id}
-          treeName={tree.name}
-          treeSpecies={tree.species}
-          contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
-        />
-      )}
+      <SendWhisperModal
+        open={whisperOpen}
+        onOpenChange={setWhisperOpen}
+        treeId={tree.id}
+        treeName={tree.name}
+        treeSpecies={tree.species}
+        contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+      />
       </>
     );
   }
