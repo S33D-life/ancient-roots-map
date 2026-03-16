@@ -83,6 +83,7 @@ const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page")
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
 const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplorerPage"), "pulse-explorer");
+const PathwaysPage = lazyImportWithRetry(() => import("./pages/PathwaysPage"), "pathways");
 const GalleryPage = lazyImportWithRetry(() => import("./pages/GalleryPage"), "gallery");
 const HeartwoodRoomPage = lazyImportWithRetry(() => import("./pages/library/HeartwoodRoomPage"), "heartwood-room");
 const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"), "dashboard");
@@ -303,6 +304,7 @@ const App = () => {
                 <Route path="/staff/:code" element={<StaffDetailPage />} />
                 <Route path="/groves" element={realm(<GrovesPage />, "roots")} />
                 <Route path="/pulse" element={realm(<PulseExplorerPage />, "roots")} />
+                <Route path="/pathways" element={realm(<PathwaysPage />, "roots")} />
                 <Route path="/library" element={realm(<GalleryPage />, "trunk")} />
                 <Route path="/library/:room" element={realm(<HeartwoodRoomPage />, "trunk")} />
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />

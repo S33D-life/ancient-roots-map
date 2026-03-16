@@ -3597,6 +3597,84 @@ export type Database = {
           },
         ]
       }
+      mycelial_pathways: {
+        Row: {
+          blessed_by: string | null
+          center_lat: number | null
+          center_lng: number | null
+          created_at: string
+          distance_km: number | null
+          end_lat: number | null
+          end_lng: number | null
+          formation_method: string
+          grove_ids: string[]
+          id: string
+          offering_count: number | null
+          pathway_name: string | null
+          pathway_status: string
+          pathway_strength: string
+          pathway_strength_score: number
+          pathway_type: string
+          species_common: string | null
+          species_scientific: string | null
+          start_lat: number | null
+          start_lng: number | null
+          tree_count: number | null
+          updated_at: string
+          visit_count: number | null
+        }
+        Insert: {
+          blessed_by?: string | null
+          center_lat?: number | null
+          center_lng?: number | null
+          created_at?: string
+          distance_km?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          formation_method?: string
+          grove_ids?: string[]
+          id?: string
+          offering_count?: number | null
+          pathway_name?: string | null
+          pathway_status?: string
+          pathway_strength?: string
+          pathway_strength_score?: number
+          pathway_type?: string
+          species_common?: string | null
+          species_scientific?: string | null
+          start_lat?: number | null
+          start_lng?: number | null
+          tree_count?: number | null
+          updated_at?: string
+          visit_count?: number | null
+        }
+        Update: {
+          blessed_by?: string | null
+          center_lat?: number | null
+          center_lng?: number | null
+          created_at?: string
+          distance_km?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          formation_method?: string
+          grove_ids?: string[]
+          id?: string
+          offering_count?: number | null
+          pathway_name?: string | null
+          pathway_status?: string
+          pathway_strength?: string
+          pathway_strength_score?: number
+          pathway_type?: string
+          species_common?: string | null
+          species_scientific?: string | null
+          start_lat?: number | null
+          start_lng?: number | null
+          tree_count?: number | null
+          updated_at?: string
+          visit_count?: number | null
+        }
+        Relationships: []
+      }
       nftree_mints: {
         Row: {
           authorization_deadline: string | null
@@ -3930,6 +4008,45 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pathway_groves: {
+        Row: {
+          created_at: string
+          grove_id: string
+          id: string
+          pathway_id: string
+          position_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          grove_id: string
+          id?: string
+          pathway_id: string
+          position_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          grove_id?: string
+          id?: string
+          pathway_id?: string
+          position_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pathway_groves_grove_id_fkey"
+            columns: ["grove_id"]
+            isOneToOne: false
+            referencedRelation: "groves"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pathway_groves_pathway_id_fkey"
+            columns: ["pathway_id"]
+            isOneToOne: false
+            referencedRelation: "mycelial_pathways"
             referencedColumns: ["id"]
           },
         ]
