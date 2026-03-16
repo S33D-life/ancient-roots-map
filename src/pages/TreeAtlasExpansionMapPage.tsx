@@ -118,6 +118,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Generate integration pack with provenance tracking",
     flag_emoji: "🇺🇸",
     lat: 39.8, lng: -98.6,
+    atlas_slug: "united-states", config_exists: true,
   },
   {
     country_code: "ZA",
