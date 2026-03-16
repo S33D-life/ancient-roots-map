@@ -76,6 +76,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Begin multi-source discovery research",
     flag_emoji: "🇯🇵",
     lat: 36.2, lng: 138.2,
+    atlas_slug: "japan", config_exists: true,
   },
   {
     country_code: "IT",
