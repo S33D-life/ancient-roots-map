@@ -366,6 +366,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const navigate = useNavigate();
   useGroveMapLayer(mapRef.current, showGroves, navigate);
   usePulseMapLayer(mapRef.current, showForestPulse);
+  usePathwayMapLayer(mapRef.current, showMycelialPathways, navigate);
 
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
