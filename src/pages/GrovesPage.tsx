@@ -225,7 +225,7 @@ export default function GrovesPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {speciesCandidates.map((g, i) => (
-                  <GroveCandidateCard key={`species-${i}`} grove={g} index={i} />
+                  <GroveCandidateCard key={`species-${i}`} grove={g} index={i} onBless={setBlessingGrove} />
                 ))}
               </div>
             )}
