@@ -232,9 +232,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const externalAbortRef = useRef<AbortController | null>(null);
   const prevTreeIdsRef = useRef<Set<string>>(new Set());
   const hasFittedRef = useRef(false);
-  const focusHandledRef = useRef<string | null>(null);
   const focusHaloRef = useRef<L.Marker | null>(null);
-  const focusFetchAttemptRef = useRef<string | null>(null);
   const focusFallbackMarkerRef = useRef<L.Marker | null>(null);
   const geo = useGeolocation();
   const locating = geo.isLocating;
