@@ -228,7 +228,7 @@ export function useNFTreeMint({
           if (!switched) throw new Error("Please switch to Base network to mint.");
         }
 
-        // ── Step 2: Check staff ──
+        // ── Step 2: Check staff + re-verify ownership on-chain ──
         setStage("checking_staff");
         if (!activeStaff)
           throw new Error(
@@ -236,6 +236,35 @@ export function useNFTreeMint({
           );
         if (!activeStaff.token_id)
           throw new Error("Invalid Staff NFT — missing token ID.");
+
+        // Re-verify Staff ownership on-chain before proceeding
+        if (STAFF_CONTRACT_ADDRESS) {
+          let verified = false;
+          for (const rpcUrl of ACTIVE_RPC_URLS) {
+            try {
+              const readProvider = new ethers.JsonRpcProvider(rpcUrl);
+              const staffContract = new ethers.Contract(
+                STAFF_CONTRACT_ADDRESS,
+                ["function ownerOf(uint256 tokenId) view returns (address)"],
+                readProvider
+              );
+              const onChainOwner = await staffContract.ownerOf(activeStaff.token_id);
+              if (onChainOwner.toLowerCase() !== walletAddress.toLowerCase()) {
+                throw new Error(
+                  "Your wallet no longer owns this Staff NFT. Please select a different Staff."
+                );
+              }
+              verified = true;
+              break;
+            } catch (rpcErr: any) {
+              if (rpcErr.message?.includes("no longer owns")) throw rpcErr;
+              // Try next RPC
+            }
+          }
+          if (!verified) {
+            throw new Error("Could not verify Staff NFT ownership on-chain. Please try again.");
+          }
+        }
 
         if (!NFTREE_CONTRACT_ADDRESS) {
           throw new Error(
