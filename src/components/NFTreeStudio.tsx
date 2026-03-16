@@ -374,6 +374,17 @@ const NFTreeStudio = ({
               <p className="text-sm font-serif text-foreground">Base</p>
             </div>
           </div>
+          {/* Staff provenance in success */}
+          {activeStaff && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary/15 bg-primary/5">
+              {activeStaff.image_url && (
+                <img src={activeStaff.image_url} alt={activeStaff.species} className="w-6 h-6 rounded object-cover" />
+              )}
+              <p className="text-[10px] font-serif text-muted-foreground">
+                Minted with <span className="text-foreground font-medium">{activeStaff.species} Staff #{activeStaff.token_id}</span>
+              </p>
+            </div>
+          )}
           <div className="flex gap-2">
             {nftreeMint.result.explorerUrl && (
               <a
