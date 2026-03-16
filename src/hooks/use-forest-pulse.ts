@@ -42,7 +42,7 @@ async function fetchPulseData(range: PulseTimeRange) {
   ] = await Promise.all([
     supabase.from("offerings").select("tree_id").gte("created_at", since).limit(500),
     supabase.from("tree_checkins").select("tree_id").gte("checked_in_at", since).limit(500),
-    supabase.from("tree_whispers").select("origin_tree_id").gte("created_at", since).limit(500),
+    supabase.from("tree_whispers").select("tree_anchor_id").gte("created_at", since).limit(500),
     supabase.from("trees").select("id, name, species, latitude, longitude, nation, created_at").gte("created_at", since).limit(200),
     supabase.from("groves").select("id, grove_name, grove_type, center_latitude, center_longitude, radius_m, tree_count, species_common, created_at").limit(200),
     supabase.from("trees").select("id, name, species, latitude, longitude, nation").not("latitude", "is", null).limit(1000),
