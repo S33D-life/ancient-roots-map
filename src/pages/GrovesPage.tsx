@@ -93,11 +93,16 @@ function GroveCandidateCard({ grove, index, onBless }: { grove: GroveCandidate; 
             )}
           </div>
 
-          <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-            <Link to={`/map?lat=${grove.center.lat}&lng=${grove.center.lng}&zoom=15`}>
-              <MapPin className="w-3 h-3 mr-1" /> View on Map
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+              <Link to={`/map?lat=${grove.center.lat}&lng=${grove.center.lng}&zoom=15`}>
+                <MapPin className="w-3 h-3 mr-1" /> View on Map
+              </Link>
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); onBless(grove); }}>
+              <Sparkles className="w-3 h-3 mr-1" /> Name this Grove
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
