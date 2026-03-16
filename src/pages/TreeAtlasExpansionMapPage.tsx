@@ -548,12 +548,18 @@ function RegionDetailCard({ region }: { region: ExpansionRegion }) {
               <Eye className="w-3 h-3 mr-1" /> Watcher
             </Link>
           </Button>
-          {region.status === "integrated" && (
+          {region.atlas_slug && (
             <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-              <Link to={`/atlas/${region.country_code.toLowerCase()}`}>
+              <Link to={`/atlas/${region.atlas_slug}`}>
                 <MapPin className="w-3 h-3 mr-1" /> Atlas Page
               </Link>
             </Button>
+          )}
+          {region.config_exists && (
+            <Badge variant="outline" className="text-[9px] bg-primary/5 border-primary/20 text-primary/70">
+              Config ✓
+            </Badge>
+          )}
           )}
         </div>
       </CardContent>
