@@ -374,6 +374,7 @@ const App = () => {
                 <Route path="/dataset-watcher" element={<DatasetWatcherPage />} />
                 <Route path="/atlas-expansion" element={<TreeAtlasExpansionMapPage />} />
                 <Route path="/seed-plan-generator" element={<SeedPlanGeneratorPage />} />
+                <Route path="/canopy-projection" element={<CanopyProjectionPage />} />
                 <Route path="/ecosystem" element={<EcosystemMapPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
