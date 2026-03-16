@@ -319,6 +319,7 @@ const App = () => {
                 <Route path="/markets" element={<Navigate to="/library/rhythms" replace />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
+                <Route path="/atlas/hong-kong" element={<HongKongAtlasPage />} />
                 {/* Sub-portal redirects */}
                 <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<Navigate to="/atlas/switzerland" replace />} />
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />
