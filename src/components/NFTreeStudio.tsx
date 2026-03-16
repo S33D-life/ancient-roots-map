@@ -505,15 +505,20 @@ const NFTreeStudio = ({
 
                 <MintChecklist />
 
-                {/* Active staff indicator */}
+                {/* Active staff indicator with verification status */}
                 {activeStaff && (
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5">
+                  <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-primary/20 bg-primary/5">
                     {activeStaff.image_url && (
                       <img src={activeStaff.image_url} alt={activeStaff.species} className="w-8 h-8 rounded-lg object-cover" />
                     )}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-xs font-serif text-foreground">Sealing with: {activeStaff.species} Staff</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{activeStaff.id} · Token #{activeStaff.token_id}</p>
+                      {activeStaff.owner_address && (
+                        <p className="text-[9px] text-primary/70 font-serif mt-0.5">
+                          ✓ Verified owner · {activeStaff.owner_address.slice(0, 6)}…{activeStaff.owner_address.slice(-4)}
+                        </p>
+                      )}
                     </div>
                     <Shield className="w-4 h-4 text-primary" />
                   </div>

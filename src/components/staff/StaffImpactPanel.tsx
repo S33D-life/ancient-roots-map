@@ -41,18 +41,19 @@ const StaffImpactPanel = () => {
 
       if (!staff) { setLoading(false); return; }
 
-      const [heartsRes, treesRes, speciesRes, influenceRes, councilRes] = await Promise.all([
+      const [heartsRes, treesRes, speciesRes, influenceRes, councilRes, nftreeRes] = await Promise.all([
         supabase.from("heart_transactions").select("amount").eq("user_id", userId),
         supabase.from("trees").select("*", { count: "exact", head: true }).eq("created_by", userId),
         supabase.from("species_heart_transactions").select("amount").eq("user_id", userId),
         supabase.from("influence_transactions").select("amount").eq("user_id", userId),
         supabase.from("council_participation_rewards").select("*", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("nftree_mints").select("*", { count: "exact", head: true }).eq("minter_user_id", userId).eq("mint_status", "confirmed"),
       ]);
 
       setImpact({
         heartsGenerated: (heartsRes.data || []).reduce((s, r) => s + (r.amount || 0), 0),
         treesMapped: treesRes.count || 0,
-        nfTreesMinted: 0, // Future feature
+        nfTreesMinted: nftreeRes.count || 0,
         councilParticipation: councilRes.count || 0,
         influenceEarned: (influenceRes.data || []).reduce((s, r) => s + (r.amount || 0), 0),
         speciesHeartsEarned: (speciesRes.data || []).reduce((s, r) => s + (r.amount || 0), 0),

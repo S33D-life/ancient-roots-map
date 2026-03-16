@@ -287,32 +287,24 @@ const VaultWalletCard = ({ wallet }: VaultWalletCardProps) => {
                     {walletSignin.error && (
                       <p className="text-[11px] text-destructive font-serif">{walletSignin.error}</p>
                     )}
-                    <Button
-                      variant="sacred"
-                      size="sm"
-                      className="h-8 text-xs"
-                      disabled={!walletSignin.signedIn || !staffGate.isStaffHolder || staffGate.isLoading}
-                      title={
-                        !walletSignin.signedIn
-                          ? "Sign in required"
-                          : staffGate.isStaffHolder
-                            ? "Staff holder verified — mint from any tree page"
-                            : "Staff holder required"
-                      }
-                    >
-                      <Shield className="w-3 h-3 mr-1.5" />
-                      {staffGate.isStaffHolder ? "Staff Verified — Mint from Tree Page" : "Staff Required to Mint"}
-                    </Button>
-                    {walletSignin.signedIn && !staffGate.isStaffHolder && (
-                      <p className="text-[10px] text-muted-foreground font-serif">
-                        Connect a wallet holding a Staff NFT to unlock NFTree minting.
-                      </p>
-                    )}
-                    {walletSignin.signedIn && staffGate.isStaffHolder && (
-                      <p className="text-[10px] text-muted-foreground/70 font-serif">
-                        ✓ Visit any tree page and open NFTree Studio to mint on Base.
-                      </p>
-                    )}
+                    {walletSignin.signedIn && staffGate.isStaffHolder ? (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+                        <Shield className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-serif text-foreground">Staff Verified</p>
+                          <p className="text-[10px] text-muted-foreground/70 font-serif">
+                            Visit any tree page → open NFTree Studio to mint on Base.
+                          </p>
+                        </div>
+                      </div>
+                    ) : walletSignin.signedIn && !staffGate.isStaffHolder ? (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/20 border border-border/30">
+                        <Shield className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <p className="text-[10px] text-muted-foreground font-serif">
+                          Connect a wallet holding a Staff NFT to unlock NFTree minting.
+                        </p>
+                      </div>
+                    ) : null}
                   </div>
 
                   {/* Optional token verification */}
