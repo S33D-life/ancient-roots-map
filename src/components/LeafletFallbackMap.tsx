@@ -358,6 +358,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const bloomConstellationMode = layers.bloomConstellationMode;
   const clearView = layers.clearView;
   const groveViewActive = layers.groveView;
+  const showForestPulse = layers.forestPulse;
 
   // Grove map layer — renders detected grove halos and center markers
   const navigate = useNavigate();
