@@ -83,6 +83,7 @@ const MapPage = lazyImportWithRetry(() => import("./pages/MapPage"), "map-page")
 const AuthPage = lazyImportWithRetry(() => import("./pages/AuthPage"), "auth");
 const GrovesPage = lazyImportWithRetry(() => import("./pages/GrovesPage"), "groves");
 const PulseExplorerPage = lazyImportWithRetry(() => import("./pages/PulseExplorerPage"), "pulse-explorer");
+const PathwaysPage = lazyImportWithRetry(() => import("./pages/PathwaysPage"), "pathways");
 const GalleryPage = lazyImportWithRetry(() => import("./pages/GalleryPage"), "gallery");
 const HeartwoodRoomPage = lazyImportWithRetry(() => import("./pages/library/HeartwoodRoomPage"), "heartwood-room");
 const DashboardPage = lazyImportWithRetry(() => import("./pages/DashboardPage"), "dashboard");
