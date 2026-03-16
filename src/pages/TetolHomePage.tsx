@@ -27,7 +27,7 @@ const quickLinks = [
   { to: "/value-tree", label: "Value Tree", icon: TreePine },
   { to: "/companion", label: "Companion Mode", icon: Smartphone },
   { to: "/support", label: "Support", icon: Heart },
-  { to: "/vault", label: "Vault", icon: Search },
+  { to: "/vault", label: "Vault", icon: Sparkles },
   { to: "/roadmap", label: "Roadmap", icon: Map },
 ];
 

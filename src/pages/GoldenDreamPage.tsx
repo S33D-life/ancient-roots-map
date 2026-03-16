@@ -6,7 +6,7 @@ import TetolBridge from "@/components/TetolBridge";
 import { BookOpen, Cherry, Archive, Map, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+import { useMediaQuery } from "@/hooks/use-mobile";
 import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useFullscreen } from "@/hooks/use-fullscreen";
