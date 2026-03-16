@@ -328,8 +328,11 @@ export default function GrovesPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {[
             { label: "Ancient Friends Map", to: "/map", icon: "🗺" },
-            { label: "Tree Data Commons", to: "/tree-data-commons", icon: "📊" },
-            { label: "Species Hives", to: "/hive-wall", icon: "🐝" },
+            { label: "Atlas", to: "/atlas", icon: "🌍" },
+            { label: "Forest Pulse", to: "/pulse", icon: "💚" },
+            { label: "Mycelial Pathways", to: "/pathways", icon: "🕸️" },
+            { label: "Greenhouse", to: "/library/greenhouse", icon: "🌱" },
+            { label: "Species Hives", to: "/hives", icon: "🐝" },
           ].map(link => (
             <Link key={link.to} to={link.to}
               className="flex items-center gap-2 p-3 rounded-lg bg-card/50 border border-primary/15 hover:border-primary/40 transition-all group text-sm">
