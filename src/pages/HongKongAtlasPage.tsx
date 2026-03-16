@@ -241,7 +241,7 @@ const HongKongAtlasPage = () => {
                           </p>
                         </div>
                         {t.designation_type === "Stone Wall Tree" && (
-                          <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-400 shrink-0">
+                          <Badge variant="outline" className="text-[10px] border-primary/30 text-primary shrink-0">
                             Stone Wall
                           </Badge>
                         )}
