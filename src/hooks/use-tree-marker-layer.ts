@@ -234,7 +234,7 @@ export function useTreeMarkerLayer({
             : "hsla(42, 60%, 50%, 0.4)",
           opacity: 0.6,
         },
-        iconCreateFunction: createClusterIcon,
+        iconCreateFunction: (cluster: any) => createClusterIcon(cluster, isLineageFocused),
       });
     },
     [config.lineageFilter, config.groveScale]
