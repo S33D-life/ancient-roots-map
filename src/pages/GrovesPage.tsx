@@ -142,6 +142,7 @@ export default function GrovesPage() {
   useDocumentTitle("Groves — Living Tree Communities");
   const { data: detection, isLoading: detecting } = useGroveDetection();
   const { data: savedGroves, isLoading: loadingSaved } = useGroves();
+  const [blessingGrove, setBlessingGrove] = useState<GroveCandidate | null>(null);
 
   const localCandidates = detection?.local || [];
   const speciesCandidates = detection?.species || [];
