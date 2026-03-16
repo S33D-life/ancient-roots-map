@@ -79,24 +79,7 @@ const Header = () => {
     return () => window.removeEventListener("open-tetol", handler);
   }, [user, navigate, location.pathname]);
 
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !document.documentElement.classList.contains('light');
-    }
-    return true;
-  });
-
-  const toggleTheme = () => {
-    const html = document.documentElement;
-    if (isDark) {
-      html.classList.remove('dark');
-      html.classList.add('light');
-    } else {
-      html.classList.remove('light');
-      html.classList.add('dark');
-    }
-    setIsDark(!isDark);
-  };
+  // Theme is always dark — no toggle needed
 
   // ⌘K shortcut opens global search directly
   useEffect(() => {
