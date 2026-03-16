@@ -590,6 +590,11 @@ const TreeDetailPage = () => {
             {/* Species Attestation */}
             <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
 
+            {/* Grove Membership */}
+            <Suspense fallback={null}>
+              <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
+            </Suspense>
+
             {/* Sources */}
             <TreeSourcesDisplay
               verified={verifiedSources}
