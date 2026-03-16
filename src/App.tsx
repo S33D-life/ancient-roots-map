@@ -130,6 +130,14 @@ const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/Bioregio
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
 const HongKongAtlasPage = lazyImportWithRetry(() => import("./pages/HongKongAtlasPage"), "hong-kong-atlas");
 const SingaporeAtlasPage = lazyImportWithRetry(() => import("./pages/SingaporeAtlasPage"), "singapore-atlas");
+const JapanAtlasPage = lazyImportWithRetry(() => import("./pages/JapanAtlasPage"), "japan-atlas");
+const ItalyAtlasPage = lazyImportWithRetry(() => import("./pages/ItalyAtlasPage"), "italy-atlas");
+const UnitedStatesAtlasPage = lazyImportWithRetry(() => import("./pages/UnitedStatesAtlasPage"), "us-atlas");
+const SouthAfricaAtlasPage = lazyImportWithRetry(() => import("./pages/SouthAfricaAtlasPage"), "south-africa-atlas");
+const IndiaAtlasPage = lazyImportWithRetry(() => import("./pages/IndiaAtlasPage"), "india-atlas");
+const TaiwanAtlasPage = lazyImportWithRetry(() => import("./pages/TaiwanAtlasPage"), "taiwan-atlas");
+const SpainAtlasPage = lazyImportWithRetry(() => import("./pages/SpainAtlasPage"), "spain-atlas");
+const MexicoAtlasPage = lazyImportWithRetry(() => import("./pages/MexicoAtlasPage"), "mexico-atlas");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
@@ -325,6 +333,14 @@ const App = () => {
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/hong-kong" element={<HongKongAtlasPage />} />
                 <Route path="/atlas/singapore" element={<SingaporeAtlasPage />} />
+                <Route path="/atlas/japan" element={<JapanAtlasPage />} />
+                <Route path="/atlas/italy" element={<ItalyAtlasPage />} />
+                <Route path="/atlas/united-states" element={<UnitedStatesAtlasPage />} />
+                <Route path="/atlas/south-africa" element={<SouthAfricaAtlasPage />} />
+                <Route path="/atlas/india" element={<IndiaAtlasPage />} />
+                <Route path="/atlas/taiwan" element={<TaiwanAtlasPage />} />
+                <Route path="/atlas/spain" element={<SpainAtlasPage />} />
+                <Route path="/atlas/mexico" element={<MexicoAtlasPage />} />
                 {/* Sub-portal redirects */}
                 <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<Navigate to="/atlas/switzerland" replace />} />
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />

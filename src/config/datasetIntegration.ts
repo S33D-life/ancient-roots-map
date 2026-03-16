@@ -4,6 +4,9 @@
  * Config-driven framework for integrating heritage tree datasets into S33D.
  * Uses existing tables: tree_data_sources → tree_datasets → research_trees
  *
+ * Candidate expansion configs live in ./candidateDatasets.ts and are merged
+ * into DATASET_CONFIGS automatically.
+ *
  * To add a new dataset:
  * 1. Add a DatasetConfig entry
  * 2. Add country to countryRegistry.ts
@@ -212,9 +215,11 @@ export function buildRegistryJsonEntry(config: DatasetConfig) {
   };
 }
 
+import { CANDIDATE_DATASET_CONFIGS } from "./candidateDatasets";
+
 /* ── Dataset Configs ── */
 
-export const DATASET_CONFIGS: Record<string, DatasetConfig> = {
+const CORE_DATASET_CONFIGS: Record<string, DatasetConfig> = {
   "hk-ovt-register": {
     key: "hk-ovt-register",
     name: "Hong Kong Old and Valuable Trees Register",
@@ -277,6 +282,12 @@ export const DATASET_CONFIGS: Record<string, DatasetConfig> = {
       { label: "Singapore Botanic Gardens", url: "https://www.nparks.gov.sg/sbg" },
     ],
   },
+};
+
+/** Merged configs: core + candidate expansion regions */
+export const DATASET_CONFIGS: Record<string, DatasetConfig> = {
+  ...CORE_DATASET_CONFIGS,
+  ...CANDIDATE_DATASET_CONFIGS,
 };
 
 /** Look up a dataset config by its key */

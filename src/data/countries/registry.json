@@ -3,26 +3,11 @@
     "country_code": "CR",
     "name": "Costa Rica",
     "slug": "costa-rica",
-    "center": [
-      9.7489,
-      -83.7534
-    ],
-    "bbox": [
-      8,
-      -85.95,
-      11.35,
-      -82.55
-    ],
+    "center": [9.7489, -83.7534],
+    "bbox": [8, -85.95, 11.35, -82.55],
     "enabled": true,
     "priority": 10,
-    "sources_enabled": [
-      "natural-earth",
-      "overpass",
-      "wikidata",
-      "wdpa",
-      "gbif",
-      "inat"
-    ],
+    "sources_enabled": ["natural-earth", "overpass", "wikidata", "wdpa", "gbif", "inat"],
     "wikidata_qid": "Q800"
   },
   {
@@ -51,52 +36,110 @@
     "country_code": "ID",
     "name": "Indonesia",
     "slug": "indonesia",
-    "center": [
-      -2.5489,
-      118.0149
-    ],
-    "bbox": [
-      -11,
-      95,
-      6.2,
-      141.1
-    ],
+    "center": [-2.5489, 118.0149],
+    "bbox": [-11, 95, 6.2, 141.1],
     "enabled": true,
     "priority": 10,
-    "sources_enabled": [
-      "natural-earth",
-      "overpass",
-      "wikidata",
-      "wdpa",
-      "gbif",
-      "inat"
-    ],
+    "sources_enabled": ["natural-earth", "overpass", "wikidata", "wdpa", "gbif", "inat"],
     "wikidata_qid": "Q252"
   },
   {
     "country_code": "PE",
     "name": "Peru",
     "slug": "peru",
-    "center": [
-      -9.19,
-      -75.0152
-    ],
-    "bbox": [
-      -18.5,
-      -81.5,
-      0.2,
-      -68.6
-    ],
+    "center": [-9.19, -75.0152],
+    "bbox": [-18.5, -81.5, 0.2, -68.6],
     "enabled": true,
     "priority": 10,
-    "sources_enabled": [
-      "natural-earth",
-      "overpass",
-      "wikidata",
-      "wdpa",
-      "gbif",
-      "inat"
-    ],
+    "sources_enabled": ["natural-earth", "overpass", "wikidata", "wdpa", "gbif", "inat"],
     "wikidata_qid": "Q419"
+  },
+  {
+    "country_code": "JP",
+    "name": "Japan",
+    "slug": "japan",
+    "center": [36.2, 138.2],
+    "bbox": [24, 122.9, 45.5, 153.9],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["jp-sacred-trees"],
+    "candidate": true
+  },
+  {
+    "country_code": "IT",
+    "name": "Italy",
+    "slug": "italy",
+    "center": [41.9, 12.5],
+    "bbox": [35.5, 6.6, 47.1, 18.5],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["it-monumental-trees"],
+    "candidate": true
+  },
+  {
+    "country_code": "US",
+    "name": "United States",
+    "slug": "united-states",
+    "center": [39.8, -98.6],
+    "bbox": [24.5, -125, 49.5, -66.9],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["us-champion-trees"],
+    "candidate": true
+  },
+  {
+    "country_code": "ZA",
+    "name": "South Africa",
+    "slug": "south-africa",
+    "center": [-30.6, 24.0],
+    "bbox": [-35, 16.4, -22.1, 33],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["za-champion-trees"],
+    "candidate": true
+  },
+  {
+    "country_code": "IN",
+    "name": "India",
+    "slug": "india",
+    "center": [20.6, 78.9],
+    "bbox": [6.7, 68.1, 35.5, 97.4],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["in-heritage-banyans"],
+    "candidate": true
+  },
+  {
+    "country_code": "TW",
+    "name": "Taiwan",
+    "slug": "taiwan",
+    "center": [23.7, 120.9],
+    "bbox": [21.9, 120, 25.3, 122.1],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["tw-protected-trees"],
+    "candidate": true
+  },
+  {
+    "country_code": "ES",
+    "name": "Spain",
+    "slug": "spain",
+    "center": [40.4, -3.7],
+    "bbox": [27.6, -18.2, 43.8, 4.3],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["es-arboles-singulares"],
+    "candidate": true
+  },
+  {
+    "country_code": "MX",
+    "name": "Mexico",
+    "slug": "mexico",
+    "center": [23.6, -102.5],
+    "bbox": [14.5, -118.4, 32.7, -86.7],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["mx-monumental-trees"],
+    "candidate": true
   }
 ]

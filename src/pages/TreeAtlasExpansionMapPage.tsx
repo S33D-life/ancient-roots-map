@@ -48,9 +48,10 @@ interface ExpansionRegion {
   notes: string;
   recommended_action: string;
   flag_emoji: string;
-  // lat/lng for map dot
   lat: number;
   lng: number;
+  atlas_slug?: string;
+  config_exists?: boolean;
 }
 
 /* ── 8 seed expansion regions ─── */
@@ -75,6 +76,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Begin multi-source discovery research",
     flag_emoji: "🇯🇵",
     lat: 36.2, lng: 138.2,
+    atlas_slug: "japan", config_exists: true,
   },
   {
     country_code: "IT",
@@ -95,6 +97,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Generate integration pack & prepare seed set",
     flag_emoji: "🇮🇹",
     lat: 41.9, lng: 12.5,
+    atlas_slug: "italy", config_exists: true,
   },
   {
     country_code: "US",
@@ -115,6 +118,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Generate integration pack with provenance tracking",
     flag_emoji: "🇺🇸",
     lat: 39.8, lng: -98.6,
+    atlas_slug: "united-states", config_exists: true,
   },
   {
     country_code: "ZA",
@@ -135,6 +139,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Generate integration pack & prepare seed set",
     flag_emoji: "🇿🇦",
     lat: -30.6, lng: 22.9,
+    atlas_slug: "south-africa", config_exists: true,
   },
   {
     country_code: "IN",
@@ -155,6 +160,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Phased multi-source discovery research",
     flag_emoji: "🇮🇳",
     lat: 20.6, lng: 78.9,
+    atlas_slug: "india", config_exists: true,
   },
   {
     country_code: "TW",
@@ -175,6 +181,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Aggregate county-level sources and assess unity",
     flag_emoji: "🇹🇼",
     lat: 23.7, lng: 120.9,
+    atlas_slug: "taiwan", config_exists: true,
   },
   {
     country_code: "ES",
@@ -195,6 +202,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Map regional catalogs and assess aggregation path",
     flag_emoji: "🇪🇸",
     lat: 40.5, lng: -3.7,
+    atlas_slug: "spain", config_exists: true,
   },
   {
     country_code: "MX",
@@ -215,6 +223,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Begin discovery research and manual curation pathway",
     flag_emoji: "🇲🇽",
     lat: 23.6, lng: -102.5,
+    atlas_slug: "mexico", config_exists: true,
   },
 ];
 
@@ -229,7 +238,7 @@ const INTEGRATED_REGIONS: ExpansionRegion[] = [
     circles: ["Stone Wall Trees", "Urban Canopy Giants"],
     notes: "Fully integrated — OVT Register seeded.",
     recommended_action: "Monitor for updates via Watcher",
-    flag_emoji: "🇭🇰", lat: 22.3, lng: 114.2,
+    flag_emoji: "🇭🇰", lat: 22.3, lng: 114.2, atlas_slug: "hong-kong", config_exists: true,
   },
   {
     country_code: "SG", country_name: "Singapore", region_name: "Singapore",
@@ -240,7 +249,7 @@ const INTEGRATED_REGIONS: ExpansionRegion[] = [
     circles: ["NParks Heritage Trees", "Botanical Garden Elders"],
     notes: "Fully integrated — NParks Heritage Trees seeded.",
     recommended_action: "Monitor for updates via Watcher",
-    flag_emoji: "🇸🇬", lat: 1.35, lng: 103.8,
+    flag_emoji: "🇸🇬", lat: 1.35, lng: 103.8, atlas_slug: "singapore", config_exists: true,
   },
   {
     country_code: "CR", country_name: "Costa Rica", region_name: "Costa Rica",
@@ -539,12 +548,17 @@ function RegionDetailCard({ region }: { region: ExpansionRegion }) {
               <Eye className="w-3 h-3 mr-1" /> Watcher
             </Link>
           </Button>
-          {region.status === "integrated" && (
+          {region.atlas_slug && (
             <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-              <Link to={`/atlas/${region.country_code.toLowerCase()}`}>
+              <Link to={`/atlas/${region.atlas_slug}`}>
                 <MapPin className="w-3 h-3 mr-1" /> Atlas Page
               </Link>
             </Button>
+          )}
+          {region.config_exists && (
+            <Badge variant="outline" className="text-[9px] bg-primary/5 border-primary/20 text-primary/70">
+              Config ✓
+            </Badge>
           )}
         </div>
       </CardContent>
