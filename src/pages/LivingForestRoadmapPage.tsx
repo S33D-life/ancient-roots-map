@@ -250,6 +250,7 @@ const ForestParticles = () => (
 
 /* ── MAIN PAGE ── */
 const LivingForestRoadmapPage = () => {
+  useDocumentTitle("Living Forest Roadmap");
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);

@@ -13,6 +13,7 @@ import hearthBg from "@/assets/hearth-bg.jpeg";
 import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
 const VaultPage = () => {
+  useDocumentTitle("Vault");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

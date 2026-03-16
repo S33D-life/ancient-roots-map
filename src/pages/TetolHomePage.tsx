@@ -62,6 +62,7 @@ const nodeColors: Record<string, { bg: string; border: string; iconColor: string
 const LEAF_SHAPES = ["🍃", "🍂", "🌿", "✦"] as const;
 
 const TetolHomePage = () => {
+  useDocumentTitle("Home");
   const navigate = useNavigate();
   const [activeNode, setActiveNode] = useState<string | null>(null);
 

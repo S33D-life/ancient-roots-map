@@ -20,6 +20,7 @@ const passwordSchema = z.string().min(6, "Password must be at least 6 characters
 type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password";
 
 const AuthPage = () => {
+  useDocumentTitle("Sign In");
   const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

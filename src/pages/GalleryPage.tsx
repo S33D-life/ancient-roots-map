@@ -9,6 +9,7 @@ import HeartwoodLanding from "@/components/library/HeartwoodLanding";
 import heartwoodLanding from "@/assets/hearth-cave.png";
 
 const GalleryPage = () => {
+  useDocumentTitle("Heartwood Library");
   const { showEntrance: showSplash, dismissEntrance: dismissSplash } = useEntranceOnce("gallery", true);
 
   if (showSplash) {

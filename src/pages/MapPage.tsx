@@ -30,6 +30,7 @@ const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "
 const MapPage = () => <MapPageFull />;
 
 const MapPageFull = () => {
+  useDocumentTitle("Ancient Friends Map");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mapFocus = parseMapFocusParams(searchParams);
