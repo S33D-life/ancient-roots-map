@@ -610,6 +610,13 @@ const WorldAtlasPage = () => {
               {/* View toggle */}
               <div className="flex items-center bg-muted/30 rounded-lg p-0.5">
                 <button
+                  onClick={() => setViewMode("map")}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === "map" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  title="Atlas Map"
+                >
+                  <Earth className="w-3.5 h-3.5" />
+                </button>
+                <button
                   onClick={() => setViewMode("cards")}
                   className={`p-1.5 rounded-md transition-all ${viewMode === "cards" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
                   title="Card View"
