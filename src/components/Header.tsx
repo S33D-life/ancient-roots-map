@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TreeDeciduous, BookOpen, Leaf, Sunrise, Stars, Search } from "lucide-react";
+import { TreeDeciduous, BookOpen, Leaf, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag-small.webp";
 import hearthIcon from "@/assets/hearth-icon.jpeg";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
