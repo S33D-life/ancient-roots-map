@@ -13,6 +13,8 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "@/styles/map-markers.css";
+import "@/styles/grove-map.css";
+import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useTreeFocus } from "@/hooks/use-tree-focus";
 import { haversineKm, convexHull } from "@/utils/mapGeometry";
