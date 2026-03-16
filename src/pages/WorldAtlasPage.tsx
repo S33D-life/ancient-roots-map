@@ -658,7 +658,7 @@ const WorldAtlasPage = () => {
           </div>
         </section>
 
-        {/* ─── Country Grid (Cards or Hybrid) ─── */}
+        {/* ─── Country Grid (Map, Cards, or Hybrid) ─── */}
         <section className="px-4 max-w-4xl mx-auto mb-12">
           {loading ? (
             <p className="text-center py-12 text-muted-foreground text-sm font-serif italic">Gathering chapters…</p>
@@ -671,6 +671,15 @@ const WorldAtlasPage = () => {
                 </p>
               </CardContent>
             </Card>
+          ) : viewMode === "map" ? (
+            <div className="space-y-6">
+              <Suspense fallback={<div className="h-[400px] rounded-xl bg-muted/20 animate-pulse" />}>
+                <GlobalForestAtlasMap countryStats={displayedStats} />
+              </Suspense>
+              <Suspense fallback={null}>
+                <AtlasDiscoveryPanel stats={displayedStats} />
+              </Suspense>
+            </div>
           ) : viewMode === "cards" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {displayedStats.map(stat => (
