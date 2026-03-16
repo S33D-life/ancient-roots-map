@@ -721,6 +721,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       layers: [
         { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => toggle("groves") },
         { key: "forestPulse", label: "💓 Forest Pulse", active: showForestPulse, toggle: () => toggle("forestPulse") },
+        { key: "mycelialPathways", label: "🍄 Mycelial Pathways", active: showMycelialPathways, toggle: () => toggle("mycelialPathways") },
         { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => toggle("rootThreads") },
         { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
         { key: "champion", label: "🏆 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: "DFFE" },

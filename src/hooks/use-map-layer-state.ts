@@ -103,6 +103,7 @@ function getInitialState(): LayerState {
     groveView: false,
     bloomConstellationMode: false,
     forestPulse: false,
+    mycelialPathways: false,
   };
 }
 
