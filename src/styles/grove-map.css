@@ -83,6 +83,37 @@
   box-shadow: 0 8px 24px hsl(var(--primary) / 0.1);
 }
 
+/* ── Mycelial Pathway layer ── */
+.pathway-center-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.pathway-glow, .pathway-thread {
+  transition: opacity 0.5s ease;
+}
+
+.pathway-pulse-forming { animation: pulse-breathe 22s ease-in-out infinite; }
+.pathway-pulse-rooted { animation: pulse-breathe 18s ease-in-out infinite; }
+.pathway-pulse-thriving { animation: pulse-breathe 14s ease-in-out infinite; }
+.pathway-pulse-ancient { animation: pulse-breathe 10s ease-in-out infinite; }
+
+.pathway-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  border: 1px solid hsl(var(--primary) / 0.15);
+  background: hsl(var(--card) / 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.pathway-popup .leaflet-popup-tip {
+  background: hsl(var(--card) / 0.95);
+}
+
+.pathway-popup .leaflet-popup-content {
+  margin: 8px 12px;
+  color: hsl(var(--foreground));
+}
+
 .grove-popup .leaflet-popup-tip {
   background: hsl(var(--card) / 0.95);
   border: 1px solid hsl(var(--primary) / 0.15);
