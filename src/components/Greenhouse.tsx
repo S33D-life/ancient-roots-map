@@ -680,6 +680,30 @@ const AddPlantDialog = ({
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-3">
+          {/* Plant type selector */}
+          <div className="space-y-1.5">
+            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+              Type
+            </Label>
+            <div className="flex gap-1.5 flex-wrap">
+              {(["houseplant", "sapling", "seedling", "cutting"] as PlantType[]).map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setPlantType(t)}
+                  className="px-3 py-1.5 rounded-lg font-serif text-[11px] tracking-wider transition-all duration-200"
+                  style={{
+                    background: plantType === t ? 'hsla(120, 30%, 85%, 0.6)' : 'hsla(90, 15%, 92%, 0.4)',
+                    color: plantType === t ? 'hsl(120, 35%, 30%)' : 'hsl(90, 15%, 50%)',
+                    border: `1px solid ${plantType === t ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                  }}
+                >
+                  {PLANT_TYPE_LABELS[t]}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Name *
@@ -687,7 +711,7 @@ const AddPlantDialog = ({
             <Input
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 100))}
-              placeholder="e.g. Kitchen Fern"
+              placeholder={isSapling ? "e.g. Young Olive from Trevi" : "e.g. Kitchen Fern"}
               maxLength={100}
               required
               className="font-serif rounded-xl"
