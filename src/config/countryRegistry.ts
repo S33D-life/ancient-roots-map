@@ -385,6 +385,30 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     provenanceText: "Research records drawn from the Hong Kong Old and Valuable Trees Register and Stone Wall Trees dataset. Verification comes through presence.",
   },
   {
+    country: "Singapore",
+    slug: "singapore",
+    flag: "🇸🇬",
+    descriptor: "Heritage Trees (NParks)",
+    portalTitle: "Singapore — City in a Garden",
+    portalSubtitle: "Heritage tembusu, rainforest dipterocarps & temple guardians — a living map of Singapore's extraordinary urban forest canopy.",
+    sourceLabel: "NParks Heritage Tree Register",
+    isoCode: "SG",
+    bbox: [1.15, 103.6, 1.47, 104.1],
+    defaultMapFocus: {
+      center: { lat: 1.3521, lng: 103.8198 },
+      zoom: 11,
+    },
+    defaultFilters: {
+      tags: ["heritage", "ancient"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "NParks Heritage Tree Register", url: "https://www.nparks.gov.sg/gardens-parks-and-nature/heritage-trees" },
+      { label: "Singapore Botanic Gardens", url: "https://www.nparks.gov.sg/sbg" },
+    ],
+    provenanceText: "Research records drawn from the Singapore Heritage Tree Register (NParks). Verification comes through presence.",
+  },
+  {
     country: "Iran",
     slug: "iran",
     flag: "🇮🇷",
