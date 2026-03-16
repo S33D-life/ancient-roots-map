@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
+import { useTreeMarkerLayer } from "@/hooks/use-tree-marker-layer";
 import { useMapLayerState, type LayerKey } from "@/hooks/use-map-layer-state";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
