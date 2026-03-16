@@ -107,6 +107,7 @@ const TreeDetailPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tree, setTree] = useState<Tree | null>(null);
+  useDocumentTitle(tree ? `${tree.name} — ${tree.species}` : "Tree");
   const [loading, setLoading] = useState(true);
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<OfferingType>("photo");

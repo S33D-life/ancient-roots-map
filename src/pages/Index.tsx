@@ -1,4 +1,5 @@
 import { useCallback, lazy, Suspense } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import S33dEntrance from "@/components/S33dEntrance";
