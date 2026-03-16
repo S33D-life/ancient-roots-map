@@ -21,7 +21,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
-import { ACTIVE_CHAIN_ID } from "@/config/staffContract";
+import { ACTIVE_CHAIN_ID, ACTIVE_RPC_URLS, STAFF_CONTRACT_ADDRESS } from "@/config/staffContract";
 import {
   NFTREE_CONTRACT_ADDRESS,
   NFTREE_ABI,
