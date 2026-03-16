@@ -215,9 +215,11 @@ export function buildRegistryJsonEntry(config: DatasetConfig) {
   };
 }
 
+import { CANDIDATE_DATASET_CONFIGS } from "./candidateDatasets";
+
 /* ── Dataset Configs ── */
 
-export const DATASET_CONFIGS: Record<string, DatasetConfig> = {
+const CORE_DATASET_CONFIGS: Record<string, DatasetConfig> = {
   "hk-ovt-register": {
     key: "hk-ovt-register",
     name: "Hong Kong Old and Valuable Trees Register",
