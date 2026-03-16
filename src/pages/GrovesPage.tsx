@@ -302,6 +302,12 @@ export default function GrovesPage() {
           ))}
         </div>
       </main>
+
+      <GroveNamingRitual
+        grove={blessingGrove}
+        open={!!blessingGrove}
+        onOpenChange={(open) => { if (!open) setBlessingGrove(null); }}
+      />
     </>
   );
 }
