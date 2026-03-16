@@ -48,9 +48,10 @@ interface ExpansionRegion {
   notes: string;
   recommended_action: string;
   flag_emoji: string;
-  // lat/lng for map dot
   lat: number;
   lng: number;
+  atlas_slug?: string;
+  config_exists?: boolean;
 }
 
 /* ── 8 seed expansion regions ─── */
