@@ -44,7 +44,8 @@ export type LayerKey =
   | "clearView"
   | "groveView"
   | "bloomConstellationMode"
-  | "forestPulse";
+  | "forestPulse"
+  | "mycelialPathways";
 
 export type LayerState = Record<LayerKey, boolean>;
 
