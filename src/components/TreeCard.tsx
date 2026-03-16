@@ -172,23 +172,21 @@ const TreeCard = ({
           </div>
           {/* Tier badge */}
           <div className="self-start flex items-center gap-1.5">
-            {!isResearch && <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />}
+            <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />
             <Badge variant="outline" className={`text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
             {isResearch ? "Seed" : TIER_LABELS[tier]}
             </Badge>
           </div>
         </div>
       </Card>
-      {!isResearch && (
-        <SendWhisperModal
-          open={whisperOpen}
-          onOpenChange={setWhisperOpen}
-          treeId={tree.id}
-          treeName={tree.name}
-          treeSpecies={tree.species}
-          contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
-        />
-      )}
+      <SendWhisperModal
+        open={whisperOpen}
+        onOpenChange={setWhisperOpen}
+        treeId={tree.id}
+        treeName={tree.name}
+        treeSpecies={tree.species}
+        contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+      />
       </>
     );
   }
@@ -218,7 +216,7 @@ const TreeCard = ({
       </div>
       {isClustered && (
         <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
-          {!isResearch && <TreeWhisperButton onClick={openWhisper} />}
+          <TreeWhisperButton onClick={openWhisper} />
           <Badge variant="secondary" className="font-serif text-[10px] gap-1 bg-accent/20 text-accent border-accent/30 backdrop-blur-sm">
             <Users className="h-3 w-3" />
             {encounterCount} encounters
@@ -336,16 +334,14 @@ const TreeCard = ({
         </div>
       </CardContent>
     </Card>
-    {!isResearch && (
-      <SendWhisperModal
-        open={whisperOpen}
-        onOpenChange={setWhisperOpen}
-        treeId={tree.id}
-        treeName={tree.name}
-        treeSpecies={tree.species}
-        contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
-      />
-    )}
+    <SendWhisperModal
+      open={whisperOpen}
+      onOpenChange={setWhisperOpen}
+      treeId={tree.id}
+      treeName={tree.name}
+      treeSpecies={tree.species}
+      contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
+    />
     </>
   );
 };

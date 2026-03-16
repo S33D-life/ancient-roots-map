@@ -480,6 +480,24 @@ const CountryPortalPage = () => {
 
             {/* Badge row */}
             <div className="flex flex-wrap justify-center gap-2 mb-6">
+              {/* Innovation #4: Dataset Coverage Badge */}
+              {totalCount > 0 && (
+                <Badge variant="outline" className={`text-xs ${
+                  verifiedCount > 0
+                    ? "border-primary/50 bg-primary/10 text-primary"
+                    : "border-accent/40 bg-accent/10 text-accent-foreground"
+                }`}>
+                  <TreeDeciduous className="w-3 h-3 mr-1" />
+                  {verifiedCount > 0
+                    ? `${verifiedCount} Verified · ${totalCount} Research`
+                    : `${totalCount} Research Trees`}
+                  {totalCount > 0 && (
+                    <span className="ml-1 opacity-70">
+                      ({Math.round((withCoords / totalCount) * 100)}% mapped)
+                    </span>
+                  )}
+                </Badge>
+              )}
               <Badge variant="outline" className="text-xs border-primary/30">
                 <Scroll className="w-3 h-3 mr-1" /> Research Layer
               </Badge>

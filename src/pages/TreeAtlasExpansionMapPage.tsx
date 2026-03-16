@@ -538,6 +538,14 @@ function RegionDetailCard({ region }: { region: ExpansionRegion }) {
 
         {/* Quick actions */}
         <div className="flex flex-wrap gap-2 pt-1">
+          {/* Innovation #1: Quick-Seed from Expansion Map */}
+          {region.status !== "integrated" && (
+            <Button size="sm" variant="default" className="h-7 text-xs" asChild>
+              <Link to={`/seed-plan-generator?dataset=${region.atlas_slug || region.country_code.toLowerCase()}`}>
+                <Leaf className="w-3 h-3 mr-1" /> Generate Seed Plan
+              </Link>
+            </Button>
+          )}
           <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
             <Link to="/discovery-agent">
               <Telescope className="w-3 h-3 mr-1" /> Discovery Agent
