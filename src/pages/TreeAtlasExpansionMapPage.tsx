@@ -160,6 +160,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Phased multi-source discovery research",
     flag_emoji: "🇮🇳",
     lat: 20.6, lng: 78.9,
+    atlas_slug: "india", config_exists: true,
   },
   {
     country_code: "TW",
