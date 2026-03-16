@@ -20,6 +20,9 @@ import ContextualWhisper from "@/components/ContextualWhisper";
 import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 import { DATASET_CONFIGS, getDatasetsByCountry, type DatasetConfig } from "@/config/datasetIntegration";
 
+const GlobalForestAtlasMap = lazy(() => import("@/components/atlas/GlobalForestAtlasMap"));
+const AtlasDiscoveryPanel = lazy(() => import("@/components/atlas/AtlasDiscoveryPanel"));
+
 /* ─── Types ─── */
 interface CountryStats {
   country: string;
