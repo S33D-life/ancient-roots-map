@@ -621,14 +621,17 @@ const AddPlantDialog = ({
         species: species.trim() || null,
         photo_url: photoUrl,
         notes: notes.trim() || null,
-      });
+        plant_type: plantType,
+        lifecycle_stage: lifecycleStage,
+        seed_source: seedSource.trim() || null,
+        lineage_story: lineageStory.trim() || null,
+      } as any);
       if (error) throw error;
-      toast({ title: "Plant added! 🌱" });
-      setName("");
-      setSpecies("");
-      setNotes("");
-      setPhotoUrl(null);
-      setPreviewUrl(null);
+      toast({ title: isSapling ? "Sapling recorded! 🌿" : "Plant added! 🌱" });
+      setName(""); setSpecies(""); setNotes("");
+      setPlantType("houseplant"); setLifecycleStage("growing");
+      setSeedSource(""); setLineageStory("");
+      setPhotoUrl(null); setPreviewUrl(null);
       onOpenChange(false);
       onAdded();
     } catch (err: any) {
