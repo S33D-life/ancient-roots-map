@@ -744,6 +744,7 @@ const TreeDataCommonsPage = () => {
               { label: "Discovery Agent", desc: "Find & evaluate new datasets", to: "/discovery-agent", icon: "🔭" },
               { label: "Dataset Watcher", desc: "Monitor approved sources", to: "/dataset-watcher", icon: "👁️" },
               { label: "Expansion Map", desc: "Global canopy coverage & next regions", to: "/atlas-expansion", icon: "🌍" },
+              { label: "Seed-Plan Generator", desc: "Curated starter planting plans", to: "/seed-plan-generator", icon: "🌱" },
               { label: "Atlas Map", desc: "Datasets become map layers", to: "/map", icon: "🗺" },
               { label: "Ledger Explorer", desc: "Source & integration records", to: "/ledger", icon: "📜" },
               { label: "Spiral of Species", desc: "Species enrichment", to: "/hives", icon: "🌀" },
