@@ -157,6 +157,7 @@ const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapP
 const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/DatasetDiscoveryAgentPage"), "discovery-agent");
 const DatasetWatcherPage = lazyImportWithRetry(() => import("./pages/DatasetWatcherPage"), "dataset-watcher");
 const TreeAtlasExpansionMapPage = lazyImportWithRetry(() => import("./pages/TreeAtlasExpansionMapPage"), "atlas-expansion");
+const SeedPlanGeneratorPage = lazyImportWithRetry(() => import("./pages/SeedPlanGeneratorPage"), "seed-plan-generator");
 
 const queryClient = new QueryClient({
   defaultOptions: {
