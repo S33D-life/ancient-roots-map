@@ -53,6 +53,7 @@ const SeedPlanter = lazy(() => import("@/components/SeedPlanter"));
 const WhisperRipple = lazy(() => import("@/components/WhisperRipple"));
 const TreeHeartPool = lazy(() => import("@/components/TreeHeartPool"));
 const SpeciesAttestation = lazy(() => import("@/components/SpeciesAttestation"));
+const GroveContext = lazy(() => import("@/components/GroveContext"));
 const BloomingClock = lazy(() => import("@/components/BloomingClock"));
 const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
 const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
@@ -588,6 +589,11 @@ const TreeDetailPage = () => {
 
             {/* Species Attestation */}
             <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
+
+            {/* Grove Membership */}
+            <Suspense fallback={null}>
+              <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
+            </Suspense>
 
             {/* Sources */}
             <TreeSourcesDisplay

@@ -2,7 +2,7 @@
  * GrovesPage — discover and explore grove candidates and blessed groves.
  * Natural layer of place-making inside S33D.
  */
-import { lazy, Suspense } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useGroveDetection, useGroves } from "@/hooks/use-grove-detection";
+import GroveNamingRitual from "@/components/GroveNamingRitual";
 import {
   STRENGTH_LABELS,
   STRENGTH_COLORS,
@@ -27,7 +28,7 @@ import {
 const TreesIcon = TreeDeciduous;
 
 /* ─── Grove Candidate Card ─── */
-function GroveCandidateCard({ grove, index }: { grove: GroveCandidate; index: number }) {
+function GroveCandidateCard({ grove, index, onBless }: { grove: GroveCandidate; index: number; onBless: (g: GroveCandidate) => void }) {
   const navigate = useNavigate();
   const isSpecies = grove.grove_type === "species_grove";
 
@@ -92,11 +93,16 @@ function GroveCandidateCard({ grove, index }: { grove: GroveCandidate; index: nu
             )}
           </div>
 
-          <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
-            <Link to={`/map?lat=${grove.center.lat}&lng=${grove.center.lng}&zoom=15`}>
-              <MapPin className="w-3 h-3 mr-1" /> View on Map
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+              <Link to={`/map?lat=${grove.center.lat}&lng=${grove.center.lng}&zoom=15`}>
+                <MapPin className="w-3 h-3 mr-1" /> View on Map
+              </Link>
+            </Button>
+            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); onBless(grove); }}>
+              <Sparkles className="w-3 h-3 mr-1" /> Name this Grove
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
@@ -136,6 +142,7 @@ export default function GrovesPage() {
   useDocumentTitle("Groves — Living Tree Communities");
   const { data: detection, isLoading: detecting } = useGroveDetection();
   const { data: savedGroves, isLoading: loadingSaved } = useGroves();
+  const [blessingGrove, setBlessingGrove] = useState<GroveCandidate | null>(null);
 
   const localCandidates = detection?.local || [];
   const speciesCandidates = detection?.species || [];
@@ -197,7 +204,7 @@ export default function GrovesPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {localCandidates.map((g, i) => (
-                  <GroveCandidateCard key={`local-${i}`} grove={g} index={i} />
+                  <GroveCandidateCard key={`local-${i}`} grove={g} index={i} onBless={setBlessingGrove} />
                 ))}
               </div>
             )}
@@ -218,7 +225,7 @@ export default function GrovesPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {speciesCandidates.map((g, i) => (
-                  <GroveCandidateCard key={`species-${i}`} grove={g} index={i} />
+                  <GroveCandidateCard key={`species-${i}`} grove={g} index={i} onBless={setBlessingGrove} />
                 ))}
               </div>
             )}
@@ -295,6 +302,12 @@ export default function GrovesPage() {
           ))}
         </div>
       </main>
+
+      <GroveNamingRitual
+        grove={blessingGrove}
+        open={!!blessingGrove}
+        onOpenChange={(open) => { if (!open) setBlessingGrove(null); }}
+      />
     </>
   );
 }

@@ -13,6 +13,8 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "@/styles/map-markers.css";
+import "@/styles/grove-map.css";
+import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useTreeFocus } from "@/hooks/use-tree-focus";
 import { haversineKm, convexHull } from "@/utils/mapGeometry";
@@ -356,7 +358,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const clearView = layers.clearView;
   const groveViewActive = layers.groveView;
 
-  // Non-boolean layer state (not part of reducer)
+  // Grove map layer — renders detected grove halos and center markers
+  const navigate = useNavigate();
+  useGroveMapLayer(mapRef.current, showGroves, navigate);
+
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
@@ -1330,59 +1335,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [bloomedSeeds, trees, showSeeds]);
 
-  // Draw grove boundary polygons when showGroves is on
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (groveLayerRef.current) {
-      map.removeLayer(groveLayerRef.current);
-      groveLayerRef.current = null;
-    }
-
-    if (!showGroves || filteredTrees.length < 3) return;
-
-    const groveLayer = L.layerGroup();
-
-    // Viewport-cull: only group trees visible on screen
-    const visible = getVisibleTrees(map, filteredTrees, 0.3);
-    const bySpecies: Record<string, Tree[]> = {};
-    visible.forEach((t) => {
-      const key = t.species.toLowerCase();
-      if (!bySpecies[key]) bySpecies[key] = [];
-      bySpecies[key].push(t);
-    });
-
-    Object.entries(bySpecies).forEach(([speciesKey, group]) => {
-      if (group.length < 3) return;
-
-      const points: [number, number][] = group.map((t) => [t.longitude, t.latitude]);
-      const hull = convexHull(points);
-      if (hull.length < 3) return;
-
-      // Convert to Leaflet [lat, lng] and close the ring
-      const latlngs = hull.map(([lng, lat]) => [lat, lng] as [number, number]);
-      latlngs.push(latlngs[0]);
-
-      const hue = getSpeciesHue(speciesKey);
-
-      L.polygon(latlngs, {
-        color: `hsla(${hue}, 50%, 45%, 0.5)`,
-        fillColor: `hsla(${hue}, 40%, 35%, 0.12)`,
-        fillOpacity: 1,
-        weight: 2,
-        dashArray: "6 4",
-        interactive: false,
-      }).addTo(groveLayer);
-    });
-
-    groveLayer.addTo(map);
-    groveLayerRef.current = groveLayer;
-
-    return () => {
-      if (map.hasLayer(groveLayer)) map.removeLayer(groveLayer);
-    };
-  }, [filteredTrees, showGroves]);
+  // Grove boundaries now handled by useGroveMapLayer hook
+  // (old convex-hull code replaced with detection-based halos + center markers)
 
   // Draw root threads — golden dashed lines between same-species trees within 80km
   // Viewport-culled + O(n²) capped to prevent jank with large datasets
