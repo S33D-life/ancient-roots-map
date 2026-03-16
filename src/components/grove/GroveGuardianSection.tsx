@@ -16,7 +16,7 @@ import {
   GUARDIAN_ROLE_ICONS,
   type GroveGuardian,
 } from "@/hooks/use-grove-guardians";
-import { useAuth } from "@/hooks/use-auth";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 interface Props {
   groveId: string;

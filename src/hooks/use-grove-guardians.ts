@@ -52,7 +52,6 @@ export function useGroveGuardians(groveId: string | undefined) {
         .order("since_date", { ascending: true });
       if (error) throw error;
 
-      // Fetch profiles for guardians
       const guardians = (data || []) as any[];
       if (guardians.length === 0) return [] as GroveGuardian[];
 
@@ -90,7 +89,6 @@ export function useUserGuardianships(userId: string | undefined) {
       const guardianships = (data || []) as any[];
       if (guardianships.length === 0) return [];
 
-      // Fetch grove details
       const groveIds = guardianships.map((g: any) => g.grove_id);
       const { data: groves } = await supabase
         .from("groves")
@@ -111,20 +109,17 @@ export function useUserGuardianships(userId: string | undefined) {
 
 /** Check if current user is guardian of a grove */
 export function useIsGroveGuardian(groveId: string | undefined) {
-  const user = useCurrentUser();
+  const { user } = useCurrentUser();
   const { data: guardians } = useGroveGuardians(groveId);
-  if (!user || !guardians) return { isGuardian: false, role: null };
-  const match = guardians.find(g => g.user_id === user.id);
-  return { isGuardian: !!match, role: match?.role || null };
-  if (!user || !guardians) return { isGuardian: false, role: null };
-  const match = guardians.find(g => g.user_id === user.id);
-  return { isGuardian: !!match, role: match?.role || null };
+  if (!user || !guardians) return { isGuardian: false, role: null as GuardianRole | null };
+  const found = guardians.find(g => g.user_id === user.id);
+  return { isGuardian: !!found, role: found?.role || null };
 }
 
 /** Request to become a grove guardian */
 export function useBecomeGuardian() {
   const queryClient = useQueryClient();
-  const currentUser = useCurrentUser();
+  const { user } = useCurrentUser();
 
   return useMutation({
     mutationFn: async ({ groveId, role }: { groveId: string; role?: GuardianRole }) => {
@@ -139,7 +134,6 @@ export function useBecomeGuardian() {
 
       if (existing) throw new Error("Already a guardian of this grove");
 
-      // Determine role: if no guardians exist, become founder
       const { count } = await supabase
         .from("grove_guardians" as any)
         .select("id", { count: "exact", head: true })
