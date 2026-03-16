@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
 import Header from "@/components/Header";

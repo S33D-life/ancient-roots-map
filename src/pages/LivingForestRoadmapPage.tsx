@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";

@@ -4,6 +4,7 @@
  */
 import { useNavigate, Link } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
   Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf,
   Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
