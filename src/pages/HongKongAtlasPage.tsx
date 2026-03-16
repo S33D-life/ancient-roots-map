@@ -295,7 +295,13 @@ const HongKongAtlasPage = () => {
               <Card className="border-primary/15 bg-card/70 overflow-hidden">
                 <CardContent className="p-0">
                   <div className="h-[400px] md:h-[500px]">
-                    <PlaceMapPreview bbox={bbox} label="Hong Kong Heritage Trees" />
+                    <PlaceMapPreview
+                      bbox={bbox}
+                      placeType="city"
+                      placeCode="hong-kong"
+                      countrySlug="hong-kong"
+                      defaultFilters={{ researchLayer: "on" }}
+                    />
                   </div>
                 </CardContent>
               </Card>
