@@ -560,7 +560,6 @@ function RegionDetailCard({ region }: { region: ExpansionRegion }) {
               Config ✓
             </Badge>
           )}
-          )}
         </div>
       </CardContent>
     </Card>
