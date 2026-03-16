@@ -2,7 +2,7 @@
  * GrovesPage — discover and explore grove candidates and blessed groves.
  * Natural layer of place-making inside S33D.
  */
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useGroveDetection, useGroves } from "@/hooks/use-grove-detection";
+import { useGroveGuardians } from "@/hooks/use-grove-guardians";
 import GroveNamingRitual from "@/components/GroveNamingRitual";
 import {
   STRENGTH_LABELS,
@@ -21,8 +22,10 @@ import {
 } from "@/utils/groveDetection";
 import {
   TreeDeciduous, MapPin, Compass, Layers, Leaf,
-  ChevronRight, Sparkles, CircleDot,
+  ChevronRight, Sparkles, CircleDot, Shield,
 } from "lucide-react";
+
+const GroveGuardianSection = lazy(() => import("@/components/grove/GroveGuardianSection"));
 
 // Lucide doesn't export Trees — use TreeDeciduous pair
 const TreesIcon = TreeDeciduous;
