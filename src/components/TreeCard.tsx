@@ -342,7 +342,6 @@ const TreeCard = ({
       treeSpecies={tree.species}
       contextLabel={tree.what3words ? `/${tree.what3words}` : undefined}
     />
-    )}
     </>
   );
 };
