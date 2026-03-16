@@ -542,8 +542,9 @@ function createClusterIcon(cluster: any, isLineageFocused = false) {
       ringStyle = "border-color:hsla(80,40%,40%,0.35);--grove-accent:80,40%,40%";
     }
   }
-  // Lineage filter emphasis is determined by the calling component
-  if (hasAncient) {
+  if (isLineageFocused && isMonoLineage) {
+    ringStyle = "border-color:hsla(120,35%,40%,0.4);box-shadow:0 0 6px hsla(120,35%,40%,0.15)";
+  } else if (hasAncient) {
     ringStyle +=
       ";border-color:hsla(42,60%,50%,0.4);box-shadow:0 0 8px hsla(42,60%,50%,0.15)";
   } else if (hasMajorStory) {
