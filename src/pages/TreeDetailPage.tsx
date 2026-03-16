@@ -602,6 +602,11 @@ const TreeDetailPage = () => {
               <TreePulseIndicator treeId={id!} />
             </Suspense>
 
+            {/* Mycelial Pathways */}
+            <Suspense fallback={null}>
+              <PathwayContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} />
+            </Suspense>
+
             {/* Sources */}
             <TreeSourcesDisplay
               verified={verifiedSources}
