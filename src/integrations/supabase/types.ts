@@ -2084,6 +2084,93 @@ export type Database = {
           },
         ]
       }
+      dataset_watch_state: {
+        Row: {
+          change_confidence: string
+          change_detected: boolean
+          change_explanation: string | null
+          check_count: number
+          consecutive_failures: number
+          created_at: string
+          dataset_id: string | null
+          id: string
+          last_checked_at: string | null
+          last_known_file_size: number | null
+          last_known_file_url: string | null
+          last_known_record_count: number | null
+          last_known_source_hash: string | null
+          last_known_updated_label: string | null
+          last_successful_check_at: string | null
+          refresh_recommendation: string
+          source_id: string
+          updated_at: string
+          watch_enabled: boolean
+          watch_notes: string | null
+          watch_status: string
+        }
+        Insert: {
+          change_confidence?: string
+          change_detected?: boolean
+          change_explanation?: string | null
+          check_count?: number
+          consecutive_failures?: number
+          created_at?: string
+          dataset_id?: string | null
+          id?: string
+          last_checked_at?: string | null
+          last_known_file_size?: number | null
+          last_known_file_url?: string | null
+          last_known_record_count?: number | null
+          last_known_source_hash?: string | null
+          last_known_updated_label?: string | null
+          last_successful_check_at?: string | null
+          refresh_recommendation?: string
+          source_id: string
+          updated_at?: string
+          watch_enabled?: boolean
+          watch_notes?: string | null
+          watch_status?: string
+        }
+        Update: {
+          change_confidence?: string
+          change_detected?: boolean
+          change_explanation?: string | null
+          check_count?: number
+          consecutive_failures?: number
+          created_at?: string
+          dataset_id?: string | null
+          id?: string
+          last_checked_at?: string | null
+          last_known_file_size?: number | null
+          last_known_file_url?: string | null
+          last_known_record_count?: number | null
+          last_known_source_hash?: string | null
+          last_known_updated_label?: string | null
+          last_successful_check_at?: string | null
+          refresh_recommendation?: string
+          source_id?: string
+          updated_at?: string
+          watch_enabled?: boolean
+          watch_notes?: string | null
+          watch_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataset_watch_state_dataset_id_fkey"
+            columns: ["dataset_id"]
+            isOneToOne: false
+            referencedRelation: "tree_datasets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dataset_watch_state_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: true
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       digital_fire_votes: {
         Row: {
           created_at: string

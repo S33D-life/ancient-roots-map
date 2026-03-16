@@ -742,6 +742,7 @@ const TreeDataCommonsPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Discovery Agent", desc: "Find & evaluate new datasets", to: "/discovery-agent", icon: "🔭" },
+              { label: "Dataset Watcher", desc: "Monitor approved sources", to: "/dataset-watcher", icon: "👁️" },
               { label: "Atlas Map", desc: "Datasets become map layers", to: "/map", icon: "🗺" },
               { label: "Ledger Explorer", desc: "Source & integration records", to: "/ledger", icon: "📜" },
               { label: "Spiral of Species", desc: "Species enrichment", to: "/hives", icon: "🌀" },
