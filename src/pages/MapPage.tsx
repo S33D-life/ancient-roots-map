@@ -146,6 +146,20 @@ const MapPageFull = () => {
           <TeotagWhisper />
         </Suspense>
       )}
+
+      {/* Research tree whisper modal */}
+      {researchWhisper && (
+        <Suspense fallback={null}>
+          <SendWhisperModal
+            open={!!researchWhisper}
+            onOpenChange={(open) => { if (!open) setResearchWhisper(null); }}
+            treeId={researchWhisper.treeId}
+            treeName={researchWhisper.treeName}
+            treeSpecies={researchWhisper.species}
+            contextLabel="Research Layer"
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
