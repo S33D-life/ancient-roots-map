@@ -192,6 +192,7 @@ const PodSection = ({ icon: Icon, label, count, accent, defaultOpen = false, chi
 };
 
 const DashboardPage = () => {
+  useDocumentTitle("Hearth");
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);

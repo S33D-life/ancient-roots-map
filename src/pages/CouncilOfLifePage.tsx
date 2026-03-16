@@ -58,6 +58,7 @@ const councilRooms = [
 ];
 
 const CouncilOfLifePage = () => {
+  useDocumentTitle("Council of Life");
   const navigate = useNavigate();
   const { focusMap } = useMapFocus();
   const [isFullscreen, setIsFullscreen] = useState(false);
