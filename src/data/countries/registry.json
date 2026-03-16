@@ -37,6 +37,17 @@
     "wikidata_qid": "Q8646"
   },
   {
+    "country_code": "SG",
+    "name": "Singapore",
+    "slug": "singapore",
+    "center": [1.3521, 103.8198],
+    "bbox": [1.15, 103.6, 1.47, 104.1],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["nparks-heritage"],
+    "wikidata_qid": "Q334"
+  },
+  {
     "country_code": "ID",
     "name": "Indonesia",
     "slug": "indonesia",
