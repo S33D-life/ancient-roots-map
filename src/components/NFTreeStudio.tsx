@@ -194,6 +194,20 @@ const NFTreeStudio = ({
     [allTreeOfferings]
   );
 
+  // Query nftree_mints for this tree to get staff provenance
+  const [mintRecords, setMintRecords] = useState<Array<{ id: string; staff_id: string | null; staff_token_id: number; token_id: number | null; mint_status: string; tx_hash: string | null; confirmed_at: string | null }>>([]);
+  useEffect(() => {
+    if (!open || !treeId) return;
+    supabase
+      .from("nftree_mints")
+      .select("id, staff_id, staff_token_id, token_id, mint_status, tx_hash, confirmed_at")
+      .eq("tree_id", treeId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setMintRecords(data as any);
+      });
+  }, [open, treeId]);
+
   // ── Upload image and get URL ──
   const uploadImage = async (): Promise<string | null> => {
     const { data: { user } } = await supabase.auth.getUser();
