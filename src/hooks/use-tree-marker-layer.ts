@@ -119,7 +119,8 @@ export function useTreeMarkerLayer({
             age,
             refs.treePhotos[tree.id],
             refs.birdsongCounts[tree.id] || 0,
-            refs.whisperCounts[tree.id] || 0
+            refs.whisperCounts[tree.id] || 0,
+            refs.userLatLng
           ),
         {
           className: "atlas-leaflet-popup",
