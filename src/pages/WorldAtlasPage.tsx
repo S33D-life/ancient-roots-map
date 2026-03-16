@@ -42,12 +42,11 @@ interface CountryStats {
 
 type ViewMode = "cards" | "hybrid" | "map";
 
-/* ─── Pulse label & color helpers ─── */
+/* ─── Pulse label & color helpers (import from shared utils) ─── */
+import { PULSE_LABELS as SHARED_PULSE_LABELS, PULSE_COLORS as SHARED_PULSE_COLORS } from "@/utils/forestPulse";
+
 const PULSE_LABELS: Record<string, string> = {
-  quiet: "Quiet",
-  stirring: "Stirring",
-  growing: "Growing",
-  vibrant: "Vibrant",
+  ...SHARED_PULSE_LABELS,
   forest_awakened: "Awakened",
 };
 
@@ -833,6 +832,9 @@ const WorldAtlasPage = () => {
           <div className="flex flex-wrap justify-center gap-3">
             <Button variant="ghost" size="sm" asChild><Link to="/tree-data-commons"><BookOpen className="w-3.5 h-3.5 mr-1" /> Tree Data Commons</Link></Button>
             <Button variant="ghost" size="sm" asChild><Link to="/map"><MapPin className="w-3.5 h-3.5 mr-1" /> Ancient Friends Map</Link></Button>
+            <Button variant="ghost" size="sm" asChild><Link to="/groves"><TreeDeciduous className="w-3.5 h-3.5 mr-1" /> Groves</Link></Button>
+            <Button variant="ghost" size="sm" asChild><Link to="/pulse"><Leaf className="w-3.5 h-3.5 mr-1" /> Forest Pulse</Link></Button>
+            <Button variant="ghost" size="sm" asChild><Link to="/library/greenhouse"><Leaf className="w-3.5 h-3.5 mr-1" /> Greenhouse</Link></Button>
             <Button variant="ghost" size="sm" asChild><Link to="/council-of-life"><Users className="w-3.5 h-3.5 mr-1" /> Council of Life</Link></Button>
           </div>
         </section>

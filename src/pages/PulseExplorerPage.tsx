@@ -194,6 +194,25 @@ export default function PulseExplorerPage() {
             ))}
           </Tabs>
         )}
+
+        {/* Ecosystem connections */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {[
+            { label: "Ancient Friends Map", to: "/map", icon: "🗺" },
+            { label: "Atlas", to: "/atlas", icon: "🌍" },
+            { label: "Groves", to: "/groves", icon: "🌳" },
+            { label: "Mycelial Pathways", to: "/pathways", icon: "🕸️" },
+            { label: "Greenhouse", to: "/library/greenhouse", icon: "🌱" },
+            { label: "Species Hives", to: "/hives", icon: "🐝" },
+          ].map(link => (
+            <Link key={link.to} to={link.to}
+              className="flex items-center gap-2 p-3 rounded-lg bg-card/50 border border-border/20 hover:border-primary/30 transition-all group text-sm">
+              <span>{link.icon}</span>
+              <span className="text-xs font-serif text-foreground group-hover:text-primary transition-colors">{link.label}</span>
+              <ChevronRight className="w-3 h-3 ml-auto text-muted-foreground" />
+            </Link>
+          ))}
+        </div>
       </main>
     </>
   );
