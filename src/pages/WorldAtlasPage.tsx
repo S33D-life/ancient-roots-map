@@ -10,7 +10,7 @@ import {
   Globe, TreeDeciduous, MapPin, Eye, Shield, Scroll, Footprints,
   ChevronRight, Heart, BookOpen, ExternalLink, Sparkles, Compass,
   Leaf, Users, Search, X, Map as MapIcon, LayoutGrid, MapPinned,
-  Columns, Filter, Network,
+  Columns, Filter, Network, Earth,
 } from "lucide-react";
 import { useMapFocus } from "@/hooks/use-map-focus";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +19,9 @@ import Header from "@/components/Header";
 import ContextualWhisper from "@/components/ContextualWhisper";
 import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 import { DATASET_CONFIGS, getDatasetsByCountry, type DatasetConfig } from "@/config/datasetIntegration";
+
+const GlobalForestAtlasMap = lazy(() => import("@/components/atlas/GlobalForestAtlasMap"));
+const AtlasDiscoveryPanel = lazy(() => import("@/components/atlas/AtlasDiscoveryPanel"));
 
 /* ─── Types ─── */
 interface CountryStats {
@@ -37,7 +40,7 @@ interface CountryStats {
   portalSubtitle?: string;
 }
 
-type ViewMode = "cards" | "hybrid";
+type ViewMode = "cards" | "hybrid" | "map";
 
 /* ─── Pulse label & color helpers ─── */
 const PULSE_LABELS: Record<string, string> = {
@@ -607,6 +610,13 @@ const WorldAtlasPage = () => {
               {/* View toggle */}
               <div className="flex items-center bg-muted/30 rounded-lg p-0.5">
                 <button
+                  onClick={() => setViewMode("map")}
+                  className={`p-1.5 rounded-md transition-all ${viewMode === "map" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                  title="Atlas Map"
+                >
+                  <Earth className="w-3.5 h-3.5" />
+                </button>
+                <button
                   onClick={() => setViewMode("cards")}
                   className={`p-1.5 rounded-md transition-all ${viewMode === "cards" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
                   title="Card View"
@@ -648,7 +658,7 @@ const WorldAtlasPage = () => {
           </div>
         </section>
 
-        {/* ─── Country Grid (Cards or Hybrid) ─── */}
+        {/* ─── Country Grid (Map, Cards, or Hybrid) ─── */}
         <section className="px-4 max-w-4xl mx-auto mb-12">
           {loading ? (
             <p className="text-center py-12 text-muted-foreground text-sm font-serif italic">Gathering chapters…</p>
@@ -661,6 +671,15 @@ const WorldAtlasPage = () => {
                 </p>
               </CardContent>
             </Card>
+          ) : viewMode === "map" ? (
+            <div className="space-y-6">
+              <Suspense fallback={<div className="h-[400px] rounded-xl bg-muted/20 animate-pulse" />}>
+                <GlobalForestAtlasMap countryStats={displayedStats} />
+              </Suspense>
+              <Suspense fallback={null}>
+                <AtlasDiscoveryPanel stats={displayedStats} />
+              </Suspense>
+            </div>
           ) : viewMode === "cards" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {displayedStats.map(stat => (
