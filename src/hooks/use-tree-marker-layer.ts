@@ -470,7 +470,7 @@ export function useTreeMarkerLayer({
 }
 
 /* ── Cluster icon factory — extracted for reuse ── */
-function createClusterIcon(cluster: any) {
+function createClusterIcon(cluster: any, isLineageFocused = false) {
   const count = cluster.getChildCount();
   const childMarkers = cluster.getAllChildMarkers();
 
