@@ -360,6 +360,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const clearView = layers.clearView;
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
+  const showMycelialPathways = layers.mycelialPathways;
 
   // Grove map layer — renders detected grove halos and center markers
   const navigate = useNavigate();
