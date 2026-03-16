@@ -596,6 +596,11 @@ const TreeDetailPage = () => {
               <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
             </Suspense>
 
+            {/* Forest Pulse */}
+            <Suspense fallback={null}>
+              <TreePulseIndicator treeId={id!} />
+            </Suspense>
+
             {/* Sources */}
             <TreeSourcesDisplay
               verified={verifiedSources}
