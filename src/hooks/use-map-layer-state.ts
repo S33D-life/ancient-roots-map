@@ -101,6 +101,7 @@ function getInitialState(): LayerState {
     clearView: false,
     groveView: false,
     bloomConstellationMode: false,
+    forestPulse: false,
   };
 }
 
