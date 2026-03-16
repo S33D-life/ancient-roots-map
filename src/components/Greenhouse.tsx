@@ -576,12 +576,17 @@ const AddPlantDialog = ({
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [notes, setNotes] = useState("");
+  const [plantType, setPlantType] = useState<PlantType>("houseplant");
+  const [lifecycleStage, setLifecycleStage] = useState<LifecycleStage>("growing");
+  const [seedSource, setSeedSource] = useState("");
+  const [lineageStory, setLineageStory] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const isSapling = plantType !== "houseplant";
 
   const handleFile = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
