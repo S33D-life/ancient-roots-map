@@ -116,7 +116,15 @@ const HongKongAtlasPage = () => {
             <div className="flex flex-wrap gap-3 mt-6">
               <Button
                 size="sm"
-                onClick={() => focusMap({ lat: 22.3193, lng: 114.1694 }, 12, "country", "hong-kong")}
+                onClick={() => focusMap({
+                  type: "area",
+                  id: "hong-kong",
+                  center: { lat: 22.3193, lng: 114.1694 },
+                  bbox: [22.15, 113.83, 22.56, 114.43],
+                  source: "country",
+                  countrySlug: "hong-kong",
+                  researchLayer: "on",
+                })}
               >
                 <MapPin className="w-4 h-4 mr-1" /> Open on Map
               </Button>
