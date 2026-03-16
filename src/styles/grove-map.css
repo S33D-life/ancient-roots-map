@@ -27,6 +27,53 @@
   50% { opacity: 0.7; }
 }
 
+/* ── Forest Pulse layer ── */
+.pulse-center-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.pulse-halo {
+  transition: opacity 0.5s ease;
+}
+
+.pulse-stirring {
+  animation: pulse-breathe 22s ease-in-out infinite;
+}
+
+.pulse-growing {
+  animation: pulse-breathe 18s ease-in-out infinite;
+}
+
+.pulse-vibrant {
+  animation: pulse-breathe 14s ease-in-out infinite;
+}
+
+.pulse-forest_awakened {
+  animation: pulse-breathe 10s ease-in-out infinite;
+}
+
+@keyframes pulse-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.pulse-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  border: 1px solid hsl(var(--primary) / 0.15);
+  background: hsl(var(--card) / 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.pulse-popup .leaflet-popup-tip {
+  background: hsl(var(--card) / 0.95);
+}
+
+.pulse-popup .leaflet-popup-content {
+  margin: 8px 12px;
+  color: hsl(var(--foreground));
+}
+
 /* Grove popup */
 .grove-popup .leaflet-popup-content-wrapper {
   border-radius: 12px;

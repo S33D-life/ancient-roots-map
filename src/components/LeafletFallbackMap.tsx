@@ -15,6 +15,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "@/styles/map-markers.css";
 import "@/styles/grove-map.css";
 import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
+import { usePulseMapLayer } from "@/hooks/use-pulse-map-layer";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useTreeFocus } from "@/hooks/use-tree-focus";
 import { haversineKm, convexHull } from "@/utils/mapGeometry";
@@ -357,10 +358,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const bloomConstellationMode = layers.bloomConstellationMode;
   const clearView = layers.clearView;
   const groveViewActive = layers.groveView;
+  const showForestPulse = layers.forestPulse;
 
   // Grove map layer — renders detected grove halos and center markers
   const navigate = useNavigate();
   useGroveMapLayer(mapRef.current, showGroves, navigate);
+  usePulseMapLayer(mapRef.current, showForestPulse);
 
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -714,6 +717,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       icon: "🌿",
       layers: [
         { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => toggle("groves") },
+        { key: "forestPulse", label: "💓 Forest Pulse", active: showForestPulse, toggle: () => toggle("forestPulse") },
         { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => toggle("rootThreads") },
         { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
         { key: "champion", label: "🏆 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: "DFFE" },
