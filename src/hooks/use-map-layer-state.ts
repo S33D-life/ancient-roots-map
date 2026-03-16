@@ -43,7 +43,8 @@ export type LayerKey =
   | "watersCommons"
   | "clearView"
   | "groveView"
-  | "bloomConstellationMode";
+  | "bloomConstellationMode"
+  | "forestPulse";
 
 export type LayerState = Record<LayerKey, boolean>;
 
