@@ -28,7 +28,7 @@ import {
 const TreesIcon = TreeDeciduous;
 
 /* ─── Grove Candidate Card ─── */
-function GroveCandidateCard({ grove, index }: { grove: GroveCandidate; index: number }) {
+function GroveCandidateCard({ grove, index, onBless }: { grove: GroveCandidate; index: number; onBless: (g: GroveCandidate) => void }) {
   const navigate = useNavigate();
   const isSpecies = grove.grove_type === "species_grove";
 
