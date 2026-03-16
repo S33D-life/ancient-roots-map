@@ -202,6 +202,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Map regional catalogs and assess aggregation path",
     flag_emoji: "🇪🇸",
     lat: 40.5, lng: -3.7,
+    atlas_slug: "spain", config_exists: true,
   },
   {
     country_code: "MX",
