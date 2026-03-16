@@ -1,485 +1,300 @@
-import { useState, useEffect, useRef } from "react";
-import { getMapStyle } from "@/config/mapbox";
-import { escapeHtml } from "@/utils/escapeHtml";
+/**
+ * GrovesPage — discover and explore grove candidates and blessed groves.
+ * Natural layer of place-making inside S33D.
+ */
+import { lazy, Suspense } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Header from "@/components/Header";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Plus, MapPin, ExternalLink } from "lucide-react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { useDocumentTitle } from "@/hooks/use-document-title";
+import { useGroveDetection, useGroves } from "@/hooks/use-grove-detection";
+import {
+  STRENGTH_LABELS,
+  STRENGTH_COLORS,
+  type GroveCandidate,
+  type GroveStrength,
+} from "@/utils/groveDetection";
+import {
+  TreeDeciduous, MapPin, Compass, Layers, Leaf,
+  ChevronRight, Sparkles, CircleDot,
+} from "lucide-react";
 
-interface TreeProject {
-  id: string;
-  name: string;
-  description: string | null;
-  website_url: string | null;
-  api_url: string | null;
-  species: string | null;
-  state: string | null;
-  nation: string | null;
-  bioregion: string | null;
-  what3words: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  project_scope: string | null;
-  created_at: string;
-}
+// Lucide doesn't export Trees — use TreeDeciduous pair
+const TreesIcon = TreeDeciduous;
 
-const GrovesPage = () => {
-  const [projects, setProjects] = useState<TreeProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<maplibregl.Map | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [filterSpecies, setFilterSpecies] = useState<string>('all');
-  const [filterScope, setFilterScope] = useState<string>('all');
-  const [filterLocation, setFilterLocation] = useState<string>('all');
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    website_url: "",
-    api_url: "",
-    species: "",
-    state: "",
-    nation: "",
-    bioregion: "",
-    latitude: "",
-    longitude: "",
-    project_scope: "local",
-  });
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-
-  useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: getMapStyle() as any,
-      center: [-98, 39],
-      zoom: 3,
-    });
-
-    map.current.addControl(new maplibregl.NavigationControl(), "top-right");
-
-    return () => {
-      map.current?.remove();
-      map.current = null;
-    };
-  }, []);
-
-  // Filter projects based on search and filters
-  const filteredProjects = projects.filter((project) => {
-    const matchesSearch = searchQuery === '' || 
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesSpecies = filterSpecies === 'all' || project.species === filterSpecies;
-    const matchesScope = filterScope === 'all' || project.project_scope === filterScope;
-    const matchesLocation = filterLocation === 'all' || 
-      project.state === filterLocation || 
-      project.nation === filterLocation;
-    
-    return matchesSearch && matchesSpecies && matchesScope && matchesLocation;
-  });
-
-  // Get unique values for filters
-  const uniqueSpecies = Array.from(new Set(projects.map(p => p.species).filter(Boolean)));
-  const uniqueScopes = Array.from(new Set(projects.map(p => p.project_scope).filter(Boolean)));
-  const uniqueLocations = Array.from(new Set([
-    ...projects.map(p => p.state).filter(Boolean),
-    ...projects.map(p => p.nation).filter(Boolean)
-  ]));
-
-  useEffect(() => {
-    if (!map.current || filteredProjects.length === 0) return;
-
-    // Clear existing markers
-    const markers = document.querySelectorAll(".project-marker");
-    markers.forEach((marker) => marker.remove());
-
-    // Add markers for each filtered project
-    filteredProjects.forEach((project) => {
-      if (project.latitude && project.longitude) {
-        const el = document.createElement("div");
-        el.className = "project-marker";
-        el.style.cssText = `
-          background-color: hsl(var(--primary));
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          border: 2px solid hsl(var(--background));
-          cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        `;
-
-        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
-          <div style="padding: 8px;">
-            <h3 style="font-weight: bold; margin-bottom: 4px;">${escapeHtml(project.name)}</h3>
-            <p style="font-size: 12px; margin-bottom: 4px;">${escapeHtml(project.description || "")}</p>
-            <p style="font-size: 11px; color: #666;">${escapeHtml(project.project_scope || "")} | ${escapeHtml(project.species || "All species")}</p>
-          </div>
-        `);
-
-        new maplibregl.Marker({ element: el })
-          .setLngLat([project.longitude, project.latitude])
-          .setPopup(popup)
-          .addTo(map.current!);
-      }
-    });
-  }, [filteredProjects]);
-
-  const fetchProjects = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("tree_projects")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setProjects(data || []);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      toast.error("Failed to load projects");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast.error("Please log in to add projects");
-      return;
-    }
-
-    try {
-      const { error } = await supabase.from("tree_projects").insert({
-        ...formData,
-        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        created_by: user.id,
-      });
-
-      if (error) throw error;
-
-      toast.success("Project added successfully!");
-      setIsDialogOpen(false);
-      setFormData({
-        name: "",
-        description: "",
-        website_url: "",
-        api_url: "",
-        species: "",
-        state: "",
-        nation: "",
-        bioregion: "",
-        latitude: "",
-        longitude: "",
-        project_scope: "local",
-      });
-      fetchProjects();
-    } catch (error) {
-      console.error("Error adding project:", error);
-      toast.error("Failed to add project");
-    }
-  };
+/* ─── Grove Candidate Card ─── */
+function GroveCandidateCard({ grove, index }: { grove: GroveCandidate; index: number }) {
+  const navigate = useNavigate();
+  const isSpecies = grove.grove_type === "species_grove";
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 pt-32 pb-12">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-4xl font-serif font-bold text-mystical mb-2">
-                Tree Mapping Resources
-              </h1>
-              <p className="text-muted-foreground">
-                Discover existing databases and projects for finding ancient trees
-              </p>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+    >
+      <Card className="border-primary/10 bg-card/60 hover:border-primary/25 transition-all group cursor-pointer"
+        onClick={() => navigate(`/map?lat=${grove.center.lat}&lng=${grove.center.lng}&zoom=15`)}
+      >
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-full bg-primary/10">
+                {isSpecies ? <Leaf className="w-4 h-4 text-primary" /> : <TreesIcon className="w-4 h-4 text-primary" />}
+              </div>
+              <div>
+                <p className="text-sm font-serif text-foreground group-hover:text-primary transition-colors">
+                  {grove.suggested_name}
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  {grove.trees.length} trees · {Math.round(grove.radius_m)}m radius
+                </p>
+              </div>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="sacred" size="lg">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="font-serif text-2xl">Add Tree Mapping Project</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Project Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="website_url">Website URL</Label>
-                    <Input
-                      id="website_url"
-                      type="url"
-                      value={formData.website_url}
-                      onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="api_url">API URL</Label>
-                    <Input
-                      id="api_url"
-                      type="url"
-                      value={formData.api_url}
-                      onChange={(e) => setFormData({ ...formData, api_url: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="species">Species</Label>
-                    <Input
-                      id="species"
-                      value={formData.species}
-                      onChange={(e) => setFormData({ ...formData, species: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="project_scope">Project Scope</Label>
-                    <Select
-                      value={formData.project_scope}
-                      onValueChange={(value) => setFormData({ ...formData, project_scope: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="local">Local</SelectItem>
-                        <SelectItem value="regional">Regional</SelectItem>
-                        <SelectItem value="national">National</SelectItem>
-                        <SelectItem value="species-specific">Species-Specific</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="nation">Nation</Label>
-                    <Input
-                      id="nation"
-                      value={formData.nation}
-                      onChange={(e) => setFormData({ ...formData, nation: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="bioregion">Bioregion</Label>
-                    <Input
-                      id="bioregion"
-                      value={formData.bioregion}
-                      onChange={(e) => setFormData({ ...formData, bioregion: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="latitude">Latitude</Label>
-                    <Input
-                      id="latitude"
-                      type="number"
-                      step="any"
-                      value={formData.latitude}
-                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="longitude">Longitude</Label>
-                    <Input
-                      id="longitude"
-                      type="number"
-                      step="any"
-                      value={formData.longitude}
-                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <Button type="submit" variant="sacred" className="w-full">
-                  Add Project
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+            <Badge variant="outline" className={`text-[9px] ${STRENGTH_COLORS[grove.grove_strength]}`}>
+              {STRENGTH_LABELS[grove.grove_strength]}
+            </Badge>
           </div>
+
+          {/* Scores */}
+          <div className="flex gap-3 text-[10px]">
+            <div>
+              <span className="text-muted-foreground">Strength</span>
+              <p className="text-sm font-serif text-primary">{grove.grove_strength_score}</p>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Compactness</span>
+              <p className="text-sm font-serif text-foreground">{Math.round(grove.compactness_score * 100)}%</p>
+            </div>
+            {isSpecies && grove.species_common && (
+              <div>
+                <span className="text-muted-foreground">Species</span>
+                <p className="text-sm font-serif text-foreground">{grove.species_common}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Tree preview chips */}
+          <div className="flex flex-wrap gap-1">
+            {grove.trees.slice(0, 5).map(t => (
+              <span key={t.id} className="text-[9px] px-2 py-0.5 rounded-full bg-muted/40 text-muted-foreground border border-border/30">
+                {t.name.substring(0, 20)}{t.name.length > 20 ? "…" : ""}
+              </span>
+            ))}
+            {grove.trees.length > 5 && (
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
+                +{grove.trees.length - 5} more
+              </span>
+            )}
+          </div>
+
+          <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+            <Link to={`/map?lat=${grove.center.lat}&lng=${grove.center.lng}&zoom=15`}>
+              <MapPin className="w-3 h-3 mr-1" /> View on Map
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+/* ─── Saved Grove Card ─── */
+function SavedGroveCard({ grove }: { grove: any }) {
+  return (
+    <Card className="border-primary/15 bg-card/60">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-full bg-primary/10">
+            {grove.grove_type === "species_grove"
+              ? <Leaf className="w-4 h-4 text-primary" />
+              : <TreesIcon className="w-4 h-4 text-primary" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-serif text-foreground truncate">
+              {grove.grove_name || "Unnamed Grove"}
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              {grove.tree_count} trees · {grove.grove_type === "species_grove" ? grove.species_common || grove.species_scientific : "Mixed species"}
+            </p>
+          </div>
+          <Badge variant="outline" className={`text-[9px] ${STRENGTH_COLORS[grove.grove_strength as GroveStrength] || ""}`}>
+            {STRENGTH_LABELS[grove.grove_strength as GroveStrength] || grove.grove_strength}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ─── Main Page ─── */
+export default function GrovesPage() {
+  useDocumentTitle("Groves — Living Tree Communities");
+  const { data: detection, isLoading: detecting } = useGroveDetection();
+  const { data: savedGroves, isLoading: loadingSaved } = useGroves();
+
+  const localCandidates = detection?.local || [];
+  const speciesCandidates = detection?.species || [];
+
+  return (
+    <>
+      <Header />
+      <main className="max-w-5xl mx-auto px-4 pt-[var(--content-top)] pb-24 space-y-6">
+        {/* Hero */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-2xl font-serif text-primary flex items-center gap-2">
+            <TreesIcon className="w-6 h-6" /> Groves
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+            Living communities of trees, emerging from proximity and kinship.
+            Where trees gather closely or where the same species roots nearby,
+            a grove begins to form.
+          </p>
+        </motion.div>
+
+        {/* Summary */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { label: "Trees Scanned", value: detection?.totalTrees || 0, icon: TreeDeciduous },
+            { label: "Local Groves", value: localCandidates.length, icon: TreesIcon },
+            { label: "Species Groves", value: speciesCandidates.length, icon: Leaf },
+            { label: "Blessed Groves", value: savedGroves?.length || 0, icon: Sparkles },
+          ].map(m => (
+            <Card key={m.label} className="border-primary/10 bg-card/40">
+              <CardContent className="p-3 text-center">
+                <m.icon className="w-4 h-4 mx-auto text-primary/60 mb-1" />
+                <p className="text-lg font-serif text-primary">{m.value}</p>
+                <p className="text-[10px] text-muted-foreground leading-tight">{m.label}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Search and Filters */}
-        <Card className="border-mystical mb-6">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2">
-                <Label htmlFor="search">Search Projects</Label>
-                <Input
-                  id="search"
-                  placeholder="Search by name or description..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="filterSpecies">Filter by Species</Label>
-                <Select value={filterSpecies} onValueChange={setFilterSpecies}>
-                  <SelectTrigger id="filterSpecies">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Species</SelectItem>
-                    {uniqueSpecies.map((species) => (
-                      <SelectItem key={species} value={species!}>
-                        {species}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="filterScope">Filter by Scope</Label>
-                <Select value={filterScope} onValueChange={setFilterScope}>
-                  <SelectTrigger id="filterScope">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Scopes</SelectItem>
-                    {uniqueScopes.map((scope) => (
-                      <SelectItem key={scope} value={scope!}>
-                        {scope}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="mt-4">
-              <Label htmlFor="filterLocation">Filter by Location</Label>
-              <Select value={filterLocation} onValueChange={setFilterLocation}>
-                <SelectTrigger id="filterLocation">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  {uniqueLocations.map((location) => (
-                    <SelectItem key={location} value={location!}>
-                      {location}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="mt-4 text-sm text-muted-foreground">
-              Showing {filteredProjects.length} of {projects.length} projects
-            </div>
-          </CardContent>
-        </Card>
-
-        <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-            <TabsTrigger value="map">Map View</TabsTrigger>
-            <TabsTrigger value="list">List View</TabsTrigger>
+        {/* Tabs */}
+        <Tabs defaultValue="local" className="w-full">
+          <TabsList className="w-full justify-start bg-muted/30 overflow-x-auto">
+            <TabsTrigger value="local" className="text-xs">Local Groves ({localCandidates.length})</TabsTrigger>
+            <TabsTrigger value="species" className="text-xs">Species Groves ({speciesCandidates.length})</TabsTrigger>
+            <TabsTrigger value="blessed" className="text-xs">Blessed ({savedGroves?.length || 0})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="map" className="mt-0">
-              <div
-                ref={mapContainer}
-                className="w-full h-[600px] rounded-lg border border-mystical shadow-lg"
-              />
-          </TabsContent>
-
-          <TabsContent value="list" className="mt-0">
-            {loading ? (
-              <p className="text-center py-8">Loading projects...</p>
-            ) : filteredProjects.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                {projects.length === 0 ? "No projects found. Be the first to add one!" : "No projects match your filters."}
-              </p>
+          <TabsContent value="local" className="space-y-3 mt-4">
+            {detecting ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <CircleDot className="w-6 h-6 mx-auto mb-2 animate-pulse" />
+                <p className="text-sm">Scanning the canopy for local groves…</p>
+              </div>
+            ) : localCandidates.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <TreesIcon className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">No local groves detected yet.</p>
+                <p className="text-xs mt-1">Add more trees to the map to see groves emerge.</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProjects.map((project) => (
-                  <Card key={project.id} className="border-mystical hover:shadow-elegant transition-mystical">
-                    <CardHeader>
-                      <CardTitle className="font-serif text-mystical flex items-start justify-between">
-                        {project.name}
-                        {project.website_url && (
-                          <a
-                            href={project.website_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:text-primary/80"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        )}
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        {project.project_scope} • {project.species || "All species"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {project.description || "No description available"}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <MapPin className="w-3 h-3" />
-                        <span>
-                          {[project.state, project.nation, project.bioregion]
-                            .filter(Boolean)
-                            .join(", ") || "Location not specified"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {localCandidates.map((g, i) => (
+                  <GroveCandidateCard key={`local-${i}`} grove={g} index={i} />
                 ))}
               </div>
             )}
           </TabsContent>
-        </Tabs>
-      </main>
-    </div>
-  );
-};
 
-export default GrovesPage;
+          <TabsContent value="species" className="space-y-3 mt-4">
+            {detecting ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Leaf className="w-6 h-6 mx-auto mb-2 animate-pulse" />
+                <p className="text-sm">Detecting species patterns…</p>
+              </div>
+            ) : speciesCandidates.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Leaf className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">No species groves detected yet.</p>
+                <p className="text-xs mt-1">Species groves form when 6+ trees of the same species are nearby.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {speciesCandidates.map((g, i) => (
+                  <GroveCandidateCard key={`species-${i}`} grove={g} index={i} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="blessed" className="space-y-3 mt-4">
+            {loadingSaved ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Sparkles className="w-6 h-6 mx-auto mb-2 animate-pulse" />
+                <p className="text-sm">Loading blessed groves…</p>
+              </div>
+            ) : !savedGroves?.length ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Sparkles className="w-6 h-6 mx-auto mb-2 opacity-40" />
+                <p className="text-sm">No groves have been blessed yet.</p>
+                <p className="text-xs mt-1">Explore grove candidates and bless one to give it a name and story.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {savedGroves.map((g: any) => <SavedGroveCard key={g.id} grove={g} />)}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Explanation */}
+        <Card className="border-primary/10 bg-card/40">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-serif flex items-center gap-2">
+              <Compass className="w-4 h-4 text-primary" /> How Groves Form
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-xs text-muted-foreground">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p className="font-medium text-foreground mb-1 flex items-center gap-1">
+                  <TreesIcon className="w-3.5 h-3.5 text-primary" /> Local Groves
+                </p>
+                <p>Formed when 3 or more trees gather in one place within ~2km. The closer they are, the stronger the grove. Mixed species welcome — this is about shared place.</p>
+              </div>
+              <div>
+                <p className="font-medium text-foreground mb-1 flex items-center gap-1">
+                  <Leaf className="w-3.5 h-3.5 text-primary" /> Species Groves
+                </p>
+                <p>Formed when 6+ trees of the same species are found nearby. The tighter the local concentration, the more powerful the grove.</p>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-border/20">
+              <p className="font-medium text-foreground mb-1">Grove Strength</p>
+              <div className="flex flex-wrap gap-2">
+                {(Object.entries(STRENGTH_LABELS) as [GroveStrength, string][]).map(([key, label]) => (
+                  <Badge key={key} variant="outline" className={`text-[9px] ${STRENGTH_COLORS[key]}`}>
+                    {label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Connected Systems */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {[
+            { label: "Ancient Friends Map", to: "/map", icon: "🗺" },
+            { label: "Tree Data Commons", to: "/tree-data-commons", icon: "📊" },
+            { label: "Species Hives", to: "/hive-wall", icon: "🐝" },
+          ].map(link => (
+            <Link key={link.to} to={link.to}
+              className="flex items-center gap-2 p-3 rounded-lg bg-card/50 border border-primary/15 hover:border-primary/40 transition-all group text-sm">
+              <span>{link.icon}</span>
+              <span className="text-xs font-serif text-foreground group-hover:text-primary transition-colors">{link.label}</span>
+              <ChevronRight className="w-3 h-3 ml-auto text-muted-foreground" />
+            </Link>
+          ))}
+        </div>
+      </main>
+    </>
+  );
+}
