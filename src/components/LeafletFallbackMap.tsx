@@ -363,6 +363,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   // Grove map layer — renders detected grove halos and center markers
   const navigate = useNavigate();
   useGroveMapLayer(mapRef.current, showGroves, navigate);
+  usePulseMapLayer(mapRef.current, showForestPulse);
 
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
