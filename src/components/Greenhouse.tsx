@@ -479,6 +479,8 @@ const GreenhouseNav = () => (
     {[
       { to: "/map", icon: <MapPin className="h-3 w-3" />, label: "Map" },
       { to: "/atlas", icon: <TreePine className="h-3 w-3" />, label: "Atlas" },
+      { to: "/groves", icon: <TreeDeciduous className="h-3 w-3" />, label: "Groves" },
+      { to: "/pulse", icon: <Flower2 className="h-3 w-3" />, label: "Forest Pulse" },
       { to: "/library", icon: <Flower2 className="h-3 w-3" />, label: "Library" },
     ].map(link => (
       <Link
