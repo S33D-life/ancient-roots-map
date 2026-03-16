@@ -43,6 +43,7 @@ interface MarkerLayerRefs {
   birdsongCounts: Record<string, number>;
   whisperCounts: Record<string, number>;
   treePhotos: Record<string, string>;
+  userLatLng: [number, number] | null;
 }
 
 interface UseTreeMarkerLayerOptions {
@@ -118,7 +119,8 @@ export function useTreeMarkerLayer({
             age,
             refs.treePhotos[tree.id],
             refs.birdsongCounts[tree.id] || 0,
-            refs.whisperCounts[tree.id] || 0
+            refs.whisperCounts[tree.id] || 0,
+            refs.userLatLng
           ),
         {
           className: "atlas-leaflet-popup",
@@ -232,7 +234,7 @@ export function useTreeMarkerLayer({
             : "hsla(42, 60%, 50%, 0.4)",
           opacity: 0.6,
         },
-        iconCreateFunction: createClusterIcon,
+        iconCreateFunction: (cluster: any) => createClusterIcon(cluster, isLineageFocused),
       });
     },
     [config.lineageFilter, config.groveScale]
@@ -468,7 +470,7 @@ export function useTreeMarkerLayer({
 }
 
 /* ── Cluster icon factory — extracted for reuse ── */
-function createClusterIcon(cluster: any) {
+function createClusterIcon(cluster: any, isLineageFocused = false) {
   const count = cluster.getChildCount();
   const childMarkers = cluster.getAllChildMarkers();
 
@@ -540,8 +542,9 @@ function createClusterIcon(cluster: any) {
       ringStyle = "border-color:hsla(80,40%,40%,0.35);--grove-accent:80,40%,40%";
     }
   }
-  // Lineage filter emphasis is determined by the calling component
-  if (hasAncient) {
+  if (isLineageFocused && isMonoLineage) {
+    ringStyle = "border-color:hsla(120,35%,40%,0.4);box-shadow:0 0 6px hsla(120,35%,40%,0.15)";
+  } else if (hasAncient) {
     ringStyle +=
       ";border-color:hsla(42,60%,50%,0.4);box-shadow:0 0 8px hsla(42,60%,50%,0.15)";
   } else if (hasMajorStory) {
@@ -554,7 +557,7 @@ function createClusterIcon(cluster: any) {
     badge = `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:hsl(42,95%,60%);border:1.5px solid hsl(30,15%,10%);"></span>`;
   } else if (speciesDiversity >= 3) {
     badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:8px;line-height:1;opacity:0.7" title="${speciesDiversity} species">🌿</span>`;
-  } else if (dominantLineage && dominantLineage[1] >= 3) {
+  } else if (dominantLineage && dominantLineage[1] >= 3 && !isLineageFocused) {
     badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:9px;line-height:1;" title="${dominantLineage[0]}">🌿</span>`;
   }
 

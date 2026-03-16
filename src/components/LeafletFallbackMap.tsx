@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
+import { useTreeMarkerLayer } from "@/hooks/use-tree-marker-layer";
 import { useMapLayerState, type LayerKey } from "@/hooks/use-map-layer-state";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
@@ -1224,388 +1225,41 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [filteredTrees]);
 
-  // Update tree markers when filteredTrees change
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    const renderStartedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
+  // ── Tree markers — delegated to useTreeMarkerLayer hook ──
+  const onClusterRefCb = useCallback((cluster: any) => {
+    clusterRef.current = cluster;
+  }, []);
+  const onPerfUpdateCb = useCallback((stats: { markerCount: number; clusterCount: number; renderMs: number }) => {
+    if (!debugEnabled) return;
+    setPerfDebug((prev) => ({
+      ...prev,
+      markerCount: stats.markerCount,
+      clusterCount: stats.clusterCount,
+      renderMs: stats.renderMs,
+      lastRenderAt: new Date().toISOString(),
+    }));
+  }, [debugEnabled]);
 
-    if (clusterRef.current) {
-      map.removeLayer(clusterRef.current);
-    }
-
-    // When filtering by lineage or tight grove scale, tighten clustering
-    const isLineageFocused = lineageFilter !== "all";
-    const isGroveFocused = groveScale !== "all";
-    const tightCluster = isLineageFocused || isGroveFocused;
-    const treeCount = filteredTrees.length;
-
-    // Dynamically choose disableClusteringAtZoom based on visible tree count + context
-    const disableZoom = groveScale === "hyper_local"
-      ? 14
-      : groveScale === "local"
-      ? 15
-      : tightCluster
-      ? 16
-      : treeCount <= 50
-      ? 15   // Few trees — uncluster earlier for detail
-      : treeCount <= 200
-      ? 16
-      : treeCount <= 500
-      ? 17
-      : 18;  // Many trees — keep clustered longer for performance
-
-    const clusterGroup = (L as any).markerClusterGroup({
-      maxClusterRadius: (zoom: number) => {
-        // Density-aware continuous curve with safe breakpoints
-        // densityFactor smoothly scales with tree count via clamped log curve
-        const df = Math.min(1.35, Math.max(0.7, 0.55 + Math.log10(Math.max(treeCount, 1)) * 0.25));
-
-        if (groveScale === "hyper_local") {
-          // Tight view — collapse quickly
-          return zoom <= 12 ? 35 : zoom <= 14 ? 20 : 10;
-        }
-        if (groveScale === "local") {
-          const base = zoom <= 8 ? 50 : zoom <= 10 ? 42 : zoom <= 12 ? 32 : zoom <= 14 ? 24 : zoom <= 16 ? 16 : 12;
-          return Math.round(base * df);
-        }
-        if (tightCluster) {
-          const base = zoom <= 4 ? 60 : zoom <= 6 ? 52 : zoom <= 8 ? 44 : zoom <= 10 ? 36 : zoom <= 12 ? 26 : zoom <= 14 ? 20 : zoom <= 16 ? 14 : 10;
-          return Math.round(base * df);
-        }
-
-        // Default — smooth piecewise-linear curve with 2-zoom-level steps for stable transitions
-        // Breakpoints: z2→80, z4→72, z6→62, z8→52, z10→42, z12→34, z14→26, z16→18, z18+→14
-        const breakpoints: [number, number][] = [
-          [2, 80], [4, 72], [6, 62], [8, 52], [10, 42], [12, 34], [14, 26], [16, 18], [18, 14],
-        ];
-
-        // Interpolate between breakpoints for smooth transitions (no popping)
-        let base: number;
-        if (zoom <= breakpoints[0][0]) {
-          base = breakpoints[0][1];
-        } else if (zoom >= breakpoints[breakpoints.length - 1][0]) {
-          base = breakpoints[breakpoints.length - 1][1];
-        } else {
-          let lo = breakpoints[0], hi = breakpoints[breakpoints.length - 1];
-          for (let i = 0; i < breakpoints.length - 1; i++) {
-            if (zoom >= breakpoints[i][0] && zoom <= breakpoints[i + 1][0]) {
-              lo = breakpoints[i];
-              hi = breakpoints[i + 1];
-              break;
-            }
-          }
-          const t = (zoom - lo[0]) / (hi[0] - lo[0]);
-          base = lo[1] + (hi[1] - lo[1]) * t;
-        }
-
-        return Math.round(base * df);
-      },
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      animate: true,
-      animateAddingMarkers: false,
-      disableClusteringAtZoom: disableZoom,
-      chunkedLoading: true,
-      chunkInterval: treeCount > 500 ? 100 : treeCount > 200 ? 80 : 50,
-      chunkDelay: treeCount > 500 ? 12 : 8,
-      spiderfyDistanceMultiplier: 2.0,
-      spiderLegPolylineOptions: {
-        weight: 1.5,
-        color: tightCluster ? "hsla(120, 50%, 45%, 0.45)" : "hsla(42, 60%, 50%, 0.4)",
-        opacity: 0.6,
-      },
-      iconCreateFunction: (cluster: any) => {
-        const count = cluster.getChildCount();
-        const childMarkers = cluster.getAllChildMarkers();
-
-        // Determine dominant tier in cluster
-        let ancientCount = 0;
-        let storiedCount = 0;
-        childMarkers.forEach((m: any) => {
-          const html = m.options?.icon?.options?.html || "";
-          if (html.includes("marker-ancient")) ancientCount++;
-          else if (html.includes("storied")) storiedCount++;
-        });
-
-        const hasAncient = ancientCount > 0;
-        const hasMajorStory = storiedCount >= count * 0.3;
-
-        // Species analysis for dominant-species tinting
-        const speciesCounts: Record<string, number> = {};
-        childMarkers.forEach((m: any) => {
-          const sp = m._treeSpecies;
-          if (sp) speciesCounts[sp] = (speciesCounts[sp] || 0) + 1;
-        });
-        const speciesEntries = Object.entries(speciesCounts).sort((a, b) => b[1] - a[1]);
-        const dominantSpecies = speciesEntries.length > 0 ? speciesEntries[0] : null;
-        const speciesDiversity = speciesEntries.length;
-        const isMonoSpecies = dominantSpecies && dominantSpecies[1] >= count * 0.7;
-
-        // Lineage analysis for cluster labelling
-        const lineageCounts: Record<string, number> = {};
-        childMarkers.forEach((m: any) => {
-          const lin = m._treeLineage;
-          if (lin) lineageCounts[lin] = (lineageCounts[lin] || 0) + 1;
-        });
-        const lineageEntries = Object.entries(lineageCounts).sort((a, b) => b[1] - a[1]);
-        const dominantLineage = lineageEntries.length > 0 ? lineageEntries[0] : null;
-        const isMonoLineage = dominantLineage && dominantLineage[1] === count;
-
-        // Grove tier — organic thresholds
-        const groveTier = count >= 50
-          ? "grove-ancient"     // 50+ = ancient grove
-          : count >= 16
-          ? "grove-flourishing"  // 16-49 = flourishing
-          : count >= 6
-          ? "grove-established"  // 6-15 = established
-          : count >= 3
-          ? "grove-small"        // 3-5 = small grove
-          : "grove-seedling";    // 1-2 = seedling cluster
-        const dim = count >= 50 ? 60 : count >= 16 ? 54 : count >= 6 ? 46 : count >= 3 ? 38 : 32;
-
-        // Ring styling — species-focused, lineage, or tier-based
-        let ringStyle = "";
-        // Species-dominant tinting: warm hues per family
-        if (isMonoSpecies && dominantSpecies) {
-          const spLower = dominantSpecies[0].toLowerCase();
-          if (spLower.includes("yew") || spLower.includes("taxus")) {
-            ringStyle = "border-color:hsla(280,30%,40%,0.35);--grove-accent:280,30%,40%";
-          } else if (spLower.includes("oak") || spLower.includes("quercus")) {
-            ringStyle = "border-color:hsla(90,35%,35%,0.35);--grove-accent:90,35%,35%";
-          } else if (spLower.includes("beech") || spLower.includes("fagus")) {
-            ringStyle = "border-color:hsla(35,40%,38%,0.35);--grove-accent:35,40%,38%";
-          } else if (spLower.includes("pine") || spLower.includes("pinus")) {
-            ringStyle = "border-color:hsla(150,35%,30%,0.35);--grove-accent:150,35%,30%";
-          } else if (spLower.includes("lime") || spLower.includes("tilia") || spLower.includes("linden")) {
-            ringStyle = "border-color:hsla(80,40%,40%,0.35);--grove-accent:80,40%,40%";
-          }
-        }
-        if (isLineageFocused && isMonoLineage) {
-          ringStyle = "border-color:hsla(120,35%,40%,0.4);box-shadow:0 0 6px hsla(120,35%,40%,0.15)";
-        } else if (hasAncient) {
-          ringStyle += ";border-color:hsla(42,60%,50%,0.4);box-shadow:0 0 8px hsla(42,60%,50%,0.15)";
-        } else if (hasMajorStory) {
-          ringStyle += ";border-color:hsla(42,45%,45%,0.3);box-shadow:0 0 5px hsla(42,45%,45%,0.1)";
-        }
-
-        // Badge: ancient golden dot, species count, or lineage indicator
-        let badge = "";
-        if (hasAncient) {
-          badge = `<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:hsl(42,95%,60%);border:1.5px solid hsl(30,15%,10%);"></span>`;
-        } else if (speciesDiversity >= 3) {
-          badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:8px;line-height:1;opacity:0.7" title="${speciesDiversity} species">🌿</span>`;
-        } else if (dominantLineage && dominantLineage[1] >= 3 && !isLineageFocused) {
-          badge = `<span style="position:absolute;top:-4px;right:-4px;font-size:9px;line-height:1;" title="${dominantLineage[0]}">🌿</span>`;
-        }
-
-        // Whisper echo — count whispers in this grove cluster
-        let groveWhisperCount = 0;
-        childMarkers.forEach((m: any) => {
-          groveWhisperCount += (m._whisperCount || 0);
-        });
-
-        // Mycelium thread ring for established+ groves
-        const myceliumRing = count >= 6
-          ? `<span class="grove-mycelium" style="border:1px dashed hsla(${isMonoSpecies && ringStyle.includes('--grove-accent') ? 'var(--grove-accent)' : '120,50%,40%'},0.25);"></span>`
-          : "";
-
-        // Grove label — species name for mono-species, or "Grove" for mixed
-        const groveLabel = count >= 5
-          ? isMonoSpecies && dominantSpecies
-            ? `<span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;font-family:'Cinzel',serif;color:hsl(42,50%,60%);text-shadow:0 1px 3px rgba(0,0,0,0.7);letter-spacing:0.04em;opacity:0.8;">${dominantSpecies[0].length > 14 ? dominantSpecies[0].slice(0, 12) + "…" : dominantSpecies[0]}</span>`
-            : isMonoLineage && dominantLineage && count >= 8
-            ? `<span style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;font-family:'Cinzel',serif;color:hsl(42,50%,60%);text-shadow:0 1px 3px rgba(0,0,0,0.7);letter-spacing:0.04em;opacity:0.8;">${dominantLineage[0].length > 14 ? dominantLineage[0].slice(0, 12) + "…" : dominantLineage[0]}</span>`
-            : ""
-          : "";
-
-        const whisperEcho = groveWhisperCount > 0
-          ? `<span style="position:absolute;bottom:${groveLabel ? -2 : -12}px;left:50%;transform:translateX(-50%);font-size:8px;color:hsla(200,40%,65%,0.7);white-space:nowrap;pointer-events:none;">🌬️ ${groveWhisperCount}</span>`
-          : "";
-
-        const groveGlowClass = groveWhisperCount > 0 ? ' whisper-glow' : '';
-
-        return L.divIcon({
-          html: `<div class="tree-cluster ${groveTier}${groveGlowClass}" style="${ringStyle};position:relative;">${count}${badge}${myceliumRing}${groveLabel}${whisperEcho}</div>`,
-          className: "leaflet-tree-marker",
-          iconSize: L.point(dim, dim + (groveLabel || whisperEcho ? 14 : 0)),
-        });
-      },
-    });
-
-    const currentOfferings = offeringCountsRef.current;
-    const currentBirdsong = birdsongCountsRef.current;
-    const currentWhispers = whisperCountsRef.current;
-
-    filteredTrees.forEach((tree) => {
-      const offerings = currentOfferings[tree.id] || 0;
-      const age = tree.estimated_age || 0;
-      const bCount = currentBirdsong[tree.id] || 0;
-      const tier = getTreeTier(age, offerings);
-      const hiveHue = showHiveLayer ? (() => {
-        const h = getHiveForSpecies(tree.species);
-        return h ? hslStringToHue(h.accentHsl) : undefined;
-      })() : undefined;
-      const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue);
-      const wCount = currentWhispers[tree.id] || 0;
-
-      const marker = L.marker([tree.latitude, tree.longitude], { icon });
-      // If tree has whispers, add a subtle glow class to marker element after add
-      if (wCount > 0) {
-        marker.on('add', () => {
-          const el = (marker as any)._icon;
-          if (el) el.classList.add('whisper-glow');
-        });
-      }
-      // Attach metadata for cluster analysis and tree focus
-      (marker as any)._treeLineage = (tree as any).lineage || null;
-      (marker as any)._treeSpecies = tree.species || null;
-      (marker as any)._treeId = tree.id;
-      (marker as any)._treeName = tree.name;
-      (marker as any)._whisperCount = wCount;
-      marker.bindPopup(() => buildPopupHtml(tree, currentOfferings[tree.id] || 0, age, treePhotosRef.current[tree.id], currentBirdsong[tree.id] || 0, whisperCountsRef.current[tree.id] || 0, userLatLng), {
-        className: "atlas-leaflet-popup",
-        maxWidth: 280,
-        closeButton: true,
-        autoPanPadding: L.point(20, 60),
-      });
-      clusterGroup.addLayer(marker);
-    });
-
-    map.addLayer(clusterGroup);
-    clusterRef.current = clusterGroup;
-    const renderMetricsTimer =
-      typeof window !== "undefined"
-        ? window.setTimeout(() => {
-            if (!debugEnabled) return;
-            const markerCount = typeof clusterGroup.getLayers === "function" ? clusterGroup.getLayers().length : treeCount;
-            const clusterCount = containerRef.current?.querySelectorAll(".tree-cluster").length ?? 0;
-            const renderEndedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
-            const renderMs = Number((renderEndedAt - renderStartedAt).toFixed(2));
-            console.info(
-              `[MapPerf] Leaflet render ${renderMs}ms | markers=${markerCount} | clusters=${clusterCount}`,
-            );
-            setPerfDebug((prev) => ({
-              ...prev,
-              markerCount,
-              clusterCount,
-              renderMs,
-              lastRenderAt: new Date().toISOString(),
-            }));
-          }, 80)
-        : 0;
-
-    // ── Per-geo-spiderfy preload with jitter prevention ──
-    // Cache last computed state to skip redundant recalculations during rapid zoom
-    const lastSpiderfyState = { zoom: -1, densityBand: -1, disableZoom: -1, timerHandle: 0 as any };
-
-    const computeDensityBand = (count: number): number =>
-      count > 200 ? 4 : count > 80 ? 3 : count > 30 ? 2 : 1;
-
-    const applyClusteringUpdate = (z: number, visibleCount: number, densityBand: number) => {
-      const opts = (clusterGroup as any).options;
-
-      // Spiderfy distance — ramp with zoom but cap at 2.8 to prevent extreme spread
-      const MAX_SPIDERFY = 2.8;
-      const rawSpiderfy = z >= 18 ? 3.0 : z >= 16 ? 2.5 : z >= 14 ? 2.2 : 2.0;
-      opts.spiderfyDistanceMultiplier = Math.min(rawSpiderfy, MAX_SPIDERFY);
-
-      // Density-aware uncluster threshold
-      const newDisable = densityBand >= 4 ? 18 : densityBand >= 3 ? 17 : densityBand >= 2 ? 16 : 15;
-
-      if (opts.disableClusteringAtZoom !== newDisable) {
-        opts.disableClusteringAtZoom = newDisable;
-        lastSpiderfyState.disableZoom = newDisable;
-        // Lightweight re-process by toggling layer
-        map.removeLayer(clusterGroup);
-        map.addLayer(clusterGroup);
-      }
-
-      // Adjust chunked loading params for current density
-      opts.chunkInterval = visibleCount > 300 ? 120 : visibleCount > 100 ? 80 : 50;
-      opts.chunkDelay = visibleCount > 300 ? 14 : visibleCount > 100 ? 10 : 6;
-
-      lastSpiderfyState.zoom = z;
-      lastSpiderfyState.densityBand = densityBand;
-    };
-
-    const adjustClusteringOnZoom = () => {
-      const z = map.getZoom();
-
-      // Quick bail-out: if zoom hasn't changed, skip expensive viewport scan
-      // (moveend without zoom change only matters if density might shift significantly)
-      const zoomChanged = Math.abs(z - lastSpiderfyState.zoom) >= 0.5;
-
-      // Debounce rapid zooms — cancel any pending update, schedule a new one
-      if (lastSpiderfyState.timerHandle) {
-        clearTimeout(lastSpiderfyState.timerHandle);
-        lastSpiderfyState.timerHandle = 0;
-      }
-
-      // For rapid zoom sequences, defer the heavy work by 120ms
-      // This prevents jitter from repeated cluster toggling mid-animation
-      const delay = zoomChanged ? 120 : 200;
-
-      lastSpiderfyState.timerHandle = setTimeout(() => {
-        lastSpiderfyState.timerHandle = 0;
-        const currentZ = map.getZoom();
-        const bounds = map.getBounds();
-        let visibleCount = 0;
-        filteredTrees.forEach(t => {
-          if (bounds.contains([t.latitude, t.longitude])) visibleCount++;
-        });
-        const band = computeDensityBand(visibleCount);
-
-        // Skip if nothing meaningful changed (same zoom band + same density band)
-        const zoomBand = Math.floor(currentZ);
-        const prevZoomBand = Math.floor(lastSpiderfyState.zoom);
-        if (zoomBand === prevZoomBand && band === lastSpiderfyState.densityBand) return;
-
-        applyClusteringUpdate(currentZ, visibleCount, band);
-      }, delay);
-    };
-
-    map.on("zoomend", adjustClusteringOnZoom);
-    map.on("moveend", adjustClusteringOnZoom);
-    // Initial calculation — run immediately without debounce
-    const bounds0 = map.getBounds();
-    let vc0 = 0;
-    filteredTrees.forEach(t => { if (bounds0.contains([t.latitude, t.longitude])) vc0++; });
-    applyClusteringUpdate(map.getZoom(), vc0, computeDensityBand(vc0));
-
-    // Only auto-fit on first load
-    if (!hasFittedRef.current && filteredTrees.length > 0) {
-      hasFittedRef.current = true;
-      if (userLatLng && filteredTrees.length > 3) {
-        const nearby = filteredTrees.filter(
-          (t) => haversineKm(userLatLng[0], userLatLng[1], t.latitude, t.longitude) < 50
-        );
-        if (nearby.length >= 2) {
-          const bounds = L.latLngBounds(nearby.map((t) => [t.latitude, t.longitude]));
-          bounds.extend(userLatLng);
-          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13, animate: true, duration: 1 });
-        } else {
-          const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
-          map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
-        }
-      } else {
-        const bounds = L.latLngBounds(filteredTrees.map((t) => [t.latitude, t.longitude]));
-        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 5, animate: true, duration: 0.8 });
-      }
-    }
-
-    return () => {
-      map.off("zoomend", adjustClusteringOnZoom);
-      map.off("moveend", adjustClusteringOnZoom);
-      if (lastSpiderfyState.timerHandle) {
-        clearTimeout(lastSpiderfyState.timerHandle);
-      }
-      if (renderMetricsTimer) {
-        window.clearTimeout(renderMetricsTimer);
-      }
-    };
-  }, [filteredTrees, userLatLng, lineageFilter, groveScale, showHiveLayer, debugEnabled]);
+  useTreeMarkerLayer({
+    map: mapRef.current,
+    filteredTrees,
+    config: {
+      lineageFilter,
+      groveScale,
+      showHiveLayer,
+    },
+    refs: {
+      offeringCounts: offeringCountsRef.current,
+      birdsongCounts: birdsongCountsRef.current,
+      whisperCounts: whisperCountsRef.current,
+      treePhotos: treePhotosRef.current,
+      userLatLng,
+    },
+    userLatLng,
+    debugEnabled,
+    onClusterRef: onClusterRefCb,
+    onPerfUpdate: onPerfUpdateCb,
+  });
 
   // ── Focus on a specific tree when navigated via "View on Map" ──
   useEffect(() => {
