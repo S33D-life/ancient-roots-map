@@ -55,6 +55,7 @@ const TreeHeartPool = lazy(() => import("@/components/TreeHeartPool"));
 const SpeciesAttestation = lazy(() => import("@/components/SpeciesAttestation"));
 const GroveContext = lazy(() => import("@/components/GroveContext"));
 const TreePulseIndicator = lazy(() => import("@/components/TreePulseIndicator"));
+const PathwayContext = lazy(() => import("@/components/PathwayContext"));
 const BloomingClock = lazy(() => import("@/components/BloomingClock"));
 const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
 const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
