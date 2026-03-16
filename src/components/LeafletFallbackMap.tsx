@@ -358,7 +358,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const clearView = layers.clearView;
   const groveViewActive = layers.groveView;
 
-  // Non-boolean layer state (not part of reducer)
+  // Grove map layer — renders detected grove halos and center markers
+  const navigate = useNavigate();
+  useGroveMapLayer(mapRef.current, showGroves, navigate);
+
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
