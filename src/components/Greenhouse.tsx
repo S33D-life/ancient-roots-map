@@ -135,7 +135,7 @@ const Greenhouse = () => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"mine" | "community">("mine");
+  const [viewMode, setViewMode] = useState<"mine" | "forest" | "community">("mine");
   const { toast } = useToast();
 
   useEffect(() => {
