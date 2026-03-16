@@ -439,7 +439,7 @@ const main = async () => {
     heritage_status: "official_register",
     status: "research",
     record_status: "draft",
-    record_kind: "heritage_tree",
+    record_kind: "individual_tree",
   }));
 
   if (dryRun) {
