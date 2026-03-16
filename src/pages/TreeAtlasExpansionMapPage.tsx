@@ -139,6 +139,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Generate integration pack & prepare seed set",
     flag_emoji: "🇿🇦",
     lat: -30.6, lng: 22.9,
+    atlas_slug: "south-africa", config_exists: true,
   },
   {
     country_code: "IN",
