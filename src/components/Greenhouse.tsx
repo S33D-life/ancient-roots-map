@@ -96,6 +96,9 @@ const GreenhouseMotes = () => {
   );
 };
 
+type PlantType = "houseplant" | "sapling" | "cutting" | "seedling";
+type LifecycleStage = "seed" | "seedling" | "sapling" | "growing" | "ready_to_plant" | "planted";
+
 interface Plant {
   id: string;
   user_id: string;
@@ -105,7 +108,26 @@ interface Plant {
   is_shared: boolean;
   notes: string | null;
   created_at: string;
+  plant_type: PlantType;
+  lifecycle_stage: LifecycleStage;
+  origin_tree_id: string | null;
+  origin_grove_id: string | null;
+  seed_source: string | null;
+  lineage_story: string | null;
+  target_grove_id: string | null;
 }
+
+const LIFECYCLE_LABELS: Record<LifecycleStage, string> = {
+  seed: "Seed", seedling: "Seedling", sapling: "Sapling",
+  growing: "Growing", ready_to_plant: "Ready to Plant", planted: "Planted",
+};
+const LIFECYCLE_ICONS: Record<LifecycleStage, string> = {
+  seed: "🌰", seedling: "🌱", sapling: "🪴",
+  growing: "🌿", ready_to_plant: "✨", planted: "🌳",
+};
+const PLANT_TYPE_LABELS: Record<PlantType, string> = {
+  houseplant: "Houseplant", sapling: "Sapling", cutting: "Cutting", seedling: "Seedling",
+};
 
 const Greenhouse = () => {
   const [plants, setPlants] = useState<Plant[]>([]);
