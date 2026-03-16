@@ -158,6 +158,7 @@ const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/Data
 const DatasetWatcherPage = lazyImportWithRetry(() => import("./pages/DatasetWatcherPage"), "dataset-watcher");
 const TreeAtlasExpansionMapPage = lazyImportWithRetry(() => import("./pages/TreeAtlasExpansionMapPage"), "atlas-expansion");
 const SeedPlanGeneratorPage = lazyImportWithRetry(() => import("./pages/SeedPlanGeneratorPage"), "seed-plan-generator");
+const CanopyProjectionPage = lazyImportWithRetry(() => import("./pages/CanopyProjectionPage"), "canopy-projection");
 
 const queryClient = new QueryClient({
   defaultOptions: {
