@@ -495,6 +495,41 @@ const PlantCard = ({
           {plant.species}
         </p>
       )}
+      {/* Lifecycle & type badges */}
+      {plant.plant_type !== "houseplant" && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          <span
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-serif"
+            style={{
+              background: 'hsla(120, 25%, 85%, 0.5)',
+              color: 'hsl(120, 30%, 35%)',
+              border: '1px solid hsla(120, 25%, 70%, 0.3)',
+            }}
+          >
+            {LIFECYCLE_ICONS[plant.lifecycle_stage]} {LIFECYCLE_LABELS[plant.lifecycle_stage]}
+          </span>
+          <span
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-serif"
+            style={{
+              background: 'hsla(90, 20%, 88%, 0.5)',
+              color: 'hsl(90, 20%, 40%)',
+              border: '1px solid hsla(90, 20%, 75%, 0.3)',
+            }}
+          >
+            {PLANT_TYPE_LABELS[plant.plant_type]}
+          </span>
+        </div>
+      )}
+      {plant.seed_source && (
+        <p className="text-[9px] mt-1 truncate" style={{ color: 'hsl(30, 20%, 55%)' }}>
+          🌰 {plant.seed_source}
+        </p>
+      )}
+      {plant.lineage_story && (
+        <p className="text-[9px] mt-0.5 italic line-clamp-2" style={{ color: 'hsl(30, 15%, 55%)' }}>
+          {plant.lineage_story}
+        </p>
+      )}
       {isOwner && (
         <div
           className="flex items-center justify-between mt-2.5 pt-2.5"
