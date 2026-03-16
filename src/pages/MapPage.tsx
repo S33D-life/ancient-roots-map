@@ -23,8 +23,7 @@ const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const TeotagWhisper = lazy(() => import("@/components/TeotagWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
-const RecentlyAddedTrees = lazy(() => import("@/components/RecentlyAddedTrees"));
-const TreesAwaitingVisits = lazy(() => import("@/components/TreesAwaitingVisits"));
+const MapTreePanel = lazy(() => import("@/components/MapTreePanel"));
 
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
