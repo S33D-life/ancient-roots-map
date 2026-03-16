@@ -181,6 +181,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Aggregate county-level sources and assess unity",
     flag_emoji: "🇹🇼",
     lat: 23.7, lng: 120.9,
+    atlas_slug: "taiwan", config_exists: true,
   },
   {
     country_code: "ES",
