@@ -4,6 +4,9 @@
  * Config-driven framework for integrating heritage tree datasets into S33D.
  * Uses existing tables: tree_data_sources → tree_datasets → research_trees
  *
+ * Candidate expansion configs live in ./candidateDatasets.ts and are merged
+ * into DATASET_CONFIGS automatically.
+ *
  * To add a new dataset:
  * 1. Add a DatasetConfig entry
  * 2. Add country to countryRegistry.ts
