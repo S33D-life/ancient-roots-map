@@ -1953,6 +1953,137 @@ export type Database = {
           },
         ]
       }
+      dataset_discovery_queue: {
+        Row: {
+          access_type: string
+          api_available: boolean
+          country_code: string | null
+          country_name: string | null
+          created_at: string
+          data_format: string
+          dataset_type: string
+          discovered_by: string | null
+          discovery_confidence: string
+          discovery_method: string
+          download_available: boolean
+          estimated_record_count: number | null
+          geo_available: boolean
+          id: string
+          individual_trees: boolean
+          license_notes: string | null
+          priority_tier: string | null
+          promoted_source_id: string | null
+          readiness_score: number | null
+          region_name: string | null
+          review_notes: string | null
+          score_geographic_precision: number | null
+          score_heritage_value: number | null
+          score_individual_records: number | null
+          score_licensing_clarity: number | null
+          score_map_compatibility: number | null
+          score_official_status: number | null
+          score_public_accessibility: number | null
+          score_species_detail: number | null
+          score_story_value: number | null
+          score_update_frequency: number | null
+          source_name: string
+          source_org: string | null
+          source_url: string | null
+          species_detail: boolean
+          status: string
+          update_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_type?: string
+          api_available?: boolean
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          data_format?: string
+          dataset_type?: string
+          discovered_by?: string | null
+          discovery_confidence?: string
+          discovery_method?: string
+          download_available?: boolean
+          estimated_record_count?: number | null
+          geo_available?: boolean
+          id?: string
+          individual_trees?: boolean
+          license_notes?: string | null
+          priority_tier?: string | null
+          promoted_source_id?: string | null
+          readiness_score?: number | null
+          region_name?: string | null
+          review_notes?: string | null
+          score_geographic_precision?: number | null
+          score_heritage_value?: number | null
+          score_individual_records?: number | null
+          score_licensing_clarity?: number | null
+          score_map_compatibility?: number | null
+          score_official_status?: number | null
+          score_public_accessibility?: number | null
+          score_species_detail?: number | null
+          score_story_value?: number | null
+          score_update_frequency?: number | null
+          source_name: string
+          source_org?: string | null
+          source_url?: string | null
+          species_detail?: boolean
+          status?: string
+          update_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_type?: string
+          api_available?: boolean
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string
+          data_format?: string
+          dataset_type?: string
+          discovered_by?: string | null
+          discovery_confidence?: string
+          discovery_method?: string
+          download_available?: boolean
+          estimated_record_count?: number | null
+          geo_available?: boolean
+          id?: string
+          individual_trees?: boolean
+          license_notes?: string | null
+          priority_tier?: string | null
+          promoted_source_id?: string | null
+          readiness_score?: number | null
+          region_name?: string | null
+          review_notes?: string | null
+          score_geographic_precision?: number | null
+          score_heritage_value?: number | null
+          score_individual_records?: number | null
+          score_licensing_clarity?: number | null
+          score_map_compatibility?: number | null
+          score_official_status?: number | null
+          score_public_accessibility?: number | null
+          score_species_detail?: number | null
+          score_story_value?: number | null
+          score_update_frequency?: number | null
+          source_name?: string
+          source_org?: string | null
+          source_url?: string | null
+          species_detail?: boolean
+          status?: string
+          update_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataset_discovery_queue_promoted_source_id_fkey"
+            columns: ["promoted_source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       digital_fire_votes: {
         Row: {
           created_at: string
