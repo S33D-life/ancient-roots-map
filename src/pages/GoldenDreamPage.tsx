@@ -71,8 +71,7 @@ const GoldenDreamPage = () => {
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen();
   const [coverDismissed, setCoverDismissed] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const isDark = typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
 
