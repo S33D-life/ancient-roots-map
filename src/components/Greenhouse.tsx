@@ -817,6 +817,70 @@ const AddPlantDialog = ({
             />
           </div>
 
+          {/* Sapling-specific fields */}
+          {isSapling && (
+            <>
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                  Lifecycle Stage
+                </Label>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(["seed", "seedling", "sapling", "growing", "ready_to_plant"] as LifecycleStage[]).map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setLifecycleStage(s)}
+                      className="px-2.5 py-1 rounded-lg font-serif text-[10px] tracking-wider transition-all duration-200"
+                      style={{
+                        background: lifecycleStage === s ? 'hsla(120, 30%, 85%, 0.6)' : 'hsla(90, 15%, 92%, 0.4)',
+                        color: lifecycleStage === s ? 'hsl(120, 35%, 30%)' : 'hsl(90, 15%, 50%)',
+                        border: `1px solid ${lifecycleStage === s ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                      }}
+                    >
+                      {LIFECYCLE_ICONS[s]} {LIFECYCLE_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                  Seed Source
+                </Label>
+                <Input
+                  value={seedSource}
+                  onChange={(e) => setSeedSource(e.target.value.slice(0, 200))}
+                  placeholder="e.g. Trevi Olive Grove, seed exchange"
+                  maxLength={200}
+                  className="font-serif rounded-xl"
+                  style={{
+                    background: 'hsla(0, 0%, 100%, 0.7)',
+                    borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                    color: 'hsl(30, 20%, 25%)',
+                  }}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                  Lineage Story
+                </Label>
+                <Input
+                  value={lineageStory}
+                  onChange={(e) => setLineageStory(e.target.value.slice(0, 500))}
+                  placeholder="Where did this seed come from? What tree?"
+                  maxLength={500}
+                  className="font-serif rounded-xl"
+                  style={{
+                    background: 'hsla(0, 0%, 100%, 0.7)',
+                    borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                    color: 'hsl(30, 20%, 25%)',
+                  }}
+                />
+              </div>
+            </>
+          )}
+
           <div className="flex gap-2 pt-2">
             <Button
               type="button"
