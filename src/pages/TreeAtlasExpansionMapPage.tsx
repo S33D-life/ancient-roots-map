@@ -249,7 +249,7 @@ const INTEGRATED_REGIONS: ExpansionRegion[] = [
     circles: ["NParks Heritage Trees", "Botanical Garden Elders"],
     notes: "Fully integrated — NParks Heritage Trees seeded.",
     recommended_action: "Monitor for updates via Watcher",
-    flag_emoji: "🇸🇬", lat: 1.35, lng: 103.8,
+    flag_emoji: "🇸🇬", lat: 1.35, lng: 103.8, atlas_slug: "singapore", config_exists: true,
   },
   {
     country_code: "CR", country_name: "Costa Rica", region_name: "Costa Rica",
