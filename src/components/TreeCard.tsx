@@ -216,7 +216,7 @@ const TreeCard = ({
       </div>
       {isClustered && (
         <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
-          {!isResearch && <TreeWhisperButton onClick={openWhisper} />}
+          <TreeWhisperButton onClick={openWhisper} />
           <Badge variant="secondary" className="font-serif text-[10px] gap-1 bg-accent/20 text-accent border-accent/30 backdrop-blur-sm">
             <Users className="h-3 w-3" />
             {encounterCount} encounters
