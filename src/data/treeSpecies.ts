@@ -288,6 +288,17 @@ const TREE_SPECIES: TreeSpecies[] = [
   { common: "Chinese Elm", scientific: "Ulmus pumila", family: "Ulmaceae", aliases: ["Siberian Elm"] },
   { common: "Masson Pine", scientific: "Pinus massoniana", family: "Pinaceae" },
   { common: "Chinese Tallow", scientific: "Triadica sebifera", family: "Euphorbiaceae" },
+
+  // ── Hong Kong / South China species ──
+  { common: "Chinese Banyan", scientific: "Ficus microcarpa", family: "Moraceae", aliases: ["Indian Laurel", "Curtain Fig"] },
+  { common: "Flame Tree", scientific: "Delonix regia", family: "Fabaceae", aliases: ["Royal Poinciana", "Flamboyant"] },
+  { common: "Rain Tree", scientific: "Samanea saman", family: "Fabaceae", aliases: ["Monkey Pod"] },
+  { common: "Incense Tree", scientific: "Aquilaria sinensis", family: "Thymelaeaceae", aliases: ["Agarwood", "Chenxiang"] },
+  { common: "Camphor Tree", scientific: "Cinnamomum camphora", family: "Lauraceae", aliases: ["Camphor Laurel"] },
+  { common: "Lychee", scientific: "Litchi chinensis", family: "Sapindaceae", aliases: ["Litchi"] },
+  { common: "Cajuput Tree", scientific: "Melaleuca cajuputi", family: "Myrtaceae", aliases: ["Paperbark"] },
+  { common: "Fabri Maple", scientific: "Acer fabri", family: "Sapindaceae" },
+  { common: "Grey Mangrove", scientific: "Avicennia marina", family: "Acanthaceae" },
 ];
 
 export default TREE_SPECIES;
