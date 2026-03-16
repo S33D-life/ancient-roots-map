@@ -8,11 +8,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   Plus, Loader2, Leaf, ImagePlus, X, Share2, Lock, Trash2, Sprout, Sun,
+  TreeDeciduous, MapPin, Shield, ChevronRight, Flower2, TreePine,
 } from "lucide-react";
 
-/* ---------- Floating Pollen / Light Motes ---------- */
+/* ═══════════════════════════════════════════════════════
+   Floating Pollen / Light Motes — warm greenhouse dust
+   ═══════════════════════════════════════════════════════ */
 const MOTE_COUNT = 35;
 
 interface Mote {
@@ -59,18 +63,13 @@ const GreenhouseMotes = () => {
         m.x += m.dx + Math.sin(t * m.speed + m.phase) * 0.15;
         m.y += m.dy;
         const a = m.alpha + Math.sin(t * m.speed * 1.5 + m.phase) * 0.12;
-        // wrap
         if (m.y < -10) { m.y = h() + 10; m.x = Math.random() * w(); }
         if (m.x < -10) m.x = w() + 10;
         if (m.x > w() + 10) m.x = -10;
-
-        // warm pollen glow
         ctx.beginPath();
         ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
         ctx.fillStyle = `hsla(50, 70%, 80%, ${Math.max(0.05, a)})`;
         ctx.fill();
-
-        // soft halo
         ctx.beginPath();
         ctx.arc(m.x, m.y, m.r * 3, 0, Math.PI * 2);
         ctx.fillStyle = `hsla(90, 40%, 85%, ${Math.max(0.01, a * 0.2)})`;
@@ -96,6 +95,9 @@ const GreenhouseMotes = () => {
   );
 };
 
+/* ═══════════════════════════════════════════════════════
+   Types
+   ═══════════════════════════════════════════════════════ */
 type PlantType = "houseplant" | "sapling" | "cutting" | "seedling";
 type LifecycleStage = "seed" | "seedling" | "sapling" | "growing" | "ready_to_plant" | "planted";
 
@@ -129,13 +131,383 @@ const PLANT_TYPE_LABELS: Record<PlantType, string> = {
   houseplant: "Houseplant", sapling: "Sapling", cutting: "Cutting", seedling: "Seedling",
 };
 
+/* Growth stage progress (0-1) */
+const LIFECYCLE_PROGRESS: Record<LifecycleStage, number> = {
+  seed: 0.1, seedling: 0.25, sapling: 0.45,
+  growing: 0.65, ready_to_plant: 0.85, planted: 1.0,
+};
+
+/* ═══════════════════════════════════════════════════════
+   Section Header — bench-like warm divider
+   ═══════════════════════════════════════════════════════ */
+const SectionBench = ({
+  icon,
+  title,
+  subtitle,
+  count,
+  accentHue = 120,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  count: number;
+  accentHue?: number;
+}) => (
+  <div
+    className="flex items-center gap-3 px-5 py-4 rounded-xl mb-4"
+    style={{
+      background: `linear-gradient(135deg, hsla(${accentHue}, 20%, 92%, 0.6), hsla(${accentHue}, 15%, 88%, 0.4))`,
+      border: `1px solid hsla(${accentHue}, 25%, 75%, 0.3)`,
+    }}
+  >
+    <div
+      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+      style={{
+        background: `hsla(${accentHue}, 30%, 80%, 0.5)`,
+        border: `1px solid hsla(${accentHue}, 25%, 65%, 0.3)`,
+      }}
+    >
+      {icon}
+    </div>
+    <div className="flex-1 min-w-0">
+      <h3 className="font-serif text-sm tracking-wide" style={{ color: `hsl(${accentHue - 90 < 0 ? accentHue + 270 : accentHue - 90}, 20%, 30%)` }}>
+        {title}
+      </h3>
+      <p className="text-[10px] font-serif tracking-wider" style={{ color: `hsl(${accentHue}, 15%, 50%)` }}>
+        {subtitle}
+      </p>
+    </div>
+    <span
+      className="text-[10px] font-serif tracking-widest px-2.5 py-1 rounded-full"
+      style={{
+        background: `hsla(${accentHue}, 25%, 85%, 0.5)`,
+        color: `hsl(${accentHue}, 25%, 40%)`,
+        border: `1px solid hsla(${accentHue}, 20%, 70%, 0.3)`,
+      }}
+    >
+      {count}
+    </span>
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   Growth Progress Bar — thin organic bar
+   ═══════════════════════════════════════════════════════ */
+const GrowthBar = ({ stage }: { stage: LifecycleStage }) => {
+  const progress = LIFECYCLE_PROGRESS[stage];
+  return (
+    <div className="mt-2">
+      <div
+        className="h-1 rounded-full overflow-hidden"
+        style={{ background: 'hsla(90, 15%, 85%, 0.5)' }}
+      >
+        <motion.div
+          className="h-full rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress * 100}%` }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          style={{
+            background: progress >= 0.85
+              ? 'linear-gradient(90deg, hsl(120, 40%, 55%), hsl(80, 50%, 50%))'
+              : 'linear-gradient(90deg, hsl(120, 30%, 60%), hsl(100, 35%, 55%))',
+          }}
+        />
+      </div>
+      <div className="flex justify-between mt-0.5">
+        <span className="text-[8px] font-serif" style={{ color: 'hsl(90, 15%, 55%)' }}>
+          {LIFECYCLE_ICONS[stage]} {LIFECYCLE_LABELS[stage]}
+        </span>
+        {stage === "ready_to_plant" && (
+          <span className="text-[8px] font-serif" style={{ color: 'hsl(45, 60%, 45%)' }}>
+            ✨ Ready for the forest
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════
+   Sapling Card — richer than houseplant card
+   ═══════════════════════════════════════════════════════ */
+const SaplingCard = ({
+  plant,
+  isOwner,
+  onToggleShare,
+  onDelete,
+}: {
+  plant: Plant;
+  isOwner: boolean;
+  onToggleShare: () => void;
+  onDelete: () => void;
+}) => (
+  <motion.div
+    layout
+    className="rounded-2xl overflow-hidden group"
+    style={{
+      background: 'hsla(0, 0%, 100%, 0.7)',
+      border: '1px solid hsla(90, 30%, 72%, 0.45)',
+      boxShadow: '0 2px 16px hsla(90, 25%, 40%, 0.07)',
+    }}
+  >
+    {/* Image / placeholder */}
+    <div className="aspect-[5/3] relative overflow-hidden" style={{ background: 'hsla(85, 18%, 90%, 0.5)' }}>
+      {plant.photo_url ? (
+        <img
+          src={plant.photo_url}
+          alt={plant.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <motion.div
+            animate={{ scale: [1, 1.06, 1], rotate: [0, 2, -2, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            {plant.lifecycle_stage === "seed" ? (
+              <span className="text-3xl">🌰</span>
+            ) : plant.lifecycle_stage === "seedling" ? (
+              <Sprout className="h-10 w-10" style={{ color: 'hsla(120, 30%, 60%, 0.5)' }} />
+            ) : (
+              <TreeDeciduous className="h-10 w-10" style={{ color: 'hsla(120, 25%, 60%, 0.4)' }} />
+            )}
+          </motion.div>
+        </div>
+      )}
+      {/* Stage badge overlay */}
+      <div
+        className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-serif tracking-wider flex items-center gap-1"
+        style={{
+          background: 'hsla(0, 0%, 100%, 0.88)',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid hsla(120, 25%, 70%, 0.3)',
+          color: 'hsl(120, 30%, 38%)',
+        }}
+      >
+        {LIFECYCLE_ICONS[plant.lifecycle_stage]} {LIFECYCLE_LABELS[plant.lifecycle_stage]}
+      </div>
+      {plant.is_shared && (
+        <div
+          className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-serif tracking-widest flex items-center gap-1"
+          style={{
+            background: 'hsla(0, 0%, 100%, 0.85)',
+            color: 'hsl(120, 30%, 40%)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid hsla(120, 25%, 70%, 0.3)',
+          }}
+        >
+          <Share2 className="h-2.5 w-2.5" />
+          SHARED
+        </div>
+      )}
+      <div
+        className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
+        style={{ background: 'linear-gradient(transparent, hsla(0, 0%, 100%, 0.5))' }}
+      />
+    </div>
+
+    {/* Info section */}
+    <div className="p-4" style={{ background: 'linear-gradient(180deg, hsla(0, 0%, 100%, 0.3), hsla(30, 20%, 95%, 0.3))' }}>
+      <h4 className="font-serif text-sm truncate" style={{ color: 'hsl(30, 25%, 25%)' }}>
+        {plant.name}
+      </h4>
+      {plant.species && (
+        <p className="text-[11px] italic truncate mt-0.5" style={{ color: 'hsl(90, 15%, 50%)' }}>
+          {plant.species}
+        </p>
+      )}
+
+      {/* Growth bar */}
+      <GrowthBar stage={plant.lifecycle_stage} />
+
+      {/* Seed source / lineage */}
+      {plant.seed_source && (
+        <div className="flex items-center gap-1.5 mt-2.5">
+          <span className="text-[10px]">🌰</span>
+          <p className="text-[10px] font-serif truncate" style={{ color: 'hsl(30, 20%, 48%)' }}>
+            {plant.seed_source}
+          </p>
+        </div>
+      )}
+      {plant.lineage_story && (
+        <p className="text-[9px] mt-1.5 italic line-clamp-2 leading-relaxed" style={{ color: 'hsl(30, 15%, 52%)' }}>
+          "{plant.lineage_story}"
+        </p>
+      )}
+
+      {/* Owner controls */}
+      {isOwner && (
+        <div
+          className="flex items-center justify-between mt-3 pt-3"
+          style={{ borderTop: '1px solid hsla(90, 20%, 80%, 0.4)' }}
+        >
+          <button
+            onClick={onToggleShare}
+            className="text-[10px] font-serif flex items-center gap-1 transition-colors duration-200"
+            style={{ color: 'hsl(90, 20%, 50%)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(120, 35%, 40%)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 20%, 50%)')}
+          >
+            {plant.is_shared ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
+            {plant.is_shared ? "Private" : "Share"}
+          </button>
+          <button
+            onClick={onDelete}
+            className="text-[10px] transition-colors duration-200 p-1 rounded-lg"
+            style={{ color: 'hsl(90, 15%, 60%)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(0, 60%, 50%)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 15%, 60%)')}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+    </div>
+  </motion.div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   Houseplant Card — simpler, original style
+   ═══════════════════════════════════════════════════════ */
+const HouseplantCard = ({
+  plant,
+  isOwner,
+  onToggleShare,
+  onDelete,
+}: {
+  plant: Plant;
+  isOwner: boolean;
+  onToggleShare: () => void;
+  onDelete: () => void;
+}) => (
+  <div
+    className="rounded-2xl overflow-hidden group transition-all duration-500"
+    style={{
+      background: 'hsla(0, 0%, 100%, 0.65)',
+      border: '1px solid hsla(90, 25%, 75%, 0.4)',
+      boxShadow: '0 2px 12px hsla(90, 20%, 40%, 0.06)',
+    }}
+  >
+    <div className="aspect-[4/3] relative overflow-hidden" style={{ background: 'hsla(90, 15%, 90%, 0.5)' }}>
+      {plant.photo_url ? (
+        <img
+          src={plant.photo_url}
+          alt={plant.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <motion.div
+            animate={{ rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Leaf className="h-10 w-10" style={{ color: 'hsla(120, 20%, 70%, 0.4)' }} />
+          </motion.div>
+        </div>
+      )}
+      {plant.is_shared && (
+        <div
+          className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-serif tracking-widest flex items-center gap-1"
+          style={{
+            background: 'hsla(0, 0%, 100%, 0.85)',
+            color: 'hsl(120, 30%, 40%)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid hsla(120, 25%, 70%, 0.3)',
+          }}
+        >
+          <Share2 className="h-2.5 w-2.5" />
+          SHARED
+        </div>
+      )}
+      <div
+        className="absolute inset-x-0 bottom-0 h-12 pointer-events-none"
+        style={{ background: 'linear-gradient(transparent, hsla(0, 0%, 100%, 0.4))' }}
+      />
+    </div>
+    <div className="p-3.5" style={{ background: 'linear-gradient(180deg, hsla(0, 0%, 100%, 0.3), hsla(30, 20%, 95%, 0.3))' }}>
+      <h4 className="font-serif text-sm truncate" style={{ color: 'hsl(30, 25%, 25%)' }}>
+        {plant.name}
+      </h4>
+      {plant.species && (
+        <p className="text-[11px] italic truncate mt-0.5" style={{ color: 'hsl(90, 15%, 50%)' }}>
+          {plant.species}
+        </p>
+      )}
+      {isOwner && (
+        <div
+          className="flex items-center justify-between mt-2.5 pt-2.5"
+          style={{ borderTop: '1px solid hsla(90, 20%, 80%, 0.4)' }}
+        >
+          <button
+            onClick={onToggleShare}
+            className="text-[10px] font-serif flex items-center gap-1 transition-colors duration-200"
+            style={{ color: 'hsl(90, 20%, 50%)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(120, 35%, 40%)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 20%, 50%)')}
+          >
+            {plant.is_shared ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
+            {plant.is_shared ? "Private" : "Share"}
+          </button>
+          <button
+            onClick={onDelete}
+            className="text-[10px] transition-colors duration-200 p-1 rounded-lg"
+            style={{ color: 'hsl(90, 15%, 60%)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(0, 60%, 50%)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 15%, 60%)')}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   Navigation Links — ecosystem connections
+   ═══════════════════════════════════════════════════════ */
+const GreenhouseNav = () => (
+  <div
+    className="flex gap-2 flex-wrap px-5 py-3 rounded-xl mt-4"
+    style={{
+      background: 'hsla(30, 20%, 92%, 0.5)',
+      border: '1px solid hsla(30, 20%, 80%, 0.3)',
+    }}
+  >
+    {[
+      { to: "/map", icon: <MapPin className="h-3 w-3" />, label: "Map" },
+      { to: "/atlas", icon: <TreePine className="h-3 w-3" />, label: "Atlas" },
+      { to: "/library", icon: <Flower2 className="h-3 w-3" />, label: "Library" },
+    ].map(link => (
+      <Link
+        key={link.to}
+        to={link.to}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-serif text-[10px] tracking-wider transition-all duration-200"
+        style={{
+          background: 'hsla(0, 0%, 100%, 0.5)',
+          color: 'hsl(90, 20%, 42%)',
+          border: '1px solid hsla(90, 20%, 78%, 0.3)',
+        }}
+      >
+        {link.icon}
+        {link.label}
+        <ChevronRight className="h-2.5 w-2.5 opacity-40" />
+      </Link>
+    ))}
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════
+   Main Greenhouse Component
+   ═══════════════════════════════════════════════════════ */
 const Greenhouse = () => {
   const [plants, setPlants] = useState<Plant[]>([]);
   const [communityPlants, setCommunityPlants] = useState<Plant[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"mine" | "forest" | "community">("mine");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -187,8 +559,10 @@ const Greenhouse = () => {
     }
   };
 
-  const forestPlants = plants.filter(p => p.plant_type !== "houseplant");
-  const displayPlants = viewMode === "mine" ? plants : viewMode === "forest" ? forestPlants : communityPlants;
+  /* Categorise plants */
+  const houseplants = plants.filter(p => p.plant_type === "houseplant");
+  const forestSaplings = plants.filter(p => p.plant_type !== "houseplant" && !p.lineage_story && !p.origin_tree_id);
+  const lineageSaplings = plants.filter(p => p.plant_type !== "houseplant" && (!!p.lineage_story || !!p.origin_tree_id));
 
   return (
     <div className="relative min-h-[60vh]">
@@ -237,13 +611,12 @@ const Greenhouse = () => {
                   Greenhouse
                 </h2>
                 <p className="text-xs font-serif tracking-wider" style={{ color: 'hsl(30, 20%, 50%)' }}>
-                  Your houseplants &amp; saplings
+                  The cradle of the forest
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Daylight indicator */}
               <motion.div
                 animate={{ opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -278,56 +651,8 @@ const Greenhouse = () => {
           </div>
         </div>
 
-        {/* View toggle — frosted glass tabs */}
-        <div className="px-6 py-3" style={{ background: 'hsla(90, 20%, 93%, 0.7)' }}>
-          <div
-            className="inline-flex rounded-xl p-1 gap-1"
-            style={{
-              background: 'hsla(90, 15%, 88%, 0.6)',
-              border: '1px solid hsla(90, 20%, 80%, 0.4)',
-            }}
-          >
-            <button
-              onClick={() => setViewMode("mine")}
-              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
-              style={{
-                background: viewMode === "mine" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
-                color: viewMode === "mine" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
-                boxShadow: viewMode === "mine" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
-              }}
-            >
-              <Leaf className="h-3 w-3" />
-              My Plants ({plants.length})
-            </button>
-            <button
-              onClick={() => setViewMode("forest")}
-              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
-              style={{
-                background: viewMode === "forest" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
-                color: viewMode === "forest" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
-                boxShadow: viewMode === "forest" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
-              }}
-            >
-              <Sprout className="h-3 w-3" />
-              Forest Saplings ({forestPlants.length})
-            </button>
-            <button
-              onClick={() => setViewMode("community")}
-              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
-              style={{
-                background: viewMode === "community" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
-                color: viewMode === "community" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
-                boxShadow: viewMode === "community" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
-              }}
-            >
-              <Share2 className="h-3 w-3" />
-              Community ({communityPlants.length})
-            </button>
-          </div>
-        </div>
-
-        {/* Plant grid — breathing space */}
-        <div className="px-6 py-6" style={{ background: 'hsla(90, 15%, 95%, 0.5)' }}>
+        {/* ── Content: sectioned greenhouse layout ── */}
+        <div className="px-6 py-6 space-y-6" style={{ background: 'hsla(90, 15%, 95%, 0.5)' }}>
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <motion.div
@@ -340,72 +665,156 @@ const Greenhouse = () => {
                 Tending the greenhouse…
               </p>
             </div>
-          ) : displayPlants.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl p-12 text-center"
-              style={{
-                background: `
-                  radial-gradient(ellipse at 50% 80%, hsla(120, 30%, 85%, 0.3) 0%, transparent 60%),
-                  hsla(0, 0%, 100%, 0.4)
-                `,
-                border: '1px dashed hsla(120, 25%, 65%, 0.4)',
-              }}
-            >
-              <motion.div
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Leaf className="h-12 w-12 mx-auto mb-4" style={{ color: 'hsla(120, 25%, 65%, 0.4)' }} />
-              </motion.div>
-              <p className="font-serif text-sm mb-1" style={{ color: 'hsl(30, 20%, 40%)' }}>
-                {viewMode === "mine"
-                  ? userId
-                    ? "A quiet space, ready for growth."
-                    : "Log in to start your greenhouse."
-                  : "No shared plants yet. Be the first to share!"}
-              </p>
-              <p className="text-xs mb-4" style={{ color: 'hsl(90, 15%, 55%)' }}>
-                {viewMode === "mine" && userId && "Add your first houseplant or sapling to begin."}
-              </p>
-              {viewMode === "mine" && userId && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setAddOpen(true)}
-                  className="font-serif text-xs rounded-xl"
-                  style={{
-                    borderColor: 'hsla(120, 25%, 60%, 0.4)',
-                    color: 'hsl(120, 30%, 40%)',
-                  }}
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Plant
-                </Button>
-              )}
-            </motion.div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              <AnimatePresence mode="popLayout">
-                {displayPlants.map((plant, i) => (
-                  <motion.div
-                    key={plant.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: i * 0.06, duration: 0.4, ease: "easeOut" }}
-                  >
-                    <PlantCard
-                      plant={plant}
-                      isOwner={plant.user_id === userId}
-                      onToggleShare={() => toggleShare(plant)}
-                      onDelete={() => deletePlant(plant.id)}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
+            <>
+              {/* ═══ Section 1: My Plants — personal houseplants ═══ */}
+              <section>
+                <SectionBench
+                  icon={<Leaf className="h-4 w-4" style={{ color: 'hsl(120, 30%, 45%)' }} />}
+                  title="My Plants"
+                  subtitle="Personal houseplants & indoor gardens"
+                  count={houseplants.length}
+                  accentHue={120}
+                />
+                {houseplants.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    <AnimatePresence mode="popLayout">
+                      {houseplants.map((plant, i) => (
+                        <motion.div
+                          key={plant.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ delay: i * 0.05, duration: 0.4 }}
+                        >
+                          <HouseplantCard
+                            plant={plant}
+                            isOwner={plant.user_id === userId}
+                            onToggleShare={() => toggleShare(plant)}
+                            onDelete={() => deletePlant(plant.id)}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <EmptyBench
+                    message={userId ? "A quiet windowsill, ready for your first plant." : "Log in to start your greenhouse."}
+                    action={userId ? () => setAddOpen(true) : undefined}
+                  />
+                )}
+              </section>
+
+              {/* ═══ Section 2: Forest Saplings — growing for the forest ═══ */}
+              <section>
+                <SectionBench
+                  icon={<TreeDeciduous className="h-4 w-4" style={{ color: 'hsl(100, 35%, 42%)' }} />}
+                  title="Forest Saplings"
+                  subtitle="Growing for groves & restoration"
+                  count={forestSaplings.length}
+                  accentHue={100}
+                />
+                {forestSaplings.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <AnimatePresence mode="popLayout">
+                      {forestSaplings.map((plant, i) => (
+                        <motion.div
+                          key={plant.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ delay: i * 0.06, duration: 0.4 }}
+                        >
+                          <SaplingCard
+                            plant={plant}
+                            isOwner={plant.user_id === userId}
+                            onToggleShare={() => toggleShare(plant)}
+                            onDelete={() => deletePlant(plant.id)}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <EmptyBench
+                    message="No forest saplings yet. Grow a sapling to help the forest."
+                    action={userId ? () => setAddOpen(true) : undefined}
+                    variant="forest"
+                  />
+                )}
+              </section>
+
+              {/* ═══ Section 3: Lineage Saplings — connected to Ancient Friends ═══ */}
+              <section>
+                <SectionBench
+                  icon={<Shield className="h-4 w-4" style={{ color: 'hsl(35, 50%, 45%)' }} />}
+                  title="Lineage Saplings"
+                  subtitle="Connected to Ancient Friends & sacred groves"
+                  count={lineageSaplings.length}
+                  accentHue={35}
+                />
+                {lineageSaplings.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <AnimatePresence mode="popLayout">
+                      {lineageSaplings.map((plant, i) => (
+                        <motion.div
+                          key={plant.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ delay: i * 0.06, duration: 0.4 }}
+                        >
+                          <SaplingCard
+                            plant={plant}
+                            isOwner={plant.user_id === userId}
+                            onToggleShare={() => toggleShare(plant)}
+                            onDelete={() => deletePlant(plant.id)}
+                          />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <EmptyBench
+                    message="No lineage saplings yet. Grow a seed from an Ancient Friend."
+                    variant="lineage"
+                  />
+                )}
+              </section>
+
+              {/* ═══ Community Saplings (shared) ═══ */}
+              {communityPlants.length > 0 && (
+                <section>
+                  <SectionBench
+                    icon={<Share2 className="h-4 w-4" style={{ color: 'hsl(200, 30%, 45%)' }} />}
+                    title="Community Garden"
+                    subtitle="Shared by the S33D community"
+                    count={communityPlants.length}
+                    accentHue={200}
+                  />
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                    {communityPlants.slice(0, 8).map((plant, i) => (
+                      <motion.div
+                        key={plant.id}
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04, duration: 0.35 }}
+                      >
+                        <HouseplantCard
+                          plant={plant}
+                          isOwner={false}
+                          onToggleShare={() => {}}
+                          onDelete={() => {}}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ═══ Navigation links ═══ */}
+              <GreenhouseNav />
+            </>
           )}
         </div>
       </div>
@@ -422,146 +831,66 @@ const Greenhouse = () => {
   );
 };
 
-/* ---------- Plant Card — glass terracotta pot ---------- */
-
-const PlantCard = ({
-  plant,
-  isOwner,
-  onToggleShare,
-  onDelete,
+/* ═══════════════════════════════════════════════════════
+   Empty Bench — poetic empty state
+   ═══════════════════════════════════════════════════════ */
+const EmptyBench = ({
+  message,
+  action,
+  variant = "default",
 }: {
-  plant: Plant;
-  isOwner: boolean;
-  onToggleShare: () => void;
-  onDelete: () => void;
-}) => (
-  <div
-    className="rounded-2xl overflow-hidden group transition-all duration-500"
-    style={{
-      background: 'hsla(0, 0%, 100%, 0.65)',
-      border: '1px solid hsla(90, 25%, 75%, 0.4)',
-      boxShadow: '0 2px 12px hsla(90, 20%, 40%, 0.06)',
-    }}
-  >
-    {/* Image area — soft rounded container */}
-    <div className="aspect-[4/3] relative overflow-hidden" style={{ background: 'hsla(90, 15%, 90%, 0.5)' }}>
-      {plant.photo_url ? (
-        <img
-          src={plant.photo_url}
-          alt={plant.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <Leaf className="h-10 w-10" style={{ color: 'hsla(120, 20%, 70%, 0.4)' }} />
-          </motion.div>
-        </div>
-      )}
-      {plant.is_shared && (
-        <div
-          className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-serif tracking-widest flex items-center gap-1"
+  message: string;
+  action?: () => void;
+  variant?: "default" | "forest" | "lineage";
+}) => {
+  const hue = variant === "forest" ? 100 : variant === "lineage" ? 35 : 120;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-xl p-8 text-center"
+      style={{
+        background: `radial-gradient(ellipse at 50% 80%, hsla(${hue}, 25%, 85%, 0.25) 0%, transparent 60%), hsla(0, 0%, 100%, 0.35)`,
+        border: `1px dashed hsla(${hue}, 25%, 65%, 0.35)`,
+      }}
+    >
+      <motion.div
+        animate={{ y: [0, -3, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {variant === "forest" ? (
+          <TreeDeciduous className="h-8 w-8 mx-auto mb-3" style={{ color: `hsla(${hue}, 20%, 65%, 0.4)` }} />
+        ) : variant === "lineage" ? (
+          <Shield className="h-8 w-8 mx-auto mb-3" style={{ color: `hsla(${hue}, 30%, 60%, 0.4)` }} />
+        ) : (
+          <Leaf className="h-8 w-8 mx-auto mb-3" style={{ color: `hsla(${hue}, 20%, 65%, 0.4)` }} />
+        )}
+      </motion.div>
+      <p className="font-serif text-xs" style={{ color: `hsl(${hue - 10}, 15%, 45%)` }}>
+        {message}
+      </p>
+      {action && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={action}
+          className="mt-3 font-serif text-xs rounded-xl"
           style={{
-            background: 'hsla(0, 0%, 100%, 0.85)',
-            color: 'hsl(120, 30%, 40%)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid hsla(120, 25%, 70%, 0.3)',
+            borderColor: `hsla(${hue}, 25%, 60%, 0.4)`,
+            color: `hsl(${hue}, 30%, 40%)`,
           }}
         >
-          <Share2 className="h-2.5 w-2.5" />
-          SHARED
-        </div>
+          <Plus className="h-3 w-3 mr-1" />
+          Add Plant
+        </Button>
       )}
-      {/* Soft bottom gradient for text readability */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-12 pointer-events-none"
-        style={{
-          background: 'linear-gradient(transparent, hsla(0, 0%, 100%, 0.4))',
-        }}
-      />
-    </div>
+    </motion.div>
+  );
+};
 
-    {/* Info — warm wood-toned card bottom */}
-    <div className="p-3.5" style={{ background: 'linear-gradient(180deg, hsla(0, 0%, 100%, 0.3), hsla(30, 20%, 95%, 0.3))' }}>
-      <h4 className="font-serif text-sm truncate" style={{ color: 'hsl(30, 25%, 25%)' }}>
-        {plant.name}
-      </h4>
-      {plant.species && (
-        <p className="text-[11px] italic truncate mt-0.5" style={{ color: 'hsl(90, 15%, 50%)' }}>
-          {plant.species}
-        </p>
-      )}
-      {/* Lifecycle & type badges */}
-      {plant.plant_type !== "houseplant" && (
-        <div className="flex flex-wrap gap-1 mt-1.5">
-          <span
-            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-serif"
-            style={{
-              background: 'hsla(120, 25%, 85%, 0.5)',
-              color: 'hsl(120, 30%, 35%)',
-              border: '1px solid hsla(120, 25%, 70%, 0.3)',
-            }}
-          >
-            {LIFECYCLE_ICONS[plant.lifecycle_stage]} {LIFECYCLE_LABELS[plant.lifecycle_stage]}
-          </span>
-          <span
-            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-serif"
-            style={{
-              background: 'hsla(90, 20%, 88%, 0.5)',
-              color: 'hsl(90, 20%, 40%)',
-              border: '1px solid hsla(90, 20%, 75%, 0.3)',
-            }}
-          >
-            {PLANT_TYPE_LABELS[plant.plant_type]}
-          </span>
-        </div>
-      )}
-      {plant.seed_source && (
-        <p className="text-[9px] mt-1 truncate" style={{ color: 'hsl(30, 20%, 55%)' }}>
-          🌰 {plant.seed_source}
-        </p>
-      )}
-      {plant.lineage_story && (
-        <p className="text-[9px] mt-0.5 italic line-clamp-2" style={{ color: 'hsl(30, 15%, 55%)' }}>
-          {plant.lineage_story}
-        </p>
-      )}
-      {isOwner && (
-        <div
-          className="flex items-center justify-between mt-2.5 pt-2.5"
-          style={{ borderTop: '1px solid hsla(90, 20%, 80%, 0.4)' }}
-        >
-          <button
-            onClick={onToggleShare}
-            className="text-[10px] font-serif flex items-center gap-1 transition-colors duration-200"
-            style={{ color: 'hsl(90, 20%, 50%)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(120, 35%, 40%)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 20%, 50%)')}
-          >
-            {plant.is_shared ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-            {plant.is_shared ? "Make Private" : "Share"}
-          </button>
-          <button
-            onClick={onDelete}
-            className="text-[10px] transition-colors duration-200 p-1 rounded-lg"
-            style={{ color: 'hsl(90, 15%, 60%)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'hsl(0, 60%, 50%)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 15%, 60%)')}
-          >
-            <Trash2 className="h-3 w-3" />
-          </button>
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-/* ---------- Add Plant Dialog — glass greenhouse panel ---------- */
-
+/* ═══════════════════════════════════════════════════════
+   Add Plant Dialog — glass greenhouse panel
+   ═══════════════════════════════════════════════════════ */
 const AddPlantDialog = ({
   open,
   onOpenChange,
@@ -622,7 +951,7 @@ const AddPlantDialog = ({
         photo_url: photoUrl,
         notes: notes.trim() || null,
         plant_type: plantType,
-        lifecycle_stage: lifecycleStage,
+        lifecycle_stage: isSapling ? lifecycleStage : "growing",
         seed_source: seedSource.trim() || null,
         lineage_story: lineageStory.trim() || null,
       } as any);
@@ -644,7 +973,7 @@ const AddPlantDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md p-0 rounded-2xl overflow-hidden"
+        className="max-w-md p-0 rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
         style={{
           background: 'linear-gradient(180deg, hsla(80, 25%, 95%, 0.98), hsla(90, 20%, 92%, 0.98))',
           border: '1px solid hsla(90, 25%, 78%, 0.5)',
@@ -671,19 +1000,19 @@ const AddPlantDialog = ({
               >
                 <Sprout className="h-4 w-4" style={{ color: 'hsl(120, 35%, 45%)' }} />
               </div>
-              Add Plant
+              Add to Greenhouse
             </DialogTitle>
             <p className="text-xs font-serif tracking-wider mt-1" style={{ color: 'hsl(90, 15%, 50%)' }}>
-              Log a houseplant or sapling in your greenhouse
+              {isSapling ? "A new sapling for the forest" : "Log a houseplant or sapling"}
             </p>
           </DialogHeader>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-3">
-          {/* Plant type selector */}
+          {/* Plant type — warm botanical chips */}
           <div className="space-y-1.5">
             <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-              Type
+              What are you growing?
             </Label>
             <div className="flex gap-1.5 flex-wrap">
               {(["houseplant", "sapling", "seedling", "cutting"] as PlantType[]).map(t => (
@@ -691,55 +1020,41 @@ const AddPlantDialog = ({
                   key={t}
                   type="button"
                   onClick={() => setPlantType(t)}
-                  className="px-3 py-1.5 rounded-lg font-serif text-[11px] tracking-wider transition-all duration-200"
+                  className="px-3 py-2 rounded-xl font-serif text-[11px] tracking-wider transition-all duration-300"
                   style={{
-                    background: plantType === t ? 'hsla(120, 30%, 85%, 0.6)' : 'hsla(90, 15%, 92%, 0.4)',
-                    color: plantType === t ? 'hsl(120, 35%, 30%)' : 'hsl(90, 15%, 50%)',
-                    border: `1px solid ${plantType === t ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                    background: plantType === t
+                      ? 'linear-gradient(135deg, hsla(120, 30%, 82%, 0.7), hsla(100, 25%, 85%, 0.6))'
+                      : 'hsla(90, 15%, 92%, 0.4)',
+                    color: plantType === t ? 'hsl(120, 35%, 28%)' : 'hsl(90, 15%, 50%)',
+                    border: `1px solid ${plantType === t ? 'hsla(120, 30%, 60%, 0.5)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                    boxShadow: plantType === t ? '0 2px 8px hsla(120, 25%, 50%, 0.1)' : 'none',
                   }}
                 >
-                  {PLANT_TYPE_LABELS[t]}
+                  {t === "houseplant" ? "🪴" : t === "sapling" ? "🌱" : t === "seedling" ? "🌰" : "✂️"} {PLANT_TYPE_LABELS[t]}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-              Name *
-            </Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value.slice(0, 100))}
-              placeholder={isSapling ? "e.g. Young Olive from Trevi" : "e.g. Kitchen Fern"}
-              maxLength={100}
-              required
-              className="font-serif rounded-xl"
-              style={{
-                background: 'hsla(0, 0%, 100%, 0.7)',
-                borderColor: 'hsla(90, 20%, 75%, 0.5)',
-                color: 'hsl(30, 20%, 25%)',
-              }}
-            />
-          </div>
+          {/* Name */}
+          <FormField
+            label="Name"
+            required
+            value={name}
+            onChange={setName}
+            placeholder={isSapling ? "e.g. Young Olive from Trevi" : "e.g. Kitchen Fern"}
+            maxLength={100}
+          />
 
-          <div className="space-y-1.5">
-            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-              Species
-            </Label>
-            <Input
-              value={species}
-              onChange={(e) => setSpecies(e.target.value.slice(0, 100))}
-              placeholder="e.g. Nephrolepis exaltata"
-              maxLength={100}
-              className="font-serif italic rounded-xl"
-              style={{
-                background: 'hsla(0, 0%, 100%, 0.7)',
-                borderColor: 'hsla(90, 20%, 75%, 0.5)',
-                color: 'hsl(30, 20%, 25%)',
-              }}
-            />
-          </div>
+          {/* Species */}
+          <FormField
+            label="Species"
+            value={species}
+            onChange={setSpecies}
+            placeholder="e.g. Olea europaea"
+            maxLength={100}
+            italic
+          />
 
           {/* Photo upload */}
           <div className="space-y-1.5">
@@ -771,7 +1086,7 @@ const AddPlantDialog = ({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full rounded-xl p-6 text-center transition-all duration-300"
+                className="w-full rounded-xl p-5 text-center transition-all duration-300"
                 style={{
                   border: '2px dashed hsla(120, 25%, 70%, 0.4)',
                   background: 'hsla(120, 20%, 95%, 0.3)',
@@ -785,8 +1100,8 @@ const AddPlantDialog = ({
                   e.currentTarget.style.background = 'hsla(120, 20%, 95%, 0.3)';
                 }}
               >
-                <ImagePlus className="h-6 w-6 mx-auto mb-2" style={{ color: 'hsla(120, 20%, 65%, 0.5)' }} />
-                <p className="text-xs font-serif" style={{ color: 'hsl(90, 15%, 55%)' }}>Click to upload a photo</p>
+                <ImagePlus className="h-5 w-5 mx-auto mb-1.5" style={{ color: 'hsla(120, 20%, 65%, 0.5)' }} />
+                <p className="text-[10px] font-serif" style={{ color: 'hsl(90, 15%, 55%)' }}>Upload a photo</p>
               </button>
             )}
             <input
@@ -799,87 +1114,79 @@ const AddPlantDialog = ({
           </div>
 
           {/* Notes */}
-          <div className="space-y-1.5">
-            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-              Notes
-            </Label>
-            <Input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value.slice(0, 500))}
-              placeholder="Any notes about this plant..."
-              maxLength={500}
-              className="font-serif rounded-xl"
-              style={{
-                background: 'hsla(0, 0%, 100%, 0.7)',
-                borderColor: 'hsla(90, 20%, 75%, 0.5)',
-                color: 'hsl(30, 20%, 25%)',
-              }}
-            />
-          </div>
+          <FormField
+            label="Notes"
+            value={notes}
+            onChange={setNotes}
+            placeholder="Care notes, observations…"
+            maxLength={500}
+          />
 
-          {/* Sapling-specific fields */}
-          {isSapling && (
-            <>
-              <div className="space-y-1.5">
-                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-                  Lifecycle Stage
-                </Label>
-                <div className="flex gap-1.5 flex-wrap">
-                  {(["seed", "seedling", "sapling", "growing", "ready_to_plant"] as LifecycleStage[]).map(s => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setLifecycleStage(s)}
-                      className="px-2.5 py-1 rounded-lg font-serif text-[10px] tracking-wider transition-all duration-200"
-                      style={{
-                        background: lifecycleStage === s ? 'hsla(120, 30%, 85%, 0.6)' : 'hsla(90, 15%, 92%, 0.4)',
-                        color: lifecycleStage === s ? 'hsl(120, 35%, 30%)' : 'hsl(90, 15%, 50%)',
-                        border: `1px solid ${lifecycleStage === s ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
-                      }}
-                    >
-                      {LIFECYCLE_ICONS[s]} {LIFECYCLE_LABELS[s]}
-                    </button>
-                  ))}
+          {/* ── Sapling-specific fields ── */}
+          <AnimatePresence>
+            {isSapling && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4 overflow-hidden"
+              >
+                {/* Divider */}
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="h-px flex-1" style={{ background: 'hsla(90, 20%, 75%, 0.4)' }} />
+                  <span className="text-[9px] font-serif tracking-widest" style={{ color: 'hsl(90, 15%, 55%)' }}>
+                    FOREST DETAILS
+                  </span>
+                  <div className="h-px flex-1" style={{ background: 'hsla(90, 20%, 75%, 0.4)' }} />
                 </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-                  Seed Source
-                </Label>
-                <Input
+                {/* Lifecycle stage */}
+                <div className="space-y-1.5">
+                  <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                    Growth Stage
+                  </Label>
+                  <div className="flex gap-1 flex-wrap">
+                    {(["seed", "seedling", "sapling", "growing", "ready_to_plant"] as LifecycleStage[]).map(s => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setLifecycleStage(s)}
+                        className="px-2.5 py-1.5 rounded-lg font-serif text-[10px] tracking-wider transition-all duration-200"
+                        style={{
+                          background: lifecycleStage === s
+                            ? 'linear-gradient(135deg, hsla(120, 30%, 82%, 0.7), hsla(90, 25%, 85%, 0.6))'
+                            : 'hsla(90, 15%, 92%, 0.4)',
+                          color: lifecycleStage === s ? 'hsl(120, 35%, 28%)' : 'hsl(90, 15%, 50%)',
+                          border: `1px solid ${lifecycleStage === s ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                        }}
+                      >
+                        {LIFECYCLE_ICONS[s]} {LIFECYCLE_LABELS[s]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Seed source */}
+                <FormField
+                  label="Seed Source"
                   value={seedSource}
-                  onChange={(e) => setSeedSource(e.target.value.slice(0, 200))}
+                  onChange={setSeedSource}
                   placeholder="e.g. Trevi Olive Grove, seed exchange"
                   maxLength={200}
-                  className="font-serif rounded-xl"
-                  style={{
-                    background: 'hsla(0, 0%, 100%, 0.7)',
-                    borderColor: 'hsla(90, 20%, 75%, 0.5)',
-                    color: 'hsl(30, 20%, 25%)',
-                  }}
                 />
-              </div>
 
-              <div className="space-y-1.5">
-                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
-                  Lineage Story
-                </Label>
-                <Input
+                {/* Lineage story */}
+                <FormField
+                  label="Lineage Story"
                   value={lineageStory}
-                  onChange={(e) => setLineageStory(e.target.value.slice(0, 500))}
-                  placeholder="Where did this seed come from? What tree?"
+                  onChange={setLineageStory}
+                  placeholder="The story of this seed — where it came from, which tree…"
                   maxLength={500}
-                  className="font-serif rounded-xl"
-                  style={{
-                    background: 'hsla(0, 0%, 100%, 0.7)',
-                    borderColor: 'hsla(90, 20%, 75%, 0.5)',
-                    color: 'hsl(30, 20%, 25%)',
-                  }}
                 />
-              </div>
-            </>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="flex gap-2 pt-2">
             <Button
@@ -906,7 +1213,7 @@ const AddPlantDialog = ({
               }}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sprout className="h-3 w-3" />}
-              {uploading ? "Uploading..." : "Add Plant"}
+              {uploading ? "Uploading…" : isSapling ? "Plant Sapling" : "Add Plant"}
             </Button>
           </div>
         </form>
@@ -914,5 +1221,45 @@ const AddPlantDialog = ({
     </Dialog>
   );
 };
+
+/* ═══════════════════════════════════════════════════════
+   FormField — reusable glass input
+   ═══════════════════════════════════════════════════════ */
+const FormField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  maxLength,
+  required,
+  italic,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  maxLength: number;
+  required?: boolean;
+  italic?: boolean;
+}) => (
+  <div className="space-y-1.5">
+    <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+      {label} {required && "*"}
+    </Label>
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
+      placeholder={placeholder}
+      maxLength={maxLength}
+      required={required}
+      className={`font-serif rounded-xl ${italic ? "italic" : ""}`}
+      style={{
+        background: 'hsla(0, 0%, 100%, 0.7)',
+        borderColor: 'hsla(90, 20%, 75%, 0.5)',
+        color: 'hsl(30, 20%, 25%)',
+      }}
+    />
+  </div>
+);
 
 export default Greenhouse;
