@@ -43,6 +43,7 @@ interface MarkerLayerRefs {
   birdsongCounts: Record<string, number>;
   whisperCounts: Record<string, number>;
   treePhotos: Record<string, string>;
+  userLatLng: [number, number] | null;
 }
 
 interface UseTreeMarkerLayerOptions {
