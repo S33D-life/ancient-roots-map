@@ -238,7 +238,7 @@ const INTEGRATED_REGIONS: ExpansionRegion[] = [
     circles: ["Stone Wall Trees", "Urban Canopy Giants"],
     notes: "Fully integrated — OVT Register seeded.",
     recommended_action: "Monitor for updates via Watcher",
-    flag_emoji: "🇭🇰", lat: 22.3, lng: 114.2,
+    flag_emoji: "🇭🇰", lat: 22.3, lng: 114.2, atlas_slug: "hong-kong", config_exists: true,
   },
   {
     country_code: "SG", country_name: "Singapore", region_name: "Singapore",
