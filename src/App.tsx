@@ -130,6 +130,14 @@ const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/Bioregio
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
 const HongKongAtlasPage = lazyImportWithRetry(() => import("./pages/HongKongAtlasPage"), "hong-kong-atlas");
 const SingaporeAtlasPage = lazyImportWithRetry(() => import("./pages/SingaporeAtlasPage"), "singapore-atlas");
+const JapanAtlasPage = lazyImportWithRetry(() => import("./pages/JapanAtlasPage"), "japan-atlas");
+const ItalyAtlasPage = lazyImportWithRetry(() => import("./pages/ItalyAtlasPage"), "italy-atlas");
+const UnitedStatesAtlasPage = lazyImportWithRetry(() => import("./pages/UnitedStatesAtlasPage"), "us-atlas");
+const SouthAfricaAtlasPage = lazyImportWithRetry(() => import("./pages/SouthAfricaAtlasPage"), "south-africa-atlas");
+const IndiaAtlasPage = lazyImportWithRetry(() => import("./pages/IndiaAtlasPage"), "india-atlas");
+const TaiwanAtlasPage = lazyImportWithRetry(() => import("./pages/TaiwanAtlasPage"), "taiwan-atlas");
+const SpainAtlasPage = lazyImportWithRetry(() => import("./pages/SpainAtlasPage"), "spain-atlas");
+const MexicoAtlasPage = lazyImportWithRetry(() => import("./pages/MexicoAtlasPage"), "mexico-atlas");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
