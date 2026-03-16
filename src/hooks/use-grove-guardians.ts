@@ -111,8 +111,11 @@ export function useUserGuardianships(userId: string | undefined) {
 
 /** Check if current user is guardian of a grove */
 export function useIsGroveGuardian(groveId: string | undefined) {
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const { data: guardians } = useGroveGuardians(groveId);
+  if (!user || !guardians) return { isGuardian: false, role: null };
+  const match = guardians.find(g => g.user_id === user.id);
+  return { isGuardian: !!match, role: match?.role || null };
   if (!user || !guardians) return { isGuardian: false, role: null };
   const match = guardians.find(g => g.user_id === user.id);
   return { isGuardian: !!match, role: match?.role || null };
