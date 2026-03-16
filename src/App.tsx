@@ -148,6 +148,7 @@ const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPag
 const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapPage"), "ecosystem-map");
 const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/DatasetDiscoveryAgentPage"), "discovery-agent");
 const DatasetWatcherPage = lazyImportWithRetry(() => import("./pages/DatasetWatcherPage"), "dataset-watcher");
+const TreeAtlasExpansionMapPage = lazyImportWithRetry(() => import("./pages/TreeAtlasExpansionMapPage"), "atlas-expansion");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -353,6 +354,7 @@ const App = () => {
                 <Route path="/agent-garden" element={<AgentGardenPage />} />
                 <Route path="/discovery-agent" element={<DatasetDiscoveryAgentPage />} />
                 <Route path="/dataset-watcher" element={<DatasetWatcherPage />} />
+                <Route path="/atlas-expansion" element={<TreeAtlasExpansionMapPage />} />
                 <Route path="/ecosystem" element={<EcosystemMapPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
