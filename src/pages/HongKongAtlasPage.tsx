@@ -240,7 +240,7 @@ const HongKongAtlasPage = () => {
                             {t.species_common} · {t.province} · {t.designation_type}
                           </p>
                         </div>
-                        {t.designation_type === "Stone Wall Tree" && (
+                        {t.source_program === "hk-stone-wall-trees" && (
                           <Badge variant="outline" className="text-[10px] border-primary/30 text-primary shrink-0">
                             Stone Wall
                           </Badge>
