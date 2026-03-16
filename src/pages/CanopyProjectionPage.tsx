@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft, TreeDeciduous, Globe, TrendingUp, Layers, Heart,
-  Server, BarChart3, Leaf, Sparkles, Eye, Users, Database
+  Server, BarChart3, Leaf, Sparkles, Eye, Users, Database, BookOpen, ChevronRight
 } from "lucide-react";
 
 /* ── Types ── */
@@ -592,6 +592,30 @@ const CanopyProjectionPage = () => {
             <InfraPanel snapshots={snapshots} />
           </TabsContent>
         </Tabs>
+
+        {/* Connected Systems */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-10">
+          <h2 className="text-sm font-serif text-primary mb-3 flex items-center gap-2">
+            <BookOpen className="w-4 h-4" /> Connected Systems
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { label: "Tree Data Commons", to: "/tree-data-commons", icon: "📊" },
+              { label: "Expansion Map", to: "/atlas-expansion", icon: "🌍" },
+              { label: "Seed-Plan Generator", to: "/seed-plan-generator", icon: "🌱" },
+              { label: "Discovery Agent", to: "/discovery-agent", icon: "🔭" },
+              { label: "Dataset Watcher", to: "/dataset-watcher", icon: "👁️" },
+              { label: "Atlas Map", to: "/map", icon: "🗺" },
+            ].map(link => (
+              <Link key={link.to} to={link.to}
+                className="flex items-center gap-2 p-3 rounded-lg bg-card/50 border border-primary/15 hover:border-primary/40 transition-all group text-sm">
+                <span>{link.icon}</span>
+                <span className="text-xs font-serif text-foreground group-hover:text-primary transition-colors">{link.label}</span>
+                <ChevronRight className="w-3 h-3 ml-auto text-muted-foreground" />
+              </Link>
+            ))}
+          </div>
+        </motion.div>
       </main>
     </>
   );
