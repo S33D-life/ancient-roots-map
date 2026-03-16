@@ -18,7 +18,8 @@
     "import:rootstones": "node scripts/import-rootstones.mjs",
     "export:rootstones:staging": "node scripts/export-rootstones-staging.mjs",
     "open:country": "node scripts/open-country.mjs",
-    "seed:country": "node scripts/seed-country.mjs"
+    "seed:country": "node scripts/seed-country.mjs",
+    "seed:hong-kong": "node scripts/seed-hong-kong.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
