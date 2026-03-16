@@ -2571,6 +2571,116 @@ export type Database = {
           },
         ]
       }
+      grove_trees: {
+        Row: {
+          added_at: string
+          grove_id: string
+          id: string
+          tree_id: string
+          tree_source: string
+        }
+        Insert: {
+          added_at?: string
+          grove_id: string
+          id?: string
+          tree_id: string
+          tree_source?: string
+        }
+        Update: {
+          added_at?: string
+          grove_id?: string
+          id?: string
+          tree_id?: string
+          tree_source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grove_trees_grove_id_fkey"
+            columns: ["grove_id"]
+            isOneToOne: false
+            referencedRelation: "groves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groves: {
+        Row: {
+          blessed_by: string | null
+          center_latitude: number | null
+          center_longitude: number | null
+          compactness_score: number | null
+          country: string | null
+          created_at: string
+          formation_method: string
+          grove_name: string | null
+          grove_status: string
+          grove_strength: string
+          grove_strength_score: number
+          grove_type: string
+          id: string
+          offering_count: number
+          radius_m: number | null
+          region: string | null
+          species_common: string | null
+          species_scientific: string | null
+          tree_count: number
+          updated_at: string
+          verified_tree_count: number
+          visit_count: number
+          whisper_count: number
+        }
+        Insert: {
+          blessed_by?: string | null
+          center_latitude?: number | null
+          center_longitude?: number | null
+          compactness_score?: number | null
+          country?: string | null
+          created_at?: string
+          formation_method?: string
+          grove_name?: string | null
+          grove_status?: string
+          grove_strength?: string
+          grove_strength_score?: number
+          grove_type?: string
+          id?: string
+          offering_count?: number
+          radius_m?: number | null
+          region?: string | null
+          species_common?: string | null
+          species_scientific?: string | null
+          tree_count?: number
+          updated_at?: string
+          verified_tree_count?: number
+          visit_count?: number
+          whisper_count?: number
+        }
+        Update: {
+          blessed_by?: string | null
+          center_latitude?: number | null
+          center_longitude?: number | null
+          compactness_score?: number | null
+          country?: string | null
+          created_at?: string
+          formation_method?: string
+          grove_name?: string | null
+          grove_status?: string
+          grove_strength?: string
+          grove_strength_score?: number
+          grove_type?: string
+          id?: string
+          offering_count?: number
+          radius_m?: number | null
+          region?: string | null
+          species_common?: string | null
+          species_scientific?: string | null
+          tree_count?: number
+          updated_at?: string
+          verified_tree_count?: number
+          visit_count?: number
+          whisper_count?: number
+        }
+        Relationships: []
+      }
       habitat_pool_ledger: {
         Row: {
           allocation_pct: number
