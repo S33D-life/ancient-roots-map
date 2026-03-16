@@ -255,7 +255,7 @@ export function useTreePulse(treeId: string) {
         supabase.from("trees").select("name, species, latitude, longitude, nation").eq("id", treeId).single(),
         supabase.from("tree_checkins").select("*", { count: "exact", head: true }).eq("tree_id", treeId).gte("checked_in_at", since),
         supabase.from("offerings").select("*", { count: "exact", head: true }).eq("tree_id", treeId).gte("created_at", since),
-        supabase.from("tree_whispers").select("*", { count: "exact", head: true }).eq("origin_tree_id", treeId).gte("created_at", since),
+        supabase.from("tree_whispers").select("*", { count: "exact", head: true }).eq("tree_anchor_id", treeId).gte("created_at", since),
       ]);
       
       if (!tree) return null;
