@@ -333,6 +333,14 @@ const App = () => {
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/hong-kong" element={<HongKongAtlasPage />} />
                 <Route path="/atlas/singapore" element={<SingaporeAtlasPage />} />
+                <Route path="/atlas/japan" element={<JapanAtlasPage />} />
+                <Route path="/atlas/italy" element={<ItalyAtlasPage />} />
+                <Route path="/atlas/united-states" element={<UnitedStatesAtlasPage />} />
+                <Route path="/atlas/south-africa" element={<SouthAfricaAtlasPage />} />
+                <Route path="/atlas/india" element={<IndiaAtlasPage />} />
+                <Route path="/atlas/taiwan" element={<TaiwanAtlasPage />} />
+                <Route path="/atlas/spain" element={<SpainAtlasPage />} />
+                <Route path="/atlas/mexico" element={<MexicoAtlasPage />} />
                 {/* Sub-portal redirects */}
                 <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<Navigate to="/atlas/switzerland" replace />} />
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />
