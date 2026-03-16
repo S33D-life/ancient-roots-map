@@ -172,7 +172,7 @@ const TreeCard = ({
           </div>
           {/* Tier badge */}
           <div className="self-start flex items-center gap-1.5">
-            {!isResearch && <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />}
+            <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />
             <Badge variant="outline" className={`text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
             {isResearch ? "Seed" : TIER_LABELS[tier]}
             </Badge>
