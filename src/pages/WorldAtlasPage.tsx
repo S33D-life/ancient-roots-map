@@ -42,12 +42,11 @@ interface CountryStats {
 
 type ViewMode = "cards" | "hybrid" | "map";
 
-/* ─── Pulse label & color helpers ─── */
+/* ─── Pulse label & color helpers (import from shared utils) ─── */
+import { PULSE_LABELS as SHARED_PULSE_LABELS, PULSE_COLORS as SHARED_PULSE_COLORS } from "@/utils/forestPulse";
+
 const PULSE_LABELS: Record<string, string> = {
-  quiet: "Quiet",
-  stirring: "Stirring",
-  growing: "Growing",
-  vibrant: "Vibrant",
+  ...SHARED_PULSE_LABELS,
   forest_awakened: "Awakened",
 };
 
