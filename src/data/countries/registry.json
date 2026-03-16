@@ -26,6 +26,17 @@
     "wikidata_qid": "Q800"
   },
   {
+    "country_code": "HK",
+    "name": "Hong Kong",
+    "slug": "hong-kong",
+    "center": [22.3193, 114.1694],
+    "bbox": [22.15, 113.83, 22.56, 114.43],
+    "enabled": true,
+    "priority": 10,
+    "sources_enabled": ["ovt-register", "stone-wall-trees"],
+    "wikidata_qid": "Q8646"
+  },
+  {
     "country_code": "ID",
     "name": "Indonesia",
     "slug": "indonesia",
