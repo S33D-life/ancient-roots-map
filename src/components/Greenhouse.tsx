@@ -96,6 +96,9 @@ const GreenhouseMotes = () => {
   );
 };
 
+type PlantType = "houseplant" | "sapling" | "cutting" | "seedling";
+type LifecycleStage = "seed" | "seedling" | "sapling" | "growing" | "ready_to_plant" | "planted";
+
 interface Plant {
   id: string;
   user_id: string;
@@ -105,7 +108,26 @@ interface Plant {
   is_shared: boolean;
   notes: string | null;
   created_at: string;
+  plant_type: PlantType;
+  lifecycle_stage: LifecycleStage;
+  origin_tree_id: string | null;
+  origin_grove_id: string | null;
+  seed_source: string | null;
+  lineage_story: string | null;
+  target_grove_id: string | null;
 }
+
+const LIFECYCLE_LABELS: Record<LifecycleStage, string> = {
+  seed: "Seed", seedling: "Seedling", sapling: "Sapling",
+  growing: "Growing", ready_to_plant: "Ready to Plant", planted: "Planted",
+};
+const LIFECYCLE_ICONS: Record<LifecycleStage, string> = {
+  seed: "🌰", seedling: "🌱", sapling: "🪴",
+  growing: "🌿", ready_to_plant: "✨", planted: "🌳",
+};
+const PLANT_TYPE_LABELS: Record<PlantType, string> = {
+  houseplant: "Houseplant", sapling: "Sapling", cutting: "Cutting", seedling: "Seedling",
+};
 
 const Greenhouse = () => {
   const [plants, setPlants] = useState<Plant[]>([]);
@@ -113,7 +135,7 @@ const Greenhouse = () => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"mine" | "community">("mine");
+  const [viewMode, setViewMode] = useState<"mine" | "forest" | "community">("mine");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -138,7 +160,7 @@ const Greenhouse = () => {
       }
       const { data: shared } = await supabase
         .rpc("get_shared_plants", { result_limit: 50 });
-      setCommunityPlants((shared as Plant[]) || []);
+      setCommunityPlants((shared as unknown as Plant[]) || []);
     } finally {
       setLoading(false);
     }
@@ -165,7 +187,8 @@ const Greenhouse = () => {
     }
   };
 
-  const displayPlants = viewMode === "mine" ? plants : communityPlants;
+  const forestPlants = plants.filter(p => p.plant_type !== "houseplant");
+  const displayPlants = viewMode === "mine" ? plants : viewMode === "forest" ? forestPlants : communityPlants;
 
   return (
     <div className="relative min-h-[60vh]">
@@ -275,6 +298,18 @@ const Greenhouse = () => {
             >
               <Leaf className="h-3 w-3" />
               My Plants ({plants.length})
+            </button>
+            <button
+              onClick={() => setViewMode("forest")}
+              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
+              style={{
+                background: viewMode === "forest" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
+                color: viewMode === "forest" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
+                boxShadow: viewMode === "forest" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
+              }}
+            >
+              <Sprout className="h-3 w-3" />
+              Forest Saplings ({forestPlants.length})
             </button>
             <button
               onClick={() => setViewMode("community")}
@@ -460,6 +495,41 @@ const PlantCard = ({
           {plant.species}
         </p>
       )}
+      {/* Lifecycle & type badges */}
+      {plant.plant_type !== "houseplant" && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          <span
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-serif"
+            style={{
+              background: 'hsla(120, 25%, 85%, 0.5)',
+              color: 'hsl(120, 30%, 35%)',
+              border: '1px solid hsla(120, 25%, 70%, 0.3)',
+            }}
+          >
+            {LIFECYCLE_ICONS[plant.lifecycle_stage]} {LIFECYCLE_LABELS[plant.lifecycle_stage]}
+          </span>
+          <span
+            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-serif"
+            style={{
+              background: 'hsla(90, 20%, 88%, 0.5)',
+              color: 'hsl(90, 20%, 40%)',
+              border: '1px solid hsla(90, 20%, 75%, 0.3)',
+            }}
+          >
+            {PLANT_TYPE_LABELS[plant.plant_type]}
+          </span>
+        </div>
+      )}
+      {plant.seed_source && (
+        <p className="text-[9px] mt-1 truncate" style={{ color: 'hsl(30, 20%, 55%)' }}>
+          🌰 {plant.seed_source}
+        </p>
+      )}
+      {plant.lineage_story && (
+        <p className="text-[9px] mt-0.5 italic line-clamp-2" style={{ color: 'hsl(30, 15%, 55%)' }}>
+          {plant.lineage_story}
+        </p>
+      )}
       {isOwner && (
         <div
           className="flex items-center justify-between mt-2.5 pt-2.5"
@@ -506,12 +576,17 @@ const AddPlantDialog = ({
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [notes, setNotes] = useState("");
+  const [plantType, setPlantType] = useState<PlantType>("houseplant");
+  const [lifecycleStage, setLifecycleStage] = useState<LifecycleStage>("growing");
+  const [seedSource, setSeedSource] = useState("");
+  const [lineageStory, setLineageStory] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const isSapling = plantType !== "houseplant";
 
   const handleFile = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
@@ -546,14 +621,17 @@ const AddPlantDialog = ({
         species: species.trim() || null,
         photo_url: photoUrl,
         notes: notes.trim() || null,
-      });
+        plant_type: plantType,
+        lifecycle_stage: lifecycleStage,
+        seed_source: seedSource.trim() || null,
+        lineage_story: lineageStory.trim() || null,
+      } as any);
       if (error) throw error;
-      toast({ title: "Plant added! 🌱" });
-      setName("");
-      setSpecies("");
-      setNotes("");
-      setPhotoUrl(null);
-      setPreviewUrl(null);
+      toast({ title: isSapling ? "Sapling recorded! 🌿" : "Plant added! 🌱" });
+      setName(""); setSpecies(""); setNotes("");
+      setPlantType("houseplant"); setLifecycleStage("growing");
+      setSeedSource(""); setLineageStory("");
+      setPhotoUrl(null); setPreviewUrl(null);
       onOpenChange(false);
       onAdded();
     } catch (err: any) {
@@ -602,6 +680,30 @@ const AddPlantDialog = ({
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-3">
+          {/* Plant type selector */}
+          <div className="space-y-1.5">
+            <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+              Type
+            </Label>
+            <div className="flex gap-1.5 flex-wrap">
+              {(["houseplant", "sapling", "seedling", "cutting"] as PlantType[]).map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setPlantType(t)}
+                  className="px-3 py-1.5 rounded-lg font-serif text-[11px] tracking-wider transition-all duration-200"
+                  style={{
+                    background: plantType === t ? 'hsla(120, 30%, 85%, 0.6)' : 'hsla(90, 15%, 92%, 0.4)',
+                    color: plantType === t ? 'hsl(120, 35%, 30%)' : 'hsl(90, 15%, 50%)',
+                    border: `1px solid ${plantType === t ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                  }}
+                >
+                  {PLANT_TYPE_LABELS[t]}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
               Name *
@@ -609,7 +711,7 @@ const AddPlantDialog = ({
             <Input
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 100))}
-              placeholder="e.g. Kitchen Fern"
+              placeholder={isSapling ? "e.g. Young Olive from Trevi" : "e.g. Kitchen Fern"}
               maxLength={100}
               required
               className="font-serif rounded-xl"
@@ -714,6 +816,70 @@ const AddPlantDialog = ({
               }}
             />
           </div>
+
+          {/* Sapling-specific fields */}
+          {isSapling && (
+            <>
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                  Lifecycle Stage
+                </Label>
+                <div className="flex gap-1.5 flex-wrap">
+                  {(["seed", "seedling", "sapling", "growing", "ready_to_plant"] as LifecycleStage[]).map(s => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setLifecycleStage(s)}
+                      className="px-2.5 py-1 rounded-lg font-serif text-[10px] tracking-wider transition-all duration-200"
+                      style={{
+                        background: lifecycleStage === s ? 'hsla(120, 30%, 85%, 0.6)' : 'hsla(90, 15%, 92%, 0.4)',
+                        color: lifecycleStage === s ? 'hsl(120, 35%, 30%)' : 'hsl(90, 15%, 50%)',
+                        border: `1px solid ${lifecycleStage === s ? 'hsla(120, 30%, 60%, 0.4)' : 'hsla(90, 15%, 80%, 0.3)'}`,
+                      }}
+                    >
+                      {LIFECYCLE_ICONS[s]} {LIFECYCLE_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                  Seed Source
+                </Label>
+                <Input
+                  value={seedSource}
+                  onChange={(e) => setSeedSource(e.target.value.slice(0, 200))}
+                  placeholder="e.g. Trevi Olive Grove, seed exchange"
+                  maxLength={200}
+                  className="font-serif rounded-xl"
+                  style={{
+                    background: 'hsla(0, 0%, 100%, 0.7)',
+                    borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                    color: 'hsl(30, 20%, 25%)',
+                  }}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[11px] tracking-widest uppercase" style={{ color: 'hsl(90, 15%, 50%)' }}>
+                  Lineage Story
+                </Label>
+                <Input
+                  value={lineageStory}
+                  onChange={(e) => setLineageStory(e.target.value.slice(0, 500))}
+                  placeholder="Where did this seed come from? What tree?"
+                  maxLength={500}
+                  className="font-serif rounded-xl"
+                  style={{
+                    background: 'hsla(0, 0%, 100%, 0.7)',
+                    borderColor: 'hsla(90, 20%, 75%, 0.5)',
+                    color: 'hsl(30, 20%, 25%)',
+                  }}
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex gap-2 pt-2">
             <Button

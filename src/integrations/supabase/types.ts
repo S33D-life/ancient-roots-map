@@ -2466,10 +2466,19 @@ export type Database = {
           created_at: string
           id: string
           is_shared: boolean
+          lifecycle_stage: string
+          lineage_story: string | null
           name: string
           notes: string | null
+          origin_grove_id: string | null
+          origin_tree_id: string | null
           photo_url: string | null
+          plant_type: string
+          planted_at: string | null
+          planted_tree_id: string | null
+          seed_source: string | null
           species: string | null
+          target_grove_id: string | null
           updated_at: string
           user_id: string
         }
@@ -2477,10 +2486,19 @@ export type Database = {
           created_at?: string
           id?: string
           is_shared?: boolean
+          lifecycle_stage?: string
+          lineage_story?: string | null
           name: string
           notes?: string | null
+          origin_grove_id?: string | null
+          origin_tree_id?: string | null
           photo_url?: string | null
+          plant_type?: string
+          planted_at?: string | null
+          planted_tree_id?: string | null
+          seed_source?: string | null
           species?: string | null
+          target_grove_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -2488,14 +2506,52 @@ export type Database = {
           created_at?: string
           id?: string
           is_shared?: boolean
+          lifecycle_stage?: string
+          lineage_story?: string | null
           name?: string
           notes?: string | null
+          origin_grove_id?: string | null
+          origin_tree_id?: string | null
           photo_url?: string | null
+          plant_type?: string
+          planted_at?: string | null
+          planted_tree_id?: string | null
+          seed_source?: string | null
           species?: string | null
+          target_grove_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "greenhouse_plants_origin_grove_id_fkey"
+            columns: ["origin_grove_id"]
+            isOneToOne: false
+            referencedRelation: "groves"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "greenhouse_plants_origin_tree_id_fkey"
+            columns: ["origin_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "greenhouse_plants_planted_tree_id_fkey"
+            columns: ["planted_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "greenhouse_plants_target_grove_id_fkey"
+            columns: ["target_grove_id"]
+            isOneToOne: false
+            referencedRelation: "groves"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       grove_companions: {
         Row: {
@@ -7933,8 +7989,12 @@ export type Database = {
         Returns: {
           created_at: string
           id: string
+          lifecycle_stage: string
+          lineage_story: string
           name: string
           photo_url: string
+          plant_type: string
+          seed_source: string
           species: string
         }[]
       }
