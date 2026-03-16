@@ -120,16 +120,11 @@ const MapPageFull = () => {
         </Suspense>
       )}
 
-      {/* Recently Added Trees — floating panel */}
+      {/* Tree discovery panel — combined Recent + Awaiting */}
       {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
-        <>
-          <Suspense fallback={null}>
-            <RecentlyAddedTrees onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
-          </Suspense>
-          <Suspense fallback={null}>
-            <TreesAwaitingVisits onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
-          </Suspense>
-        </>
+        <Suspense fallback={null}>
+          <MapTreePanel onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
+        </Suspense>
       )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
