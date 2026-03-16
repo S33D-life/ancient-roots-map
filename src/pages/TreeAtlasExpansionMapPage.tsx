@@ -97,6 +97,7 @@ const EXPANSION_REGIONS: ExpansionRegion[] = [
     recommended_action: "Generate integration pack & prepare seed set",
     flag_emoji: "🇮🇹",
     lat: 41.9, lng: 12.5,
+    atlas_slug: "italy", config_exists: true,
   },
   {
     country_code: "US",
