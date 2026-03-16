@@ -284,6 +284,12 @@ const CORE_DATASET_CONFIGS: Record<string, DatasetConfig> = {
   },
 };
 
+/** Merged configs: core + candidate expansion regions */
+export const DATASET_CONFIGS: Record<string, DatasetConfig> = {
+  ...CORE_DATASET_CONFIGS,
+  ...CANDIDATE_DATASET_CONFIGS,
+};
+
 /** Look up a dataset config by its key */
 export const getDatasetConfig = (key: string): DatasetConfig | undefined =>
   DATASET_CONFIGS[key];
