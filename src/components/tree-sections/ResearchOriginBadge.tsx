@@ -15,6 +15,7 @@ const DESIGNATION_LABELS: Record<string, string> = {
   "Heritage Tree": "🏛️ Heritage Tree",
   "Sacred Tree": "✨ Sacred Tree",
   "Notable Tree": "📜 Notable Tree",
+  "Stone Wall Tree": "🧱 Stone Wall Tree",
 };
 
 const ResearchOriginBadge = ({ origin }: Props) => {

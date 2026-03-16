@@ -1950,17 +1950,27 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       setResearchTreeCount(data.length);
 
       data.forEach((rt: any) => {
-        const sz = 16;
+        const isStoneWall = rt.source_program === 'hk-stone-wall-trees' || rt.designation_type === 'Stone Wall Tree';
+        const sz = isStoneWall ? 20 : 16;
         const half = sz / 2;
         const precColor = rt.geo_precision === 'exact' ? 'hsl(120,50%,45%)' : rt.geo_precision === 'approx' ? 'hsl(35,70%,50%)' : 'hsl(0,50%,50%)';
 
+        const dotStyle = isStoneWall
+          ? `width:${sz}px;height:${sz}px;background:hsla(28,45%,30%,0.92);border:2.5px solid hsl(42,55%,50%);box-shadow:0 0 10px hsla(28,50%,40%,0.5);border-radius:4px;position:relative;`
+          : `width:${sz}px;height:${sz}px;background:hsla(35,50%,25%,0.85);border:2.5px solid hsl(35,65%,50%);box-shadow:0 0 8px hsla(35,70%,50%,0.4);position:relative;`;
+
+        const rootLines = isStoneWall
+          ? `<span style="position:absolute;bottom:-4px;left:3px;width:1.5px;height:6px;background:hsl(28,40%,35%);transform:rotate(-15deg);"></span><span style="position:absolute;bottom:-4px;right:3px;width:1.5px;height:6px;background:hsl(28,40%,35%);transform:rotate(15deg);"></span><span style="position:absolute;bottom:-3px;left:50%;width:1.5px;height:5px;background:hsl(28,40%,35%);transform:translateX(-50%);"></span>`
+          : '';
+
         const icon = L.divIcon({
-          className: 'research-marker',
-          html: `<div class="research-dot" style="width:${sz}px;height:${sz}px;background:hsla(35,50%,25%,0.85);border:2.5px solid hsl(35,65%,50%);box-shadow:0 0 8px hsla(35,70%,50%,0.4);position:relative;">
+          className: isStoneWall ? 'research-marker stone-wall-marker' : 'research-marker',
+          html: `<div class="research-dot" style="${dotStyle}">
             <span style="position:absolute;top:-3px;right:-3px;width:5px;height:5px;border-radius:50%;background:${precColor};border:1px solid hsl(25,18%,10%);"></span>
+            ${rootLines}
           </div>`,
-          iconSize: [sz, sz],
-          iconAnchor: [half, half],
+          iconSize: [sz + 4, sz + 8],
+          iconAnchor: [(sz + 4) / 2, (sz + 8) / 2],
         });
 
         const marker = L.marker([rt.latitude, rt.longitude], { icon });

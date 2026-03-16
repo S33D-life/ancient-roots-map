@@ -25,6 +25,7 @@ export interface SubRegionEntry {
 
 /** Geographic vocabulary label per country */
 export const SUB_REGION_LABELS: Record<string, string> = {
+  "hong-kong": "Districts",
   switzerland: "Cantons",
   indonesia: "Islands",
   "united-states": "States",
@@ -33,6 +34,40 @@ export const SUB_REGION_LABELS: Record<string, string> = {
 };
 
 const SUB_REGION_REGISTRY: SubRegionEntry[] = [
+  // Hong Kong — Districts
+  {
+    name: "Central & Western",
+    slug: "central-western",
+    countrySlug: "hong-kong",
+    tagline: "Stone wall survivors & harbour-front sentinels",
+    icon: "🏙️",
+    provinceKey: "Central and Western",
+  },
+  {
+    name: "Kowloon",
+    slug: "kowloon",
+    countrySlug: "hong-kong",
+    tagline: "Urban elders among the densest canopy on Earth",
+    icon: "🌆",
+    provinceKey: ["Kowloon City", "Yau Tsim Mong", "Sham Shui Po", "Wong Tai Sin", "Kwun Tong"],
+  },
+  {
+    name: "New Territories",
+    slug: "new-territories",
+    countrySlug: "hong-kong",
+    tagline: "Fung shui woods, village banyans & hillside pioneers",
+    icon: "🌿",
+    provinceKey: ["Sha Tin", "Tai Po", "North", "Yuen Long", "Tuen Mun", "Tsuen Wan", "Kwai Tsing", "Sai Kung", "Islands"],
+  },
+  {
+    name: "Hong Kong Island",
+    slug: "hong-kong-island",
+    countrySlug: "hong-kong",
+    tagline: "Botanical garden treasures & Peak District elders",
+    icon: "🏝️",
+    provinceKey: ["Eastern", "Southern", "Wan Chai", "Central and Western"],
+  },
+
   // Switzerland — Cantons
   {
     name: "Valais (Wallis)",

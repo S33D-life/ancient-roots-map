@@ -128,6 +128,7 @@ const BioRegionsIndexPage = lazyImportWithRetry(() => import("./pages/BioRegions
 const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"), "bio-region");
 const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/BioregionCalendarPage"), "bio-calendar");
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
+const HongKongAtlasPage = lazyImportWithRetry(() => import("./pages/HongKongAtlasPage"), "hong-kong-atlas");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
@@ -318,6 +319,7 @@ const App = () => {
                 <Route path="/markets" element={<Navigate to="/library/rhythms" replace />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
+                <Route path="/atlas/hong-kong" element={<HongKongAtlasPage />} />
                 {/* Sub-portal redirects */}
                 <Route path="/atlas/switzerland/valais/king-of-bavleux" element={<Navigate to="/atlas/switzerland" replace />} />
                 <Route path="/atlas/italy/dolomiti-ampezzo" element={<Navigate to="/atlas/bio-regions/dolomites-ampezzo-cadore" replace />} />
