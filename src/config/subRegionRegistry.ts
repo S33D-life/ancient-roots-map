@@ -25,6 +25,7 @@ export interface SubRegionEntry {
 
 /** Geographic vocabulary label per country */
 export const SUB_REGION_LABELS: Record<string, string> = {
+  "hong-kong": "Districts",
   switzerland: "Cantons",
   indonesia: "Islands",
   "united-states": "States",

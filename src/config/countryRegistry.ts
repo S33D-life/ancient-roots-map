@@ -361,6 +361,30 @@ const COUNTRY_REGISTRY: CountryRegistryEntry[] = [
     provenanceText: "These seeds were planted by the S33D community. Walk among them and help them grow.",
   },
   {
+    country: "Hong Kong",
+    slug: "hong-kong",
+    flag: "🇭🇰",
+    descriptor: "Old & Valuable Trees / Stone Wall Trees",
+    portalTitle: "Hong Kong — Living Walls & Heritage Trees",
+    portalSubtitle: "Stone wall survivors, harbour sentinels & garden elders — a living map of Hong Kong's arboreal heritage.",
+    sourceLabel: "LCSD / GLTMS registers",
+    isoCode: "HK",
+    bbox: [22.15, 113.83, 22.56, 114.43],
+    defaultMapFocus: {
+      center: { lat: 22.3193, lng: 114.1694 },
+      zoom: 11,
+    },
+    defaultFilters: {
+      tags: ["heritage", "stone_wall", "ancient"],
+      researchLayer: "on",
+    },
+    keySources: [
+      { label: "Old and Valuable Trees Register (GLTMS)", url: "https://www.greening.gov.hk/en/greening-activities/register-ovt.html" },
+      { label: "Stone Wall Trees — LCSD", url: "https://www.lcsd.gov.hk/en/green/tree/index.html" },
+    ],
+    provenanceText: "Research records drawn from the Hong Kong Old and Valuable Trees Register and Stone Wall Trees dataset. Verification comes through presence.",
+  },
+  {
     country: "Iran",
     slug: "iran",
     flag: "🇮🇷",
