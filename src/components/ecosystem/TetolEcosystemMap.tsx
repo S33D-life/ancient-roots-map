@@ -1,21 +1,23 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import EcosystemPulseOverlay from "@/components/ecosystem/EcosystemPulseOverlay";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, ZoomIn, ZoomOut, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
+import { X, ExternalLink, ZoomIn, ZoomOut, Shield, ShieldAlert, ShieldCheck, Zap, ZapOff } from "lucide-react";
 import {
-  TREE_NODES, PARTNER_NODES, ORBIT_NODES, COMMUNITY_NODE, ALTERNATIVE_NODES,
-  CONNECTIONS, RESILIENCE_CONNECTIONS, ORBIT_RINGS, getAllNodes,
+  TREE_NODES, PARTNER_NODES, ORBIT_NODES, COMMUNITY_NODE, ALTERNATIVE_NODES, PROPOSAL_NODES,
+  CONNECTIONS, RESILIENCE_CONNECTIONS, PROPOSAL_CONNECTIONS, ORBIT_RINGS, getAllNodes,
   DEPENDENCY_COLORS, DEPENDENCY_LABELS,
-  type EcoNode, type EcoConnection, type OrbitRing, type DependencyLevel,
+  SOVEREIGNTY_LABELS, SOVEREIGNTY_COLORS, PROPOSAL_CATEGORIES,
+  type EcoNode, type EcoConnection, type OrbitRing, type DependencyLevel, type SovereigntyScore,
 } from "@/data/ecosystemMapData";
 
 // ─── Layout constants ───
 const SVG_W = 1200;
-const SVG_H = 1400;
+const SVG_H = 1500;
 const TREE_CX = SVG_W / 2;
 const TREE_TOP = 180;
 const TREE_LAYER_GAP = 140;
 const MYCELIUM_Y = TREE_TOP + 3 * TREE_LAYER_GAP + 120;
+const RESILIENCE_Y = MYCELIUM_Y + 120;
 const ORBIT_CY = TREE_TOP + 1.5 * TREE_LAYER_GAP;
 const COMMUNITY_X = 180;
 const COMMUNITY_Y = MYCELIUM_Y - 40;
@@ -55,11 +57,27 @@ function alternativePos(altNode: EcoNode, primaryPos: { x: number; y: number }, 
   };
 }
 
+/** Position proposal nodes around the community node */
+function proposalPos(index: number, total: number) {
+  const baseAngle = -Math.PI * 0.6;
+  const spread = Math.PI * 0.8;
+  const angle = baseAngle + (total > 1 ? (spread / (total - 1)) * index : 0);
+  const dist = 80;
+  return {
+    x: COMMUNITY_X + Math.cos(angle) * dist,
+    y: COMMUNITY_Y + Math.sin(angle) * dist,
+  };
+}
+
 function nodePos(node: EcoNode, positions?: Record<string, { x: number; y: number }>): { x: number; y: number } {
   if (node.type === "tree") return treePos(node.treeLayer ?? 0);
   if (node.type === "partner") return partnerPos(node.partnerOrder ?? 0, PARTNER_NODES.length);
   if (node.type === "orbit") return orbitPos(node.orbit!, node.orbitAngle ?? 0);
   if (node.id === "community-proposals") return { x: COMMUNITY_X, y: COMMUNITY_Y };
+  if (node.type === "proposal") {
+    const idx = PROPOSAL_NODES.findIndex((p) => p.id === node.id);
+    return proposalPos(idx, PROPOSAL_NODES.length);
+  }
   if (node.type === "alternative" && node.alternativeFor && positions) {
     const primaryPos = positions[node.alternativeFor];
     if (primaryPos) {
@@ -91,6 +109,37 @@ function orbitLinkPath(from: { x: number; y: number }, to: { x: number; y: numbe
   return `M${from.x},${from.y} Q${cx},${cy} ${to.x},${to.y}`;
 }
 
+// ─── Sovereignty ring (arc meter around node) ───
+function SovereigntyMeter({ cx, cy, r, score }: { cx: number; cy: number; r: number; score: SovereigntyScore }) {
+  const color = SOVEREIGNTY_COLORS[score];
+  const circumference = 2 * Math.PI * (r + 7);
+  const filledFraction = score / 5;
+  const dashLen = circumference * filledFraction;
+  const gapLen = circumference * (1 - filledFraction);
+
+  return (
+    <g>
+      {/* Background track */}
+      <circle cx={cx} cy={cy} r={r + 7} fill="none" stroke="hsl(0, 0%, 25%)" strokeWidth={2} opacity={0.2} />
+      {/* Filled arc */}
+      <circle
+        cx={cx} cy={cy} r={r + 7}
+        fill="none" stroke={color} strokeWidth={2.5} opacity={0.7}
+        strokeDasharray={`${dashLen} ${gapLen}`}
+        strokeDashoffset={circumference * 0.25}
+        strokeLinecap="round"
+      />
+      {/* Score label */}
+      <text
+        x={cx + r + 12} y={cy - r + 2}
+        fontSize={7} fill={color} fontFamily="serif" opacity={0.8}
+      >
+        {score}/5
+      </text>
+    </g>
+  );
+}
+
 // ─── Dependency badge (small ring around node) ───
 function DependencyBadge({ cx, cy, r, level }: { cx: number; cy: number; r: number; level: DependencyLevel }) {
   const color = DEPENDENCY_COLORS[level];
@@ -104,27 +153,49 @@ function DependencyBadge({ cx, cy, r, level }: { cx: number; cy: number; r: numb
   );
 }
 
+// ─── Failure X marker ───
+function FailureMarker({ cx, cy, r }: { cx: number; cy: number; r: number }) {
+  const s = r * 0.45;
+  return (
+    <g opacity={0.9}>
+      <circle cx={cx} cy={cy} r={r + 2} fill="hsl(0, 50%, 15%)" fillOpacity={0.6} stroke="hsl(0, 60%, 45%)" strokeWidth={1.5} />
+      <line x1={cx - s} y1={cy - s} x2={cx + s} y2={cy + s} stroke="hsl(0, 65%, 55%)" strokeWidth={2.5} strokeLinecap="round" />
+      <line x1={cx + s} y1={cy - s} x2={cx - s} y2={cy + s} stroke="hsl(0, 65%, 55%)" strokeWidth={2.5} strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r={r + 6} fill="none" stroke="hsl(0, 60%, 45%)" strokeWidth={1} opacity={0.4}>
+        <animate attributeName="r" values={`${r + 4};${r + 10};${r + 4}`} dur="1.5s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.4;0.1;0.4" dur="1.5s" repeatCount="indefinite" />
+      </circle>
+    </g>
+  );
+}
+
 // ─── Node component ───
 function EcoNodeCircle({
-  node, pos, selected, highlighted, dimmed, onSelect, resilienceMode,
+  node, pos, selected, highlighted, dimmed, disabled, onSelect, resilienceMode, showSovereignty, failureSimMode,
 }: {
   node: EcoNode;
   pos: { x: number; y: number };
   selected: boolean;
   highlighted: boolean;
   dimmed: boolean;
+  disabled: boolean;
   onSelect: (id: string) => void;
   resilienceMode: boolean;
+  showSovereignty: boolean;
+  failureSimMode: boolean;
 }) {
   const isTree = node.type === "tree";
   const isPartner = node.type === "partner";
   const isCommunity = node.type === "community";
   const isAlt = node.type === "alternative";
-  const r = isTree ? 38 : isCommunity ? 34 : isPartner ? 28 : isAlt ? 18 : 24;
+  const isProposal = node.type === "proposal";
+  const r = isTree ? 38 : isCommunity ? 34 : isPartner ? 28 : isAlt ? 18 : isProposal ? 16 : 24;
 
   const orbitMeta = node.orbit ? ORBIT_RINGS.find((o) => o.id === node.orbit) : null;
 
-  const fillColor = isAlt
+  const fillColor = isProposal
+    ? "hsl(42, 30%, 14%)"
+    : isAlt
     ? "hsl(160, 20%, 12%)"
     : isTree
     ? "hsl(42, 45%, 18%)"
@@ -134,7 +205,9 @@ function EcoNodeCircle({
     ? "hsl(42, 50%, 20%)"
     : "hsl(220, 20%, 14%)";
 
-  const strokeColor = isAlt
+  const strokeColor = isProposal
+    ? "hsl(42, 40%, 40%)"
+    : isAlt
     ? "hsl(160, 40%, 45%)"
     : isTree
     ? "hsl(42, 60%, 50%)"
@@ -144,7 +217,8 @@ function EcoNodeCircle({
     ? "hsl(42, 55%, 55%)"
     : orbitMeta?.color ?? "hsl(200, 30%, 45%)";
 
-  const showDepBadge = resilienceMode && node.dependencyLevel && node.type === "orbit";
+  const showDepBadge = resilienceMode && node.dependencyLevel && (node.type === "orbit" || node.type === "partner");
+  const showSovMeter = showSovereignty && node.sovereigntyScore !== undefined && !isTree;
 
   return (
     <motion.g
@@ -152,17 +226,20 @@ function EcoNodeCircle({
       onClick={() => onSelect(node.id)}
       initial={{ opacity: 0, scale: 0 }}
       animate={{
-        opacity: dimmed ? 0.2 : 1,
+        opacity: disabled ? 0.15 : dimmed ? 0.2 : 1,
         scale: selected ? 1.15 : highlighted ? 1.08 : 1,
       }}
       transition={{ type: "spring", stiffness: 200, damping: 20, delay: Math.random() * 0.4 }}
-      whileHover={{ scale: 1.12 }}
+      whileHover={{ scale: disabled ? 1 : 1.12 }}
     >
       {/* Dependency badge */}
-      {showDepBadge && <DependencyBadge cx={pos.x} cy={pos.y} r={r} level={node.dependencyLevel!} />}
+      {showDepBadge && !disabled && <DependencyBadge cx={pos.x} cy={pos.y} r={r} level={node.dependencyLevel!} />}
+
+      {/* Sovereignty meter */}
+      {showSovMeter && !disabled && <SovereigntyMeter cx={pos.x} cy={pos.y} r={r} score={node.sovereigntyScore!} />}
 
       {/* Glow */}
-      {(selected || highlighted) && (
+      {(selected || highlighted) && !disabled && (
         <circle cx={pos.x} cy={pos.y} r={r + 12} fill="none" stroke={strokeColor} strokeWidth={1.5} opacity={0.3}>
           <animate attributeName="r" values={`${r + 10};${r + 16};${r + 10}`} dur="3s" repeatCount="indefinite" />
           <animate attributeName="opacity" values="0.3;0.15;0.3" dur="3s" repeatCount="indefinite" />
@@ -173,39 +250,43 @@ function EcoNodeCircle({
       <circle
         cx={pos.x} cy={pos.y} r={r}
         fill={fillColor} stroke={strokeColor}
-        strokeWidth={selected ? 2.5 : isAlt ? 1 : 1.5}
-        strokeDasharray={isAlt ? "4 2" : undefined}
+        strokeWidth={selected ? 2.5 : isAlt || isProposal ? 1 : 1.5}
+        strokeDasharray={isAlt ? "4 2" : isProposal ? "3 2" : undefined}
       />
 
       {/* Emoji */}
-      <text x={pos.x} y={pos.y + 1} textAnchor="middle" dominantBaseline="central" fontSize={isAlt ? 12 : isTree ? 22 : 18} className="select-none pointer-events-none">
+      <text x={pos.x} y={pos.y + 1} textAnchor="middle" dominantBaseline="central" fontSize={isAlt || isProposal ? 12 : isTree ? 22 : 18} className="select-none pointer-events-none">
         {node.emoji}
       </text>
 
       {/* Label */}
       <text
         x={pos.x}
-        y={pos.y + r + (isAlt ? 10 : 14)}
+        y={pos.y + r + (isAlt || isProposal ? 10 : 14)}
         textAnchor="middle"
-        fontSize={isAlt ? 7.5 : isTree ? 11 : 9.5}
-        fill={isAlt ? "hsl(160, 30%, 55%)" : "hsl(42, 30%, 72%)"}
+        fontSize={isAlt || isProposal ? 7.5 : isTree ? 11 : 9.5}
+        fill={isProposal ? "hsl(42, 35%, 55%)" : isAlt ? "hsl(160, 30%, 55%)" : "hsl(42, 30%, 72%)"}
         fontFamily="serif"
-        fontStyle={isAlt ? "italic" : undefined}
+        fontStyle={isAlt || isProposal ? "italic" : undefined}
         className="select-none pointer-events-none"
       >
         {node.label}
       </text>
+
+      {/* Failure X overlay */}
+      {disabled && <FailureMarker cx={pos.x} cy={pos.y} r={r} />}
     </motion.g>
   );
 }
 
 // ─── Connection line ───
 function ConnectionLine({
-  conn, positions, highlighted,
+  conn, positions, highlighted, anyDisabled,
 }: {
   conn: EcoConnection;
   positions: Record<string, { x: number; y: number }>;
   highlighted: boolean;
+  anyDisabled?: boolean;
 }) {
   const from = positions[conn.from];
   const to = positions[conn.to];
@@ -240,7 +321,10 @@ function ConnectionLine({
       strokeWidth={isTrunk ? 3 : isMycelium ? 1.8 : isResilience ? 1.2 : 1.2}
       strokeDasharray={isMycelium ? "6 4" : isProposal ? "4 3" : isResilience ? "3 2" : undefined}
       initial={{ pathLength: 0, opacity: 0 }}
-      animate={{ pathLength: 1, opacity: highlighted ? 0.9 : isResilience ? 0.5 : 0.4 }}
+      animate={{
+        pathLength: 1,
+        opacity: anyDisabled ? 0.1 : highlighted ? 0.9 : isResilience ? 0.5 : isProposal ? 0.3 : 0.4,
+      }}
       transition={{ duration: 1.2, delay: Math.random() * 0.5 }}
     />
   );
@@ -257,19 +341,28 @@ function OrbitRingEllipse({ ring }: { ring: typeof ORBIT_RINGS[number] }) {
 }
 
 // ─── Detail panel ───
-function DetailPanel({ node, onClose, resilienceMode, allNodes, onSelect }: {
+function DetailPanel({ node, onClose, resilienceMode, failureSimMode, disabledNodes, onToggleDisable, allNodes, onSelect }: {
   node: EcoNode;
   onClose: () => void;
   resilienceMode: boolean;
+  failureSimMode: boolean;
+  disabledNodes: Set<string>;
+  onToggleDisable: (id: string) => void;
   allNodes: EcoNode[];
   onSelect: (id: string) => void;
 }) {
   const orbitMeta = node.orbit ? ORBIT_RINGS.find((o) => o.id === node.orbit) : null;
   const depLevel = node.dependencyLevel;
+  const sovScore = node.sovereigntyScore;
   const altNodes = node.alternatives
     ? node.alternatives.map((id) => allNodes.find((n) => n.id === id)).filter(Boolean) as EcoNode[]
     : [];
   const primaryNode = node.alternativeFor ? allNodes.find((n) => n.id === node.alternativeFor) : null;
+  const isDisabled = disabledNodes.has(node.id);
+  const canDisable = failureSimMode && (node.type === "orbit" || node.type === "partner");
+  const proposalCat = node.proposalCategory
+    ? PROPOSAL_CATEGORIES.find((c) => c.id === node.proposalCategory)
+    : null;
 
   return (
     <motion.div
@@ -301,6 +394,8 @@ function DetailPanel({ node, onClose, resilienceMode, allNodes, onSelect }: {
                 ? "Community"
                 : node.type === "alternative"
                 ? "Alternative"
+                : node.type === "proposal"
+                ? "Proposal"
                 : orbitMeta?.label ?? "Infrastructure"}
             </span>
             {depLevel && (
@@ -315,11 +410,40 @@ function DetailPanel({ node, onClose, resilienceMode, allNodes, onSelect }: {
                 {depLevel}
               </span>
             )}
+            {isDisabled && (
+              <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full font-serif border border-destructive/40 bg-destructive/10 text-destructive">
+                Disabled
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{node.description}</p>
+
+      {/* Sovereignty score */}
+      {sovScore !== undefined && (
+        <div className="mt-3 p-2.5 rounded-lg border border-border/20 bg-muted/30">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-serif text-muted-foreground">Sovereignty</span>
+            <span className="text-[10px] font-serif" style={{ color: SOVEREIGNTY_COLORS[sovScore] }}>
+              {SOVEREIGNTY_LABELS[sovScore]}
+            </span>
+          </div>
+          <div className="flex gap-1">
+            {([1, 2, 3, 4, 5] as SovereigntyScore[]).map((s) => (
+              <div
+                key={s}
+                className="flex-1 h-2 rounded-full transition-colors"
+                style={{
+                  background: s <= sovScore ? SOVEREIGNTY_COLORS[sovScore] : "hsl(0, 0%, 20%)",
+                  opacity: s <= sovScore ? 0.8 : 0.3,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Dependency info */}
       {depLevel && resilienceMode && (
@@ -331,6 +455,41 @@ function DetailPanel({ node, onClose, resilienceMode, allNodes, onSelect }: {
             <span className="text-[10px] font-serif text-muted-foreground">{DEPENDENCY_LABELS[depLevel]}</span>
           </div>
         </div>
+      )}
+
+      {/* Proposal category badge */}
+      {proposalCat && (
+        <div className="mt-3 flex items-center gap-1.5">
+          <span className="text-sm">{proposalCat.emoji}</span>
+          <span className="text-[10px] font-serif text-muted-foreground/80 italic">{proposalCat.label}</span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full border border-primary/20 bg-primary/5 text-primary/70 font-serif ml-auto">
+            Provisional
+          </span>
+        </div>
+      )}
+
+      {/* Failure simulation button */}
+      {canDisable && (
+        <button
+          onClick={() => onToggleDisable(node.id)}
+          className={`mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-xs font-serif transition-colors min-h-[40px] ${
+            isDisabled
+              ? "border-[hsl(160,40%,35%)] bg-[hsl(160,30%,12%)] text-[hsl(160,50%,60%)] hover:bg-[hsl(160,30%,16%)]"
+              : "border-destructive/30 bg-destructive/5 text-destructive/80 hover:bg-destructive/10"
+          }`}
+        >
+          {isDisabled ? (
+            <>
+              <Zap className="w-3.5 h-3.5" />
+              Restore this node
+            </>
+          ) : (
+            <>
+              <ZapOff className="w-3.5 h-3.5" />
+              Simulate failure
+            </>
+          )}
+        </button>
       )}
 
       {/* Supports */}
@@ -351,16 +510,23 @@ function DetailPanel({ node, onClose, resilienceMode, allNodes, onSelect }: {
       {/* Alternatives */}
       {altNodes.length > 0 && (
         <div className="mt-3">
-          <span className="text-[10px] text-muted-foreground/60 font-serif">Alternatives:</span>
+          <span className="text-[10px] text-muted-foreground/60 font-serif">
+            {isDisabled ? "🔄 Rerouting to:" : "Alternatives:"}
+          </span>
           <div className="flex flex-wrap gap-1.5 mt-1">
             {altNodes.map((alt) => (
               <button
                 key={alt.id}
                 onClick={() => onSelect(alt.id)}
-                className="text-[10px] px-2 py-1 rounded-full border font-serif transition-colors hover:bg-muted/50 cursor-pointer"
-                style={{ color: "hsl(160, 40%, 55%)", borderColor: "hsl(160, 30%, 30%)" }}
+                className={`text-[10px] px-2 py-1 rounded-full border font-serif transition-colors hover:bg-muted/50 cursor-pointer ${
+                  isDisabled ? "border-[hsl(160,50%,40%)] text-[hsl(160,50%,60%)] bg-[hsl(160,30%,10%)]" : ""
+                }`}
+                style={isDisabled ? undefined : { color: "hsl(160, 40%, 55%)", borderColor: "hsl(160, 30%, 30%)" }}
               >
                 {alt.emoji} {alt.label}
+                {alt.sovereigntyScore !== undefined && (
+                  <span className="ml-1 opacity-60">({alt.sovereigntyScore}/5)</span>
+                )}
               </button>
             ))}
           </div>
@@ -411,6 +577,9 @@ function UndergroundLayer() {
       <text x={TREE_CX} y={MYCELIUM_Y - 75} textAnchor="middle" fontSize={10} fill="hsl(270, 25%, 45%)" fontFamily="serif" opacity={0.6}>
         ── Mycelium Network ──
       </text>
+      <text x={TREE_CX} y={RESILIENCE_Y - 20} textAnchor="middle" fontSize={9} fill="hsl(160, 30%, 40%)" fontFamily="serif" opacity={0.4}>
+        ── Resilience Roots ──
+      </text>
     </g>
   );
 }
@@ -440,6 +609,28 @@ function AmbientParticles() {
   );
 }
 
+// ─── Resilience reroute indicator ───
+function RerouteIndicator({ fromPos, toPos }: { fromPos: { x: number; y: number }; toPos: { x: number; y: number } }) {
+  const mx = (fromPos.x + toPos.x) / 2;
+  const my = (fromPos.y + toPos.y) / 2 - 15;
+  const d = `M${fromPos.x},${fromPos.y} Q${mx},${my} ${toPos.x},${toPos.y}`;
+
+  return (
+    <motion.path
+      d={d}
+      fill="none"
+      stroke="hsl(160, 55%, 50%)"
+      strokeWidth={2}
+      strokeDasharray="6 3"
+      initial={{ pathLength: 0, opacity: 0 }}
+      animate={{ pathLength: 1, opacity: 0.8 }}
+      transition={{ duration: 0.8 }}
+    >
+      <animate attributeName="stroke-dashoffset" values="0;-18" dur="1.5s" repeatCount="indefinite" />
+    </motion.path>
+  );
+}
+
 // ─── Main component ───
 export default function TetolEcosystemMap() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -447,19 +638,48 @@ export default function TetolEcosystemMap() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [resilienceMode, setResilienceMode] = useState(false);
+  const [failureSimMode, setFailureSimMode] = useState(false);
+  const [disabledNodes, setDisabledNodes] = useState<Set<string>>(new Set());
+  const [showSovereignty, setShowSovereignty] = useState(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allNodes = useMemo(() => getAllNodes(resilienceMode), [resilienceMode]);
+  // Enabling failure sim also enables resilience
+  useEffect(() => {
+    if (failureSimMode && !resilienceMode) setResilienceMode(true);
+  }, [failureSimMode, resilienceMode]);
 
-  // Two-pass position calculation: first primary nodes, then alternatives
+  // Clearing failure sim clears disabled nodes
+  const toggleFailureSim = useCallback(() => {
+    setFailureSimMode((v) => {
+      if (v) setDisabledNodes(new Set());
+      return !v;
+    });
+  }, []);
+
+  const toggleDisableNode = useCallback((id: string) => {
+    setDisabledNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const allNodes = useMemo(
+    () => getAllNodes(resilienceMode, resilienceMode),
+    [resilienceMode]
+  );
+
+  // Two-pass position calculation
   const positions = useMemo(() => {
     const map: Record<string, { x: number; y: number }> = {};
-    // First pass: non-alternative nodes
-    allNodes.filter((n) => n.type !== "alternative").forEach((n) => {
+    allNodes.filter((n) => n.type !== "alternative" && n.type !== "proposal").forEach((n) => {
       map[n.id] = nodePos(n);
     });
-    // Second pass: alternatives (need primary positions)
+    allNodes.filter((n) => n.type === "proposal").forEach((n) => {
+      map[n.id] = nodePos(n, map);
+    });
     allNodes.filter((n) => n.type === "alternative").forEach((n) => {
       map[n.id] = nodePos(n, map);
     });
@@ -474,7 +694,9 @@ export default function TetolEcosystemMap() {
     const ids = new Set<string>();
     ids.add(selected);
 
-    const allConns = resilienceMode ? [...CONNECTIONS, ...RESILIENCE_CONNECTIONS] : CONNECTIONS;
+    const allConns = resilienceMode
+      ? [...CONNECTIONS, ...RESILIENCE_CONNECTIONS, ...PROPOSAL_CONNECTIONS]
+      : CONNECTIONS;
     allConns.forEach((c) => {
       if (c.from === selected) ids.add(c.to);
       if (c.to === selected) ids.add(c.from);
@@ -506,8 +728,24 @@ export default function TetolEcosystemMap() {
 
   const allConnections = useMemo(() => {
     const base = [...CONNECTIONS, ...orbitLinks];
-    return resilienceMode ? [...base, ...RESILIENCE_CONNECTIONS] : base;
+    if (resilienceMode) return [...base, ...RESILIENCE_CONNECTIONS, ...PROPOSAL_CONNECTIONS];
+    return base;
   }, [orbitLinks, resilienceMode]);
+
+  // Active reroute paths (disabled node → its alternatives)
+  const reroutePaths = useMemo(() => {
+    if (!failureSimMode || disabledNodes.size === 0) return [];
+    const paths: { from: string; to: string }[] = [];
+    disabledNodes.forEach((id) => {
+      const node = allNodes.find((n) => n.id === id);
+      if (node?.alternatives) {
+        node.alternatives.forEach((altId) => {
+          if (!disabledNodes.has(altId)) paths.push({ from: id, to: altId });
+        });
+      }
+    });
+    return paths;
+  }, [failureSimMode, disabledNodes, allNodes]);
 
   // Single points of failure
   const singlePointIds = useMemo(() => {
@@ -518,6 +756,19 @@ export default function TetolEcosystemMap() {
         .map((n) => n.id)
     );
   }, [resilienceMode]);
+
+  // True SPOF: disabled core nodes with no available alternatives
+  const trueSPOFIds = useMemo(() => {
+    if (!failureSimMode || disabledNodes.size === 0) return new Set<string>();
+    const spofs = new Set<string>();
+    disabledNodes.forEach((id) => {
+      const node = allNodes.find((n) => n.id === id);
+      if (!node) return;
+      const hasAvailableAlt = node.alternatives?.some((a) => !disabledNodes.has(a)) ?? false;
+      if (!hasAvailableAlt) spofs.add(id);
+    });
+    return spofs;
+  }, [failureSimMode, disabledNodes, allNodes]);
 
   // Pan/zoom handlers
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
@@ -545,6 +796,14 @@ export default function TetolEcosystemMap() {
   useEffect(() => {
     document.title = "TETOL Ecosystem Map — S33D.life";
   }, []);
+
+  const subtitleText = failureSimMode
+    ? `⚡ Failure Simulation — ${disabledNodes.size} node${disabledNodes.size !== 1 ? "s" : ""} disabled${trueSPOFIds.size > 0 ? ` · ${trueSPOFIds.size} true SPOF` : ""}`
+    : resilienceMode
+    ? "🛡️ Resilience Mode — showing dependency levels and alternative paths"
+    : showSovereignty
+    ? "🏛️ Sovereignty View — showing decentralisation scores"
+    : "The Ethereal Tree of Life — tap any node to explore";
 
   return (
     <div className="relative w-full h-[100dvh] bg-background overflow-hidden" ref={containerRef}>
@@ -585,6 +844,34 @@ export default function TetolEcosystemMap() {
         >
           <Shield className="w-4 h-4" />
         </button>
+
+        {/* Sovereignty Toggle */}
+        <button
+          onClick={() => setShowSovereignty((v) => !v)}
+          className={`w-10 h-10 rounded-xl border backdrop-blur-md flex items-center justify-center transition-colors text-sm ${
+            showSovereignty
+              ? "bg-[hsl(42,40%,18%)] border-[hsl(42,50%,35%)] text-[hsl(42,60%,60%)]"
+              : "bg-card/80 border-border/30 text-foreground/70 hover:text-foreground"
+          }`}
+          aria-label="Toggle sovereignty view"
+          title="Sovereignty Meter"
+        >
+          🏛️
+        </button>
+
+        {/* Failure Simulation Toggle */}
+        <button
+          onClick={toggleFailureSim}
+          className={`w-10 h-10 rounded-xl border backdrop-blur-md flex items-center justify-center transition-colors ${
+            failureSimMode
+              ? "bg-[hsl(0,40%,18%)] border-[hsl(0,50%,35%)] text-[hsl(0,60%,60%)]"
+              : "bg-card/80 border-border/30 text-foreground/70 hover:text-foreground"
+          }`}
+          aria-label="Toggle failure simulation"
+          title="Failure Simulation"
+        >
+          <Zap className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Title */}
@@ -593,14 +880,12 @@ export default function TetolEcosystemMap() {
           🌳 TETOL Living Ecosystem Map
         </h1>
         <p className="text-[10px] sm:text-xs text-muted-foreground/60 font-serif mt-0.5">
-          {resilienceMode
-            ? "🛡️ Resilience Mode — showing dependency levels and alternative paths"
-            : "The Ethereal Tree of Life — tap any node to explore"}
+          {subtitleText}
         </p>
       </div>
 
       {/* Legend */}
-      <div className="absolute top-4 right-4 z-10 hidden sm:flex flex-col gap-1 rounded-xl border border-border/20 bg-card/70 backdrop-blur-md p-3">
+      <div className="absolute top-4 right-4 z-10 hidden sm:flex flex-col gap-1 rounded-xl border border-border/20 bg-card/70 backdrop-blur-md p-3 max-h-[85vh] overflow-y-auto">
         <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50 font-serif mb-1">Legend</span>
         {[
           { emoji: "🌳", label: "Core Tree", color: "hsl(42, 60%, 50%)" },
@@ -635,6 +920,59 @@ export default function TetolEcosystemMap() {
                   <span className="w-2 h-2 rounded-full" style={{ background: "hsl(160, 40%, 45%)" }} />
                   <span className="text-[10px] text-muted-foreground/70 font-serif italic">Alternative path</span>
                 </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="w-2 h-2 rounded-full border border-dashed" style={{ borderColor: "hsl(42, 40%, 40%)" }} />
+                  <span className="text-[10px] text-muted-foreground/70 font-serif italic">Proposal</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Sovereignty legend */}
+        <AnimatePresence>
+          {showSovereignty && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-border/20 mt-1.5 pt-1.5">
+                <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50 font-serif">Sovereignty</span>
+                {([5, 4, 3, 2, 1] as SovereigntyScore[]).map((s) => (
+                  <div key={s} className="flex items-center gap-2 mt-0.5">
+                    <span className="w-2 h-2 rounded-full" style={{ background: SOVEREIGNTY_COLORS[s] }} />
+                    <span className="text-[10px] text-muted-foreground/70 font-serif">{s} — {SOVEREIGNTY_LABELS[s]}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Failure sim legend */}
+        <AnimatePresence>
+          {failureSimMode && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="border-t border-border/20 mt-1.5 pt-1.5">
+                <span className="text-[9px] uppercase tracking-widest text-muted-foreground/50 font-serif">Simulation</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px]">✕</span>
+                  <span className="text-[10px] text-muted-foreground/70 font-serif">Disabled node</span>
+                </div>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="w-2 h-2 rounded-full" style={{ background: "hsl(160, 55%, 50%)" }} />
+                  <span className="text-[10px] text-muted-foreground/70 font-serif">Active reroute</span>
+                </div>
+                <p className="text-[9px] text-muted-foreground/50 font-serif mt-1 italic">
+                  Click infrastructure nodes to disable
+                </p>
               </div>
             </motion.div>
           )}
@@ -684,14 +1022,24 @@ export default function TetolEcosystemMap() {
           {/* Connections */}
           {allConnections.map((conn, i) => {
             const isHighlighted = connectedIds.has(conn.from) && connectedIds.has(conn.to);
+            const isDisabledConn = disabledNodes.has(conn.from) || disabledNodes.has(conn.to);
             return (
               <ConnectionLine
                 key={`${conn.from}-${conn.to}-${i}`}
                 conn={conn}
                 positions={positions}
                 highlighted={selected ? isHighlighted : false}
+                anyDisabled={isDisabledConn}
               />
             );
+          })}
+
+          {/* Active reroute paths */}
+          {reroutePaths.map((rp) => {
+            const fromPos = positions[rp.from];
+            const toPos = positions[rp.to];
+            if (!fromPos || !toPos) return null;
+            return <RerouteIndicator key={`reroute-${rp.from}-${rp.to}`} fromPos={fromPos} toPos={toPos} />;
           })}
 
           {/* Nodes */}
@@ -701,6 +1049,7 @@ export default function TetolEcosystemMap() {
             const isSelected = selected === node.id;
             const isHighlighted = connectedIds.has(node.id);
             const isDimmed = !!selected && !isHighlighted;
+            const isDisabled = disabledNodes.has(node.id);
             return (
               <EcoNodeCircle
                 key={node.id}
@@ -709,8 +1058,11 @@ export default function TetolEcosystemMap() {
                 selected={isSelected}
                 highlighted={!isSelected && isHighlighted}
                 dimmed={isDimmed}
+                disabled={isDisabled}
                 onSelect={setSelected}
                 resilienceMode={resilienceMode}
+                showSovereignty={showSovereignty}
+                failureSimMode={failureSimMode}
               />
             );
           })}
@@ -719,7 +1071,7 @@ export default function TetolEcosystemMap() {
           <EcosystemPulseOverlay positions={positions} />
 
           {/* Single-point-of-failure warning markers */}
-          {resilienceMode && Array.from(singlePointIds).map((id) => {
+          {resilienceMode && !failureSimMode && Array.from(singlePointIds).map((id) => {
             const pos = positions[id];
             if (!pos) return null;
             return (
@@ -734,6 +1086,23 @@ export default function TetolEcosystemMap() {
               </g>
             );
           })}
+
+          {/* True SPOF markers in failure sim */}
+          {failureSimMode && Array.from(trueSPOFIds).map((id) => {
+            const pos = positions[id];
+            if (!pos) return null;
+            return (
+              <g key={`true-spof-${id}`}>
+                <circle cx={pos.x} cy={pos.y} r={50} fill="none" stroke="hsl(0, 70%, 50%)" strokeWidth={2} opacity={0.6}>
+                  <animate attributeName="r" values="48;55;48" dur="1.2s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.2s" repeatCount="indefinite" />
+                </circle>
+                <text x={pos.x} y={pos.y - 42} textAnchor="middle" fontSize={9} fill="hsl(0, 70%, 60%)" fontFamily="serif" fontWeight="bold" opacity={0.9}>
+                  ⚠ TRUE SPOF
+                </text>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
@@ -744,6 +1113,9 @@ export default function TetolEcosystemMap() {
             node={selectedNode}
             onClose={() => setSelected(null)}
             resilienceMode={resilienceMode}
+            failureSimMode={failureSimMode}
+            disabledNodes={disabledNodes}
+            onToggleDisable={toggleDisableNode}
             allNodes={allNodes}
             onSelect={setSelected}
           />
