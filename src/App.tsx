@@ -129,6 +129,7 @@ const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"),
 const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/BioregionCalendarPage"), "bio-calendar");
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
 const HongKongAtlasPage = lazyImportWithRetry(() => import("./pages/HongKongAtlasPage"), "hong-kong-atlas");
+const SingaporeAtlasPage = lazyImportWithRetry(() => import("./pages/SingaporeAtlasPage"), "singapore-atlas");
 const SupportPage = lazyImportWithRetry(() => import("./pages/SupportPage"), "support");
 const ResearchTreeDetailPage = lazyImportWithRetry(() => import("./pages/ResearchTreeDetailPage"), "research-tree-detail");
 const HarvestPage = lazyImportWithRetry(() => import("./pages/HarvestPage"), "harvest");
