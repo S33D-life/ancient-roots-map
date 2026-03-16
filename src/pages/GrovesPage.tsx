@@ -2,7 +2,7 @@
  * GrovesPage — discover and explore grove candidates and blessed groves.
  * Natural layer of place-making inside S33D.
  */
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useGroveDetection, useGroves } from "@/hooks/use-grove-detection";
+import { useGroveGuardians } from "@/hooks/use-grove-guardians";
 import GroveNamingRitual from "@/components/GroveNamingRitual";
 import {
   STRENGTH_LABELS,
@@ -21,8 +22,10 @@ import {
 } from "@/utils/groveDetection";
 import {
   TreeDeciduous, MapPin, Compass, Layers, Leaf,
-  ChevronRight, Sparkles, CircleDot,
+  ChevronRight, Sparkles, CircleDot, Shield,
 } from "lucide-react";
+
+const GroveGuardianSection = lazy(() => import("@/components/grove/GroveGuardianSection"));
 
 // Lucide doesn't export Trees — use TreeDeciduous pair
 const TreesIcon = TreeDeciduous;
@@ -111,29 +114,64 @@ function GroveCandidateCard({ grove, index, onBless }: { grove: GroveCandidate; 
 
 /* ─── Saved Grove Card ─── */
 function SavedGroveCard({ grove }: { grove: any }) {
+  const [showGuardians, setShowGuardians] = useState(false);
+
   return (
-    <Card className="border-primary/15 bg-card/60">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-primary/10">
-            {grove.grove_type === "species_grove"
-              ? <Leaf className="w-4 h-4 text-primary" />
-              : <TreesIcon className="w-4 h-4 text-primary" />}
+    <div className="space-y-2">
+      <Card className="border-primary/15 bg-card/60">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              {grove.grove_type === "species_grove"
+                ? <Leaf className="w-4 h-4 text-primary" />
+                : <TreesIcon className="w-4 h-4 text-primary" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-serif text-foreground truncate">
+                {grove.grove_name || "Unnamed Grove"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {grove.tree_count} trees · {grove.grove_type === "species_grove" ? grove.species_common || grove.species_scientific : "Mixed species"}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {grove.guardian_count > 0 && (
+                <Badge variant="outline" className="text-[9px] text-primary/70 border-primary/20 gap-0.5">
+                  <Shield className="w-2.5 h-2.5" /> {grove.guardian_count}
+                </Badge>
+              )}
+              <Badge variant="outline" className={`text-[9px] ${STRENGTH_COLORS[grove.grove_strength as GroveStrength] || ""}`}>
+                {STRENGTH_LABELS[grove.grove_strength as GroveStrength] || grove.grove_strength}
+              </Badge>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-serif text-foreground truncate">
-              {grove.grove_name || "Unnamed Grove"}
-            </p>
-            <p className="text-[10px] text-muted-foreground">
-              {grove.tree_count} trees · {grove.grove_type === "species_grove" ? grove.species_common || grove.species_scientific : "Mixed species"}
-            </p>
+
+          {/* Actions */}
+          <div className="flex gap-2 mt-3">
+            <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+              <Link to={`/map?lat=${grove.center_latitude}&lng=${grove.center_longitude}&zoom=15`}>
+                <MapPin className="w-3 h-3 mr-1" /> View on Map
+              </Link>
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 text-xs"
+              onClick={() => setShowGuardians(v => !v)}
+            >
+              <Shield className="w-3 h-3 mr-1" /> {showGuardians ? "Hide" : "Guardians"}
+            </Button>
           </div>
-          <Badge variant="outline" className={`text-[9px] ${STRENGTH_COLORS[grove.grove_strength as GroveStrength] || ""}`}>
-            {STRENGTH_LABELS[grove.grove_strength as GroveStrength] || grove.grove_strength}
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Guardian section — lazy loaded */}
+      {showGuardians && (
+        <Suspense fallback={null}>
+          <GroveGuardianSection groveId={grove.id} groveName={grove.grove_name} />
+        </Suspense>
+      )}
+    </div>
   );
 }
 
