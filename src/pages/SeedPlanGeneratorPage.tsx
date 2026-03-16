@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import {
   Sprout, TreeDeciduous, Download, ChevronRight, Target,
   Shuffle, Check, Circle, Layers, FileJson, BookOpen, Leaf,
-  ArrowLeft, Map, BarChart3, Sparkles, Eye
+  ArrowLeft, Map, BarChart3, Sparkles, Eye, ChevronRight
 } from "lucide-react";
 import { DATASET_CONFIGS, type DatasetConfig, type CircleConfig, type SeedTree } from "@/config/datasetIntegration";
 

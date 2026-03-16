@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft, TreeDeciduous, Globe, TrendingUp, Layers, Heart,
-  Server, BarChart3, Leaf, Sparkles, Eye, Users, Database
+  Server, BarChart3, Leaf, Sparkles, Eye, Users, Database, BookOpen, ChevronRight
 } from "lucide-react";
 
 /* ── Types ── */
