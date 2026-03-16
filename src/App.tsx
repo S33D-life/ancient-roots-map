@@ -147,6 +147,7 @@ const TreeDataCommonsPage = lazyImportWithRetry(() => import("./pages/TreeDataCo
 const AgentGardenPage = lazyImportWithRetry(() => import("./pages/AgentGardenPage"), "agent-garden");
 const EcosystemMapPage = lazyImportWithRetry(() => import("./pages/EcosystemMapPage"), "ecosystem-map");
 const DatasetDiscoveryAgentPage = lazyImportWithRetry(() => import("./pages/DatasetDiscoveryAgentPage"), "discovery-agent");
+const DatasetWatcherPage = lazyImportWithRetry(() => import("./pages/DatasetWatcherPage"), "dataset-watcher");
 
 const queryClient = new QueryClient({
   defaultOptions: {
