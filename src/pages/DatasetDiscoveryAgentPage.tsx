@@ -737,9 +737,11 @@ const DatasetDiscoveryAgentPage = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
               { label: "Tree Data Commons", to: "/tree-data-commons", icon: "📊" },
-              { label: "Atlas Pages", to: "/atlas", icon: "🗺" },
-              { label: "Agent Garden", to: "/agent-garden", icon: "🤖" },
-              { label: "Ancient Friends", to: "/library/gallery", icon: "🌳" },
+              { label: "Dataset Watcher", to: "/dataset-watcher", icon: "👁️" },
+              { label: "Expansion Map", to: "/atlas-expansion", icon: "🌍" },
+              { label: "Seed-Plan Generator", to: "/seed-plan-generator", icon: "🌱" },
+              { label: "Canopy Projection", to: "/canopy-projection", icon: "🔮" },
+              { label: "Atlas Map", to: "/map", icon: "🗺" },
             ].map(link => (
               <Link key={link.to} to={link.to}
                 className="flex items-center gap-2 p-3 rounded-lg bg-card/50 border border-primary/15 hover:border-primary/40 transition-all group text-sm">
