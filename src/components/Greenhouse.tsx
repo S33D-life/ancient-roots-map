@@ -300,6 +300,18 @@ const Greenhouse = () => {
               My Plants ({plants.length})
             </button>
             <button
+              onClick={() => setViewMode("forest")}
+              className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
+              style={{
+                background: viewMode === "forest" ? 'hsla(0, 0%, 100%, 0.9)' : 'transparent',
+                color: viewMode === "forest" ? 'hsl(120, 30%, 35%)' : 'hsl(90, 15%, 50%)',
+                boxShadow: viewMode === "forest" ? '0 1px 4px hsla(0, 0%, 0%, 0.06)' : 'none',
+              }}
+            >
+              <Sprout className="h-3 w-3" />
+              Forest Saplings ({forestPlants.length})
+            </button>
+            <button
               onClick={() => setViewMode("community")}
               className="px-4 py-2 rounded-lg font-serif text-xs tracking-wider flex items-center gap-1.5 transition-all duration-300"
               style={{
