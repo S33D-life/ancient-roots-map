@@ -8074,6 +8074,7 @@ export type Database = {
         Args: { p_id: string; p_weight: number }
         Returns: undefined
       }
+      owns_agent: { Args: { _agent_id: string }; Returns: boolean }
       record_referral_secure: {
         Args: { p_invite_code: string; p_invitee_id: string }
         Returns: Json
