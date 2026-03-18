@@ -7119,6 +7119,11 @@ export type Database = {
           lore_text: string | null
           name: string
           nation: string | null
+          photo_error: string | null
+          photo_original_url: string | null
+          photo_processed_url: string | null
+          photo_status: string
+          photo_thumb_url: string | null
           project_name: string | null
           project_url: string | null
           radio_theme: string | null
@@ -7153,6 +7158,11 @@ export type Database = {
           lore_text?: string | null
           name: string
           nation?: string | null
+          photo_error?: string | null
+          photo_original_url?: string | null
+          photo_processed_url?: string | null
+          photo_status?: string
+          photo_thumb_url?: string | null
           project_name?: string | null
           project_url?: string | null
           radio_theme?: string | null
@@ -7187,6 +7197,11 @@ export type Database = {
           lore_text?: string | null
           name?: string
           nation?: string | null
+          photo_error?: string | null
+          photo_original_url?: string | null
+          photo_processed_url?: string | null
+          photo_status?: string
+          photo_thumb_url?: string | null
           project_name?: string | null
           project_url?: string | null
           radio_theme?: string | null
