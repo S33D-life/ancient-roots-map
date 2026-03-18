@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { processTreePhoto } from "@/utils/backgroundPhotoProcessor";
+import NearbyDuplicateWarning from "@/components/NearbyDuplicateWarning";
 import { extractExifDate } from "@/utils/exifDate";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -1042,6 +1043,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       </Button>
                     </div>
                   )}
+
+                  {/* Nearby Duplicate Detection */}
+                  <NearbyDuplicateWarning
+                    latitude={lat}
+                    longitude={lng}
+                    name={name}
+                    species={species}
+                    onSelectExisting={(treeId) => {
+                      onOpenChange(false);
+                      navigate(`/tree/${treeId}`);
+                    }}
+                    onDismiss={() => {/* user chose to create anyway */}}
+                  />
 
                   {/* ─── Check in to existing tree ─── */}
                   <div

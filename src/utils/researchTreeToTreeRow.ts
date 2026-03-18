@@ -85,6 +85,8 @@ export function mapResearchTreeToTreeRow(rt: ResearchTreeRow): TreeRow & { __res
     photo_processed_url: null,
     photo_thumb_url: null,
     photo_error: null,
+    image_similarity_hash: null,
+    merged_into_tree_id: null,
   };
 
   const researchOrigin: ResearchOrigin = {

@@ -6642,6 +6642,66 @@ export type Database = {
           },
         ]
       }
+      tree_duplicate_reports: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          proposer_id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          similarity_score: number
+          status: string
+          tree_a_id: string
+          tree_b_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          proposer_id: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similarity_score?: number
+          status?: string
+          tree_a_id: string
+          tree_b_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          proposer_id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          similarity_score?: number
+          status?: string
+          tree_a_id?: string
+          tree_b_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_duplicate_reports_tree_a_id_fkey"
+            columns: ["tree_a_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_duplicate_reports_tree_b_id_fkey"
+            columns: ["tree_b_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_edit_history: {
         Row: {
           created_at: string
@@ -6814,6 +6874,51 @@ export type Database = {
             foreignKeyName: "tree_heart_pools_tree_id_fkey"
             columns: ["tree_id"]
             isOneToOne: true
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_merge_history: {
+        Row: {
+          created_at: string
+          data_migrated: Json | null
+          id: string
+          merge_reason: string | null
+          merged_by: string
+          primary_tree_id: string
+          secondary_tree_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_migrated?: Json | null
+          id?: string
+          merge_reason?: string | null
+          merged_by: string
+          primary_tree_id: string
+          secondary_tree_id: string
+        }
+        Update: {
+          created_at?: string
+          data_migrated?: Json | null
+          id?: string
+          merge_reason?: string | null
+          merged_by?: string
+          primary_tree_id?: string
+          secondary_tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_merge_history_primary_tree_id_fkey"
+            columns: ["primary_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_merge_history_secondary_tree_id_fkey"
+            columns: ["secondary_tree_id"]
+            isOneToOne: false
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
@@ -7164,6 +7269,7 @@ export type Database = {
           girth_cm: number | null
           grove_scale: Database["public"]["Enums"]["grove_scale"] | null
           id: string
+          image_similarity_hash: string | null
           is_anchor_node: boolean | null
           is_churchyard_tree: boolean | null
           latitude: number | null
@@ -7171,6 +7277,7 @@ export type Database = {
           linked_churchyard_id: string | null
           longitude: number | null
           lore_text: string | null
+          merged_into_tree_id: string | null
           name: string
           nation: string | null
           photo_error: string | null
@@ -7203,6 +7310,7 @@ export type Database = {
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
+          image_similarity_hash?: string | null
           is_anchor_node?: boolean | null
           is_churchyard_tree?: boolean | null
           latitude?: number | null
@@ -7210,6 +7318,7 @@ export type Database = {
           linked_churchyard_id?: string | null
           longitude?: number | null
           lore_text?: string | null
+          merged_into_tree_id?: string | null
           name: string
           nation?: string | null
           photo_error?: string | null
@@ -7242,6 +7351,7 @@ export type Database = {
           girth_cm?: number | null
           grove_scale?: Database["public"]["Enums"]["grove_scale"] | null
           id?: string
+          image_similarity_hash?: string | null
           is_anchor_node?: boolean | null
           is_churchyard_tree?: boolean | null
           latitude?: number | null
@@ -7249,6 +7359,7 @@ export type Database = {
           linked_churchyard_id?: string | null
           longitude?: number | null
           lore_text?: string | null
+          merged_into_tree_id?: string | null
           name?: string
           nation?: string | null
           photo_error?: string | null
@@ -7275,6 +7386,13 @@ export type Database = {
             columns: ["linked_churchyard_id"]
             isOneToOne: false
             referencedRelation: "uk_churchyards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trees_merged_into_tree_id_fkey"
+            columns: ["merged_into_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
             referencedColumns: ["id"]
           },
         ]
