@@ -6642,6 +6642,60 @@ export type Database = {
           },
         ]
       }
+      tree_edit_history: {
+        Row: {
+          created_at: string
+          edit_reason: string | null
+          edit_type: string
+          field_name: string
+          id: string
+          new_value: string | null
+          old_value: string | null
+          proposal_id: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          edit_reason?: string | null
+          edit_type?: string
+          field_name: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          proposal_id?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          edit_reason?: string | null
+          edit_type?: string
+          field_name?: string
+          id?: string
+          new_value?: string | null
+          old_value?: string | null
+          proposal_id?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_edit_history_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "tree_edit_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_edit_history_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_edit_proposals: {
         Row: {
           confidence: string
