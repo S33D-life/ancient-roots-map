@@ -246,7 +246,7 @@ const MapFilters = ({
 
         <Separator />
 
-        <ScrollArea className="flex-1 h-[calc(100vh-420px)]">
+        <ScrollArea className="flex-1 h-[calc(100dvh-420px)]">
           <div className="grid grid-cols-4 gap-2 px-4 pb-4">
             {/* All option */}
             <button
