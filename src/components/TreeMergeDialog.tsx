@@ -90,18 +90,20 @@ export default function TreeMergeDialog({
       if (!user) throw new Error("Not authenticated");
 
       // 1. Reassign offerings from secondary → primary
-      const { count: offeringsCount } = await supabase
+      const offeringsResult = await supabase
         .from("offerings")
         .update({ tree_id: primary.id } as any)
         .eq("tree_id", secondary.id)
-        .select("id", { count: "exact", head: true });
+        .select("id");
+      const offeringsCount = offeringsResult.data?.length || 0;
 
       // 2. Reassign checkins
-      const { count: checkinsCount } = await supabase
+      const checkinsResult = await supabase
         .from("tree_checkins" as any)
         .update({ tree_id: primary.id } as any)
         .eq("tree_id", secondary.id)
-        .select("id", { count: "exact", head: true });
+        .select("id");
+      const checkinsCount = checkinsResult.data?.length || 0;
 
       // 3. Reassign heart transactions
       await supabase
