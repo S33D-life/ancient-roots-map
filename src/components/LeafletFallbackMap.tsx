@@ -238,6 +238,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const hasFittedRef = useRef(false);
   const focusHaloRef = useRef<L.Marker | null>(null);
   const focusFallbackMarkerRef = useRef<L.Marker | null>(null);
+  const zoomStageRef = useRef<{ treeId: string; stage: number; ts: number } | null>(null);
   const geo = useGeolocation();
   const locating = geo.isLocating;
   const [located, setLocated] = useState(false);
