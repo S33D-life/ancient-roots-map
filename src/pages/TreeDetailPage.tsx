@@ -774,10 +774,14 @@ const TreeDetailPage = () => {
                 </AnimatePresence>
               </div>
             )}
+            </Suspense>
+            </TabErrorBoundary>
           </TabsContent>
 
           {/* ── OFFERINGS TAB ── */}
           <TabsContent value="offerings" className="space-y-6">
+            <TabErrorBoundary tabName="Offerings">
+            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
             {/* Gate: offerings require active/expiring meeting */}
             {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
               <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
