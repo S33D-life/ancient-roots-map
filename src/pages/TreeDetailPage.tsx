@@ -166,6 +166,7 @@ const TreeDetailPage = () => {
   const checkinStats = useCheckinStats(id, userId);
   const bloomStatus = useBloomStatus(tree?.species);
   const { data: treeContributions = [] } = useTreeContributions(id);
+  const { role: editRole, canDirectEdit, loading: editPermLoading, userId: editUserId } = useTreeEditPermission(id);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
     treeId: id,
     treeSpecies: tree?.species || "",
