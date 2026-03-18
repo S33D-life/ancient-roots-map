@@ -58,7 +58,7 @@ import { useSeasonalLens, LENS_CONFIGS, type SeasonalLensType } from "@/contexts
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
-import NearbyDiscoveryPanel from "./NearbyDiscoveryPanel";
+// NearbyDiscoveryPanel removed — replaced by MapTreePanel in MapPage
 import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
 import type { Rootstone } from "@/data/rootstones";
 import { consumeQueuedMycelialThreads, onMycelialThread, type MycelialPoint, type MycelialThreadEvent } from "@/lib/mycelial-network";

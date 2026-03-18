@@ -1,6 +1,7 @@
 /**
  * MapTreePanel — Combined floating panel (top-right) with two tabs:
  *   "Recent" (recently added trees) and "Nearby" (trees awaiting visits).
+ *   Hides when the map's clear-view (eye) toggle is active.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,17 @@ export default function MapTreePanel({ onTreeClick }: { onTreeClick?: (treeId: s
   const [tab, setTab] = useState<Tab>("recent");
   const [recentTrees, setRecentTrees] = useState<TreeItem[]>([]);
   const [nearbyTrees, setNearbyTrees] = useState<TreeItem[]>([]);
+  const [hidden, setHidden] = useState(false);
+
+  // Listen for clear-view toggle from the map
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setHidden(!!detail?.clearView);
+    };
+    window.addEventListener("s33d-clear-view", handler);
+    return () => window.removeEventListener("s33d-clear-view", handler);
+  }, []);
 
   useEffect(() => {
     supabase
@@ -58,7 +70,7 @@ export default function MapTreePanel({ onTreeClick }: { onTreeClick?: (treeId: s
 
   const trees = tab === "recent" ? recentTrees : nearbyTrees;
 
-  if (!recentTrees.length && !nearbyTrees.length) return null;
+  if (hidden || (!recentTrees.length && !nearbyTrees.length)) return null;
 
   return (
     <div
