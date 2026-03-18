@@ -295,6 +295,25 @@ const TreeDetailPage = () => {
     };
 
     Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount(), fetchEcoBelonging()]).then(() => setLoading(false));
+
+    // Realtime subscription for photo processing updates
+    const channel = supabase
+      .channel(`tree-photo-${id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'trees', filter: `id=eq.${id}` },
+        (payload) => {
+          const updated = payload.new as any;
+          if (updated.photo_status) {
+            setTree((prev) => prev ? { ...prev, ...updated } : prev);
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [id]);
 
   if (loading) {
