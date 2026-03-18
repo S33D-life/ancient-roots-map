@@ -628,6 +628,8 @@ const TreeDetailPage = () => {
 
           {/* ── ENCOUNTERS TAB ── */}
           <TabsContent value="encounters" className="space-y-6">
+            <TabErrorBoundary tabName="Encounters">
+            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
             {/* Encounter Cluster */}
             <EncounterClusterPanel tree={tree} />
 
