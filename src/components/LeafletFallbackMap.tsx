@@ -359,6 +359,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const showBloomingClock = layers.bloomingClock;
   const bloomConstellationMode = layers.bloomConstellationMode;
   const clearView = layers.clearView;
+
+  // Broadcast clearView state so external panels (MapTreePanel) can hide
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("s33d-clear-view", { detail: { clearView } }));
+  }, [clearView]);
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
   const showMycelialPathways = layers.mycelialPathways;
