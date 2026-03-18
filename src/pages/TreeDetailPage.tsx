@@ -366,12 +366,20 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center text-muted-foreground">Tree not found</p>
-          <Link to="/map" className="block text-center mt-4 text-primary hover:underline">
-            Return to Map
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="container mx-auto px-4 py-16 text-center space-y-4 max-w-md"
+        >
+          <div className="text-4xl mb-2">🌿</div>
+          <p className="text-muted-foreground font-serif">
+            This Ancient Friend could not be found — it may have moved to another part of the forest.
+          </p>
+          <Link to="/map" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm transition-colors">
+            <Map className="h-4 w-4" />
+            Return to the Map
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
