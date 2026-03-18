@@ -91,7 +91,9 @@ const PresenceRitual = lazy(() => import("@/components/PresenceRitual"));
 const CoWitnessPanel = lazy(() => import("@/components/witness/CoWitnessPanel"));
 const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"));
 const TreeRelationshipCard = lazy(() => import("@/components/tree-sections/TreeRelationshipCard"));
+const StewardToolsSection = lazy(() => import("@/components/StewardToolsSection"));
 import { useTreeRelationship } from "@/hooks/use-tree-relationship";
+import { useTreeEditPermission } from "@/hooks/use-tree-edit-permission";
 import TabErrorBoundary from "@/components/TabErrorBoundary";
 import { InfluenceTokenProvider } from "@/contexts/InfluenceTokenContext";
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
@@ -164,6 +166,7 @@ const TreeDetailPage = () => {
   const checkinStats = useCheckinStats(id, userId);
   const bloomStatus = useBloomStatus(tree?.species);
   const { data: treeContributions = [] } = useTreeContributions(id);
+  const { role: editRole, canDirectEdit, loading: editPermLoading, userId: editUserId } = useTreeEditPermission(id);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
     treeId: id,
     treeSpecies: tree?.species || "",
@@ -639,6 +642,20 @@ const TreeDetailPage = () => {
               loading={sourcesLoading}
               onContribute={() => setContributeSourceOpen(true)}
             />
+
+            {/* Steward Tools — edit / suggest / history */}
+            <Suspense fallback={null}>
+              <StewardToolsSection
+                tree={tree}
+                treeId={id!}
+                userId={editUserId}
+                role={editRole}
+                canDirectEdit={canDirectEdit}
+                loading={editPermLoading}
+                onProposeEdit={() => setProposeEditOpen(true)}
+                onTreeUpdated={(updated) => setTree(updated)}
+              />
+            </Suspense>
 
             {/* Stewardship Log */}
             <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
