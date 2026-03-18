@@ -649,8 +649,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         longitude: lng,
         estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
         created_by: user.id,
+        photo_status: droppedPhotoFile ? 'pending' : 'none',
         ...(photoDate ? { created_at: photoDate } : {}),
-      }).select('id').single();
+      } as any).select('id').single();
 
       if (error) throw error;
       setSavedTreeId(data.id);
@@ -677,8 +678,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         species: speciesValue,
       }));
 
+      // Fire-and-forget background photo processing
       if (droppedPhotoFile) {
-        uploadPhotoOffering(data.id, user.id, droppedPhotoFile);
+        const photoFile = droppedPhotoFile;
+        processTreePhoto({
+          treeId: data.id,
+          userId: user.id,
+          file: photoFile,
+          onStatusChange: (status) => {
+            if (status === "ready") {
+              toast({ title: "📷 Photo processed", description: "Your tree's photo is now ready" });
+            } else if (status === "failed") {
+              toast({ title: "Photo processing issue", description: "Original photo was preserved. You can retry from the tree page.", variant: "destructive" });
+            }
+          },
+        });
       }
 
       setTransitionDir("forward");
