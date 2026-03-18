@@ -88,7 +88,7 @@ export default function MapTreePanel({ onTreeClick }: { onTreeClick?: (treeId: s
         }}
       >
         {tab === "recent" ? (
-          <TreeDeciduous className="w-3 h-3 text-emerald-400" />
+          <TreeDeciduous className="w-3 h-3" style={{ color: "hsl(var(--accent))" }} />
         ) : (
           <Compass className="w-3 h-3 text-primary/70" />
         )}
