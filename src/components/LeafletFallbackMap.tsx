@@ -238,6 +238,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const hasFittedRef = useRef(false);
   const focusHaloRef = useRef<L.Marker | null>(null);
   const focusFallbackMarkerRef = useRef<L.Marker | null>(null);
+  const zoomStageRef = useRef<{ treeId: string; stage: number; ts: number } | null>(null);
   const geo = useGeolocation();
   const locating = geo.isLocating;
   const [located, setLocated] = useState(false);
@@ -2589,14 +2590,42 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [filteredTrees]);
 
+  // Reset progressive zoom stage on user drag
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const onDragStart = () => { zoomStageRef.current = null; };
+    map.on("dragstart", onDragStart);
+    return () => { map.off("dragstart", onDragStart); };
+  }, []);
+
   const handleSearchSelect = useCallback((tree: Tree) => {
     if (!mapRef.current) return;
-    // "Seeking Line" profile — direct, intentional, shorter duration
-    mapRef.current.flyTo([tree.latitude, tree.longitude], 16, {
-      duration: 0.9,
+    const now = Date.now();
+    const prev = zoomStageRef.current;
+
+    // Progressive zoom: if same tree selected within 3s, escalate
+    const isSameTree = prev && prev.treeId === tree.id && (now - prev.ts) < 3000;
+    let targetZoom: number;
+
+    if (isSameTree && prev.stage === 1) {
+      // Second click → close zoom
+      targetZoom = 19;
+      zoomStageRef.current = { treeId: tree.id, stage: 2, ts: now };
+    } else {
+      // First click or reset → overview zoom
+      targetZoom = 15;
+      zoomStageRef.current = { treeId: tree.id, stage: 1, ts: now };
+    }
+
+    const isCloseZoom = targetZoom >= 18;
+
+    mapRef.current.flyTo([tree.latitude, tree.longitude], targetZoom, {
+      duration: isCloseZoom ? 0.7 : 0.9,
       easeLinearity: 0.25,
     });
-    // Open popup after flyTo settles
+
+    // Open popup and optionally show pulse on close zoom
     setTimeout(() => {
       const map = mapRef.current;
       if (!map || !clusterRef.current) return;
@@ -2605,10 +2634,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         if (ll && Math.abs(ll.lat - tree.latitude) < 0.0001 && Math.abs(ll.lng - tree.longitude) < 0.0001) {
           clusterRef.current.zoomToShowLayer(layer, () => {
             layer.openPopup();
+            // Pulse animation on close zoom
+            if (isCloseZoom) {
+              const el = (layer as any)._icon;
+              if (el) {
+                el.classList.add("tree-zoom-pulse");
+                setTimeout(() => el.classList.remove("tree-zoom-pulse"), 1200);
+              }
+            }
           });
         }
       });
-    }, 1100);
+    }, isCloseZoom ? 900 : 1100);
   }, []);
 
   return (
