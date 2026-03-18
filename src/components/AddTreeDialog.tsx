@@ -1044,6 +1044,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     </div>
                   )}
 
+                  {/* Nearby Duplicate Detection */}
+                  <NearbyDuplicateWarning
+                    latitude={lat}
+                    longitude={lng}
+                    name={name}
+                    species={species}
+                    onSelectExisting={(treeId) => {
+                      onOpenChange(false);
+                      navigate(`/tree/${treeId}`);
+                    }}
+                    onDismiss={() => {/* user chose to create anyway */}}
+                  />
+
                   {/* ─── Check in to existing tree ─── */}
                   <div
                     className="rounded-xl p-3.5 cursor-pointer group transition-all hover:scale-[1.01]"
