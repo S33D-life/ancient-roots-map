@@ -2777,32 +2777,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         />
       )}
 
-      {/* Nearby Ancient Friends discovery panel */}
-      {!clearView && (
-        <NearbyDiscoveryPanel
-          trees={filteredTrees}
-          userLat={userLatLng?.[0] ?? null}
-          userLng={userLatLng?.[1] ?? null}
-          visible={!!userLatLng && !atlasFilterOpen}
-          onTreeSelect={(lat, lng, treeId) => {
-            const map = mapRef.current;
-            if (map) {
-              map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 1.2 });
-              // Trigger marker focus after fly
-              setTimeout(() => {
-                const cluster = clusterRef.current;
-                if (cluster) {
-                  cluster.eachLayer((layer: any) => {
-                    if (layer?.options?.treeData?.id === treeId) {
-                      layer.openPopup();
-                    }
-                  });
-                }
-              }, 1400);
-            }
-          }}
-        />
-      )}
+      {/* NearbyDiscoveryPanel removed — replaced by MapTreePanel in MapPage */}
 
       {debugEnabled && (
         <div
