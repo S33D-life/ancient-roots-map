@@ -402,93 +402,69 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: init
     } finally { setLoading(false); submittingRef.current = false; }
   };
 
+  const celebrationOverlay = <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />;
+
   // Delegated flows for song/voice/book
   if (activeType === "song") {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          {/* Ambient glow bar */}
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">🎵</span> Song Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Let music flow through this Ancient Friend
-              </p>
-            </DialogHeader>
-            {/* Type switcher */}
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : (
-              <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
+        subtitle="Let music flow through this Ancient Friend"
+      >
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+        <div className="mt-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
+          )}
+        </div>
+      </ResponsiveDialog>
     );
   }
 
   if (activeType === "voice") {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">🎙️</span> Voice Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Speak into the canopy — your voice becomes part of this tree
-              </p>
-            </DialogHeader>
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : (
-              <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
+        subtitle="Speak into the canopy — your voice becomes part of this tree"
+      >
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+        <div className="mt-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+          )}
+        </div>
+      </ResponsiveDialog>
     );
   }
 
   if (activeType === "book") {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">📖</span> Book Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Place a story in this Ancient Friend's living archive
-              </p>
-            </DialogHeader>
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : (
-              <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
+        subtitle="Place a story in this Ancient Friend's living archive"
+      >
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+        <div className="mt-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
+          )}
+        </div>
+      </ResponsiveDialog>
     );
   }
 
