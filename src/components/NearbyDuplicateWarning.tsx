@@ -102,10 +102,10 @@ export default function NearbyDuplicateWarning({
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.3 }}
       >
-        <Card className="border-yellow-500/30 bg-yellow-500/5">
+        <Card className="border-accent/30 bg-accent/5">
           <CardContent className="p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0" />
+              <AlertTriangle className="h-4 w-4 text-accent shrink-0" />
               <p className="text-xs font-serif text-foreground/80">
                 Possible Ancient Friend nearby
               </p>

@@ -176,8 +176,8 @@ export default function TreeMergeDialog({
 
             {warnings.length > 0 && (
               <div className="space-y-1">
-                {warnings.map((w, i) => (
-                  <div key={i} className="flex items-start gap-1.5 text-yellow-500">
+              {warnings.map((w, i) => (
+                  <div key={i} className="flex items-start gap-1.5 text-accent">
                     <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
                     <span className="text-[10px]">{w}</span>
                   </div>
