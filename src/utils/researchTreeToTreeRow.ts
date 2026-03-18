@@ -80,6 +80,11 @@ export function mapResearchTreeToTreeRow(rt: ResearchTreeRow): TreeRow & { __res
     source_url: rt.source_doc_url,
     what3words: null,
     wish_tags: null,
+    photo_status: "none",
+    photo_original_url: null,
+    photo_processed_url: null,
+    photo_thumb_url: null,
+    photo_error: null,
   };
 
   const researchOrigin: ResearchOrigin = {
