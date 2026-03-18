@@ -35,6 +35,7 @@ interface TreePageHeroProps {
   onWhisper?: () => void;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
+  onRetryPhoto?: () => void;
 }
 
 const TreePageHero = ({
