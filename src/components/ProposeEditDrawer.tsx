@@ -312,7 +312,7 @@ export default function ProposeEditDrawer({ open, onOpenChange, tree }: Props) {
           {flags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {flags.map((f) => (
-                <Badge key={f} variant="outline" className="text-[10px] border-yellow-500/40 text-yellow-600 font-serif">
+                <Badge key={f} variant="outline" className="text-[10px] border-accent/40 text-accent font-serif">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   {f.replace(/_/g, " ")}
                 </Badge>
