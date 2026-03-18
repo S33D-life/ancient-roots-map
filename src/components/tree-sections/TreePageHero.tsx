@@ -96,9 +96,9 @@ const TreePageHero = ({
         className="absolute inset-0 z-0"
         style={{ transform: `translateY(${scrollY}px)` }}
       >
-        {photoUrl ? (
+        {displayPhoto ? (
           <img
-            src={photoUrl}
+            src={displayPhoto}
             alt={tree.name}
             className="w-full h-full object-cover opacity-30 cursor-pointer"
             loading="eager"
@@ -114,6 +114,13 @@ const TreePageHero = ({
             }}
           />
         )}
+
+        {/* Photo processing status overlay */}
+        <TreePhotoStatus
+          status={photoStatus}
+          originalUrl={photoOriginalUrl}
+          onRetry={onRetryPhoto}
+        />
         {/* Gold leaf vignette */}
         <div
           className="absolute inset-0"
