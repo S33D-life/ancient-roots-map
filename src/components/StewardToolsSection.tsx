@@ -1,19 +1,22 @@
 /**
  * StewardToolsSection — contextual editing controls for tree pages.
  * Shows different tools based on the user's editing permission:
- * - Creator / Steward: Edit Details, Edit Location, View History
- * - Contributor: Suggest Edit, View History
+ * - Creator / Steward: Edit Details, Edit Location, View History, Duplicate Review, Merge
+ * - Contributor: Suggest Edit, Report Duplicate, View History
  * - Anonymous: nothing
  */
 import { lazy, Suspense, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, MapPin, MessageSquarePlus, Clock, Shield, Loader2 } from "lucide-react";
+import { Pencil, MessageSquarePlus, Clock, Shield, Loader2, GitMerge } from "lucide-react";
 import type { TreeEditRole } from "@/hooks/use-tree-edit-permission";
 
 const TreeDirectEditPanel = lazy(() => import("@/components/TreeDirectEditPanel"));
 const TreeEditHistory = lazy(() => import("@/components/TreeEditHistory"));
+const DuplicateReviewQueue = lazy(() => import("@/components/DuplicateReviewQueue"));
+const TreeMergeDialog = lazy(() => import("@/components/TreeMergeDialog"));
+const ReportDuplicateButton = lazy(() => import("@/components/ReportDuplicateButton"));
 
 interface Tree {
   id: string;
@@ -57,10 +60,20 @@ export default function StewardToolsSection({
 }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDuplicates, setShowDuplicates] = useState(false);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergePrimaryId, setMergePrimaryId] = useState("");
+  const [mergeSecondaryId, setMergeSecondaryId] = useState("");
 
   if (loading || role === "anonymous") return null;
 
   const roleInfo = ROLE_LABELS[role];
+
+  const handleMergeTrees = (primaryId: string, secondaryId: string) => {
+    setMergePrimaryId(primaryId);
+    setMergeSecondaryId(secondaryId);
+    setMergeOpen(true);
+  };
 
   return (
     <>
@@ -116,11 +129,42 @@ export default function StewardToolsSection({
               <Clock className="h-3 w-3" />
               {showHistory ? "Hide History" : "View History"}
             </Button>
+
+            {/* Duplicate tools */}
+            {canDirectEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs font-serif gap-1.5 text-muted-foreground"
+                onClick={() => setShowDuplicates(!showDuplicates)}
+              >
+                <GitMerge className="h-3 w-3" />
+                {showDuplicates ? "Hide Duplicates" : "Duplicate Queue"}
+              </Button>
+            )}
+
+            {!canDirectEdit && (
+              <Suspense fallback={null}>
+                <ReportDuplicateButton
+                  treeId={treeId}
+                  treeName={tree.name}
+                  treeSpecies={tree.species}
+                  treeLat={tree.latitude}
+                  treeLng={tree.longitude}
+                />
+              </Suspense>
+            )}
           </div>
 
           {showHistory && (
             <Suspense fallback={<div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary/40" /></div>}>
               <TreeEditHistory treeId={treeId} />
+            </Suspense>
+          )}
+
+          {showDuplicates && canDirectEdit && (
+            <Suspense fallback={<div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-primary/40" /></div>}>
+              <DuplicateReviewQueue onMergeTrees={handleMergeTrees} />
             </Suspense>
           )}
         </CardContent>
@@ -135,6 +179,21 @@ export default function StewardToolsSection({
             userId={userId}
             role={role}
             onTreeUpdated={onTreeUpdated}
+          />
+        </Suspense>
+      )}
+
+      {canDirectEdit && mergeOpen && (
+        <Suspense fallback={null}>
+          <TreeMergeDialog
+            open={mergeOpen}
+            onOpenChange={setMergeOpen}
+            primaryTreeId={mergePrimaryId}
+            secondaryTreeId={mergeSecondaryId}
+            onMergeComplete={() => {
+              setShowDuplicates(true);
+              onTreeUpdated(tree); // refresh
+            }}
           />
         </Suspense>
       )}
