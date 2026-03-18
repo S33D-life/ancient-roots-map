@@ -395,7 +395,7 @@ const TreeDataCommonsPage = () => {
 
         {/* ── Tabs ── */}
         <Tabs defaultValue="sources" className="mt-8">
-          <TabsList className="bg-card/50 border border-primary/20">
+          <TabsList className="bg-card/50 border border-primary/20 w-full overflow-x-auto flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="sources">
               <Database className="w-3.5 h-3.5 mr-1.5" /> Sources
             </TabsTrigger>
