@@ -55,6 +55,13 @@ const TreePageHero = ({
   const heroRef = useRef<HTMLDivElement>(null);
   const { isFullscreen: imageFullscreen, enterFullscreen: openImageFS, exitFullscreen: closeImageFS } = useFullscreen();
   const isAnchor = (tree as any).is_anchor_node;
+  const photoStatus = ((tree as any).photo_status || "none") as PhotoProcessingStatus;
+  const photoOriginalUrl = (tree as any).photo_original_url as string | null;
+
+  // Determine the best available photo for display
+  const displayPhoto = photoUrl
+    || (tree as any).photo_processed_url
+    || photoOriginalUrl;
 
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
