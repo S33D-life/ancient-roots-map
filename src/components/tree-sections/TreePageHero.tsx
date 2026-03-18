@@ -49,6 +49,7 @@ const TreePageHero = ({
   onWhisper,
   ecoBelonging,
   onNavigateHive,
+  onRetryPhoto,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
