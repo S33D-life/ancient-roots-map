@@ -417,56 +417,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
   }, [toast]);
 
-  // Upload dropped photo as first offering after tree is saved
-  const uploadPhotoOffering = useCallback(async (treeId: string, userId: string, file: File) => {
-    setUploadingOffering(true);
-    try {
-      // Downscale image client-side (2048px max, 0.82 quality)
-      const compressed = await new Promise<Blob>((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const maxDim = 2048;
-          let w = img.width, h = img.height;
-          if (w > maxDim || h > maxDim) {
-            const scale = maxDim / Math.max(w, h);
-            w = Math.round(w * scale);
-            h = Math.round(h * scale);
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = w; canvas.height = h;
-          canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
-          canvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.82);
-        };
-        img.src = URL.createObjectURL(file);
-      });
-
-      const filePath = `${userId}/${treeId}/photo-${Date.now()}.jpeg`;
-      const { error: uploadErr } = await supabase.storage
-        .from("offerings")
-        .upload(filePath, compressed, { contentType: "image/jpeg" });
-      if (uploadErr) throw uploadErr;
-
-      const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(filePath);
-
-      const { error: insertErr } = await supabase.from("offerings").insert({
-        tree_id: treeId,
-        title: "First encounter",
-        type: "photo" as any,
-        media_url: urlData.publicUrl,
-        created_by: userId,
-        visibility: "public",
-        ...(photoDate ? { created_at: photoDate } : {}),
-      });
-      if (insertErr) throw insertErr;
-
-      toast({ title: "📷 Photo offering saved", description: "Your first encounter photo has been added" });
-    } catch (err: any) {
-      console.error("Photo offering upload error:", err);
-      toast({ title: "Photo upload failed", description: err.message || "Could not save the photo offering", variant: "destructive" });
-    } finally {
-      setUploadingOffering(false);
-    }
-  }, [photoDate, toast]);
+  // Photo processing is now handled by backgroundPhotoProcessor — uploadPhotoOffering removed
 
   const onDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
