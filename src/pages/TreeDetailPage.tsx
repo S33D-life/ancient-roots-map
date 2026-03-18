@@ -335,18 +335,29 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8 text-center space-y-4">
-          <p className="text-muted-foreground font-serif">
-            This record has been merged with another Ancient Friend.
-          </p>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="container mx-auto px-4 py-16 text-center space-y-6 max-w-md"
+        >
+          <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center bg-primary/10 border border-primary/20">
+            <TreeDeciduous className="h-8 w-8 text-primary/60" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-serif text-lg text-foreground/90">Records Merged</h2>
+            <p className="text-sm text-muted-foreground font-serif">
+              This Ancient Friend has been merged with another record to maintain an accurate atlas.
+            </p>
+          </div>
           <Link
             to={`/tree/${(tree as any).merged_into_tree_id}`}
-            className="inline-flex items-center gap-2 text-primary hover:underline font-serif"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm tracking-wide transition-colors"
           >
             <TreeDeciduous className="h-4 w-4" />
-            View the merged tree
+            Visit the unified record →
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -355,12 +366,20 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center text-muted-foreground">Tree not found</p>
-          <Link to="/map" className="block text-center mt-4 text-primary hover:underline">
-            Return to Map
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="container mx-auto px-4 py-16 text-center space-y-4 max-w-md"
+        >
+          <div className="text-4xl mb-2">🌿</div>
+          <p className="text-muted-foreground font-serif">
+            This Ancient Friend could not be found — it may have moved to another part of the forest.
+          </p>
+          <Link to="/map" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm transition-colors">
+            <Map className="h-4 w-4" />
+            Return to the Map
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -1127,26 +1146,41 @@ const EmptyOffering = ({
   type: OfferingType;
   label: string;
   onAdd: () => void;
-}) => (
-  <div
-    className="relative rounded-xl border border-dashed border-primary/30 p-10 text-center overflow-hidden"
-    style={{
-      background:
-        "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.06), transparent 70%)",
-    }}
-  >
-    <div className="text-4xl mb-3 opacity-40">
-      {type === "photo" ? "📷" : type === "song" ? "🎵" : type === "poem" ? "📜" : type === "story" ? "✍️" : type === "book" ? "📖" : type === "voice" ? "🎙️" : "✨"}
-    </div>
-    <p className="text-muted-foreground font-serif mb-4">
-      No {label.toLowerCase()} yet. Be the first to leave an offering.
-    </p>
-    <Button variant="outline" size="sm" onClick={onAdd} className="font-serif tracking-wider text-xs">
-      <Sparkles className="h-3 w-3 mr-1.5" />
-      Add the first {label.slice(0, -1).toLowerCase()}
-    </Button>
-  </div>
-);
+}) => {
+  const emptyMessages: Record<string, string> = {
+    photo: "Leave the first memory beneath this tree.",
+    song: "Be the first to offer a song to this Ancient Friend.",
+    poem: "Write the first poem for this tree's story.",
+    story: "Share the first musing about this Ancient Friend.",
+    voice: "Record the first voice offering for this tree.",
+    book: "Offer the first book to this tree's library.",
+    nft: "Create the first digital artifact for this tree.",
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="relative rounded-xl border border-dashed border-primary/20 p-10 text-center overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.04), transparent 70%)",
+      }}
+    >
+      <div className="text-4xl mb-3 opacity-30">
+        {type === "photo" ? "📷" : type === "song" ? "🎵" : type === "poem" ? "📜" : type === "story" ? "✍️" : type === "book" ? "📖" : type === "voice" ? "🎙️" : "✨"}
+      </div>
+      <p className="text-muted-foreground font-serif mb-4 text-sm">
+        {emptyMessages[type] || `No ${label.toLowerCase()} yet.`}
+      </p>
+      <Button variant="outline" size="sm" onClick={onAdd} className="font-serif tracking-wider text-xs gap-1.5">
+        <Sparkles className="h-3 w-3" />
+        Leave the first {label.slice(0, -1).toLowerCase()}
+      </Button>
+    </motion.div>
+  );
+};
 
 const PhotoGrid = ({
   offerings,

@@ -152,7 +152,7 @@ export default function TreeMergeDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md max-h-[90dvh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle className="font-serif flex items-center gap-2">
             <GitMerge className="h-5 w-5 text-primary" />

@@ -76,8 +76,30 @@ export default function CanopyVisitsTimeline({ checkins, stats, loading, onCheck
     }
   };
 
-  if (loading) return null;
-  if (checkins.length === 0 && !showCheckinButton) return null;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-6">
+        <Loader2 className="h-5 w-5 animate-spin text-primary/40" />
+      </div>
+    );
+  }
+
+  if (checkins.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-primary/20 p-8 text-center" style={{ background: "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.04), transparent 70%)" }}>
+        <div className="text-3xl mb-3 opacity-30">🌿</div>
+        <p className="text-sm text-muted-foreground font-serif mb-3">
+          Be the first wanderer to meet this Ancient Friend.
+        </p>
+        {showCheckinButton && (
+          <Button variant="outline" size="sm" onClick={onCheckin} className="font-serif text-xs gap-1.5">
+            <MapPin className="h-3 w-3" />
+            Record your visit
+          </Button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-8">

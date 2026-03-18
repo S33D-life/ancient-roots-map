@@ -187,7 +187,7 @@ export default function ProposeEditDrawer({ open, onOpenChange, tree }: Props) {
           >
             <Input value={species} onChange={(e) => setSpecies(e.target.value)} className="font-serif text-sm" />
             {editSpecies && species !== tree.species && (
-              <Badge variant="outline" className="mt-1 text-[10px] border-yellow-500/50 text-yellow-500">
+              <Badge variant="outline" className="mt-1 text-[10px] border-accent/50 text-accent">
                 <AlertTriangle className="w-3 h-3 mr-1" /> Species change flagged for review
               </Badge>
             )}
@@ -312,7 +312,7 @@ export default function ProposeEditDrawer({ open, onOpenChange, tree }: Props) {
           {flags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {flags.map((f) => (
-                <Badge key={f} variant="outline" className="text-[10px] border-yellow-500/40 text-yellow-600 font-serif">
+                <Badge key={f} variant="outline" className="text-[10px] border-accent/40 text-accent font-serif">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   {f.replace(/_/g, " ")}
                 </Badge>

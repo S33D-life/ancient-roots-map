@@ -205,7 +205,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="overflow-y-auto sm:max-w-lg">
+        <SheetContent className="overflow-y-auto sm:max-w-lg" style={{ maxHeight: '100dvh' }}>
           <SheetHeader>
             <SheetTitle className="font-serif text-primary tracking-wide flex items-center gap-2">
               <Pencil className="h-4 w-4" />
@@ -362,7 +362,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <AlertTriangle className="h-5 w-5 text-accent" />
               Confirm Sensitive Changes
             </AlertDialogTitle>
             <AlertDialogDescription className="font-serif text-sm space-y-2">
@@ -404,8 +404,8 @@ function SensitivityBadge({ field }: { field: string }) {
 
   return (
     <div className="flex items-start gap-1.5 mt-1">
-      <AlertTriangle className="h-3 w-3 text-yellow-500 shrink-0 mt-0.5" />
-      <span className="text-[10px] text-yellow-500/80">{message}</span>
+      <AlertTriangle className="h-3 w-3 text-accent shrink-0 mt-0.5" />
+      <span className="text-[10px] text-accent/80">{message}</span>
     </div>
   );
 }

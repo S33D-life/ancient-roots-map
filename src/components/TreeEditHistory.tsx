@@ -64,7 +64,28 @@ export default function TreeEditHistory({ treeId }: Props) {
     fetch();
   }, [treeId]);
 
-  if (loading || entries.length === 0) return null;
+  if (loading) {
+    return (
+      <Card className="bg-card/50 border-border/30">
+        <CardContent className="p-4 flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5 text-muted-foreground/40 animate-pulse" />
+          <span className="text-xs font-serif text-muted-foreground">Loading history…</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (entries.length === 0) {
+    return (
+      <Card className="bg-card/50 border-border/30">
+        <CardContent className="p-4">
+          <p className="text-xs text-muted-foreground font-serif text-center">
+            No edits recorded yet — this tree's history is untouched.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const visible = expanded ? entries : entries.slice(0, 3);
 
