@@ -205,7 +205,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="overflow-y-auto sm:max-w-lg">
+        <SheetContent className="overflow-y-auto sm:max-w-lg" style={{ maxHeight: '100dvh' }}>
           <SheetHeader>
             <SheetTitle className="font-serif text-primary tracking-wide flex items-center gap-2">
               <Pencil className="h-4 w-4" />

@@ -102,9 +102,14 @@ export default function DuplicateReviewQueue({ onMergeTrees }: Props) {
 
   if (reports.length === 0) {
     return (
-      <p className="text-xs text-muted-foreground font-serif text-center py-3">
-        No pending duplicate reports
-      </p>
+      <div className="text-center py-4 space-y-1">
+        <p className="text-xs text-muted-foreground font-serif">
+          No pending duplicate reports — the atlas is looking clean.
+        </p>
+        <p className="text-[10px] text-muted-foreground/50 font-serif">
+          Reports from contributors will appear here for review.
+        </p>
+      </div>
     );
   }
 
