@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { processTreePhoto } from "@/utils/backgroundPhotoProcessor";
 import { extractExifDate } from "@/utils/exifDate";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -416,56 +417,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
     }
   }, [toast]);
 
-  // Upload dropped photo as first offering after tree is saved
-  const uploadPhotoOffering = useCallback(async (treeId: string, userId: string, file: File) => {
-    setUploadingOffering(true);
-    try {
-      // Downscale image client-side (2048px max, 0.82 quality)
-      const compressed = await new Promise<Blob>((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const maxDim = 2048;
-          let w = img.width, h = img.height;
-          if (w > maxDim || h > maxDim) {
-            const scale = maxDim / Math.max(w, h);
-            w = Math.round(w * scale);
-            h = Math.round(h * scale);
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = w; canvas.height = h;
-          canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
-          canvas.toBlob((blob) => resolve(blob!), "image/jpeg", 0.82);
-        };
-        img.src = URL.createObjectURL(file);
-      });
-
-      const filePath = `${userId}/${treeId}/photo-${Date.now()}.jpeg`;
-      const { error: uploadErr } = await supabase.storage
-        .from("offerings")
-        .upload(filePath, compressed, { contentType: "image/jpeg" });
-      if (uploadErr) throw uploadErr;
-
-      const { data: urlData } = supabase.storage.from("offerings").getPublicUrl(filePath);
-
-      const { error: insertErr } = await supabase.from("offerings").insert({
-        tree_id: treeId,
-        title: "First encounter",
-        type: "photo" as any,
-        media_url: urlData.publicUrl,
-        created_by: userId,
-        visibility: "public",
-        ...(photoDate ? { created_at: photoDate } : {}),
-      });
-      if (insertErr) throw insertErr;
-
-      toast({ title: "📷 Photo offering saved", description: "Your first encounter photo has been added" });
-    } catch (err: any) {
-      console.error("Photo offering upload error:", err);
-      toast({ title: "Photo upload failed", description: err.message || "Could not save the photo offering", variant: "destructive" });
-    } finally {
-      setUploadingOffering(false);
-    }
-  }, [photoDate, toast]);
+  // Photo processing is now handled by backgroundPhotoProcessor — uploadPhotoOffering removed
 
   const onDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation();
@@ -648,8 +600,9 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         longitude: lng,
         estimated_age: estimatedAge ? parseInt(estimatedAge) : null,
         created_by: user.id,
+        photo_status: droppedPhotoFile ? 'pending' : 'none',
         ...(photoDate ? { created_at: photoDate } : {}),
-      }).select('id').single();
+      } as any).select('id').single();
 
       if (error) throw error;
       setSavedTreeId(data.id);
@@ -676,8 +629,21 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         species: speciesValue,
       }));
 
+      // Fire-and-forget background photo processing
       if (droppedPhotoFile) {
-        uploadPhotoOffering(data.id, user.id, droppedPhotoFile);
+        const photoFile = droppedPhotoFile;
+        processTreePhoto({
+          treeId: data.id,
+          userId: user.id,
+          file: photoFile,
+          onStatusChange: (status) => {
+            if (status === "ready") {
+              toast({ title: "📷 Photo processed", description: "Your tree's photo is now ready" });
+            } else if (status === "failed") {
+              toast({ title: "Photo processing issue", description: "Original photo was preserved. You can retry from the tree page.", variant: "destructive" });
+            }
+          },
+        });
       }
 
       setTransitionDir("forward");

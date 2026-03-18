@@ -7,6 +7,8 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import TreePhotoStatus from "@/components/TreePhotoStatus";
+import type { PhotoProcessingStatus } from "@/utils/backgroundPhotoProcessor";
 import FullscreenShell from "@/components/FullscreenShell";
 import FullscreenToggle from "@/components/FullscreenToggle";
 import ZoomPanLayer from "@/components/ZoomPanLayer";
@@ -33,6 +35,7 @@ interface TreePageHeroProps {
   onWhisper?: () => void;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
+  onRetryPhoto?: () => void;
 }
 
 const TreePageHero = ({
@@ -46,11 +49,19 @@ const TreePageHero = ({
   onWhisper,
   ecoBelonging,
   onNavigateHive,
+  onRetryPhoto,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const { isFullscreen: imageFullscreen, enterFullscreen: openImageFS, exitFullscreen: closeImageFS } = useFullscreen();
   const isAnchor = (tree as any).is_anchor_node;
+  const photoStatus = ((tree as any).photo_status || "none") as PhotoProcessingStatus;
+  const photoOriginalUrl = (tree as any).photo_original_url as string | null;
+
+  // Determine the best available photo for display
+  const displayPhoto = photoUrl
+    || (tree as any).photo_processed_url
+    || photoOriginalUrl;
 
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -85,9 +96,9 @@ const TreePageHero = ({
         className="absolute inset-0 z-0"
         style={{ transform: `translateY(${scrollY}px)` }}
       >
-        {photoUrl ? (
+        {displayPhoto ? (
           <img
-            src={photoUrl}
+            src={displayPhoto}
             alt={tree.name}
             className="w-full h-full object-cover opacity-30 cursor-pointer"
             loading="eager"
@@ -103,6 +114,13 @@ const TreePageHero = ({
             }}
           />
         )}
+
+        {/* Photo processing status overlay */}
+        <TreePhotoStatus
+          status={photoStatus}
+          originalUrl={photoOriginalUrl}
+          onRetry={onRetryPhoto}
+        />
         {/* Gold leaf vignette */}
         <div
           className="absolute inset-0"
