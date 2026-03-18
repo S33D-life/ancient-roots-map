@@ -335,18 +335,29 @@ const TreeDetailPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-8 text-center space-y-4">
-          <p className="text-muted-foreground font-serif">
-            This record has been merged with another Ancient Friend.
-          </p>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="container mx-auto px-4 py-16 text-center space-y-6 max-w-md"
+        >
+          <div className="w-16 h-16 mx-auto rounded-full flex items-center justify-center bg-primary/10 border border-primary/20">
+            <TreeDeciduous className="h-8 w-8 text-primary/60" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="font-serif text-lg text-foreground/90">Records Merged</h2>
+            <p className="text-sm text-muted-foreground font-serif">
+              This Ancient Friend has been merged with another record to maintain an accurate atlas.
+            </p>
+          </div>
           <Link
             to={`/tree/${(tree as any).merged_into_tree_id}`}
-            className="inline-flex items-center gap-2 text-primary hover:underline font-serif"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-serif text-sm tracking-wide transition-colors"
           >
             <TreeDeciduous className="h-4 w-4" />
-            View the merged tree
+            Visit the unified record →
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
