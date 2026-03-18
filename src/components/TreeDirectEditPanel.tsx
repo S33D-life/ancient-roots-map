@@ -362,7 +362,7 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <AlertTriangle className="h-5 w-5 text-accent" />
               Confirm Sensitive Changes
             </AlertDialogTitle>
             <AlertDialogDescription className="font-serif text-sm space-y-2">
