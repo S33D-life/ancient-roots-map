@@ -115,7 +115,7 @@ export default function ReportDuplicateButton({ treeId, treeName, treeSpecies, t
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm max-h-[85dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-sm">Report Possible Duplicate</DialogTitle>
           </DialogHeader>

@@ -92,7 +92,16 @@ export default function NearbyDuplicateWarning({
     }
   }, [latitude, longitude, checkSimilar]);
 
-  if (dismissed || results.length === 0 || loading) return null;
+  if (dismissed || (results.length === 0 && !loading)) return null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 p-3 rounded-lg border border-border/20 bg-card/30">
+        <Loader2 className="h-4 w-4 animate-spin text-primary/40" />
+        <span className="text-xs font-serif text-muted-foreground">Checking for nearby Ancient Friends…</span>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>
