@@ -330,6 +330,27 @@ const TreeDetailPage = () => {
     );
   }
 
+  // Handle merged tree redirect
+  if (!loading && tree && (tree as any).merged_into_tree_id) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8 text-center space-y-4">
+          <p className="text-muted-foreground font-serif">
+            This record has been merged with another Ancient Friend.
+          </p>
+          <Link
+            to={`/tree/${(tree as any).merged_into_tree_id}`}
+            className="inline-flex items-center gap-2 text-primary hover:underline font-serif"
+          >
+            <TreeDeciduous className="h-4 w-4" />
+            View the merged tree
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!tree) {
     return (
       <div className="min-h-screen bg-background">
