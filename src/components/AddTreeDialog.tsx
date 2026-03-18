@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { processTreePhoto } from "@/utils/backgroundPhotoProcessor";
+import NearbyDuplicateWarning from "@/components/NearbyDuplicateWarning";
 import { extractExifDate } from "@/utils/exifDate";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
