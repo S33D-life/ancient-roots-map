@@ -404,8 +404,8 @@ function SensitivityBadge({ field }: { field: string }) {
 
   return (
     <div className="flex items-start gap-1.5 mt-1">
-      <AlertTriangle className="h-3 w-3 text-yellow-500 shrink-0 mt-0.5" />
-      <span className="text-[10px] text-yellow-500/80">{message}</span>
+      <AlertTriangle className="h-3 w-3 text-accent shrink-0 mt-0.5" />
+      <span className="text-[10px] text-accent/80">{message}</span>
     </div>
   );
 }
