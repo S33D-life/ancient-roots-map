@@ -19,8 +19,12 @@ const BottomNav = () => {
 
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 md:hidden border-t transition-all duration-300 ${isMap ? "opacity-85 hover:opacity-100 focus-within:opacity-100" : ""}`}
+      className={`md:hidden border-t transition-all duration-300 ${isMap ? "opacity-85 hover:opacity-100 focus-within:opacity-100" : ""}`}
       style={{
+        position: "fixed",
+        left: 0,
+        right: 0,
+        bottom: 0,
         zIndex: Z.BOTTOM_NAV,
         background: isMap ? "hsl(var(--card) / 0.88)" : "hsl(var(--card) / 0.96)",
         borderColor: "hsl(var(--border) / 0.15)",
@@ -28,8 +32,10 @@ const BottomNav = () => {
         backdropFilter: "blur(24px) saturate(1.3)",
         WebkitBackdropFilter: "blur(24px) saturate(1.3)",
         boxShadow: "0 -2px 16px hsl(var(--background) / 0.4)",
-        /* Ensure no parent transform can break fixed positioning */
+        /* Prevent any parent transform/filter/will-change from creating new stacking context */
         contain: "layout",
+        transform: "none",
+        willChange: "auto",
       }}
     >
       <div className="flex items-center justify-around py-1">
