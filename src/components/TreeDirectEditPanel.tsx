@@ -249,14 +249,14 @@ export default function TreeDirectEditPanel({ open, onOpenChange, tree, userId, 
                 <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
                   {speciesSuggestions.map((s) => (
                     <button
-                      key={s.key}
+                      key={s.common + s.scientific}
                       className="w-full text-left px-3 py-2 text-xs font-serif hover:bg-muted/50 transition-colors"
                       onClick={() => {
-                        setSpecies(s.commonName || s.scientificName);
+                        setSpecies(s.common || s.scientific);
                         setShowSpeciesSuggestions(false);
                       }}
                     >
-                      {s.commonName} <span className="text-muted-foreground italic">({s.scientificName})</span>
+                      {s.common} <span className="text-muted-foreground italic">({s.scientific})</span>
                     </button>
                   ))}
                 </div>
