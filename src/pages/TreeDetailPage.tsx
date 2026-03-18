@@ -643,6 +643,20 @@ const TreeDetailPage = () => {
               onContribute={() => setContributeSourceOpen(true)}
             />
 
+            {/* Steward Tools — edit / suggest / history */}
+            <Suspense fallback={null}>
+              <StewardToolsSection
+                tree={tree}
+                treeId={id!}
+                userId={editUserId}
+                role={editRole}
+                canDirectEdit={canDirectEdit}
+                loading={editPermLoading}
+                onProposeEdit={() => setProposeEditOpen(true)}
+                onTreeUpdated={(updated) => setTree(updated)}
+              />
+            </Suspense>
+
             {/* Stewardship Log */}
             <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
 
