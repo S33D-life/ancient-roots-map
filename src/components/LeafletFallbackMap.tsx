@@ -58,7 +58,7 @@ import { useSeasonalLens, LENS_CONFIGS, type SeasonalLensType } from "@/contexts
 import { useHiveSeasonFilter } from "@/contexts/HiveSeasonContext";
 import HiveFruitLayer from "./HiveFruitLayer";
 import HiveFruitPreview from "./HiveFruitPreview";
-import NearbyDiscoveryPanel from "./NearbyDiscoveryPanel";
+// NearbyDiscoveryPanel removed — replaced by MapTreePanel in MapPage
 import { ALL_ROOTSTONES, getRootstoneById } from "@/data/rootstones";
 import type { Rootstone } from "@/data/rootstones";
 import { consumeQueuedMycelialThreads, onMycelialThread, type MycelialPoint, type MycelialThreadEvent } from "@/lib/mycelial-network";
@@ -359,6 +359,11 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const showBloomingClock = layers.bloomingClock;
   const bloomConstellationMode = layers.bloomConstellationMode;
   const clearView = layers.clearView;
+
+  // Broadcast clearView state so external panels (MapTreePanel) can hide
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("s33d-clear-view", { detail: { clearView } }));
+  }, [clearView]);
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
   const showMycelialPathways = layers.mycelialPathways;
@@ -2777,32 +2782,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         />
       )}
 
-      {/* Nearby Ancient Friends discovery panel */}
-      {!clearView && (
-        <NearbyDiscoveryPanel
-          trees={filteredTrees}
-          userLat={userLatLng?.[0] ?? null}
-          userLng={userLatLng?.[1] ?? null}
-          visible={!!userLatLng && !atlasFilterOpen}
-          onTreeSelect={(lat, lng, treeId) => {
-            const map = mapRef.current;
-            if (map) {
-              map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 1.2 });
-              // Trigger marker focus after fly
-              setTimeout(() => {
-                const cluster = clusterRef.current;
-                if (cluster) {
-                  cluster.eachLayer((layer: any) => {
-                    if (layer?.options?.treeData?.id === treeId) {
-                      layer.openPopup();
-                    }
-                  });
-                }
-              }, 1400);
-            }
-          }}
-        />
-      )}
+      {/* NearbyDiscoveryPanel removed — replaced by MapTreePanel in MapPage */}
 
       {debugEnabled && (
         <div
