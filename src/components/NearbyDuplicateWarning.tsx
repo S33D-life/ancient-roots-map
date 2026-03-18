@@ -130,7 +130,7 @@ export default function NearbyDuplicateWarning({
                     variant="outline"
                     className={`text-[9px] shrink-0 ${
                       r.confidence === "very_likely"
-                        ? "border-yellow-500/40 text-yellow-500"
+                        ? "border-accent/40 text-accent"
                         : "border-muted-foreground/30 text-muted-foreground"
                     }`}
                   >
