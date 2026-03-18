@@ -900,6 +900,8 @@ const TreeDetailPage = () => {
             {/* Linked Volumes & Markets (secondary context) */}
             <LinkedVolumesPanel treeId={id!} />
             <TreeMarkets treeId={id!} treeSpecies={tree.species} />
+            </Suspense>
+            </TabErrorBoundary>
           </TabsContent>
         </Tabs>
 
