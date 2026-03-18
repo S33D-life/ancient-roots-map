@@ -7925,6 +7925,10 @@ export type Database = {
         Args: { p_amount: number; p_bug_id: string; p_curator_id: string }
         Returns: undefined
       }
+      can_edit_tree: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_view_message: { Args: { msg_room_id: string }; Returns: boolean }
       cast_influence_vote: {
         Args: {
