@@ -150,3 +150,12 @@
 
 /* Seed pulse */
 @keyframes seedPulse{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.2);opacity:1}}
+
+/* Progressive zoom pulse — plays when user double-taps to close zoom */
+@keyframes treeZoomPulse{
+  0%{box-shadow:0 0 0 0 hsla(42,80%,55%,0.6);transform:scale(1)}
+  40%{box-shadow:0 0 0 14px hsla(42,80%,55%,0);transform:scale(1.15)}
+  100%{box-shadow:0 0 0 0 hsla(42,80%,55%,0);transform:scale(1)}
+}
+.tree-zoom-pulse{animation:treeZoomPulse 1.2s ease-out!important;border-radius:50%}
+@media(prefers-reduced-motion:reduce){.tree-zoom-pulse{animation:none!important}}
