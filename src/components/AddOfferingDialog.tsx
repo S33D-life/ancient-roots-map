@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import SeasonalMomentPanel from "@/components/SeasonalMomentPanel";
 import type { OfferingPrompt } from "@/hooks/use-seasonal-offerings";
 import { useWandererSearch, WandererProfile } from "@/hooks/use-fellow-wanderers";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ResponsiveDialog from "@/components/ui/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -402,326 +402,287 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: init
     } finally { setLoading(false); submittingRef.current = false; }
   };
 
+  const celebrationOverlay = <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />;
+
   // Delegated flows for song/voice/book
   if (activeType === "song") {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          {/* Ambient glow bar */}
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">🎵</span> Song Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Let music flow through this Ancient Friend
-              </p>
-            </DialogHeader>
-            {/* Type switcher */}
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : (
-              <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
+        subtitle="Let music flow through this Ancient Friend"
+      >
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+        <div className="mt-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
+          )}
+        </div>
+      </ResponsiveDialog>
     );
   }
 
   if (activeType === "voice") {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">🎙️</span> Voice Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Speak into the canopy — your voice becomes part of this tree
-              </p>
-            </DialogHeader>
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : (
-              <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
+        subtitle="Speak into the canopy — your voice becomes part of this tree"
+      >
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+        <div className="mt-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+          )}
+        </div>
+      </ResponsiveDialog>
     );
   }
 
   if (activeType === "book") {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-          <div className="px-6 pt-5 pb-0">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <span className="text-2xl">📖</span> Book Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Place a story in this Ancient Friend's living archive
-              </p>
-            </DialogHeader>
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-          </div>
-          <div className="px-6 pb-6 mt-2">
-            {loading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : (
-              <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
+        subtitle="Place a story in this Ancient Friend's living archive"
+      >
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+        <div className="mt-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : (
+            <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
+          )}
+        </div>
+      </ResponsiveDialog>
     );
   }
 
+  const titleNode = (
+    <span className="flex items-center gap-2">
+      <motion.span
+        className="text-2xl"
+        key={cfg.emoji}
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        {cfg.emoji}
+      </motion.span>
+      {cfg.singular} Offering
+    </span>
+  );
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card border-border max-w-md max-h-[90vh] overflow-y-auto p-0">
-          <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        overlay={celebrationOverlay}
+        title={titleNode}
+        subtitle={`Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
+      >
+        {/* Type switcher */}
+        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
 
-          {/* Ambient glow bar */}
-          <div className="h-1 rounded-t-lg" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }} />
-
-          {/* Ambient radial background */}
-          <div
-            className="absolute inset-0 pointer-events-none rounded-lg"
-            style={{ background: "radial-gradient(ellipse at 50% 0%, hsl(var(--primary) / 0.04), transparent 60%)" }}
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+          {/* Seasonal offering prompt */}
+          <SeasonalMomentPanel
+            compact
+            onPromptSelect={(prompt: OfferingPrompt) => {
+              if (prompt.suggestedType) {
+                setActiveType(prompt.suggestedType as OfferingType);
+              }
+            }}
           />
-
-          <div className="px-6 pt-5 pb-0 relative">
-            <DialogHeader>
-              <DialogTitle className="text-primary font-serif text-xl tracking-wide flex items-center gap-2">
-                <motion.span
-                  className="text-2xl"
-                  key={cfg.emoji}
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  {cfg.emoji}
-                </motion.span>
-                {cfg.singular} Offering
-              </DialogTitle>
-              <p className="text-xs text-muted-foreground/70 font-serif tracking-wider mt-1">
-                Offer {["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} {cfg.singular.toLowerCase()} to this Ancient Friend
-              </p>
-            </DialogHeader>
-
-            {/* Type switcher */}
-            <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={e => setTitle(e.target.value.slice(0, 200))}
+              placeholder={`Name your ${cfg.singular.toLowerCase()}`}
+              className="bg-secondary/20 border-border/50 font-serif"
+              maxLength={200}
+              required
+            />
           </div>
 
-          <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4 mt-2 relative">
-            {/* Seasonal offering prompt */}
-            <SeasonalMomentPanel
-              compact
-              onPromptSelect={(prompt: OfferingPrompt) => {
-                if (prompt.suggestedType) {
-                  setActiveType(prompt.suggestedType as OfferingType);
-                }
-                if (!content && prompt.text) {
-                  // Set as placeholder inspiration, not overwrite
-                }
-              }}
+          {/* Content */}
+          <div className="space-y-2">
+            <Label htmlFor="content" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">{cfg.contentLabel}</Label>
+            <Textarea
+              id="content"
+              value={content}
+              onChange={e => setContent(e.target.value.slice(0, 5000))}
+              placeholder={cfg.placeholder}
+              maxLength={5000}
+              className="bg-secondary/20 border-border/50 font-serif min-h-[100px]"
             />
-            {/* Title */}
+          </div>
+
+          {/* Photo upload */}
+          {activeType === "photo" && (
             <div className="space-y-2">
-              <Label htmlFor="title" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={e => setTitle(e.target.value.slice(0, 200))}
-                placeholder={`Name your ${cfg.singular.toLowerCase()}`}
-                className="bg-secondary/20 border-border/50 font-serif"
-                maxLength={200}
-                required
-              />
-            </div>
-
-            {/* Content */}
-            <div className="space-y-2">
-              <Label htmlFor="content" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">{cfg.contentLabel}</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={e => setContent(e.target.value.slice(0, 5000))}
-                placeholder={cfg.placeholder}
-                maxLength={5000}
-                className="bg-secondary/20 border-border/50 font-serif min-h-[100px]"
-              />
-            </div>
-
-            {/* Photo upload */}
-            {activeType === "photo" && (
-              <div className="space-y-2">
-                <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Photo</Label>
-                {previewUrl ? (
-                  <div className="relative rounded-lg overflow-hidden border border-border/50">
-                    <img src={previewUrl} alt="Preview" className="w-full max-h-48 object-cover" />
-                    <button type="button" onClick={clearSelectedFile} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 hover:bg-background">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                      dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/40 hover:border-primary/30 hover:bg-primary/[0.02]"
-                    }`}
-                    style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
-                    onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-                    onDragLeave={() => setDragActive(false)}
-                    onDrop={handleDrop}
-                  >
-                    <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-                      <ImagePlus className="h-6 w-6 text-primary/50" />
-                    </div>
-                    <p className="text-sm text-muted-foreground/70 font-serif mb-3">Drop a photo here, or choose one</p>
-                    <div className="flex justify-center gap-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
-                        <ImagePlus className="h-3 w-3" /> Gallery
-                      </Button>
-                      <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
-                        <Camera className="h-3 w-3" /> Camera
-                      </Button>
-                    </div>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                    <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Media URL for non-photo */}
-            {activeType !== "photo" && (
-              <div className="space-y-2">
-                <Label htmlFor="media" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Media URL (optional)</Label>
-                <Input id="media" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://..." className="bg-secondary/20 border-border/50 font-serif" />
-              </div>
-            )}
-
-            {/* NFT link */}
-            {activeType === "nft" && (
-              <div className="space-y-2">
-                <Label htmlFor="nft" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">NFT Link</Label>
-                <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link..." className="bg-secondary/20 border-border/50 font-serif" />
-              </div>
-            )}
-
-            {/* Tree role picker — always visible as it's important */}
-            <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
-
-            {/* ─── Collapsible advanced options ─── */}
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-              <CollapsibleTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/60 hover:text-muted-foreground transition-colors group"
+              <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Photo</Label>
+              {previewUrl ? (
+                <div className="relative rounded-lg overflow-hidden border border-border/50">
+                  <img src={previewUrl} alt="Preview" className="w-full max-h-48 object-cover" />
+                  <button type="button" onClick={clearSelectedFile} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 hover:bg-background">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+                    dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/40 hover:border-primary/30 hover:bg-primary/[0.02]"
+                  }`}
+                  style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
+                  onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                  onDragLeave={() => setDragActive(false)}
+                  onDrop={handleDrop}
                 >
-                  <div className="h-px flex-1 bg-border/20" />
-                  <Settings2 className="w-3 h-3" />
-                  <span>More options</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-                  <div className="h-px flex-1 bg-border/20" />
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4 pt-2">
-                {/* Quote */}
-                <OfferingQuoteInput value={quote} onChange={setQuote} />
-
-                {/* Visibility (not for photos) */}
-                {activeType !== "photo" && (
-                  <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading} />
-                )}
-
-                {/* Staff seal */}
-                <div className="space-y-2">
-                  <Label htmlFor="staff" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Sealed by Staff (optional)</Label>
-                  <Input id="staff" value={sealedByStaff} onChange={e => setSealedByStaff(e.target.value)} placeholder="Staff code..." className="bg-secondary/20 border-border/50 font-serif" />
-                </div>
-
-                {/* Tag wanderers */}
-                <div className="space-y-2">
-                  <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase flex items-center gap-1"><UserPlus className="h-3 w-3" /> Tag Wanderers</Label>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      value={tagQuery}
-                      onChange={e => {
-                        setTagQuery(e.target.value);
-                        if (tagTimerRef.current) clearTimeout(tagTimerRef.current);
-                        if (e.target.value.length >= 2) {
-                          tagTimerRef.current = setTimeout(() => searchTags(e.target.value), 300);
-                        } else { clearTagResults(); }
-                      }}
-                      placeholder="Search by name..."
-                      className="bg-secondary/20 border-border/50 font-serif pl-8"
-                    />
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                    <ImagePlus className="h-6 w-6 text-primary/50" />
                   </div>
-                  {tagResults.length > 0 && (
-                    <div className="border border-border/50 rounded-lg max-h-32 overflow-y-auto">
-                      {tagResults.filter(r => !taggedUsers.find(t => t.id === r.id)).map(r => (
-                        <button key={r.id} type="button" className="flex items-center gap-2 w-full px-3 py-2 hover:bg-secondary/30 text-left" onClick={() => { setTaggedUsers(prev => [...prev, r]); setTagQuery(""); clearTagResults(); }}>
-                          <Avatar className="h-5 w-5"><AvatarImage src={r.avatar_url || undefined} /><AvatarFallback className="text-[8px]">{(r.full_name || "?")[0]}</AvatarFallback></Avatar>
-                          <span className="text-xs font-serif">{r.full_name || "Unknown"}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {taggedUsers.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {taggedUsers.map(t => (
-                        <Badge key={t.id} variant="secondary" className="gap-1 text-[10px] font-serif">
-                          {t.full_name || "Unknown"}
-                          <button type="button" onClick={() => setTaggedUsers(prev => prev.filter(x => x.id !== t.id))}><X className="h-2.5 w-2.5" /></button>
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <p className="text-sm text-muted-foreground/70 font-serif mb-3">Drop a photo here, or choose one</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
+                      <ImagePlus className="h-3 w-3" /> Gallery
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
+                      <Camera className="h-3 w-3" /> Camera
+                    </Button>
+                  </div>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                  <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Submit */}
-            <div className="pt-2">
-              <Button
-                type="submit"
-                disabled={loading || uploading}
-                className="w-full font-serif tracking-wider gap-2 h-11"
-                style={{
-                  background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
-                  boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
-                }}
-              >
-                {loading || uploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-                {uploading ? "Uploading..." : `Offer ${cfg.singular}`}
-              </Button>
+              )}
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          )}
+
+          {/* Media URL for non-photo */}
+          {activeType !== "photo" && (
+            <div className="space-y-2">
+              <Label htmlFor="media" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Media URL (optional)</Label>
+              <Input id="media" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://..." className="bg-secondary/20 border-border/50 font-serif" />
+            </div>
+          )}
+
+          {/* NFT link */}
+          {activeType === "nft" && (
+            <div className="space-y-2">
+              <Label htmlFor="nft" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">NFT Link</Label>
+              <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link..." className="bg-secondary/20 border-border/50 font-serif" />
+            </div>
+          )}
+
+          {/* Tree role picker — always visible as it's important */}
+          <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
+
+          {/* ─── Collapsible advanced options ─── */}
+          <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/60 hover:text-muted-foreground transition-colors group"
+              >
+                <div className="h-px flex-1 bg-border/20" />
+                <Settings2 className="w-3 h-3" />
+                <span>More options</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
+                <div className="h-px flex-1 bg-border/20" />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-2">
+              {/* Quote */}
+              <OfferingQuoteInput value={quote} onChange={setQuote} />
+
+              {/* Visibility (not for photos) */}
+              {activeType !== "photo" && (
+                <OfferingVisibilityPicker value={visibility} onChange={setVisibility} disabled={loading} />
+              )}
+
+              {/* Staff seal */}
+              <div className="space-y-2">
+                <Label htmlFor="staff" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Sealed by Staff (optional)</Label>
+                <Input id="staff" value={sealedByStaff} onChange={e => setSealedByStaff(e.target.value)} placeholder="Staff code..." className="bg-secondary/20 border-border/50 font-serif" />
+              </div>
+
+              {/* Tag wanderers */}
+              <div className="space-y-2">
+                <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase flex items-center gap-1"><UserPlus className="h-3 w-3" /> Tag Wanderers</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    value={tagQuery}
+                    onChange={e => {
+                      setTagQuery(e.target.value);
+                      if (tagTimerRef.current) clearTimeout(tagTimerRef.current);
+                      if (e.target.value.length >= 2) {
+                        tagTimerRef.current = setTimeout(() => searchTags(e.target.value), 300);
+                      } else { clearTagResults(); }
+                    }}
+                    placeholder="Search by name..."
+                    className="bg-secondary/20 border-border/50 font-serif pl-8"
+                  />
+                </div>
+                {tagResults.length > 0 && (
+                  <div className="border border-border/50 rounded-lg max-h-32 overflow-y-auto">
+                    {tagResults.filter(r => !taggedUsers.find(t => t.id === r.id)).map(r => (
+                      <button key={r.id} type="button" className="flex items-center gap-2 w-full px-3 py-2 hover:bg-secondary/30 text-left" onClick={() => { setTaggedUsers(prev => [...prev, r]); setTagQuery(""); clearTagResults(); }}>
+                        <Avatar className="h-5 w-5"><AvatarImage src={r.avatar_url || undefined} /><AvatarFallback className="text-[8px]">{(r.full_name || "?")[0]}</AvatarFallback></Avatar>
+                        <span className="text-xs font-serif truncate">{r.full_name || "Unknown"}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {taggedUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {taggedUsers.map(t => (
+                      <Badge key={t.id} variant="secondary" className="gap-1 text-[10px] font-serif">
+                        {t.full_name || "Unknown"}
+                        <button type="button" onClick={() => setTaggedUsers(prev => prev.filter(x => x.id !== t.id))}><X className="h-2.5 w-2.5" /></button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Submit */}
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={loading || uploading}
+              className="w-full font-serif tracking-wider gap-2 h-11"
+              style={{
+                background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
+                boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
+              }}
+            >
+              {loading || uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {uploading ? "Uploading..." : `Offer ${cfg.singular}`}
+            </Button>
+          </div>
+        </form>
+      </ResponsiveDialog>
       <RewardReceipt
         visible={showRewardReceipt}
         onClose={() => { setShowRewardReceipt(false); setRewardResult(null); onOpenChange(false); }}
