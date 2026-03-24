@@ -45,8 +45,16 @@ const BottomNav = () => {
         ))}
 
         {/* Center: Add Tree FAB */}
-        <Link
-          to={ROUTES.ADD_TREE}
+        <button
+          onClick={() => {
+            if (isMap) {
+              // Dispatch event for the map's AddTreeChooser to intercept
+              window.dispatchEvent(new CustomEvent("s33d-add-tree-chooser"));
+            } else {
+              // Navigate to map with add-tree intent
+              window.location.href = "/map?addTree=true";
+            }
+          }}
           className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[48px] min-h-[48px] active:scale-95"
           aria-label="Add a tree"
         >
@@ -61,7 +69,7 @@ const BottomNav = () => {
             <Plus className="w-5 h-5" style={{ color: "hsl(var(--primary-foreground))" }} />
           </div>
           <span className="text-[9px] font-serif tracking-wider text-primary">Add</span>
-        </Link>
+        </button>
 
         {/* Last two nav items */}
         {NAV_ITEMS.slice(2).map((item) => (
