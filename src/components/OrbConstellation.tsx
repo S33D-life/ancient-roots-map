@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Z } from "@/lib/z-index";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useState } from "react";
+import teotagLogo from "@/assets/teotag-small.webp";
 
 /* ─── Action definitions ─── */
 export interface ConstellationAction {
@@ -252,6 +253,53 @@ export default function OrbConstellation({
                 );
               })}
             </svg>
+
+            {/* TEOTAG center — replaces the orb when constellation is open */}
+            <motion.button
+              key="teotag-center"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25, delay: 0.05 }}
+              onClick={() => {
+                onClose();
+                setTimeout(() => navigate("/dashboard?tab=teotag"), 120);
+              }}
+              className="fixed flex items-center justify-center pointer-events-auto rounded-full
+                active:scale-90 transition-transform duration-150 group"
+              style={{
+                width: 52,
+                height: 52,
+                left: orbCenterX - 26,
+                top: orbCenterY - 26,
+              }}
+              aria-label="TEOTAG — Enter the Hearth"
+            >
+              <span
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: "radial-gradient(circle, hsl(var(--primary) / 0.25), transparent 70%)",
+                  filter: "blur(8px)",
+                }}
+              />
+              <img
+                src={teotagLogo}
+                alt="TEOTAG"
+                className="w-11 h-11 rounded-full object-cover transition-all duration-300
+                  group-hover:scale-110 group-hover:shadow-[0_0_18px_hsl(var(--primary)/0.5)]"
+                style={{
+                  border: "1.5px solid hsl(var(--primary) / 0.4)",
+                  boxShadow: "0 0 12px hsl(var(--primary) / 0.3)",
+                }}
+              />
+              <span
+                className="absolute text-[8px] font-serif tracking-wide whitespace-nowrap
+                  text-muted-foreground/70 group-hover:text-primary/90 transition-colors duration-200"
+                style={{ top: 56, left: "50%", transform: "translateX(-50%)" }}
+              >
+                Hearth
+              </span>
+            </motion.button>
 
             {/* Action nodes */}
             {actions.map((a, i) => {
