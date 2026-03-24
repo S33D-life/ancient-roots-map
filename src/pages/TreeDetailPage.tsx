@@ -542,6 +542,8 @@ const TreeDetailPage = () => {
 
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-8">
+            {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
+
             {/* Visit Counter */}
             {checkinStats && (
               <div className="flex items-center gap-4 px-4 py-2.5 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
@@ -570,54 +572,25 @@ const TreeDetailPage = () => {
                 <TreeRelationshipCard
                   progress={relationship}
                   treeName={tree.name}
-                  onCoWitness={() => {
-                    // Trigger co-witness panel — the CoWitnessPanel button handles this
-                  }}
+                  onCoWitness={() => {}}
                   onMakeOffering={() => setAddOfferingOpen(true)}
                 />
               </Suspense>
             )}
 
-            {/* Story + Structured Data (two-column) */}
+            {/* Story + Structured Data */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
 
-            {/* Seasonal Moment — ceremonial timing context */}
-            <SeasonalMomentPanel
-              onPromptSelect={(prompt) => {
-                if (prompt.suggestedType) {
-                  setActiveTab(prompt.suggestedType);
-                }
-                setAddOfferingOpen(true);
-              }}
-            />
-
-            {/* Universal Contribution Entry Point */}
-            <AddContributionPanel treeId={id!} treeName={tree.name} />
-
-            {/* Community Contributions Feed */}
-            <ContributionFeed contributions={treeContributions} treeId={id!} />
+            {/* Photo Gallery */}
+            {photoOfferings.length > 0 && (
+              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
+            )}
 
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
               onAddOffering={() => setAddOfferingOpen(true)}
               treeName={tree.name}
-            />
-
-            {/* Wishes Section */}
-            <TreeWishesSection
-              treeId={id!}
-              treeName={tree.name}
-              wishTags={(tree as any).wish_tags}
-              isAnchorNode={(tree as any).is_anchor_node}
-            />
-
-            {/* Tree Radio */}
-            <TreeRadioBlock
-              treeId={id!}
-              treeName={tree.name}
-              species={tree.species}
-              radioTheme={(tree as any).radio_theme}
             />
 
             {/* Map Journey Anchor */}
@@ -629,90 +602,134 @@ const TreeDetailPage = () => {
               w3w={tree.what3words}
             />
 
-            {/* Journey Invitations — contribution CTAs + hive link */}
-            <TreeJourneyInvitations
-              species={tree.species}
-              treeId={id!}
-              treeName={tree.name}
-              onAddOffering={() => setAddOfferingOpen(true)}
-            />
+            {/* ═══ SECONDARY ZONE — Collapsed by default ═══ */}
+            <Collapsible open={secondaryOpen} onOpenChange={setSecondaryOpen}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center gap-3 py-3 group cursor-pointer">
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent)" }} />
+                  <span className="text-sm font-serif text-muted-foreground tracking-wider uppercase flex items-center gap-2 group-hover:text-primary transition-colors">
+                    <Layers className="h-3.5 w-3.5" />
+                    More about this tree
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${secondaryOpen ? "rotate-180" : ""}`} />
+                  </span>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.3), transparent)" }} />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8 pt-4"
+                >
+                  {/* Seasonal Moment */}
+                  <SeasonalMomentPanel
+                    onPromptSelect={(prompt) => {
+                      if (prompt.suggestedType) setActiveTab(prompt.suggestedType);
+                      setAddOfferingOpen(true);
+                    }}
+                  />
 
-            {/* Hive Connections */}
-            <TreeHiveConnections
-              species={tree.species}
-              ecoBelonging={ecoBelonging}
-            />
+                  {/* Universal Contribution Entry Point */}
+                  <AddContributionPanel treeId={id!} treeName={tree.name} />
 
-            {/* Heart Rewards */}
-            <TreeHeartRewards />
+                  {/* Community Contributions Feed */}
+                  <ContributionFeed contributions={treeContributions} treeId={id!} />
 
-            {/* Vine divider */}
-            <div className="vine-divider" />
+                  {/* Wishes Section */}
+                  <TreeWishesSection
+                    treeId={id!}
+                    treeName={tree.name}
+                    wishTags={(tree as any).wish_tags}
+                    isAnchorNode={(tree as any).is_anchor_node}
+                  />
 
-            {/* Weather */}
-            <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
+                  {/* Tree Radio */}
+                  <TreeRadioBlock
+                    treeId={id!}
+                    treeName={tree.name}
+                    species={tree.species}
+                    radioTheme={(tree as any).radio_theme}
+                  />
 
-            {/* Photo Gallery */}
-            {photoOfferings.length > 0 && (
-              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
-            )}
+                  {/* Journey Invitations */}
+                  <TreeJourneyInvitations
+                    species={tree.species}
+                    treeId={id!}
+                    treeName={tree.name}
+                    onAddOffering={() => setAddOfferingOpen(true)}
+                  />
 
-            {/* Tree Heart Pool */}
-            <TreeHeartPool treeId={id!} userId={userId} />
+                  {/* Hive Connections */}
+                  <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} />
 
-            {/* Blooming Clock */}
-            {tree?.species && (
-              <BloomingClock species={tree.species} region={tree.nation} />
-            )}
+                  {/* Heart Rewards */}
+                  <TreeHeartRewards />
 
-            {/* Species Attestation */}
-            <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
+                  <div className="vine-divider" />
 
-            {/* Grove Membership */}
-            <Suspense fallback={null}>
-              <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
-            </Suspense>
+                  {/* Weather */}
+                  <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
-            {/* Forest Pulse */}
-            <Suspense fallback={null}>
-              <TreePulseIndicator treeId={id!} />
-            </Suspense>
+                  {/* Tree Heart Pool */}
+                  <TreeHeartPool treeId={id!} userId={userId} />
 
-            {/* Mycelial Pathways */}
-            <Suspense fallback={null}>
-              <PathwayContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} />
-            </Suspense>
+                  {/* Blooming Clock */}
+                  {tree?.species && (
+                    <BloomingClock species={tree.species} region={tree.nation} />
+                  )}
 
-            {/* Sources */}
-            <TreeSourcesDisplay
-              verified={verifiedSources}
-              pending={pendingSources}
-              loading={sourcesLoading}
-              onContribute={() => setContributeSourceOpen(true)}
-            />
+                  {/* Species Attestation */}
+                  <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
 
-            {/* Steward Tools — edit / suggest / history */}
-            <Suspense fallback={null}>
-              <StewardToolsSection
-                tree={tree}
-                treeId={id!}
-                userId={editUserId}
-                role={editRole}
-                canDirectEdit={canDirectEdit}
-                loading={editPermLoading}
-                onProposeEdit={() => setProposeEditOpen(true)}
-                onTreeUpdated={(updated) => setTree(updated)}
-              />
-            </Suspense>
+                  {/* Grove Membership */}
+                  <Suspense fallback={null}>
+                    <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
+                  </Suspense>
 
-            {/* Stewardship Log */}
-            <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
+                  {/* Forest Pulse */}
+                  <Suspense fallback={null}>
+                    <TreePulseIndicator treeId={id!} />
+                  </Suspense>
 
-            {/* Tree Guardians */}
-            <TreeGuardianRoles treeId={id!} />
+                  {/* Mycelial Pathways */}
+                  <Suspense fallback={null}>
+                    <PathwayContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} />
+                  </Suspense>
 
-            {/* Stewardship Leaderboard */}
-            <StewardshipLeaderboard treeId={id!} />
+                  {/* Sources */}
+                  <TreeSourcesDisplay
+                    verified={verifiedSources}
+                    pending={pendingSources}
+                    loading={sourcesLoading}
+                    onContribute={() => setContributeSourceOpen(true)}
+                  />
+
+                  {/* Steward Tools */}
+                  <Suspense fallback={null}>
+                    <StewardToolsSection
+                      tree={tree}
+                      treeId={id!}
+                      userId={editUserId}
+                      role={editRole}
+                      canDirectEdit={canDirectEdit}
+                      loading={editPermLoading}
+                      onProposeEdit={() => setProposeEditOpen(true)}
+                      onTreeUpdated={(updated) => setTree(updated)}
+                    />
+                  </Suspense>
+
+                  {/* Stewardship Log */}
+                  <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
+
+                  {/* Tree Guardians */}
+                  <TreeGuardianRoles treeId={id!} />
+
+                  {/* Stewardship Leaderboard */}
+                  <StewardshipLeaderboard treeId={id!} />
+                </motion.div>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           {/* ── ENCOUNTERS TAB ── */}
