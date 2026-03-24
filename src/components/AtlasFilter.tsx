@@ -20,9 +20,6 @@ import { getFamilyForSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import { QUICK_PRESETS, ALL_MANAGED_KEYS, type QuickPreset } from "@/lib/map-layer-groups";
 import type { LayerKey } from "@/hooks/use-map-layer-state";
-import { Link } from "react-router-dom";
-import { getFamilyForSpecies } from "@/data/treeSpecies";
-import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 
 /* ── Hive colour dot mapping — faithful to original Living Layers sidebar ── */
 function getHiveColourDot(family: string): string {
