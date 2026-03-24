@@ -266,7 +266,10 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                       {trees.length > 0 && (
                         <div className="space-y-1">
                           {mappedTrees.length > 0 && (
-                            <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Research Records</p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Research Records</span>
+                              <Badge variant="outline" className="text-[10px] border-border/30 font-mono">{trees.length}</Badge>
+                            </div>
                           )}
                           {trees.slice(0, 20).map((t) => (
                             <Link
