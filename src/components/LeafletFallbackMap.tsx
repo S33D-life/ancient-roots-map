@@ -50,6 +50,7 @@ import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
+import AddTreeChooser from "./AddTreeChooser";
 import { supabase } from "@/integrations/supabase/client";
 import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
@@ -247,6 +248,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [discoveryCount, setDiscoveryCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const [nearbySheetOpenFromChooser, setNearbySheetOpenFromChooser] = useState(false);
   const safeMapFlags = useMemo(() => {
     const params = new URLSearchParams(location.search);
     const SAFE_MAP_DEBUG = import.meta.env.DEV && params.get("mapDebug") === "1";
@@ -390,6 +393,33 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     window.addEventListener("s33d-companion-cmd", handler);
     return () => window.removeEventListener("s33d-companion-cmd", handler);
   }, [trees]);
+
+  // Listen for BottomNav FAB tap to open the chooser
+  useEffect(() => {
+    const handler = () => {
+      const map = mapRef.current;
+      if (map) {
+        const c = map.getCenter();
+        setAddTreeCoords({ lat: c.lat, lng: c.lng });
+      } else {
+        setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+      }
+      setChooserOpen(true);
+    };
+    window.addEventListener("s33d-add-tree-chooser", handler);
+    return () => window.removeEventListener("s33d-add-tree-chooser", handler);
+  }, [userLatLng]);
+
+  // Auto-open chooser when navigated with ?addTree=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("addTree") === "true") {
+      setChooserOpen(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("addTree");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
 
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
@@ -2788,7 +2818,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             } else {
               setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
             }
-            setAddDialogOpen(true);
+            setChooserOpen(true);
           }}
         />
       )}
@@ -3087,7 +3117,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     } else {
                       setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
                     }
-                    setAddDialogOpen(true);
+                    setChooserOpen(true);
                   }}
                   className={`hidden md:flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
                   style={{
@@ -3132,6 +3162,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
+
+      {/* Add Tree Chooser */}
+      <AddTreeChooser
+        open={chooserOpen}
+        onOpenChange={setChooserOpen}
+        mapCenter={addTreeCoords}
+        onAddNew={() => setAddDialogOpen(true)}
+        onCheckIn={(treeId) => {
+          navigate(`/tree/${treeId}`);
+        }}
+        onShowFullNearby={() => {
+          // Open add tree dialog which has the full NearbyTreesSheet built in
+          setAddDialogOpen(true);
+        }}
+      />
 
       {/* Add Tree Dialog */}
       <AddTreeDialog
