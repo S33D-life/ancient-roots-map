@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Map, List } from "lucide-react";
+import { X, ExternalLink, Map as MapIcon, List } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
