@@ -5,7 +5,7 @@
  * living forest view. Shows Grove Signals panel (including recent/nearby trees),
  * mythic time selector, live event stream, and seasonal atmosphere shifts.
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";

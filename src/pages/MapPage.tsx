@@ -83,12 +83,6 @@ const MapPageFull = () => {
       <MapOfflineOverlay />
       <MapJourneyOverlay active={journeyActive} />
       
-      {/* Heart balance badge */}
-      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
-        <Suspense fallback={null}>
-          <MapHeartBadge />
-        </Suspense>
-      )}
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
       {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && paramArrival && (
