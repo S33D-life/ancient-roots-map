@@ -445,7 +445,7 @@ const TreeDetailPage = () => {
         )}
       </AnimatePresence>
 
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl overflow-x-hidden">
         <button
           onClick={() => {
             if (window.history.length > 1) {

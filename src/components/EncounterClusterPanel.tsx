@@ -38,6 +38,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
 
   useEffect(() => {
     const fetchEncounters = async () => {
+      try {
       // Fetch all trees with same species in a bounding box for efficiency
       if (!tree.latitude || !tree.longitude) {
         setLoading(false);
