@@ -1,6 +1,6 @@
 /**
  * DailySeedRitual — once-per-day welcome moment.
- * Shows a gentle overlay: "33 seeds await planting today."
+ * Shows a gentle overlay: "3 seeds await planting today."
  * Uses localStorage to fire only once per calendar day.
  */
 import { useState, useEffect } from "react";
