@@ -609,6 +609,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
       if (error) throw error;
       setSavedTreeId(data.id);
+      setSavedUserId(user.id);
 
       setShowCelebration(true);
 
