@@ -16,7 +16,7 @@ import {
   TreeHiveConnections,
   TreeHeartRewards,
 } from "@/components/tree-sections";
-import CoreLoopBar from "@/components/CoreLoopBar";
+// CoreLoopBar removed — unused import
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -529,7 +529,7 @@ const TreeDetailPage = () => {
             </TabsTrigger>
             <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
               Encounters
-              {(checkinStats?.totalVisits || 0) > 0 && (
+              {checkinStats && (checkinStats.totalVisits ?? 0) > 0 && (
                 <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{checkinStats.totalVisits}</Badge>
               )}
             </TabsTrigger>
@@ -595,9 +595,11 @@ const TreeDetailPage = () => {
             />
 
             {/* Recent Activity Timeline */}
-            <Suspense fallback={null}>
-              <TreeActivityTimeline treeId={id} limit={5} />
-            </Suspense>
+            {id && (
+              <Suspense fallback={null}>
+                <TreeActivityTimeline treeId={id} limit={5} />
+              </Suspense>
+            )}
 
             {/* Map Journey Anchor */}
             <TreeMapJourneyAnchor
