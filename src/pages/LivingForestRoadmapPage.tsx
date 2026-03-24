@@ -452,7 +452,7 @@ const ViewToggle = ({
             : "text-muted-foreground hover:text-foreground"
           }`}
       >
-        <Map className="w-3.5 h-3.5" />
+        <MapIcon className="w-3.5 h-3.5" />
         Map View
       </button>
       <button
