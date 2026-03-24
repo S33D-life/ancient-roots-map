@@ -12,7 +12,7 @@ type Room = { key: string; label: string; desc: string; accentH: number; particl
 const YOUR_SPACES: Room[] = [
   { key: "staff-room",    label: "🪵 Staff Room",      desc: "144 Sacred Staffs",        accentH: 280, particle: "wand"       },
   { key: "greenhouse",    label: "🌱 Greenhouse",       desc: "Houseplants & Saplings",   accentH: 130, particle: "leaf"       },
-  { key: "wishlist",      label: "⭐ Wishing Tree",     desc: "Trees you dream to visit",  accentH: 45,  particle: "star"       },
+  { key: "wishlist",      label: "⭐ Dream Trees",      desc: "Trees you dream to visit",  accentH: 45,  particle: "star"       },
   { key: "bookshelf",     label: "📚 Bookshelf",        desc: "Your Reading Journey",     accentH: 25,  particle: "shimmer"    },
   { key: "creators-path", label: "🎨 Creator's Path",   desc: "Your Journey",             accentH: 340, particle: "spark"      },
   { key: "vault",         label: "🔐 Vault",            desc: "Staff, Tokens & Treasures", accentH: 270, particle: "shimmer"    },
