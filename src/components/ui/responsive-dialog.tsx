@@ -41,12 +41,19 @@ const ResponsiveDialog = ({
   title,
   subtitle,
   overlay,
+  snapPoints,
+  defaultSnapPoint,
 }: ResponsiveDialogProps) => {
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        snapPoints={snapPoints}
+        activeSnapPoint={defaultSnapPoint}
+      >
         <DrawerContent
           className={`max-h-[92dvh] overflow-hidden ${contentClassName ?? ""}`}
           style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
