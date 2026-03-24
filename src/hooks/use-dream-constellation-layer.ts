@@ -141,12 +141,12 @@ export function useDreamConstellationLayer({
       }
     }
 
-    // Fetch dream offerings within viewport
+    // Fetch dream offerings (tree_wishlist entries with notes = expressions)
     if (showDreamOfferings) {
       const { data } = await supabase
-        .from("offerings")
-        .select("tree_id, trees!inner(latitude, longitude)")
-        .eq("type", "dream")
+        .from("tree_wishlist")
+        .select("tree_id, notes, trees!inner(latitude, longitude)")
+        .not("notes", "is", null)
         .gte("trees.latitude", south)
         .lte("trees.latitude", north)
         .gte("trees.longitude", west)
