@@ -48,7 +48,7 @@ import AtlasFilter, { type VisualLayerSection, type PerspectivePreset } from "./
 
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
-import LiteMapSearch from "./LiteMapSearch";
+
 import AddTreeDialog from "./AddTreeDialog";
 import AddTreeChooser from "./AddTreeChooser";
 import MapSeedNudge from "./MapSeedNudge";
