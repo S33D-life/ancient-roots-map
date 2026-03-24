@@ -97,6 +97,8 @@ const FeatureNode = ({
     ancient: "scale-110",
   }[feature.stage];
 
+  const isLive = feature.status === "live" && feature.route;
+
   return (
     <motion.button
       onClick={() => onSelect(feature)}
@@ -114,19 +116,25 @@ const FeatureNode = ({
         <span className="absolute inset-0 rounded-xl animate-pulse opacity-30"
           style={{ boxShadow: `0 0 20px 4px hsl(var(--sacred-gold) / 0.4)` }} />
       )}
+      {isLive && (
+        <span className="absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ boxShadow: `0 0 12px 2px hsl(120 55% 45% / 0.2)` }} />
+      )}
       <span
         className={`
           w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center
           border-2 transition-colors duration-300 text-sm
           ${isActive
             ? "border-primary bg-primary/20 shadow-lg"
-            : "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card"
+            : isLive
+              ? "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card ring-1 ring-primary/10"
+              : "border-border/40 bg-card/70 group-hover:border-border/60 opacity-75"
           }
         `}
       >
         {feature.symbol || <StageIcon stage={feature.stage} className="w-5 h-5 md:w-6 md:h-6 text-primary" />}
       </span>
-      <span className="text-[10px] md:text-xs font-serif text-foreground/80 text-center leading-tight max-w-[90px]">
+      <span className={`text-[10px] md:text-xs font-serif text-center leading-tight max-w-[90px] ${isLive ? "text-foreground/80" : "text-foreground/50"}`}>
         {feature.name}
       </span>
       <span
