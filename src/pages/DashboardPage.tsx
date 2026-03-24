@@ -525,6 +525,10 @@ const DashboardPage = () => {
               </div>
             </TabsContent>
 
+            <TabsContent value="teotag">
+              {user && <TeotagAITab userId={user.id} />}
+            </TabsContent>
+
             <TabsContent value="profile">
               {user && (
                 <DashboardProfile
