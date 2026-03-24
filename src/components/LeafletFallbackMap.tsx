@@ -833,6 +833,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
+      key: "dreams",
+      title: "Dream Constellation",
+      icon: "✨",
+      accent: "hsl(280, 55%, 65%)",
+      description: "A living sky of intention — where people dream to go, and what they carry with them.",
+      layers: [
+        { key: "dream-trees", label: "🌙 Dream Trees", description: "Grounded glow on trees people intend to visit", active: showDreamTrees, toggle: () => toggle("dreamTrees"), extra: showDreamTrees ? (dreamTreeCount > 0 ? `${dreamTreeCount}` : "—") : undefined, accent: "280, 55%, 65%" },
+        { key: "dream-offerings", label: "✨ Dream Offerings", description: "Ethereal particles of wishes and intentions pinned to trees", active: showDreamOfferings, toggle: () => toggle("dreamOfferings"), extra: showDreamOfferings ? (dreamOfferingCount > 0 ? `${dreamOfferingCount}` : "—") : undefined, accent: "42, 80%, 65%" },
+      ],
+    },
+    {
       key: "seasonal-lens",
       title: "🌿 Seasonal Lens",
       icon: "🌿",
