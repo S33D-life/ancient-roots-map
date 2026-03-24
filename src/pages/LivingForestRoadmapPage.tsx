@@ -505,7 +505,12 @@ const ViewToggle = ({
 /* ── MAIN PAGE ── */
 const LivingForestRoadmapPage = () => {
   useDocumentTitle("Living Forest Roadmap");
+  const navigate = useNavigate();
   const [view, setView] = useState<RoadmapView>("map");
+
+  const handleNavigate = useCallback((route: string) => {
+    navigate(route);
+  }, [navigate]);
 
   const counts = useMemo(() => {
     const c: Record<RoadmapStage, number> = { seed: 0, sprout: 0, rooted: 0, ancient: 0 };
@@ -524,10 +529,19 @@ const LivingForestRoadmapPage = () => {
             <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
               Living Forest Roadmap
             </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               The S33D ecosystem grows like a forest. Seeds are planted, shoots emerge,
               trees take root, and ancient pillars anchor the canopy.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/map")}
+              className="font-serif text-xs border-primary/30 text-primary hover:bg-primary/10 gap-1.5"
+            >
+              Enter the Living System
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
           </section>
 
           {/* ── Stats strip ── */}
