@@ -70,8 +70,8 @@ export default function AddTreeChooser({
   const [hasLocation, setHasLocation] = useState(false);
   const [locating, setLocating] = useState(false);
 
-  const userLat = geo.latitude;
-  const userLng = geo.longitude;
+  const userLat = geo.position?.lat ?? null;
+  const userLng = geo.position?.lng ?? null;
 
   const fetchNearby = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
