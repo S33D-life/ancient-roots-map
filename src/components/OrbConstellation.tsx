@@ -282,7 +282,9 @@ export default function OrbConstellation({
                   <span
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background: "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent 70%)",
+                      background: a.key === "update"
+                        ? "radial-gradient(circle, hsl(180 70% 55% / 0.25), transparent 70%)"
+                        : "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent 70%)",
                       filter: "blur(6px)",
                     }}
                   />
@@ -291,8 +293,12 @@ export default function OrbConstellation({
                     className="relative w-10 h-10 rounded-full flex items-center justify-center
                       transition-all duration-200 group-hover:scale-110"
                     style={{
-                      background: "hsl(var(--card) / 0.92)",
-                      border: "1px solid hsl(var(--primary) / 0.25)",
+                      background: a.key === "update"
+                        ? "hsl(180 25% 15% / 0.95)"
+                        : "hsl(var(--card) / 0.92)",
+                      border: a.key === "update"
+                        ? "1px solid hsl(180 60% 50% / 0.4)"
+                        : "1px solid hsl(var(--primary) / 0.25)",
                       backdropFilter: "blur(12px)",
                       boxShadow: "0 2px 12px hsl(var(--primary) / 0.1), inset 0 0 8px hsl(var(--primary) / 0.05)",
                     }}
