@@ -1,8 +1,8 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Crosshair, Move, ScrollText, GripVertical, Map } from "lucide-react";
+import { Crosshair, Move, ScrollText, GripVertical, Map, MousePointerClick } from "lucide-react";
 import type { CompanionCommand, CompanionMode, CompanionSettings } from "@/lib/companion-types";
-import { hapticClick, hapticDragStart } from "@/lib/haptics";
+import { hapticClick, hapticDragStart, hapticTap } from "@/lib/haptics";
 
 /**
  * Multi-mode gesture surface for companion controller.
@@ -11,7 +11,7 @@ import { hapticClick, hapticDragStart } from "@/lib/haptics";
  * Pointer:  1-finger = pointer (higher sensitivity), edge = slow map pan in map mode
  * Scroll:   1-finger vertical = scroll (or map zoom in map mode), horizontal = pan
  *
- * All modes support drag via long-press or drag toggle.
+ * Bottom click strip: always visible, tapping it sends a click at current pointer position.
  */
 
 interface PointerPadProps {
@@ -24,7 +24,8 @@ interface PointerPadProps {
 }
 
 const DEAD_ZONE = 2;
-const TAP_MAX_MS = 200;
+const TAP_MAX_MS = 300;
+const TAP_MAX_DIST = 8;
 const LONG_PRESS_MS = 400;
 /** Edge zone (0-1 normalised) for pointer-mode edge-panning */
 const EDGE_ZONE = 0.12;
@@ -39,7 +40,7 @@ interface DebugInfo {
 
 const MODE_HINTS: Record<CompanionMode, { default: string; map: string }> = {
   trackpad: {
-    default: "drag: move · 2-finger: scroll · tap: click",
+    default: "drag: move · tap: click · 2-finger: scroll",
     map: "drag: pointer · 2-finger: pan map · tap: select tree",
   },
   pointer: {
@@ -69,8 +70,17 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
   const edgePanTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({ gesture: "idle", touches: 0, dx: 0, dy: 0 });
   const [touchActive, setTouchActive] = useState(false);
+  const [clickFlash, setClickFlash] = useState(false);
 
   const scrollDir = settings.naturalScroll ? 1 : -1;
+
+  const doClick = useCallback(() => {
+    send({ type: "pointer_click", x: 0, y: 0 });
+    hapticClick();
+    setClickFlash(true);
+    setTimeout(() => setClickFlash(false), 200);
+    if (debug) setDebugInfo(d => ({ ...d, gesture: "click" }));
+  }, [send, debug]);
 
   // Edge-pan: when in pointer+map mode, if pointer is near pad edge, continuously pan
   const startEdgePan = useCallback((nx: number, ny: number) => {
@@ -146,12 +156,12 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
       e.preventDefault();
       e.stopPropagation();
 
-      // Cancel long-press if finger moves
-      if (!movedRef.current && longPressTimerRef.current) {
+      // Cancel long-press if finger moves beyond threshold
+      if (longPressTimerRef.current && touchStartRef.current) {
         const t = e.touches[0];
-        if (t && touchStartRef.current) {
+        if (t) {
           const dist = Math.hypot(t.clientX - touchStartRef.current.x, t.clientY - touchStartRef.current.y);
-          if (dist > 6) {
+          if (dist > TAP_MAX_DIST) {
             clearTimeout(longPressTimerRef.current);
             longPressTimerRef.current = null;
           }
@@ -163,17 +173,19 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
         const rawDx = t.clientX - lastTouchRef.current.x;
         const rawDy = t.clientY - lastTouchRef.current.y;
         if (Math.abs(rawDx) < DEAD_ZONE && Math.abs(rawDy) < DEAD_ZONE) return;
-        movedRef.current = true;
+
+        // Check total distance from start to decide if this is a move vs tap
+        if (touchStartRef.current) {
+          const totalDist = Math.hypot(t.clientX - touchStartRef.current.x, t.clientY - touchStartRef.current.y);
+          if (totalDist > TAP_MAX_DIST) movedRef.current = true;
+        }
 
         if (mode === "scroll") {
           if (isMapMode) {
-            // Scroll mode + map: vertical = zoom, horizontal = pan
             if (Math.abs(rawDy) > Math.abs(rawDx) * 1.5) {
-              // Vertical dominant → zoom
               const zoomDelta = -rawDy * settings.scrollSensitivity * scrollDir * 0.02;
               send({ type: "map_zoom", delta: zoomDelta });
             } else {
-              // Horizontal or mixed → pan
               send({ type: "map_pan", dx: rawDx * settings.scrollSensitivity * scrollDir, dy: rawDy * settings.scrollSensitivity * scrollDir });
             }
           } else {
@@ -185,7 +197,6 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
           const sens = mode === "pointer" ? settings.pointerSensitivity * 1.4 : settings.pointerSensitivity;
           send({ type: "pointer_delta", dx: rawDx * sens, dy: rawDy * sens });
 
-          // Edge-pan in pointer+map mode
           if (isMapMode && mode === "pointer") {
             const rect = pad.getBoundingClientRect();
             const nx = (t.clientX - rect.left) / rect.width;
@@ -206,7 +217,6 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
         movedRef.current = true;
 
         if (isMapMode) {
-          // 2-finger in map mode → map pan (not DOM scroll)
           send({ type: "map_pan", dx: rawDx * settings.scrollSensitivity * scrollDir, dy: rawDy * settings.scrollSensitivity * scrollDir });
         } else {
           send({ type: "scroll", dx: rawDx * settings.scrollSensitivity * scrollDir, dy: rawDy * settings.scrollSensitivity * scrollDir });
@@ -232,16 +242,11 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
         isLongPressRef.current = false;
       }
 
-      // Tap detection
+      // Tap detection — click at current pointer position (not finger position)
       if (touchStartRef.current && !movedRef.current && e.touches.length === 0 && mode !== "scroll") {
         const elapsed = Date.now() - touchStartRef.current.time;
         if (elapsed < TAP_MAX_MS) {
-          const rect = pad.getBoundingClientRect();
-          const nx = (touchStartRef.current.x - rect.left) / rect.width;
-          const ny = (touchStartRef.current.y - rect.top) / rect.height;
-          send({ type: "pointer_click", x: nx, y: ny });
-          hapticClick();
-          if (debug) setDebugInfo(d => ({ ...d, gesture: "tap" }));
+          doClick();
         }
       }
 
@@ -274,7 +279,7 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
       if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
       stopEdgePan();
     };
-  }, [send, mode, settings, dragging, isMapMode, debug, scrollDir, startEdgePan, stopEdgePan]);
+  }, [send, mode, settings, dragging, isMapMode, debug, scrollDir, startEdgePan, stopEdgePan, doClick]);
 
   // Mouse fallback
   const lastMouseRef = useRef<{ x: number; y: number } | null>(null);
@@ -308,7 +313,7 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
   const hints = MODE_HINTS[mode];
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="flex flex-col items-center gap-0">
       {/* Gesture surface */}
       <div
         ref={padRef}
@@ -316,7 +321,7 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="w-full rounded-2xl border relative overflow-hidden select-none transition-all duration-300"
+        className="w-full rounded-t-2xl border border-b-0 relative overflow-hidden select-none transition-all duration-300"
         style={{
           touchAction: "none",
           aspectRatio: "16/10",
@@ -413,8 +418,47 @@ export default function PointerPad({ send, mode, settings, dragging, isMapMode =
         </AnimatePresence>
       </div>
 
+      {/* ── Click strip (bottom bar, like a real trackpad click zone) ── */}
+      {mode !== "scroll" && (
+        <button
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            hapticTap();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            doClick();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            doClick();
+          }}
+          className="w-full rounded-b-2xl border relative overflow-hidden select-none transition-all duration-150 flex items-center justify-center gap-1.5 active:scale-[0.99]"
+          style={{
+            touchAction: "none",
+            height: "44px",
+            background: clickFlash
+              ? isMapMode ? "hsl(120 20% 18% / 0.5)" : "hsl(var(--primary) / 0.1)"
+              : isMapMode ? "hsl(120 8% 10% / 0.4)" : "hsl(var(--secondary) / 0.15)",
+            borderColor: clickFlash
+              ? isMapMode ? "hsl(120 25% 40% / 0.5)" : "hsl(var(--primary) / 0.4)"
+              : "hsl(var(--border) / 0.4)",
+            borderTop: "1px solid hsl(var(--border) / 0.15)",
+          }}
+        >
+          <MousePointerClick className="w-3.5 h-3.5 text-muted-foreground/50" />
+          <span className="text-[10px] font-serif text-muted-foreground/50">Click</span>
+        </button>
+      )}
+
+      {/* Divider for scroll mode (no click strip) */}
+      {mode === "scroll" && (
+        <div className="w-full h-px" style={{ background: "hsl(var(--border) / 0.2)" }} />
+      )}
+
       {/* Hint */}
-      <p className="text-[10px] text-muted-foreground/50 font-serif text-center">
+      <p className="text-[10px] text-muted-foreground/50 font-serif text-center mt-1.5">
         {isMapMode ? hints.map : hints.default}
       </p>
 
