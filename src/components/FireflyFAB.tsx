@@ -371,6 +371,9 @@ const FireflyFAB = () => {
         onSelectAction={handleSelectAction}
         cx={xy.x}
         cy={xy.y}
+        updateAvailable={updateAvailable}
+        onApplyUpdate={applyUpdate}
+        onDismissUpdate={dismissUpdate}
       />
 
       {/* Heavy dialog — lazy, only after first action selected */}

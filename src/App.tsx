@@ -273,7 +273,7 @@ const App = () => {
         {ShowDevPanel && <DevDiagnosticsOverlay />}
         
         <CanopyHeartPulse />
-        <AppUpdateBanner />
+        
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
           <HiveSeasonProvider>

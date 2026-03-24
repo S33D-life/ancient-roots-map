@@ -157,6 +157,10 @@ export default function OrbConstellation({
   const handleAction = useCallback(
     (a: ConstellationAction) => {
       onClose();
+      if (a.key === "update" && onApplyUpdate) {
+        setTimeout(() => onApplyUpdate(), 120);
+        return;
+      }
       if (a.action === "search") {
         setTimeout(() => setSearchOpen(true), 120);
       } else if (a.action === "nav" && a.to) {
@@ -165,7 +169,7 @@ export default function OrbConstellation({
         setTimeout(() => onSelectAction(a.key), 120);
       }
     },
-    [onClose, navigate, onSelectAction],
+    [onClose, navigate, onSelectAction, onApplyUpdate],
   );
 
   // Orb center in page coords
