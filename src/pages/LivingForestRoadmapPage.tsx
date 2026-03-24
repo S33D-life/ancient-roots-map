@@ -151,15 +151,17 @@ const FeatureNode = ({
 const DetailPanel = ({
   feature,
   onClose,
+  onNavigate,
 }: {
   feature: RoadmapFeature;
   onClose: () => void;
+  onNavigate: (route: string) => void;
 }) => {
-  const meta = STAGE_META[feature.stage];
   const regionMeta = REGION_META[feature.region];
   const statusMeta = STATUS_META[feature.status];
   const catMeta = CATEGORY_META[feature.category];
   const connected = ROADMAP_FEATURES.filter((f) => feature.connections.includes(f.id));
+  const isLive = feature.status === "live" && feature.route;
 
   return (
     <motion.div
@@ -197,6 +199,25 @@ const DetailPanel = ({
       </div>
 
       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.description}</p>
+
+      {/* Navigation CTA or coming-soon message */}
+      {isLive ? (
+        <button
+          onClick={() => onNavigate(feature.route!)}
+          className="w-full mb-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-serif
+                     bg-primary/10 text-primary border border-primary/25 hover:bg-primary/20 hover:border-primary/40
+                     transition-all duration-300"
+        >
+          Enter {feature.name}
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      ) : (
+        <div className="mb-4 px-3 py-2.5 rounded-xl border border-border/30 bg-muted/30 text-center">
+          <p className="text-xs text-muted-foreground font-serif">
+            {feature.status === "building" ? "🌿 Growing — this feature is being built" : "🌱 Seed — this feature is planned for the future"}
+          </p>
+        </div>
+      )}
 
       <div className="text-xs text-muted-foreground/70 mb-3">
         <span className="font-serif text-foreground/60">{regionMeta.label}</span> · {regionMeta.description}
