@@ -36,7 +36,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import BottomNav from "@/components/BottomNav";
 import CanopyHeartPulse from "@/components/CanopyHeartPulse";
-import AppUpdateBanner from "@/components/AppUpdateBanner";
+
 import FireflyFAB from "@/components/FireflyFAB";
 import MissingEnvBanner from "@/components/MissingEnvBanner";
 import { attachAutoSync } from "@/utils/syncEngine";
@@ -273,7 +273,7 @@ const App = () => {
         {ShowDevPanel && <DevDiagnosticsOverlay />}
         
         <CanopyHeartPulse />
-        <AppUpdateBanner />
+        
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TetolLevelProvider>
           <HiveSeasonProvider>

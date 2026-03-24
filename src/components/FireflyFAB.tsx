@@ -21,6 +21,7 @@ import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import OrbConstellation from "@/components/OrbConstellation";
 import FireflyGuidance from "@/components/FireflyGuidance";
 import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
+import { useAppUpdate } from "@/hooks/use-app-update";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
@@ -65,6 +66,7 @@ const DOUBLE_TAP_MS = 350;
 const FireflyFAB = () => {
   const navigate = useNavigate();
   const { activeLens, lensConfig } = useSeasonalLens();
+  const { updateAvailable, applyUpdate, dismissUpdate } = useAppUpdate();
   const [constellationOpen, setConstellationOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEverOpened, setDialogEverOpened] = useState(false);
@@ -284,12 +286,35 @@ const FireflyFAB = () => {
         </span>
 
         {/* Seasonal lens badge — subtle emoji indicator */}
-        {activeLens && lensConfig && (
+        {activeLens && lensConfig && !updateAvailable && (
           <span
             className="absolute -top-1 -right-1 text-[10px] leading-none pointer-events-none animate-in fade-in duration-500"
             title={lensConfig.label}
           >
             {lensConfig.emoji}
+          </span>
+        )}
+
+        {/* Update available badge — gentle glowing dot */}
+        {updateAvailable && (
+          <span
+            className="absolute -top-0.5 -right-0.5 pointer-events-none"
+            title="Update available"
+          >
+            <span
+              className="block w-3 h-3 rounded-full"
+              style={{
+                background: "radial-gradient(circle, hsl(180 70% 65%), hsl(180 60% 45%))",
+                boxShadow: "0 0 8px 2px hsl(180 70% 55% / 0.5)",
+              }}
+            />
+            <span
+              className="absolute inset-0 rounded-full animate-ping"
+              style={{
+                background: "hsl(180 70% 60% / 0.4)",
+                animationDuration: "2.5s",
+              }}
+            />
           </span>
         )}
 
@@ -346,6 +371,9 @@ const FireflyFAB = () => {
         onSelectAction={handleSelectAction}
         cx={xy.x}
         cy={xy.y}
+        updateAvailable={updateAvailable}
+        onApplyUpdate={applyUpdate}
+        onDismissUpdate={dismissUpdate}
       />
 
       {/* Heavy dialog — lazy, only after first action selected */}
