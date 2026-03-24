@@ -229,7 +229,6 @@ const GoldenDreamPage = () => {
                       setActiveRoom(room.id);
                     }
                   }}
-                  }}
                 >
                   <CardHeader className="text-center p-3 md:p-5">
                     <Icon className="h-7 w-7 mx-auto mb-2 text-primary group-hover:text-accent transition-colors" />
