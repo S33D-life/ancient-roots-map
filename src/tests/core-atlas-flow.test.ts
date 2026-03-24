@@ -123,16 +123,10 @@ describe("offline sync queue", () => {
     expect(typeof mod.isOnline).toBe("function");
   });
 
-  it("legacy offlineQueue.ts is deleted", async () => {
-    // This should fail to import — the file no longer exists
-    try {
-      await import("@/utils/offlineQueue");
-      // If it resolves, something is wrong
-      expect(true).toBe(false);
-    } catch {
-      // Expected — module not found
-      expect(true).toBe(true);
-    }
+  it("legacy offlineQueue.ts no longer exists", async () => {
+    const fs = await import("fs");
+    const exists = fs.existsSync("src/utils/offlineQueue.ts");
+    expect(exists).toBe(false);
   });
 });
 
