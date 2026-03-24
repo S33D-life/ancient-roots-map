@@ -740,7 +740,7 @@ const TreeDetailPage = () => {
             {/* Encounters intro — always visible */}
             <div className="text-center py-4">
               <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Encounters</h3>
-              <p className="text-xs text-muted-foreground font-serif">Visits, check-ins, and shared moments with this Ancient Friend</p>
+              <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
             </div>
 
             {/* Encounter Cluster */}
@@ -816,88 +816,6 @@ const TreeDetailPage = () => {
               </Suspense>
             )}
 
-            <SeedPlanter
-              treeId={id!}
-              treeLat={tree.latitude}
-              treeLng={tree.longitude}
-              userId={userId}
-              treeSpecies={tree.species}
-            />
-
-            {/* Whispers */}
-            {userId && tree && (
-              <Button
-                onClick={() => setWhisperModalOpen(true)}
-                variant="outline"
-                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Send a Whisper Through This Tree
-              </Button>
-            )}
-
-            {availableWhispers.length > 0 && userId && tree && (
-              <WhisperCollector
-                whispers={availableWhispers}
-                userId={userId}
-                treeId={tree.id}
-                treeName={tree.name}
-                onCollected={() => {
-                  if (userId && tree) {
-                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
-                  }
-                }}
-              />
-            )}
-
-            {/* Anchored Memories */}
-            {anchoredOfferings.length > 0 && (
-              <div>
-                <button
-                  onClick={() => setShowAnchored(!showAnchored)}
-                  className="w-full flex items-center gap-3 mb-4"
-                >
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
-                  <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
-                    🏡 Anchored Memories
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
-                    <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
-                  </span>
-                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
-                </button>
-                <AnimatePresence>
-                  {showAnchored && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-2 overflow-hidden"
-                    >
-                      <div className="grid gap-3 md:grid-cols-2">
-                        {anchoredOfferings.map((off) => (
-                          <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
-                            <CardContent className="p-3 flex items-center gap-3">
-                              {off.media_url && off.type === "photo" && (
-                                <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
-                                <span className="text-[10px] text-muted-foreground/60 font-mono">
-                                  {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                                </span>
-                              </div>
-                              <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
-                                🌿 {off.type}
-                              </Badge>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
             </Suspense>
             </TabErrorBoundary>
           </TabsContent>
