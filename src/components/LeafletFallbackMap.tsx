@@ -410,6 +410,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return () => window.removeEventListener("s33d-add-tree-chooser", handler);
   }, [userLatLng]);
 
+  // Auto-open chooser when navigated with ?addTree=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("addTree") === "true") {
+      setChooserOpen(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("addTree");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
+
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
   const showMycelialPathways = layers.mycelialPathways;
