@@ -348,7 +348,13 @@ const CompactRow = ({
             {new Date(offering.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
           </span>
         </div>
-        {/* Influence upvote in compact mode */}
+        {/* Resonance + Influence in compact mode */}
+        <OfferingResonanceButton
+          offeringId={offering.id}
+          userId={userId ?? null}
+          initialCount={(offering as any).resonance_count || 0}
+          compact
+        />
         {treeId && (
           <InfluenceUpvoteButton
             offeringId={offering.id}
