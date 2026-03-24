@@ -10,7 +10,6 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import NotificationBell from "./NotificationBell";
-import EnsoNudge from "./EnsoNudge";
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";
 import ThemeToggle from "./ThemeToggle";
