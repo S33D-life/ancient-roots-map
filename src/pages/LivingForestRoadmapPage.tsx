@@ -1,7 +1,9 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Map as MapIcon, List } from "lucide-react";
+import { X, ExternalLink, Map as MapIcon, List, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
@@ -95,6 +97,8 @@ const FeatureNode = ({
     ancient: "scale-110",
   }[feature.stage];
 
+  const isLive = feature.status === "live" && feature.route;
+
   return (
     <motion.button
       onClick={() => onSelect(feature)}
@@ -112,19 +116,25 @@ const FeatureNode = ({
         <span className="absolute inset-0 rounded-xl animate-pulse opacity-30"
           style={{ boxShadow: `0 0 20px 4px hsl(var(--sacred-gold) / 0.4)` }} />
       )}
+      {isLive && (
+        <span className="absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{ boxShadow: `0 0 12px 2px hsl(120 55% 45% / 0.2)` }} />
+      )}
       <span
         className={`
           w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center
           border-2 transition-colors duration-300 text-sm
           ${isActive
             ? "border-primary bg-primary/20 shadow-lg"
-            : "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card"
+            : isLive
+              ? "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card ring-1 ring-primary/10"
+              : "border-border/40 bg-card/70 group-hover:border-border/60 opacity-75"
           }
         `}
       >
         {feature.symbol || <StageIcon stage={feature.stage} className="w-5 h-5 md:w-6 md:h-6 text-primary" />}
       </span>
-      <span className="text-[10px] md:text-xs font-serif text-foreground/80 text-center leading-tight max-w-[90px]">
+      <span className={`text-[10px] md:text-xs font-serif text-center leading-tight max-w-[90px] ${isLive ? "text-foreground/80" : "text-foreground/50"}`}>
         {feature.name}
       </span>
       <span
@@ -141,15 +151,17 @@ const FeatureNode = ({
 const DetailPanel = ({
   feature,
   onClose,
+  onNavigate,
 }: {
   feature: RoadmapFeature;
   onClose: () => void;
+  onNavigate: (route: string) => void;
 }) => {
-  const meta = STAGE_META[feature.stage];
   const regionMeta = REGION_META[feature.region];
   const statusMeta = STATUS_META[feature.status];
   const catMeta = CATEGORY_META[feature.category];
   const connected = ROADMAP_FEATURES.filter((f) => feature.connections.includes(f.id));
+  const isLive = feature.status === "live" && feature.route;
 
   return (
     <motion.div
@@ -187,6 +199,25 @@ const DetailPanel = ({
       </div>
 
       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{feature.description}</p>
+
+      {/* Navigation CTA or coming-soon message */}
+      {isLive ? (
+        <button
+          onClick={() => onNavigate(feature.route!)}
+          className="w-full mb-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-serif
+                     bg-primary/10 text-primary border border-primary/25 hover:bg-primary/20 hover:border-primary/40
+                     transition-all duration-300"
+        >
+          Enter {feature.name}
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      ) : (
+        <div className="mb-4 px-3 py-2.5 rounded-xl border border-border/30 bg-muted/30 text-center">
+          <p className="text-xs text-muted-foreground font-serif">
+            {feature.status === "building" ? "🌿 Growing — this feature is being built" : "🌱 Seed — this feature is planned for the future"}
+          </p>
+        </div>
+      )}
 
       <div className="text-xs text-muted-foreground/70 mb-3">
         <span className="font-serif text-foreground/60">{regionMeta.label}</span> · {regionMeta.description}
@@ -250,7 +281,7 @@ const ForestParticles = () => (
 );
 
 /* ── Map View (Kumu-style visual network) ── */
-const MapView = () => {
+const MapView = ({ onNavigate }: { onNavigate: (route: string) => void }) => {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);
@@ -425,6 +456,7 @@ const MapView = () => {
             key={activeFeature.id}
             feature={activeFeature}
             onClose={() => setActiveFeature(null)}
+            onNavigate={onNavigate}
           />
         )}
       </AnimatePresence>
@@ -473,7 +505,12 @@ const ViewToggle = ({
 /* ── MAIN PAGE ── */
 const LivingForestRoadmapPage = () => {
   useDocumentTitle("Living Forest Roadmap");
+  const navigate = useNavigate();
   const [view, setView] = useState<RoadmapView>("map");
+
+  const handleNavigate = useCallback((route: string) => {
+    navigate(route);
+  }, [navigate]);
 
   const counts = useMemo(() => {
     const c: Record<RoadmapStage, number> = { seed: 0, sprout: 0, rooted: 0, ancient: 0 };
@@ -492,10 +529,19 @@ const LivingForestRoadmapPage = () => {
             <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
               Living Forest Roadmap
             </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               The S33D ecosystem grows like a forest. Seeds are planted, shoots emerge,
               trees take root, and ancient pillars anchor the canopy.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/map")}
+              className="font-serif text-xs border-primary/30 text-primary hover:bg-primary/10 gap-1.5"
+            >
+              Enter the Living System
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
           </section>
 
           {/* ── Stats strip ── */}
@@ -527,7 +573,7 @@ const LivingForestRoadmapPage = () => {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
               >
-                <MapView />
+                <MapView onNavigate={handleNavigate} />
               </motion.div>
             ) : (
               <motion.div

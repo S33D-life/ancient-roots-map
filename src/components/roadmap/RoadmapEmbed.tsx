@@ -5,7 +5,7 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ChevronDown, ChevronUp, Bug, Bot, Plus, Loader2 } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronUp, Bug, Bot, Plus, Loader2, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ROADMAP_FEATURES,
@@ -176,7 +176,21 @@ const MilestoneCard = ({
             <p className="text-xs text-muted-foreground leading-relaxed mt-2 pl-[46px]">
               {feature.description}
             </p>
-            <div className="flex items-center gap-3 mt-1.5 pl-[46px]">
+            <div className="flex items-center gap-3 mt-2 pl-[46px] flex-wrap">
+              {feature.status === "live" && feature.route ? (
+                <Link
+                  to={feature.route}
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 text-[10px] font-serif px-2.5 py-1 rounded-full
+                             bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors"
+                >
+                  Enter {feature.name} <ArrowRight className="w-2.5 h-2.5" />
+                </Link>
+              ) : (
+                <span className="text-[10px] font-serif text-muted-foreground/60 italic">
+                  {feature.status === "building" ? "🌿 Growing…" : "🌱 Coming soon"}
+                </span>
+              )}
               {feature.notionLink && (
                 <a
                   href={feature.notionLink}
@@ -185,7 +199,7 @@ const MilestoneCard = ({
                   className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <ExternalLink className="w-3 h-3" /> View in Notion
+                  <ExternalLink className="w-3 h-3" /> Notion
                 </a>
               )}
               {isCurator && !showCreateTask && (
