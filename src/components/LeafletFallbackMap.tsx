@@ -3162,9 +3162,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           navigate(`/tree/${treeId}`);
         }}
         onShowFullNearby={() => {
-          setNearbySheetOpenFromChooser(true);
-          // Dispatch to open nearby sheet if it exists, or navigate
-          navigate(`/tree/nearby`);
+          // Open add tree dialog which has the full NearbyTreesSheet built in
+          setAddDialogOpen(true);
         }}
       />
 
