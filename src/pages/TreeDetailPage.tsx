@@ -593,6 +593,11 @@ const TreeDetailPage = () => {
               treeName={tree.name}
             />
 
+            {/* Recent Activity Timeline */}
+            <Suspense fallback={null}>
+              <TreeActivityTimeline treeId={id} limit={5} />
+            </Suspense>
+
             {/* Map Journey Anchor */}
             <TreeMapJourneyAnchor
               treeId={tree.id}
