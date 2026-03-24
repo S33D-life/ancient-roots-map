@@ -101,7 +101,7 @@ function getInitialState(): LayerState {
     botanicalGardens: false,
     bloomingClock: false,
     watersCommons: false,
-    clearView: false,
+    clearView: true,
     groveView: false,
     bloomConstellationMode: false,
     forestPulse: false,
