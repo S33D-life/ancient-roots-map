@@ -17,7 +17,7 @@ import FullscreenToggle from "@/components/FullscreenToggle";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
-const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
+
 const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
 
 interface GoldenDreamRoom {
