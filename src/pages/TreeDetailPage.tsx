@@ -16,7 +16,7 @@ import {
   TreeHiveConnections,
   TreeHeartRewards,
 } from "@/components/tree-sections";
-import CoreLoopBar from "@/components/CoreLoopBar";
+// CoreLoopBar removed — unused import
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
