@@ -456,6 +456,7 @@ const MapView = ({ onNavigate }: { onNavigate: (route: string) => void }) => {
             key={activeFeature.id}
             feature={activeFeature}
             onClose={() => setActiveFeature(null)}
+            onNavigate={onNavigate}
           />
         )}
       </AnimatePresence>
