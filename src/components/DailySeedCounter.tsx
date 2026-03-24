@@ -11,7 +11,7 @@ interface DailySeedCounterProps {
   compact?: boolean;
 }
 
-const DailySeedCounter = ({ remaining, total = 33, compact = false }: DailySeedCounterProps) => {
+const DailySeedCounter = ({ remaining, total = 3, compact = false }: DailySeedCounterProps) => {
   const pct = total > 0 ? (remaining / total) * 100 : 0;
   const isEmpty = remaining <= 0;
 
@@ -42,7 +42,7 @@ const DailySeedCounter = ({ remaining, total = 33, compact = false }: DailySeedC
       <TooltipContent side="bottom" className="text-xs font-serif">
         <p>{remaining} of {total} seeds remaining today</p>
         <p className="text-muted-foreground/60 text-[10px] mt-0.5">
-          Plant seeds at trees to grow Hearts
+          Each seed carries 33 hearts when collected
         </p>
       </TooltipContent>
     </Tooltip>

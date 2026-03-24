@@ -56,7 +56,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
     if (success) {
       setShowBurst(true);
       setShowPlanted(true);
-      toast.success("🌱 Seed planted! It will bloom into a Heart in 24 hours.");
+      toast.success("🌱 Seed planted! It carries 33 hearts — blooming in 24 hours.");
       setTimeout(() => { setShowPlanted(false); setShowBurst(false); }, 2500);
     } else {
       if (seedsRemaining <= 0) {
@@ -74,7 +74,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
     if (success) {
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
-      setReceiptData({ s33dHearts: 1, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
+      setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
     } else {
       toast.error(`You need to be within ${PROXIMITY_METERS}m to collect this Heart.`);

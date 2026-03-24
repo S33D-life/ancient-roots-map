@@ -1,6 +1,6 @@
 /**
  * DailySeedRitual — once-per-day welcome moment.
- * Shows a gentle overlay: "33 seeds await planting today."
+ * Shows a gentle overlay: "3 seeds await planting today."
  * Uses localStorage to fire only once per calendar day.
  */
 import { useState, useEffect } from "react";
@@ -84,7 +84,7 @@ const DailySeedRitual = () => {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="text-2xl font-serif text-foreground tracking-wide"
             >
-              33 seeds await planting today.
+              3 seeds await planting today.
             </motion.h2>
 
             {/* Subtitle */}
@@ -94,7 +94,7 @@ const DailySeedRitual = () => {
               transition={{ delay: 0.7, duration: 0.5 }}
               className="text-sm font-serif text-muted-foreground/70 mt-3 tracking-wider"
             >
-              Plant them where the forest calls you.
+              Each seed carries 33 hearts. Plant them where the forest calls you.
             </motion.p>
 
             {/* Actions */}
@@ -133,7 +133,7 @@ const DailySeedRitual = () => {
               transition={{ delay: 1.1, duration: 0.4 }}
               className="mt-6 text-[11px] text-muted-foreground/40 font-serif tracking-widest"
             >
-              🌱 33 / 33
+              🌱 3 / 3
             </motion.p>
           </motion.div>
         </motion.div>
