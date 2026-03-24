@@ -94,7 +94,7 @@ const DailySeedRitual = () => {
               transition={{ delay: 0.7, duration: 0.5 }}
               className="text-sm font-serif text-muted-foreground/70 mt-3 tracking-wider"
             >
-              Plant them where the forest calls you.
+              Each seed carries 33 hearts. Plant them where the forest calls you.
             </motion.p>
 
             {/* Actions */}
