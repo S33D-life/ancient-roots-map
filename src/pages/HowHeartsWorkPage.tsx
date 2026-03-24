@@ -76,7 +76,7 @@ const HowHeartsWorkPage = () => (
 
         <Section icon={<Clock className="w-4 h-4 text-primary" />} title="Daily Limits">
           <p><strong>100 hearts per day</strong> — to keep the economy healthy, you can earn up to 100 hearts in a single day. This prevents farming while rewarding consistent engagement.</p>
-          <p><strong>33 seeds per day</strong> — you can plant up to 33 seeds daily, max 3 per tree. Seeds bloom after 24 hours and must be collected in person by another wanderer.</p>
+          <p><strong>3 seeds per day</strong> — you can plant up to 3 seeds daily, one per tree. Each seed carries 33 hearts: 11 for the finder, 11 returned to you, and 11 for the tree. Seeds bloom after 24 hours and must be collected in person by another wanderer.</p>
           <p><strong>Time Tree: once per day</strong> — you earn hearts from your first Time Tree entry each day. Additional entries are recorded but don't earn hearts.</p>
           <p>Limits reset at midnight. Unused seeds do not carry over.</p>
         </Section>

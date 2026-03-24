@@ -74,7 +74,7 @@ const SeedPlanter = ({ treeId, treeLat, treeLng, userId, treeSpecies }: SeedPlan
 
     if (success) {
       const family = treeSpecies ? getFamilyForSpecies(treeSpecies) : undefined;
-      setReceiptData({ s33dHearts: 1, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
+      setReceiptData({ s33dHearts: 11, speciesHearts: family ? 1 : 0, speciesFamily: family || undefined });
       setReceiptVisible(true);
     } else {
       toast.error(`You need to be within ${PROXIMITY_METERS}m to collect this Heart.`);

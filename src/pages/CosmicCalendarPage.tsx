@@ -438,7 +438,7 @@ const CosmicCalendarPage = () => {
           <div className="text-[10px] text-muted-foreground space-y-1 leading-relaxed">
             <p>🌑🌕 <strong>Lunar phases</strong> are calculated algorithmically and drive Time Tree rituals.</p>
             <p>🌱☀️ <strong>Solar events</strong> mark seasonal transitions and future global gatherings.</p>
-            <p>💚 <strong>Daily reset</strong> at midnight refreshes your 33 seeds, check-in caps, and Time Tree rewards.</p>
+            <p>💚 <strong>Daily reset</strong> at midnight refreshes your 3 seeds (each carrying 33 hearts), check-in caps, and Time Tree rewards.</p>
             <p>🌸 <strong>Bloom windows</strong> come from the Seed Cellar's seasonal data.</p>
             <p>🍎 <strong>Harvest listings</strong> from guardian produce appear as seasonal calendar events.</p>
             <p>🐍 <strong>Calendar Lenses</strong> are optional overlays. Cultural lenses are offered with respect and attribution. <Link to="/cosmic/settings" className="text-primary underline">Manage lenses →</Link></p>

@@ -133,7 +133,7 @@ const DailySeedRitual = () => {
               transition={{ delay: 1.1, duration: 0.4 }}
               className="mt-6 text-[11px] text-muted-foreground/40 font-serif tracking-widest"
             >
-              🌱 33 / 33
+              🌱 3 / 3
             </motion.p>
           </motion.div>
         </motion.div>

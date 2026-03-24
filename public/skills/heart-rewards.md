@@ -16,9 +16,9 @@ S33D Hearts are the reward currency of the ecosystem. They are earned through me
 
 | Type | Source | Amount |
 |------|--------|--------|
-| **Wanderer** | Collecting a planted seed | 1 |
-| **Sower** | Someone collects your seed | 1 |
-| **Tree** | Each seed → tree pool | 1 |
+| **Wanderer** | Collecting a planted seed | 11 |
+| **Sower** | Someone collects your seed | 11 |
+| **Tree** | Each seed → tree pool | 11 |
 | **Windfall** | Pool threshold bonus | 3 |
 | **Contribution** | Verified tree contribution | 2 |
 | **Time Tree** | Full/new moon reflection | 5+ |

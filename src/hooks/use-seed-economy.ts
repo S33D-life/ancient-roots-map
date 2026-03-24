@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const SEEDS_PER_DAY = 33;
+const SEEDS_PER_DAY = 3;
 const SEEDS_PER_TREE = 3;
 const PROXIMITY_METERS = 100;
 

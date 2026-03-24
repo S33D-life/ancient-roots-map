@@ -11,7 +11,7 @@ interface DailySeedCounterProps {
   compact?: boolean;
 }
 
-const DailySeedCounter = ({ remaining, total = 33, compact = false }: DailySeedCounterProps) => {
+const DailySeedCounter = ({ remaining, total = 3, compact = false }: DailySeedCounterProps) => {
   const pct = total > 0 ? (remaining / total) * 100 : 0;
   const isEmpty = remaining <= 0;
 

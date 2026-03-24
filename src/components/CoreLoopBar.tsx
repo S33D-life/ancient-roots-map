@@ -19,8 +19,8 @@ interface CoreLoopBarProps {
 }
 
 const CoreLoopBar = ({
-  seedsRemaining = 33,
-  seedsTotal = 33,
+  seedsRemaining = 3,
+  seedsTotal = 3,
   onTreePage = false,
   onWhisper,
   onSeed,
