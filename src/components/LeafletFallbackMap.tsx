@@ -2900,6 +2900,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         userLat={userLatLng?.[0]}
         treeLookup={treeLookup}
         onEventPulses={setCurrentEventPulses}
+        onTreeClick={(treeId) => navigate(`/tree/${treeId}`)}
       />
 
       {/* Blooming Clock — Global Seasonal Atlas */}
