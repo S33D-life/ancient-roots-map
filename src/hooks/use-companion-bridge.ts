@@ -7,7 +7,7 @@ import { ROUTES } from "@/lib/routes";
 
 /**
  * useCompanionBridge — desktop-side handler that maps companion commands
- * to actual desktop actions: navigation, pointer, scroll, click, fullscreen.
+ * to actual desktop actions: navigation, pointer, scroll, click, drag, fullscreen.
  */
 
 const ROOM_ROUTES: Record<CompanionRoom, string> = {
@@ -28,7 +28,6 @@ function detectRoom(pathname: string): CompanionRoom {
   return "unknown";
 }
 
-/** Accumulated pointer position (normalised 0-1 across viewport) */
 interface PointerAccumulator {
   x: number;
   y: number;
@@ -40,6 +39,7 @@ export function useCompanionBridge() {
   const location = useLocation();
   const lastToastRef = useRef(0);
   const pointerRef = useRef<PointerAccumulator>({ x: 0.5, y: 0.5 });
+  const dragActiveRef = useRef(false);
   const [debugInfo, setDebugInfo] = useState({
     lastEvent: "",
     pointerX: 0.5,
@@ -48,7 +48,6 @@ export function useCompanionBridge() {
     scrollDy: 0,
   });
 
-  // Broadcast room state on route change
   useEffect(() => {
     if (!paired) return;
     const room = detectRoom(location.pathname);
@@ -66,7 +65,22 @@ export function useCompanionBridge() {
     toast("📱 " + label, { duration: 1500, position: "bottom-right" });
   }, []);
 
-  // Register all handlers when paired
+  /** Dispatch a synthetic mouse event at the pointer position */
+  const dispatchMouseAt = useCallback((type: string, p: PointerAccumulator) => {
+    const absX = p.x * window.innerWidth;
+    const absY = p.y * window.innerHeight;
+    const el = document.elementFromPoint(absX, absY);
+    if (el) {
+      el.dispatchEvent(new MouseEvent(type, {
+        clientX: absX,
+        clientY: absY,
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      }));
+    }
+  }, []);
+
   useEffect(() => {
     if (!paired) return;
 
@@ -121,54 +135,59 @@ export function useCompanionBridge() {
         showCommandFeedback("Exiting fullscreen");
       },
 
-      // --- NEW: Relative pointer delta ---
+      // Relative pointer delta
       onPointerDelta: (dx: number, dy: number) => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        // Convert px delta to normalised movement
         const p = pointerRef.current;
         p.x = Math.max(0, Math.min(1, p.x + dx / vw));
         p.y = Math.max(0, Math.min(1, p.y + dy / vh));
 
-        // Broadcast the absolute position for the orb
         window.dispatchEvent(
           new CustomEvent("s33d-companion-cmd", {
             detail: { type: "pointer_move", x: p.x, y: p.y },
           }),
         );
 
+        // If dragging, also dispatch mousemove
+        if (dragActiveRef.current) {
+          dispatchMouseAt("mousemove", p);
+        }
+
         setDebugInfo(d => ({
           ...d,
-          lastEvent: "pointer_delta",
+          lastEvent: dragActiveRef.current ? "drag_move" : "pointer_delta",
           pointerX: Math.round(p.x * 100) / 100,
           pointerY: Math.round(p.y * 100) / 100,
         }));
       },
 
-      // --- NEW: Tap = click ---
+      // Click
       onPointerClick: (_x: number, _y: number) => {
         const p = pointerRef.current;
         const absX = p.x * window.innerWidth;
         const absY = p.y * window.innerHeight;
 
-        // Find and click the element under the pointer
+        // Dispatch click event for the orb pulse
+        window.dispatchEvent(
+          new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_click" } }),
+        );
+
         const el = document.elementFromPoint(absX, absY);
         if (el && el instanceof HTMLElement) {
           el.click();
-          // Also dispatch a focus for inputs
           el.focus?.();
         }
 
         setDebugInfo(d => ({ ...d, lastEvent: "click" }));
       },
 
-      // --- NEW: Two-finger scroll ---
+      // Scroll
       onScroll: (dx: number, dy: number) => {
         const p = pointerRef.current;
         const absX = p.x * window.innerWidth;
         const absY = p.y * window.innerHeight;
 
-        // Find scrollable element under pointer
         let target = document.elementFromPoint(absX, absY) as HTMLElement | null;
         let scrolled = false;
 
@@ -176,33 +195,52 @@ export function useCompanionBridge() {
           const { overflowY, overflowX } = getComputedStyle(target);
           const canScrollY = (overflowY === "auto" || overflowY === "scroll") && target.scrollHeight > target.clientHeight;
           const canScrollX = (overflowX === "auto" || overflowX === "scroll") && target.scrollWidth > target.clientWidth;
-
           if (canScrollY || canScrollX) {
             target.scrollBy({ left: -dx, top: -dy });
             scrolled = true;
           }
           target = target.parentElement;
         }
-
-        // Fallback: scroll the window
         if (!scrolled) {
           window.scrollBy({ left: -dx, top: -dy });
         }
 
-        // Also dispatch to map/custom handlers
         window.dispatchEvent(
           new CustomEvent("s33d-companion-cmd", { detail: { type: "scroll", dx, dy } }),
         );
 
-        setDebugInfo(d => ({
-          ...d,
-          lastEvent: "scroll",
-          scrollDx: Math.round(dx),
-          scrollDy: Math.round(dy),
-        }));
+        setDebugInfo(d => ({ ...d, lastEvent: "scroll", scrollDx: Math.round(dx), scrollDy: Math.round(dy) }));
       },
 
-      // Legacy absolute pointer (keep for backward compat)
+      // Drag lifecycle
+      onDragStart: () => {
+        dragActiveRef.current = true;
+        const p = pointerRef.current;
+        dispatchMouseAt("mousedown", p);
+        setDebugInfo(d => ({ ...d, lastEvent: "drag_start" }));
+      },
+      onDragMove: (dx: number, dy: number) => {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const p = pointerRef.current;
+        p.x = Math.max(0, Math.min(1, p.x + dx / vw));
+        p.y = Math.max(0, Math.min(1, p.y + dy / vh));
+
+        window.dispatchEvent(
+          new CustomEvent("s33d-companion-cmd", {
+            detail: { type: "pointer_move", x: p.x, y: p.y },
+          }),
+        );
+        dispatchMouseAt("mousemove", p);
+      },
+      onDragEnd: () => {
+        dragActiveRef.current = false;
+        const p = pointerRef.current;
+        dispatchMouseAt("mouseup", p);
+        setDebugInfo(d => ({ ...d, lastEvent: "drag_end" }));
+      },
+
+      // Legacy absolute pointer
       onPointerMove: (x: number, y: number) => {
         pointerRef.current = { x, y };
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_move", x, y } }));
@@ -218,7 +256,7 @@ export function useCompanionBridge() {
         showCommandFeedback(`Received: ${label || "item"}`);
       },
     });
-  }, [paired, registerHandlers, navigate, showCommandFeedback]);
+  }, [paired, registerHandlers, navigate, showCommandFeedback, dispatchMouseAt]);
 
   return { paired, session, debugInfo };
 }
