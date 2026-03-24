@@ -413,14 +413,16 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={onOpenChange}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
-        subtitle="Let music flow through this Ancient Friend"
+        subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
+        snapPoints={[0.5, 0.92]}
+        defaultSnapPoint={0.5}
       >
         <TypeSwitcher activeType={activeType} onChange={setActiveType} />
         <div className="mt-2">
           {loading ? (
             <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
           ) : (
-            <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
+            <MusicOfferingFlow treeId={treeId} treeName={treeName} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
           )}
         </div>
       </ResponsiveDialog>
