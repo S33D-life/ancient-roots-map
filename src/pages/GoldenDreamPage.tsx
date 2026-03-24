@@ -223,9 +223,12 @@ const GoldenDreamPage = () => {
                   onClick={() => {
                     if ('externalUrl' in room && room.externalUrl) {
                       window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
+                    } else if (room.id === 'roadmap') {
+                      navigate('/roadmap');
                     } else {
                       setActiveRoom(room.id);
                     }
+                  }}
                   }}
                 >
                   <CardHeader className="text-center p-3 md:p-5">
