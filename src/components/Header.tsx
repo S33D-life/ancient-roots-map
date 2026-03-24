@@ -223,10 +223,10 @@ const Header = () => {
                 </Button>
               )}
 
-              {/* TEOTAG — guiding intelligence orb */}
+              {/* TEOTAG — guiding intelligence orb → Hearth AI tab */}
               <button
                 type="button"
-                onClick={() => { setGuideTab("guide"); setGuideOpen(true); }}
+                onClick={() => navigate("/dashboard?tab=teotag")}
                 className="shrink-0 group"
                 aria-label="TEOTAG — The Echo of the Ancient Groves"
               >
