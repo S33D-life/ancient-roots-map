@@ -33,6 +33,7 @@ interface AddOfferingDialogProps {
   onOpenChange: (open: boolean) => void;
   treeId: string;
   treeSpecies?: string;
+  treeName?: string;
   type: OfferingType;
   meetingId?: string | null;
 }
@@ -96,7 +97,7 @@ const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =
     img.src = url;
   });
 
-const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: initialType, meetingId }: AddOfferingDialogProps) => {
+const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, type: initialType, meetingId }: AddOfferingDialogProps) => {
   const [activeType, setActiveType] = useState<OfferingType>(initialType);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -412,14 +413,16 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: init
         onOpenChange={onOpenChange}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
-        subtitle="Let music flow through this Ancient Friend"
+        subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
+        snapPoints={[0.5, 0.92]}
+        defaultSnapPoint={0.5}
       >
         <TypeSwitcher activeType={activeType} onChange={setActiveType} />
         <div className="mt-2">
           {loading ? (
             <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
           ) : (
-            <MusicOfferingFlow treeId={treeId} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
+            <MusicOfferingFlow treeId={treeId} treeName={treeName} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
           )}
         </div>
       </ResponsiveDialog>
@@ -695,25 +698,32 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: init
   );
 };
 
-/** Inline type switcher — scrollable pill bar */
-const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onChange: (t: OfferingType) => void }) => (
-  <div className="flex gap-1.5 overflow-x-auto py-3 -mx-1 px-1 scrollbar-none">
-    {QUICK_TYPES.map((t) => (
-      <button
-        key={t.value}
-        type="button"
-        onClick={() => onChange(t.value)}
-        className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-serif transition-all ${
-          activeType === t.value
-            ? "border-primary/40 bg-primary/10 text-primary shadow-sm"
-            : "border-border/30 text-muted-foreground/60 hover:border-primary/20 hover:text-foreground/80"
-        }`}
-      >
-        <span className="text-sm">{t.emoji}</span>
-        <span>{t.label}</span>
-      </button>
-    ))}
-  </div>
-);
+/** Inline type switcher — scrollable pill bar with reduced visual weight */
+const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onChange: (t: OfferingType) => void }) => {
+  // Persist last-used tab
+  useEffect(() => {
+    try { localStorage.setItem("s33d-last-offering-type", activeType); } catch {}
+  }, [activeType]);
+
+  return (
+    <div className="flex gap-1 overflow-x-auto py-2.5 -mx-1 px-1 scrollbar-none">
+      {QUICK_TYPES.map((t) => (
+        <button
+          key={t.value}
+          type="button"
+          onClick={() => onChange(t.value)}
+          className={`shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-serif transition-all duration-200 ${
+            activeType === t.value
+              ? "bg-primary/15 text-primary border border-primary/30"
+              : "text-muted-foreground/40 hover:text-muted-foreground/70 border border-transparent"
+          }`}
+        >
+          <span className="text-sm">{t.emoji}</span>
+          <span className={activeType === t.value ? "font-medium" : ""}>{t.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export default AddOfferingDialog;

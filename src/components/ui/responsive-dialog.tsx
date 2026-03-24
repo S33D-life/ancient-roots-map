@@ -27,6 +27,10 @@ interface ResponsiveDialogProps {
   subtitle?: React.ReactNode;
   /** Overlay content rendered above the scrollable body (e.g. celebration) */
   overlay?: React.ReactNode;
+  /** Vaul snap points for the mobile drawer (e.g. [0.5, 0.92]) */
+  snapPoints?: number[];
+  /** Default snap point index value */
+  defaultSnapPoint?: number;
 }
 
 const ResponsiveDialog = ({
@@ -37,12 +41,19 @@ const ResponsiveDialog = ({
   title,
   subtitle,
   overlay,
+  snapPoints,
+  defaultSnapPoint,
 }: ResponsiveDialogProps) => {
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        snapPoints={snapPoints}
+        activeSnapPoint={defaultSnapPoint}
+      >
         <DrawerContent
           className={`max-h-[92dvh] overflow-hidden ${contentClassName ?? ""}`}
           style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
