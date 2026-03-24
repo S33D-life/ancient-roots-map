@@ -3206,6 +3206,83 @@ export type Database = {
         }
         Relationships: []
       }
+      heart_signals: {
+        Row: {
+          body: string | null
+          created_at: string
+          deep_link: string | null
+          dismissed: boolean
+          id: string
+          is_read: boolean
+          metadata: Json | null
+          related_offering_id: string | null
+          related_transaction_id: string | null
+          related_tree_id: string | null
+          signal_type: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          deep_link?: string | null
+          dismissed?: boolean
+          id?: string
+          is_read?: boolean
+          metadata?: Json | null
+          related_offering_id?: string | null
+          related_transaction_id?: string | null
+          related_tree_id?: string | null
+          signal_type?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          deep_link?: string | null
+          dismissed?: boolean
+          id?: string
+          is_read?: boolean
+          metadata?: Json | null
+          related_offering_id?: string | null
+          related_transaction_id?: string | null
+          related_tree_id?: string | null
+          signal_type?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heart_signals_related_offering_id_fkey"
+            columns: ["related_offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heart_signals_related_transaction_id_fkey"
+            columns: ["related_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "heart_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heart_signals_related_tree_id_fkey"
+            columns: ["related_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heart_signals_related_tree_id_fkey"
+            columns: ["related_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       heart_transactions: {
         Row: {
           amount: number
