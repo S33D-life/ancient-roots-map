@@ -121,6 +121,10 @@ interface OrbConstellationProps {
   /** Center of the Orb (px) */
   cx: number;
   cy: number;
+  /** App update state */
+  updateAvailable?: boolean;
+  onApplyUpdate?: () => void;
+  onDismissUpdate?: () => void;
 }
 
 export default function OrbConstellation({
