@@ -58,11 +58,22 @@ const StatTile = ({ label, value, icon: Icon }: { label: string; value: number |
   </Card>
 );
 
+interface MappedTree {
+  id: string;
+  name: string;
+  species: string | null;
+  nation: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
 const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
   const config = getDatasetConfig(datasetKey);
   useDocumentTitle(config?.portalTitle ?? "Candidate Region");
   const { focusMap } = useMapFocus();
   const [trees, setTrees] = useState<DatasetTree[]>([]);
+  const [mappedTrees, setMappedTrees] = useState<MappedTree[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -70,13 +81,24 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
     if (!config) return;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("research_trees")
-        .select("id,tree_name,species_common,species_scientific,province,locality_text,latitude,longitude,designation_type,description,height_m,source_program,source_row_ref")
-        .eq("country", config.countryName)
-        .not("latitude", "is", null)
-        .order("tree_name");
-      setTrees((data as DatasetTree[]) || []);
+      // Fetch research trees and community-mapped trees in parallel
+      const [researchResult, mappedResult] = await Promise.all([
+        supabase
+          .from("research_trees")
+          .select("id,tree_name,species_common,species_scientific,province,locality_text,latitude,longitude,designation_type,description,height_m,source_program,source_row_ref")
+          .eq("country", config.countryName)
+          .not("latitude", "is", null)
+          .order("tree_name"),
+        supabase
+          .from("trees")
+          .select("id,name,species,nation,state,latitude,longitude")
+          .ilike("nation", `%${config.countryName}%`)
+          .not("latitude", "is", null)
+          .order("name")
+          .limit(200),
+      ]);
+      setTrees((researchResult.data as DatasetTree[]) || []);
+      setMappedTrees((mappedResult.data as MappedTree[]) || []);
       setLoading(false);
     })();
   }, [config?.countryName]);
@@ -90,11 +112,19 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
     );
   }
 
-  const speciesCount = new Set(trees.map(t => t.species_scientific).filter(Boolean)).size;
-  const regionSet = new Set(trees.map(t => t.province).filter(Boolean));
+  const allSpecies = new Set([
+    ...trees.map(t => t.species_scientific).filter(Boolean),
+    ...mappedTrees.map(t => t.species).filter(Boolean),
+  ]);
+  const speciesCount = allSpecies.size;
+  const regionSet = new Set([
+    ...trees.map(t => t.province).filter(Boolean),
+    ...mappedTrees.map(t => t.state).filter(Boolean),
+  ]);
   const regionCount = regionSet.size;
   const regions = Array.from(regionSet).sort();
-  const hasTrees = trees.length > 0;
+  const totalTreeCount = trees.length + mappedTrees.length;
+  const hasTrees = totalTreeCount > 0;
 
   const bbox = {
     south: config.bbox[0],
