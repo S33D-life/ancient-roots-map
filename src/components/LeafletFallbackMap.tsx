@@ -3003,8 +3003,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
         return (
           <>
-            {/* Master Eye toggle — always visible, bottom-right */}
-            <div className="absolute right-3 z-[1000]" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+            {/* Master Eye toggle — always visible, bottom-left */}
+            <div className="absolute left-3 z-[1000]" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
               <button
                 onClick={handleEyeToggle}
                 className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 active:scale-90 glow-button"
@@ -3041,9 +3041,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               </button>
             </div>
 
-            {/* Left column — hidden in clear view */}
+            {/* Left column — stacked above the Eye toggle, hidden in clear view */}
             {!clearView && (
-              <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
+              <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px + 3rem)" }}>
                 <button
                   onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
                   className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
