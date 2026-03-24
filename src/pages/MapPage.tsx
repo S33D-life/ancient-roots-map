@@ -120,12 +120,6 @@ const MapPageFull = () => {
         </Suspense>
       )}
 
-      {/* Tree discovery panel — combined Recent + Awaiting */}
-      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
-        <Suspense fallback={null}>
-          <MapTreePanel onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
-        </Suspense>
-      )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
       {!safeDisableNonessentialOverlays && !showBlessing && !blessingJustDismissed && (
