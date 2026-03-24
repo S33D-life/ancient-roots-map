@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Share2, Music, Sparkles, ExternalLink, Camera, FileText, MessageSquare, Mic, BookOpen, Eye, EyeOff, Users, Trash2 } from "lucide-react";
+import OfferingResonanceButton from "@/components/OfferingResonanceButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,11 @@ const CardFooter = ({
   <div className="flex items-center justify-between mt-4">
     <DateLabel date={offering.created_at} />
     <div className="flex items-center gap-3">
+      <OfferingResonanceButton
+        offeringId={offering.id}
+        userId={userId ?? null}
+        initialCount={(offering as any).resonance_count || 0}
+      />
       {treeId && (
         <InfluenceUpvoteButton
           offeringId={offering.id}
@@ -342,7 +348,13 @@ const CompactRow = ({
             {new Date(offering.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
           </span>
         </div>
-        {/* Influence upvote in compact mode */}
+        {/* Resonance + Influence in compact mode */}
+        <OfferingResonanceButton
+          offeringId={offering.id}
+          userId={userId ?? null}
+          initialCount={(offering as any).resonance_count || 0}
+          compact
+        />
         {treeId && (
           <InfluenceUpvoteButton
             offeringId={offering.id}

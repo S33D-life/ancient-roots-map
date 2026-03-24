@@ -58,11 +58,22 @@ const StatTile = ({ label, value, icon: Icon }: { label: string; value: number |
   </Card>
 );
 
+interface MappedTree {
+  id: string;
+  name: string;
+  species: string | null;
+  nation: string | null;
+  state: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
 const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
   const config = getDatasetConfig(datasetKey);
   useDocumentTitle(config?.portalTitle ?? "Candidate Region");
   const { focusMap } = useMapFocus();
   const [trees, setTrees] = useState<DatasetTree[]>([]);
+  const [mappedTrees, setMappedTrees] = useState<MappedTree[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -70,13 +81,24 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
     if (!config) return;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("research_trees")
-        .select("id,tree_name,species_common,species_scientific,province,locality_text,latitude,longitude,designation_type,description,height_m,source_program,source_row_ref")
-        .eq("country", config.countryName)
-        .not("latitude", "is", null)
-        .order("tree_name");
-      setTrees((data as DatasetTree[]) || []);
+      // Fetch research trees and community-mapped trees in parallel
+      const [researchResult, mappedResult] = await Promise.all([
+        supabase
+          .from("research_trees")
+          .select("id,tree_name,species_common,species_scientific,province,locality_text,latitude,longitude,designation_type,description,height_m,source_program,source_row_ref")
+          .eq("country", config.countryName)
+          .not("latitude", "is", null)
+          .order("tree_name"),
+        supabase
+          .from("trees")
+          .select("id,name,species,nation,state,latitude,longitude")
+          .ilike("nation", `%${config.countryName}%`)
+          .not("latitude", "is", null)
+          .order("name")
+          .limit(200),
+      ]);
+      setTrees((researchResult.data as DatasetTree[]) || []);
+      setMappedTrees((mappedResult.data as MappedTree[]) || []);
       setLoading(false);
     })();
   }, [config?.countryName]);
@@ -90,11 +112,19 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
     );
   }
 
-  const speciesCount = new Set(trees.map(t => t.species_scientific).filter(Boolean)).size;
-  const regionSet = new Set(trees.map(t => t.province).filter(Boolean));
+  const allSpecies = new Set([
+    ...trees.map(t => t.species_scientific).filter(Boolean),
+    ...mappedTrees.map(t => t.species).filter(Boolean),
+  ]);
+  const speciesCount = allSpecies.size;
+  const regionSet = new Set([
+    ...trees.map(t => t.province).filter(Boolean),
+    ...mappedTrees.map(t => t.state).filter(Boolean),
+  ]);
   const regionCount = regionSet.size;
   const regions = Array.from(regionSet).sort();
-  const hasTrees = trees.length > 0;
+  const totalTreeCount = trees.length + mappedTrees.length;
+  const hasTrees = totalTreeCount > 0;
 
   const bbox = {
     south: config.bbox[0],
@@ -161,7 +191,7 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatTile label="Ancient Friends" value={loading ? "…" : trees.length} icon={TreeDeciduous} />
+            <StatTile label="Ancient Friends" value={loading ? "…" : totalTreeCount} icon={TreeDeciduous} />
             <StatTile label="Species" value={loading ? "…" : speciesCount} icon={Flower2} />
             <StatTile label="Regions" value={loading ? "…" : regionCount} icon={Compass} />
             <StatTile label="Circles" value={config.circles.length} icon={Layers} />
@@ -189,34 +219,71 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                 <CardContent className="space-y-2">
                   {loading ? (
                     <p className="text-sm text-muted-foreground animate-pulse">Loading trees…</p>
-                  ) : trees.length === 0 ? (
+                  ) : totalTreeCount === 0 ? (
                     <div className="text-center py-6 space-y-2">
                       <TreeDeciduous className="w-8 h-8 text-muted-foreground/40 mx-auto" />
                       <p className="text-sm text-muted-foreground">No Ancient Friends mapped here yet</p>
                       <p className="text-xs text-muted-foreground">Trees will appear once seed data is curated and reviewed.</p>
                     </div>
                   ) : (
-                    trees.slice(0, 20).map((t) => (
-                      <Link
-                        key={t.id}
-                        to={`/tree/research/${t.id}`}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
-                      >
-                        <span className="text-lg">🌳</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-foreground truncate">{t.tree_name || t.species_common || "Unnamed tree"}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {t.species_common} · {t.province} · {t.designation_type}
-                          </p>
+                    <>
+                      {/* Community-mapped trees first */}
+                      {mappedTrees.length > 0 && (
+                        <div className="space-y-1 mb-4">
+                          <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Community Mapped</p>
+                          {mappedTrees.slice(0, 10).map((t) => (
+                            <Link
+                              key={t.id}
+                              to={`/tree/${t.id}`}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
+                            >
+                              <span className="text-lg">🌿</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{t.name || "Unnamed tree"}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {t.species} {t.state ? `· ${t.state}` : ""}
+                                </p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            </Link>
+                          ))}
+                          {mappedTrees.length > 10 && (
+                            <p className="text-xs text-muted-foreground text-center pt-1">
+                              +{mappedTrees.length - 10} more community trees
+                            </p>
+                          )}
                         </div>
-                        <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                      </Link>
-                    ))
-                  )}
-                  {trees.length > 20 && (
-                    <p className="text-xs text-muted-foreground text-center pt-2">
-                      Showing 20 of {trees.length} trees. Open the map to explore all.
-                    </p>
+                      )}
+                      {/* Research trees */}
+                      {trees.length > 0 && (
+                        <div className="space-y-1">
+                          {mappedTrees.length > 0 && (
+                            <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Research Records</p>
+                          )}
+                          {trees.slice(0, 20).map((t) => (
+                            <Link
+                              key={t.id}
+                              to={`/tree/research/${t.id}`}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
+                            >
+                              <span className="text-lg">🌳</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{t.tree_name || t.species_common || "Unnamed tree"}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {t.species_common} · {t.province} · {t.designation_type}
+                                </p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            </Link>
+                          ))}
+                          {trees.length > 20 && (
+                            <p className="text-xs text-muted-foreground text-center pt-2">
+                              Showing 20 of {trees.length} research trees. Open the map to explore all.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                 </CardContent>
               </Card>

@@ -93,6 +93,7 @@ const CoWitnessPanel = lazy(() => import("@/components/witness/CoWitnessPanel"))
 const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"));
 const TreeRelationshipCard = lazy(() => import("@/components/tree-sections/TreeRelationshipCard"));
 const StewardToolsSection = lazy(() => import("@/components/StewardToolsSection"));
+const TreeActivityTimeline = lazy(() => import("@/components/TreeActivityTimeline"));
 import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { useTreeEditPermission } from "@/hooks/use-tree-edit-permission";
 import TabErrorBoundary from "@/components/TabErrorBoundary";
@@ -592,6 +593,11 @@ const TreeDetailPage = () => {
               onAddOffering={() => setAddOfferingOpen(true)}
               treeName={tree.name}
             />
+
+            {/* Recent Activity Timeline */}
+            <Suspense fallback={null}>
+              <TreeActivityTimeline treeId={id} limit={5} />
+            </Suspense>
 
             {/* Map Journey Anchor */}
             <TreeMapJourneyAnchor
