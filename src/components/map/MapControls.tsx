@@ -1,7 +1,7 @@
 /**
  * MapControls — bottom control bar extracted from LeafletFallbackMap.
- * Contains: Atlas Filter toggle, GroveView toggle, Mycelial toggle,
- * Atlas portal, Locate, Add Tree, Compass Reset, Clear View.
+ * Single Eye toggle as master visibility control.
+ * Contains: Atlas Filter toggle, Atlas portal, Locate, Add Tree, Compass Reset.
  */
 import { memo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,6 @@ import {
   Layers,
   Eye,
   EyeOff,
-  TreePine,
   Globe,
   Plus,
   Loader2,
@@ -77,13 +76,9 @@ function AtlasNavButton() {
 export interface MapControlsProps {
   perspective: string;
   clearView: boolean;
-  setClearView: (fn: (v: boolean) => boolean) => void;
+  onEyeToggle: () => void;
   atlasFilterOpen: boolean;
   setAtlasFilterOpen: (v: boolean) => void;
-  groveViewActive: boolean;
-  setGroveViewActive: (fn: (v: boolean) => boolean) => void;
-  showMycelialNetwork: boolean;
-  setShowMycelialNetwork: (fn: (v: boolean) => boolean) => void;
   locating: boolean;
   located: boolean;
   geoError: GeolocationPositionError | null;
@@ -101,13 +96,9 @@ export interface MapControlsProps {
 const MapControls = memo(function MapControls({
   perspective,
   clearView,
-  setClearView,
+  onEyeToggle,
   atlasFilterOpen,
   setAtlasFilterOpen,
-  groveViewActive,
-  setGroveViewActive,
-  showMycelialNetwork,
-  setShowMycelialNetwork,
   locating,
   located,
   geoError,
@@ -129,6 +120,7 @@ const MapControls = memo(function MapControls({
       : "42, 90%, 55%";
   const addEmphasis = perspective === "personal";
   const globeEmphasis = perspective === "collective";
+  const overlaysOn = !clearView;
 
   const activeLayers = visualSections.reduce(
     (s, sec) => s + sec.layers.filter((l) => l.active).length,
@@ -144,40 +136,45 @@ const MapControls = memo(function MapControls({
 
   return (
     <>
-      {/* Clear View toggle — always visible, right side */}
+      {/* Master Eye toggle — always visible, bottom-right */}
       <div
         className="absolute right-3 z-[1000]"
         style={{
-          bottom:
-            "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
+          bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
         }}
       >
         <button
-          onClick={() => setClearView((v) => !v)}
-          className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 active:scale-90 glow-button`}
+          onClick={onEyeToggle}
+          className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 active:scale-90 glow-button"
           style={{
             ...btnBase,
-            color: clearView
-              ? "hsl(200, 60%, 70%)"
+            color: overlaysOn
+              ? "hsl(120, 55%, 65%)"
               : "hsl(var(--muted-foreground) / 0.6)",
-            background: clearView
-              ? "hsla(200, 40%, 15%, 0.95)"
+            background: overlaysOn
+              ? "hsla(120, 30%, 12%, 0.95)"
               : (btnBase.background as string),
-            border: clearView
-              ? "1px solid hsla(200, 50%, 50%, 0.4)"
+            border: overlaysOn
+              ? "1px solid hsla(120, 40%, 40%, 0.5)"
               : (btnBase.border as string),
           }}
-          title={clearView ? "Show controls" : "Clear view"}
-          aria-label={
-            clearView
-              ? "Show map controls"
-              : "Hide map controls for clear view"
-          }
+          title={overlaysOn ? "Hide overlays" : "Show overlays"}
+          aria-label={overlaysOn ? "Hide map overlays" : "Show map overlays"}
         >
-          {clearView ? (
+          {overlaysOn ? (
             <Eye className="w-[18px] h-[18px]" />
           ) : (
             <EyeOff className="w-[18px] h-[18px]" />
+          )}
+          {overlaysOn && (
+            <span
+              className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+              style={{
+                background: "hsl(120, 55%, 50%)",
+                boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
+                animation: "ancientGlow 3s ease-in-out infinite",
+              }}
+            />
           )}
         </button>
       </div>
@@ -187,8 +184,7 @@ const MapControls = memo(function MapControls({
         <div
           className="absolute left-3 z-[1000] flex flex-col-reverse gap-2"
           style={{
-            bottom:
-              "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
+            bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
           }}
         >
           <button
@@ -221,69 +217,7 @@ const MapControls = memo(function MapControls({
               </span>
             )}
           </button>
-          {/* Secondary controls — hidden when atlas filter is open */}
-          {!atlasFilterOpen && (
-            <>
-              <button
-                onClick={() => setGroveViewActive((v) => !v)}
-                className={`relative flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full transition-all duration-200 active:scale-90 ${
-                  groveViewActive ? "glow-button--emerald" : ""
-                } glow-button`}
-                style={{
-                  ...btnBase,
-                  color: groveViewActive
-                    ? "hsl(120, 55%, 65%)"
-                    : "hsl(42, 60%, 60%)",
-                  background: groveViewActive
-                    ? "hsla(120, 30%, 12%, 0.95)"
-                    : (btnBase.background as string),
-                  border: groveViewActive
-                    ? "1px solid hsla(120, 40%, 40%, 0.5)"
-                    : (btnBase.border as string),
-                }}
-                title="Living Earth Mode"
-              >
-                <Eye className="w-4 h-4 md:w-[18px] md:h-[18px]" />
-                {groveViewActive && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
-                    style={{
-                      background: "hsl(120, 55%, 50%)",
-                      boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
-                      animation: "ancientGlow 3s ease-in-out infinite",
-                    }}
-                  />
-                )}
-              </button>
-              <button
-                onClick={() => setShowMycelialNetwork((v) => !v)}
-                className={`relative flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
-                style={{
-                  ...btnBase,
-                  color: showMycelialNetwork
-                    ? "hsl(178, 72%, 68%)"
-                    : "hsl(42, 60%, 60%)",
-                  border: showMycelialNetwork
-                    ? "1px solid hsla(178, 65%, 55%, 0.5)"
-                    : (btnBase.border as string),
-                }}
-                title="Toggle Mycelial Network"
-                aria-label="Toggle Mycelial Network"
-              >
-                <TreePine className="w-4 h-4 md:w-[16px] md:h-[16px]" />
-                {showMycelialNetwork && (
-                  <span
-                    className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
-                    style={{
-                      background: "hsl(178, 72%, 62%)",
-                      boxShadow: "0 0 6px hsla(178, 72%, 62%, 0.6)",
-                    }}
-                  />
-                )}
-              </button>
-              <AtlasNavButton />
-            </>
-          )}
+          {!atlasFilterOpen && <AtlasNavButton />}
         </div>
       )}
 
@@ -292,14 +226,13 @@ const MapControls = memo(function MapControls({
         <div
           className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2"
           style={{
-            bottom:
-              "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
+            bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)",
           }}
         >
           <button
             onClick={onFindMe}
             disabled={locating}
-            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+            className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button"
             style={{
               ...btnBase,
               color: locating
@@ -310,9 +243,7 @@ const MapControls = memo(function MapControls({
                 ? `hsl(${modeAccent})`
                 : "hsl(42, 60%, 60%)",
             }}
-            title={
-              geoError ? `Location: ${geoError.message}` : "Locate me"
-            }
+            title={geoError ? `Location: ${geoError.message}` : "Locate me"}
           >
             {locating ? (
               <Loader2 className="w-[18px] h-[18px] animate-spin" />
@@ -320,7 +251,6 @@ const MapControls = memo(function MapControls({
               <Crosshair className="w-[18px] h-[18px]" />
             )}
           </button>
-          {/* Add tree button — desktop only */}
           <button
             onClick={onAddTree}
             className={`hidden md:flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${
@@ -338,7 +268,7 @@ const MapControls = memo(function MapControls({
           </button>
           <button
             onClick={onCompassReset}
-            className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button`}
+            className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button"
             style={{
               ...btnBase,
               color: globeEmphasis
