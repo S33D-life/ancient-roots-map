@@ -213,7 +213,12 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                 <CardHeader>
                   <CardTitle className="font-serif text-lg flex items-center gap-2">
                     <TreeDeciduous className="w-5 h-5 text-primary" />
-                    Ancient Friends ({loading ? "…" : trees.length})
+                    Ancient Friends
+                    {!loading && (
+                      <Badge variant="outline" className="ml-1 text-xs border-primary/20 font-mono">
+                        {totalTreeCount}
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -230,7 +235,10 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                       {/* Community-mapped trees first */}
                       {mappedTrees.length > 0 && (
                         <div className="space-y-1 mb-4">
-                          <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Community Mapped</p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-serif text-primary uppercase tracking-wider">Community Mapped</span>
+                            <Badge variant="outline" className="text-[10px] border-primary/20 font-mono">{mappedTrees.length}</Badge>
+                          </div>
                           {mappedTrees.slice(0, 10).map((t) => (
                             <Link
                               key={t.id}
@@ -258,7 +266,10 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                       {trees.length > 0 && (
                         <div className="space-y-1">
                           {mappedTrees.length > 0 && (
-                            <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Research Records</p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Research Records</span>
+                              <Badge variant="outline" className="text-[10px] border-border/30 font-mono">{trees.length}</Badge>
+                            </div>
                           )}
                           {trees.slice(0, 20).map((t) => (
                             <Link
@@ -300,14 +311,16 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {regions.map((r) => {
-                        const count = trees.filter(t => t.province === r).length;
+                        const researchCount = trees.filter(t => t.province === r).length;
+                        const mappedCount = mappedTrees.filter(t => t.state === r).length;
+                        const total = researchCount + mappedCount;
                         return (
                           <Badge
                             key={r}
                             variant="outline"
                             className="text-xs border-primary/20 text-foreground cursor-default"
                           >
-                            {r} · {count}
+                            {r} · {total}
                           </Badge>
                         );
                       })}
