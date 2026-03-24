@@ -573,7 +573,7 @@ const LivingForestRoadmapPage = () => {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
               >
-                <MapView />
+                <MapView onNavigate={handleNavigate} />
               </motion.div>
             ) : (
               <motion.div
