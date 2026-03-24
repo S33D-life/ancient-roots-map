@@ -213,7 +213,12 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                 <CardHeader>
                   <CardTitle className="font-serif text-lg flex items-center gap-2">
                     <TreeDeciduous className="w-5 h-5 text-primary" />
-                    Ancient Friends ({loading ? "…" : trees.length})
+                    Ancient Friends
+                    {!loading && (
+                      <Badge variant="outline" className="ml-1 text-xs border-primary/20 font-mono">
+                        {totalTreeCount}
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
