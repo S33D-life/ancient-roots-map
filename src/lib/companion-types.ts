@@ -38,6 +38,8 @@ export type CompanionCommand =
   | { type: "pointer_hide" }
   | { type: "pointer_delta"; dx: number; dy: number }
   | { type: "pointer_click"; x: number; y: number }
+  | { type: "pointer_down"; x: number; y: number }
+  | { type: "pointer_up"; x: number; y: number }
   | { type: "scroll"; dx: number; dy: number }
   | { type: "drag_start" }
   | { type: "drag_move"; dx: number; dy: number }
