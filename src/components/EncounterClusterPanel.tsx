@@ -113,7 +113,15 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
     fetchEncounters();
   }, [tree.id, tree.latitude, tree.longitude]);
 
-  if (loading || encounters.length === 0) return null;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-6">
+        <div className="animate-spin h-5 w-5 border-2 border-primary/30 border-t-primary rounded-full" />
+      </div>
+    );
+  }
+
+  if (encounters.length === 0) return null;
 
   const uniqueWanderers = new Set(encounters.map(e => e.tree.created_by).filter(Boolean));
   // Add current tree's creator
