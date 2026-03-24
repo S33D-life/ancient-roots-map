@@ -3179,6 +3179,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         }}
       />
 
+      {/* Proximity seed nudge */}
+      <MapSeedNudge
+        trees={trees as any}
+        userLatLng={userLatLng}
+        userId={userId}
+      />
+
       {/* Add Tree Dialog */}
       <AddTreeDialog
         open={addDialogOpen}
