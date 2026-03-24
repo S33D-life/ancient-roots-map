@@ -831,22 +831,14 @@ const TreeDetailPage = () => {
               <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, stories, seeds, and whispers placed at this Ancient Friend</p>
             </div>
 
-            {/* Auth / meeting gate messages */}
-            {!userId ? (
-              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
-                <p className="text-sm text-muted-foreground font-serif">
+            {/* Auth / meeting gate — subtle inline hint, not a blocking wall */}
+            {!userId && (
+              <div className="p-3 rounded-lg border border-border/30 bg-secondary/10 text-center">
+                <p className="text-xs text-muted-foreground font-serif">
                   Sign in to leave offerings at this Ancient Friend.
                 </p>
               </div>
-            ) : meetingStatus !== "active" && meetingStatus !== "expiring" ? (
-              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
-                <p className="text-sm text-muted-foreground font-serif">
-                  {meetingStatus === "expired"
-                    ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
-                    : "Meet this Ancient Friend to open a 12-hour offering window."}
-                </p>
-              </div>
-            ) : null}
+            )}
 
             {/* Seed Planter (moved from Encounters) */}
             <SeedPlanter

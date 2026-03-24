@@ -68,7 +68,7 @@ const MapHeartBadge = () => {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1.5, type: "spring", stiffness: 200 }}
       onClick={() => navigate("/vault")}
-      className="absolute bottom-20 right-3 z-[15] flex items-center gap-1.5 px-3 py-1.5 rounded-full
+      className="absolute bottom-[5.5rem] right-3 z-[15] flex items-center gap-1.5 px-3 py-1.5 rounded-full
         bg-card/80 border border-border/30 backdrop-blur-md shadow-lg
         hover:bg-card/95 transition-colors cursor-pointer min-h-[36px]"
       aria-label="Open Heart Vault"
