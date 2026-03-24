@@ -97,7 +97,7 @@ const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =
     img.src = url;
   });
 
-const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, type: initialType, meetingId }: AddOfferingDialogProps) => {
+const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, type: initialType, meetingId }: AddOfferingDialogProps) => {
   const [activeType, setActiveType] = useState<OfferingType>(initialType);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
