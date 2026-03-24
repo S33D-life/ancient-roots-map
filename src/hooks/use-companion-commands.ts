@@ -26,6 +26,9 @@ export interface RoomHandlers {
   onSelectChart?: (chartId: string) => void;
   onPointerMove?: (x: number, y: number) => void;
   onPointerHide?: () => void;
+  onPointerDelta?: (dx: number, dy: number) => void;
+  onPointerClick?: (x: number, y: number) => void;
+  onScroll?: (dx: number, dy: number) => void;
   onNavigateRoom?: (room: string) => void;
   onSendToDesktop?: (entityType: string, entityId: string, label?: string) => void;
 }
@@ -54,6 +57,9 @@ export function useCompanionDisplay() {
       case "select_chart": h.onSelectChart?.(cmd.chartId); break;
       case "pointer_move": h.onPointerMove?.(cmd.x, cmd.y); break;
       case "pointer_hide": h.onPointerHide?.(); break;
+      case "pointer_delta": h.onPointerDelta?.(cmd.dx, cmd.dy); break;
+      case "pointer_click": h.onPointerClick?.(cmd.x, cmd.y); break;
+      case "scroll": h.onScroll?.(cmd.dx, cmd.dy); break;
       case "navigate_room": h.onNavigateRoom?.(cmd.room); break;
       case "send_to_desktop": h.onSendToDesktop?.(cmd.entityType, cmd.entityId, cmd.label); break;
     }

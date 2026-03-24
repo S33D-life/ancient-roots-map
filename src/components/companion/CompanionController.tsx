@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw, Check } from "lucide-react";
+import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw, Check, Bug } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanionSession } from "@/hooks/use-companion-session";
@@ -22,6 +22,7 @@ export default function CompanionController() {
   const [error, setError] = useState("");
   const [autoJoinAttempted, setAutoJoinAttempted] = useState(false);
   const [lastAction, setLastAction] = useState<string | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
 
   const { session, paired, pairTimedOut, roomState, joinSession, sendCommand, disconnect } =
     useCompanionSession({ role: "controller" });
@@ -34,12 +35,10 @@ export default function CompanionController() {
     }
   }, [urlCode, autoJoinAttempted, session, joinSession]);
 
-  // Haptic on successful pair
   useEffect(() => {
     if (paired) hapticSuccess();
   }, [paired]);
 
-  // Wrap sendCommand to show action feedback on mobile
   const sendWithFeedback = useCallback(
     (cmd: Parameters<typeof sendCommand>[0]) => {
       sendCommand(cmd);
@@ -55,8 +54,11 @@ export default function CompanionController() {
         cmd.type === "export_view" ? "Capture" :
         cmd.type === "open_panel" ? "Open" :
         cmd.type === "close_panel" ? "Close" :
-        cmd.type === "pointer_move" ? null : // silent
+        cmd.type === "pointer_delta" ? null :
+        cmd.type === "pointer_move" ? null :
         cmd.type === "pointer_hide" ? null :
+        cmd.type === "pointer_click" ? "Click" :
+        cmd.type === "scroll" ? null :
         cmd.type;
 
       if (label) {
@@ -111,30 +113,46 @@ export default function CompanionController() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col">
+    <div
+      className="min-h-[100dvh] bg-background flex flex-col overflow-hidden"
+      style={{ touchAction: "none" }}
+    >
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-border/30">
         <div className="flex items-center gap-2">
           <Smartphone className="w-5 h-5 text-primary" />
           <span className="text-sm font-serif text-foreground">S33D Companion</span>
         </div>
-        {(paired || session) && (
-          <button
-            onClick={disconnect}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif transition-colors min-h-[36px]",
-              paired
-                ? "bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/20"
-                : "bg-muted/30 border border-border/30 text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <WifiOff className="w-3.5 h-3.5" />
-            {paired ? "Disconnect" : "Cancel"}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {paired && (
+            <button
+              onClick={() => setShowDebug(d => !d)}
+              className={cn(
+                "p-1.5 rounded-full transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center",
+                showDebug ? "bg-primary/20 text-primary" : "bg-muted/20 text-muted-foreground",
+              )}
+            >
+              <Bug className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {(paired || session) && (
+            <button
+              onClick={disconnect}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif transition-colors min-h-[36px]",
+                paired
+                  ? "bg-destructive/10 border border-destructive/20 text-destructive hover:bg-destructive/20"
+                  : "bg-muted/30 border border-border/30 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <WifiOff className="w-3.5 h-3.5" />
+              {paired ? "Disconnect" : "Cancel"}
+            </button>
+          )}
+        </div>
       </header>
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col overflow-hidden">
         <AnimatePresence mode="wait">
           {!session ? (
             <motion.div
@@ -155,13 +173,12 @@ export default function CompanionController() {
                   </p>
                 </div>
 
-                {/* How it works */}
                 <div className="w-full rounded-xl border border-border/20 bg-secondary/10 p-3 space-y-1.5">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-serif">How it works</p>
                   <ul className="text-xs text-muted-foreground space-y-1 list-none">
                     <li className="flex items-start gap-2"><span className="text-primary">📱</span> Your phone becomes a remote controller</li>
                     <li className="flex items-start gap-2"><span className="text-primary">🖥️</span> Desktop shows the map, gallery, or staff room</li>
-                    <li className="flex items-start gap-2"><span className="text-primary">🎯</span> Tap controls here — see results on desktop</li>
+                    <li className="flex items-start gap-2"><span className="text-primary">🎯</span> Drag to move pointer · tap to click · 2-finger to scroll</li>
                     <li className="flex items-start gap-2"><span className="text-primary">✨</span> Same portal, different roles</li>
                   </ul>
                 </div>
@@ -242,7 +259,7 @@ export default function CompanionController() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex-1 flex flex-col"
+              className="flex-1 flex flex-col overflow-hidden"
             >
               {/* Connected indicator + action feedback */}
               <div className="flex items-center justify-center gap-2 py-2 relative">
@@ -252,7 +269,6 @@ export default function CompanionController() {
                 </span>
                 <span className="text-xs text-primary font-serif">Connected</span>
 
-                {/* Action confirmation pill */}
                 <AnimatePresence>
                   {lastAction && (
                     <motion.span
@@ -272,13 +288,13 @@ export default function CompanionController() {
               <RoomNav currentRoom={fallbackState.room} send={sendWithFeedback} />
 
               {/* Room-specific controls */}
-              <div className="flex-1 flex flex-col items-center justify-center max-w-xs mx-auto w-full">
+              <div className="flex-1 flex flex-col items-center justify-center max-w-xs mx-auto w-full min-h-0">
                 {renderController()}
               </div>
 
-              {/* Pointer pad */}
+              {/* Trackpad — primary interaction surface */}
               <div className="px-4 pb-2">
-                <PointerPad send={sendCommand} />
+                <PointerPad send={sendCommand} debug={showDebug} />
               </div>
 
               {/* Fullscreen toggle */}
