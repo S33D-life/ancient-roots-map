@@ -51,6 +51,7 @@ import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import AddTreeChooser from "./AddTreeChooser";
+import MapSeedNudge from "./MapSeedNudge";
 import { supabase } from "@/integrations/supabase/client";
 import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
