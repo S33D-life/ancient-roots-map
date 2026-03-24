@@ -1,15 +1,12 @@
 /**
  * useTreeMapData — React Query-based hook for fetching tree, birdsong, and seed
- * data for the Atlas map. Replaces the manual useEffect + state pattern in Map.tsx.
+ * data for the Atlas map.
  *
- * Benefits:
- * - 5-minute stale time prevents redundant fetches
- * - Automatic background refetch on window focus
- * - Realtime invalidation via Supabase channel
- * - Shared cache across components
+ * OPTIMISED: 10-minute stale time, longer cache, debounced realtime (5s).
+ * The full dataset is fetched once and cached — viewport filtering happens client-side.
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ── Types ── */
@@ -49,7 +46,7 @@ export interface BloomedSeed {
 
 /* ── Query keys ── */
 const TREE_MAP_KEY = ["tree-map-data"] as const;
-const STALE_TIME = 5 * 60 * 1000; // 5 minutes
+const STALE_TIME = 10 * 60 * 1000; // 10 minutes (up from 5)
 
 /* ── Fetch function ── */
 async function fetchTreeMapData() {
@@ -106,30 +103,31 @@ export function useTreeMapData() {
     queryKey: TREE_MAP_KEY,
     queryFn: fetchTreeMapData,
     staleTime: STALE_TIME,
-    gcTime: 10 * 60 * 1000, // keep in cache 10 min
-    refetchOnWindowFocus: true,
+    gcTime: 30 * 60 * 1000, // keep in cache 30 min (up from 10)
+    refetchOnWindowFocus: false, // disable auto-refetch on tab focus
+    refetchOnReconnect: false,
   });
 
-  // Realtime invalidation — debounced to 2 seconds
+  // Realtime invalidation — debounced to 5 seconds (up from 2)
   useEffect(() => {
     let debounceTimer: ReturnType<typeof setTimeout>;
     const debouncedInvalidate = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: TREE_MAP_KEY });
-      }, 2000);
+      }, 5000);
     };
 
     const channel = supabase
       .channel("tree-map-realtime")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "trees" },
+        { event: "INSERT", schema: "public", table: "trees" },
         debouncedInvalidate
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "planted_seeds" },
+        { event: "INSERT", schema: "public", table: "planted_seeds" },
         debouncedInvalidate
       )
       .subscribe();
