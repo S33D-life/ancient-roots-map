@@ -97,7 +97,7 @@ const CosmicCalendarPage = () => {
     const solar = solarEvents.find(e => e.date.toDateString() === key);
     if (solar) events.push({ icon: solar.emoji, label: solar.name, detail: solar.description });
 
-    events.push({ icon: "💚", label: "Daily Heart Reset", detail: "33 seeds refresh. Check-in caps reset." });
+    events.push({ icon: "💚", label: "Daily Heart Reset", detail: "3 seeds refresh. Each seed carries 33 hearts. Check-in caps reset." });
 
     // Lens-contributed events
     const lensData = getLensDataForDate(selectedDate);
