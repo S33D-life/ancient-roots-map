@@ -114,7 +114,7 @@ const SeedNudge = ({
 
   return (
     <>
-      <SeedBurst active={showBurst} />
+      <SeedBurst visible={showBurst} />
       <AnimatePresence>
         {!planted && (
           <motion.div
