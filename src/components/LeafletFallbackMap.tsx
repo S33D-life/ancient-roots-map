@@ -51,6 +51,7 @@ import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
 import AddTreeChooser from "./AddTreeChooser";
+import MapSeedNudge from "./MapSeedNudge";
 import { supabase } from "@/integrations/supabase/client";
 import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
@@ -3176,6 +3177,13 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
           // Open add tree dialog which has the full NearbyTreesSheet built in
           setAddDialogOpen(true);
         }}
+      />
+
+      {/* Proximity seed nudge */}
+      <MapSeedNudge
+        trees={trees as any}
+        userLatLng={userLatLng}
+        userId={userId}
       />
 
       {/* Add Tree Dialog */}

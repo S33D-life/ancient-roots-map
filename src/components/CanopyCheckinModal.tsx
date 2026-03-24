@@ -29,6 +29,7 @@ import {
   Loader2, MapPin, Leaf, Heart, TreeDeciduous, Share2,
 } from "lucide-react";
 import { toast } from "sonner";
+import SeedNudge from "@/components/SeedNudge";
 
 const CANOPY_RADIUS_KM = 0.1; // 100m
 
@@ -360,6 +361,25 @@ export default function CanopyCheckinModal({
                     userId={userId}
                     treeId={treeId}
                     treeName={treeName}
+                  />
+                </motion.div>
+              )}
+
+              {/* Seed nudge after check-in */}
+              {userId && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.1 }}
+                  className="w-full max-w-sm"
+                >
+                  <SeedNudge
+                    treeId={treeId}
+                    treeName={treeName}
+                    treeLat={treeLat ?? null}
+                    treeLng={treeLng ?? null}
+                    userId={userId}
+                    context="checkin"
                   />
                 </motion.div>
               )}

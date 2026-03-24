@@ -24,6 +24,7 @@ import {
   type SpeciesVisionPrediction,
   type SpeciesVisionResult,
 } from "@/services/speciesVision";
+import SeedNudge from "@/components/SeedNudge";
 
 interface AddTreeDialogProps {
   open: boolean;
@@ -63,6 +64,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
   const [originLat, setOriginLat] = useState<number | null>(null);
   const [originLng, setOriginLng] = useState<number | null>(null);
   const [savedTreeId, setSavedTreeId] = useState<string | null>(null);
+  const [savedUserId, setSavedUserId] = useState<string | null>(null);
   const [transitionDir, setTransitionDir] = useState<"forward" | "back">("forward");
   const [showCelebration, setShowCelebration] = useState(false);
   const [showFirstTreeMilestone, setShowFirstTreeMilestone] = useState(false);
@@ -607,6 +609,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
 
       if (error) throw error;
       setSavedTreeId(data.id);
+      setSavedUserId(user.id);
 
       setShowCelebration(true);
 
@@ -1312,6 +1315,20 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                     </a>
                   ))}
                 </div>
+
+                {/* Seed nudge after tree creation */}
+                {savedTreeId && lat != null && lng != null && (
+                  <div className="max-w-xs mx-auto w-full">
+                    <SeedNudge
+                      treeId={savedTreeId}
+                      treeName={name || species || "this tree"}
+                      treeLat={lat}
+                      treeLng={lng}
+                      userId={savedUserId}
+                      context="new_tree"
+                    />
+                  </div>
+                )}
 
                 <Button
                   variant="ghost"
