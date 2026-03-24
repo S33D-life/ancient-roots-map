@@ -291,6 +291,7 @@ const Header = () => {
           {/* Right actions */}
             <div className="flex items-center gap-1 md:gap-2 shrink-0">
             <OfflineIndicator />
+            <ThemeToggle />
             {/* Search button */}
             <Button
               variant="ghost"
@@ -301,7 +302,7 @@ const Header = () => {
             >
               <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </Button>
-            {user && <DailySeedCounter remaining={seedsRemaining} compact />}
+            {user && <HeartJar userId={user?.id ?? null} />}
             {user && <NotificationBell />}
             {user ? (
               <Link
@@ -323,7 +324,6 @@ const Header = () => {
                 </div>
                 <span className="font-serif">S33D</span>
                 <LivingStreak streak={heartBalance.streak} />
-                <HeartJar userId={user?.id ?? null} />
               </Link>
             ) : (
               <Button
