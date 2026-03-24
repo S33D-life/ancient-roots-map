@@ -1,12 +1,13 @@
 /**
- * HeartJar — Glass jar of glowing hearts. Primary balance UI.
- * Tapping opens a sliding panel with balance, ledger, earn/spend options.
- * Shows a gentle skeleton while loading — never blank.
+ * HeartJar — Unified living balance vessel.
+ * Compact header indicator showing hearts + influence + seeds.
+ * Expands into a full balance panel on tap.
  */
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, ArrowRight, X } from "lucide-react";
+import { Heart, Sparkles, ArrowRight, X, Shield, Sprout } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
+import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import HeartLedgerPanel from "./HeartLedgerPanel";
 import HeartClaimsPanel from "./HeartClaimsPanel";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +19,7 @@ interface Props {
 
 const HeartJar = ({ userId, className = "" }: Props) => {
   const { balance, isLoading } = useHeartEconomy(userId);
+  const { seedsRemaining } = useSeedEconomy(userId);
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"overview" | "ledger" | "claims">("overview");
   const prevBalance = useRef(balance.s33d);
@@ -35,7 +37,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
 
   if (!userId) return null;
 
-  // Skeleton state while loading — matches jar shape
+  // Skeleton state while loading
   if (isLoading) {
     return (
       <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-border/20 bg-card/60 ${className}`}>
@@ -49,14 +51,24 @@ const HeartJar = ({ userId, className = "" }: Props) => {
 
   return (
     <>
-      {/* Jar button */}
+      {/* Compact jar button */}
       <button
         onClick={() => setOpen(true)}
-        className={`relative group flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-primary/20 bg-card/60 backdrop-blur-sm hover:border-primary/40 transition-all ${className}`}
-        aria-label="Open Heart Jar"
+        className={`relative group flex items-center gap-1.5 px-2 py-1 md:px-2.5 md:py-1.5 rounded-full border transition-all ${className}`}
+        style={{
+          borderColor: "hsl(var(--primary) / 0.2)",
+          background: "hsl(var(--card) / 0.6)",
+          backdropFilter: "blur(8px)",
+        }}
+        aria-label="Open Heart Jar — your living balances"
       >
         {/* Mini jar */}
-        <div className="relative w-6 h-7 rounded-b-lg rounded-t-sm border border-primary/30 overflow-hidden bg-card/80">
+        <div className="relative w-5 h-6 md:w-6 md:h-7 rounded-b-lg rounded-t-sm overflow-hidden"
+          style={{
+            border: "1px solid hsl(var(--primary) / 0.3)",
+            background: "hsl(var(--card) / 0.8)",
+          }}
+        >
           <motion.div
             className="absolute bottom-0 left-0 right-0"
             style={{
@@ -71,27 +83,42 @@ const HeartJar = ({ userId, className = "" }: Props) => {
             }}
             transition={{ duration: 0.6 }}
           />
-          {/* Floating heart particles inside jar */}
           {balance.s33d > 0 && (
             <>
               <motion.div
-                className="absolute w-1.5 h-1.5 rounded-full bg-primary/60"
-                style={{ left: "30%", bottom: `${fillPct * 0.4}%` }}
+                className="absolute w-1.5 h-1.5 rounded-full"
+                style={{ left: "30%", bottom: `${fillPct * 0.4}%`, background: "hsl(var(--primary) / 0.6)" }}
                 animate={{ y: [-1, 1, -1], opacity: [0.4, 0.8, 0.4] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />
               <motion.div
-                className="absolute w-1 h-1 rounded-full bg-primary/50"
-                style={{ left: "60%", bottom: `${fillPct * 0.6}%` }}
+                className="absolute w-1 h-1 rounded-full"
+                style={{ left: "60%", bottom: `${fillPct * 0.6}%`, background: "hsl(var(--primary) / 0.5)" }}
                 animate={{ y: [1, -1, 1], opacity: [0.3, 0.7, 0.3] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               />
             </>
           )}
         </div>
-        <span className="text-xs font-serif font-bold tabular-nums text-primary">
-          {balance.s33d.toLocaleString()}
-        </span>
+
+        {/* Compact stats — hearts primary, seeds as dot */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs font-serif font-bold tabular-nums text-primary">
+            {balance.s33d.toLocaleString()}
+          </span>
+          {/* Seeds dot indicator */}
+          {seedsRemaining > 0 && (
+            <span
+              className="flex items-center justify-center w-4 h-4 rounded-full text-[8px] font-serif font-bold tabular-nums"
+              style={{
+                background: "hsl(var(--primary) / 0.15)",
+                color: "hsl(var(--primary) / 0.8)",
+              }}
+            >
+              {seedsRemaining}
+            </span>
+          )}
+        </div>
       </button>
 
       {/* Panel overlay */}
@@ -99,14 +126,20 @@ const HeartJar = ({ userId, className = "" }: Props) => {
         {open && (
           <>
             <motion.div
-              className="fixed inset-0 bg-background/60 backdrop-blur-sm z-50"
+              className="fixed inset-0 z-50"
+              style={{ background: "hsl(var(--background) / 0.6)", backdropFilter: "blur(4px)" }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
             />
             <motion.div
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card"
+              className="fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t"
+              style={{
+                borderColor: "hsl(var(--border))",
+                background: "hsl(var(--card))",
+                paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)",
+              }}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
@@ -114,18 +147,32 @@ const HeartJar = ({ userId, className = "" }: Props) => {
             >
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+                <div className="w-10 h-1 rounded-full" style={{ background: "hsl(var(--muted-foreground) / 0.2)" }} />
               </div>
 
               {/* Header */}
-              <div className="px-5 pb-3 flex items-center justify-between">
+              <div className="px-5 pb-1 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Heart className="w-5 h-5 text-primary fill-primary/20" />
-                  <h2 className="font-serif text-lg text-foreground">Heart Jar</h2>
+                  <div>
+                    <h2 className="font-serif text-lg text-foreground">Heart Jar</h2>
+                    <p className="text-[10px] font-serif text-muted-foreground">Your living balances</p>
+                  </div>
                 </div>
-                <button onClick={() => setOpen(false)} className="p-1.5 rounded-full hover:bg-secondary/40 transition-colors">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="p-1.5 rounded-full transition-colors"
+                  style={{ background: "transparent" }}
+                >
                   <X className="w-4 h-4 text-muted-foreground" />
                 </button>
+              </div>
+
+              {/* Quick summary strip */}
+              <div className="px-5 py-3 flex gap-2">
+                <QuickStat icon={<Heart className="w-3.5 h-3.5 text-primary" />} label="Hearts" value={balance.s33d} />
+                <QuickStat icon={<Shield className="w-3.5 h-3.5 text-muted-foreground" />} label="Influence" value={balance.influence} />
+                <QuickStat icon={<Sprout className="w-3.5 h-3.5 text-primary" />} label="Seeds today" value={seedsRemaining} suffix="/3" />
               </div>
 
               {/* Tab bar */}
@@ -150,7 +197,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                 <AnimatePresence mode="wait">
                   {tab === "overview" && (
                     <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <JarOverview balance={balance} />
+                      <JarOverview balance={balance} seedsRemaining={seedsRemaining} />
                     </motion.div>
                   )}
                   {tab === "ledger" && (
@@ -173,15 +220,40 @@ const HeartJar = ({ userId, className = "" }: Props) => {
   );
 };
 
+/* ── Quick stat chip ── */
+const QuickStat = ({ icon, label, value, suffix = "" }: { icon: React.ReactNode; label: string; value: number; suffix?: string }) => (
+  <div
+    className="flex-1 flex items-center gap-1.5 px-2.5 py-2 rounded-xl"
+    style={{
+      background: "hsl(var(--secondary) / 0.15)",
+      border: "1px solid hsl(var(--border) / 0.15)",
+    }}
+  >
+    {icon}
+    <div className="min-w-0">
+      <p className="text-sm font-serif font-bold tabular-nums text-foreground">
+        {value.toLocaleString()}{suffix}
+      </p>
+      <p className="text-[8px] font-serif text-muted-foreground uppercase tracking-wider truncate">{label}</p>
+    </div>
+  </div>
+);
+
 /* ── Overview tab ── */
 import type { HeartBalance } from "@/lib/heart-economy-types";
 import { Link } from "react-router-dom";
 
-const JarOverview = ({ balance }: { balance: HeartBalance }) => (
+const JarOverview = ({ balance, seedsRemaining }: { balance: HeartBalance; seedsRemaining: number }) => (
   <div className="space-y-4">
     {/* Big jar visualization */}
     <div className="flex flex-col items-center py-4">
-      <div className="relative w-24 h-32 rounded-b-2xl rounded-t-lg border-2 border-primary/30 overflow-hidden bg-card/80">
+      <div
+        className="relative w-24 h-32 rounded-b-2xl rounded-t-lg overflow-hidden"
+        style={{
+          border: "2px solid hsl(var(--primary) / 0.3)",
+          background: "hsl(var(--card) / 0.8)",
+        }}
+      >
         <motion.div
           className="absolute bottom-0 left-0 right-0"
           initial={{ height: 0 }}
@@ -192,14 +264,14 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
             boxShadow: "inset 0 -4px 12px hsl(var(--primary) / 0.3)",
           }}
         />
-        {/* Floating particles */}
         {[0, 1, 2, 3, 4].map(i => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 rounded-full bg-primary"
+            className="absolute w-2 h-2 rounded-full"
             style={{
               opacity: 0.4 + i * 0.1,
               left: `${15 + i * 15}%`,
+              background: "hsl(var(--primary))",
             }}
             animate={{
               y: [0, -8, 0],
@@ -227,6 +299,7 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
     <div className="grid grid-cols-2 gap-2">
       <BalanceCard label="Species Hearts" value={balance.species} icon="🌿" />
       <BalanceCard label="Influence" value={balance.influence} icon="🛡️" />
+      <BalanceCard label="Seeds Today" value={seedsRemaining} icon="🌱" suffix="/3" />
       {balance.locked > 0 && (
         <BalanceCard label="Locked (Staking)" value={balance.locked} icon="🔒" />
       )}
@@ -239,7 +312,10 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
     <div className="space-y-1.5 pt-2">
       <Link
         to="/how-hearts-work"
-        className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/30 hover:border-primary/20 transition-all group"
+        className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group"
+        style={{
+          border: "1px solid hsl(var(--border) / 0.3)",
+        }}
       >
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary/60" />
@@ -249,7 +325,10 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
       </Link>
       <Link
         to="/value-tree?tab=economy"
-        className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/30 hover:border-primary/20 transition-all group"
+        className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group"
+        style={{
+          border: "1px solid hsl(var(--border) / 0.3)",
+        }}
       >
         <div className="flex items-center gap-2">
           <Heart className="w-4 h-4 text-primary/60" />
@@ -261,14 +340,18 @@ const JarOverview = ({ balance }: { balance: HeartBalance }) => (
   </div>
 );
 
-const BalanceCard = ({ label, value, icon }: { label: string; value: number; icon: string }) => (
+const BalanceCard = ({ label, value, icon, suffix = "" }: { label: string; value: number; icon: string; suffix?: string }) => (
   <div
-    className="flex items-center gap-2 p-3 rounded-xl border border-border/20 bg-secondary/5"
+    className="flex items-center gap-2 p-3 rounded-xl"
+    style={{
+      border: "1px solid hsl(var(--border) / 0.2)",
+      background: "hsl(var(--secondary) / 0.05)",
+    }}
   >
     <span className="text-base">{icon}</span>
     <div className="min-w-0">
       <p className="text-sm font-serif font-bold tabular-nums text-foreground">
-        {value.toLocaleString()}
+        {value.toLocaleString()}{suffix}
       </p>
       <p className="text-[9px] font-serif text-muted-foreground truncate">{label}</p>
     </div>

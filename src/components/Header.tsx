@@ -11,12 +11,11 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
 import { toast } from "sonner";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
-import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import LivingStreak from "./LivingStreak";
 import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
-import DailySeedCounter from "./DailySeedCounter";
 import HeartJar from "./economy/HeartJar";
+import ThemeToggle from "./ThemeToggle";
 import CompanionPairDialog from "./companion/CompanionPairDialog";
 import CompanionIndicator from "./companion/CompanionIndicator";
 import { useCompanion } from "@/contexts/CompanionContext";
@@ -79,9 +78,19 @@ const Header = () => {
     return () => window.removeEventListener("open-tetol", handler);
   }, [user, navigate, location.pathname]);
 
-  // Theme is always dark — no toggle needed
+  // Apply saved theme preference on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("s33d-theme");
+    const root = document.documentElement;
+    if (saved === "light") {
+      root.classList.add("light");
+      root.classList.remove("dark");
+    } else if (!root.classList.contains("light")) {
+      root.classList.add("dark");
+    }
+  }, []);
 
-  // ⌘K shortcut opens global search directly
+  // ⌘K shortcut opens global search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -91,12 +100,6 @@ const Header = () => {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (!document.documentElement.classList.contains('light')) {
-      document.documentElement.classList.add('dark');
-    }
   }, []);
 
   useEffect(() => {
@@ -125,7 +128,6 @@ const Header = () => {
 
   const heartBalance = useHeartBalance(user?.id ?? null);
   const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
-  const { seedsRemaining } = useSeedEconomy(user?.id ?? null);
 
   // Realtime heart toast
   useEffect(() => {
@@ -301,6 +303,7 @@ const Header = () => {
           {/* Right actions */}
             <div className="flex items-center gap-1 md:gap-2 shrink-0">
             <OfflineIndicator />
+            <ThemeToggle />
             {/* Search button */}
             <Button
               variant="ghost"
@@ -311,7 +314,7 @@ const Header = () => {
             >
               <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </Button>
-            {user && <DailySeedCounter remaining={seedsRemaining} compact />}
+            {user && <HeartJar userId={user?.id ?? null} />}
             {user && <NotificationBell />}
             {user ? (
               <Link
@@ -333,7 +336,6 @@ const Header = () => {
                 </div>
                 <span className="font-serif">S33D</span>
                 <LivingStreak streak={heartBalance.streak} />
-                <HeartJar userId={user?.id ?? null} />
               </Link>
             ) : (
               <Button
