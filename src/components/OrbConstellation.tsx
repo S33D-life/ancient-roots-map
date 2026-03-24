@@ -125,6 +125,8 @@ interface OrbConstellationProps {
   updateAvailable?: boolean;
   onApplyUpdate?: () => void;
   onDismissUpdate?: () => void;
+  /** Unread heart signals count */
+  unreadSignals?: number;
 }
 
 export default function OrbConstellation({
@@ -136,6 +138,7 @@ export default function OrbConstellation({
   updateAvailable,
   onApplyUpdate,
   onDismissUpdate,
+  unreadSignals = 0,
 }: OrbConstellationProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -143,15 +146,28 @@ export default function OrbConstellation({
 
   const baseActions = useMemo(() => getActionsForRoute(pathname), [pathname]);
   const actions = useMemo(() => {
-    if (!updateAvailable) return baseActions;
-    const updateAction: ConstellationAction = {
-      key: "update",
-      emoji: "✨",
-      label: "Update",
-      action: "nav", // handled specially below
-    };
-    return [updateAction, ...baseActions];
-  }, [baseActions, updateAvailable]);
+    const result = [...baseActions];
+    // Add signals action if there are unread signals
+    if (unreadSignals > 0) {
+      const signalAction: ConstellationAction = {
+        key: "signals",
+        emoji: "✨",
+        label: `Signals (${unreadSignals})`,
+        action: "dialog", // handled via onSelectAction
+      };
+      result.unshift(signalAction);
+    }
+    if (updateAvailable) {
+      const updateAction: ConstellationAction = {
+        key: "update",
+        emoji: "🔄",
+        label: "Update",
+        action: "nav",
+      };
+      result.unshift(updateAction);
+    }
+    return result;
+  }, [baseActions, updateAvailable, unreadSignals]);
   const layout = useMemo(() => computeLayout(cx, cy, actions.length), [cx, cy, actions.length]);
 
   const handleAction = useCallback(
