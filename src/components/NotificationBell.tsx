@@ -1,6 +1,7 @@
 /**
  * NotificationBell — now powered by Heart Signals.
  * Shows unread signal count badge and opens a compact dropdown.
+ * Includes gateway to Hearth Notification Settings.
  */
 import { useState, useEffect } from "react";
 import { Bell, CheckCheck, X } from "lucide-react";
