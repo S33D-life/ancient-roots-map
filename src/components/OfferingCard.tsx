@@ -114,6 +114,11 @@ const CardFooter = ({
   <div className="flex items-center justify-between mt-4">
     <DateLabel date={offering.created_at} />
     <div className="flex items-center gap-3">
+      <OfferingResonanceButton
+        offeringId={offering.id}
+        userId={userId ?? null}
+        initialCount={(offering as any).resonance_count || 0}
+      />
       {treeId && (
         <InfluenceUpvoteButton
           offeringId={offering.id}
