@@ -114,6 +114,17 @@ const NotificationBell = () => {
             </div>
           )}
         </ScrollArea>
+
+        {/* Settings gateway */}
+        <div className="border-t border-border/30 px-4 py-2">
+          <button
+            onClick={() => navigate("/dashboard?tab=notifications")}
+            className="flex items-center gap-2 w-full text-left text-xs font-serif text-muted-foreground hover:text-foreground transition-colors py-1.5"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            Notification Settings
+          </button>
+        </div>
       </PopoverContent>
     </Popover>
   );
