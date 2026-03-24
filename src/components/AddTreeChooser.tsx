@@ -169,7 +169,7 @@ export default function AddTreeChooser({
                 <span className="ml-1.5 text-primary/60">• GPS</span>
               )}
             </h3>
-            {!hasLocation && geo.requestLocation && (
+            {!hasLocation && (
               <button
                 onClick={handleLocate}
                 className="flex items-center gap-1 text-[10px] font-serif text-primary/70 hover:text-primary transition-colors"
