@@ -152,6 +152,8 @@ export interface AtlasFilterProps {
   onPerspectivePreset?: (preset: PerspectivePreset) => void;
   /* Add Ancient Friend callback */
   onAddTree?: () => void;
+  /* Quick preset handler — batch-enables layers */
+  onQuickPreset?: (enable: LayerKey[]) => void;
 }
 
 /* ── Shared chip styles ── */
