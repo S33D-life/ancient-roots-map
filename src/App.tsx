@@ -267,6 +267,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <Suspense fallback={null}><StarryNight /></Suspense>
+        <HeartbeatNotification />
         <MissingEnvBanner />
         {ShowDevPanel && <DevQAPanel />}
         {ShowDevPanel && <DevDiagnosticsOverlay />}
