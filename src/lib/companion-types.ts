@@ -19,6 +19,9 @@ export type CompanionCommand =
   | { type: "zoom_out" }
   | { type: "zoom_reset" }
   | { type: "pan"; dx: number; dy: number }
+  | { type: "map_pan"; dx: number; dy: number }
+  | { type: "map_zoom"; delta: number }
+  | { type: "locate_me" }
   | { type: "focus_tree"; treeId: string }
   | { type: "focus_staff"; staffCode: string }
   | { type: "next" }
@@ -44,7 +47,7 @@ export type CompanionCommand =
 
 /** Whitelist of valid command types for input validation */
 export const VALID_COMMAND_TYPES = new Set<string>([
-  "zoom_in", "zoom_out", "zoom_reset", "pan",
+  "zoom_in", "zoom_out", "zoom_reset", "pan", "map_pan", "map_zoom", "locate_me",
   "focus_tree", "focus_staff", "next", "previous",
   "toggle_fullscreen", "enter_fullscreen", "exit_fullscreen",
   "open_panel", "close_panel", "highlight_node",
@@ -75,9 +78,9 @@ export interface CompanionSession {
 
 /** Controller sensitivity settings */
 export interface CompanionSettings {
-  pointerSensitivity: number; // 0.5 – 3.0, default 1.8
-  scrollSensitivity: number;  // 0.5 – 3.0, default 1.2
-  naturalScroll: boolean;     // default true
+  pointerSensitivity: number;
+  scrollSensitivity: number;
+  naturalScroll: boolean;
 }
 
 export const DEFAULT_SETTINGS: CompanionSettings = {

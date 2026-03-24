@@ -7,7 +7,7 @@ import { ROUTES } from "@/lib/routes";
 
 /**
  * useCompanionBridge — desktop-side handler that maps companion commands
- * to actual desktop actions: navigation, pointer, scroll, click, drag, fullscreen.
+ * to actual desktop actions including map-specific pan/zoom/locate.
  */
 
 const ROOM_ROUTES: Record<CompanionRoom, string> = {
@@ -65,7 +65,6 @@ export function useCompanionBridge() {
     toast("📱 " + label, { duration: 1500, position: "bottom-right" });
   }, []);
 
-  /** Dispatch a synthetic mouse event at the pointer position */
   const dispatchMouseAt = useCallback((type: string, p: PointerAccumulator) => {
     const absX = p.x * window.innerWidth;
     const absY = p.y * window.innerHeight;
@@ -105,6 +104,23 @@ export function useCompanionBridge() {
       onPan: (dx: number, dy: number) => {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pan", dx, dy } }));
       },
+
+      // Map-specific pan — dispatches to Leaflet via the same event system
+      onMapPan: (dx: number, dy: number) => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "map_pan", dx, dy } }));
+      },
+
+      // Map-specific zoom — continuous zoom delta
+      onMapZoom: (delta: number) => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "map_zoom", delta } }));
+      },
+
+      // Locate me — triggers geolocation on desktop
+      onLocateMe: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "locate_me" } }));
+        showCommandFeedback("Locating…");
+      },
+
       onFocusTree: (treeId: string) => {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "focus_tree", treeId } }));
         showCommandFeedback("Focusing tree");
@@ -149,7 +165,6 @@ export function useCompanionBridge() {
           }),
         );
 
-        // If dragging, also dispatch mousemove
         if (dragActiveRef.current) {
           dispatchMouseAt("mousemove", p);
         }
@@ -162,21 +177,47 @@ export function useCompanionBridge() {
         }));
       },
 
-      // Click
+      // Click — prioritise tree markers by searching for closest interactive element
       onPointerClick: (_x: number, _y: number) => {
         const p = pointerRef.current;
         const absX = p.x * window.innerWidth;
         const absY = p.y * window.innerHeight;
 
-        // Dispatch click event for the orb pulse
         window.dispatchEvent(
           new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_click" } }),
         );
 
-        const el = document.elementFromPoint(absX, absY);
-        if (el && el instanceof HTMLElement) {
-          el.click();
-          el.focus?.();
+        // Try to find a tree marker first (they have data attributes or specific classes)
+        // Sample a small area around the click point to bias toward markers
+        let bestEl: HTMLElement | null = null;
+        const searchRadius = 8;
+        const offsets = [
+          [0, 0], [-searchRadius, 0], [searchRadius, 0], [0, -searchRadius], [0, searchRadius],
+          [-searchRadius, -searchRadius], [searchRadius, -searchRadius],
+          [-searchRadius, searchRadius], [searchRadius, searchRadius],
+        ];
+
+        for (const [ox, oy] of offsets) {
+          const el = document.elementFromPoint(absX + ox, absY + oy);
+          if (el instanceof HTMLElement) {
+            // Prefer elements that look like tree markers or interactive elements
+            const isMarker = el.closest(".leaflet-marker-icon, .tree-marker, [data-tree-id], .leaflet-interactive");
+            const isButton = el.closest("button, a, [role='button']");
+            if (isMarker || isButton) {
+              bestEl = (isMarker || isButton) as HTMLElement;
+              break;
+            }
+          }
+        }
+
+        // Fallback to exact point
+        if (!bestEl) {
+          bestEl = document.elementFromPoint(absX, absY) as HTMLElement;
+        }
+
+        if (bestEl) {
+          bestEl.click();
+          bestEl.focus?.();
         }
 
         setDebugInfo(d => ({ ...d, lastEvent: "click" }));
@@ -212,11 +253,10 @@ export function useCompanionBridge() {
         setDebugInfo(d => ({ ...d, lastEvent: "scroll", scrollDx: Math.round(dx), scrollDy: Math.round(dy) }));
       },
 
-      // Drag lifecycle
+      // Drag
       onDragStart: () => {
         dragActiveRef.current = true;
-        const p = pointerRef.current;
-        dispatchMouseAt("mousedown", p);
+        dispatchMouseAt("mousedown", pointerRef.current);
         setDebugInfo(d => ({ ...d, lastEvent: "drag_start" }));
       },
       onDragMove: (dx: number, dy: number) => {
@@ -225,22 +265,18 @@ export function useCompanionBridge() {
         const p = pointerRef.current;
         p.x = Math.max(0, Math.min(1, p.x + dx / vw));
         p.y = Math.max(0, Math.min(1, p.y + dy / vh));
-
         window.dispatchEvent(
-          new CustomEvent("s33d-companion-cmd", {
-            detail: { type: "pointer_move", x: p.x, y: p.y },
-          }),
+          new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_move", x: p.x, y: p.y } }),
         );
         dispatchMouseAt("mousemove", p);
       },
       onDragEnd: () => {
         dragActiveRef.current = false;
-        const p = pointerRef.current;
-        dispatchMouseAt("mouseup", p);
+        dispatchMouseAt("mouseup", pointerRef.current);
         setDebugInfo(d => ({ ...d, lastEvent: "drag_end" }));
       },
 
-      // Legacy absolute pointer
+      // Legacy
       onPointerMove: (x: number, y: number) => {
         pointerRef.current = { x, y };
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_move", x, y } }));
@@ -250,9 +286,16 @@ export function useCompanionBridge() {
       },
 
       onExportView: () => showCommandFeedback("Capture requested"),
-      onOpenPanel: () => showCommandFeedback("Opening panel"),
-      onClosePanel: () => showCommandFeedback("Closing panel"),
+      onOpenPanel: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "open_panel" } }));
+        showCommandFeedback("Opening panel");
+      },
+      onClosePanel: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "close_panel" } }));
+        showCommandFeedback("Closing panel");
+      },
       onSendToDesktop: (_type: string, _id: string, label?: string) => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "send_to_desktop", entityType: _type, entityId: _id, label } }));
         showCommandFeedback(`Received: ${label || "item"}`);
       },
     });
