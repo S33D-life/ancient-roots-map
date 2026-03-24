@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Layers } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import {
@@ -130,6 +131,7 @@ const TreeDetailPage = () => {
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>("overview");
+  const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [greetingCardOpen, setGreetingCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
@@ -524,16 +526,24 @@ const TreeDetailPage = () => {
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+            <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
               Encounters
+              {(checkinStats?.totalVisits || 0) > 0 && (
+                <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{checkinStats.totalVisits}</Badge>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
               Offerings
+              {(offerings.length + birdsongCount) > 0 && (
+                <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{offerings.length + birdsongCount}</Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-8">
+            {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
+
             {/* Visit Counter */}
             {checkinStats && (
               <div className="flex items-center gap-4 px-4 py-2.5 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
@@ -562,54 +572,25 @@ const TreeDetailPage = () => {
                 <TreeRelationshipCard
                   progress={relationship}
                   treeName={tree.name}
-                  onCoWitness={() => {
-                    // Trigger co-witness panel — the CoWitnessPanel button handles this
-                  }}
+                  onCoWitness={() => {}}
                   onMakeOffering={() => setAddOfferingOpen(true)}
                 />
               </Suspense>
             )}
 
-            {/* Story + Structured Data (two-column) */}
+            {/* Story + Structured Data */}
             <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
 
-            {/* Seasonal Moment — ceremonial timing context */}
-            <SeasonalMomentPanel
-              onPromptSelect={(prompt) => {
-                if (prompt.suggestedType) {
-                  setActiveTab(prompt.suggestedType);
-                }
-                setAddOfferingOpen(true);
-              }}
-            />
-
-            {/* Universal Contribution Entry Point */}
-            <AddContributionPanel treeId={id!} treeName={tree.name} />
-
-            {/* Community Contributions Feed */}
-            <ContributionFeed contributions={treeContributions} treeId={id!} />
+            {/* Photo Gallery */}
+            {photoOfferings.length > 0 && (
+              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
+            )}
 
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
               onAddOffering={() => setAddOfferingOpen(true)}
               treeName={tree.name}
-            />
-
-            {/* Wishes Section */}
-            <TreeWishesSection
-              treeId={id!}
-              treeName={tree.name}
-              wishTags={(tree as any).wish_tags}
-              isAnchorNode={(tree as any).is_anchor_node}
-            />
-
-            {/* Tree Radio */}
-            <TreeRadioBlock
-              treeId={id!}
-              treeName={tree.name}
-              species={tree.species}
-              radioTheme={(tree as any).radio_theme}
             />
 
             {/* Map Journey Anchor */}
@@ -621,90 +602,134 @@ const TreeDetailPage = () => {
               w3w={tree.what3words}
             />
 
-            {/* Journey Invitations — contribution CTAs + hive link */}
-            <TreeJourneyInvitations
-              species={tree.species}
-              treeId={id!}
-              treeName={tree.name}
-              onAddOffering={() => setAddOfferingOpen(true)}
-            />
+            {/* ═══ SECONDARY ZONE — Collapsed by default ═══ */}
+            <Collapsible open={secondaryOpen} onOpenChange={setSecondaryOpen}>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center gap-3 py-3 group cursor-pointer">
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent)" }} />
+                  <span className="text-sm font-serif text-muted-foreground tracking-wider uppercase flex items-center gap-2 group-hover:text-primary transition-colors">
+                    <Layers className="h-3.5 w-3.5" />
+                    More about this tree
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${secondaryOpen ? "rotate-180" : ""}`} />
+                  </span>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.3), transparent)" }} />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8 pt-4"
+                >
+                  {/* Seasonal Moment */}
+                  <SeasonalMomentPanel
+                    onPromptSelect={(prompt) => {
+                      if (prompt.suggestedType) setActiveTab(prompt.suggestedType);
+                      setAddOfferingOpen(true);
+                    }}
+                  />
 
-            {/* Hive Connections */}
-            <TreeHiveConnections
-              species={tree.species}
-              ecoBelonging={ecoBelonging}
-            />
+                  {/* Universal Contribution Entry Point */}
+                  <AddContributionPanel treeId={id!} treeName={tree.name} />
 
-            {/* Heart Rewards */}
-            <TreeHeartRewards />
+                  {/* Community Contributions Feed */}
+                  <ContributionFeed contributions={treeContributions} treeId={id!} />
 
-            {/* Vine divider */}
-            <div className="vine-divider" />
+                  {/* Wishes Section */}
+                  <TreeWishesSection
+                    treeId={id!}
+                    treeName={tree.name}
+                    wishTags={(tree as any).wish_tags}
+                    isAnchorNode={(tree as any).is_anchor_node}
+                  />
 
-            {/* Weather */}
-            <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
+                  {/* Tree Radio */}
+                  <TreeRadioBlock
+                    treeId={id!}
+                    treeName={tree.name}
+                    species={tree.species}
+                    radioTheme={(tree as any).radio_theme}
+                  />
 
-            {/* Photo Gallery */}
-            {photoOfferings.length > 0 && (
-              <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
-            )}
+                  {/* Journey Invitations */}
+                  <TreeJourneyInvitations
+                    species={tree.species}
+                    treeId={id!}
+                    treeName={tree.name}
+                    onAddOffering={() => setAddOfferingOpen(true)}
+                  />
 
-            {/* Tree Heart Pool */}
-            <TreeHeartPool treeId={id!} userId={userId} />
+                  {/* Hive Connections */}
+                  <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} />
 
-            {/* Blooming Clock */}
-            {tree?.species && (
-              <BloomingClock species={tree.species} region={tree.nation} />
-            )}
+                  {/* Heart Rewards */}
+                  <TreeHeartRewards />
 
-            {/* Species Attestation */}
-            <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
+                  <div className="vine-divider" />
 
-            {/* Grove Membership */}
-            <Suspense fallback={null}>
-              <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
-            </Suspense>
+                  {/* Weather */}
+                  <WeatherCard latitude={tree.latitude} longitude={tree.longitude} />
 
-            {/* Forest Pulse */}
-            <Suspense fallback={null}>
-              <TreePulseIndicator treeId={id!} />
-            </Suspense>
+                  {/* Tree Heart Pool */}
+                  <TreeHeartPool treeId={id!} userId={userId} />
 
-            {/* Mycelial Pathways */}
-            <Suspense fallback={null}>
-              <PathwayContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} />
-            </Suspense>
+                  {/* Blooming Clock */}
+                  {tree?.species && (
+                    <BloomingClock species={tree.species} region={tree.nation} />
+                  )}
 
-            {/* Sources */}
-            <TreeSourcesDisplay
-              verified={verifiedSources}
-              pending={pendingSources}
-              loading={sourcesLoading}
-              onContribute={() => setContributeSourceOpen(true)}
-            />
+                  {/* Species Attestation */}
+                  <SpeciesAttestation treeId={id!} treeSpecies={tree.species} userId={userId} />
 
-            {/* Steward Tools — edit / suggest / history */}
-            <Suspense fallback={null}>
-              <StewardToolsSection
-                tree={tree}
-                treeId={id!}
-                userId={editUserId}
-                role={editRole}
-                canDirectEdit={canDirectEdit}
-                loading={editPermLoading}
-                onProposeEdit={() => setProposeEditOpen(true)}
-                onTreeUpdated={(updated) => setTree(updated)}
-              />
-            </Suspense>
+                  {/* Grove Membership */}
+                  <Suspense fallback={null}>
+                    <GroveContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} treeSpecies={tree.species} />
+                  </Suspense>
 
-            {/* Stewardship Log */}
-            <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
+                  {/* Forest Pulse */}
+                  <Suspense fallback={null}>
+                    <TreePulseIndicator treeId={id!} />
+                  </Suspense>
 
-            {/* Tree Guardians */}
-            <TreeGuardianRoles treeId={id!} />
+                  {/* Mycelial Pathways */}
+                  <Suspense fallback={null}>
+                    <PathwayContext treeId={id!} treeLat={tree.latitude} treeLng={tree.longitude} />
+                  </Suspense>
 
-            {/* Stewardship Leaderboard */}
-            <StewardshipLeaderboard treeId={id!} />
+                  {/* Sources */}
+                  <TreeSourcesDisplay
+                    verified={verifiedSources}
+                    pending={pendingSources}
+                    loading={sourcesLoading}
+                    onContribute={() => setContributeSourceOpen(true)}
+                  />
+
+                  {/* Steward Tools */}
+                  <Suspense fallback={null}>
+                    <StewardToolsSection
+                      tree={tree}
+                      treeId={id!}
+                      userId={editUserId}
+                      role={editRole}
+                      canDirectEdit={canDirectEdit}
+                      loading={editPermLoading}
+                      onProposeEdit={() => setProposeEditOpen(true)}
+                      onTreeUpdated={(updated) => setTree(updated)}
+                    />
+                  </Suspense>
+
+                  {/* Stewardship Log */}
+                  <TreeStewardshipLog treeId={id!} treeName={tree.name} userId={userId} />
+
+                  {/* Tree Guardians */}
+                  <TreeGuardianRoles treeId={id!} />
+
+                  {/* Stewardship Leaderboard */}
+                  <StewardshipLeaderboard treeId={id!} />
+                </motion.div>
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           {/* ── ENCOUNTERS TAB ── */}
@@ -715,7 +740,7 @@ const TreeDetailPage = () => {
             {/* Encounters intro — always visible */}
             <div className="text-center py-4">
               <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Encounters</h3>
-              <p className="text-xs text-muted-foreground font-serif">Visits, check-ins, and shared moments with this Ancient Friend</p>
+              <p className="text-xs text-muted-foreground font-serif">Moments of being with this Ancient Friend</p>
             </div>
 
             {/* Encounter Cluster */}
@@ -791,6 +816,39 @@ const TreeDetailPage = () => {
               </Suspense>
             )}
 
+            </Suspense>
+            </TabErrorBoundary>
+          </TabsContent>
+
+          {/* ── OFFERINGS TAB ── */}
+          <TabsContent value="offerings" className="space-y-6">
+            <TabErrorBoundary tabName="Offerings">
+            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
+
+            {/* Offerings intro — always visible */}
+            <div className="text-center py-4">
+              <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Offerings</h3>
+              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, stories, seeds, and whispers placed at this Ancient Friend</p>
+            </div>
+
+            {/* Auth / meeting gate messages */}
+            {!userId ? (
+              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
+                <p className="text-sm text-muted-foreground font-serif">
+                  Sign in to leave offerings at this Ancient Friend.
+                </p>
+              </div>
+            ) : meetingStatus !== "active" && meetingStatus !== "expiring" ? (
+              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
+                <p className="text-sm text-muted-foreground font-serif">
+                  {meetingStatus === "expired"
+                    ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
+                    : "Meet this Ancient Friend to open a 12-hour offering window."}
+                </p>
+              </div>
+            ) : null}
+
+            {/* Seed Planter (moved from Encounters) */}
             <SeedPlanter
               treeId={id!}
               treeLat={tree.latitude}
@@ -799,7 +857,7 @@ const TreeDetailPage = () => {
               treeSpecies={tree.species}
             />
 
-            {/* Whispers */}
+            {/* Whispers (moved from Encounters) */}
             {userId && tree && (
               <Button
                 onClick={() => setWhisperModalOpen(true)}
@@ -825,7 +883,123 @@ const TreeDetailPage = () => {
               />
             )}
 
-            {/* Anchored Memories */}
+            {/* Empty state — only when truly no offerings, no birdsong */}
+            {offerings.length === 0 && birdsongCount === 0 ? (
+              <div className="py-8 text-center">
+                <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
+                <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
+                <p className="text-xs text-muted-foreground/60 font-serif mt-1">Be the first to leave something meaningful.</p>
+                {userId && (meetingStatus === "active" || meetingStatus === "expiring") && (
+                  <Button
+                    size="sm"
+                    onClick={() => setAddOfferingOpen(true)}
+                    className="mt-4 font-serif tracking-wider text-xs gap-1.5"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Leave the first offering
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Birdsong Button */}
+                <Button
+                  onClick={() => setBirdsongOpen(true)}
+                  variant="outline"
+                  className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+                >
+                  <Bird className="h-4 w-4" />
+                  Offer a Birdsong
+                  {birdsongCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
+                  )}
+                </Button>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
+                    {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
+                      <TabsTrigger
+                        key={type}
+                        value={type}
+                        className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                      >
+                        {offeringIcons[type]}
+                        {offeringLabels[type]}
+                        <span className="text-[10px] opacity-60">
+                          ({getOfferingsByType(type).length})
+                        </span>
+                      </TabsTrigger>
+                    ))}
+                    <TabsTrigger
+                      value="birdsong"
+                      className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                    >
+                      <Bird className="h-4 w-4" />
+                      Birdsong
+                      <span className="text-[10px] opacity-60">({birdsongCount})</span>
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {(Object.keys(offeringLabels) as OfferingType[]).map((type) => {
+                    const canAdd = meetingStatus === "active" || meetingStatus === "expiring";
+                    return (
+                      <TabsContent key={type} value={type}>
+                        <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
+                          <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
+                            {offeringLabels[type]}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <OfferingSortControls value={sortMode} onChange={setSortMode} />
+                            {canAdd ? (
+                              <Button
+                                size="sm"
+                                onClick={() => handleAddOffering(type)}
+                                className="font-serif tracking-wider text-xs gap-1.5"
+                              >
+                                <Sparkles className="h-3 w-3" />
+                                Add {offeringLabels[type].slice(0, -1)}
+                              </Button>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/60 font-serif italic">
+                                Meet this tree to unlock
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {getOfferingsByType(type).length === 0 ? (
+                          <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
+                        ) : type === "photo" ? (
+                          <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
+                        ) : type === "book" ? (
+                          <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
+                        ) : (
+                          <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+                            {sortOfferings(getOfferingsByType(type)).map((offering) => (
+                              <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                                <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
+                              </motion.div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </TabsContent>
+                    );
+                  })}
+
+                  <TabsContent value="birdsong">
+                    <div className="flex justify-between items-center mb-5">
+                      <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
+                      <Button size="sm" onClick={() => setBirdsongOpen(true)} className="font-serif tracking-wider text-xs gap-1.5">
+                        <Bird className="h-3 w-3" /> Add Birdsong
+                      </Button>
+                    </div>
+                    <BirdsongTab treeId={id!} />
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
+
+            {/* Anchored Memories (moved from Encounters — these are offerings) */}
             {anchoredOfferings.length > 0 && (
               <div>
                 <button
@@ -873,137 +1047,6 @@ const TreeDetailPage = () => {
                 </AnimatePresence>
               </div>
             )}
-            </Suspense>
-            </TabErrorBoundary>
-          </TabsContent>
-
-          {/* ── OFFERINGS TAB ── */}
-          <TabsContent value="offerings" className="space-y-6">
-            <TabErrorBoundary tabName="Offerings">
-            <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
-
-            {/* Offerings intro — always visible */}
-            <div className="text-center py-4">
-              <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Offerings</h3>
-              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, and stories placed at this Ancient Friend</p>
-            </div>
-
-            {/* Gate: offerings require active/expiring meeting */}
-            {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
-              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
-                <p className="text-sm text-muted-foreground font-serif">
-                  {meetingStatus === "expired"
-                    ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
-                    : meetingStatus === "none"
-                    ? "Meet this Ancient Friend to open a 12-hour offering window."
-                    : "This meeting cannot be used for offerings."}
-                </p>
-              </div>
-            )}
-
-            {!userId && (
-              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
-                <p className="text-sm text-muted-foreground font-serif">
-                  Sign in to leave offerings at this Ancient Friend.
-                </p>
-              </div>
-            )}
-
-            {offerings.length === 0 && (
-              <div className="py-8 text-center">
-                <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
-                <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
-                <p className="text-xs text-muted-foreground/60 font-serif mt-1">Be the first to leave something meaningful.</p>
-              </div>
-            )}
-
-            {/* Birdsong Button */}
-            <Button
-              onClick={() => setBirdsongOpen(true)}
-              variant="outline"
-              className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-            >
-              <Bird className="h-4 w-4" />
-              Offer a Birdsong
-              {birdsongCount > 0 && (
-                <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
-              )}
-            </Button>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
-                {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
-                  <TabsTrigger
-                    key={type}
-                    value={type}
-                    className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-                  >
-                    {offeringIcons[type]}
-                    {offeringLabels[type]}
-                    <span className="text-[10px] opacity-60">
-                      ({getOfferingsByType(type).length})
-                    </span>
-                  </TabsTrigger>
-                ))}
-                <TabsTrigger
-                  value="birdsong"
-                  className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
-                >
-                  <Bird className="h-4 w-4" />
-                  Birdsong
-                  <span className="text-[10px] opacity-60">({birdsongCount})</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
-                <TabsContent key={type} value={type}>
-                  <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
-                    <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
-                      {offeringLabels[type]}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <OfferingSortControls value={sortMode} onChange={setSortMode} />
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddOffering(type)}
-                        disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
-                        className="font-serif tracking-wider text-xs gap-1.5"
-                        title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        Add {offeringLabels[type].slice(0, -1)}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {getOfferingsByType(type).length === 0 ? (
-                    <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
-                  ) : type === "photo" ? (
-                    <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
-                  ) : type === "book" ? (
-                    <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
-                  ) : (
-                    <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
-                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </TabsContent>
-              ))}
-
-              <TabsContent value="birdsong">
-                <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
-                  <Button size="sm" onClick={() => setBirdsongOpen(true)} className="font-serif tracking-wider text-xs gap-1.5">
-                    <Bird className="h-3 w-3" /> Add Birdsong
-                  </Button>
-                </div>
-                <BirdsongTab treeId={id!} />
-              </TabsContent>
-            </Tabs>
 
             {/* Offering History */}
             {userId && allMeetings.length > 0 && (
