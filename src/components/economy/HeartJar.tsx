@@ -311,6 +311,20 @@ const JarOverview = ({ balance, seedsRemaining }: { balance: HeartBalance; seeds
     {/* Action links */}
     <div className="space-y-1.5 pt-2">
       <Link
+        to="/vault"
+        className="flex items-center justify-between px-3 py-3 rounded-xl transition-all group"
+        style={{
+          background: "hsl(var(--primary) / 0.08)",
+          border: "1px solid hsl(var(--primary) / 0.25)",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <Heart className="w-4 h-4 text-primary" />
+          <span className="text-sm font-serif font-medium text-foreground">Enter Heartwood Vault</span>
+        </div>
+        <ArrowRight className="w-4 h-4 text-primary/60 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+      </Link>
+      <Link
         to="/how-hearts-work"
         className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group"
         style={{
