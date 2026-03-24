@@ -116,7 +116,6 @@ const Header = () => {
 
   const heartBalance = useHeartBalance(user?.id ?? null);
   const heartsCount = heartBalance.loading ? null : heartBalance.totalHearts;
-  const { seedsRemaining } = useSeedEconomy(user?.id ?? null);
 
   // Realtime heart toast
   useEffect(() => {
