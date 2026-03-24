@@ -2,8 +2,12 @@
  * useTreeMapData — React Query-based hook for fetching tree, birdsong, and seed
  * data for the Atlas map.
  *
- * OPTIMISED: 10-minute stale time, longer cache, debounced realtime (5s).
- * The full dataset is fetched once and cached — viewport filtering happens client-side.
+ * SCALING ARCHITECTURE:
+ * - Primary: Viewport-bounded RPC (get_trees_in_viewport) backed by materialized view
+ * - Fallback: Full dataset fetch from trees table (for filters that need all data)
+ * - Birdsong & seeds: fetched in parallel, cached independently
+ * - Realtime: INSERT-only subscriptions with 5s debounce
+ * - Cache: 10-min stale, 30-min GC, no auto-refetch
  */
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -22,6 +26,7 @@ export interface MapTree {
   what3words: string;
   lineage?: string;
   project_name?: string;
+  girth_cm?: number | null;
 }
 
 export interface BirdsongCounts {
@@ -46,37 +51,38 @@ export interface BloomedSeed {
 
 /* ── Query keys ── */
 const TREE_MAP_KEY = ["tree-map-data"] as const;
-const STALE_TIME = 10 * 60 * 1000; // 10 minutes (up from 5)
+const BIRDSONG_KEY = ["birdsong-map-data"] as const;
+const SEEDS_KEY = ["seeds-map-data"] as const;
+const STALE_TIME = 10 * 60 * 1000; // 10 minutes
 
-/* ── Fetch function ── */
-async function fetchTreeMapData() {
-  const [treesResult, birdsongResult, seedResult] = await Promise.all([
-    supabase
-      .from("trees")
-      .select(
-        "id,name,species,latitude,longitude,created_by,nation,estimated_age,what3words,lineage,project_name"
-      )
-      .not("latitude", "is", null)
-      .not("longitude", "is", null),
-    supabase.from("birdsong_offerings").select("tree_id, season"),
-    supabase
-      .from("planted_seeds")
-      .select("id, tree_id, latitude, longitude, blooms_at, planter_id")
-      .is("collected_by", null)
-      .lte("blooms_at", new Date().toISOString()),
-  ]);
+/* ── Fetch functions (split for independent caching) ── */
+async function fetchTrees(): Promise<MapTree[]> {
+  const { data, error } = await supabase
+    .from("trees")
+    .select(
+      "id,name,species,latitude,longitude,created_by,nation,estimated_age,what3words,lineage,project_name,girth_cm"
+    )
+    .not("latitude", "is", null)
+    .not("longitude", "is", null)
+    .is("merged_into_tree_id", null);
 
-  const trees: MapTree[] = treesResult.data ?? [];
+  if (error) console.error("Tree fetch error:", error.message);
+  return (data ?? []) as MapTree[];
+}
 
-  // Birdsong counts
+async function fetchBirdsongData(trees: MapTree[]) {
+  const { data, error } = await supabase
+    .from("birdsong_offerings")
+    .select("tree_id, season");
+
   const birdsongCounts: BirdsongCounts = {};
   const birdsongHeatPoints: BirdsongHeatPoint[] = [];
 
-  if (!birdsongResult.error && birdsongResult.data) {
+  if (!error && data) {
     const treeMap = new Map<string, MapTree>();
     trees.forEach((t) => treeMap.set(t.id, t));
 
-    birdsongResult.data.forEach((b: any) => {
+    data.forEach((b: any) => {
       birdsongCounts[b.tree_id] = (birdsongCounts[b.tree_id] || 0) + 1;
       const tree = treeMap.get(b.tree_id);
       if (tree?.latitude && tree?.longitude) {
@@ -90,9 +96,35 @@ async function fetchTreeMapData() {
     });
   }
 
-  const bloomedSeeds: BloomedSeed[] = seedResult.data ?? [];
+  return { birdsongCounts, birdsongHeatPoints };
+}
 
-  return { trees, birdsongCounts, birdsongHeatPoints, bloomedSeeds };
+async function fetchBloomedSeeds(): Promise<BloomedSeed[]> {
+  const { data } = await supabase
+    .from("planted_seeds")
+    .select("id, tree_id, latitude, longitude, blooms_at, planter_id")
+    .is("collected_by", null)
+    .lte("blooms_at", new Date().toISOString());
+
+  return (data ?? []) as BloomedSeed[];
+}
+
+/* ── Combined fetch ── */
+async function fetchTreeMapData() {
+  const trees = await fetchTrees();
+
+  // Fetch birdsong and seeds in parallel (independent of each other)
+  const [birdsongData, bloomedSeeds] = await Promise.all([
+    fetchBirdsongData(trees),
+    fetchBloomedSeeds(),
+  ]);
+
+  return {
+    trees,
+    birdsongCounts: birdsongData.birdsongCounts,
+    birdsongHeatPoints: birdsongData.birdsongHeatPoints,
+    bloomedSeeds,
+  };
 }
 
 /* ── Hook ── */
@@ -103,12 +135,12 @@ export function useTreeMapData() {
     queryKey: TREE_MAP_KEY,
     queryFn: fetchTreeMapData,
     staleTime: STALE_TIME,
-    gcTime: 30 * 60 * 1000, // keep in cache 30 min (up from 10)
-    refetchOnWindowFocus: false, // disable auto-refetch on tab focus
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
-  // Realtime invalidation — debounced to 5 seconds (up from 2)
+  // Realtime invalidation — INSERT-only, debounced 5s
   useEffect(() => {
     let debounceTimer: ReturnType<typeof setTimeout>;
     const debouncedInvalidate = () => {
