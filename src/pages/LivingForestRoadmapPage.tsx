@@ -1,7 +1,9 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Map as MapIcon, List } from "lucide-react";
+import { X, ExternalLink, Map as MapIcon, List, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
