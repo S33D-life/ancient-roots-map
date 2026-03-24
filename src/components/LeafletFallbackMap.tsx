@@ -733,14 +733,14 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return Array.from(m.values()).sort((a, b) => b.count - a.count);
   }, [trees]);
 
-  /** Visual layer sections for AtlasFilter — renderer-specific toggles passed as props */
+  /** Visual layer sections for AtlasFilter — reorganised into 6 semantic groups */
   const visualSections: VisualLayerSection[] = useMemo(() => [
     {
-      key: "discovery",
-      title: "Discovery Filters",
-      icon: "🔍",
+      key: "trees",
+      title: "Ancient Friends",
+      icon: "🌳",
       accent: "hsl(42, 80%, 55%)",
-      description: "Highlight trees by significance, harvest availability, or community offerings.",
+      description: "Core tree markers and highlights.",
       layers: [
         { key: "ancient-highlight", label: "👑 Ancient Trees", description: "Golden halos on the oldest, most storied trees", active: showAncientHighlight, toggle: () => toggle("ancientHighlight"), accent: "42, 80%, 55%" },
         { key: "harvest-layer", label: "🍎 Harvest Available", description: "Trees with active produce listings", active: showHarvestLayer, toggle: () => toggle("harvestLayer"), extra: showHarvestLayer ? (harvestTreeIds.size > 0 ? `${harvestTreeIds.size}` : "—") : undefined, accent: "25, 70%, 50%" },
@@ -748,15 +748,61 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ],
     },
     {
-      key: "signals",
-      title: "Mycelial Whispers",
-      icon: "✦",
+      key: "discovery",
+      title: "Discovery",
+      icon: "🧭",
+      accent: "hsl(200, 55%, 55%)",
+      description: "Explore nearby trees, groves, and forest connections.",
       layers: [
-        { key: "seeds", label: "💚 Bloomed Seeds", active: showSeeds, toggle: () => toggle("seeds") },
-        { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => toggle("heartGlow"), accent: "0, 65%, 55%" },
+        { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => toggle("groves") },
+        { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => toggle("rootThreads") },
+        { key: "mycelialPathways", label: "🍄 Mycelial Pathways", active: showMycelialPathways, toggle: () => toggle("mycelialPathways") },
+        { key: "seeds", label: "💚 Seeds", active: showSeeds, toggle: () => toggle("seeds") },
+      ],
+    },
+    {
+      key: "atlas",
+      title: "Atlas",
+      icon: "🌐",
+      accent: "hsl(35, 65%, 55%)",
+      description: "Geographic overlays — datasets, regions, archives, and landmarks.",
+      layers: [
+        { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
+        { key: "champion", label: "🏆 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: "DFFE" },
+        { key: "rootstones", label: "🪨 Rootstones", active: showRootstones, toggle: () => toggle("rootstones"), extra: showRootstones ? `${rootstoneCount}` : "198" },
+        { key: "rootstones-trees", label: "🌳 Rootstone Trees", active: showRootstoneTrees, toggle: () => toggle("rootstoneTrees"), extra: "33x3" },
+        { key: "rootstones-groves", label: "🌲 Rootstone Groves", active: showRootstoneGroves, toggle: () => toggle("rootstoneGroves"), extra: "33x3" },
+        { key: "immutable", label: "🔱 Minted Sigils", active: showImmutableLayer, toggle: () => toggle("immutableLayer"), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
+        { key: "external", label: "🗺️ Distant Groves", active: showExternalTrees, toggle: () => toggle("externalTrees"), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
+        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { toggle("waterways"); if (!showWatersCommons) setLayer("watersCommons", true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "210, 35%, 75%" },
+        { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => toggle("watersCommons"), accent: "145, 50%, 50%" },
+        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { toggle("footpaths"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "42, 75%, 52%" },
+        { key: "churchyards", label: "⛪ Sacred Sites", active: showChurchyards, toggle: () => { toggle("churchyards"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "35, 65%, 55%" },
+        { key: "heritage", label: "🏛️ Heritage Buildings", active: showHeritage, toggle: () => { toggle("heritage"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "25, 55%, 55%" },
+        { key: "castles", label: "🏰 Castles & Monuments", active: showCastles, toggle: () => { toggle("castles"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "0, 35%, 55%" },
+        { key: "libraries", label: "📚 Libraries", active: showLibraries, toggle: () => { toggle("libraries"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "270, 45%, 55%" },
+        { key: "bookshops", label: "📖 Bookshops", active: showBookshops, toggle: () => { toggle("bookshops"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "310, 40%, 55%" },
+        { key: "botanical", label: "🌺 Botanical Gardens", active: showBotanicalGardens, toggle: () => { toggle("botanicalGardens"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "160, 50%, 50%" },
+      ],
+    },
+    {
+      key: "ecology",
+      title: "Ecology",
+      icon: "🍃",
+      accent: "hsl(120, 50%, 50%)",
+      description: "Species hives, birdsong, mycelial networks, and seasonal lenses.",
+      layers: [
+        { key: "hive-layer", label: "🐝 Species Hives", active: showHiveLayer, toggle: () => toggle("hiveLayer"), accent: "42, 70%, 55%" },
         { key: "birdsong", label: "🐦 Birdsong Heat", active: showBirdsongHeat, toggle: () => toggle("birdsongHeat"), extra: showBirdsongHeat ? `${birdsongHeatPoints.length} rec.` : "" },
         { key: "mycelial-network", label: "🕸️ Mycelial Network", active: showMycelialNetwork, toggle: () => toggle("mycelialNetwork"), extra: showMycelialNetwork ? `${mycelialConnections.length}` : "off" },
-        { key: "hive-layer", label: "🐝 Species Hives", active: showHiveLayer, toggle: () => toggle("hiveLayer"), accent: "42, 70%, 55%" },
+        ...(["spring", "summer", "autumn", "winter"] as const).map(season => ({
+          key: `lens-${season}`,
+          label: `${LENS_CONFIGS[season].emoji} ${LENS_CONFIGS[season].label}`,
+          description: `Months ${LENS_CONFIGS[season].months.join(", ")}`,
+          active: activeLens === season,
+          toggle: () => setLens(activeLens === season ? null : season),
+          accent: ({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[season],
+        })),
       ],
       subContent: showBirdsongHeat ? (
         <div className="pl-7 pt-1 flex flex-wrap gap-1">
@@ -782,113 +828,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             </button>
           ))}
         </div>
-      ) : undefined,
-    },
-    {
-      key: "structures",
-      title: "Grove Borders & Archives",
-      icon: "🌿",
-      layers: [
-        { key: "groves", label: "🌿 Grove Boundaries", active: showGroves, toggle: () => toggle("groves") },
-        { key: "forestPulse", label: "💓 Forest Pulse", active: showForestPulse, toggle: () => toggle("forestPulse") },
-        { key: "mycelialPathways", label: "🍄 Mycelial Pathways", active: showMycelialPathways, toggle: () => toggle("mycelialPathways") },
-        { key: "root-threads", label: "✦ Root Threads", active: showRootThreads, toggle: () => toggle("rootThreads") },
-        { key: "research", label: "📜 Elder Archives", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: showResearchLayer ? (researchLoading ? "loading…" : researchTreeCount > 0 ? `${researchTreeCount}` : "—") : "1,020" },
-        { key: "champion", label: "🏆 🇿🇦 Champion Trees", active: showResearchLayer, toggle: () => toggle("researchLayer"), extra: "DFFE" },
-        { key: "rootstones", label: "🪨 Rootstones", active: showRootstones, toggle: () => toggle("rootstones"), extra: showRootstones ? `${rootstoneCount}` : "198" },
-        { key: "rootstones-trees", label: "🌳 Rootstone Trees", active: showRootstoneTrees, toggle: () => toggle("rootstoneTrees"), extra: "33x3" },
-        { key: "rootstones-groves", label: "🌲 Rootstone Groves", active: showRootstoneGroves, toggle: () => toggle("rootstoneGroves"), extra: "33x3" },
-        { key: "immutable", label: "🔱 Minted Sigils", active: showImmutableLayer, toggle: () => toggle("immutableLayer"), extra: showImmutableLayer ? (immutableLoading ? "loading…" : immutableTreeCount > 0 ? `${immutableTreeCount}` : "—") : "—" },
-        { key: "external", label: "🗺️ Distant Groves", active: showExternalTrees, toggle: () => toggle("externalTrees"), extra: showExternalTrees ? (externalLoading ? "loading…" : externalTreeCount === -1 ? "zoom in" : externalTreeCount > 0 ? `${externalTreeCount}` : "—") : "sources" },
-      ],
-    },
-    {
-      key: "nature",
-      title: "Nature & Waterways",
-      icon: "🌊",
-      accent: "hsl(210, 35%, 75%)",
-      description: "Silver rivers, streams, and springs that shape the land.",
-      layers: [
-        { key: "waters", label: "🌊 Rivers & Waterways", active: showWaterways, toggle: () => { toggle("waterways"); if (!showWatersCommons) setLayer("watersCommons", true); }, extra: showWatersCommons ? (watersCommonsLoading ? "loading…" : watersCommonsCount === -1 ? "zoom in" : watersCommonsCount > 0 ? `${watersCommonsCount}` : "—") : "OSM", accent: "210, 35%, 75%" },
-        { key: "parklands", label: "🏛️ Parkland Elders", active: showWatersCommons, toggle: () => toggle("watersCommons"), accent: "145, 50%, 50%" },
-        { key: "commons", label: "🌾 Commons & Greens", active: showWatersCommons, toggle: () => toggle("watersCommons"), accent: "75, 50%, 50%" },
-      ],
-    },
-    {
-      key: "walking",
-      title: "Walking Network",
-      icon: "🥾",
-      accent: "hsl(42, 75%, 52%)",
-      description: "Golden paths, bridleways, and trails across the land.",
-      layers: [
-        { key: "footpaths", label: "🥾 Footpaths & Paths", active: showFootpaths, toggle: () => { toggle("footpaths"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "42, 75%, 52%" },
-      ],
-    },
-    {
-      key: "knowledge",
-      title: "Knowledge Places",
-      icon: "📚",
-      accent: "hsl(270, 45%, 55%)",
-      description: "Libraries, bookshops, and botanical gardens — places where knowledge takes root.",
-      layers: [
-        { key: "libraries", label: "📚 Libraries", active: showLibraries, toggle: () => { toggle("libraries"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "270, 45%, 55%" },
-        { key: "bookshops", label: "📖 Bookshops", active: showBookshops, toggle: () => { toggle("bookshops"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "310, 40%, 55%" },
-        { key: "botanical", label: "🌺 Botanical Gardens", active: showBotanicalGardens, toggle: () => { toggle("botanicalGardens"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "160, 50%, 50%" },
-      ],
-    },
-    {
-      key: "culture",
-      title: "Culture & Heritage",
-      icon: "⛪",
-      accent: "hsl(35, 65%, 55%)",
-      description: "Churches, castles, heritage buildings, and sacred places.",
-      layers: [
-        { key: "churchyards", label: "⛪ Churches & Sacred Sites", active: showChurchyards, toggle: () => { toggle("churchyards"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "35, 65%, 55%" },
-        { key: "heritage", label: "🏛️ Heritage Buildings", active: showHeritage, toggle: () => { toggle("heritage"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "25, 55%, 55%" },
-        { key: "castles", label: "🏰 Castles & Monuments", active: showCastles, toggle: () => { toggle("castles"); if (!showWatersCommons) setLayer("watersCommons", true); }, accent: "0, 35%, 55%" },
-      ],
-    },
-    {
-      key: "wanderer",
-      title: "Wanderer Activity",
-      icon: "◎",
-      accent: "hsl(260, 35%, 60%)",
-      description: "Sense the presence of others — gently, like traces in a forest.",
-      layers: [
-        { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", description: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => toggle("bloomedSeeds"), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
-        { key: "recent-visits", label: "◎ Recent Visits", description: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => toggle("recentVisits"), accent: "260, 55%, 70%" },
-        { key: "seed-traces", label: "✿ Seed & Offering Traces", description: "Subtle pulses that fade over time", active: showSeedTraces, toggle: () => toggle("seedTraces"), accent: "260, 55%, 70%" },
-        { key: "seed-trail", label: "🌱 My Seed Trail", description: "Golden trail of seeds you planted today", active: showSeedTrail, toggle: () => toggle("seedTrail"), extra: showSeedTrail ? (seedTrailCount > 0 ? `${seedTrailCount}` : "—") : undefined, accent: "42, 80%, 60%" },
-        { key: "shared-trees", label: "◐ Shared Trees", description: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => toggle("sharedTrees"), accent: "260, 55%, 70%" },
-        { key: "tribe-activity", label: "⊛ Tribe Activity", description: "Opt-in visibility for invited wanderers", active: showTribeActivity, toggle: () => toggle("tribeActivity"), accent: "260, 55%, 70%" },
-      ],
-    },
-    {
-      key: "dreams",
-      title: "Dream Constellation",
-      icon: "✨",
-      accent: "hsl(280, 55%, 65%)",
-      description: "A living sky of intention — where people dream to go, and what they carry with them.",
-      layers: [
-        { key: "dream-trees", label: "🌙 Dream Trees", description: "Grounded glow on trees people intend to visit", active: showDreamTrees, toggle: () => toggle("dreamTrees"), extra: showDreamTrees ? (dreamTreeCount > 0 ? `${dreamTreeCount}` : "—") : undefined, accent: "280, 55%, 65%" },
-        { key: "dream-offerings", label: "✨ Dream Offerings", description: "Ethereal particles of wishes and intentions pinned to trees", active: showDreamOfferings, toggle: () => toggle("dreamOfferings"), extra: showDreamOfferings ? (dreamOfferingCount > 0 ? `${dreamOfferingCount}` : "—") : undefined, accent: "42, 80%, 65%" },
-      ],
-    },
-    {
-      key: "seasonal-lens",
-      title: "🌿 Seasonal Lens",
-      icon: "🌿",
-      accent: activeLens ? `hsl(${({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[activeLens] || "42, 50%, 55%"})` : "hsl(42, 50%, 55%)",
-      description: "Harmonise the map with the Blooming Clock — highlight seasonal harvests, blooming trees, and council gatherings.",
-      layers: (["spring", "summer", "autumn", "winter"] as const).map(season => ({
-        key: `lens-${season}`,
-        label: `${LENS_CONFIGS[season].emoji} ${LENS_CONFIGS[season].label}`,
-        description: `Months ${LENS_CONFIGS[season].months.join(", ")} — ${season === "spring" ? "Blossom & planting" : season === "summer" ? "Fruiting & canopy" : season === "autumn" ? "Harvest & seed gathering" : "Rest & dormancy"}`,
-        active: activeLens === season,
-        toggle: () => setLens(activeLens === season ? null : season),
-        accent: ({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[season],
-      })),
-      subContent: activeLens && lensConfig ? (
+      ) : activeLens && lensConfig ? (
         <div className="pl-7 pt-1 pb-1">
           <p className="text-[10px] font-serif" style={{ color: `hsl(${({ spring: "340, 55%, 65%", summer: "45, 80%, 55%", autumn: "25, 70%, 55%", winter: "200, 55%, 60%" } as Record<string, string>)[activeLens] || "42, 50%, 55%"})` }}>
             {lensConfig.emoji} Active — highlighting {activeLens} harvests, blooming trees & offerings
@@ -897,11 +837,31 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       ) : undefined,
     },
     {
-      key: "blooming-clock",
-      title: "🌸 Blooming Clock",
-      icon: "🌸",
-      accent: "hsl(340, 55%, 65%)",
+      key: "activity",
+      title: "Living Pulse",
+      icon: "💠",
+      accent: "hsl(260, 55%, 65%)",
+      description: "Community activity — visits, seeds, offerings, dreams, and whispers.",
       layers: [
+        { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => toggle("heartGlow"), accent: "0, 65%, 55%" },
+        { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", description: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => toggle("bloomedSeeds"), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
+        { key: "recent-visits", label: "◎ Recent Visits", description: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => toggle("recentVisits"), accent: "260, 55%, 70%" },
+        { key: "seed-traces", label: "✿ Seed & Offering Traces", active: showSeedTraces, toggle: () => toggle("seedTraces"), accent: "260, 55%, 70%" },
+        { key: "seed-trail", label: "🌱 My Seed Trail", active: showSeedTrail, toggle: () => toggle("seedTrail"), extra: showSeedTrail ? (seedTrailCount > 0 ? `${seedTrailCount}` : "—") : undefined, accent: "42, 80%, 60%" },
+        { key: "shared-trees", label: "◐ Shared Trees", active: showSharedTrees, toggle: () => toggle("sharedTrees"), accent: "260, 55%, 70%" },
+        { key: "tribe-activity", label: "⊛ Tribe Activity", active: showTribeActivity, toggle: () => toggle("tribeActivity"), accent: "260, 55%, 70%" },
+        { key: "dream-trees", label: "🌙 Dream Trees", active: showDreamTrees, toggle: () => toggle("dreamTrees"), extra: showDreamTrees ? (dreamTreeCount > 0 ? `${dreamTreeCount}` : "—") : undefined, accent: "280, 55%, 65%" },
+        { key: "dream-offerings", label: "✨ Dream Offerings", active: showDreamOfferings, toggle: () => toggle("dreamOfferings"), extra: showDreamOfferings ? (dreamOfferingCount > 0 ? `${dreamOfferingCount}` : "—") : undefined, accent: "42, 80%, 65%" },
+      ],
+    },
+    {
+      key: "atmosphere",
+      title: "Visual",
+      icon: "🎨",
+      accent: "hsl(340, 55%, 65%)",
+      description: "Artistic overlays — blooming clock, constellation mode, forest pulse.",
+      layers: [
+        { key: "forestPulse", label: "💓 Forest Pulse", active: showForestPulse, toggle: () => toggle("forestPulse") },
         { key: "seasonal-foods", label: "🌸 Seasonal Foods", active: showBloomingClock, toggle: () => toggle("bloomingClock"), accent: "340, 55%, 65%" },
         { key: "constellation", label: "🌾 Constellation Mode", active: bloomConstellationMode, toggle: () => { toggle("bloomConstellationMode"); if (!showBloomingClock) setLayer("bloomingClock", true); }, accent: "42, 70%, 55%" },
       ],
@@ -935,7 +895,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showSeedTrail, seedTrailCount,
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
       activeLens, lensConfig, setLens,
-      showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles]);
+      showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles,
+      showForestPulse, showMycelialPathways, showDreamTrees, showDreamOfferings, dreamTreeCount, dreamOfferingCount]);
 
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
