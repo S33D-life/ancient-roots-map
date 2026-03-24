@@ -394,6 +394,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return () => window.removeEventListener("s33d-companion-cmd", handler);
   }, [trees]);
 
+  // Listen for BottomNav FAB tap to open the chooser
+  useEffect(() => {
+    const handler = () => {
+      const map = mapRef.current;
+      if (map) {
+        const c = map.getCenter();
+        setAddTreeCoords({ lat: c.lat, lng: c.lng });
+      } else {
+        setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
+      }
+      setChooserOpen(true);
+    };
+    window.addEventListener("s33d-add-tree-chooser", handler);
+    return () => window.removeEventListener("s33d-add-tree-chooser", handler);
+  }, [userLatLng]);
+
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
   const showMycelialPathways = layers.mycelialPathways;
