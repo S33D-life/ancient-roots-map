@@ -168,13 +168,37 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute left-1/2 -translate-x-1/2 z-[1001] w-[min(280px,calc(100vw-2rem))]"
-            style={{ bottom: "calc(var(--bottom-nav-height, 3.5rem) + var(--safe-bottom, 8px) + var(--bottom-nav-height, 3.5rem) + 8px)" }}
+            className="absolute left-1/2 z-[1001] w-[min(280px,calc(100vw-2rem))]"
+            style={{
+              bottom: "calc(var(--bottom-nav-height, 3.5rem) + var(--safe-bottom, 8px) + var(--bottom-nav-height, 3.5rem) + 8px)",
+              transform: `translateX(calc(-50% + ${dragOffset.x}px)) translateY(${dragOffset.y}px)`,
+            }}
           >
+            {/* Drag handle */}
+            <div
+              onMouseDown={onDragStart}
+              onMouseMove={onDragMove}
+              onMouseUp={onDragEnd}
+              onMouseLeave={onDragEnd}
+              onTouchStart={onDragStart}
+              onTouchMove={onDragMove}
+              onTouchEnd={onDragEnd}
+              className="flex items-center justify-center py-1 cursor-grab active:cursor-grabbing"
+              style={{
+                background: "hsla(120, 20%, 8%, 0.92)",
+                borderRadius: "12px 12px 0 0",
+                border: "1px solid hsla(120, 30%, 30%, 0.3)",
+                borderBottom: "none",
+                backdropFilter: "blur(12px)",
+                touchAction: "none",
+              }}
+            >
+              <div className="w-8 h-1 rounded-full" style={{ background: "hsla(120, 40%, 50%, 0.35)" }} />
+            </div>
             {/* Collapse toggle */}
             <button
               onClick={() => setSignalsExpanded(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-t-xl text-[10px] font-serif tracking-wider transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-serif tracking-wider transition-colors"
               style={{
                 background: "hsla(120, 20%, 8%, 0.92)",
                 color: "hsl(120, 40%, 65%)",
