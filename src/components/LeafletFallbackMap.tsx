@@ -15,6 +15,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "@/styles/map-markers.css";
 import "@/styles/grove-map.css";
 import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
+import { useDreamConstellationLayer } from "@/hooks/use-dream-constellation-layer";
 import { usePulseMapLayer } from "@/hooks/use-pulse-map-layer";
 import { usePathwayMapLayer } from "@/hooks/use-pathway-map-layer";
 import { escapeHtml } from "@/utils/escapeHtml";
