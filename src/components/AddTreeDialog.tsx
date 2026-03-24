@@ -1324,7 +1324,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                       treeName={name || species || "this tree"}
                       treeLat={lat}
                       treeLng={lng}
-                      userId={userId}
+                      userId={savedUserId}
                       context="new_tree"
                     />
                   </div>
