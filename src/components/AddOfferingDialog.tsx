@@ -33,6 +33,7 @@ interface AddOfferingDialogProps {
   onOpenChange: (open: boolean) => void;
   treeId: string;
   treeSpecies?: string;
+  treeName?: string;
   type: OfferingType;
   meetingId?: string | null;
 }
