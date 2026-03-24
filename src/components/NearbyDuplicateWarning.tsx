@@ -38,11 +38,19 @@ export default function NearbyDuplicateWarning({
   const [loading, setLoading] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  const checkSimilar = useCallback(async () => {
+  // Cache nearby candidates so we don't re-query on name/species edits
+  const [nearbyCandidates, setNearbyCandidates] = useState<SimilarityCandidate[]>([]);
+  const lastCoordsRef = useRef<string>("");
+
+  // Only fetch from DB when location changes (not on name/species keystrokes)
+  const fetchNearbyCandidates = useCallback(async () => {
     if (latitude === null || longitude === null) return;
+    const coordKey = `${latitude.toFixed(5)},${longitude.toFixed(5)}`;
+    if (coordKey === lastCoordsRef.current) return; // skip duplicate coord fetches
+    lastCoordsRef.current = coordKey;
+
     setLoading(true);
     try {
-      // Bounding box: ~60m in degrees
       const degLat = 60 / 110540;
       const degLng = 60 / (111320 * Math.cos((latitude * Math.PI) / 180));
 
@@ -56,12 +64,7 @@ export default function NearbyDuplicateWarning({
         .is("merged_into_tree_id", null)
         .limit(20);
 
-      if (!data || data.length === 0) {
-        setResults([]);
-        return;
-      }
-
-      const candidates: SimilarityCandidate[] = data
+      const candidates: SimilarityCandidate[] = (data || [])
         .filter((t) => t.latitude != null && t.longitude != null)
         .map((t) => ({
           id: t.id,
@@ -70,27 +73,35 @@ export default function NearbyDuplicateWarning({
           latitude: t.latitude!,
           longitude: t.longitude!,
         }));
-
-      const similar = findSimilarTrees(
-        { name: name || species || "", species: species || "", latitude, longitude },
-        candidates,
-        0.45,
-      ).slice(0, 3);
-
-      setResults(similar);
+      setNearbyCandidates(candidates);
     } catch {
-      // silently fail
+      setNearbyCandidates([]);
     } finally {
       setLoading(false);
     }
-  }, [latitude, longitude, name, species]);
+  }, [latitude, longitude]);
 
+  // Re-run similarity scoring client-side when name/species change (no DB call)
+  useEffect(() => {
+    if (latitude === null || longitude === null || nearbyCandidates.length === 0) {
+      setResults([]);
+      return;
+    }
+    const similar = findSimilarTrees(
+      { name: name || species || "", species: species || "", latitude, longitude },
+      nearbyCandidates,
+      0.45,
+    ).slice(0, 3);
+    setResults(similar);
+  }, [nearbyCandidates, name, species, latitude, longitude]);
+
+  // Fetch candidates only when coordinates change
   useEffect(() => {
     if (latitude !== null && longitude !== null) {
       setDismissed(false);
-      checkSimilar();
+      fetchNearbyCandidates();
     }
-  }, [latitude, longitude, checkSimilar]);
+  }, [latitude, longitude, fetchNearbyCandidates]);
 
   if (dismissed || (results.length === 0 && !loading)) return null;
 
