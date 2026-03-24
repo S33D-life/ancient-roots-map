@@ -300,6 +300,8 @@ export default function OrbConstellation({
                     style={{
                       background: a.key === "update"
                         ? "radial-gradient(circle, hsl(180 70% 55% / 0.25), transparent 70%)"
+                        : a.key === "signals"
+                        ? "radial-gradient(circle, hsl(45 90% 60% / 0.3), transparent 70%)"
                         : "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent 70%)",
                       filter: "blur(6px)",
                     }}
@@ -311,12 +313,18 @@ export default function OrbConstellation({
                     style={{
                       background: a.key === "update"
                         ? "hsl(180 25% 15% / 0.95)"
+                        : a.key === "signals"
+                        ? "hsl(45 30% 15% / 0.95)"
                         : "hsl(var(--card) / 0.92)",
                       border: a.key === "update"
                         ? "1px solid hsl(180 60% 50% / 0.4)"
+                        : a.key === "signals"
+                        ? "1px solid hsl(45 80% 55% / 0.4)"
                         : "1px solid hsl(var(--primary) / 0.25)",
                       backdropFilter: "blur(12px)",
-                      boxShadow: "0 2px 12px hsl(var(--primary) / 0.1), inset 0 0 8px hsl(var(--primary) / 0.05)",
+                      boxShadow: a.key === "signals"
+                        ? "0 2px 16px hsl(45 90% 60% / 0.2), inset 0 0 8px hsl(45 90% 60% / 0.1)"
+                        : "0 2px 12px hsl(var(--primary) / 0.1), inset 0 0 8px hsl(var(--primary) / 0.05)",
                     }}
                   >
                     <span className="text-base">{a.emoji}</span>
