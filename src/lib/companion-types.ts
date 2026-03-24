@@ -55,7 +55,9 @@ export const VALID_COMMAND_TYPES = new Set<string>([
   "open_panel", "close_panel", "highlight_node",
   "export_view", "select_chart",
   "pointer_move", "pointer_hide",
-  "pointer_delta", "pointer_click", "scroll",
+  "pointer_delta", "pointer_click",
+  "pointer_down", "pointer_up",
+  "scroll",
   "drag_start", "drag_move", "drag_end",
   "navigate_room", "send_to_desktop",
 ]);
