@@ -311,14 +311,16 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
                       {regions.map((r) => {
-                        const count = trees.filter(t => t.province === r).length;
+                        const researchCount = trees.filter(t => t.province === r).length;
+                        const mappedCount = mappedTrees.filter(t => t.state === r).length;
+                        const total = researchCount + mappedCount;
                         return (
                           <Badge
                             key={r}
                             variant="outline"
                             className="text-xs border-primary/20 text-foreground cursor-default"
                           >
-                            {r} · {count}
+                            {r} · {total}
                           </Badge>
                         );
                       })}
