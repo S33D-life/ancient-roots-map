@@ -203,8 +203,9 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
                 background: "hsla(120, 20%, 8%, 0.92)",
                 color: "hsl(120, 40%, 65%)",
                 border: "1px solid hsla(120, 30%, 30%, 0.3)",
+                borderTop: "none",
                 borderBottom: signalsExpanded ? "none" : undefined,
-                borderRadius: signalsExpanded ? "12px 12px 0 0" : "12px",
+                borderRadius: signalsExpanded ? "0" : "0 0 12px 12px",
                 backdropFilter: "blur(12px)",
               }}
             >
