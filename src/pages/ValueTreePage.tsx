@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,14 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Heart, Shield, TreePine, Sprout, GitBranch, Vote,
-  ChevronDown, ChevronRight, Clock, Check, Zap, Lock,
+  Heart, TreePine, Sprout, GitBranch,
+  ChevronDown, ChevronRight, Clock, Check, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
-  Bug, UserPlus, Megaphone, Flame, ArrowRight, Coins, Loader2,
+  Bug, UserPlus, Flame, ArrowRight, Loader2, Crown,
+  Wind, HandHeart, Wheat, ArrowLeftRight, Coins, Shield,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useHeartBalance } from "@/hooks/use-heart-balance";
-import GovernanceProposalsList from "@/components/governance/GovernanceProposalsList";
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
@@ -24,693 +23,269 @@ const YourPlaceInCycle = lazy(() => import("@/components/economy/YourPlaceInCycl
 const VaultHeartLedger = lazy(() => import("@/components/dashboard/vault/VaultHeartLedger"));
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 const EcosystemMomentum = lazy(() => import("@/components/EcosystemMomentum"));
+const FoundingStaffRoots = lazy(() => import("@/components/economy/FoundingStaffRoots"));
+const StaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
+const FlowOfValue = lazy(() => import("@/components/economy/FlowOfValue"));
+const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
 
-/* ─── Value-node data model ────────────────────────────────── */
+/* ─── Shared loading fallback ──────────────────────────────── */
+const TabLoader = () => (
+  <div className="flex justify-center py-16">
+    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+  </div>
+);
 
-interface RewardOutput {
-  token: "s33d" | "species" | "influence";
-  amount: string; // e.g. "1-3" or "1"
-  note?: string;
-}
+/* ─── System link button ───────────────────────────────────── */
+const SystemLink = ({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) => (
+  <Link
+    to={to}
+    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border/40 bg-card/30 backdrop-blur-sm text-xs font-serif text-foreground hover:border-primary/30 hover:bg-card/50 transition-all"
+  >
+    {icon}
+    <span>{label}</span>
+    <ArrowRight className="w-3 h-3 text-muted-foreground" />
+  </Link>
+);
 
-interface ValueNode {
-  id: string;
+/* ─── Flow step for the Living Flow tab ────────────────────── */
+interface FlowStepData {
+  icon: React.ReactNode;
   label: string;
   description: string;
-  icon: React.ReactNode;
-  rewards: RewardOutput[];
-  cooldown?: string;
-  verification?: string;
-  children?: ValueNode[];
-  status?: "active" | "experimental" | "seasonal" | "coming_soon";
-  /** Deep-link to the action that earns this reward */
-  actionLink?: string;
+  color: string;
+  detail: string;
+  links?: { label: string; to: string }[];
 }
 
-interface ProposalNode {
-  id: string;
-  title: string;
-  description: string;
-  proposedRewards: RewardOutput[];
-  rationale: string;
-  votes: number;
-  state: "proposed" | "under_review" | "approved" | "archived";
-}
-
-/* ─── Static data (the living reward tree) ─────────────────── */
-
-const ROOT_ACTIONS: ValueNode[] = [
+const LIVING_FLOW_STEPS: FlowStepData[] = [
   {
-    id: "checkin",
-    label: "Tree Check-in",
-    description: "Visit an Ancient Friend and log your presence.",
-    icon: <MapPin className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "1" },
-      { token: "species", amount: "1", note: "Based on tree hive" },
-    ],
-    cooldown: "3 per tree per day",
-    verification: "Self-reported",
-    actionLink: "/map",
-    children: [
-      {
-        id: "checkin-canopy",
-        label: "Check-in with Canopy Proof",
-        description: "Include a verified canopy photo for a +1 S33D Heart bonus.",
-        icon: <Camera className="w-4 h-4" />,
-        rewards: [
-          { token: "s33d", amount: "1", note: "Canopy bonus" },
-        ],
-        cooldown: "3 per tree per day",
-        verification: "Canopy photo verified",
-        actionLink: "/map",
-      },
+    icon: <Sprout className="w-5 h-5" />,
+    label: "Seeds",
+    description: "3 seeds planted daily — each a small act of attention.",
+    color: "hsl(120 50% 45%)",
+    detail: "Each seed generates 33 Hearts when collected. Seeds are planted near trees you encounter on the map.",
+    links: [{ label: "Plant seeds on the map", to: "/map" }],
+  },
+  {
+    icon: <Music className="w-5 h-5" />,
+    label: "Offerings",
+    description: "Gift a photo, poem, song, or story to an Ancient Friend.",
+    color: "hsl(30 70% 50%)",
+    detail: "Offerings deepen your relationship with a tree and earn S33D Hearts and Species Hearts. Each offering enriches the tree's living record.",
+    links: [{ label: "Make an offering", to: "/map" }],
+  },
+  {
+    icon: <Eye className="w-5 h-5" />,
+    label: "Encounter",
+    description: "Meet the Ancient Friends — presence is the seed of all value.",
+    color: "hsl(200 40% 60%)",
+    detail: "Check-ins, 333-second presence sessions, and map explorations all count as encounters. Every visit earns S33D Hearts and Species Hearts.",
+    links: [
+      { label: "Open the map", to: "/map" },
+      { label: "Browse tree stories", to: "/library/gallery" },
     ],
   },
   {
-    id: "mapping",
-    label: "Map a New Tree",
-    description: "Add a verified Ancient Friend to the atlas.",
-    icon: <TreePine className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "10" },
-      { token: "species", amount: "3", note: "Routed to tree's hive" },
-      { token: "influence", amount: "2" },
-    ],
-    verification: "Location + species + photo recommended",
-    actionLink: "/add-tree",
-    children: [
-      {
-        id: "mapping-photo",
-        label: "Map + Photo",
-        description: "Add a photo when mapping for a +1 S33D bonus.",
-        icon: <Check className="w-4 h-4" />,
-        rewards: [
-          { token: "s33d", amount: "11" },
-          { token: "species", amount: "3" },
-          { token: "influence", amount: "2" },
-        ],
-        verification: "Photo included",
-        actionLink: "/add-tree",
-      },
-    ],
+    icon: <Heart className="w-5 h-5" />,
+    label: "Hearts",
+    description: "S33D Hearts, Species Hearts, and Influence flow from every action.",
+    color: "hsl(0 65% 55%)",
+    detail: "S33D Hearts are the commons currency. Species Hearts route to botanical hives. Influence is your governance voice — soulbound and earned through curation.",
   },
   {
-    id: "offering",
-    label: "Make an Offering",
-    description: "Gift a photo, poem, song, story, or voice note to a tree.",
-    icon: <Music className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "2" },
-      { token: "species", amount: "1" },
-    ],
-    actionLink: "/map",
+    icon: <Wheat className="w-5 h-5" />,
+    label: "Accumulation",
+    description: "Hearts accumulate in your Heartwood Vault — a living ledger of your journey.",
+    color: "hsl(42 80% 50%)",
+    detail: "Every tree accumulates Hearts toward a Windfall at 144 Hearts. Your personal vault tracks all earnings, milestones, and seed blooms.",
+    links: [{ label: "Open Heartwood Vault", to: "/dashboard?tab=vault" }],
   },
   {
-    id: "curation",
-    label: "Curation Action",
-    description: "Improve tree records, verify data, or curate hive content.",
-    icon: <Eye className="w-4 h-4" />,
-    rewards: [
-      { token: "influence", amount: "1-5", note: "Based on action depth" },
-    ],
-    cooldown: "Rate-limited",
-    verification: "Peer review for higher tiers",
-    actionLink: "/map",
-    children: [
-      {
-        id: "curation-verify",
-        label: "Verify Tree Record",
-        description: "Confirm species, location, or age data.",
-        icon: <Check className="w-4 h-4" />,
-        rewards: [{ token: "influence", amount: "2" }],
-        actionLink: "/map",
-      },
-      {
-        id: "curation-metadata",
-        label: "Add Missing Metadata",
-        description: "Species, accessibility tags, story notes.",
-        icon: <Leaf className="w-4 h-4" />,
-        rewards: [{ token: "influence", amount: "1-3" }],
-        actionLink: "/map",
-      },
-      {
-        id: "curation-resolve",
-        label: "Resolve Duplicates",
-        description: "Identify and merge duplicate tree entries.",
-        icon: <GitBranch className="w-4 h-4" />,
-        rewards: [{ token: "influence", amount: "3" }],
-        verification: "Curator approval",
-        actionLink: "/map",
-      },
-    ],
+    icon: <GitBranch className="w-5 h-5" />,
+    label: "Distribution",
+    description: "Hearts flow through four branches: IGO, Accelerator, Tr33 Loto, Life Exchange.",
+    color: "hsl(280 50% 55%)",
+    detail: "The 360° Distribution Compass governs allocation. Species Hearts route to hives. The 60-year emission curve ensures long-term sustainability.",
   },
   {
-    id: "species-confirm",
-    label: "Species Confirmation",
-    description: "Community-confirm a tree's species identity.",
-    icon: <Sprout className="w-4 h-4" />,
-    rewards: [
-      { token: "species", amount: "1" },
-      { token: "influence", amount: "1" },
-    ],
-    verification: "Cross-referenced by multiple wanderers",
-    actionLink: "/map",
+    icon: <ArrowLeftRight className="w-5 h-5" />,
+    label: "Cycle Reset",
+    description: "The breath continues. Value circulates back into encounter.",
+    color: "hsl(150 50% 45%)",
+    detail: "This is a living cycle, not a linear extraction. Hearts spent on creative acts — NFTrees, room customisation, asset unlocks — feed energy back into the commons.",
   },
 ];
 
-const ADVANCED_CHAINS: ValueNode[] = [
-  {
-    id: "documentation",
-    label: "Tree Media Documentation",
-    description: "Capture seasonal photos, audio recordings, or field notes.",
-    icon: <Camera className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "1-5" },
-      { token: "species", amount: "1-2" },
-    ],
-    status: "active",
-  },
-  {
-    id: "hive-radio",
-    label: "Curate Hive Radio Set",
-    description: "Assemble a playlist from offerings within a species hive.",
-    icon: <Music className="w-4 h-4" />,
-    rewards: [
-      { token: "influence", amount: "3-5" },
-    ],
-    status: "active",
-    verification: "Minimum 5 tracks, peer reviewed",
-  },
-  {
-    id: "staking",
-    label: "Staking at Ancient Friend Trees",
-    description: "Stake Species Hearts at trees or hives to earn S33D Hearts. Part of Chapter 3.",
-    icon: <Lock className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "TBD" },
-    ],
-    status: "coming_soon",
-  },
-  {
-    id: "nft-minting",
-    label: "Minting / Holding Relevant NFTs",
-    description: "Earn Hearts through NFT participation in the S33D ecosystem. Part of Chapter 3.",
-    icon: <Star className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "TBD" },
-    ],
-    status: "coming_soon",
-  },
-  {
-    id: "sapling-nurture",
-    label: "Nurturing Saplings of Ancient Friends",
-    description: "Care for the next generation of ancient trees. Part of Chapter 3.",
-    icon: <Sprout className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "TBD" },
-      { token: "species", amount: "TBD" },
-    ],
-    status: "coming_soon",
-  },
-  {
-    id: "seed-saving",
-    label: "Saving, Sharing, or Growing Seeds",
-    description: "Participate in the broader seed economy beyond planting and collecting.",
-    icon: <Leaf className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "TBD" },
-    ],
-    status: "coming_soon",
-  },
-  {
-    id: "founding-minters",
-    label: "Founding Minter Drops & Airdrops",
-    description: "Early supporters may receive drops or airdrops as the ecosystem grows.",
-    icon: <Flame className="w-4 h-4" />,
-    rewards: [
-      { token: "s33d", amount: "TBD" },
-    ],
-    status: "coming_soon",
-  },
-];
-
-const PROPOSALS: ProposalNode[] = [
-  {
-    id: "prop-1",
-    title: "Birdsong Identification Bonus",
-    description: "Award Species Hearts when birdsong recordings identify species tied to the tree's hive.",
-    proposedRewards: [{ token: "species", amount: "2" }, { token: "influence", amount: "1" }],
-    rationale: "Encourages ecological data collection and enriches hive biodiversity records.",
-    votes: 12,
-    state: "under_review",
-  },
-  {
-    id: "prop-2",
-    title: "Story Keeper Milestone",
-    description: "Award a one-time Influence bonus for contributing 10+ stories to a single hive.",
-    proposedRewards: [{ token: "influence", amount: "10" }],
-    rationale: "Incentivizes deep narrative engagement with specific lineages.",
-    votes: 8,
-    state: "proposed",
-  },
-  {
-    id: "prop-3",
-    title: "Elder Tree Guardian",
-    description: "Monthly S33D Heart drip for verified caretakers of trees over 500 years old.",
-    proposedRewards: [{ token: "s33d", amount: "5/month" }],
-    rationale: "Rewards ongoing stewardship of irreplaceable ancient beings.",
-    votes: 23,
-    state: "approved",
-  },
-];
-
-/* ─── Token badge component ────────────────────────────────── */
-
-const TokenBadge = ({ token, amount, note }: RewardOutput) => {
-  const config = {
-    s33d: { label: "S33D Hearts", color: "hsl(0, 65%, 55%)", icon: "❤️" },
-    species: { label: "Species Hearts", color: "hsl(var(--primary))", icon: "🌿" },
-    influence: { label: "Influence", color: "hsl(42, 80%, 50%)", icon: "🛡️" },
-  }[token];
-
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-serif border"
-      style={{ borderColor: `${config.color}40`, color: config.color }}
-    >
-      <span>{config.icon}</span>
-      <span className="font-bold tabular-nums">+{amount}</span>
-      {note && <span className="text-muted-foreground text-[9px]">({note})</span>}
-    </span>
-  );
-};
-
-/* ─── Expandable tree node ─────────────────────────────────── */
-
-const TreeNode = ({ node, depth = 0 }: { node: ValueNode; depth?: number }) => {
+const LivingFlowStep = ({ step, index, isLast }: { step: FlowStepData; index: number; isLast: boolean }) => {
   const [expanded, setExpanded] = useState(false);
-  const navigate = useNavigate();
-  const hasChildren = node.children && node.children.length > 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06 }}
       className="relative"
     >
-      {/* Connector line for children */}
-      {depth > 0 && (
+      {/* Vertical connector */}
+      {!isLast && (
         <div
-          className="absolute top-0 -left-4 w-4 h-full"
-          style={{ borderLeft: "1px dashed hsl(var(--border) / 0.4)" }}
+          className="absolute left-5 top-[3.5rem] w-px h-[calc(100%-1rem)]"
+          style={{ background: `linear-gradient(180deg, ${step.color}40, transparent)` }}
         />
       )}
 
       <div
-        className={`rounded-xl border transition-all ${
-          expanded ? "border-primary/30 bg-card/60" : "border-border/40 bg-card/30 hover:border-primary/20"
-        } backdrop-blur-sm`}
+        className="rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden hover:border-primary/20 transition-all cursor-pointer"
+        onClick={() => setExpanded(!expanded)}
       >
-        <button
-          onClick={() => hasChildren && setExpanded(!expanded)}
-          className="w-full p-4 text-left flex items-start gap-3"
-        >
-          {/* Expand icon or node icon */}
-          <div className="shrink-0 mt-0.5 flex items-center gap-1.5">
-            {hasChildren ? (
-              expanded ? <ChevronDown className="w-3.5 h-3.5 text-primary" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-            ) : (
-              <span className="w-3.5" />
-            )}
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-secondary/40 text-primary">
-              {node.icon}
-            </div>
+        <div className="p-4 flex items-start gap-3">
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center border-2 shrink-0 mt-0.5"
+            style={{ borderColor: step.color, background: `${step.color}15`, color: step.color }}
+          >
+            {step.icon}
           </div>
-
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-sm font-serif text-foreground">{node.label}</h4>
-              {node.status && node.status !== "active" && (
-                <Badge
-                  variant="outline"
-                  className="text-[9px] font-serif"
-                  style={{
-                    borderColor: node.status === "coming_soon" ? "hsl(var(--muted-foreground))" :
-                      node.status === "experimental" ? "hsl(280, 60%, 55%)" :
-                      "hsl(150, 60%, 45%)",
-                  }}
-                >
-                  {node.status === "coming_soon" ? "Coming Soon" :
-                   node.status === "experimental" ? "Experimental" : "Seasonal"}
-                </Badge>
+              <h4 className="text-sm font-serif text-foreground">{step.label}</h4>
+              <span className="text-[9px] font-serif text-muted-foreground/50 tabular-nums">{index + 1}/7</span>
+              {expanded ? (
+                <ChevronDown className="w-3 h-3 text-muted-foreground ml-auto" />
+              ) : (
+                <ChevronRight className="w-3 h-3 text-muted-foreground ml-auto" />
               )}
             </div>
-            <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">{node.description}</p>
-
-            {/* Reward tokens */}
-            <div className="flex flex-wrap gap-1.5 mt-2.5">
-              {node.rewards.map((r, i) => (
-                <TokenBadge key={i} {...r} />
-              ))}
-            </div>
-
-            {/* Meta row + action link */}
-            <div className="flex flex-wrap items-center gap-3 mt-2 text-[10px] text-muted-foreground/70 font-serif">
-              {node.cooldown && (
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {node.cooldown}
-                </span>
-              )}
-              {node.verification && (
-                <span className="flex items-center gap-1">
-                  <Check className="w-3 h-3" /> {node.verification}
-                </span>
-              )}
-              {node.actionLink && (
-                <span
-                  role="link"
-                  className="flex items-center gap-1 text-primary/70 hover:text-primary cursor-pointer transition-colors"
-                  onClick={(e) => { e.stopPropagation(); navigate(node.actionLink!); }}
-                >
-                  <ArrowRight className="w-3 h-3" /> Do this now
-                </span>
-              )}
-            </div>
+            <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">{step.description}</p>
           </div>
-        </button>
-      </div>
+        </div>
 
-      {/* Children */}
-      <AnimatePresence>
-        {expanded && hasChildren && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="pl-8 mt-2 space-y-2"
-          >
-            {node.children!.map(child => (
-              <TreeNode key={child.id} node={child} depth={depth + 1} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 pl-[3.75rem] space-y-3">
+                <p className="text-[11px] font-serif text-muted-foreground/80 leading-relaxed">
+                  {step.detail}
+                </p>
+                {step.links && (
+                  <div className="flex flex-wrap gap-2">
+                    {step.links.map((l) => (
+                      <Link
+                        key={l.to + l.label}
+                        to={l.to}
+                        className="inline-flex items-center gap-1.5 text-[10px] font-serif text-primary hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <ArrowRight className="w-3 h-3" /> {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 };
 
-/* ─── Flow diagram component ───────────────────────────────── */
-
-const FlowStep = ({ icon, label, color, isLast }: { icon: React.ReactNode; label: string; color: string; isLast?: boolean }) => (
-  <div className="flex items-center gap-2">
-    <div
-      className="w-10 h-10 rounded-full flex items-center justify-center border-2 shrink-0"
-      style={{ borderColor: color, background: `${color}15` }}
-    >
-      {icon}
-    </div>
-    <span className="text-xs font-serif" style={{ color }}>{label}</span>
-    {!isLast && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0 mx-1" />}
-  </div>
-);
-
-/* ─── Proposal card ────────────────────────────────────────── */
-
-const ProposalCard = ({ proposal }: { proposal: ProposalNode }) => {
-  const stateStyles = {
-    proposed: { color: "hsl(var(--muted-foreground))", label: "Proposed" },
-    under_review: { color: "hsl(280, 60%, 55%)", label: "Under Review" },
-    approved: { color: "hsl(150, 60%, 45%)", label: "Approved" },
-    archived: { color: "hsl(var(--muted-foreground))", label: "Archived" },
-  }[proposal.state];
-
-  return (
-    <Card className="bg-card/60 backdrop-blur border-border/40 overflow-hidden">
-      <div className="h-0.5" style={{ background: `linear-gradient(90deg, transparent, ${stateStyles.color}, transparent)` }} />
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-2">
-          <h4 className="text-sm font-serif text-foreground">{proposal.title}</h4>
-          <Badge variant="outline" className="text-[9px] font-serif shrink-0" style={{ borderColor: `${stateStyles.color}60`, color: stateStyles.color }}>
-            {stateStyles.label}
-          </Badge>
-        </div>
-        <p className="text-[11px] text-muted-foreground font-serif mb-3">{proposal.description}</p>
-
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {proposal.proposedRewards.map((r, i) => (
-            <TokenBadge key={i} {...r} />
+/* ─── Reward reference card (consolidated) ─────────────────── */
+const RewardReference = () => (
+  <Card className="bg-card/40 backdrop-blur border-border/30">
+    <CardContent className="p-5">
+      <h4 className="text-xs font-serif text-foreground mb-4 uppercase tracking-wider">Heart Rewards at a Glance</h4>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span>❤️</span>
+            <span className="text-xs font-serif text-foreground">S33D Hearts</span>
+          </div>
+          {[
+            ["Map a tree", "+10"],
+            ["Check-in", "+1"],
+            ["Offering", "+2"],
+            ["Council", "+5"],
+            ["Seed bloom", "+33"],
+          ].map(([a, r]) => (
+            <div key={a} className="flex justify-between text-[11px] font-serif">
+              <span className="text-muted-foreground">{a}</span>
+              <span style={{ color: "hsl(0, 65%, 55%)" }}>{r}</span>
+            </div>
           ))}
         </div>
-
-        <div className="border-t border-border/30 pt-3 mt-3">
-          <p className="text-[10px] text-muted-foreground/70 font-serif mb-2 italic">"{proposal.rationale}"</p>
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-serif flex items-center gap-1.5" style={{ color: "hsl(42, 80%, 50%)" }}>
-              <Shield className="w-3.5 h-3.5" /> {proposal.votes} influence votes
-            </span>
-            {proposal.state === "approved" && (
-              <span className="text-[10px] font-serif text-muted-foreground flex items-center gap-1">
-                <Check className="w-3 h-3" /> Migrated to active tree
-              </span>
-            )}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span>🌿</span>
+            <span className="text-xs font-serif text-foreground">Species Hearts</span>
           </div>
+          {[
+            ["Map tree", "+3"],
+            ["Check-in", "+1"],
+            ["Quality offering", "+2"],
+            ["Complete map", "+5"],
+          ].map(([a, r]) => (
+            <div key={a} className="flex justify-between text-[11px] font-serif">
+              <span className="text-muted-foreground">{a}</span>
+              <span className="text-primary">{r}</span>
+            </div>
+          ))}
         </div>
-      </CardContent>
-    </Card>
-  );
-};
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span>🛡️</span>
+            <span className="text-xs font-serif text-foreground">Influence</span>
+          </div>
+          {[
+            ["Verify tree", "+2"],
+            ["Add metadata", "+1-3"],
+            ["Resolve dupes", "+3"],
+            ["Quality media", "+1"],
+          ].map(([a, r]) => (
+            <div key={a} className="flex justify-between text-[11px] font-serif">
+              <span className="text-muted-foreground">{a}</span>
+              <span style={{ color: "hsl(42, 80%, 50%)" }}>{r}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
-/* ─── Main Page ────────────────────────────────────────────── */
-
-/* ─── Earn Branch — Dynamic Opportunities ──────────────────── */
-
-interface Opportunity {
+/* ─── Participation action card ────────────────────────────── */
+interface ParticipationAction {
   id: string;
   label: string;
   description: string;
   icon: React.ReactNode;
-  category: string;
-  estimatedReward: string;
+  reward: string;
   link: string;
-  ready: boolean;
-  priority: number;
+  category: string;
 }
 
-const EarnBranch = () => {
-  const [userId, setUserId] = useState<string | null>(null);
-  const heartBalance = useHeartBalance(userId);
-  const navigate = useNavigate();
-  const [showNotifyModal, setShowNotifyModal] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setUserId(session?.user?.id ?? null));
-  }, []);
-
-  const opportunities = useMemo<Opportunity[]>(() => {
-    const tc = heartBalance.counts.trees;
-    const oc = heartBalance.counts.offerings;
-    const items: Opportunity[] = [
-      {
-        id: "map-tree",
-        label: "Map a Tree",
-        description: "Add an Ancient Friend to the living atlas and earn 10 S33D Hearts.",
-        icon: <TreePine className="w-5 h-5" />,
-        category: "Growth",
-        estimatedReward: "+10 ❤️ +3 🌿 +2 🛡️",
-        link: "/add-tree",
-        ready: true,
-        priority: tc === 0 ? 0 : 5,
-      },
-      {
-        id: "offering",
-        label: "Make an Offering",
-        description: "Gift a photo, poem, song, or story to a tree you've visited.",
-        icon: <Music className="w-5 h-5" />,
-        category: "Care",
-        estimatedReward: "+1-5 ❤️ +1 🌿",
-        link: "/map",
-        ready: true,
-        priority: tc > 0 && oc === 0 ? 0 : 4,
-      },
-      {
-        id: "council",
-        label: "Attend or Host a Council",
-        description: "Join or organize a Council of Life gathering.",
-        icon: <Users className="w-5 h-5" />,
-        category: "Council",
-        estimatedReward: "+5 ❤️ per event",
-        link: "/council-of-life",
-        ready: true,
-        priority: 6,
-      },
-      {
-        id: "bug-report",
-        label: "Firefly Contribution 🐞✨💡🌳",
-        description: "Report bugs, suggest improvements, share insights, or propose trees. Validated contributions earn Hearts.",
-        icon: <Bug className="w-5 h-5" />,
-        category: "Care",
-        estimatedReward: "+3-25 ❤️",
-        link: "/bug-garden",
-        ready: true,
-        priority: 7,
-      },
-      {
-        id: "curate",
-        label: "Verify or Curate Data",
-        description: "Confirm species, resolve duplicates, or add missing metadata.",
-        icon: <Eye className="w-5 h-5" />,
-        category: "Curation",
-        estimatedReward: "+1-5 🛡️",
-        link: "/map",
-        ready: true,
-        priority: 8,
-      },
-      {
-        id: "invite",
-        label: "Invite a Wanderer",
-        description: "Share your invite link and earn Hearts when they join.",
-        icon: <UserPlus className="w-5 h-5" />,
-        category: "Growth",
-        estimatedReward: "+5 ❤️ per referral",
-        link: "/referrals",
-        ready: true,
-        priority: 9,
-      },
-      {
-        id: "presence",
-        label: "333-Second Presence",
-        description: "Complete a mindfulness session with an Ancient Friend.",
-        icon: <Sun className="w-5 h-5" />,
-        category: "Presence",
-        estimatedReward: "+10 ❤️ +3 🌿",
-        link: "/map",
-        ready: true,
-        priority: 10,
-      },
-    ];
-    return items.sort((a, b) => a.priority - b.priority);
-  }, [heartBalance.counts]);
-
-  return (
-    <div className="space-y-4">
-      <p className="text-xs text-muted-foreground font-serif mb-2">
-        Active ways to grow the tree — personalized for your journey.
-      </p>
-
-      <div className="space-y-3">
-        {opportunities.map((opp, i) => (
-          <motion.div
-            key={opp.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-          >
-            <div
-              className="relative rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-all cursor-pointer group"
-              onClick={() => opp.ready ? navigate(opp.link) : setShowNotifyModal(opp.id)}
-            >
-              <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl" style={{
-                background: opp.priority <= 1
-                  ? "linear-gradient(180deg, hsl(42 80% 50%), hsl(38 70% 40%))"
-                  : "hsl(var(--primary) / 0.3)",
-              }} />
-              <div className="p-4 pl-5 flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-secondary/40 text-primary shrink-0 mt-0.5">
-                  {opp.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <h4 className="text-sm font-serif text-foreground">{opp.label}</h4>
-                    {opp.priority === 0 && (
-                      <Badge variant="outline" className="text-[9px] font-serif border-amber-500/40 text-amber-400">
-                        Recommended
-                      </Badge>
-                    )}
-                    {!opp.ready && (
-                      <Badge variant="outline" className="text-[9px] font-serif border-muted-foreground/40 text-muted-foreground">
-                        Preparing…
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">{opp.description}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[11px] font-serif text-primary/70">{opp.estimatedReward}</span>
-                    <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">{opp.category}</span>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 mt-3" />
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <Card className="bg-card/40 backdrop-blur border-border/30 mt-6">
-        <CardContent className="p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <Flame className="w-4 h-4 text-amber-400" />
-            <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Windfall Progress</h4>
-          </div>
-          <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">
-            Every tree accumulates Hearts toward a <span className="text-amber-400">Windfall</span> at 144 Hearts.
-            Keep mapping trees and making offerings to trigger the next community windfall.
-          </p>
-          <Link to="/how-hearts-work" className="text-[11px] font-serif text-primary hover:underline mt-2 inline-block">
-            Learn how Hearts work →
-          </Link>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-card/40 backdrop-blur border-primary/15 mt-4">
-        <CardContent className="p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-base">✦</span>
-            <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Firefly Contributions</h4>
-          </div>
-          <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mb-3">
-            Use the floating <span className="text-primary">Firefly ✦</span> button to report bugs, suggest improvements, share insights, or propose trees.
-            Validated contributions earn Hearts:
-          </p>
-          <div className="space-y-1.5 text-[11px] font-serif">
-            <div className="flex justify-between"><span className="text-muted-foreground">🐞 Valid bug report</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+3–20 ❤️</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">✨ Accepted UX refinement</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5–15 ❤️</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">💡 High-value insight</span><span style={{ color: "hsl(0, 65%, 55%)" }}>variable ❤️</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">🌳 Verified tree suggestion</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5–25 ❤️</span></div>
-          </div>
-          <p className="text-[10px] text-muted-foreground/60 font-serif mt-3">
-            Hearts are awarded when your contribution is reviewed and validated. Look for the glowing ✦ orb at the edge of your screen.
-          </p>
-        </CardContent>
-      </Card>
-
-      {showNotifyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowNotifyModal(null)}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-card border border-border rounded-2xl p-6 max-w-sm mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-lg font-serif text-foreground mb-2">Coming Soon</h3>
-            <p className="text-sm text-muted-foreground font-serif mb-4">
-              This opportunity is being prepared. When ready, you'll earn Hearts for participating.
-            </p>
-            <Button variant="outline" className="w-full font-serif" onClick={() => setShowNotifyModal(null)}>
-              Close
-            </Button>
-          </motion.div>
-        </div>
-      )}
-    </div>
-  );
-};
+const PARTICIPATION_ACTIONS: ParticipationAction[] = [
+  { id: "map", label: "Map a Tree", description: "Add an Ancient Friend to the living atlas.", icon: <TreePine className="w-5 h-5" />, reward: "+10 ❤️ +3 🌿 +2 🛡️", link: "/add-tree", category: "Growth" },
+  { id: "offering", label: "Make an Offering", description: "Gift a photo, poem, song, or story to a tree.", icon: <Music className="w-5 h-5" />, reward: "+2 ❤️ +1 🌿", link: "/map", category: "Care" },
+  { id: "council", label: "Attend a Council", description: "Join a Council of Life gathering.", icon: <Users className="w-5 h-5" />, reward: "+5 ❤️ per event", link: "/council-of-life", category: "Council" },
+  { id: "presence", label: "333-Second Presence", description: "Complete a mindfulness session with an Ancient Friend.", icon: <Sun className="w-5 h-5" />, reward: "+10 ❤️ +3 🌿", link: "/map", category: "Presence" },
+  { id: "curate", label: "Verify or Curate", description: "Confirm species, resolve duplicates, add metadata.", icon: <Eye className="w-5 h-5" />, reward: "+1-5 🛡️", link: "/map", category: "Curation" },
+  { id: "firefly", label: "Firefly Contribution", description: "Report bugs, suggest improvements, propose trees.", icon: <Bug className="w-5 h-5" />, reward: "+3-25 ❤️", link: "/bug-garden", category: "Care" },
+  { id: "invite", label: "Invite a Wanderer", description: "Share your invite link — earn Hearts when they join.", icon: <UserPlus className="w-5 h-5" />, reward: "+5 ❤️ per referral", link: "/referrals", category: "Growth" },
+];
 
 /* ─── Main Page ────────────────────────────────────────────── */
 
 const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "economy";
+  const navigate = useNavigate();
+  const tabMap: Record<string, string> = { economy: "overview", earn: "participation", how: "flow", chains: "flow" };
+  const rawTab = searchParams.get("tab") || "overview";
+  const initialTab = tabMap[rawTab] || rawTab;
   const [activeTab, setActiveTab] = useState(initialTab);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -724,6 +299,7 @@ const ValueTreePage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+        {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -734,10 +310,11 @@ const ValueTreePage = () => {
             The S33D Value Tree
           </h1>
           <p className="text-muted-foreground font-serif max-w-lg mx-auto text-sm leading-relaxed">
-            Explore how every action grows into ecosystem value — from roots to fruit. S33D Hearts are the commons currency, earned through stewardship, not speculation.
+            A living current of value — from breath to encounter to harvest. S33D Hearts are the commons currency, earned through stewardship, not speculation.
           </p>
         </motion.div>
 
+        {/* Token legend */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {[
             { icon: "❤️", label: "S33D Hearts", sub: "Commons currency", color: "hsl(0, 65%, 55%)" },
@@ -754,166 +331,103 @@ const ValueTreePage = () => {
           ))}
         </div>
 
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-secondary/30 border border-border/50 mb-8 flex-wrap h-auto gap-1 p-1.5 w-full justify-start">
-            <TabsTrigger value="economy" className="font-serif text-xs tracking-wider gap-1.5">
-              <Coins className="w-3.5 h-3.5" /> Living Economy
-            </TabsTrigger>
-            <TabsTrigger value="earn" className="font-serif text-xs tracking-wider gap-1.5">
-              <Flame className="w-3.5 h-3.5" /> Earn & Grow
-            </TabsTrigger>
-            <TabsTrigger value="how" className="font-serif text-xs tracking-wider gap-1.5">
-              <Sprout className="w-3.5 h-3.5" /> How Hearts Grow
+            <TabsTrigger value="overview" className="font-serif text-xs tracking-wider gap-1.5">
+              <Coins className="w-3.5 h-3.5" /> Overview
             </TabsTrigger>
             <TabsTrigger value="flow" className="font-serif text-xs tracking-wider gap-1.5">
-              <GitBranch className="w-3.5 h-3.5" /> Fractal Distribution
+              <Wind className="w-3.5 h-3.5" /> Living Flow
             </TabsTrigger>
-            <TabsTrigger value="chains" className="font-serif text-xs tracking-wider gap-1.5">
-              <Zap className="w-3.5 h-3.5" /> Value Chains
+            <TabsTrigger value="participation" className="font-serif text-xs tracking-wider gap-1.5">
+              <HandHeart className="w-3.5 h-3.5" /> Participation
             </TabsTrigger>
-            <TabsTrigger value="proposals" className="font-serif text-xs tracking-wider gap-1.5">
-              <Vote className="w-3.5 h-3.5" /> Proposed Branches
+            <TabsTrigger value="origin-staff" className="font-serif text-xs tracking-wider gap-1.5">
+              <Crown className="w-3.5 h-3.5" /> Origin Staff
+            </TabsTrigger>
+            <TabsTrigger value="vault" className="font-serif text-xs tracking-wider gap-1.5">
+              <Heart className="w-3.5 h-3.5" /> Vault
+            </TabsTrigger>
+            <TabsTrigger value="philosophy" className="font-serif text-xs tracking-wider gap-1.5">
+              <Leaf className="w-3.5 h-3.5" /> Philosophy
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="economy">
-            <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>}>
-              {/* Living Value Cycle — the encounter economy map */}
-              <div className="mb-10">
+          {/* ═══════ OVERVIEW ═══════ */}
+          <TabsContent value="overview">
+            <Suspense fallback={<TabLoader />}>
+              <div className="space-y-8">
                 <LivingValueCycle />
-              </div>
 
-              {/* Your Place in the Cycle — personal progress */}
-              {currentUserId && (
-                <div className="mb-8">
-                  <YourPlaceInCycle userId={currentUserId} />
-                </div>
-              )}
+                {currentUserId && <YourPlaceInCycle userId={currentUserId} />}
 
-              {/* Your Roots — personal economy position */}
-              {currentUserId && (
-                <div className="mb-8 space-y-4">
-                  <YourRootsPanel userId={currentUserId} />
+                <EconomyOverview />
+
+                {/* System links */}
+                <div className="flex flex-wrap gap-3">
+                  <SystemLink to="/map" label="Ancient Friends Map" icon={<MapPin className="w-3.5 h-3.5 text-primary" />} />
+                  <SystemLink to="/library/staff-room" label="Staff Room" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
+                  <SystemLink to="/council-of-life" label="Council of Life" icon={<Users className="w-3.5 h-3.5 text-primary" />} />
+                  <SystemLink to="/dashboard?tab=vault" label="Heartwood Vault" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
                 </div>
-              )}
-              <EconomyOverview />
-              {/* This week in the forest */}
-              <div className="mt-6">
+
                 <Suspense fallback={null}>
                   <EcosystemMomentum showDiscovery />
                 </Suspense>
               </div>
-
-              {/* Recent ecosystem heart activity */}
-              <div className="mt-6 space-y-3">
-                <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Heart Activity</h3>
-                <ActivityFeed limit={8} compact />
-              </div>
-              {/* Heart Flow Ledger — unified, same component as Vault */}
-              {currentUserId && (
-                <div className="mt-8" id="ledger">
-                  <VaultHeartLedger userId={currentUserId} />
-                </div>
-              )}
             </Suspense>
           </TabsContent>
 
-          <TabsContent value="earn">
-            <EarnBranch />
-          </TabsContent>
-
-          <TabsContent value="how">
-            <div className="space-y-3">
-              <p className="text-xs text-muted-foreground font-serif mb-4">
-                Tap any action to explore its reward branches. Every root leads to tokens.
-              </p>
-              {ROOT_ACTIONS.map((node, i) => (
-                <motion.div key={node.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                  <TreeNode node={node} />
-                </motion.div>
-              ))}
-            </div>
-            <Card className="bg-card/40 backdrop-blur border-border/30 mt-8">
-              <CardContent className="p-5">
-                <h4 className="text-xs font-serif text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Integrity Safeguards
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {[
-                    "Daily rate limits per tree per user",
-                    "Verification tiers for higher rewards",
-                    "Community review for curation actions",
-                    "Anti-farming cooldown periods",
-                  ].map(s => (
-                    <div key={s} className="flex items-start gap-2 text-[11px] font-serif text-muted-foreground">
-                      <Check className="w-3 h-3 mt-0.5 text-primary shrink-0" />
-                      <span>{s}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
+          {/* ═══════ LIVING FLOW ═══════ */}
           <TabsContent value="flow">
             <div className="space-y-6">
-              <p className="text-xs text-muted-foreground font-serif">
-                How rewards flow through the token system when you interact with a tree.
-              </p>
-              <Card className="bg-card/60 backdrop-blur border-border/40">
-                <CardContent className="p-6">
-                  <h4 className="text-sm font-serif text-foreground mb-5">Universal Token Flow</h4>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <FlowStep icon={<Users className="w-4 h-4 text-foreground" />} label="User Action" color="hsl(var(--foreground))" />
-                    <FlowStep icon={<Check className="w-4 h-4" style={{ color: "hsl(150, 60%, 45%)" }} />} label="Verification" color="hsl(150, 60%, 45%)" />
-                    <FlowStep icon={<Heart className="w-4 h-4" style={{ color: "hsl(0, 65%, 55%)" }} />} label="S33D Hearts" color="hsl(0, 65%, 55%)" />
-                    <FlowStep icon={<Sprout className="w-4 h-4 text-primary" />} label="Species Hearts" color="hsl(var(--primary))" />
-                    <FlowStep icon={<Shield className="w-4 h-4" style={{ color: "hsl(42, 80%, 50%)" }} />} label="Influence" color="hsl(42, 80%, 50%)" isLast />
+              <div className="text-center space-y-2 mb-6">
+                <h2 className="text-lg font-serif text-foreground">The Living Value Cycle</h2>
+                <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
+                  Every action in the S33D ecosystem follows this living cycle — from the first seed planted to the breath that starts it all again.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {LIVING_FLOW_STEPS.map((step, i) => (
+                  <LivingFlowStep
+                    key={step.label}
+                    step={step}
+                    index={i}
+                    isLast={i === LIVING_FLOW_STEPS.length - 1}
+                  />
+                ))}
+              </div>
+
+              {/* Consolidated reward reference */}
+              <div className="pt-4">
+                <RewardReference />
+              </div>
+
+              {/* Integrity safeguards */}
+              <Card className="bg-card/40 backdrop-blur border-border/30">
+                <CardContent className="p-5">
+                  <h4 className="text-xs font-serif text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Integrity Safeguards
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      "Daily rate limits per tree per user",
+                      "Verification tiers for higher rewards",
+                      "Community review for curation actions",
+                      "Anti-farming cooldown periods",
+                    ].map(s => (
+                      <div key={s} className="flex items-start gap-2 text-[11px] font-serif text-muted-foreground">
+                        <Check className="w-3 h-3 mt-0.5 text-primary shrink-0" />
+                        <span>{s}</span>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-card/60 backdrop-blur border-border/40">
-                  <CardContent className="p-5 text-center">
-                    <span className="text-3xl block mb-2">❤️</span>
-                    <h4 className="text-sm font-serif text-foreground mb-1">S33D Hearts</h4>
-                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Commons currency — always issued</p>
-                    <div className="space-y-1.5 text-[11px] font-serif text-left">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Check-in</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+1</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Map tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+10</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Offering</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+2</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Time Tree</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5-7</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Council</span><span style={{ color: "hsl(0, 65%, 55%)" }}>+5</span></div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-card/60 backdrop-blur border-border/40">
-                  <CardContent className="p-5 text-center">
-                    <span className="text-3xl block mb-2">🌿</span>
-                    <h4 className="text-sm font-serif text-foreground mb-1">Species Hearts</h4>
-                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Routed to tree's botanical hive</p>
-                    <div className="space-y-1.5 text-[11px] font-serif text-left">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Check-in</span><span className="text-primary">+1</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Map tree</span><span className="text-primary">+3</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Quality offering</span><span className="text-primary">+2</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Complete map</span><span className="text-primary">+5</span></div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="bg-card/60 backdrop-blur border-border/40">
-                  <CardContent className="p-5 text-center">
-                    <span className="text-3xl block mb-2">🛡️</span>
-                    <h4 className="text-sm font-serif text-foreground mb-1">Influence</h4>
-                    <p className="text-[10px] text-muted-foreground font-serif mb-3">Soulbound governance voice</p>
-                    <div className="space-y-1.5 text-[11px] font-serif text-left">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Verify tree</span><span style={{ color: "hsl(42, 80%, 50%)" }}>+2</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Add metadata</span><span style={{ color: "hsl(42, 80%, 50%)" }}>+1-3</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Quality media</span><span style={{ color: "hsl(42, 80%, 50%)" }}>+1</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Resolve dupes</span><span style={{ color: "hsl(42, 80%, 50%)" }}>+3</span></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+
+              {/* Hive routing note */}
               <Card className="bg-card/40 backdrop-blur border-border/30">
                 <CardContent className="p-5">
                   <h4 className="text-xs font-serif text-foreground mb-2 uppercase tracking-wider">Hive Routing</h4>
@@ -927,21 +441,256 @@ const ValueTreePage = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="chains">
-            <div className="space-y-3">
-              <p className="text-xs text-muted-foreground font-serif mb-4">
-                Active and coming-soon reward systems. Items marked "Coming Soon" are part of Chapter 3 and beyond.
-              </p>
-              {ADVANCED_CHAINS.map((node, i) => (
-                <motion.div key={node.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                  <TreeNode node={node} />
-                </motion.div>
-              ))}
+          {/* ═══════ PARTICIPATION ═══════ */}
+          <TabsContent value="participation">
+            <div className="space-y-6">
+              <div className="text-center space-y-2 mb-4">
+                <h2 className="text-lg font-serif text-foreground">How Do I Engage?</h2>
+                <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto">
+                  Every action grows the tree. Here's what you can do and what it generates.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {PARTICIPATION_ACTIONS.map((action, i) => (
+                  <motion.div
+                    key={action.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <div
+                      className="rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-all cursor-pointer group"
+                      onClick={() => navigate(action.link)}
+                    >
+                      <div className="p-4 flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-secondary/40 text-primary shrink-0 mt-0.5">
+                          {action.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-serif text-foreground mb-0.5">{action.label}</h4>
+                          <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">{action.description}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-[11px] font-serif text-primary/70">{action.reward}</span>
+                            <span className="text-[10px] font-serif text-muted-foreground/50 uppercase tracking-wider">{action.category}</span>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0 mt-3" />
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Windfall progress */}
+              <Card className="bg-card/40 backdrop-blur border-border/30">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Flame className="w-4 h-4" style={{ color: "hsl(42, 80%, 50%)" }} />
+                    <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Windfall Progress</h4>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">
+                    Every tree accumulates Hearts toward a <span style={{ color: "hsl(42, 80%, 50%)" }}>Windfall</span> at 144 Hearts.
+                    Keep mapping trees and making offerings to trigger the next community windfall.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Firefly detail */}
+              <Card className="bg-card/40 backdrop-blur border-primary/15">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-base">✦</span>
+                    <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Firefly Contributions</h4>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mb-3">
+                    Use the floating <span className="text-primary">Firefly ✦</span> button to contribute. Validated contributions earn Hearts:
+                  </p>
+                  <div className="space-y-1.5 text-[11px] font-serif">
+                    {[
+                      ["🐞 Valid bug report", "+3–20 ❤️"],
+                      ["✨ Accepted UX refinement", "+5–15 ❤️"],
+                      ["💡 High-value insight", "variable ❤️"],
+                      ["🌳 Verified tree suggestion", "+5–25 ❤️"],
+                    ].map(([l, r]) => (
+                      <div key={l} className="flex justify-between">
+                        <span className="text-muted-foreground">{l}</span>
+                        <span style={{ color: "hsl(0, 65%, 55%)" }}>{r}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Coming soon value chains */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Coming Soon</h3>
+                <p className="text-[10px] text-muted-foreground font-serif">
+                  Future participation pathways being prepared for Chapter 3 and beyond.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { label: "Staking at Ancient Friends", icon: <Lock className="w-4 h-4" /> },
+                    { label: "NFT Participation", icon: <Star className="w-4 h-4" /> },
+                    { label: "Nurturing Saplings", icon: <Sprout className="w-4 h-4" /> },
+                    { label: "Seed Saving & Sharing", icon: <Leaf className="w-4 h-4" /> },
+                  ].map(item => (
+                    <div
+                      key={item.label}
+                      className="rounded-xl border border-border/30 bg-card/20 p-3 flex items-center gap-2.5"
+                    >
+                      <div className="text-muted-foreground/50">{item.icon}</div>
+                      <span className="text-[11px] font-serif text-muted-foreground">{item.label}</span>
+                      <Badge variant="outline" className="text-[8px] font-serif ml-auto border-muted-foreground/30 text-muted-foreground/60">
+                        Soon
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="proposals">
-            <GovernanceProposalsList />
+          {/* ═══════ ORIGIN STAFF ═══════ */}
+          <TabsContent value="origin-staff">
+            <Suspense fallback={<TabLoader />}>
+              <div className="space-y-8">
+                <div className="text-center space-y-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/15 bg-primary/5">
+                    <Crown className="w-3 h-3" style={{ color: "hsl(42, 85%, 55%)" }} />
+                    <span className="text-[9px] font-serif text-foreground tracking-widest uppercase">The Origin Layer</span>
+                  </div>
+                  <h2 className="text-lg font-serif text-foreground">Founding Circle & Origin Staffs</h2>
+                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
+                    The 36 handcrafted walking staffs form the root system of the S33D forest.
+                    Each founding patron seeds the living economy and anchors the first layer of the value tree.
+                  </p>
+                </div>
+
+                {/* Patron value card */}
+                <StaffPatronValueCard />
+
+                {/* Founding Staff Roots visual */}
+                <FoundingStaffRoots />
+
+                {/* Flow of value through the system */}
+                <FlowOfValue />
+
+                {/* Connections */}
+                <Card className="bg-card/40 backdrop-blur border-border/30">
+                  <CardContent className="p-5 space-y-4">
+                    <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">How Origin Staffs Connect</h4>
+                    <div className="space-y-3 text-[11px] font-serif text-muted-foreground leading-relaxed">
+                      <div className="flex items-start gap-2">
+                        <span className="text-base">🪄</span>
+                        <p><span className="text-foreground">Staff → NFTrees:</span> Each staff can generate unique NFTree artworks, creating visual lineage from the founding moment.</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-base">🗺️</span>
+                        <p><span className="text-foreground">Staff → Mapping:</span> Trees mapped by a staff patron carry a Founding Mapper badge, visible on the tree page.</p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-base">💰</span>
+                        <p><span className="text-foreground">Staff → Value:</span> Patron donations flow into the treasury, funding development, accelerator programs, and community rewards.</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      <SystemLink to="/library/staff-room" label="Visit Staff Room" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
+                      <SystemLink to="/patron-offering" label="Patron Offering" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════ VAULT ═══════ */}
+          <TabsContent value="vault">
+            <Suspense fallback={<TabLoader />}>
+              <div className="space-y-6">
+                <div className="text-center space-y-2 mb-4">
+                  <h2 className="text-lg font-serif text-foreground">Your Heartwood Vault</h2>
+                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto">
+                    The inner chamber where encounters become lasting value. Every action in Flow and Participation appears here.
+                  </p>
+                </div>
+
+                {currentUserId ? (
+                  <>
+                    <YourRootsPanel userId={currentUserId} />
+
+                    <div id="ledger">
+                      <VaultHeartLedger userId={currentUserId} />
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Heart Activity</h3>
+                      <ActivityFeed limit={8} compact />
+                    </div>
+                  </>
+                ) : (
+                  <Card className="bg-card/40 backdrop-blur border-border/30">
+                    <CardContent className="p-8 text-center">
+                      <Heart className="w-8 h-8 mx-auto mb-3 text-muted-foreground/40" />
+                      <p className="text-sm font-serif text-muted-foreground mb-4">
+                        Sign in to see your personal Heartwood Vault.
+                      </p>
+                      <Button variant="outline" className="font-serif" onClick={() => navigate("/auth")}>
+                        Sign In
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* CTA */}
+                <div className="text-center pt-2">
+                  <Button
+                    variant="outline"
+                    className="font-serif gap-2 border-primary/30 hover:border-primary/50"
+                    onClick={() => navigate("/dashboard?tab=vault")}
+                  >
+                    <Heart className="w-4 h-4" style={{ color: "hsl(0, 65%, 55%)" }} />
+                    Open Heartwood Vault
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════ PHILOSOPHY ═══════ */}
+          <TabsContent value="philosophy">
+            <Suspense fallback={<TabLoader />}>
+              <div className="space-y-8">
+                <EncounterEconomyManifesto />
+
+                <Card className="bg-card/40 backdrop-blur border-border/30">
+                  <CardContent className="p-6 space-y-4">
+                    <h4 className="text-sm font-serif text-foreground">Long-Term Vision</h4>
+                    <div className="space-y-3 text-[11px] font-serif text-muted-foreground leading-relaxed">
+                      <p>
+                        S33D Hearts are designed for a 60-year emission cycle. This is not a sprint — it is a forest growing across generations.
+                        The 777,777,777 total supply is allocated through the Distribution Compass, ensuring every branch of the ecosystem receives nourishment.
+                      </p>
+                      <p>
+                        The economy distinguishes between active stewardship (mapping, offerings, council participation) and future participation layers
+                        (staking, NFT holding, sapling nurturing) using a temporal gating model. Nothing is rushed. Everything grows in its season.
+                      </p>
+                      <p>
+                        At its heart, the Encounter Economy is a rejection of extraction. Value begins with breath, deepens through encounter,
+                        and circulates through the commons. Hearts are not mined — they are cultivated.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* System connections */}
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <SystemLink to="/golden-dream" label="yOur Golden Dream" icon={<Star className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
+                  <SystemLink to="/how-hearts-work" label="How Hearts Work" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
+                </div>
+              </div>
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>
