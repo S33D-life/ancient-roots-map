@@ -12,6 +12,9 @@ export interface RoomHandlers {
   onZoomOut?: () => void;
   onZoomReset?: () => void;
   onPan?: (dx: number, dy: number) => void;
+  onMapPan?: (dx: number, dy: number) => void;
+  onMapZoom?: (delta: number) => void;
+  onLocateMe?: () => void;
   onFocusTree?: (treeId: string) => void;
   onFocusStaff?: (staffCode: string) => void;
   onNext?: () => void;
@@ -46,6 +49,9 @@ export function useCompanionDisplay() {
       case "zoom_out": h.onZoomOut?.(); break;
       case "zoom_reset": h.onZoomReset?.(); break;
       case "pan": h.onPan?.(cmd.dx, cmd.dy); break;
+      case "map_pan": h.onMapPan?.(cmd.dx, cmd.dy); break;
+      case "map_zoom": h.onMapZoom?.(cmd.delta); break;
+      case "locate_me": h.onLocateMe?.(); break;
       case "focus_tree": h.onFocusTree?.(cmd.treeId); break;
       case "focus_staff": h.onFocusStaff?.(cmd.staffCode); break;
       case "next": h.onNext?.(); break;
