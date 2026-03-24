@@ -2791,7 +2791,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             } else {
               setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
             }
-            setAddDialogOpen(true);
+            setChooserOpen(true);
           }}
         />
       )}
