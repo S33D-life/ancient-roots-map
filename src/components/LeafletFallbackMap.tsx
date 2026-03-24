@@ -50,6 +50,7 @@ import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
 import LiteMapSearch from "./LiteMapSearch";
 import AddTreeDialog from "./AddTreeDialog";
+import AddTreeChooser from "./AddTreeChooser";
 import { supabase } from "@/integrations/supabase/client";
 import { useWhisperCounts } from "@/hooks/use-whisper-counts";
 import { fetchRecentWhisperConnections } from "@/hooks/use-whispers";
