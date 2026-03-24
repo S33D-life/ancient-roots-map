@@ -3090,7 +3090,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     } else {
                       setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
                     }
-                    setAddDialogOpen(true);
+                    setChooserOpen(true);
                   }}
                   className={`hidden md:flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
                   style={{
