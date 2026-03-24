@@ -1087,6 +1087,7 @@ const TreeDetailPage = () => {
         onOpenChange={setAddOfferingOpen}
         treeId={id!}
         treeSpecies={tree?.species}
+        treeName={tree?.name}
         type={selectedType}
         meetingId={activeMeeting?.id}
       />
