@@ -7597,21 +7597,30 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_shared: boolean
           notes: string | null
+          shared_with: string[] | null
+          status: string
           tree_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          is_shared?: boolean
           notes?: string | null
+          shared_with?: string[] | null
+          status?: string
           tree_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          is_shared?: boolean
           notes?: string | null
+          shared_with?: string[] | null
+          status?: string
           tree_id?: string
           user_id?: string
         }

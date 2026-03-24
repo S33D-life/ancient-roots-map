@@ -173,7 +173,7 @@ const TimeTreeGame = () => {
     fetchCollectiveStats();
     toast.success(`${(data as any).hearts_awarded > 0 ? `+${(data as any).hearts_awarded} Hearts earned` : "Entry saved"}`);
 
-    // Loop closure: if this Time Tree entry references a wished tree, notify
+    // Loop closure: if this Time Tree entry references a dreamed tree, notify
     if ((data as any).tree_reference_id && userId) {
       supabase
         .from("tree_wishlist")
@@ -181,10 +181,10 @@ const TimeTreeGame = () => {
         .eq("user_id", userId)
         .eq("tree_id", (data as any).tree_reference_id)
         .maybeSingle()
-        .then(({ data: wish }) => {
-          if (wish) {
-            toast.success("You've woven a thread to a tree you wished for ⭐", {
-              description: `Your Time Tree entry connects to ${(wish as any).trees?.name || "a wished tree"}.`,
+        .then(({ data: dream }) => {
+          if (dream) {
+            toast.success("You've woven a thread to a tree you dreamed of ⭐", {
+              description: `Your Time Tree entry connects to ${(dream as any).trees?.name || "a dreamed tree"}.`,
               duration: 6000,
             });
           }
@@ -192,9 +192,9 @@ const TimeTreeGame = () => {
     }
   };
 
-  const convertToWish = async () => {
+  const convertToDream = async () => {
     if (!lastEntry || !userId) return;
-    // For MVP: plant a wish via tree_wishlist if tree_reference_id exists
+    // For MVP: plant a dream via tree_wishlist if tree_reference_id exists
     // Otherwise just mark with pilgrimage flag
     const { error } = await supabase
       .from("time_tree_entries")
@@ -392,7 +392,7 @@ const TimeTreeGame = () => {
                   <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => setStep(0)}>
                     Keep as Dream
                   </Button>
-                  <Button variant="mystical" size="sm" className="text-xs h-8" onClick={convertToWish}>
+                  <Button variant="mystical" size="sm" className="text-xs h-8" onClick={convertToDream}>
                     <Star className="w-3.5 h-3.5 mr-1" /> Make This Real
                   </Button>
                 </div>

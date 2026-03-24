@@ -1,5 +1,5 @@
 /**
- * WishlistPilgrimageNudge — shows nearby wished trees as a gentle
+ * WishlistPilgrimageNudge — shows nearby dreamed trees as a gentle
  * floating pill on the map. Encourages users to visit trees they've saved.
  */
 import { useEffect, useState, useCallback } from "react";
@@ -102,7 +102,7 @@ export default function WishlistPilgrimageNudge({ userLat, userLng, radiusKm = 5
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-serif text-foreground truncate">
-                {nearby.length} wished tree{nearby.length !== 1 ? "s" : ""} nearby
+                {nearby.length} dreamed tree{nearby.length !== 1 ? "s" : ""} nearby
               </p>
               <p className="text-[10px] text-muted-foreground font-serif">
                 Closest: {closest.treeName} · {distLabel}
