@@ -219,69 +219,72 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                 <CardContent className="space-y-2">
                   {loading ? (
                     <p className="text-sm text-muted-foreground animate-pulse">Loading trees…</p>
-                  ) : trees.length === 0 ? (
+                  ) : totalTreeCount === 0 ? (
                     <div className="text-center py-6 space-y-2">
                       <TreeDeciduous className="w-8 h-8 text-muted-foreground/40 mx-auto" />
                       <p className="text-sm text-muted-foreground">No Ancient Friends mapped here yet</p>
                       <p className="text-xs text-muted-foreground">Trees will appear once seed data is curated and reviewed.</p>
                     </div>
                   ) : (
-              {/* Community-mapped trees first */}
-              {mappedTrees.length > 0 && (
-                <div className="space-y-1 mb-4">
-                  <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Community Mapped</p>
-                  {mappedTrees.slice(0, 10).map((t) => (
-                    <Link
-                      key={t.id}
-                      to={`/tree/${t.id}`}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
-                    >
-                      <span className="text-lg">🌿</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{t.name || "Unnamed tree"}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {t.species} {t.state ? `· ${t.state}` : ""}
-                        </p>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    </Link>
-                  ))}
-                  {mappedTrees.length > 10 && (
-                    <p className="text-xs text-muted-foreground text-center pt-1">
-                      +{mappedTrees.length - 10} more community trees
-                    </p>
+                    <>
+                      {/* Community-mapped trees first */}
+                      {mappedTrees.length > 0 && (
+                        <div className="space-y-1 mb-4">
+                          <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Community Mapped</p>
+                          {mappedTrees.slice(0, 10).map((t) => (
+                            <Link
+                              key={t.id}
+                              to={`/tree/${t.id}`}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
+                            >
+                              <span className="text-lg">🌿</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{t.name || "Unnamed tree"}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {t.species} {t.state ? `· ${t.state}` : ""}
+                                </p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            </Link>
+                          ))}
+                          {mappedTrees.length > 10 && (
+                            <p className="text-xs text-muted-foreground text-center pt-1">
+                              +{mappedTrees.length - 10} more community trees
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      {/* Research trees */}
+                      {trees.length > 0 && (
+                        <div className="space-y-1">
+                          {mappedTrees.length > 0 && (
+                            <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Research Records</p>
+                          )}
+                          {trees.slice(0, 20).map((t) => (
+                            <Link
+                              key={t.id}
+                              to={`/tree/research/${t.id}`}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
+                            >
+                              <span className="text-lg">🌳</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{t.tree_name || t.species_common || "Unnamed tree"}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  {t.species_common} · {t.province} · {t.designation_type}
+                                </p>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                            </Link>
+                          ))}
+                          {trees.length > 20 && (
+                            <p className="text-xs text-muted-foreground text-center pt-2">
+                              Showing 20 of {trees.length} research trees. Open the map to explore all.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
-                </div>
-              )}
-              {/* Research trees */}
-              {trees.length > 0 && (
-                <div className="space-y-1">
-                  {mappedTrees.length > 0 && (
-                    <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Research Records</p>
-                  )}
-                  {trees.slice(0, 20).map((t) => (
-                    <Link
-                      key={t.id}
-                      to={`/tree/research/${t.id}`}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/15"
-                    >
-                      <span className="text-lg">🌳</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{t.tree_name || t.species_common || "Unnamed tree"}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {t.species_common} · {t.province} · {t.designation_type}
-                        </p>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    </Link>
-                  ))}
-                  {trees.length > 20 && (
-                    <p className="text-xs text-muted-foreground text-center pt-2">
-                      Showing 20 of {trees.length} research trees. Open the map to explore all.
-                    </p>
-                  )}
-                </div>
-              )}
                 </CardContent>
               </Card>
 
