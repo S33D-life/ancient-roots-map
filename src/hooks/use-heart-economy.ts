@@ -57,7 +57,10 @@ export function useHeartEconomy(userId: string | null) {
       entityId?: string;
       source?: string;
     }) => earnHearts({ userId: userId!, ...params }),
-    onSuccess: invalidate,
+    onSuccess: (_data, variables) => {
+      invalidate();
+      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount: variables.amount } }));
+    },
   });
 
   const spend = useMutation({
