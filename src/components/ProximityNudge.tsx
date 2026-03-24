@@ -1,11 +1,11 @@
 /**
  * ProximityNudge — app-level component that uses the Geolocation API
  * to detect when the user is near a mapped Ancient Friend or dreamed tree.
- * Renders a floating notification pill.
+ * Renders a floating encounter card with rich visual presence.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TreeDeciduous, Star, X, Navigation } from "lucide-react";
+import { TreeDeciduous, Star, X, Sprout } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePopupGate } from "@/contexts/UIFlowContext";
@@ -29,7 +29,7 @@ function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): num
 }
 
 const RADIUS_M = 500;
-const CHECK_INTERVAL_MS = 60_000; // check every 60s
+const CHECK_INTERVAL_MS = 60_000;
 const DISMISS_KEY = "s33d_proximity_dismissed";
 
 const ProximityNudge = () => {
@@ -41,7 +41,6 @@ const ProximityNudge = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Don't show on map page (map has its own nudges)
   const isMapPage = location.pathname === "/map";
 
   const checkNearby = useCallback(async (lat: number, lng: number) => {
@@ -49,13 +48,11 @@ const ProximityNudge = () => {
     if (now - lastCheck.current < CHECK_INTERVAL_MS) return;
     lastCheck.current = now;
 
-    // Check session dismissal
     const dismissedAt = sessionStorage.getItem(DISMISS_KEY);
     if (dismissedAt && now - parseInt(dismissedAt) < 30 * 60 * 1000) return;
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Bounding box query
     const degLat = RADIUS_M / 110540;
     const degLng = RADIUS_M / (111320 * Math.cos((lat * Math.PI) / 180));
 
@@ -73,7 +70,6 @@ const ProximityNudge = () => {
       return;
     }
 
-    // Get user's wishlist for highlighting
     let wishedIds = new Set<string>();
     if (user) {
       const { data: wishes } = await supabase
@@ -85,7 +81,6 @@ const ProximityNudge = () => {
       }
     }
 
-    // Find closest
     let best: NearbyResult | null = null;
     for (const t of trees) {
       if (!t.latitude || !t.longitude) continue;
@@ -100,7 +95,6 @@ const ProximityNudge = () => {
         isWished: wishedIds.has(t.id),
       };
 
-      // Prioritize wished trees, then closest
       if (!best || (candidate.isWished && !best.isWished) || (candidate.isWished === best.isWished && dist < best.distanceM)) {
         best = candidate;
       }
@@ -112,7 +106,6 @@ const ProximityNudge = () => {
   useEffect(() => {
     if (isMapPage || !("geolocation" in navigator)) return;
 
-    // Only watch if permission was already granted — never trigger the browser prompt
     const startWatchIfGranted = async () => {
       try {
         const perm = await navigator.permissions.query({ name: "geolocation" as PermissionName });
@@ -120,11 +113,11 @@ const ProximityNudge = () => {
 
         watchId.current = navigator.geolocation.watchPosition(
           (pos) => checkNearby(pos.coords.latitude, pos.coords.longitude),
-          () => {}, // silently fail
+          () => {},
           { enableHighAccuracy: false, maximumAge: 60_000, timeout: 10_000 }
         );
       } catch {
-        // permissions API not supported — skip to avoid triggering prompt
+        // permissions API not supported
       }
     };
 
@@ -153,68 +146,109 @@ const ProximityNudge = () => {
     ? `${Math.round(nearest.distanceM)}m away`
     : `${(nearest.distanceM / 1000).toFixed(1)}km away`;
 
+  const inPlantingRange = nearest.distanceM <= 100;
+
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed md:bottom-6 left-4 right-4 mx-auto z-[90] max-w-sm"
-        style={{ bottom: "calc(4rem + max(env(safe-area-inset-bottom, 0px), 8px))" }}
-        initial={{ y: 60, opacity: 0, scale: 0.95 }}
+        className="fixed left-3 right-3 mx-auto z-[90] max-w-sm"
+        style={{ bottom: "calc(4.5rem + max(env(safe-area-inset-bottom, 0px), 8px))" }}
+        initial={{ y: 50, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 60, opacity: 0, scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        exit={{ y: 50, opacity: 0, scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 280, damping: 28 }}
       >
         <div
-          onClick={handleTap}
-          role="button"
-          tabIndex={0}
-          className="w-full rounded-2xl border bg-card/95 backdrop-blur-lg shadow-xl overflow-hidden text-left cursor-pointer"
-          style={{ borderColor: nearest.isWished ? "hsl(var(--accent) / 0.4)" : "hsl(var(--border))" }}
+          className="w-full rounded-2xl overflow-hidden text-left"
+          style={{
+            background: "linear-gradient(160deg, hsl(120 18% 14%), hsl(30 14% 12%))",
+            border: nearest.isWished
+              ? "1px solid hsl(42 65% 55% / 0.45)"
+              : "1px solid hsl(42 55% 45% / 0.3)",
+            boxShadow: "0 8px 32px -8px hsl(0 0% 0% / 0.55), inset 0 1px 0 hsl(42 55% 45% / 0.06)",
+          }}
         >
+          {/* Gold accent line */}
           <div
-            className="h-0.5"
+            className="h-[2px]"
             style={{
               background: nearest.isWished
-                ? "linear-gradient(90deg, transparent, hsl(var(--accent) / 0.5), transparent)"
-                : "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), transparent)",
+                ? "linear-gradient(90deg, transparent 5%, hsl(42 70% 55% / 0.6) 30%, hsl(42 70% 55% / 0.7) 50%, hsl(42 70% 55% / 0.6) 70%, transparent 95%)"
+                : "linear-gradient(90deg, transparent 5%, hsl(42 55% 45% / 0.4) 30%, hsl(42 55% 45% / 0.55) 50%, hsl(42 55% 45% / 0.4) 70%, transparent 95%)",
             }}
           />
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border"
-              style={{
-                background: nearest.isWished
-                  ? "hsl(var(--accent) / 0.15)"
-                  : "hsl(var(--primary) / 0.15)",
-                borderColor: nearest.isWished
-                  ? "hsl(var(--accent) / 0.25)"
-                  : "hsl(var(--primary) / 0.25)",
-              }}
+
+          {/* Top label */}
+          <div className="px-4 pt-3 pb-0">
+            <p
+              className="text-[9px] font-serif uppercase tracking-[0.14em]"
+              style={{ color: "hsl(42 50% 55% / 0.7)" }}
             >
-              {nearest.isWished ? (
-                <Star className="w-4 h-4 text-accent fill-accent/30" />
-              ) : (
-                <TreeDeciduous className="w-4 h-4 text-primary" />
-              )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-serif text-foreground truncate">
-                {nearest.isWished ? "🌟 A wished tree is nearby!" : "An Ancient Friend is nearby"}
-              </p>
-              <p className="text-[10px] text-muted-foreground font-serif">
-                {nearest.name} · {nearest.species} · {distLabel}
-              </p>
-            </div>
-
-            <Navigation className="w-4 h-4 text-muted-foreground shrink-0" />
-
-            <button
-              className="p-1 text-muted-foreground/50 hover:text-foreground shrink-0"
-              onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+              {nearest.isWished ? "✦ Wished Tree Nearby" : inPlantingRange ? "Planting Range Reached" : "Nearby Ancient Friend"}
+            </p>
           </div>
+
+          <div
+            onClick={handleTap}
+            role="button"
+            tabIndex={0}
+            className="cursor-pointer"
+          >
+            <div className="flex items-center gap-3.5 px-4 py-3">
+              {/* Icon with heartbeat glow */}
+              <motion.div
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  background: "radial-gradient(circle, hsl(42 60% 50% / 0.1), transparent 70%)",
+                  border: "1px solid hsl(42 55% 45% / 0.2)",
+                }}
+                animate={{
+                  boxShadow: [
+                    "0 0 0 0 hsl(42 60% 50% / 0.04)",
+                    "0 0 14px 3px hsl(42 60% 50% / 0.1)",
+                    "0 0 0 0 hsl(42 60% 50% / 0.04)",
+                  ],
+                }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              >
+                {nearest.isWished ? (
+                  <Star className="w-4.5 h-4.5" style={{ color: "hsl(42 60% 55%)", fill: "hsl(42 60% 55% / 0.25)" }} />
+                ) : inPlantingRange ? (
+                  <Sprout className="w-4.5 h-4.5" style={{ color: "hsl(42 60% 55%)" }} />
+                ) : (
+                  <TreeDeciduous className="w-4.5 h-4.5" style={{ color: "hsl(42 60% 55%)" }} />
+                )}
+              </motion.div>
+
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-sm font-serif font-medium leading-snug"
+                  style={{ color: "hsl(40 30% 88%)" }}
+                >
+                  {nearest.isWished
+                    ? "A wished tree is within reach"
+                    : inPlantingRange
+                    ? "You're close enough to plant a seed here."
+                    : "An Ancient Friend is nearby"
+                  }
+                </p>
+                <p
+                  className="text-[11px] font-serif mt-0.5 leading-snug"
+                  style={{ color: "hsl(35 18% 60% / 0.7)" }}
+                >
+                  {nearest.name} · {nearest.species} · {distLabel}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Dismiss */}
+          <button
+            className="absolute top-2.5 right-2.5 p-1.5 rounded-full transition-colors hover:bg-white/5"
+            onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
+          >
+            <X className="w-3.5 h-3.5" style={{ color: "hsl(42 20% 60% / 0.4)" }} />
+          </button>
         </div>
       </motion.div>
     </AnimatePresence>
