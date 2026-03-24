@@ -360,6 +360,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const showBloomingClock = layers.bloomingClock;
   const bloomConstellationMode = layers.bloomConstellationMode;
   const clearView = layers.clearView;
+  const showDreamTrees = layers.dreamTrees;
+  const showDreamOfferings = layers.dreamOfferings;
 
   // Broadcast clearView state so external panels (MapTreePanel) can hide
   useEffect(() => {
