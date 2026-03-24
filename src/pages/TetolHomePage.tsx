@@ -88,12 +88,12 @@ const TetolHomePage = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative overflow-x-hidden">
       <Header />
       <BetaGardenBanner />
 
       <main
-        className="flex-1 flex flex-col items-center relative overflow-hidden pt-content"
+        className="flex-1 flex flex-col items-center relative overflow-hidden pt-content px-safe"
         style={{
           background:
             "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))",

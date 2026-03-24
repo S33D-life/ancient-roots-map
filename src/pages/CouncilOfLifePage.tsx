@@ -181,9 +181,9 @@ const CouncilOfLifePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Header />
-      <main className="relative pt-20 pb-8">
+      <main className="relative pt-20 pb-8 px-safe">
         <TetolBreadcrumb />
         <div className="absolute inset-0 z-0">
           <img
