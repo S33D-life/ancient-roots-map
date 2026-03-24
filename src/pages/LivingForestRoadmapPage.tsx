@@ -281,7 +281,7 @@ const ForestParticles = () => (
 );
 
 /* ── Map View (Kumu-style visual network) ── */
-const MapView = () => {
+const MapView = ({ onNavigate }: { onNavigate: (route: string) => void }) => {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);
