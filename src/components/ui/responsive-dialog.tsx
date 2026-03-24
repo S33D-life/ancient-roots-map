@@ -27,6 +27,10 @@ interface ResponsiveDialogProps {
   subtitle?: React.ReactNode;
   /** Overlay content rendered above the scrollable body (e.g. celebration) */
   overlay?: React.ReactNode;
+  /** Vaul snap points for the mobile drawer (e.g. [0.5, 0.92]) */
+  snapPoints?: number[];
+  /** Default snap point index value */
+  defaultSnapPoint?: number;
 }
 
 const ResponsiveDialog = ({
