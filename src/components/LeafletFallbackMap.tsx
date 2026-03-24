@@ -2323,7 +2323,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const onMoveEnd = () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(loadPOIs, 1200);
+      debounceTimer = setTimeout(loadPOIs, 1500);
     };
 
     map.on("moveend", onMoveEnd);
