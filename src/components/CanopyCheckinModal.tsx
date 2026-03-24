@@ -29,6 +29,7 @@ import {
   Loader2, MapPin, Leaf, Heart, TreeDeciduous, Share2,
 } from "lucide-react";
 import { toast } from "sonner";
+import SeedNudge from "@/components/SeedNudge";
 
 const CANOPY_RADIUS_KM = 0.1; // 100m
 
