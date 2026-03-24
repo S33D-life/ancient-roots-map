@@ -4147,9 +4147,18 @@ export type Database = {
           max_daily_pushes: number
           nearby_mode: boolean
           nearby_radius_m: number
+          notify_council_updates: boolean
+          notify_minting_events: boolean
+          notify_nearby_friends: boolean
+          notify_system_updates: boolean
+          notify_tree_interactions: boolean
           push_enabled: boolean
           quiet_hours_end: string | null
           quiet_hours_start: string | null
+          quiet_mode: boolean
+          show_companion_suggestions: boolean
+          show_floating_prompts: boolean
+          show_onboarding_nudges: boolean
           topic_cantons: string[]
           topic_councils: string[]
           topic_countries: string[]
@@ -4158,6 +4167,10 @@ export type Database = {
           updated_at: string
           user_id: string
           weather_unit: string
+          whispers_auto_open: boolean
+          whispers_enabled: boolean
+          whispers_haptic: boolean
+          whispers_near_tree_only: boolean
           wind_unit: string
         }
         Insert: {
@@ -4166,9 +4179,18 @@ export type Database = {
           max_daily_pushes?: number
           nearby_mode?: boolean
           nearby_radius_m?: number
+          notify_council_updates?: boolean
+          notify_minting_events?: boolean
+          notify_nearby_friends?: boolean
+          notify_system_updates?: boolean
+          notify_tree_interactions?: boolean
           push_enabled?: boolean
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          quiet_mode?: boolean
+          show_companion_suggestions?: boolean
+          show_floating_prompts?: boolean
+          show_onboarding_nudges?: boolean
           topic_cantons?: string[]
           topic_councils?: string[]
           topic_countries?: string[]
@@ -4177,6 +4199,10 @@ export type Database = {
           updated_at?: string
           user_id: string
           weather_unit?: string
+          whispers_auto_open?: boolean
+          whispers_enabled?: boolean
+          whispers_haptic?: boolean
+          whispers_near_tree_only?: boolean
           wind_unit?: string
         }
         Update: {
@@ -4185,9 +4211,18 @@ export type Database = {
           max_daily_pushes?: number
           nearby_mode?: boolean
           nearby_radius_m?: number
+          notify_council_updates?: boolean
+          notify_minting_events?: boolean
+          notify_nearby_friends?: boolean
+          notify_system_updates?: boolean
+          notify_tree_interactions?: boolean
           push_enabled?: boolean
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          quiet_mode?: boolean
+          show_companion_suggestions?: boolean
+          show_floating_prompts?: boolean
+          show_onboarding_nudges?: boolean
           topic_cantons?: string[]
           topic_councils?: string[]
           topic_countries?: string[]
@@ -4196,6 +4231,10 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weather_unit?: string
+          whispers_auto_open?: boolean
+          whispers_enabled?: boolean
+          whispers_haptic?: boolean
+          whispers_near_tree_only?: boolean
           wind_unit?: string
         }
         Relationships: []
