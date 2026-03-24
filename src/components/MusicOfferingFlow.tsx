@@ -49,6 +49,7 @@ export interface SelectedSongData {
 
 interface MusicOfferingFlowProps {
   treeId: string;
+  treeName?: string;
   onComplete: (data: SelectedSongData) => void;
   onCancel: () => void;
 }
@@ -145,9 +146,45 @@ const SongRow = ({
   </motion.button>
 );
 
+/* ---------- Post-Offering Reward Moment ---------- */
+
+const OfferingSealed = ({ songTitle, treeName }: { songTitle: string; treeName?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="text-center py-8 space-y-4"
+  >
+    <motion.div
+      className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
+      style={{
+        background: "radial-gradient(circle, hsl(var(--primary) / 0.2), hsl(120 40% 30% / 0.15))",
+        boxShadow: "0 0 30px hsl(var(--primary) / 0.2), 0 0 60px hsl(120 40% 40% / 0.1)",
+      }}
+      animate={{
+        boxShadow: [
+          "0 0 20px hsl(45 90% 60% / 0.2), 0 0 40px hsl(120 40% 40% / 0.1)",
+          "0 0 30px hsl(45 90% 60% / 0.35), 0 0 60px hsl(120 40% 40% / 0.2)",
+          "0 0 20px hsl(45 90% 60% / 0.2), 0 0 40px hsl(120 40% 40% / 0.1)",
+        ],
+      }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <Music className="h-7 w-7 text-primary" />
+    </motion.div>
+    <div>
+      <p className="font-serif text-base text-foreground/90">Your offering now lives with this tree</p>
+      {treeName && (
+        <p className="text-xs text-muted-foreground/60 font-serif mt-1">
+          "{songTitle}" echoes through {treeName}
+        </p>
+      )}
+    </div>
+  </motion.div>
+);
+
 /* ---------- Main Component ---------- */
 
-const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowProps) => {
+const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOfferingFlowProps) => {
   // Search state
   const [query, setQuery] = useState("");
   const [catalogResults, setCatalogResults] = useState<CatalogSong[]>([]);
@@ -175,7 +212,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
   // Debounce
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Step: "search" | "confirm" — now merged: selection shows inline below search
+  // Step: "search" | "confirm"
   const step = selectedSong || customMode ? "confirm" : "search";
   const showSearchResults = !selectedSong && !customMode;
 
@@ -195,7 +232,6 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
     setHasSearched(true);
 
     try {
-      // Parallel: catalog + iTunes
       const [catalogRes, itunesRes] = await Promise.allSettled([
         supabase.rpc("search_songs", { query: q, result_limit: 8 }),
         fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=6`)
@@ -207,7 +243,6 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
       }
 
       if (itunesRes.status === "fulfilled" && itunesRes.value.results) {
-        // Filter out duplicates already in catalog
         const catalogTitles = new Set(
           (catalogRes.status === "fulfilled" && catalogRes.value.data || [])
             .map((c: any) => `${c.title.toLowerCase()}|${c.artist.toLowerCase()}`)
@@ -224,14 +259,12 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
     }
   }, []);
 
-  // Resolve any music link (Spotify, YouTube, Apple Music) via edge function
+  // Resolve any music link
   const resolveMusicLink = useCallback(async (input: string): Promise<boolean> => {
-    // Extract URL from input
     const urlMatch = input.match(/https?:\/\/[^\s"'<>)}\]]+/i);
     if (!urlMatch) return false;
     const url = urlMatch[0];
 
-    // Detect platform
     const isMusic = /open\.spotify\.com|spotify\.link|youtube\.com|youtu\.be|music\.youtube\.com|music\.apple\.com|itunes\.apple\.com/i.test(url);
     if (!isMusic) return false;
 
@@ -240,7 +273,6 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
     setHasSearched(true);
 
     try {
-      // For Apple Music, try direct iTunes lookup first (faster, no edge function)
       if (/music\.apple\.com|itunes\.apple\.com/i.test(url)) {
         const parsed = parseAppleMusicInput(input);
         if (parsed.trackId) {
@@ -254,7 +286,6 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
         }
       }
 
-      // Resolve via edge function for Spotify/YouTube (avoids CORS)
       const { data, error } = await supabase.functions.invoke("resolve-music-link", {
         body: { url },
       });
@@ -286,7 +317,6 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
     setQuery(value);
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
 
-    // Detect any music link (Spotify, YouTube, Apple Music)
     if (/open\.spotify\.com|spotify\.link|youtube\.com|youtu\.be|music\.youtube\.com|music\.apple\.com|itunes\.apple\.com/i.test(value)) {
       searchTimerRef.current = setTimeout(async () => {
         const resolved = await resolveMusicLink(value);
@@ -369,20 +399,29 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
 
   return (
     <div className="space-y-4">
-      {/* Search always visible */}
+      {/* Tree context anchor */}
+      {treeName && (
+        <p className="text-[10px] font-serif tracking-widest uppercase text-center text-muted-foreground/50">
+          Offering to: <span className="text-primary/70">{treeName}</span>
+        </p>
+      )}
+
+      {/* Search — always visible */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
         <Input
           value={query}
           onChange={(e) => { handleQueryChange(e.target.value); if (selectedSong) { setSelectedSong(null); setCustomMode(false); } }}
-          placeholder="Search songs or paste a Spotify / YouTube / Apple Music link..."
-          className="pl-10 pr-10 font-serif h-12 text-sm bg-secondary/20 border-border/30 focus:border-primary/50"
+          placeholder="Search or paste a Spotify / YouTube link…"
+          className="pl-11 pr-10 font-serif h-14 text-sm rounded-xl bg-secondary/15 border-border/20
+            focus:border-primary/40 focus:bg-secondary/25 transition-all placeholder:text-muted-foreground/35"
           autoFocus={!selectedSong}
         />
         {searching && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary/60" />
+          <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-primary/60" />
         )}
       </div>
+
       <AnimatePresence mode="wait">
         {showSearchResults ? (
           <motion.div
@@ -393,28 +432,37 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
             transition={{ duration: 0.2 }}
             className="space-y-4"
           >
-
-            {/* Empty state */}
+            {/* Empty state — intent */}
             {!query && !hasSearched && (
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center py-6 space-y-3"
+                className="text-center py-8 space-y-4"
               >
-                <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                  <Music className="h-6 w-6 text-primary/60" />
-                </div>
-                <div>
-                  <p className="text-sm font-serif text-foreground/80">Choose a song for this Ancient Friend</p>
-                    <p className="text-[11px] text-muted-foreground/60 mt-1">
-                      Search our catalog, or paste a Spotify / YouTube / Apple Music link
-                    </p>
-                </div>
+                <motion.div
+                  className="w-16 h-16 mx-auto rounded-full flex items-center justify-center"
+                  style={{
+                    background: "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent 70%)",
+                  }}
+                  animate={{
+                    boxShadow: [
+                      "0 0 0px hsl(var(--primary) / 0)",
+                      "0 0 20px hsl(var(--primary) / 0.15)",
+                      "0 0 0px hsl(var(--primary) / 0)",
+                    ],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Music className="h-7 w-7 text-primary/50" />
+                </motion.div>
+                <p className="text-sm font-serif text-foreground/70">
+                  What song would you like to offer{treeName ? ` to ${treeName}` : ""}?
+                </p>
 
-                {/* Recent songs for this tree */}
+                {/* Recent songs */}
                 {recentSongs.length > 0 && (
-                  <div className="pt-3 border-t border-border/20">
-                    <p className="text-[10px] text-muted-foreground/50 font-serif tracking-widest uppercase mb-2">
+                  <div className="pt-4 border-t border-border/15">
+                    <p className="text-[10px] text-muted-foreground/40 font-serif tracking-widest uppercase mb-2.5">
                       <Clock className="w-3 h-3 inline mr-1" />
                       Recently offered here
                     </p>
@@ -424,7 +472,8 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                           key={i}
                           type="button"
                           onClick={() => handleQueryChange(s.title)}
-                          className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/40 hover:bg-secondary/60 text-foreground/70 font-serif transition-colors"
+                          className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/30 hover:bg-secondary/50
+                            text-foreground/60 font-serif transition-colors"
                         >
                           {s.title}
                         </button>
@@ -437,19 +486,18 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
 
             {/* Shimmer loading */}
             {searching && allResults.length === 0 && (
-              <div className="rounded-xl border border-border/30 overflow-hidden bg-card/40 backdrop-blur">
+              <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30 backdrop-blur">
                 {[0, 1, 2, 3].map(i => <ShimmerRow key={i} />)}
               </div>
             )}
 
             {/* Results */}
             {allResults.length > 0 && (
-              <div className="rounded-xl border border-border/30 overflow-hidden bg-card/40 backdrop-blur max-h-[320px] overflow-y-auto">
-                {/* Catalog results */}
+              <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30 backdrop-blur max-h-[320px] overflow-y-auto">
                 {catalogResults.length > 0 && (
                   <div>
-                    <div className="px-3 py-1.5 bg-secondary/20 border-b border-border/20">
-                      <p className="text-[9px] font-serif tracking-widest uppercase text-muted-foreground/50">
+                    <div className="px-3 py-1.5 bg-secondary/15 border-b border-border/15">
+                      <p className="text-[9px] font-serif tracking-widest uppercase text-muted-foreground/40">
                         <Disc3 className="w-3 h-3 inline mr-1" />
                         Sacred Catalog
                       </p>
@@ -468,11 +516,10 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                   </div>
                 )}
 
-                {/* iTunes results */}
                 {itunesResults.length > 0 && (
                   <div>
-                    <div className="px-3 py-1.5 bg-secondary/20 border-b border-border/20">
-                      <p className="text-[9px] font-serif tracking-widest uppercase text-muted-foreground/50">
+                    <div className="px-3 py-1.5 bg-secondary/15 border-b border-border/15">
+                      <p className="text-[9px] font-serif tracking-widest uppercase text-muted-foreground/40">
                         <Music className="w-3 h-3 inline mr-1" />
                         Apple Music
                       </p>
@@ -493,14 +540,14 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
               </div>
             )}
 
-            {/* No results + custom entry */}
+            {/* No results */}
             {hasSearched && !searching && allResults.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center py-5 space-y-3"
               >
-                <p className="text-sm text-muted-foreground/70 font-serif">
+                <p className="text-sm text-muted-foreground/60 font-serif">
                   No songs found for "{query}"
                 </p>
                 <Button
@@ -516,22 +563,22 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
               </motion.div>
             )}
 
-            {/* Always show custom entry option when results exist */}
+            {/* Custom entry option */}
             {hasSearched && !searching && allResults.length > 0 && (
               <div className="text-center">
                 <button
                   type="button"
                   onClick={handleCustom}
-                  className="text-[11px] text-primary/60 hover:text-primary font-serif tracking-wider transition-colors inline-flex items-center gap-1"
+                  className="text-[11px] text-primary/50 hover:text-primary font-serif tracking-wider transition-colors inline-flex items-center gap-1"
                 >
                   <Plus className="h-3 w-3" />
-                  Can't find it? Add your own song
+                  Can't find it? Add your own
                 </button>
               </div>
             )}
           </motion.div>
         ) : (
-          /* ---------- Confirm (inline below search) ---------- */
+          /* ---------- Confirm ---------- */
           <motion.div
             key="confirm"
             initial={{ opacity: 0, y: 8 }}
@@ -572,16 +619,12 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                     />
                   </div>
                 </div>
-                <Badge variant="outline" className="text-[9px] border-accent/30 text-accent/70">
-                  Custom song
-                </Badge>
               </div>
             )}
 
             {/* Selected song confirmation card */}
             {selectedSong && (
-              <div className="relative rounded-xl border border-primary/30 overflow-hidden">
-                {/* Gradient accent */}
+              <div className="relative rounded-xl border border-primary/25 overflow-hidden">
                 <div
                   className="h-0.5"
                   style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)" }}
@@ -618,9 +661,6 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                       <p className="text-[11px] text-muted-foreground/50 truncate mt-0.5">{selectedSong.album}</p>
                     )}
                     <div className="flex items-center gap-2 mt-1.5">
-                      {selectedSong.genre && (
-                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{selectedSong.genre}</Badge>
-                      )}
                       <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/30">
                         {selectedSong.source === "itunes" ? "Apple Music" : selectedSong.source === "spotify" ? "Spotify" : selectedSong.source === "youtube" ? "YouTube" : "Sacred Catalog"}
                       </Badge>
@@ -639,7 +679,7 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
                     href={selectedSong.external_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-4 py-2 text-[10px] text-primary/50 hover:text-primary font-serif tracking-wider border-t border-border/20 transition-colors"
+                    className="block px-4 py-2 text-[10px] text-primary/50 hover:text-primary font-serif tracking-wider border-t border-border/15 transition-colors"
                   >
                     <ExternalLink className="w-3 h-3 inline mr-1" />
                     Listen on {selectedSong.source === "itunes" ? "Apple Music" : selectedSong.source === "spotify" ? "Spotify" : selectedSong.source === "youtube" ? "YouTube" : "streaming"}
@@ -648,41 +688,37 @@ const MusicOfferingFlow = ({ treeId, onComplete, onCancel }: MusicOfferingFlowPr
               </div>
             )}
 
-            {/* Why this offering */}
+            {/* Why this song? */}
             <div className="space-y-1.5">
-              <label className="font-serif text-[10px] tracking-widest uppercase text-muted-foreground/60">
-                Why this offering?
+              <label className="font-serif text-[10px] tracking-widest uppercase text-muted-foreground/50">
+                Why this song? <span className="normal-case tracking-normal text-muted-foreground/30">(optional)</span>
               </label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
-                placeholder="What does this song mean to you, or to this Ancient Friend?"
-                rows={3}
-                className="font-serif text-sm leading-relaxed bg-secondary/10 border-border/30 resize-none"
+                placeholder="What does this song mean to you, or to this tree?"
+                rows={2}
+                className="font-serif text-sm leading-relaxed bg-secondary/10 border-border/20 resize-none
+                  focus:border-primary/30 transition-all"
               />
-              <p className="text-[10px] text-right text-muted-foreground/30">{message.length} / 2000</p>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-1">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                className="font-serif text-xs tracking-wider"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                disabled={!canSubmit}
-                onClick={handleSubmit}
-                className="flex-1 font-serif text-xs tracking-wider gap-1.5"
-              >
-                <Sparkles className="h-3 w-3" />
-                Seal this Song Offering
-              </Button>
-            </div>
+            <Button
+              type="button"
+              disabled={!canSubmit}
+              onClick={handleSubmit}
+              className="w-full font-serif tracking-wider gap-2 h-12 rounded-xl text-sm"
+              style={{
+                background: canSubmit
+                  ? "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))"
+                  : undefined,
+                boxShadow: canSubmit ? "0 4px 20px hsl(var(--primary) / 0.25)" : undefined,
+              }}
+            >
+              <Sparkles className="h-4 w-4" />
+              Offer this song
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>
