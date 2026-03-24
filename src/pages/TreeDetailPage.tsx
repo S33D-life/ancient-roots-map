@@ -890,7 +890,7 @@ const TreeDetailPage = () => {
             </Button>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg">
+              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
                 {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
                   <TabsTrigger
                     key={type}
