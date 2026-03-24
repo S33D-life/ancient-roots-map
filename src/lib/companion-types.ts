@@ -38,6 +38,8 @@ export type CompanionCommand =
   | { type: "pointer_hide" }
   | { type: "pointer_delta"; dx: number; dy: number }
   | { type: "pointer_click"; x: number; y: number }
+  | { type: "pointer_down"; x: number; y: number }
+  | { type: "pointer_up"; x: number; y: number }
   | { type: "scroll"; dx: number; dy: number }
   | { type: "drag_start" }
   | { type: "drag_move"; dx: number; dy: number }
@@ -53,7 +55,9 @@ export const VALID_COMMAND_TYPES = new Set<string>([
   "open_panel", "close_panel", "highlight_node",
   "export_view", "select_chart",
   "pointer_move", "pointer_hide",
-  "pointer_delta", "pointer_click", "scroll",
+  "pointer_delta", "pointer_click",
+  "pointer_down", "pointer_up",
+  "scroll",
   "drag_start", "drag_move", "drag_end",
   "navigate_room", "send_to_desktop",
 ]);

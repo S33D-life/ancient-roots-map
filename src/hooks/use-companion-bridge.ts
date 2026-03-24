@@ -177,7 +177,8 @@ export function useCompanionBridge() {
         }));
       },
 
-      // Click — prioritise tree markers by searching for closest interactive element
+      // Click — uses current pointer position (from pointerRef), not payload coords.
+      // Searches a wider area to find interactive elements reliably.
       onPointerClick: (_x: number, _y: number) => {
         const p = pointerRef.current;
         const absX = p.x * window.innerWidth;
@@ -187,26 +188,57 @@ export function useCompanionBridge() {
           new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_click" } }),
         );
 
-        // Try to find a tree marker first (they have data attributes or specific classes)
-        // Sample a small area around the click point to bias toward markers
+        // Search in expanding radius for interactive elements
         let bestEl: HTMLElement | null = null;
-        const searchRadius = 8;
-        const offsets = [
-          [0, 0], [-searchRadius, 0], [searchRadius, 0], [0, -searchRadius], [0, searchRadius],
-          [-searchRadius, -searchRadius], [searchRadius, -searchRadius],
-          [-searchRadius, searchRadius], [searchRadius, searchRadius],
-        ];
+        let bestPriority = 0;
+        const radii = [0, 6, 12, 18, 24];
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315];
 
-        for (const [ox, oy] of offsets) {
-          const el = document.elementFromPoint(absX + ox, absY + oy);
-          if (el instanceof HTMLElement) {
-            // Prefer elements that look like tree markers or interactive elements
-            const isMarker = el.closest(".leaflet-marker-icon, .tree-marker, [data-tree-id], .leaflet-interactive");
-            const isButton = el.closest("button, a, [role='button']");
-            if (isMarker || isButton) {
-              bestEl = (isMarker || isButton) as HTMLElement;
-              break;
+        const classify = (el: Element | null): number => {
+          if (!el || !(el instanceof HTMLElement)) return 0;
+          // Priority 4: tree markers (highest)
+          if (el.closest(".leaflet-marker-icon, .tree-marker, [data-tree-id], .leaflet-interactive")) return 4;
+          // Priority 3: buttons and links
+          if (el.closest("button, a, [role='button'], [role='tab'], [role='menuitem']")) return 3;
+          // Priority 2: inputs and interactive controls
+          if (el.closest("input, select, textarea, [role='checkbox'], [role='switch'], [role='slider']")) return 2;
+          // Priority 1: any clickable-looking element
+          if (el.closest("[onclick], [data-state], [role='dialog'] *, .cursor-pointer")) return 1;
+          return 0;
+        };
+
+        // Check exact center first
+        const centerEl = document.elementFromPoint(absX, absY);
+        const centerPri = classify(centerEl);
+        if (centerPri > 0) {
+          bestEl = (centerEl as HTMLElement).closest(
+            ".leaflet-marker-icon, .tree-marker, [data-tree-id], button, a, [role='button'], [role='tab'], [role='menuitem'], input, select, textarea, [role='checkbox'], [role='switch'], [role='slider'], [onclick], [data-state], .cursor-pointer"
+          ) as HTMLElement || centerEl as HTMLElement;
+          bestPriority = centerPri;
+        }
+
+        // Search expanding rings if we haven't found a high-priority target
+        if (bestPriority < 3) {
+          for (const r of radii) {
+            if (r === 0) continue;
+            for (const a of angles) {
+              const rad = (a * Math.PI) / 180;
+              const ox = Math.cos(rad) * r;
+              const oy = Math.sin(rad) * r;
+              const el = document.elementFromPoint(absX + ox, absY + oy);
+              const pri = classify(el);
+              if (pri > bestPriority) {
+                bestPriority = pri;
+                const resolved = pri >= 3
+                  ? (el as HTMLElement).closest(
+                      ".leaflet-marker-icon, .tree-marker, [data-tree-id], button, a, [role='button'], [role='tab'], [role='menuitem']"
+                    ) as HTMLElement || el as HTMLElement
+                  : el as HTMLElement;
+                bestEl = resolved;
+                if (pri >= 4) break;
+              }
             }
+            if (bestPriority >= 4) break;
           }
         }
 
@@ -216,11 +248,23 @@ export function useCompanionBridge() {
         }
 
         if (bestEl) {
-          bestEl.click();
+          // Dispatch full pointer event sequence for better framework compatibility
+          const eventInit: MouseEventInit = {
+            clientX: absX,
+            clientY: absY,
+            bubbles: true,
+            cancelable: true,
+            view: window,
+          };
+          bestEl.dispatchEvent(new PointerEvent("pointerdown", { ...eventInit, pointerId: 1 }));
+          bestEl.dispatchEvent(new MouseEvent("mousedown", eventInit));
+          bestEl.dispatchEvent(new PointerEvent("pointerup", { ...eventInit, pointerId: 1 }));
+          bestEl.dispatchEvent(new MouseEvent("mouseup", eventInit));
+          bestEl.dispatchEvent(new MouseEvent("click", eventInit));
           bestEl.focus?.();
         }
 
-        setDebugInfo(d => ({ ...d, lastEvent: "click" }));
+        setDebugInfo(d => ({ ...d, lastEvent: `click:${bestPriority}` }));
       },
 
       // Scroll
