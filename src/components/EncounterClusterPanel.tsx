@@ -105,8 +105,11 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
 
       setEncounters(enriched);
       setLoading(false);
+      } catch (err) {
+        console.error("[EncounterCluster] Failed to load encounters", err);
+        setLoading(false);
+      }
     };
-
     fetchEncounters();
   }, [tree.id, tree.latitude, tree.longitude]);
 
