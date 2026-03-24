@@ -207,6 +207,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "agent_contributions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       agent_garden_tasks: {
@@ -513,6 +520,54 @@ export type Database = {
         }
         Relationships: []
       }
+      background_jobs: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_type: string
+          max_attempts: number
+          payload: Json
+          priority: number
+          scheduled_for: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type: string
+          max_attempts?: number
+          payload?: Json
+          priority?: number
+          scheduled_for?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          max_attempts?: number
+          payload?: Json
+          priority?: number
+          scheduled_for?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bio_region_trees: {
         Row: {
           bio_region_id: string
@@ -545,6 +600,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bio_region_trees_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -799,6 +861,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "birdsong_offerings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -1458,6 +1527,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_rooms_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       cid_history: {
@@ -1638,6 +1714,33 @@ export type Database = {
           user_id?: string
           visibility_state?: string
           wanderer_summary?: string | null
+        }
+        Relationships: []
+      }
+      compute_metrics: {
+        Row: {
+          id: string
+          metadata: Json | null
+          metric_key: string
+          metric_type: string
+          recorded_at: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          metadata?: Json | null
+          metric_key: string
+          metric_type: string
+          recorded_at?: string
+          value?: number
+        }
+        Update: {
+          id?: string
+          metadata?: Json | null
+          metric_key?: string
+          metric_type?: string
+          recorded_at?: string
+          value?: number
         }
         Relationships: []
       }
@@ -1865,6 +1968,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "council_trees_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       councils: {
@@ -1949,6 +2059,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_reward_caps_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -2262,6 +2379,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "draft_seeds_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       external_wisdom_cache: {
@@ -2538,10 +2662,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "greenhouse_plants_origin_tree_id_fkey"
+            columns: ["origin_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "greenhouse_plants_planted_tree_id_fkey"
             columns: ["planted_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "greenhouse_plants_planted_tree_id_fkey"
+            columns: ["planted_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
           {
@@ -2904,6 +3042,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "harvest_listings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       heart_campaigns: {
@@ -3104,6 +3249,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "heart_transactions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       hive_bio_regions: {
@@ -3238,6 +3390,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_transactions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -3707,6 +3866,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "meetings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mycelial_pathways: {
@@ -3886,6 +4052,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nftree_mints_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -4122,6 +4295,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "offerings_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       pathway_groves: {
@@ -4219,6 +4399,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phenology_observations_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -4330,6 +4517,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "planted_seeds_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       presence_streaks: {
@@ -4418,6 +4612,13 @@ export type Database = {
             columns: ["linked_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_chapters_linked_tree_id_fkey"
+            columns: ["linked_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
           {
@@ -4976,6 +5177,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "research_trees_converted_tree_id_fkey"
+            columns: ["converted_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "research_trees_dataset_id_fkey"
             columns: ["dataset_id"]
             isOneToOne: false
@@ -4994,6 +5202,13 @@ export type Database = {
             columns: ["linked_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_trees_linked_tree_id_fkey"
+            columns: ["linked_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
           {
@@ -5045,6 +5260,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "root_mail_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -5174,6 +5396,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seasonal_witnesses_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -5332,6 +5561,13 @@ export type Database = {
             columns: ["source_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sky_stamps_source_tree_id_fkey"
+            columns: ["source_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -5496,6 +5732,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "species_attestations_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       species_badges: {
@@ -5565,6 +5808,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "species_heart_transactions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -5774,6 +6024,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stewardship_actions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -6247,6 +6504,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tree_change_log_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tree_checkin_witnesses: {
@@ -6385,6 +6649,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tree_checkins_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tree_checkins_weather_snapshot_id_fkey"
             columns: ["weather_snapshot_id"]
             isOneToOne: false
@@ -6448,6 +6719,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_contributions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -6694,10 +6972,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tree_duplicate_reports_tree_a_id_fkey"
+            columns: ["tree_a_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tree_duplicate_reports_tree_b_id_fkey"
             columns: ["tree_b_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_duplicate_reports_tree_b_id_fkey"
+            columns: ["tree_b_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -6752,6 +7044,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_edit_history_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -6810,6 +7109,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tree_edit_proposals_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tree_guardians: {
@@ -6845,6 +7151,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tree_guardians_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tree_heart_pools: {
@@ -6875,6 +7188,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: true
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_heart_pools_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: true
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -6916,10 +7236,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tree_merge_history_primary_tree_id_fkey"
+            columns: ["primary_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tree_merge_history_secondary_tree_id_fkey"
             columns: ["secondary_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_merge_history_secondary_tree_id_fkey"
+            columns: ["secondary_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -6967,6 +7301,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_presence_completions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -7127,6 +7468,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tree_whisper_collections_collected_tree_id_fkey"
+            columns: ["collected_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tree_whisper_collections_whisper_id_fkey"
             columns: ["whisper_id"]
             isOneToOne: false
@@ -7202,10 +7550,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tree_whispers_collected_tree_id_fkey"
+            columns: ["collected_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tree_whispers_delivery_tree_id_fkey"
             columns: ["delivery_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_whispers_delivery_tree_id_fkey"
+            columns: ["delivery_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
           {
@@ -7220,6 +7582,13 @@ export type Database = {
             columns: ["tree_anchor_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_whispers_tree_anchor_id_fkey"
+            columns: ["tree_anchor_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -7252,6 +7621,13 @@ export type Database = {
             columns: ["tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_wishlist_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -7393,6 +7769,13 @@ export type Database = {
             columns: ["merged_into_tree_id"]
             isOneToOne: false
             referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trees_merged_into_tree_id_fkey"
+            columns: ["merged_into_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -7991,6 +8374,13 @@ export type Database = {
             referencedRelation: "trees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "witness_sessions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -8050,6 +8440,42 @@ export type Database = {
             columns: ["research_tree_id"]
             isOneToOne: false
             referencedRelation: "research_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trees_map_hot: {
+        Row: {
+          created_by: string | null
+          estimated_age: number | null
+          girth_cm: number | null
+          id: string | null
+          latitude: number | null
+          lineage: string | null
+          longitude: number | null
+          merged_into_tree_id: string | null
+          name: string | null
+          nation: string | null
+          offering_count: number | null
+          offering_photo: string | null
+          photo_thumb_url: string | null
+          project_name: string | null
+          species: string | null
+          what3words: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trees_merged_into_tree_id_fkey"
+            columns: ["merged_into_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trees_merged_into_tree_id_fkey"
+            columns: ["merged_into_tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
             referencedColumns: ["id"]
           },
         ]
@@ -8250,6 +8676,32 @@ export type Database = {
           type: string
         }[]
       }
+      get_trees_in_viewport: {
+        Args: {
+          p_east: number
+          p_limit?: number
+          p_north: number
+          p_south: number
+          p_west: number
+        }
+        Returns: {
+          created_by: string
+          estimated_age: number
+          girth_cm: number
+          id: string
+          latitude: number
+          lineage: string
+          longitude: number
+          name: string
+          nation: string
+          offering_count: number
+          offering_photo: string
+          photo_thumb_url: string
+          project_name: string
+          species: string
+          what3words: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -8278,6 +8730,7 @@ export type Database = {
           visitor_number: number
         }[]
       }
+      refresh_trees_map_hot: { Args: never; Returns: undefined }
       retract_influence_vote: {
         Args: { p_user_id: string; p_vote_id: string }
         Returns: undefined
