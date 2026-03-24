@@ -27,7 +27,6 @@ export function CompanionProvider({ children }: { children: ReactNode }) {
 
   const companion = useCompanionDisplay();
 
-  // Register pointer handlers globally
   const registerHandlersWrapped = useCallback(
     (handlers: RoomHandlers) => {
       companion.registerHandlers({
@@ -39,6 +38,19 @@ export function CompanionProvider({ children }: { children: ReactNode }) {
         onPointerHide: () => {
           setPointer((p) => ({ ...p, visible: false }));
           handlers.onPointerHide?.();
+        },
+        onPointerDelta: (dx, dy) => {
+          // Update local pointer state from deltas
+          setPointer((p) => {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            return {
+              x: Math.max(0, Math.min(1, p.x + dx / vw)),
+              y: Math.max(0, Math.min(1, p.y + dy / vh)),
+              visible: true,
+            };
+          });
+          handlers.onPointerDelta?.(dx, dy);
         },
       });
     },

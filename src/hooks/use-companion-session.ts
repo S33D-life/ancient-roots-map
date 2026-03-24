@@ -15,8 +15,11 @@ type RealtimeChannel = ReturnType<typeof supabase.channel>;
 /** How long to wait for pair_ack before giving up (ms) */
 const PAIR_TIMEOUT_MS = 12_000;
 
-/** Minimum interval between outgoing commands (ms) — prevents flooding */
-const COMMAND_THROTTLE_MS = 60;
+/**
+ * Minimum interval between outgoing commands (ms).
+ * Reduced from 60ms to 16ms (~60fps) so continuous pointer/scroll feels smooth.
+ */
+const COMMAND_THROTTLE_MS = 16;
 
 interface UseCompanionSessionOptions {
   role: "display" | "controller";
@@ -80,11 +83,9 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
       .on("broadcast", { event: "pair" }, () => {
         setSession((s) => s ? { ...s, paired: true, connectedAt: Date.now() } : s);
         clearPairTimeout();
-        // Acknowledge pairing
         channel.send({ type: "broadcast", event: "pair_ack", payload: {} });
       })
       .on("broadcast", { event: "command" }, ({ payload }) => {
-        // Validate command type before dispatching
         const cmd = payload as CompanionCommand;
         if (cmd && VALID_COMMAND_TYPES.has(cmd.type)) {
           onCommandRef.current?.(cmd);
@@ -97,8 +98,6 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
 
     channelRef.current = channel;
     setSession({ code, channelName, role: "display", paired: false });
-
-    // Auto-expire session after TTL
     expiryRef.current = setTimeout(cleanup, SESSION_TTL_MS);
   }, [cleanup, clearPairTimeout]);
 
@@ -128,7 +127,6 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
           cleanup();
         })
         .subscribe(() => {
-          // Once subscribed, send pair request
           channel.send({ type: "broadcast", event: "pair", payload: {} });
         });
 
@@ -136,12 +134,10 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
       setSession({ code: normalized, channelName, role: "controller", paired: false });
       setPairTimedOut(false);
 
-      // Pairing timeout — if no ack received
       pairTimeoutRef.current = setTimeout(() => {
         setPairTimedOut(true);
       }, PAIR_TIMEOUT_MS);
 
-      // Session TTL
       expiryRef.current = setTimeout(cleanup, SESSION_TTL_MS);
       return true;
     },
@@ -178,11 +174,9 @@ export function useCompanionSession(options: UseCompanionSessionOptions) {
       event: "disconnect",
       payload: {},
     });
-    // Small delay so message sends before channel cleanup
     setTimeout(cleanup, 100);
   }, [cleanup]);
 
-  // Cleanup on unmount
   useEffect(() => cleanup, [cleanup]);
 
   return {

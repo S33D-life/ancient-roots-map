@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCompanion } from "@/contexts/CompanionContext";
 import type { CompanionRoom } from "@/lib/companion-types";
@@ -6,11 +6,8 @@ import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
 
 /**
- * useCompanionBridge — placed inside BrowserRouter, wires up global
- * desktop-side handlers so companion commands actually DO things.
- *
- * This is the missing link: it maps navigate_room to React Router,
- * toggle_fullscreen to the Fullscreen API, and shows toasts for feedback.
+ * useCompanionBridge — desktop-side handler that maps companion commands
+ * to actual desktop actions: navigation, pointer, scroll, click, fullscreen.
  */
 
 const ROOM_ROUTES: Record<CompanionRoom, string> = {
@@ -23,7 +20,6 @@ const ROOM_ROUTES: Record<CompanionRoom, string> = {
   unknown: ROUTES.HOME,
 };
 
-/** Detect which "room" the desktop is currently in based on pathname */
 function detectRoom(pathname: string): CompanionRoom {
   if (pathname.startsWith("/map") || pathname.startsWith("/tree/")) return "map";
   if (pathname.includes("staff")) return "staff";
@@ -32,13 +28,27 @@ function detectRoom(pathname: string): CompanionRoom {
   return "unknown";
 }
 
+/** Accumulated pointer position (normalised 0-1 across viewport) */
+interface PointerAccumulator {
+  x: number;
+  y: number;
+}
+
 export function useCompanionBridge() {
   const { paired, registerHandlers, broadcastRoomState, session } = useCompanion();
   const navigate = useNavigate();
   const location = useLocation();
   const lastToastRef = useRef(0);
+  const pointerRef = useRef<PointerAccumulator>({ x: 0.5, y: 0.5 });
+  const [debugInfo, setDebugInfo] = useState({
+    lastEvent: "",
+    pointerX: 0.5,
+    pointerY: 0.5,
+    scrollDx: 0,
+    scrollDy: 0,
+  });
 
-  // Broadcast room state whenever route changes and we're paired
+  // Broadcast room state on route change
   useEffect(() => {
     if (!paired) return;
     const room = detectRoom(location.pathname);
@@ -49,16 +59,14 @@ export function useCompanionBridge() {
     });
   }, [paired, location.pathname, broadcastRoomState]);
 
-  // Show a brief desktop toast for command feedback (throttled)
   const showCommandFeedback = useCallback((label: string) => {
     const now = Date.now();
-    // Throttle toasts to max 1 per 800ms
     if (now - lastToastRef.current < 800) return;
     lastToastRef.current = now;
     toast("📱 " + label, { duration: 1500, position: "bottom-right" });
   }, []);
 
-  // Register global handlers when paired
+  // Register all handlers when paired
   useEffect(() => {
     if (!paired) return;
 
@@ -112,12 +120,97 @@ export function useCompanionBridge() {
         document.exitFullscreen?.();
         showCommandFeedback("Exiting fullscreen");
       },
+
+      // --- NEW: Relative pointer delta ---
+      onPointerDelta: (dx: number, dy: number) => {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        // Convert px delta to normalised movement
+        const p = pointerRef.current;
+        p.x = Math.max(0, Math.min(1, p.x + dx / vw));
+        p.y = Math.max(0, Math.min(1, p.y + dy / vh));
+
+        // Broadcast the absolute position for the orb
+        window.dispatchEvent(
+          new CustomEvent("s33d-companion-cmd", {
+            detail: { type: "pointer_move", x: p.x, y: p.y },
+          }),
+        );
+
+        setDebugInfo(d => ({
+          ...d,
+          lastEvent: "pointer_delta",
+          pointerX: Math.round(p.x * 100) / 100,
+          pointerY: Math.round(p.y * 100) / 100,
+        }));
+      },
+
+      // --- NEW: Tap = click ---
+      onPointerClick: (_x: number, _y: number) => {
+        const p = pointerRef.current;
+        const absX = p.x * window.innerWidth;
+        const absY = p.y * window.innerHeight;
+
+        // Find and click the element under the pointer
+        const el = document.elementFromPoint(absX, absY);
+        if (el && el instanceof HTMLElement) {
+          el.click();
+          // Also dispatch a focus for inputs
+          el.focus?.();
+        }
+
+        setDebugInfo(d => ({ ...d, lastEvent: "click" }));
+      },
+
+      // --- NEW: Two-finger scroll ---
+      onScroll: (dx: number, dy: number) => {
+        const p = pointerRef.current;
+        const absX = p.x * window.innerWidth;
+        const absY = p.y * window.innerHeight;
+
+        // Find scrollable element under pointer
+        let target = document.elementFromPoint(absX, absY) as HTMLElement | null;
+        let scrolled = false;
+
+        while (target && !scrolled) {
+          const { overflowY, overflowX } = getComputedStyle(target);
+          const canScrollY = (overflowY === "auto" || overflowY === "scroll") && target.scrollHeight > target.clientHeight;
+          const canScrollX = (overflowX === "auto" || overflowX === "scroll") && target.scrollWidth > target.clientWidth;
+
+          if (canScrollY || canScrollX) {
+            target.scrollBy({ left: -dx, top: -dy });
+            scrolled = true;
+          }
+          target = target.parentElement;
+        }
+
+        // Fallback: scroll the window
+        if (!scrolled) {
+          window.scrollBy({ left: -dx, top: -dy });
+        }
+
+        // Also dispatch to map/custom handlers
+        window.dispatchEvent(
+          new CustomEvent("s33d-companion-cmd", { detail: { type: "scroll", dx, dy } }),
+        );
+
+        setDebugInfo(d => ({
+          ...d,
+          lastEvent: "scroll",
+          scrollDx: Math.round(dx),
+          scrollDy: Math.round(dy),
+        }));
+      },
+
+      // Legacy absolute pointer (keep for backward compat)
       onPointerMove: (x: number, y: number) => {
+        pointerRef.current = { x, y };
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_move", x, y } }));
       },
       onPointerHide: () => {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_hide" } }));
       },
+
       onExportView: () => showCommandFeedback("Capture requested"),
       onOpenPanel: () => showCommandFeedback("Opening panel"),
       onClosePanel: () => showCommandFeedback("Closing panel"),
@@ -127,5 +220,5 @@ export function useCompanionBridge() {
     });
   }, [paired, registerHandlers, navigate, showCommandFeedback]);
 
-  return { paired, session };
+  return { paired, session, debugInfo };
 }
