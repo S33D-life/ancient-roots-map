@@ -45,9 +45,9 @@ const MILESTONES: Milestone[] = [
   { label: "Greenhouse Keeper", description: "Grow 5 seed pods", threshold: 5, icon: Sprout, hearts: 20, category: "seeds" },
   { label: "Nursery Warden", description: "Grow 15 seed pods", threshold: 15, icon: Sprout, hearts: 60, category: "seeds" },
 
-  // Wishlist
-  { label: "Wishing Well", description: "Add 3 wishes to the Wishing Tree", threshold: 3, icon: Star, hearts: 15, category: "wishlist" },
-  { label: "Dream Weaver", description: "Add 10 wishes to the Wishing Tree", threshold: 10, icon: Star, hearts: 50, category: "wishlist" },
+  // Dream Tree
+  { label: "Dreamer", description: "Add 3 dreams to the Dream Tree", threshold: 3, icon: Star, hearts: 15, category: "wishlist" },
+  { label: "Dream Weaver", description: "Add 10 dreams to the Dream Tree", threshold: 10, icon: Star, hearts: 50, category: "wishlist" },
 ];
 
 const getCategoryCount = (milestone: Milestone, props: RewardsProps) => {
