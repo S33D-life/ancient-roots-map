@@ -1313,6 +1313,20 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                   ))}
                 </div>
 
+                {/* Seed nudge after tree creation */}
+                {savedTreeId && lat != null && lng != null && (
+                  <div className="max-w-xs mx-auto w-full">
+                    <SeedNudge
+                      treeId={savedTreeId}
+                      treeName={name || species || "this tree"}
+                      treeLat={lat}
+                      treeLng={lng}
+                      userId={userId}
+                      context="new_tree"
+                    />
+                  </div>
+                )}
+
                 <Button
                   variant="ghost"
                   className="text-xs font-serif text-muted-foreground/60"

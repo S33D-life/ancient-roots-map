@@ -364,6 +364,25 @@ export default function CanopyCheckinModal({
                 </motion.div>
               )}
 
+              {/* Seed nudge after check-in */}
+              {userId && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.1 }}
+                  className="w-full max-w-sm"
+                >
+                  <SeedNudge
+                    treeId={treeId}
+                    treeName={treeName}
+                    treeLat={treeLat ?? null}
+                    treeLng={treeLng ?? null}
+                    userId={userId}
+                    context="checkin"
+                  />
+                </motion.div>
+              )}
+
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
