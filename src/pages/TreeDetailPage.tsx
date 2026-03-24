@@ -526,11 +526,17 @@ const TreeDetailPage = () => {
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+            <TabsTrigger value="encounters" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
               Encounters
+              {(checkinStats?.totalVisits || 0) > 0 && (
+                <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{checkinStats.totalVisits}</Badge>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary">
+            <TabsTrigger value="offerings" className="font-serif text-xs tracking-wider data-[state=active]:bg-primary/15 data-[state=active]:text-primary gap-1.5">
               Offerings
+              {(offerings.length + birdsongCount) > 0 && (
+                <Badge variant="secondary" className="text-[9px] h-4 px-1.5 font-mono">{offerings.length + birdsongCount}</Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
