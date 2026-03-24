@@ -222,6 +222,24 @@ const Header = () => {
                   <Link to="/auth">Login</Link>
                 </Button>
               )}
+
+              {/* TEOTAG — guiding intelligence orb */}
+              <button
+                type="button"
+                onClick={() => { setGuideTab("guide"); setGuideOpen(true); }}
+                className="shrink-0 group"
+                aria-label="TEOTAG — The Echo of the Ancient Groves"
+              >
+                <img
+                  src={teotagLogo}
+                  alt="TEOTAG"
+                  className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover transition-all duration-300
+                    group-hover:scale-110 group-hover:shadow-[0_0_14px_hsl(var(--primary)/0.4)]"
+                  style={{
+                    border: "1.5px solid hsl(var(--primary) / 0.25)",
+                  }}
+                />
+              </button>
             </div>
           </div>
         </div>
