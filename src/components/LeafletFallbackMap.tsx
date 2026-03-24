@@ -1842,7 +1842,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
     const onMoveEnd = () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(loadTrees, 1000); // longer debounce to reduce Overpass load
+      debounceTimer = setTimeout(loadTrees, 1500); // 1.5s debounce to reduce Overpass load
     };
 
     map.on("moveend", onMoveEnd);
