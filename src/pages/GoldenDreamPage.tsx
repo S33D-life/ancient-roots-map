@@ -1,4 +1,5 @@
 import { useState, useCallback, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,7 +17,7 @@ import FullscreenToggle from "@/components/FullscreenToggle";
 import goldenDreamBanner from "@/assets/golden-dream-splash-2.png";
 import goldenDreamNight from "@/assets/golden-dream-night.jpeg";
 
-const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
+
 const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
 
 interface GoldenDreamRoom {
@@ -69,6 +70,7 @@ const goldenDreamRooms: GoldenDreamRoom[] = [
 
 const GoldenDreamPage = () => {
   useDocumentTitle("yOur Golden Dream");
+  const navigate = useNavigate();
   const { showEntrance, dismissEntrance } = useEntranceOnce("golden-dream");
   const { isFullscreen, enterFullscreen, exitFullscreen } = useFullscreen();
   const [coverDismissed, setCoverDismissed] = useState(false);
@@ -126,40 +128,6 @@ const GoldenDreamPage = () => {
     );
   }
 
-  // Roadmap room
-  if (activeRoom === "roadmap") {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        <main className="pt-28 pb-8 px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setActiveRoom(null)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                ← Back to Golden Dream
-              </Button>
-            </div>
-
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">Living Forest Roadmap</h2>
-              <p className="text-sm text-muted-foreground max-w-lg mx-auto">
-                The S33D ecosystem unfolds organically — from seeds of vision to the full canopy of a living world.
-              </p>
-            </div>
-
-            <Suspense fallback={<div className="py-12 text-center text-muted-foreground text-sm">Growing the roadmap…</div>}>
-              <RoadmapEmbed />
-            </Suspense>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   // Notion room
   if (activeRoom) {
@@ -255,6 +223,8 @@ const GoldenDreamPage = () => {
                   onClick={() => {
                     if ('externalUrl' in room && room.externalUrl) {
                       window.open(room.externalUrl, '_blank', 'noopener,noreferrer');
+                    } else if (room.id === 'roadmap') {
+                      navigate('/roadmap');
                     } else {
                       setActiveRoom(room.id);
                     }

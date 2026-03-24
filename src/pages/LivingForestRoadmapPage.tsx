@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink } from "lucide-react";
+import { X, ExternalLink, Map as MapIcon, List } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
@@ -20,6 +20,8 @@ import {
   type RoadmapStatus,
   type RoadmapCategory,
 } from "@/data/roadmap-forest";
+
+const RoadmapEmbed = lazy(() => import("@/components/roadmap/RoadmapEmbed"));
 
 /* ── mycelial SVG connections ── */
 const MycelialLines = ({
@@ -190,7 +192,6 @@ const DetailPanel = ({
         <span className="font-serif text-foreground/60">{regionMeta.label}</span> · {regionMeta.description}
       </div>
 
-      {/* Notion link */}
       {feature.notionLink && (
         <a
           href={feature.notionLink}
@@ -248,9 +249,8 @@ const ForestParticles = () => (
   </div>
 );
 
-/* ── MAIN PAGE ── */
-const LivingForestRoadmapPage = () => {
-  useDocumentTitle("Living Forest Roadmap");
+/* ── Map View (Kumu-style visual network) ── */
+const MapView = () => {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);
@@ -284,6 +284,197 @@ const LivingForestRoadmapPage = () => {
     setActiveFeature((prev) => (prev?.id === f.id ? null : f));
   }, []);
 
+  return (
+    <>
+      {/* ── Filter chips ── */}
+      <div className="space-y-2 mb-8">
+        <div className="flex justify-center gap-2 flex-wrap">
+          <button
+            onClick={() => setRegionFilter(null)}
+            className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
+              ${!regionFilter
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-border/30 text-muted-foreground hover:border-primary/30"
+              }`}
+          >
+            All regions
+          </button>
+          {(Object.keys(REGION_META) as RoadmapRegion[]).map((r) => (
+            <button
+              key={r}
+              onClick={() => setRegionFilter(regionFilter === r ? null : r)}
+              className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
+                ${regionFilter === r
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border/30 text-muted-foreground hover:border-primary/30"
+                }`}
+            >
+              {REGION_META[r].label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex justify-center gap-2 flex-wrap">
+          {(Object.keys(CATEGORY_META) as RoadmapCategory[]).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
+              className={`text-[10px] px-2.5 py-1 rounded-full font-serif transition-colors border
+                ${categoryFilter === cat
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border/30 text-muted-foreground hover:border-primary/30"
+                }`}
+            >
+              {CATEGORY_META[cat].emoji} {CATEGORY_META[cat].label}
+            </button>
+          ))}
+          <span className="w-px h-5 bg-border/30 self-center" />
+          {(Object.keys(STATUS_META) as RoadmapStatus[]).map((st) => (
+            <button
+              key={st}
+              onClick={() => setStatusFilter(statusFilter === st ? null : st)}
+              className={`text-[10px] px-2.5 py-1 rounded-full font-serif transition-colors border
+                ${statusFilter === st
+                  ? "border-primary/40 bg-primary/10 text-primary"
+                  : "border-border/30 text-muted-foreground hover:border-primary/30"
+                }`}
+            >
+              {STATUS_META[st].emoji} {STATUS_META[st].label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Forest landscape ── */}
+      <div className="relative mx-auto overflow-x-auto">
+        <div
+          className="relative mx-auto"
+          style={{
+            width: COLS * COL_W,
+            minHeight: totalRows * ROW_H + 80,
+          }}
+        >
+          <ForestParticles />
+          <MycelialLines
+            features={ROADMAP_FEATURES}
+            positions={positions}
+            activeId={activeFeature?.id ?? null}
+          />
+
+          {([
+            { region: "roots" as RoadmapRegion, startRow: 0 },
+            { region: "trunk" as RoadmapRegion, startRow: 4 },
+            { region: "canopy" as RoadmapRegion, startRow: 6 },
+            { region: "mycelium" as RoadmapRegion, startRow: 8 },
+          ]).map(({ region, startRow }) => (
+            <div
+              key={region}
+              className="absolute left-0 right-0 flex items-center gap-2 px-2"
+              style={{ top: startRow * ROW_H - 8 }}
+            >
+              <span className="h-px flex-1 bg-border/15" />
+              <span className="text-[9px] md:text-[10px] font-serif tracking-[0.2em] uppercase text-muted-foreground/40">
+                {REGION_META[region].label}
+              </span>
+              <span className="h-px flex-1 bg-border/15" />
+            </div>
+          ))}
+
+          {filtered.map((f) => {
+            const pos = positions.get(f.id);
+            if (!pos) return null;
+            return (
+              <div
+                key={f.id}
+                className="absolute"
+                style={{
+                  left: pos.x - COL_W / 2,
+                  top: pos.y - ROW_H / 2 + 10,
+                  width: COL_W,
+                  height: ROW_H,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <FeatureNode
+                  feature={f}
+                  isActive={activeFeature?.id === f.id}
+                  onSelect={handleSelect}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Legend ── */}
+      <section className="mt-12 text-center max-w-md mx-auto">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2 font-sans">
+          How to read the forest
+        </p>
+        <p className="text-xs text-muted-foreground/60 leading-relaxed">
+          Each node is a feature. Faint dashed lines beneath represent mycelial connections
+          between systems. Click any node to learn more. The forest grows richer as development continues.
+        </p>
+      </section>
+
+      <AnimatePresence>
+        {activeFeature && (
+          <DetailPanel
+            key={activeFeature.id}
+            feature={activeFeature}
+            onClose={() => setActiveFeature(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+/* ── View toggle tabs ── */
+type RoadmapView = "map" | "list";
+
+const ViewToggle = ({
+  view,
+  onChange,
+}: {
+  view: RoadmapView;
+  onChange: (v: RoadmapView) => void;
+}) => (
+  <div className="flex justify-center mb-8">
+    <div className="inline-flex items-center gap-1 p-1 rounded-full border border-border/40 bg-card/60 backdrop-blur-sm">
+      <button
+        onClick={() => onChange("map")}
+        className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-serif transition-all duration-300
+          ${view === "map"
+            ? "bg-primary/15 text-primary border border-primary/30 shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+          }`}
+      >
+        <MapIcon className="w-3.5 h-3.5" />
+        Map View
+      </button>
+      <button
+        onClick={() => onChange("list")}
+        className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-serif transition-all duration-300
+          ${view === "list"
+            ? "bg-primary/15 text-primary border border-primary/30 shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+          }`}
+      >
+        <List className="w-3.5 h-3.5" />
+        List View
+      </button>
+    </div>
+  </div>
+);
+
+/* ── MAIN PAGE ── */
+const LivingForestRoadmapPage = () => {
+  useDocumentTitle("Living Forest Roadmap");
+  const [view, setView] = useState<RoadmapView>("map");
+
   const counts = useMemo(() => {
     const c: Record<RoadmapStage, number> = { seed: 0, sprout: 0, rooted: 0, ancient: 0 };
     ROADMAP_FEATURES.forEach((f) => c[f.stage]++);
@@ -297,14 +488,13 @@ const LivingForestRoadmapPage = () => {
 
         <main className="flex-1 container mx-auto px-4 pt-24 pb-28 md:pb-12">
           {/* ── Hero ── */}
-          <section className="text-center mb-10 max-w-2xl mx-auto">
+          <section className="text-center mb-6 max-w-2xl mx-auto">
             <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
               Living Forest Roadmap
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
               The S33D ecosystem grows like a forest. Seeds are planted, shoots emerge,
               trees take root, and ancient pillars anchor the canopy.
-              Beneath the surface, mycelial threads connect everything.
             </p>
           </section>
 
@@ -324,151 +514,37 @@ const LivingForestRoadmapPage = () => {
             <SeasonalLensBanner context="general" />
           </div>
 
-          {/* ── Filter chips ── */}
-          <div className="space-y-2 mb-8">
-            {/* Region */}
-            <div className="flex justify-center gap-2 flex-wrap">
-              <button
-                onClick={() => setRegionFilter(null)}
-                className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
-                  ${!regionFilter
-                    ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-border/30 text-muted-foreground hover:border-primary/30"
-                  }`}
+          {/* ── View Toggle ── */}
+          <ViewToggle view={view} onChange={setView} />
+
+          {/* ── View Content ── */}
+          <AnimatePresence mode="wait">
+            {view === "map" ? (
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
               >
-                All regions
-              </button>
-              {(Object.keys(REGION_META) as RoadmapRegion[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRegionFilter(regionFilter === r ? null : r)}
-                  className={`text-[11px] px-3 py-1 rounded-full font-serif transition-colors border
-                    ${regionFilter === r
-                      ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/30 text-muted-foreground hover:border-primary/30"
-                    }`}
-                >
-                  {REGION_META[r].label}
-                </button>
-              ))}
-            </div>
-
-            {/* Category + Status */}
-            <div className="flex justify-center gap-2 flex-wrap">
-              {(Object.keys(CATEGORY_META) as RoadmapCategory[]).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setCategoryFilter(categoryFilter === cat ? null : cat)}
-                  className={`text-[10px] px-2.5 py-1 rounded-full font-serif transition-colors border
-                    ${categoryFilter === cat
-                      ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/30 text-muted-foreground hover:border-primary/30"
-                    }`}
-                >
-                  {CATEGORY_META[cat].emoji} {CATEGORY_META[cat].label}
-                </button>
-              ))}
-              <span className="w-px h-5 bg-border/30 self-center" />
-              {(Object.keys(STATUS_META) as RoadmapStatus[]).map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setStatusFilter(statusFilter === st ? null : st)}
-                  className={`text-[10px] px-2.5 py-1 rounded-full font-serif transition-colors border
-                    ${statusFilter === st
-                      ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/30 text-muted-foreground hover:border-primary/30"
-                    }`}
-                >
-                  {STATUS_META[st].emoji} {STATUS_META[st].label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Forest landscape ── */}
-          <div className="relative mx-auto overflow-x-auto">
-            <div
-              className="relative mx-auto"
-              style={{
-                width: COLS * COL_W,
-                minHeight: totalRows * ROW_H + 80,
-              }}
-            >
-              <ForestParticles />
-              <MycelialLines
-                features={ROADMAP_FEATURES}
-                positions={positions}
-                activeId={activeFeature?.id ?? null}
-              />
-
-              {([
-                { region: "roots" as RoadmapRegion, startRow: 0 },
-                { region: "trunk" as RoadmapRegion, startRow: 4 },
-                { region: "canopy" as RoadmapRegion, startRow: 6 },
-                { region: "mycelium" as RoadmapRegion, startRow: 8 },
-              ]).map(({ region, startRow }) => (
-                <div
-                  key={region}
-                  className="absolute left-0 right-0 flex items-center gap-2 px-2"
-                  style={{ top: startRow * ROW_H - 8 }}
-                >
-                  <span className="h-px flex-1 bg-border/15" />
-                  <span className="text-[9px] md:text-[10px] font-serif tracking-[0.2em] uppercase text-muted-foreground/40">
-                    {REGION_META[region].label}
-                  </span>
-                  <span className="h-px flex-1 bg-border/15" />
-                </div>
-              ))}
-
-              {filtered.map((f) => {
-                const pos = positions.get(f.id);
-                if (!pos) return null;
-                return (
-                  <div
-                    key={f.id}
-                    className="absolute"
-                    style={{
-                      left: pos.x - COL_W / 2,
-                      top: pos.y - ROW_H / 2 + 10,
-                      width: COL_W,
-                      height: ROW_H,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <FeatureNode
-                      feature={f}
-                      isActive={activeFeature?.id === f.id}
-                      onSelect={handleSelect}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Legend ── */}
-          <section className="mt-12 text-center max-w-md mx-auto">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 mb-2 font-sans">
-              How to read the forest
-            </p>
-            <p className="text-xs text-muted-foreground/60 leading-relaxed">
-              Each node is a feature. Faint dashed lines beneath represent mycelial connections
-              between systems. Click any node to learn more. The forest grows richer as development continues.
-            </p>
-          </section>
+                <MapView />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="max-w-3xl mx-auto"
+              >
+                <Suspense fallback={<div className="py-12 text-center text-muted-foreground text-sm">Growing the roadmap…</div>}>
+                  <RoadmapEmbed />
+                </Suspense>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
-
-        <AnimatePresence>
-          {activeFeature && (
-            <DetailPanel
-              key={activeFeature.id}
-              feature={activeFeature}
-              onClose={() => setActiveFeature(null)}
-            />
-          )}
-        </AnimatePresence>
 
         <Footer />
       </div>
