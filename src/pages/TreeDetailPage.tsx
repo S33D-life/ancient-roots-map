@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Layers } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import {
