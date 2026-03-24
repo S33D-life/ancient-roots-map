@@ -405,6 +405,7 @@ const DashboardPage = () => {
       { value: "journey", label: "Journey", icon: Compass },
       { value: "pod", label: "My Grove", icon: Sprout, count: trees.length },
       { value: "teotag", label: "TEOTAG", icon: Bot },
+      { value: "notifications", label: "Signals", icon: BellDot },
       { value: "profile", label: "Settings", icon: Settings },
     ];
 
