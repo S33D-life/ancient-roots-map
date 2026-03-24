@@ -38,6 +38,7 @@ import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
 import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import TeotagAITab from "@/components/dashboard/TeotagAITab";
+import HearthNotificationSettings from "@/components/dashboard/HearthNotificationSettings";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
