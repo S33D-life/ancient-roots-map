@@ -392,7 +392,7 @@ const TimeTreeGame = () => {
                   <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => setStep(0)}>
                     Keep as Dream
                   </Button>
-                  <Button variant="mystical" size="sm" className="text-xs h-8" onClick={convertToWish}>
+                  <Button variant="mystical" size="sm" className="text-xs h-8" onClick={convertToDream}>
                     <Star className="w-3.5 h-3.5 mr-1" /> Make This Real
                   </Button>
                 </div>
