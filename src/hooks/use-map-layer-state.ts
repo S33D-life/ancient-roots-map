@@ -45,7 +45,9 @@ export type LayerKey =
   | "groveView"
   | "bloomConstellationMode"
   | "forestPulse"
-  | "mycelialPathways";
+  | "mycelialPathways"
+  | "dreamTrees"
+  | "dreamOfferings";
 
 export type LayerState = Record<LayerKey, boolean>;
 
