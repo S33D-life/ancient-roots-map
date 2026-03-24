@@ -40,7 +40,6 @@ export function CompanionProvider({ children }: { children: ReactNode }) {
           handlers.onPointerHide?.();
         },
         onPointerDelta: (dx, dy) => {
-          // Update local pointer state from deltas
           setPointer((p) => {
             const vw = window.innerWidth;
             const vh = window.innerHeight;
@@ -51,6 +50,18 @@ export function CompanionProvider({ children }: { children: ReactNode }) {
             };
           });
           handlers.onPointerDelta?.(dx, dy);
+        },
+        onDragMove: (dx, dy) => {
+          setPointer((p) => {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            return {
+              x: Math.max(0, Math.min(1, p.x + dx / vw)),
+              y: Math.max(0, Math.min(1, p.y + dy / vh)),
+              visible: true,
+            };
+          });
+          handlers.onDragMove?.(dx, dy);
         },
       });
     },
