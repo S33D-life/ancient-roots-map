@@ -45,7 +45,9 @@ export type LayerKey =
   | "groveView"
   | "bloomConstellationMode"
   | "forestPulse"
-  | "mycelialPathways";
+  | "mycelialPathways"
+  | "dreamTrees"
+  | "dreamOfferings";
 
 export type LayerState = Record<LayerKey, boolean>;
 
@@ -104,6 +106,8 @@ function getInitialState(): LayerState {
     bloomConstellationMode: false,
     forestPulse: false,
     mycelialPathways: false,
+    dreamTrees: false,
+    dreamOfferings: false,
   };
 }
 

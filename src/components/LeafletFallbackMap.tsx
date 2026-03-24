@@ -15,6 +15,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "@/styles/map-markers.css";
 import "@/styles/grove-map.css";
 import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
+import { useDreamConstellationLayer } from "@/hooks/use-dream-constellation-layer";
 import { usePulseMapLayer } from "@/hooks/use-pulse-map-layer";
 import { usePathwayMapLayer } from "@/hooks/use-pathway-map-layer";
 import { escapeHtml } from "@/utils/escapeHtml";
@@ -359,6 +360,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const showBloomingClock = layers.bloomingClock;
   const bloomConstellationMode = layers.bloomConstellationMode;
   const clearView = layers.clearView;
+  const showDreamTrees = layers.dreamTrees;
+  const showDreamOfferings = layers.dreamOfferings;
 
   // Broadcast clearView state so external panels (MapTreePanel) can hide
   useEffect(() => {
@@ -450,6 +453,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     setBloomStageFilter(stageMap[activeLens] || "all");
   }, [activeLens]);
 
+  // ── Dream Constellation Layer ──
+  const { dreamTreeCount, dreamOfferingCount } = useDreamConstellationLayer({
+    map: mapRef.current,
+    showDreamTrees,
+    showDreamOfferings,
+  });
 
   const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
   const { activeHiveFamily, setActiveHive } = useHiveSeasonFilter();
@@ -821,6 +830,17 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "seed-trail", label: "🌱 My Seed Trail", description: "Golden trail of seeds you planted today", active: showSeedTrail, toggle: () => toggle("seedTrail"), extra: showSeedTrail ? (seedTrailCount > 0 ? `${seedTrailCount}` : "—") : undefined, accent: "42, 80%, 60%" },
         { key: "shared-trees", label: "◐ Shared Trees", description: "Indicates others who visited the same tree", active: showSharedTrees, toggle: () => toggle("sharedTrees"), accent: "260, 55%, 70%" },
         { key: "tribe-activity", label: "⊛ Tribe Activity", description: "Opt-in visibility for invited wanderers", active: showTribeActivity, toggle: () => toggle("tribeActivity"), accent: "260, 55%, 70%" },
+      ],
+    },
+    {
+      key: "dreams",
+      title: "Dream Constellation",
+      icon: "✨",
+      accent: "hsl(280, 55%, 65%)",
+      description: "A living sky of intention — where people dream to go, and what they carry with them.",
+      layers: [
+        { key: "dream-trees", label: "🌙 Dream Trees", description: "Grounded glow on trees people intend to visit", active: showDreamTrees, toggle: () => toggle("dreamTrees"), extra: showDreamTrees ? (dreamTreeCount > 0 ? `${dreamTreeCount}` : "—") : undefined, accent: "280, 55%, 65%" },
+        { key: "dream-offerings", label: "✨ Dream Offerings", description: "Ethereal particles of wishes and intentions pinned to trees", active: showDreamOfferings, toggle: () => toggle("dreamOfferings"), extra: showDreamOfferings ? (dreamOfferingCount > 0 ? `${dreamOfferingCount}` : "—") : undefined, accent: "42, 80%, 65%" },
       ],
     },
     {
