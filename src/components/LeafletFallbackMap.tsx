@@ -2782,6 +2782,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             }
             setChooserOpen(true);
           }}
+          onQuickPreset={(enable) => {
+            const updates: Partial<Record<LayerKey, boolean>> = {};
+            // Turn off all managed layers, then enable the preset ones
+            ([
+              "ancientHighlight", "harvestLayer", "offeringGlow",
+              "groves", "rootThreads", "mycelialPathways", "seeds",
+              "researchLayer", "rootstones", "rootstoneTrees", "rootstoneGroves",
+              "immutableLayer", "externalTrees", "churchyards", "heritage", "castles",
+              "waterways", "footpaths", "watersCommons", "libraries", "bookshops", "botanicalGardens",
+              "hiveLayer", "birdsongHeat", "mycelialNetwork",
+              "heartGlow", "bloomedSeeds", "recentVisits", "seedTraces", "seedTrail",
+              "sharedTrees", "tribeActivity", "dreamTrees", "dreamOfferings",
+              "bloomingClock", "bloomConstellationMode", "forestPulse",
+            ] as LayerKey[]).forEach(k => { updates[k] = false; });
+            enable.forEach(k => { updates[k] = true; });
+            batchUpdate(updates);
+          }}
         />
       )}
 
