@@ -15,7 +15,7 @@ import MapArrivalBanner from "@/components/MapArrivalBanner";
 import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
-const MapHeartBadge = lazy(() => import("@/components/MapHeartBadge"));
+
 const SendWhisperModal = lazy(() => import("@/components/SendWhisperModal"));
 
 // Non-critical overlays — lazy-loaded after the map is interactive
@@ -83,12 +83,6 @@ const MapPageFull = () => {
       <MapOfflineOverlay />
       <MapJourneyOverlay active={journeyActive} />
       
-      {/* Heart balance badge */}
-      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
-        <Suspense fallback={null}>
-          <MapHeartBadge />
-        </Suspense>
-      )}
       
       {/* Arrival banner — contextual breadcrumb showing how you arrived */}
       {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && paramArrival && (

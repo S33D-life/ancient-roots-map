@@ -5,7 +5,7 @@
  * living forest view. Shows Grove Signals panel (including recent/nearby trees),
  * mythic time selector, live event stream, and seasonal atmosphere shifts.
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,26 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
   const [treeTab, setTreeTab] = useState<TreeTab>("recent");
   const [recentTrees, setRecentTrees] = useState<TreeItem[]>([]);
   const [nearbyTrees, setNearbyTrees] = useState<TreeItem[]>([]);
+
+  // Drag state for Grove Signals panel
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+
+  const onDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    const point = "touches" in e ? e.touches[0] : e;
+    dragRef.current = { startX: point.clientX, startY: point.clientY, origX: dragOffset.x, origY: dragOffset.y };
+  }, [dragOffset]);
+
+  const onDragMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!dragRef.current) return;
+    const point = "touches" in e ? e.touches[0] : e;
+    setDragOffset({
+      x: dragRef.current.origX + (point.clientX - dragRef.current.startX),
+      y: dragRef.current.origY + (point.clientY - dragRef.current.startY),
+    });
+  }, []);
+
+  const onDragEnd = useCallback(() => { dragRef.current = null; }, []);
 
   useEffect(() => {
     if (!active) return;
@@ -148,19 +168,44 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute left-1/2 -translate-x-1/2 z-[1001] w-[min(280px,calc(100vw-2rem))]"
-            style={{ bottom: "calc(var(--bottom-nav-height, 3.5rem) + var(--safe-bottom, 8px) + var(--bottom-nav-height, 3.5rem) + 8px)" }}
+            className="absolute left-1/2 z-[1001] w-[min(280px,calc(100vw-2rem))]"
+            style={{
+              bottom: "calc(var(--bottom-nav-height, 3.5rem) + var(--safe-bottom, 8px) + var(--bottom-nav-height, 3.5rem) + 8px)",
+              transform: `translateX(calc(-50% + ${dragOffset.x}px)) translateY(${dragOffset.y}px)`,
+            }}
           >
+            {/* Drag handle */}
+            <div
+              onMouseDown={onDragStart}
+              onMouseMove={onDragMove}
+              onMouseUp={onDragEnd}
+              onMouseLeave={onDragEnd}
+              onTouchStart={onDragStart}
+              onTouchMove={onDragMove}
+              onTouchEnd={onDragEnd}
+              className="flex items-center justify-center py-1 cursor-grab active:cursor-grabbing"
+              style={{
+                background: "hsla(120, 20%, 8%, 0.92)",
+                borderRadius: "12px 12px 0 0",
+                border: "1px solid hsla(120, 30%, 30%, 0.3)",
+                borderBottom: "none",
+                backdropFilter: "blur(12px)",
+                touchAction: "none",
+              }}
+            >
+              <div className="w-8 h-1 rounded-full" style={{ background: "hsla(120, 40%, 50%, 0.35)" }} />
+            </div>
             {/* Collapse toggle */}
             <button
               onClick={() => setSignalsExpanded(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-t-xl text-[10px] font-serif tracking-wider transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-serif tracking-wider transition-colors"
               style={{
                 background: "hsla(120, 20%, 8%, 0.92)",
                 color: "hsl(120, 40%, 65%)",
                 border: "1px solid hsla(120, 30%, 30%, 0.3)",
+                borderTop: "none",
                 borderBottom: signalsExpanded ? "none" : undefined,
-                borderRadius: signalsExpanded ? "12px 12px 0 0" : "12px",
+                borderRadius: signalsExpanded ? "0" : "0 0 12px 12px",
                 backdropFilter: "blur(12px)",
               }}
             >
