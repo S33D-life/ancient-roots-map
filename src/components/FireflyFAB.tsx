@@ -21,6 +21,7 @@ import SparkErrorBoundary from "@/components/SparkErrorBoundary";
 import OrbConstellation from "@/components/OrbConstellation";
 import FireflyGuidance from "@/components/FireflyGuidance";
 import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
+import { useAppUpdate } from "@/hooks/use-app-update";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
