@@ -235,7 +235,10 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
                       {/* Community-mapped trees first */}
                       {mappedTrees.length > 0 && (
                         <div className="space-y-1 mb-4">
-                          <p className="text-xs font-serif text-primary/70 uppercase tracking-wider mb-2">Community Mapped</p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-serif text-primary uppercase tracking-wider">Community Mapped</span>
+                            <Badge variant="outline" className="text-[10px] border-primary/20 font-mono">{mappedTrees.length}</Badge>
+                          </div>
                           {mappedTrees.slice(0, 10).map((t) => (
                             <Link
                               key={t.id}
