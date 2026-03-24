@@ -82,8 +82,8 @@ export function useHeartSignals(userId: string | null) {
 
   const markAllRead = useCallback(async () => {
     if (!userId) return;
-    await supabase.from("heart_signals").update({ is_read: true } as any).eq("user_id", userId).eq("is_read", false);
-    setSignals(prev => prev.map(s => ({ ...s, is_read: true })));
+    await supabase.from("heart_signals").update({ is_read: true, dismissed: true } as any).eq("user_id", userId).eq("is_read", false);
+    setSignals(prev => prev.filter(s => s.is_read));
   }, [userId]);
 
   const dismiss = useCallback(async (id: string) => {
