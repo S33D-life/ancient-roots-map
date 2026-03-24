@@ -510,6 +510,32 @@ const AtlasFilter = ({
               <ScrollArea className="flex-1">
                 <div className="px-4 py-3 space-y-1">
 
+                  {/* ══════ QUICK PRESETS ══════ */}
+                  {onQuickPreset && (
+                    <div className="pb-3" style={{ borderBottom: "1px solid hsla(42, 40%, 30%, 0.2)" }}>
+                      <p className="text-[9px] font-serif uppercase tracking-[0.15em] mb-2" style={{ color: "hsl(42, 40%, 45%)" }}>
+                        Quick Modes
+                      </p>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {QUICK_PRESETS.map(preset => (
+                          <button
+                            key={preset.key}
+                            onClick={() => onQuickPreset(preset.enable)}
+                            className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg text-center transition-all active:scale-95"
+                            style={{
+                              background: "hsla(30, 20%, 12%, 0.6)",
+                              border: "1px solid hsla(42, 40%, 30%, 0.25)",
+                              color: `hsl(${preset.accent})`,
+                            }}
+                          >
+                            <span className="text-base">{preset.icon}</span>
+                            <span className="text-[9px] font-serif tracking-wide">{preset.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* ══════ SPECIES HIVES ══════ */}
                   {hiveMap.length > 0 && (
                     <>
