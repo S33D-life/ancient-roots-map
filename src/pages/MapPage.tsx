@@ -15,7 +15,7 @@ import MapArrivalBanner from "@/components/MapArrivalBanner";
 import MapOfflineOverlay from "@/components/MapOfflineOverlay";
 import type { ArrivalOrigin } from "@/hooks/use-map-focus";
 import { parseMapFocusParams } from "@/utils/mapNavigation";
-const MapHeartBadge = lazy(() => import("@/components/MapHeartBadge"));
+
 const SendWhisperModal = lazy(() => import("@/components/SendWhisperModal"));
 
 // Non-critical overlays — lazy-loaded after the map is interactive
