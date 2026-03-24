@@ -152,9 +152,19 @@ const AuthPage = () => {
             delete pendingTree._photoBase64;
             delete pendingTree._photoDate;
 
+            // Strip species_ai_* fields that don't exist in the DB schema yet —
+            // they are preserved in localStorage for future use but must not be
+            // sent to the insert call.
+            delete pendingTree.species_ai_predictions;
+            delete pendingTree.species_ai_selected;
+            delete pendingTree.species_ai_provider;
+            delete pendingTree.species_ai_confidence;
+            delete pendingTree.species_ai_confirmed;
+
             const { data: treeData, error } = await supabase.from("trees").insert({
               ...pendingTree,
               created_by: session.user.id,
+              photo_status: photoBase64 ? 'pending' : 'none',
             }).select('id').single();
 
             if (!error && treeData) {
