@@ -828,125 +828,225 @@ const TreeDetailPage = () => {
             {/* Offerings intro — always visible */}
             <div className="text-center py-4">
               <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Offerings</h3>
-              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, and stories placed at this Ancient Friend</p>
+              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, stories, seeds, and whispers placed at this Ancient Friend</p>
             </div>
 
-            {/* Gate: offerings require active/expiring meeting */}
-            {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
-              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
-                <p className="text-sm text-muted-foreground font-serif">
-                  {meetingStatus === "expired"
-                    ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
-                    : meetingStatus === "none"
-                    ? "Meet this Ancient Friend to open a 12-hour offering window."
-                    : "This meeting cannot be used for offerings."}
-                </p>
-              </div>
-            )}
-
-            {!userId && (
+            {/* Auth / meeting gate messages */}
+            {!userId ? (
               <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
                 <p className="text-sm text-muted-foreground font-serif">
                   Sign in to leave offerings at this Ancient Friend.
                 </p>
               </div>
+            ) : meetingStatus !== "active" && meetingStatus !== "expiring" ? (
+              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
+                <p className="text-sm text-muted-foreground font-serif">
+                  {meetingStatus === "expired"
+                    ? "Your offering window has closed. Meet this Ancient Friend again to open a new 12-hour window."
+                    : "Meet this Ancient Friend to open a 12-hour offering window."}
+                </p>
+              </div>
+            ) : null}
+
+            {/* Seed Planter (moved from Encounters) */}
+            <SeedPlanter
+              treeId={id!}
+              treeLat={tree.latitude}
+              treeLng={tree.longitude}
+              userId={userId}
+              treeSpecies={tree.species}
+            />
+
+            {/* Whispers (moved from Encounters) */}
+            {userId && tree && (
+              <Button
+                onClick={() => setWhisperModalOpen(true)}
+                variant="outline"
+                className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Send a Whisper Through This Tree
+              </Button>
             )}
 
-            {offerings.length === 0 && (
+            {availableWhispers.length > 0 && userId && tree && (
+              <WhisperCollector
+                whispers={availableWhispers}
+                userId={userId}
+                treeId={tree.id}
+                treeName={tree.name}
+                onCollected={() => {
+                  if (userId && tree) {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }
+                }}
+              />
+            )}
+
+            {/* Empty state — only when truly no offerings, no birdsong */}
+            {offerings.length === 0 && birdsongCount === 0 ? (
               <div className="py-8 text-center">
                 <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
                 <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
                 <p className="text-xs text-muted-foreground/60 font-serif mt-1">Be the first to leave something meaningful.</p>
-              </div>
-            )}
-
-            {/* Birdsong Button */}
-            <Button
-              onClick={() => setBirdsongOpen(true)}
-              variant="outline"
-              className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-            >
-              <Bird className="h-4 w-4" />
-              Offer a Birdsong
-              {birdsongCount > 0 && (
-                <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
-              )}
-            </Button>
-
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
-                {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
-                  <TabsTrigger
-                    key={type}
-                    value={type}
-                    className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                {userId && (meetingStatus === "active" || meetingStatus === "expiring") && (
+                  <Button
+                    size="sm"
+                    onClick={() => setAddOfferingOpen(true)}
+                    className="mt-4 font-serif tracking-wider text-xs gap-1.5"
                   >
-                    {offeringIcons[type]}
-                    {offeringLabels[type]}
-                    <span className="text-[10px] opacity-60">
-                      ({getOfferingsByType(type).length})
-                    </span>
-                  </TabsTrigger>
-                ))}
-                <TabsTrigger
-                  value="birdsong"
-                  className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                    <Sparkles className="h-3 w-3" />
+                    Leave the first offering
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Birdsong Button */}
+                <Button
+                  onClick={() => setBirdsongOpen(true)}
+                  variant="outline"
+                  className="w-full font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
                 >
                   <Bird className="h-4 w-4" />
-                  Birdsong
-                  <span className="text-[10px] opacity-60">({birdsongCount})</span>
-                </TabsTrigger>
-              </TabsList>
+                  Offer a Birdsong
+                  {birdsongCount > 0 && (
+                    <Badge variant="secondary" className="ml-1 text-[10px] h-5">{birdsongCount}</Badge>
+                  )}
+                </Button>
 
-              {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
-                <TabsContent key={type} value={type}>
-                  <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
-                    <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
-                      {offeringLabels[type]}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <OfferingSortControls value={sortMode} onChange={setSortMode} />
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddOffering(type)}
-                        disabled={meetingStatus !== "active" && meetingStatus !== "expiring"}
-                        className="font-serif tracking-wider text-xs gap-1.5"
-                        title={meetingStatus !== "active" && meetingStatus !== "expiring" ? "Meet this Ancient Friend first" : undefined}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
+                    {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
+                      <TabsTrigger
+                        key={type}
+                        value={type}
+                        className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
                       >
-                        <Sparkles className="h-3 w-3" />
-                        Add {offeringLabels[type].slice(0, -1)}
+                        {offeringIcons[type]}
+                        {offeringLabels[type]}
+                        <span className="text-[10px] opacity-60">
+                          ({getOfferingsByType(type).length})
+                        </span>
+                      </TabsTrigger>
+                    ))}
+                    <TabsTrigger
+                      value="birdsong"
+                      className="flex items-center gap-1.5 font-serif text-xs tracking-wider data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                    >
+                      <Bird className="h-4 w-4" />
+                      Birdsong
+                      <span className="text-[10px] opacity-60">({birdsongCount})</span>
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {(Object.keys(offeringLabels) as OfferingType[]).map((type) => {
+                    const canAdd = meetingStatus === "active" || meetingStatus === "expiring";
+                    return (
+                      <TabsContent key={type} value={type}>
+                        <div className="flex justify-between items-center mb-5 flex-wrap gap-2">
+                          <h3 className="text-lg font-serif text-foreground/90 tracking-wide">
+                            {offeringLabels[type]}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <OfferingSortControls value={sortMode} onChange={setSortMode} />
+                            {canAdd ? (
+                              <Button
+                                size="sm"
+                                onClick={() => handleAddOffering(type)}
+                                className="font-serif tracking-wider text-xs gap-1.5"
+                              >
+                                <Sparkles className="h-3 w-3" />
+                                Add {offeringLabels[type].slice(0, -1)}
+                              </Button>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground/60 font-serif italic">
+                                Meet this tree to unlock
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {getOfferingsByType(type).length === 0 ? (
+                          <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
+                        ) : type === "photo" ? (
+                          <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
+                        ) : type === "book" ? (
+                          <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
+                        ) : (
+                          <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
+                            {sortOfferings(getOfferingsByType(type)).map((offering) => (
+                              <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
+                                <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
+                              </motion.div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </TabsContent>
+                    );
+                  })}
+
+                  <TabsContent value="birdsong">
+                    <div className="flex justify-between items-center mb-5">
+                      <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
+                      <Button size="sm" onClick={() => setBirdsongOpen(true)} className="font-serif tracking-wider text-xs gap-1.5">
+                        <Bird className="h-3 w-3" /> Add Birdsong
                       </Button>
                     </div>
-                  </div>
+                    <BirdsongTab treeId={id!} />
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
 
-                  {getOfferingsByType(type).length === 0 ? (
-                    <EmptyOffering type={type} label={offeringLabels[type]} onAdd={() => handleAddOffering(type)} />
-                  ) : type === "photo" ? (
-                    <PhotoGrid offerings={sortOfferings(getOfferingsByType(type))} onImageClick={(i) => setLightboxIndex(i)} />
-                  ) : type === "book" ? (
-                    <BookShelf offerings={sortOfferings(getOfferingsByType(type))} />
-                  ) : (
-                    <motion.div className={`space-y-4 ${["nft", "voice"].includes(type) ? "grid gap-4 md:grid-cols-2" : ""}`} initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}>
-                      {sortOfferings(getOfferingsByType(type)).map((offering) => (
-                        <motion.div key={offering.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }} transition={{ duration: 0.35, ease: "easeOut" }}>
-                          <OfferingCard offering={offering} treeId={id!} userId={userId} treeSpecies={tree?.species} treeNation={tree?.nation} />
-                        </motion.div>
-                      ))}
+            {/* Anchored Memories (moved from Encounters — these are offerings) */}
+            {anchoredOfferings.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowAnchored(!showAnchored)}
+                  className="w-full flex items-center gap-3 mb-4"
+                >
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--accent) / 0.3), transparent)" }} />
+                  <span className="text-lg font-serif text-muted-foreground tracking-widest uppercase flex items-center gap-2">
+                    🏡 Anchored Memories
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showAnchored ? "rotate-180" : ""}`} />
+                    <span className="text-xs opacity-60">({anchoredOfferings.length})</span>
+                  </span>
+                  <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--accent) / 0.3), transparent)" }} />
+                </button>
+                <AnimatePresence>
+                  {showAnchored && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {anchoredOfferings.map((off) => (
+                          <Card key={off.id} className="bg-card/30 backdrop-blur border-l-2 border-l-accent/40 border-border/20" style={{ boxShadow: "inset 0 0 20px hsl(var(--accent) / 0.03)" }}>
+                            <CardContent className="p-3 flex items-center gap-3">
+                              {off.media_url && off.type === "photo" && (
+                                <img src={off.media_url} alt={off.title} className="w-12 h-12 rounded object-cover shrink-0 opacity-90" loading="lazy" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-serif text-sm text-foreground/80 truncate">{off.title}</p>
+                                <span className="text-[10px] text-muted-foreground/60 font-mono">
+                                  {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                                </span>
+                              </div>
+                              <Badge variant="outline" className="text-[10px] font-serif shrink-0 capitalize border-accent/30 text-accent-foreground/60 gap-1">
+                                🌿 {off.type}
+                              </Badge>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
                     </motion.div>
                   )}
-                </TabsContent>
-              ))}
-
-              <TabsContent value="birdsong">
-                <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-lg font-serif text-foreground/90 tracking-wide">Birdsong</h3>
-                  <Button size="sm" onClick={() => setBirdsongOpen(true)} className="font-serif tracking-wider text-xs gap-1.5">
-                    <Bird className="h-3 w-3" /> Add Birdsong
-                  </Button>
-                </div>
-                <BirdsongTab treeId={id!} />
-              </TabsContent>
-            </Tabs>
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Offering History */}
             {userId && allMeetings.length > 0 && (
