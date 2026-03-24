@@ -1,12 +1,13 @@
 /**
  * GroundSection — the landing anchor of the Living Tree scroll.
  * Ground = the surface, where the Ancient Friend greets you.
- * Enhanced with earth-surface atmosphere and S33D seed halo.
+ * Enhanced with earth-surface atmosphere, S33D seed halo, and Ensō nudge.
  */
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Hero from "../Hero";
 import SectionAtmosphere from "./SectionAtmosphere";
+import EnsoNudge from "../EnsoNudge";
 
 const GroundSection = () => (
   <section id="ground" className="relative">
@@ -16,19 +17,21 @@ const GroundSection = () => (
     {/* The existing Ancient Friend hero landing */}
     <Hero />
 
-    {/* S33D seed halo — center anchor point */}
+    {/* S33D seed halo — center anchor point with Ensō nudge */}
     <div
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[1]"
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1]"
       aria-hidden="true"
     >
-      <motion.div
-        className="w-32 h-32 md:w-48 md:h-48 rounded-full"
-        style={{
-          background: "radial-gradient(circle, hsl(42 80% 55% / 0.06), transparent 70%)",
-        }}
-        animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.8, 0.5] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
+      <EnsoNudge size={160}>
+        <motion.div
+          className="w-32 h-32 md:w-48 md:h-48 rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, hsl(42 80% 55% / 0.06), transparent 70%)",
+          }}
+          animate={{ scale: [1, 1.05, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </EnsoNudge>
     </div>
 
     {/* Scroll direction indicators */}

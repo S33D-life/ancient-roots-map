@@ -10,7 +10,6 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
 import NotificationBell from "./NotificationBell";
-import EnsoNudge from "./EnsoNudge";
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";
 import ThemeToggle from "./ThemeToggle";
@@ -130,25 +129,23 @@ const Header = () => {
         <div className="relative z-[2] py-2">
           <div className="flex items-center justify-between min-w-0">
 
-            {/* ═══ LEFT ZONE: S33D Logo with Ensō nudge ═══ */}
-            <EnsoNudge size={52}>
-              <button
-                type="button"
-                onClick={handleLogoClick}
-                className="flex items-center gap-0 bg-transparent border-none p-0 shrink-0 group"
-                aria-label="S33D — Navigate to TETOL overview"
-              >
-                <img
-                  src={s33dHearthLogo}
-                  alt="S33D"
-                  className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover transition-all duration-300
-                    group-hover:scale-105 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.3)]"
-                  style={{
-                    border: "1.5px solid hsl(var(--primary) / 0.3)",
-                  }}
-                />
-              </button>
-            </EnsoNudge>
+            {/* ═══ LEFT ZONE: S33D Logo ═══ */}
+            <button
+              type="button"
+              onClick={handleLogoClick}
+              className="flex items-center gap-0 bg-transparent border-none p-0 shrink-0 group"
+              aria-label="S33D — Navigate to TETOL overview"
+            >
+              <img
+                src={s33dHearthLogo}
+                alt="S33D"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover transition-all duration-300
+                  group-hover:scale-105 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.3)]"
+                style={{
+                  border: "1.5px solid hsl(var(--primary) / 0.3)",
+                }}
+              />
+            </button>
 
             {/* ═══ CENTER: Desktop nav ═══ */}
             <nav className="hidden md:flex items-center gap-4 lg:gap-6">
