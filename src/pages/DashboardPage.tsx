@@ -531,6 +531,10 @@ const DashboardPage = () => {
               {user && <TeotagAITab userId={user.id} />}
             </TabsContent>
 
+            <TabsContent value="notifications">
+              {user && <HearthNotificationSettings userId={user.id} />}
+            </TabsContent>
+
             <TabsContent value="profile">
               {user && (
                 <DashboardProfile
