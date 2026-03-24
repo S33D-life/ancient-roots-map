@@ -1,6 +1,6 @@
 /**
  * ProximityNudge — app-level component that uses the Geolocation API
- * to detect when the user is near a mapped Ancient Friend or wished tree.
+ * to detect when the user is near a mapped Ancient Friend or dreamed tree.
  * Renders a floating notification pill.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
