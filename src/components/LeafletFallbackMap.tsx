@@ -248,6 +248,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [discoveryCount, setDiscoveryCount] = useState(0);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addTreeCoords, setAddTreeCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const [nearbySheetOpenFromChooser, setNearbySheetOpenFromChooser] = useState(false);
   const safeMapFlags = useMemo(() => {
     const params = new URLSearchParams(location.search);
     const SAFE_MAP_DEBUG = import.meta.env.DEV && params.get("mapDebug") === "1";
