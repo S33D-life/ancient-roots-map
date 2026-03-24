@@ -133,12 +133,25 @@ export default function OrbConstellation({
   onSelectAction,
   cx,
   cy,
+  updateAvailable,
+  onApplyUpdate,
+  onDismissUpdate,
 }: OrbConstellationProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const actions = useMemo(() => getActionsForRoute(pathname), [pathname]);
+  const baseActions = useMemo(() => getActionsForRoute(pathname), [pathname]);
+  const actions = useMemo(() => {
+    if (!updateAvailable) return baseActions;
+    const updateAction: ConstellationAction = {
+      key: "update",
+      emoji: "✨",
+      label: "Update",
+      action: "nav", // handled specially below
+    };
+    return [updateAction, ...baseActions];
+  }, [baseActions, updateAvailable]);
   const layout = useMemo(() => computeLayout(cx, cy, actions.length), [cx, cy, actions.length]);
 
   const handleAction = useCallback(
