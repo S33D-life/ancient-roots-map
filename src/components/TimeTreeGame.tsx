@@ -192,9 +192,9 @@ const TimeTreeGame = () => {
     }
   };
 
-  const convertToWish = async () => {
+  const convertToDream = async () => {
     if (!lastEntry || !userId) return;
-    // For MVP: plant a wish via tree_wishlist if tree_reference_id exists
+    // For MVP: plant a dream via tree_wishlist if tree_reference_id exists
     // Otherwise just mark with pilgrimage flag
     const { error } = await supabase
       .from("time_tree_entries")

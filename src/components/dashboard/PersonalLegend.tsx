@@ -25,7 +25,7 @@ const TYPE_META: Record<TimelineEvent["type"], { icon: React.ElementType; label:
   song:     { icon: Music, label: "Saved a song", color: "28 70% 50%" },
   plant:    { icon: Sprout, label: "Added a plant", color: "120 45% 45%" },
   vault:    { icon: Archive, label: "Stored in vault", color: "15 80% 55%" },
-  wishlist: { icon: Star, label: "Wished for a tree", color: "45 100% 60%" },
+  wishlist: { icon: Star, label: "Dreamed of a tree", color: "45 100% 60%" },
   ceremony: { icon: Wand2, label: "Staff ceremony", color: "280 60% 55%" },
 };
 

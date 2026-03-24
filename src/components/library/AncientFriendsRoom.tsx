@@ -107,15 +107,15 @@ const AncientFriendsRoom = ({
   const addToWishlist = useCallback(async (treeId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast.error("Please log in"); return; }
-    const { error } = await supabase.from("tree_wishlist").insert({ user_id: user.id, tree_id: treeId });
+    const { error } = await supabase.from("tree_wishlist").insert({ user_id: user.id, tree_id: treeId, status: "dreamed" } as any);
     if (error) {
-      if (error.code === '23505') toast.info("Already in your wishlist");
+      if (error.code === '23505') toast.info("Already in your Dream Tree");
       else toast.error("Failed to add");
       return;
     }
     setWishlistPulseId(treeId);
     setTimeout(() => setWishlistPulseId(null), 600);
-    toast.success("Tree added to your Wishing Tree!");
+    toast.success("Tree added to your Dream Tree!");
   }, []);
 
   const handleShare = useCallback(async (title: string, text: string, url?: string) => {
