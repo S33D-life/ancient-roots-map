@@ -78,23 +78,15 @@ const Header = () => {
     return () => window.removeEventListener("open-tetol", handler);
   }, [user, navigate, location.pathname]);
 
-  // Theme is always dark — no toggle needed
-
-  // ⌘K shortcut opens global search directly
+  // Apply saved theme preference on mount
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setGlobalSearchOpen(true);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (!document.documentElement.classList.contains('light')) {
-      document.documentElement.classList.add('dark');
+    const saved = localStorage.getItem("s33d-theme");
+    const root = document.documentElement;
+    if (saved === "light") {
+      root.classList.add("light");
+      root.classList.remove("dark");
+    } else if (!root.classList.contains("light")) {
+      root.classList.add("dark");
     }
   }, []);
 
