@@ -115,8 +115,7 @@ export default function AddTreeChooser({
 
   const handleLocate = () => {
     setLocating(true);
-    geo.requestLocation?.();
-    // Will re-trigger via useEffect when coords arrive
+    geo.locate("add-tree-chooser");
     setTimeout(() => setLocating(false), 3000);
   };
 
