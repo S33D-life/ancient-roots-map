@@ -23,7 +23,7 @@ const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
 const TeotagWhisper = lazy(() => import("@/components/TeotagWhisper"));
 const MapOnboardingRitual = lazy(() => import("@/components/MapOnboardingRitual"));
 const FullscreenMapControls = lazy(() => import("@/components/FullscreenMapControls"));
-const MapTreePanel = lazy(() => import("@/components/MapTreePanel"));
+
 
 const VALID_ARRIVALS = new Set<string>(["tree", "country", "region", "county", "hive", "clock", "search", "nearby", "featured", "species", "collection"]);
 
@@ -120,12 +120,6 @@ const MapPageFull = () => {
         </Suspense>
       )}
 
-      {/* Tree discovery panel — combined Recent + Awaiting */}
-      {!safeDisableNonessentialOverlays && !showBlessing && !isFullscreen && (
-        <Suspense fallback={null}>
-          <MapTreePanel onTreeClick={(treeId) => navigate(`/tree/${treeId}`)} />
-        </Suspense>
-      )}
 
       {/* Non-critical overlays deferred until after map is interactive */}
       {!safeDisableNonessentialOverlays && !showBlessing && !blessingJustDismissed && (
