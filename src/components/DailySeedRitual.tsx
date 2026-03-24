@@ -84,7 +84,7 @@ const DailySeedRitual = () => {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="text-2xl font-serif text-foreground tracking-wide"
             >
-              33 seeds await planting today.
+              3 seeds await planting today.
             </motion.h2>
 
             {/* Subtitle */}
