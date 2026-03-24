@@ -881,6 +881,13 @@ const TreeDetailPage = () => {
           <TabsContent value="offerings" className="space-y-6">
             <TabErrorBoundary tabName="Offerings">
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
+
+            {/* Offerings intro — always visible */}
+            <div className="text-center py-4">
+              <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Offerings</h3>
+              <p className="text-xs text-muted-foreground font-serif">Songs, photos, poems, and stories placed at this Ancient Friend</p>
+            </div>
+
             {/* Gate: offerings require active/expiring meeting */}
             {userId && meetingStatus !== "active" && meetingStatus !== "expiring" && (
               <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
@@ -891,6 +898,22 @@ const TreeDetailPage = () => {
                     ? "Meet this Ancient Friend to open a 12-hour offering window."
                     : "This meeting cannot be used for offerings."}
                 </p>
+              </div>
+            )}
+
+            {!userId && (
+              <div className="p-4 rounded-lg border border-border/40 bg-secondary/20 text-center">
+                <p className="text-sm text-muted-foreground font-serif">
+                  Sign in to leave offerings at this Ancient Friend.
+                </p>
+              </div>
+            )}
+
+            {offerings.length === 0 && (
+              <div className="py-8 text-center">
+                <Sparkles className="w-8 h-8 text-primary/30 mx-auto mb-2" />
+                <p className="text-sm font-serif text-muted-foreground">No offerings placed here yet.</p>
+                <p className="text-xs text-muted-foreground/60 font-serif mt-1">Be the first to leave something meaningful.</p>
               </div>
             )}
 
