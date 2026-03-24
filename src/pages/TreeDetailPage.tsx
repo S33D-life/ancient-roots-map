@@ -711,8 +711,26 @@ const TreeDetailPage = () => {
           <TabsContent value="encounters" className="space-y-6">
             <TabErrorBoundary tabName="Encounters">
             <Suspense fallback={<div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary/50" /></div>}>
+
+            {/* Encounters intro — always visible */}
+            <div className="text-center py-4">
+              <h3 className="text-lg font-serif text-foreground/90 tracking-wide mb-1">Encounters</h3>
+              <p className="text-xs text-muted-foreground font-serif">Visits, check-ins, and shared moments with this Ancient Friend</p>
+            </div>
+
             {/* Encounter Cluster */}
             <EncounterClusterPanel tree={tree} />
+
+            {!userId && (
+              <Card className="bg-secondary/20 border-border/30">
+                <CardContent className="p-6 text-center space-y-2">
+                  <TreeDeciduous className="w-8 h-8 text-primary/40 mx-auto" />
+                  <p className="text-sm font-serif text-muted-foreground">
+                    Sign in to record encounters, check in, and begin your relationship with this tree.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* 333s Presence Ritual */}
             {userId && (
