@@ -453,6 +453,12 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     setBloomStageFilter(stageMap[activeLens] || "all");
   }, [activeLens]);
 
+  // ── Dream Constellation Layer ──
+  const { dreamTreeCount, dreamOfferingCount } = useDreamConstellationLayer({
+    map: mapRef.current,
+    showDreamTrees,
+    showDreamOfferings,
+  });
 
   const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
   const { activeHiveFamily, setActiveHive } = useHiveSeasonFilter();
