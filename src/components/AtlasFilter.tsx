@@ -182,6 +182,8 @@ const AtlasFilter = ({
   isFullscreen,
   onPerspectivePreset,
   onAddTree,
+  onAddTree,
+  onQuickPreset,
 }: AtlasFilterProps) => {
   const {
     ageBand, setAgeBand,
