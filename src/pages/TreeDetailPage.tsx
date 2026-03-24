@@ -131,6 +131,7 @@ const TreeDetailPage = () => {
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
   const [sectionTab, setSectionTab] = useState<string>("overview");
+  const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [greetingCardOpen, setGreetingCardOpen] = useState(false);
   const [contributeSourceOpen, setContributeSourceOpen] = useState(false);
