@@ -72,9 +72,13 @@ const DigitalFireVote = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUserId(user?.id ?? null);
-      await fetchVotes(user?.id ?? null);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUserId(user?.id ?? null);
+        await fetchVotes(user?.id ?? null);
+      } catch (err) {
+        console.error("[DigitalFireVote] init failed", err);
+      }
       setLoading(false);
     };
     init();

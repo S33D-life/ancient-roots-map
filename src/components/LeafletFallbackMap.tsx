@@ -364,6 +364,30 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("s33d-clear-view", { detail: { clearView } }));
   }, [clearView]);
+
+  // Listen for companion controller commands and dispatch to the map
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const handler = (e: Event) => {
+      const cmd = (e as CustomEvent).detail;
+      if (!cmd?.type) return;
+      switch (cmd.type) {
+        case "zoom_in": map.zoomIn(); break;
+        case "zoom_out": map.zoomOut(); break;
+        case "zoom_reset": map.setView([30, 0], 3); break;
+        case "pan": map.panBy([cmd.dx * 80, cmd.dy * 80]); break;
+        case "focus_tree": {
+          const t = trees.find((tr: any) => tr.id === cmd.treeId);
+          if (t) map.flyTo([t.latitude, t.longitude], 17, { duration: 1.2 });
+          break;
+        }
+      }
+    };
+    window.addEventListener("s33d-companion-cmd", handler);
+    return () => window.removeEventListener("s33d-companion-cmd", handler);
+  }, [trees]);
+
   const groveViewActive = layers.groveView;
   const showForestPulse = layers.forestPulse;
   const showMycelialPathways = layers.mycelialPathways;

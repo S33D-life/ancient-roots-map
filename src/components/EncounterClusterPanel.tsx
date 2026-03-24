@@ -38,6 +38,7 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
 
   useEffect(() => {
     const fetchEncounters = async () => {
+      try {
       // Fetch all trees with same species in a bounding box for efficiency
       if (!tree.latitude || !tree.longitude) {
         setLoading(false);
@@ -104,8 +105,11 @@ const EncounterClusterPanel = ({ tree }: EncounterClusterPanelProps) => {
 
       setEncounters(enriched);
       setLoading(false);
+      } catch (err) {
+        console.error("[EncounterCluster] Failed to load encounters", err);
+        setLoading(false);
+      }
     };
-
     fetchEncounters();
   }, [tree.id, tree.latitude, tree.longitude]);
 

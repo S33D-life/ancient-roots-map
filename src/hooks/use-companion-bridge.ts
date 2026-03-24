@@ -68,12 +68,33 @@ export function useCompanionBridge() {
         navigate(route);
         showCommandFeedback(`Navigating to ${room}`);
       },
-      onZoomIn: () => showCommandFeedback("Zoom in"),
-      onZoomOut: () => showCommandFeedback("Zoom out"),
-      onZoomReset: () => showCommandFeedback("View reset"),
-      onPan: () => {}, // Handled silently — too frequent for toasts
-      onNext: () => showCommandFeedback("Next"),
-      onPrevious: () => showCommandFeedback("Previous"),
+      onZoomIn: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "zoom_in" } }));
+        showCommandFeedback("Zoom in");
+      },
+      onZoomOut: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "zoom_out" } }));
+        showCommandFeedback("Zoom out");
+      },
+      onZoomReset: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "zoom_reset" } }));
+        showCommandFeedback("View reset");
+      },
+      onPan: (dx: number, dy: number) => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pan", dx, dy } }));
+      },
+      onFocusTree: (treeId: string) => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "focus_tree", treeId } }));
+        showCommandFeedback("Focusing tree");
+      },
+      onNext: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "next" } }));
+        showCommandFeedback("Next");
+      },
+      onPrevious: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "previous" } }));
+        showCommandFeedback("Previous");
+      },
       onToggleFullscreen: () => {
         if (document.fullscreenElement) {
           document.exitFullscreen?.();
@@ -90,6 +111,12 @@ export function useCompanionBridge() {
       onExitFullscreen: () => {
         document.exitFullscreen?.();
         showCommandFeedback("Exiting fullscreen");
+      },
+      onPointerMove: (x: number, y: number) => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_move", x, y } }));
+      },
+      onPointerHide: () => {
+        window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_hide" } }));
       },
       onExportView: () => showCommandFeedback("Capture requested"),
       onOpenPanel: () => showCommandFeedback("Opening panel"),

@@ -445,7 +445,7 @@ const TreeDetailPage = () => {
         )}
       </AnimatePresence>
 
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl overflow-x-hidden">
         <button
           onClick={() => {
             if (window.history.length > 1) {
@@ -890,7 +890,7 @@ const TreeDetailPage = () => {
             </Button>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg">
+              <TabsList className="w-full justify-start bg-secondary/30 border border-border/50 mb-6 flex-wrap h-auto gap-1 p-1.5 rounded-lg overflow-x-auto max-w-[calc(100vw-2rem)]">
                 {(Object.keys(offeringLabels) as OfferingType[]).map((type) => (
                   <TabsTrigger
                     key={type}
