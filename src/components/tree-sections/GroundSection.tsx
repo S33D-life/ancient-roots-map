@@ -19,7 +19,7 @@ const GroundSection = () => (
 
     {/* S33D seed halo — center anchor point with Ensō nudge */}
     <div
-      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1]"
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[15] pointer-events-none"
       aria-hidden="true"
     >
       <EnsoNudge size={160}>
