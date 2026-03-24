@@ -3136,6 +3136,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       )}
 
 
+      {/* Add Tree Chooser */}
+      <AddTreeChooser
+        open={chooserOpen}
+        onOpenChange={setChooserOpen}
+        mapCenter={addTreeCoords}
+        onAddNew={() => setAddDialogOpen(true)}
+        onCheckIn={(treeId) => {
+          navigate(`/tree/${treeId}`);
+        }}
+        onShowFullNearby={() => {
+          setNearbySheetOpenFromChooser(true);
+          // Dispatch to open nearby sheet if it exists, or navigate
+          navigate(`/tree/nearby`);
+        }}
+      />
+
       {/* Add Tree Dialog */}
       <AddTreeDialog
         open={addDialogOpen}
