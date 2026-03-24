@@ -46,6 +46,26 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
   const [recentTrees, setRecentTrees] = useState<TreeItem[]>([]);
   const [nearbyTrees, setNearbyTrees] = useState<TreeItem[]>([]);
 
+  // Drag state for Grove Signals panel
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+
+  const onDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    const point = "touches" in e ? e.touches[0] : e;
+    dragRef.current = { startX: point.clientX, startY: point.clientY, origX: dragOffset.x, origY: dragOffset.y };
+  }, [dragOffset]);
+
+  const onDragMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!dragRef.current) return;
+    const point = "touches" in e ? e.touches[0] : e;
+    setDragOffset({
+      x: dragRef.current.origX + (point.clientX - dragRef.current.startX),
+      y: dragRef.current.origY + (point.clientY - dragRef.current.startY),
+    });
+  }, []);
+
+  const onDragEnd = useCallback(() => { dragRef.current = null; }, []);
+
   useEffect(() => {
     if (!active) return;
     supabase
