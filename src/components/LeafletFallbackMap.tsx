@@ -2711,24 +2711,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* Search */}
-      <LiteMapSearch
-        trees={trees}
-        onSelect={handleSearchSelect}
-        onSearchResult={(result) => {
-          if (result.type === "rootstone" && result.url) {
-            window.location.href = result.url;
-          } else if (result.mapContext?.lat && result.mapContext?.lng && mapRef.current) {
-            mapRef.current.flyTo(
-              [result.mapContext.lat, result.mapContext.lng],
-              result.mapContext.zoom || 14,
-              { duration: 0.9, easeLinearity: 0.25 }
-            );
-          } else if (result.url) {
-            window.location.href = result.url;
-          }
-        }}
-      />
+
+
 
       {/* Unified Atlas Filter — hidden in clear view */}
       {!clearView && (
