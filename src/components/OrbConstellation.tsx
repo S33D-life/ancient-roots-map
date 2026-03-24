@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Z } from "@/lib/z-index";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useState } from "react";
+import teotagLogo from "@/assets/teotag-small.webp";
 
 /* ─── Action definitions ─── */
 export interface ConstellationAction {
