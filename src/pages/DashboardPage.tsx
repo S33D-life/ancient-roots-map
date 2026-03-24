@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame, Compass, Bot } from "lucide-react";
+import { Loader2, TreeDeciduous, Sprout, Settings, Trophy, Users, Search, Leaf, BookOpen, Flame, Compass, Bot, BellDot } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, generateCSV, downloadCSV } from "@/utils/csvHandler";
 import { convertToCoordinates } from "@/utils/what3words";
@@ -38,6 +38,7 @@ import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
 import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import TeotagAITab from "@/components/dashboard/TeotagAITab";
+import HearthNotificationSettings from "@/components/dashboard/HearthNotificationSettings";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
@@ -404,6 +405,7 @@ const DashboardPage = () => {
       { value: "journey", label: "Journey", icon: Compass },
       { value: "pod", label: "My Grove", icon: Sprout, count: trees.length },
       { value: "teotag", label: "TEOTAG", icon: Bot },
+      { value: "notifications", label: "Signals", icon: BellDot },
       { value: "profile", label: "Settings", icon: Settings },
     ];
 
@@ -527,6 +529,10 @@ const DashboardPage = () => {
 
             <TabsContent value="teotag">
               {user && <TeotagAITab userId={user.id} />}
+            </TabsContent>
+
+            <TabsContent value="notifications">
+              {user && <HearthNotificationSettings userId={user.id} />}
             </TabsContent>
 
             <TabsContent value="profile">

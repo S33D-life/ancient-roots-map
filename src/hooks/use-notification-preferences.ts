@@ -19,6 +19,22 @@ export interface NotificationPreferences {
   topic_species: string[];
   topic_trees: string[];
   topic_councils: string[];
+  // Whispers & Presence
+  whispers_enabled: boolean;
+  whispers_near_tree_only: boolean;
+  whispers_auto_open: boolean;
+  whispers_haptic: boolean;
+  // Notifications & Alerts
+  notify_tree_interactions: boolean;
+  notify_nearby_friends: boolean;
+  notify_council_updates: boolean;
+  notify_minting_events: boolean;
+  notify_system_updates: boolean;
+  quiet_mode: boolean;
+  // Experience & Interface
+  show_onboarding_nudges: boolean;
+  show_floating_prompts: boolean;
+  show_companion_suggestions: boolean;
 }
 
 const DEFAULTS: NotificationPreferences = {
@@ -36,6 +52,19 @@ const DEFAULTS: NotificationPreferences = {
   topic_species: [],
   topic_trees: [],
   topic_councils: [],
+  whispers_enabled: true,
+  whispers_near_tree_only: false,
+  whispers_auto_open: false,
+  whispers_haptic: true,
+  notify_tree_interactions: true,
+  notify_nearby_friends: true,
+  notify_council_updates: true,
+  notify_minting_events: true,
+  notify_system_updates: true,
+  quiet_mode: false,
+  show_onboarding_nudges: true,
+  show_floating_prompts: true,
+  show_companion_suggestions: true,
 };
 
 export function useNotificationPreferences(userId: string | null) {
@@ -67,6 +96,19 @@ export function useNotificationPreferences(userId: string | null) {
             topic_species: data.topic_species || [],
             topic_trees: data.topic_trees || [],
             topic_councils: data.topic_councils || [],
+            whispers_enabled: data.whispers_enabled ?? true,
+            whispers_near_tree_only: data.whispers_near_tree_only ?? false,
+            whispers_auto_open: data.whispers_auto_open ?? false,
+            whispers_haptic: data.whispers_haptic ?? true,
+            notify_tree_interactions: data.notify_tree_interactions ?? true,
+            notify_nearby_friends: data.notify_nearby_friends ?? true,
+            notify_council_updates: data.notify_council_updates ?? true,
+            notify_minting_events: data.notify_minting_events ?? true,
+            notify_system_updates: data.notify_system_updates ?? true,
+            quiet_mode: data.quiet_mode ?? false,
+            show_onboarding_nudges: data.show_onboarding_nudges ?? true,
+            show_floating_prompts: data.show_floating_prompts ?? true,
+            show_companion_suggestions: data.show_companion_suggestions ?? true,
           });
         }
         setLoading(false);
@@ -87,10 +129,15 @@ export function useNotificationPreferences(userId: string | null) {
 
     await supabase
       .from("notification_preferences")
-      .upsert(row, { onConflict: "user_id" });
+      .upsert(row as any, { onConflict: "user_id" });
 
     setSaving(false);
   }, [userId, prefs]);
 
-  return { prefs, loading, saving, save };
+  const resetToDefaults = useCallback(async () => {
+    if (!userId) return;
+    await save(DEFAULTS);
+  }, [userId, save]);
+
+  return { prefs, loading, saving, save, resetToDefaults, DEFAULTS };
 }
