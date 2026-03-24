@@ -63,12 +63,12 @@ export function trackMetric(
   deferAction(async () => {
     try {
       const { supabase } = await import("@/integrations/supabase/client");
-      await supabase.from("compute_metrics").insert({
+      await supabase.from("compute_metrics").insert([{
         metric_type: metricType,
         metric_key: metricKey,
         value,
-        metadata: metadata ? metadata : undefined,
-      });
+        metadata: metadata ? (metadata as any) : undefined,
+      }]);
     } catch {
       // silently fail — metrics are non-critical
     }
