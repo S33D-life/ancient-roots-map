@@ -21,6 +21,7 @@ import CompanionBridge from "@/components/companion/CompanionBridge";
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import HeartbeatNotification from "@/components/HeartbeatNotification";
 const StarryNight = lazy(() => import("@/components/StarryNight"));
 
 import DevQAPanel from "@/components/DevQAPanel";
@@ -266,6 +267,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <Suspense fallback={null}><StarryNight /></Suspense>
+        <HeartbeatNotification />
         <MissingEnvBanner />
         {ShowDevPanel && <DevQAPanel />}
         {ShowDevPanel && <DevDiagnosticsOverlay />}
