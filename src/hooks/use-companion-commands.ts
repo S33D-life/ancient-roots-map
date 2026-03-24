@@ -29,6 +29,9 @@ export interface RoomHandlers {
   onPointerDelta?: (dx: number, dy: number) => void;
   onPointerClick?: (x: number, y: number) => void;
   onScroll?: (dx: number, dy: number) => void;
+  onDragStart?: () => void;
+  onDragMove?: (dx: number, dy: number) => void;
+  onDragEnd?: () => void;
   onNavigateRoom?: (room: string) => void;
   onSendToDesktop?: (entityType: string, entityId: string, label?: string) => void;
 }
@@ -60,6 +63,9 @@ export function useCompanionDisplay() {
       case "pointer_delta": h.onPointerDelta?.(cmd.dx, cmd.dy); break;
       case "pointer_click": h.onPointerClick?.(cmd.x, cmd.y); break;
       case "scroll": h.onScroll?.(cmd.dx, cmd.dy); break;
+      case "drag_start": h.onDragStart?.(); break;
+      case "drag_move": h.onDragMove?.(cmd.dx, cmd.dy); break;
+      case "drag_end": h.onDragEnd?.(); break;
       case "navigate_room": h.onNavigateRoom?.(cmd.room); break;
       case "send_to_desktop": h.onSendToDesktop?.(cmd.entityType, cmd.entityId, cmd.label); break;
     }

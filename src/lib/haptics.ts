@@ -19,3 +19,13 @@ export function hapticMedium() {
 export function hapticSuccess() {
   if (canVibrate) navigator.vibrate([15, 50, 15]);
 }
+
+/** Subtle click — 5ms, for tap-to-click */
+export function hapticClick() {
+  if (canVibrate) navigator.vibrate(5);
+}
+
+/** Drag start — gentle double-pulse */
+export function hapticDragStart() {
+  if (canVibrate) navigator.vibrate([8, 30, 12]);
+}

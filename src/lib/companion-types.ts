@@ -11,6 +11,9 @@ export type CompanionRoom =
   | "card"
   | "unknown";
 
+/** Controller interaction modes */
+export type CompanionMode = "trackpad" | "pointer" | "scroll";
+
 export type CompanionCommand =
   | { type: "zoom_in" }
   | { type: "zoom_out" }
@@ -33,6 +36,9 @@ export type CompanionCommand =
   | { type: "pointer_delta"; dx: number; dy: number }
   | { type: "pointer_click"; x: number; y: number }
   | { type: "scroll"; dx: number; dy: number }
+  | { type: "drag_start" }
+  | { type: "drag_move"; dx: number; dy: number }
+  | { type: "drag_end" }
   | { type: "navigate_room"; room: CompanionRoom }
   | { type: "send_to_desktop"; entityType: string; entityId: string; label?: string };
 
@@ -45,6 +51,7 @@ export const VALID_COMMAND_TYPES = new Set<string>([
   "export_view", "select_chart",
   "pointer_move", "pointer_hide",
   "pointer_delta", "pointer_click", "scroll",
+  "drag_start", "drag_move", "drag_end",
   "navigate_room", "send_to_desktop",
 ]);
 
@@ -53,7 +60,6 @@ export interface CompanionRoomState {
   room: CompanionRoom;
   isFullscreen: boolean;
   zoomLevel?: number;
-  /** Current item id if applicable */
   activeItemId?: string;
   activeItemLabel?: string;
 }
@@ -66,6 +72,19 @@ export interface CompanionSession {
   paired: boolean;
   connectedAt?: number;
 }
+
+/** Controller sensitivity settings */
+export interface CompanionSettings {
+  pointerSensitivity: number; // 0.5 – 3.0, default 1.8
+  scrollSensitivity: number;  // 0.5 – 3.0, default 1.2
+  naturalScroll: boolean;     // default true
+}
+
+export const DEFAULT_SETTINGS: CompanionSettings = {
+  pointerSensitivity: 1.8,
+  scrollSensitivity: 1.2,
+  naturalScroll: true,
+};
 
 /** Generate a 6-char alphanumeric code (no ambiguous chars) */
 export function generatePairingCode(): string {
