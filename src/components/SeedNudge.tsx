@@ -1,7 +1,6 @@
 /**
- * SeedNudge — a gentle contextual prompt inviting users to plant a seed.
- * Appears near trees, after tree creation, or after check-in.
- * Non-intrusive, easy to dismiss, easy to act on.
+ * SeedNudge — a place-aware encounter card inviting users to plant a seed.
+ * Designed as a rooted ritual moment, not a generic overlay.
  */
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,16 +16,13 @@ interface SeedNudgeProps {
   treeLat: number | null;
   treeLng: number | null;
   userId: string | null;
-  /** Context label for the invitation copy */
   context?: "new_tree" | "checkin" | "proximity";
-  /** Called after dismissal or planting */
   onDismiss?: () => void;
   className?: string;
 }
 
 const DISMISSED_KEY = "s33d-seed-nudge-dismissed";
 
-/** Check if nudge was dismissed for a tree in this session */
 function wasDismissed(treeId: string): boolean {
   try {
     const raw = sessionStorage.getItem(DISMISSED_KEY);
@@ -49,16 +45,19 @@ function markDismissed(treeId: string) {
 
 const CONTEXT_COPY = {
   new_tree: {
+    label: "First Offering",
     message: "Plant a seed here as your first offering?",
     sub: "A small act of reciprocity for this new Ancient Friend.",
   },
   checkin: {
-    message: "Would you like to plant a seed at this tree?",
-    sub: "Your seed carries 33 hearts — blooming for a future wanderer.",
+    label: "Planting Range Reached",
+    message: "You're close enough to plant a seed here.",
+    sub: "Seeds planted today may bloom into hearts tomorrow.",
   },
   proximity: {
-    message: "You're near an Ancient Friend.",
-    sub: "Would you like to plant a seed here?",
+    label: "Planting Range Reached",
+    message: "You're close enough to plant a seed here.",
+    sub: "Seeds planted today may bloom into hearts tomorrow.",
   },
 };
 
@@ -107,7 +106,6 @@ const SeedNudge = ({
     }
   }, [treeId, treeLat, treeLng, plantSeed, seedsRemaining, dismiss]);
 
-  // Don't render if: no user, no seeds, no coords, dismissed, or already planted
   if (!userId || seedsRemaining <= 0 || !treeLat || !treeLng || !visible) return null;
 
   const copy = CONTEXT_COPY[context];
@@ -118,86 +116,128 @@ const SeedNudge = ({
       <AnimatePresence>
         {!planted && (
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className={`relative rounded-xl overflow-hidden ${className}`}
+            initial={{ opacity: 0, y: 20, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 260, damping: 28 }}
+            className={`relative rounded-2xl overflow-hidden ${className}`}
             style={{
-              background: "linear-gradient(135deg, hsl(var(--primary) / 0.06), hsl(var(--accent) / 0.04))",
-              border: "1px solid hsl(var(--primary) / 0.15)",
+              background: "linear-gradient(160deg, hsl(120 18% 14%), hsl(30 14% 12%))",
+              border: "1px solid hsl(42 55% 45% / 0.35)",
+              boxShadow: "0 8px 32px -8px hsl(0 0% 0% / 0.5), inset 0 1px 0 hsl(42 55% 45% / 0.08)",
             }}
           >
+            {/* Gold accent bar */}
+            <div
+              className="h-[2px]"
+              style={{
+                background: "linear-gradient(90deg, transparent 5%, hsl(42 60% 50% / 0.5) 30%, hsl(42 60% 50% / 0.6) 50%, hsl(42 60% 50% / 0.5) 70%, transparent 95%)",
+              }}
+            />
+
             {/* Dismiss button */}
             <button
               onClick={dismiss}
-              className="absolute top-2 right-2 p-1 rounded-full transition-colors hover:bg-muted/30"
+              className="absolute top-2.5 right-2.5 p-1.5 rounded-full transition-colors hover:bg-white/5"
               aria-label="Dismiss"
             >
-              <X className="w-3.5 h-3.5 text-muted-foreground/50" />
+              <X className="w-3.5 h-3.5" style={{ color: "hsl(42 20% 60% / 0.5)" }} />
             </button>
 
-            <div className="flex items-start gap-3 p-3.5 pr-8">
-              {/* Seed icon with glow */}
+            <div className="flex items-start gap-3.5 p-4 pr-9">
+              {/* Seed icon with heartbeat glow */}
               <motion.div
-                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 mt-0.5"
                 style={{
-                  background: "radial-gradient(circle, hsl(var(--primary) / 0.15), transparent)",
-                  border: "1px solid hsl(var(--primary) / 0.2)",
+                  background: "radial-gradient(circle, hsl(42 60% 50% / 0.12), transparent 70%)",
+                  border: "1px solid hsl(42 55% 45% / 0.25)",
                 }}
                 animate={{
                   boxShadow: [
-                    "0 0 0 0 hsl(var(--primary) / 0.1)",
-                    "0 0 12px 2px hsl(var(--primary) / 0.15)",
-                    "0 0 0 0 hsl(var(--primary) / 0.1)",
+                    "0 0 0 0 hsl(42 60% 50% / 0.05)",
+                    "0 0 16px 4px hsl(42 60% 50% / 0.12)",
+                    "0 0 0 0 hsl(42 60% 50% / 0.05)",
                   ],
                 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <Sprout className="w-4.5 h-4.5 text-primary" />
+                <Sprout className="w-5 h-5" style={{ color: "hsl(42 60% 55%)" }} />
               </motion.div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-serif text-foreground/90 leading-snug">
+                {/* Top label */}
+                <p
+                  className="text-[10px] font-serif uppercase tracking-[0.12em] mb-1"
+                  style={{ color: "hsl(42 50% 55% / 0.8)" }}
+                >
+                  {copy.label}
+                </p>
+
+                {/* Main message */}
+                <p
+                  className="text-[15px] font-serif leading-snug font-medium"
+                  style={{ color: "hsl(40 30% 88%)" }}
+                >
                   {copy.message}
                 </p>
-                <p className="text-[11px] font-serif text-muted-foreground mt-0.5 leading-snug">
+
+                {/* Tree context anchor */}
+                {treeName && (
+                  <p
+                    className="text-[11px] font-serif mt-1 leading-snug"
+                    style={{ color: "hsl(35 20% 60% / 0.7)" }}
+                  >
+                    Offering to: {treeName}
+                  </p>
+                )}
+
+                {/* Supporting line */}
+                <p
+                  className="text-[11px] font-serif mt-1.5 leading-relaxed italic"
+                  style={{ color: "hsl(35 18% 65% / 0.75)" }}
+                >
                   {copy.sub}
                 </p>
-                <p className="text-[10px] font-serif text-muted-foreground/60 mt-1">
+
+                {/* Seeds remaining */}
+                <p
+                  className="text-[10px] font-serif mt-1"
+                  style={{ color: "hsl(35 15% 55% / 0.5)" }}
+                >
                   {seedsRemaining} seed{seedsRemaining !== 1 ? "s" : ""} remaining today
                 </p>
 
-                <div className="flex items-center gap-2 mt-2.5">
+                {/* CTAs */}
+                <div className="flex items-center gap-3 mt-3.5">
                   <Button
                     size="sm"
-                    className="h-8 text-xs font-serif gap-1.5 px-3"
+                    className="h-9 text-[13px] font-serif font-medium gap-2 px-5 rounded-lg border-0 transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
                     style={{
-                      background: "linear-gradient(135deg, hsl(var(--primary) / 0.85), hsl(var(--primary)))",
-                      color: "hsl(var(--primary-foreground))",
+                      background: "linear-gradient(135deg, hsl(42 65% 48%), hsl(38 60% 42%))",
+                      color: "hsl(30 15% 10%)",
+                      boxShadow: "0 2px 12px -2px hsl(42 60% 45% / 0.35)",
                     }}
                     disabled={planting}
                     onClick={handlePlant}
                   >
                     {planting ? (
                       <motion.div
-                        className="w-3 h-3 border-2 border-current border-t-transparent rounded-full"
+                        className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
                       />
                     ) : (
-                      <Sprout className="w-3.5 h-3.5" />
+                      <Sprout className="w-4 h-4" />
                     )}
-                    Plant Seed
+                    Plant a Seed
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 text-xs font-serif text-muted-foreground/60"
+                  <button
+                    className="text-[12px] font-serif transition-colors duration-200 hover:brightness-125"
+                    style={{ color: "hsl(35 15% 55% / 0.45)" }}
                     onClick={dismiss}
                   >
                     Not now
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
