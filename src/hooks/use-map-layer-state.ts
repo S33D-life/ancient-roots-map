@@ -106,6 +106,8 @@ function getInitialState(): LayerState {
     bloomConstellationMode: false,
     forestPulse: false,
     mycelialPathways: false,
+    dreamTrees: false,
+    dreamOfferings: false,
   };
 }
 
