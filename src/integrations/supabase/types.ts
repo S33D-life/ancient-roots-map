@@ -6658,6 +6658,13 @@ export type Database = {
             referencedRelation: "tree_checkins"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tree_checkin_witnesses_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tree_checkins: {
@@ -8479,10 +8486,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "witness_sessions_initiator_checkin_id_fkey"
+            columns: ["initiator_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "witness_sessions_joiner_checkin_id_fkey"
             columns: ["joiner_checkin_id"]
             isOneToOne: false
             referencedRelation: "tree_checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "witness_sessions_joiner_checkin_id_fkey"
+            columns: ["joiner_checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins_public"
             referencedColumns: ["id"]
           },
           {
@@ -8503,6 +8524,60 @@ export type Database = {
       }
     }
     Views: {
+      tree_checkins_public: {
+        Row: {
+          birdsong_heard: boolean | null
+          canopy_proof: boolean | null
+          checked_in_at: string | null
+          fungi_present: boolean | null
+          id: string | null
+          minted_status: string | null
+          privacy: string | null
+          season_stage: string | null
+          tree_id: string | null
+          weather: string | null
+        }
+        Insert: {
+          birdsong_heard?: boolean | null
+          canopy_proof?: boolean | null
+          checked_in_at?: string | null
+          fungi_present?: boolean | null
+          id?: string | null
+          minted_status?: string | null
+          privacy?: string | null
+          season_stage?: string | null
+          tree_id?: string | null
+          weather?: string | null
+        }
+        Update: {
+          birdsong_heard?: boolean | null
+          canopy_proof?: boolean | null
+          checked_in_at?: string | null
+          fungi_present?: boolean | null
+          id?: string | null
+          minted_status?: string | null
+          privacy?: string | null
+          season_stage?: string | null
+          tree_id?: string | null
+          weather?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_checkins_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_checkins_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_sources_public: {
         Row: {
           contributor_name: string | null
