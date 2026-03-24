@@ -1,5 +1,5 @@
 /**
- * WishlistPilgrimageNudge — shows nearby wished trees as a gentle
+ * WishlistPilgrimageNudge — shows nearby dreamed trees as a gentle
  * floating pill on the map. Encourages users to visit trees they've saved.
  */
 import { useEffect, useState, useCallback } from "react";
