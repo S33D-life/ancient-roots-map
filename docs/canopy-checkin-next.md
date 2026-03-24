@@ -9,7 +9,7 @@ All canopy check-ins now flow through edge function:
 
 Rules enforced on server (not just UI):
 - Cooldown per user+tree: 10 minutes.
-- Max check-ins per user per day: 18.
+- Max check-ins per user per day: 50.
 - Max check-ins per tree per day: 200.
 - Minimum GPS accuracy for verified check-in: `<= 80m`.
 - Radius check for verified check-in: within `100m` of tree coordinates.
