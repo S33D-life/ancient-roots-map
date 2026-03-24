@@ -24,6 +24,7 @@ import {
   type SpeciesVisionPrediction,
   type SpeciesVisionResult,
 } from "@/services/speciesVision";
+import SeedNudge from "@/components/SeedNudge";
 
 interface AddTreeDialogProps {
   open: boolean;
