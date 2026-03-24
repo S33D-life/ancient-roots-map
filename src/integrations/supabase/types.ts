@@ -4165,6 +4165,35 @@ export type Database = {
         }
         Relationships: []
       }
+      offering_resonances: {
+        Row: {
+          created_at: string
+          id: string
+          offering_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offering_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offering_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offering_resonances_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       offering_tags: {
         Row: {
           created_at: string
@@ -4215,6 +4244,7 @@ export type Database = {
           quote_source: string | null
           quote_text: string | null
           ranked_at: string | null
+          resonance_count: number
           sealed_by_staff: string | null
           sky_stamp_id: string | null
           title: string
@@ -4240,6 +4270,7 @@ export type Database = {
           quote_source?: string | null
           quote_text?: string | null
           ranked_at?: string | null
+          resonance_count?: number
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
           title: string
@@ -4265,6 +4296,7 @@ export type Database = {
           quote_source?: string | null
           quote_text?: string | null
           ranked_at?: string | null
+          resonance_count?: number
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
           title?: string
