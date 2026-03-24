@@ -191,7 +191,7 @@ const CandidateAtlasPage = ({ datasetKey, readinessNotes }: Props) => {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatTile label="Ancient Friends" value={loading ? "…" : trees.length} icon={TreeDeciduous} />
+            <StatTile label="Ancient Friends" value={loading ? "…" : totalTreeCount} icon={TreeDeciduous} />
             <StatTile label="Species" value={loading ? "…" : speciesCount} icon={Flower2} />
             <StatTile label="Regions" value={loading ? "…" : regionCount} icon={Compass} />
             <StatTile label="Circles" value={config.circles.length} icon={Layers} />
