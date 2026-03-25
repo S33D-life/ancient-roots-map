@@ -522,7 +522,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const changeTypeLink = onChangeType ? (
     <button
       type="button"
-      onClick={() => { onOpenChange(false); onChangeType(); }}
+      onClick={onChangeType}
       className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors mt-0.5"
     >
       ← Change type
