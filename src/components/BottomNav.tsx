@@ -68,7 +68,7 @@ const BottomNav = () => {
           >
             <Plus className="w-5 h-5" style={{ color: "hsl(var(--primary-foreground))" }} />
           </div>
-          <span className="text-[9px] font-serif tracking-wider text-primary">Add</span>
+          <span className="text-[9px] font-serif tracking-wider text-primary">Add Tree</span>
         </button>
 
         {/* Last two nav items */}
