@@ -25,6 +25,7 @@ import {
   EmptyWishes,
   EmptyWhispers,
 } from "@/components/tree-sections/ResearchEmptyStates";
+const TreeDiscoveryPaths = lazy(() => import("@/components/tree-sections/TreeDiscoveryPaths"));
 import {
   mapResearchTreeToTreeRow,
   type ResearchOrigin,
