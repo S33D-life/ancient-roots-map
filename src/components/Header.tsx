@@ -232,12 +232,15 @@ const Header = () => {
                 </Button>
               )}
 
-              {/* TEOTAG — guiding intelligence orb → Hearth AI tab */}
+              {/* TEOTAG — guiding intelligence orb → Hearth AI tab. Long-press to restore hidden orb. */}
               <button
                 type="button"
                 onClick={() => navigate("/dashboard?tab=teotag")}
-                className="shrink-0 group"
-                aria-label="TEOTAG — The Echo of the Ancient Groves"
+                onPointerDown={orbRestore.onPointerDown}
+                onPointerMove={orbRestore.onPointerMove}
+                onPointerUp={orbRestore.onPointerUp}
+                className="shrink-0 group relative"
+                aria-label="TEOTAG — The Echo of the Ancient Groves. Hold to restore orb."
               >
                 <img
                   src={teotagLogo}
@@ -248,6 +251,24 @@ const Header = () => {
                     border: "1.5px solid hsl(var(--primary) / 0.25)",
                   }}
                 />
+                {/* Long-press progress ring for restore */}
+                {orbRestoreProgress > 0 && orbRestoreProgress < 1 && (
+                  <svg
+                    className="absolute pointer-events-none"
+                    style={{ inset: -3, width: "calc(100% + 6px)", height: "calc(100% + 6px)" }}
+                    viewBox="0 0 40 40"
+                  >
+                    <circle
+                      cx="20" cy="20" r="18"
+                      fill="none"
+                      stroke="hsl(45 90% 60% / 0.6)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeDasharray={`${orbRestoreProgress * 113} 113`}
+                      transform="rotate(-90 20 20)"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
