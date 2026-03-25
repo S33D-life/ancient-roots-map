@@ -46,6 +46,7 @@ const DESKTOP_NAV = [
 const PAGE_CONTEXT: { prefix: string; label: string }[] = [
   { prefix: "/map", label: "Map Room" },
   { prefix: "/tree/", label: "Ancient Friend" },
+  { prefix: "/add-tree", label: "Add Tree" },
   { prefix: "/library/staff-room", label: "Staff Room" },
   { prefix: "/staff/", label: "Staff Room" },
   { prefix: "/library/music-room", label: "Tree Radio" },
@@ -55,14 +56,22 @@ const PAGE_CONTEXT: { prefix: string; label: string }[] = [
   { prefix: "/vault", label: "Heartwood Vault" },
   { prefix: "/dashboard", label: "Hearth" },
   { prefix: "/value-tree", label: "Value Tree" },
+  { prefix: "/how-hearts-work", label: "How Hearts Work" },
+  { prefix: "/patron-offering", label: "Patron Offering" },
+  { prefix: "/harvest", label: "Harvest" },
+  { prefix: "/cosmic", label: "Cosmic Calendar" },
   { prefix: "/atlas/bio-regions", label: "Atlas · Bioregions" },
   { prefix: "/hives", label: "Atlas · Hives" },
   { prefix: "/hive/", label: "Atlas · Hive" },
   { prefix: "/atlas", label: "Atlas · Countries" },
   { prefix: "/council", label: "Council" },
+  { prefix: "/golden-dream", label: "Golden Dream" },
   { prefix: "/roadmap", label: "Roadmap" },
   { prefix: "/bug-garden", label: "Bug Garden" },
   { prefix: "/discovery", label: "Discovery" },
+  { prefix: "/support", label: "Support" },
+  { prefix: "/groves", label: "Groves" },
+  { prefix: "/press", label: "Press" },
 ];
 
 function getPageContext(pathname: string): string | null {
