@@ -386,28 +386,20 @@ const ValueTreePage = () => {
             </Suspense>
           </TabsContent>
 
-          {/* ═══════ COMPASS ═══════ */}
+          {/* ═══════ COMPASS (hidden, kept for deep-link compat) ═══════ */}
           <TabsContent value="compass">
             <Suspense fallback={<TabLoader />}>
-              <div className="space-y-6">
-                <div className="text-center space-y-2 mb-4">
-                  <h2 className="text-lg font-serif text-foreground">The Distribution Compass</h2>
-                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
-                    How 777,777,777 S33D Hearts are allocated, distributed, and routed through the living ecosystem.
-                  </p>
-                </div>
-                <EconomyCompass />
-              </div>
+              <EconomyCompass />
             </Suspense>
           </TabsContent>
 
-          {/* ═══════ LIVING FLOW ═══════ */}
+          {/* ═══════ LIVING FLOW (How It Works) ═══════ */}
           <TabsContent value="flow">
             <div className="space-y-6">
               <div className="text-center space-y-2 mb-6">
-                <h2 className="text-lg font-serif text-foreground">The Living Value Cycle</h2>
+                <h2 className="text-lg font-serif text-foreground">How Value Flows</h2>
                 <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
-                  Every action in the S33D ecosystem follows this living cycle — from the first seed planted to the breath that starts it all again.
+                  Every action follows this cycle — from the first seed to the breath that starts it again.
                 </p>
               </div>
 
@@ -427,35 +419,13 @@ const ValueTreePage = () => {
                 <RewardReference />
               </div>
 
-              {/* Integrity safeguards */}
-              <Card className="bg-card/40 backdrop-blur border-border/30">
-                <CardContent className="p-5">
-                  <h4 className="text-xs font-serif text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
-                    <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Integrity Safeguards
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {[
-                      "Daily rate limits per tree per user",
-                      "Verification tiers for higher rewards",
-                      "Community review for curation actions",
-                      "Anti-farming cooldown periods",
-                    ].map(s => (
-                      <div key={s} className="flex items-start gap-2 text-[11px] font-serif text-muted-foreground">
-                        <Check className="w-3 h-3 mt-0.5 text-primary shrink-0" />
-                        <span>{s}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Hive routing note */}
               <Card className="bg-card/40 backdrop-blur border-border/30">
                 <CardContent className="p-5">
                   <h4 className="text-xs font-serif text-foreground mb-2 uppercase tracking-wider">Hive Routing</h4>
                   <p className="text-[11px] text-muted-foreground font-serif leading-relaxed">
                     When you interact with a tree, Species Hearts are minted for the tree's botanical family.
-                    An Oak tree mints Oak Hearts. A Pine mints Pine Hearts. Each hive accumulates its own fractal economy.
+                    An Oak tree mints Oak Hearts. A Pine mints Pine Hearts.
                     <Link to="/hives" className="text-primary hover:underline ml-1">Browse all hives →</Link>
                   </p>
                 </CardContent>
@@ -467,7 +437,7 @@ const ValueTreePage = () => {
           <TabsContent value="participation">
             <div className="space-y-6">
               <div className="text-center space-y-2 mb-4">
-                <h2 className="text-lg font-serif text-foreground">How Do I Engage?</h2>
+                <h2 className="text-lg font-serif text-foreground">Ways to Participate</h2>
                 <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto">
                   Every action grows the tree. Here's what you can do and what it generates.
                 </p>
@@ -517,202 +487,126 @@ const ValueTreePage = () => {
                   </p>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
 
-              {/* Firefly detail */}
-              <Card className="bg-card/40 backdrop-blur border-primary/15">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-base">✦</span>
-                    <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">Firefly Contributions</h4>
+          {/* ═══════ DEEPER ═══════ */}
+          <TabsContent value="deeper">
+            <div className="space-y-6">
+              <div className="text-center space-y-2 mb-4">
+                <h2 className="text-lg font-serif text-foreground">Deeper into the Roots</h2>
+                <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
+                  The mechanics, philosophy, and founding layer beneath the living economy.
+                </p>
+              </div>
+
+              {/* Vault quick link */}
+              <Card className="bg-card/40 backdrop-blur border-border/30 hover:border-primary/20 transition-all cursor-pointer" onClick={() => navigate("/vault")}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <Heart className="w-5 h-5 shrink-0" style={{ color: "hsl(0, 65%, 55%)" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-serif text-foreground">Heartwood Vault</p>
+                    <p className="text-[10px] text-muted-foreground font-serif">Your hearts, encounters, and full activity ledger</p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground font-serif leading-relaxed mb-3">
-                    Use the floating <span className="text-primary">Firefly ✦</span> button to contribute. Validated contributions earn Hearts:
-                  </p>
-                  <div className="space-y-1.5 text-[11px] font-serif">
+                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                </CardContent>
+              </Card>
+
+              {/* Distribution Compass */}
+              <Collapsible>
+                <CollapsibleTrigger className="w-full flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 hover:border-primary/20 transition-all">
+                  <Compass className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-serif text-foreground flex-1 text-left">Distribution Compass</span>
+                  <span className="text-[9px] font-serif text-muted-foreground/50">777M Hearts across 4 branches</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="pt-3">
+                    <Suspense fallback={<TabLoader />}>
+                      <EconomyCompass />
+                    </Suspense>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Origin Staff */}
+              <Collapsible>
+                <CollapsibleTrigger className="w-full flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 hover:border-primary/20 transition-all">
+                  <Crown className="w-4 h-4 shrink-0" style={{ color: "hsl(42, 85%, 55%)" }} />
+                  <span className="text-sm font-serif text-foreground flex-1 text-left">Origin Staffs & Founding Circle</span>
+                  <span className="text-[9px] font-serif text-muted-foreground/50">36 staffs</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="pt-3 space-y-6">
+                    <Suspense fallback={<TabLoader />}>
+                      <StaffPatronValueCard />
+                      <FoundingStaffRoots />
+                      <FlowOfValue />
+                      <div className="flex flex-wrap gap-3">
+                        <SystemLink to="/library/staff-room" label="Visit Staff Room" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
+                        <SystemLink to="/patron-offering" label="Patron Offering" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
+                      </div>
+                    </Suspense>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Philosophy */}
+              <Collapsible>
+                <CollapsibleTrigger className="w-full flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 hover:border-primary/20 transition-all">
+                  <Leaf className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-sm font-serif text-foreground flex-1 text-left">Philosophy & Vision</span>
+                  <span className="text-[9px] font-serif text-muted-foreground/50">The encounter economy</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="pt-3 space-y-6">
+                    <Suspense fallback={<TabLoader />}>
+                      <EncounterEconomyManifesto />
+                      <Card className="bg-card/40 backdrop-blur border-border/30">
+                        <CardContent className="p-5 space-y-3 text-[11px] font-serif text-muted-foreground leading-relaxed">
+                          <p>
+                            S33D Hearts are designed for a 60-year emission cycle. This is not a sprint — it is a forest growing across generations.
+                          </p>
+                          <p>
+                            At its heart, the Encounter Economy is a rejection of extraction. Value begins with breath, deepens through encounter,
+                            and circulates through the commons. Hearts are not mined — they are cultivated.
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <div className="flex flex-wrap gap-3 justify-center">
+                        <SystemLink to="/golden-dream" label="yOur Golden Dream" icon={<Star className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
+                        <SystemLink to="/how-hearts-work" label="How Hearts Work" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
+                      </div>
+                    </Suspense>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Integrity safeguards */}
+              <Card className="bg-card/40 backdrop-blur border-border/30">
+                <CardContent className="p-5">
+                  <h4 className="text-xs font-serif text-foreground mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 text-muted-foreground" /> Integrity Safeguards
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {[
-                      ["🐞 Valid bug report", "+3–20 ❤️"],
-                      ["✨ Accepted UX refinement", "+5–15 ❤️"],
-                      ["💡 High-value insight", "variable ❤️"],
-                      ["🌳 Verified tree suggestion", "+5–25 ❤️"],
-                    ].map(([l, r]) => (
-                      <div key={l} className="flex justify-between">
-                        <span className="text-muted-foreground">{l}</span>
-                        <span style={{ color: "hsl(0, 65%, 55%)" }}>{r}</span>
+                      "Daily rate limits per tree per user",
+                      "Verification tiers for higher rewards",
+                      "Community review for curation actions",
+                      "Anti-farming cooldown periods",
+                    ].map(s => (
+                      <div key={s} className="flex items-start gap-2 text-[11px] font-serif text-muted-foreground">
+                        <Check className="w-3 h-3 mt-0.5 text-primary shrink-0" />
+                        <span>{s}</span>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Coming soon value chains */}
-              <div className="space-y-3">
-                <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Coming Soon</h3>
-                <p className="text-[10px] text-muted-foreground font-serif">
-                  Future participation pathways being prepared for Chapter 3 and beyond.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { label: "Staking at Ancient Friends", icon: <Lock className="w-4 h-4" /> },
-                    { label: "NFT Participation", icon: <Star className="w-4 h-4" /> },
-                    { label: "Nurturing Saplings", icon: <Sprout className="w-4 h-4" /> },
-                    { label: "Seed Saving & Sharing", icon: <Leaf className="w-4 h-4" /> },
-                  ].map(item => (
-                    <div
-                      key={item.label}
-                      className="rounded-xl border border-border/30 bg-card/20 p-3 flex items-center gap-2.5"
-                    >
-                      <div className="text-muted-foreground/50">{item.icon}</div>
-                      <span className="text-[11px] font-serif text-muted-foreground">{item.label}</span>
-                      <Badge variant="outline" className="text-[8px] font-serif ml-auto border-muted-foreground/30 text-muted-foreground/60">
-                        Soon
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           </TabsContent>
-
-          {/* ═══════ ORIGIN STAFF ═══════ */}
-          <TabsContent value="origin-staff">
-            <Suspense fallback={<TabLoader />}>
-              <div className="space-y-8">
-                <div className="text-center space-y-3">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/15 bg-primary/5">
-                    <Crown className="w-3 h-3" style={{ color: "hsl(42, 85%, 55%)" }} />
-                    <span className="text-[9px] font-serif text-foreground tracking-widest uppercase">The Origin Layer</span>
-                  </div>
-                  <h2 className="text-lg font-serif text-foreground">Founding Circle & Origin Staffs</h2>
-                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
-                    The 36 handcrafted walking staffs form the root system of the S33D forest.
-                    Each founding patron seeds the living economy and anchors the first layer of the value tree.
-                  </p>
-                </div>
-
-                {/* Patron value card */}
-                <StaffPatronValueCard />
-
-                {/* Founding Staff Roots visual */}
-                <FoundingStaffRoots />
-
-                {/* Flow of value through the system */}
-                <FlowOfValue />
-
-                {/* Connections */}
-                <Card className="bg-card/40 backdrop-blur border-border/30">
-                  <CardContent className="p-5 space-y-4">
-                    <h4 className="text-xs font-serif text-foreground uppercase tracking-wider">How Origin Staffs Connect</h4>
-                    <div className="space-y-3 text-[11px] font-serif text-muted-foreground leading-relaxed">
-                      <div className="flex items-start gap-2">
-                        <span className="text-base">🪄</span>
-                        <p><span className="text-foreground">Staff → NFTrees:</span> Each staff can generate unique NFTree artworks, creating visual lineage from the founding moment.</p>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-base">🗺️</span>
-                        <p><span className="text-foreground">Staff → Mapping:</span> Trees mapped by a staff patron carry a Founding Mapper badge, visible on the tree page.</p>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="text-base">💰</span>
-                        <p><span className="text-foreground">Staff → Value:</span> Patron donations flow into the treasury, funding development, accelerator programs, and community rewards.</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-3 pt-2">
-                      <SystemLink to="/library/staff-room" label="Visit Staff Room" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
-                      <SystemLink to="/patron-offering" label="Patron Offering" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </Suspense>
-          </TabsContent>
-
-          {/* ═══════ VAULT ═══════ */}
-          <TabsContent value="vault">
-            <Suspense fallback={<TabLoader />}>
-              <div className="space-y-6">
-                <div className="text-center space-y-2 mb-4">
-                  <h2 className="text-lg font-serif text-foreground">Your Heartwood Vault</h2>
-                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto">
-                    The inner chamber where encounters become lasting value. Every action in Flow and Participation appears here.
-                  </p>
-                </div>
-
-                {currentUserId ? (
-                  <>
-                    <YourRootsPanel userId={currentUserId} />
-
-                    <div id="ledger">
-                      <VaultHeartLedger userId={currentUserId} />
-                    </div>
-
-                    <div className="space-y-3">
-                      <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Heart Activity</h3>
-                      <ActivityFeed limit={8} compact />
-                    </div>
-                  </>
-                ) : (
-                  <Card className="bg-card/40 backdrop-blur border-border/30">
-                    <CardContent className="p-8 text-center">
-                      <Heart className="w-8 h-8 mx-auto mb-3 text-muted-foreground/40" />
-                      <p className="text-sm font-serif text-muted-foreground mb-4">
-                        Sign in to see your personal Heartwood Vault.
-                      </p>
-                      <Button variant="outline" className="font-serif" onClick={() => navigate("/auth")}>
-                        Sign In
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* CTA */}
-                <div className="text-center pt-2">
-                  <Button
-                    variant="outline"
-                    className="font-serif gap-2 border-primary/30 hover:border-primary/50"
-                    onClick={() => navigate("/dashboard?tab=vault")}
-                  >
-                    <Heart className="w-4 h-4" style={{ color: "hsl(0, 65%, 55%)" }} />
-                    Open Heartwood Vault
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </Suspense>
-          </TabsContent>
-
-          {/* ═══════ PHILOSOPHY ═══════ */}
-          <TabsContent value="philosophy">
-            <Suspense fallback={<TabLoader />}>
-              <div className="space-y-8">
-                <EncounterEconomyManifesto />
-
-                <Card className="bg-card/40 backdrop-blur border-border/30">
-                  <CardContent className="p-6 space-y-4">
-                    <h4 className="text-sm font-serif text-foreground">Long-Term Vision</h4>
-                    <div className="space-y-3 text-[11px] font-serif text-muted-foreground leading-relaxed">
-                      <p>
-                        S33D Hearts are designed for a 60-year emission cycle. This is not a sprint — it is a forest growing across generations.
-                        The 777,777,777 total supply is allocated through the Distribution Compass, ensuring every branch of the ecosystem receives nourishment.
-                      </p>
-                      <p>
-                        The economy distinguishes between active stewardship (mapping, offerings, council participation) and future participation layers
-                        (staking, NFT holding, sapling nurturing) using a temporal gating model. Nothing is rushed. Everything grows in its season.
-                      </p>
-                      <p>
-                        At its heart, the Encounter Economy is a rejection of extraction. Value begins with breath, deepens through encounter,
-                        and circulates through the commons. Hearts are not mined — they are cultivated.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* System connections */}
-                <div className="flex flex-wrap gap-3 justify-center">
-                  <SystemLink to="/golden-dream" label="yOur Golden Dream" icon={<Star className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
-                  <SystemLink to="/how-hearts-work" label="How Hearts Work" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
-                </div>
-              </div>
-            </Suspense>
           </TabsContent>
         </Tabs>
       </div>
