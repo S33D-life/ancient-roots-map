@@ -34,15 +34,14 @@ interface EnsoNudgeProps {
 }
 
 export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudgeProps) {
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showMicroCopy, setShowMicroCopy] = useState(false);
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
     if (!seen) {
-      setIsFirstVisit(true);
-      // Show micro-copy after delay
+      // Show micro-copy "Begin here" only for truly first-time visitors
       const t = setTimeout(() => setShowMicroCopy(true), 3000);
       return () => clearTimeout(t);
     }
