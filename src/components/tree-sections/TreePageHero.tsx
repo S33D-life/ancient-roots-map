@@ -28,6 +28,8 @@ interface TreePageHeroProps {
   tree: Tree;
   photoUrl: string | null;
   onMakeOffering: () => void;
+  onAddPhoto?: () => void;
+  onAddSong?: () => void;
   onAddWish: () => void;
   onViewMap: () => void;
   onShare: () => void;
