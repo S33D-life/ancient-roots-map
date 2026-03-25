@@ -125,12 +125,12 @@ export default function EnsoNudge({ size = 52, offsetY = 0, children, onInteract
             <motion.div
               className="absolute rounded-full"
               style={{
-                inset: "-18%",
-                background: "radial-gradient(circle, hsl(42 80% 55% / 0.18) 0%, hsl(42 70% 50% / 0.08) 45%, transparent 72%)",
+                inset: "-22%",
+                background: "radial-gradient(circle, hsl(42 80% 55% / 0.25) 0%, hsl(42 70% 50% / 0.12) 40%, transparent 70%)",
               }}
               initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: [1, 1.12, 1], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 2.8 }}
+              animate={{ scale: [1, 1.18, 1], opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 2.8 }}
             />
             {/* Inner warm glow hugging the icon */}
             <motion.div
