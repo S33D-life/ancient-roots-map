@@ -42,12 +42,12 @@ const NotificationBell = () => {
     <Popover>
       <PopoverTrigger asChild>
         <button className="relative p-1 md:p-1.5 rounded-full hover:bg-accent/20 transition-colors">
-          <Bell className="w-4 h-4 md:w-5 md:h-5 text-foreground/50" />
+          <Bell className="w-3.5 h-3.5 md:w-4 md:h-4 text-muted-foreground/40 md:text-foreground/50" />
           {unreadCount > 0 && (
             <span
-              className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full text-[10px] font-bold flex items-center justify-center px-1"
+              className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 md:min-w-[16px] md:h-4 rounded-full text-[9px] md:text-[10px] font-bold flex items-center justify-center px-0.5"
               style={{
-                background: "hsl(var(--primary))",
+                background: "hsl(var(--primary) / 0.85)",
                 color: "hsl(var(--primary-foreground))",
               }}
             >
