@@ -494,17 +494,6 @@ const ValueTreePage = () => {
                 </p>
               </div>
 
-              {/* Vault quick link */}
-              <Card className="bg-card/40 backdrop-blur border-border/30 hover:border-primary/20 transition-all cursor-pointer" onClick={() => navigate("/vault")}>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <Heart className="w-5 h-5 shrink-0" style={{ color: "hsl(0, 65%, 55%)" }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-serif text-foreground">Heartwood Vault</p>
-                    <p className="text-[10px] text-muted-foreground font-serif">Your hearts, encounters, and full activity ledger</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                </CardContent>
-              </Card>
 
               {/* Distribution Compass */}
               <Collapsible>
