@@ -84,7 +84,7 @@ const ShimmerRow = () => (
 
 /* ---------- Song Row ---------- */
 
-const SongRow = ({
+const SongRow = memo(({
   song,
   isPlaying,
   onSelect,
