@@ -7,6 +7,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sprout } from "lucide-react";
 import { useIsNewUser } from "@/hooks/use-is-new-user";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 const LS_KEY = "s33d-beta-banner-dismissed";
 
@@ -17,9 +18,10 @@ function isDismissed(): boolean {
 const BetaGardenBanner = () => {
   const [visible, setVisible] = useState(() => !isDismissed());
   const { isNewUser } = useIsNewUser();
+  const { quietMode } = useQuietMode();
 
-  // Hide for brand-new users — reduce first-load noise
-  if (!visible || isNewUser) return null;
+  // Hide for brand-new users or when quiet mode is ON — reduce noise
+  if (!visible || isNewUser || quietMode) return null;
 
   const handleDismiss = () => {
     try { localStorage.setItem(LS_KEY, "1"); } catch {}

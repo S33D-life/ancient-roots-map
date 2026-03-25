@@ -487,9 +487,16 @@ export default function StaffRoomGallery() {
       align: "center",
       containScroll: "trimSnaps",
       loop: false,
-      startIndex: activeIndex,
+      startIndex: 0,
     });
-    const [selectedIdx, setSelectedIdx] = useState(activeIndex);
+    const [selectedIdx, setSelectedIdx] = useState(0);
+
+    // Reset carousel when filter changes
+    useEffect(() => {
+      if (!emblaApi) return;
+      emblaApi.scrollTo(0, true);
+      setSelectedIdx(0);
+    }, [emblaApi, filter]);
 
     useEffect(() => {
       if (!emblaApi) return;
