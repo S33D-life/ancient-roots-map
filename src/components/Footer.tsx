@@ -39,6 +39,10 @@ const Footer = () => {
             Feedback
           </Link>
           <Dot />
+          <Link to="/about" className="hover:text-primary transition-colors">About</Link>
+          <Dot />
+          <Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
+          <Dot />
           <span className="text-[10px] text-muted-foreground/40">EST 2016</span>
         </div>
       </div>
