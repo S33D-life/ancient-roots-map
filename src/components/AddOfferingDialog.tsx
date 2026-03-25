@@ -257,7 +257,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
         tree_id: treeId,
         type: activeType,
-        title: title.trim(),
+        title: resolvedTitle,
         content: content.trim() || null,
         media_url: finalMediaUrl,
         nft_link: activeType === "nft" ? nftLink.trim() || null : null,
