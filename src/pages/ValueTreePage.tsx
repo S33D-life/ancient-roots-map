@@ -31,6 +31,7 @@ const FoundingStaffRoots = lazy(() => import("@/components/economy/FoundingStaff
 const StaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const FlowOfValue = lazy(() => import("@/components/economy/FlowOfValue"));
 const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
+const PublicGoodsFunding = lazy(() => import("@/components/economy/PublicGoodsFunding"));
 
 /* ─── Shared loading fallback ──────────────────────────────── */
 const TabLoader = () => (
