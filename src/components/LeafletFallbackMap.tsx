@@ -1177,32 +1177,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [groveViewActive, currentEventPulses]);
 
-  // ── Overlay layers (Seeds, Root Threads, Offering Glow, Harvest, Ancient, Birdsong, Bloomed Seeds, Seed Trail, Heart Glow) ──
-  // Managed by useMapOverlayLayers hook — wired here to replace inline effects
-  const overlayResults = useMapOverlayLayers({
-    map: mapRef.current,
-    trees,
-    filteredTrees,
-    bloomedSeeds,
-    birdsongHeatPoints,
-    offeringCounts: offeringCountsRef.current,
-    treeLookup,
-    userId,
-    showSeeds,
-    showRootThreads,
-    showOfferingGlow,
-    showHarvestLayer,
-    showAncientHighlight,
-    showBirdsongHeat,
-    showBloomedSeeds,
-    showSeedTrail,
-    showHeartGlow,
-    birdsongSeason,
-  });
-  const bloomedSeedCount = overlayResults.bloomedSeedCount;
-  const seedTrailCount = overlayResults.seedTrailCount;
-  // harvestTreeIds for UI is now managed inside the hook
-
+  // [Overlay hook is called earlier, before visualSections]
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
     if (userAccuracyRef.current) map.removeLayer(userAccuracyRef.current);
