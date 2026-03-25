@@ -246,7 +246,7 @@ const TetolHomePage = () => {
 
             {/* S33D gateway node — wrapped in Ensō nudge */}
             <div className="relative z-10 py-3 w-full flex flex-col items-center">
-              <EnsoNudge size={108}>
+              <EnsoNudge size={27}>
                 <button
                   onClick={() => handleItemClick("/s33d")}
                   className="flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none transition-all duration-200"
