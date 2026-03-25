@@ -53,13 +53,13 @@ const typeConfig: Record<
 
 /** Quick-select offering types — primary first, then secondary */
 const PRIMARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
-  { value: "photo", emoji: "📷", label: "Memory" },
+  { value: "photo", emoji: "📸", label: "Memory" },
+  { value: "song", emoji: "🎵", label: "Song" },
   { value: "story", emoji: "✍️", label: "Musing" },
   { value: "poem", emoji: "📜", label: "Poem" },
 ];
 
 const SECONDARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
-  { value: "song", emoji: "🎵", label: "Song" },
   { value: "voice", emoji: "🎙️", label: "Voice" },
   { value: "book", emoji: "📖", label: "Book" },
   { value: "nft", emoji: "✨", label: "NFT" },
