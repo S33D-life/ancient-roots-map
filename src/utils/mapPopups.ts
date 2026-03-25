@@ -7,6 +7,7 @@ import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/
 import { haversineKm } from "@/utils/mapGeometry";
 import type { ExternalTreeCandidate } from "@/utils/externalTreeSources";
 import { getSourceById } from "@/utils/externalTreeSources";
+import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Rootstone } from "@/data/rootstones";
 
 /* ── Popup HTML cache — avoids rebuilding for the same tree state ── */
