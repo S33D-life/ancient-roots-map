@@ -359,7 +359,7 @@ export default function StaffRoomGallery() {
   const setActiveTab = useCallback((tab: string) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (tab === "overview") next.delete("tab");
+      if (tab === "explorer") next.delete("tab");
       else next.set("tab", tab);
       return next;
     }, { replace: true });
