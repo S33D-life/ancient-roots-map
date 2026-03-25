@@ -144,7 +144,8 @@ const SongRow = memo(({
       </Badge>
     )}
   </motion.button>
-);
+));
+SongRow.displayName = "SongRow";
 
 /* ---------- Post-Offering Reward Moment ---------- */
 
