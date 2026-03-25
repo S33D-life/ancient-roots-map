@@ -25,7 +25,7 @@ interface MapProps {
   onJourneyEnd?: () => void;
 }
 
-const Map = ({
+const Map = memo(({
   initialView,
   initialSpecies,
   initialW3w,
