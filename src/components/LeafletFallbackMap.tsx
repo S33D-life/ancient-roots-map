@@ -435,6 +435,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   usePulseMapLayer(mapRef.current, showForestPulse);
   usePathwayMapLayer(mapRef.current, showMycelialPathways, navigate);
 
+  // Gateway mode — Countries / Hives / Bioregions perspective
+  const [gatewayMode, setGatewayMode] = useState<GatewayMode>("countries");
+  const handleGatewayChange = useCallback((mode: GatewayMode) => {
+    setGatewayMode(mode);
+    if (mode === "hives") {
+      batchUpdate({ hiveLayer: true });
+    } else if (mode === "countries") {
+      setLayer("hiveLayer", false);
+    }
+  }, [batchUpdate, setLayer]);
+  const handleBioregionNavigate = useCallback((slug: string) => {
+    navigate(`/atlas/bio-regions/${slug}`);
+  }, [navigate]);
+  useBioregionMapLayer(mapRef.current, gatewayMode === "bioregions", handleBioregionNavigate);
+
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
