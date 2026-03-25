@@ -467,7 +467,7 @@ const AuthPage = () => {
     const c = configs[view];
 
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'radial-gradient(ellipse at top, hsl(75 20% 14%), hsl(80 15% 10%))' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-sm text-center space-y-6">
           <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
             {c.icon}
