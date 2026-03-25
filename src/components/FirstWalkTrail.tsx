@@ -20,8 +20,10 @@ const STEP_META: Record<WalkStep, { icon: typeof MapPin; label: string; hint: st
 const FirstWalkTrail = () => {
   const { steps, completed, finished, dismissed, dismiss, currentIndex } = useFirstWalk();
 
-  // Don't render if finished or dismissed
-  if (finished || dismissed) return null;
+  const { showOnboardingNudges } = useQuietMode();
+
+  // Don't render if finished, dismissed, or nudges disabled
+  if (finished || dismissed || !showOnboardingNudges) return null;
 
   const progress = completed.size;
 

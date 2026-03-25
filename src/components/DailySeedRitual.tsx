@@ -15,6 +15,7 @@ const STORAGE_KEY = "s33d-ritual-date";
 
 const DailySeedRitual = () => {
   const [visible, setVisible] = useState(false);
+  const { showOnboardingNudges } = useQuietMode();
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
