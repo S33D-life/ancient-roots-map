@@ -383,6 +383,21 @@ const ValueTreePage = () => {
             </Suspense>
           </TabsContent>
 
+          {/* ═══════ COMPASS ═══════ */}
+          <TabsContent value="compass">
+            <Suspense fallback={<TabLoader />}>
+              <div className="space-y-6">
+                <div className="text-center space-y-2 mb-4">
+                  <h2 className="text-lg font-serif text-foreground">The Distribution Compass</h2>
+                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
+                    How 777,777,777 S33D Hearts are allocated, distributed, and routed through the living ecosystem.
+                  </p>
+                </div>
+                <EconomyCompass />
+              </div>
+            </Suspense>
+          </TabsContent>
+
           {/* ═══════ LIVING FLOW ═══════ */}
           <TabsContent value="flow">
             <div className="space-y-6">
