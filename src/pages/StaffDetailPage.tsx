@@ -314,12 +314,12 @@ export default function StaffDetailPage() {
   /* ═══════════════════════════════════════════════════════════════
      RENDER — The Vessel
      ═══════════════════════════════════════════════════════════════ */
-  return (
+   return (
     <div className="min-h-screen relative bg-background">
       <HeartwoodBackground />
       <Header />
 
-      <main className="relative z-10 container mx-auto px-4 pt-24 pb-20 max-w-3xl">
+      <PageShell className="relative z-10 container mx-auto px-4 pt-24 pb-20 max-w-3xl" cinematic>
         {/* ── Navigation ──────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-8">
           <Link
