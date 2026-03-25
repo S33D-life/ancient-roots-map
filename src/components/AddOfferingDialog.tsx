@@ -36,6 +36,8 @@ interface AddOfferingDialogProps {
   treeName?: string;
   type: OfferingType;
   meetingId?: string | null;
+  /** Called when user wants to return to the gateway to pick a different type */
+  onChangeType?: () => void;
 }
 
 const typeConfig: Record<
@@ -102,7 +104,7 @@ const resizeImage = (file: File, maxDim = 2048, quality = 0.82): Promise<File> =
     img.src = url;
   });
 
-const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, type: initialType, meetingId }: AddOfferingDialogProps) => {
+const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, type: initialType, meetingId, onChangeType }: AddOfferingDialogProps) => {
   const [activeType, setActiveType] = useState<OfferingType>(initialType);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -446,7 +448,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
-        subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
+        subtitle={<>{treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}{onChangeType && <> · <button type="button" onClick={() => { onOpenChange(false); onChangeType(); }} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
         fullscreenMobile
       >
         {/* Type pre-selected from gateway — no switcher */}
@@ -472,7 +474,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
-        subtitle="Speak into the canopy — your voice becomes part of this tree"
+        subtitle={<>Speak into the canopy — your voice becomes part of this tree{onChangeType && <> · <button type="button" onClick={() => { onOpenChange(false); onChangeType(); }} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
         fullscreenMobile
       >
         {/* Type pre-selected from gateway — no switcher */}
@@ -498,7 +500,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
-        subtitle="Place a story in this Ancient Friend's living archive"
+        subtitle={<>Place a story in this Ancient Friend's living archive{onChangeType && <> · <button type="button" onClick={() => { onOpenChange(false); onChangeType(); }} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
         fullscreenMobile
       >
         {/* Type pre-selected from gateway — no switcher */}
@@ -516,6 +518,16 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       </ResponsiveDialog>
     );
   }
+
+  const changeTypeLink = onChangeType ? (
+    <button
+      type="button"
+      onClick={() => { onOpenChange(false); onChangeType(); }}
+      className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors mt-0.5"
+    >
+      ← Change type
+    </button>
+  ) : null;
 
   const titleNode = (
     <span className="flex items-center gap-2">
@@ -539,7 +551,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={titleNode}
-        subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
+        subtitle={<>{treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}{changeTypeLink && <> · {changeTypeLink}</>}</>}
         fullscreenMobile
       >
 

@@ -1120,7 +1120,6 @@ const TreeDetailPage = () => {
           open={gatewayOpen}
           onClose={() => setGatewayOpen(false)}
           onSelect={(type) => {
-            setGatewayOpen(false);
             // Map gateway types to offering types (gratitude/intention → story)
             const typeMap: Record<string, OfferingType> = {
               photo: "photo", song: "song", book: "book", story: "story",
@@ -1130,7 +1129,9 @@ const TreeDetailPage = () => {
             };
             const offeringType = typeMap[type] || "story";
             setSelectedType(offeringType);
-            setTimeout(() => setAddOfferingOpen(true), 150);
+            // Open flow immediately, then close gateway — eliminates flash
+            setAddOfferingOpen(true);
+            requestAnimationFrame(() => setGatewayOpen(false));
           }}
           treeName={tree?.name}
         />
@@ -1144,6 +1145,7 @@ const TreeDetailPage = () => {
         treeName={tree?.name}
         type={selectedType}
         meetingId={activeMeeting?.id}
+        onChangeType={openOfferingGateway}
       />
 
       <ProposeEditDrawer
