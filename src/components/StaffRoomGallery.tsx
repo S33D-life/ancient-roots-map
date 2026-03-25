@@ -705,36 +705,22 @@ export default function StaffRoomGallery() {
               <LazySpiralOfSpecies />
             </Suspense>
 
-            <SectionDivider />
+          </TabsContent>
 
-            {/* Staff Ceremony CTA */}
-            <div className="rounded-2xl border border-primary/15 bg-card/30 backdrop-blur-sm p-5 space-y-3">
-              <div className="text-center space-y-2">
-                <Wand2 className="w-5 h-5 text-primary mx-auto" style={{ filter: "drop-shadow(0 0 8px hsl(var(--primary) / 0.4))" }} />
-                <h3 className="font-serif text-base text-foreground">The Staff Ceremony</h3>
-                <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  Claiming a staff is a ceremonial act. You choose your species, receive your staff code, and map your first Ancient Friend tree.
-                </p>
-              </div>
-              {hasLinkedStaff ? (
-                <div className="text-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs font-serif gap-1.5"
-                    onClick={() => setShowCeremony(!showCeremony)}
-                    style={{ borderColor: "hsla(42, 60%, 50%, 0.3)", color: "hsl(42, 80%, 60%)" }}
-                  >
-                    <Wand2 className="w-3.5 h-3.5" />
-                    {showCeremony ? "Close Ceremony" : "Begin Ceremony"}
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-center text-[10px] font-serif text-muted-foreground italic">
-                  Connect a staff above to begin your ceremony.
-                </p>
-              )}
-            </div>
+          {/* ─── CEREMONY TAB ─── */}
+          <TabsContent value="ceremony" className="space-y-5 mt-4">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-3">
+              <Wand2 className="w-6 h-6 text-primary mx-auto" style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.4))" }} />
+              <h3 className="font-serif text-lg text-foreground">The Staff Ceremony</h3>
+              <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
+                Claiming a staff is a ceremonial act. You choose your species, receive your staff code, and map your first Ancient Friend tree.
+              </p>
+              <div className="h-px max-w-xs mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)" }} />
+            </motion.div>
+            <StaffCeremony
+              onComplete={() => { setShowCeremony(false); setHasLinkedStaff(true); }}
+              onCancel={() => { setShowCeremony(false); setHasLinkedStaff(true); }}
+            />
           </TabsContent>
 
           {/* ─── EXPLORER TAB ─── */}
