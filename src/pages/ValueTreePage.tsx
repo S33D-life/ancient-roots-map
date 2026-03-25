@@ -285,7 +285,7 @@ const PARTICIPATION_ACTIONS: ParticipationAction[] = [
 const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const tabMap: Record<string, string> = { economy: "overview", earn: "participation", how: "flow", chains: "compass", distribution: "compass" };
+  const tabMap: Record<string, string> = { economy: "overview", earn: "participation", how: "flow", chains: "deeper", distribution: "deeper", compass: "deeper", vault: "deeper", philosophy: "deeper", "origin-staff": "deeper" };
   const rawTab = searchParams.get("tab") || "overview";
   const initialTab = tabMap[rawTab] || rawTab;
   const [activeTab, setActiveTab] = useState(initialTab);
