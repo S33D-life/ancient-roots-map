@@ -374,39 +374,64 @@ const DashboardPage = () => {
     </div>
   );
 
+  const HearthCollapsibleSection = ({ icon: Icon, title, subtitle, defaultOpen = false, children }: {
+    icon: React.ElementType; title: string; subtitle?: string; defaultOpen?: boolean; children: React.ReactNode;
+  }) => {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="w-full group">
+          <div className="flex items-center gap-2.5 pb-1 cursor-pointer select-none">
+            <Icon className="w-4 h-4 text-primary/70" />
+            <div className="flex-1 text-left">
+              <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
+              {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
+            </div>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-4 space-y-5">
+          {children}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
+
   const GrowthEngineHearth = ({ userId, profile: p }: { userId: string; profile: Profile | null }) => {
     const { data: quests, initQuests, season } = useSeasonalQuests(userId);
     return (
-      <div className="space-y-10">
+      <div className="space-y-8">
         {/* Onboarding */}
         <FirstEncounterFunnel userId={userId} />
 
-        {/* Identity & Daily Status */}
+        {/* Identity & Daily Status — always open */}
         <section className="space-y-5">
           <HearthSectionHeader icon={Flame} title="Today" subtitle="Your daily pulse and earnable rewards" />
           <GroveIdentityCard userId={userId} userName={p?.full_name} />
           <EarnableToday userId={userId} />
-          <SeedTrailPanel userId={userId} />
         </section>
 
-        {/* Growth & Quests */}
-        <section className="space-y-5">
-          <HearthSectionHeader icon={Sprout} title="Growth" subtitle="Quests, campaigns, and contributions" />
-          <SeasonalQuestCard
-            quests={quests || []}
-            season={season}
-            onInit={() => initQuests.mutate()}
-          />
-          <ContributionPathways />
-          <ActiveCampaigns />
+        {/* Growth — collapsed by default, surfaces quests */}
+        <section>
+          <HearthCollapsibleSection icon={Sprout} title="Growth" subtitle="Quests, campaigns, and contributions">
+            <SeasonalQuestCard
+              quests={quests || []}
+              season={season}
+              onInit={() => initQuests.mutate()}
+            />
+            <SeedTrailPanel userId={userId} />
+            <ContributionPathways />
+            <ActiveCampaigns />
+          </HearthCollapsibleSection>
         </section>
 
-        {/* Deeper exploration */}
-        <section className="space-y-5">
-          <HearthSectionHeader icon={Compass} title="Explore" subtitle="Warmth, presence, and pathways" />
-          <PresenceSpiralCard userId={userId} />
-          <HearthWarmth userId={userId} />
-          <HearthCrossLinks />
+        {/* Explore — collapsed by default */}
+        <section>
+          <HearthCollapsibleSection icon={Compass} title="Explore" subtitle="Warmth, presence, and pathways">
+            <PresenceSpiralCard userId={userId} />
+            <HearthWarmth userId={userId} />
+            <HearthCrossLinks />
+          </HearthCollapsibleSection>
         </section>
       </div>
     );
@@ -573,8 +598,20 @@ const DashboardPage = () => {
 
             <TabsContent value="notifications">
               {user && <HearthNotificationSettings userId={user.id} />}
-              <Separator className="my-6 bg-border/20" />
-              <HearthLocationSettings />
+              <div className="mt-6">
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full group">
+                    <div className="flex items-center gap-2 py-3 cursor-pointer select-none">
+                      <MapPin className="w-4 h-4 text-primary/70" />
+                      <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90 flex-1 text-left">Location Services</h3>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground/50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-2">
+                    <HearthLocationSettings />
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             </TabsContent>
 
             <TabsContent value="profile">

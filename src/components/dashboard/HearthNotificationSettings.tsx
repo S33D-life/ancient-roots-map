@@ -1,13 +1,18 @@
 /**
  * HearthNotificationSettings — Notification & experience tuning panel for the Hearth.
- * Groups toggles into: Whispers & Presence, Notifications & Alerts, Experience & Interface.
+ * Groups toggles into collapsible sections: essential first, advanced tucked away.
  */
+import { useState } from "react";
 import { useNotificationPreferences, NotificationPreferences } from "@/hooks/use-notification-preferences";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Wind, Bell, Sparkles, RotateCcw, Loader2 } from "lucide-react";
+import { Wind, Bell, Sparkles, RotateCcw, Loader2, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface ToggleRowProps {
   label: string;
@@ -18,7 +23,7 @@ interface ToggleRowProps {
 }
 
 const ToggleRow = ({ label, description, checked, disabled, onCheckedChange }: ToggleRowProps) => (
-  <div className="flex items-start justify-between gap-4 py-3">
+  <div className="flex items-start justify-between gap-4 py-2.5">
     <div className="space-y-0.5 flex-1 min-w-0">
       <p className="text-sm font-serif text-foreground">{label}</p>
       {description && <p className="text-[11px] text-muted-foreground leading-snug">{description}</p>}
@@ -32,21 +37,34 @@ const ToggleRow = ({ label, description, checked, disabled, onCheckedChange }: T
   </div>
 );
 
-interface SectionProps {
-  icon: React.ReactNode;
+/** Collapsible section with consistent pattern */
+const SettingsSection = ({
+  icon: Icon,
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  icon: React.ElementType;
   title: string;
+  defaultOpen?: boolean;
   children: React.ReactNode;
-}
-
-const Section = ({ icon, title, children }: SectionProps) => (
-  <div className="space-y-1">
-    <div className="flex items-center gap-2 pt-2 pb-1">
-      {icon}
-      <h3 className="text-sm font-serif tracking-wider text-foreground/80">{title}</h3>
-    </div>
-    <div className="divide-y divide-border/20">{children}</div>
-  </div>
-);
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger className="w-full group">
+        <div className="flex items-center gap-2 py-3 cursor-pointer select-none">
+          <Icon className="w-4 h-4 text-primary" />
+          <h3 className="text-sm font-serif tracking-wider text-foreground/80 flex-1 text-left">{title}</h3>
+          <ChevronDown className={`w-4 h-4 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        </div>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pb-2">
+        <div className="divide-y divide-border/20 pl-6">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+};
 
 interface Props {
   userId: string;
@@ -69,17 +87,59 @@ const HearthNotificationSettings = ({ userId }: Props) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Header */}
-      <div className="space-y-1">
+      <div className="space-y-1 mb-4">
         <h2 className="text-xl font-serif tracking-wide text-foreground">Hearth Settings</h2>
         <p className="text-xs text-muted-foreground font-serif italic">
           Shape how the world speaks to you
         </p>
       </div>
 
-      {/* ── A. Whispers & Presence ── */}
-      <Section icon={<Wind className="w-4 h-4 text-primary" />} title="Whispers & Presence">
+      {/* ── Essential: Quiet Mode — always visible ── */}
+      <div className="rounded-lg border border-border/30 bg-card/40 p-4 mb-4">
+        <ToggleRow
+          label="🤫 Quiet Mode"
+          description="Silence all non-essential notifications — only critical system alerts remain"
+          checked={prefs.quiet_mode}
+          onCheckedChange={toggle("quiet_mode")}
+        />
+      </div>
+
+      {/* ── A. Notifications & Alerts — open by default ── */}
+      <SettingsSection icon={Bell} title="Notifications & Alerts" defaultOpen>
+        <ToggleRow
+          label="Tree interactions"
+          description="Seeds sprouting, hearts received, offerings acknowledged"
+          checked={prefs.notify_tree_interactions}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("notify_tree_interactions")}
+        />
+        <ToggleRow
+          label="Nearby Ancient Friends"
+          description="Alerts when near unmapped or notable trees"
+          checked={prefs.notify_nearby_friends}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("notify_nearby_friends")}
+        />
+        <ToggleRow
+          label="Council of Life updates"
+          description="Gatherings, proposals, and governance"
+          checked={prefs.notify_council_updates}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("notify_council_updates")}
+        />
+        <ToggleRow
+          label="System updates"
+          description="App updates, new features, maintenance"
+          checked={prefs.notify_system_updates}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("notify_system_updates")}
+        />
+      </SettingsSection>
+
+      {/* ── B. Whispers & Presence — collapsed ── */}
+      <SettingsSection icon={Wind} title="Whispers & Presence">
         <ToggleRow
           label="Enable Whispers"
           description="Receive messages left beneath trees by other wanderers"
@@ -88,14 +148,13 @@ const HearthNotificationSettings = ({ userId }: Props) => {
         />
         <ToggleRow
           label="Only near a tree"
-          description="Only show whispers when you are physically near an Ancient Friend"
+          description="Only show whispers when physically near an Ancient Friend"
           checked={prefs.whispers_near_tree_only}
           disabled={!prefs.whispers_enabled}
           onCheckedChange={toggle("whispers_near_tree_only")}
         />
         <ToggleRow
           label="Auto-open whisper panel"
-          description="Automatically open the whisper panel when you arrive near a tree"
           checked={prefs.whispers_auto_open}
           disabled={!prefs.whispers_enabled}
           onCheckedChange={toggle("whispers_auto_open")}
@@ -107,100 +166,53 @@ const HearthNotificationSettings = ({ userId }: Props) => {
           disabled={!prefs.whispers_enabled}
           onCheckedChange={toggle("whispers_haptic")}
         />
-      </Section>
+      </SettingsSection>
 
-      <Separator className="bg-border/30" />
-
-      {/* ── B. Notifications & Alerts ── */}
-      <Section icon={<Bell className="w-4 h-4 text-primary" />} title="Notifications & Alerts">
-        <ToggleRow
-          label="Quiet Mode"
-          description="Silence all non-essential notifications — only critical system alerts remain"
-          checked={prefs.quiet_mode}
-          onCheckedChange={toggle("quiet_mode")}
-        />
-        <ToggleRow
-          label="Tree interactions"
-          description="Seeds sprouting, hearts received, offerings acknowledged"
-          checked={prefs.notify_tree_interactions}
-          disabled={prefs.quiet_mode}
-          onCheckedChange={toggle("notify_tree_interactions")}
-        />
-        <ToggleRow
-          label="Nearby Ancient Friends"
-          description="Alerts when you're near unmapped or notable trees"
-          checked={prefs.notify_nearby_friends}
-          disabled={prefs.quiet_mode}
-          onCheckedChange={toggle("notify_nearby_friends")}
-        />
-        <ToggleRow
-          label="Council of Life updates"
-          description="Gatherings, proposals, and governance activity"
-          checked={prefs.notify_council_updates}
-          disabled={prefs.quiet_mode}
-          onCheckedChange={toggle("notify_council_updates")}
-        />
-        <ToggleRow
-          label="Minting / NFTree events"
-          description="On-chain anchoring, NFTree generation, and Staff ceremonies"
-          checked={prefs.notify_minting_events}
-          disabled={prefs.quiet_mode}
-          onCheckedChange={toggle("notify_minting_events")}
-        />
-        <ToggleRow
-          label="System updates"
-          description="App updates, new features, and maintenance notices"
-          checked={prefs.notify_system_updates}
-          disabled={prefs.quiet_mode}
-          onCheckedChange={toggle("notify_system_updates")}
-        />
-      </Section>
-
-      <Separator className="bg-border/30" />
-
-      {/* ── C. Experience & Interface Signals ── */}
-      <Section icon={<Sparkles className="w-4 h-4 text-primary" />} title="Experience & Interface">
+      {/* ── C. Experience & Interface — collapsed ── */}
+      <SettingsSection icon={Sparkles} title="Experience & Interface">
         <ToggleRow
           label="TEOTAG guidance whispers"
-          description="Contextual hints and poetic nudges from the guiding orb"
+          description="Contextual hints and poetic nudges"
           checked={(prefs as any).show_teotag_whispers !== false}
           disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_teotag_whispers" as any)}
         />
         <ToggleRow
           label="Celebration overlays"
-          description="Heart-earned animations, reward bursts, and milestone toasts"
+          description="Heart animations, reward bursts, milestone toasts"
           checked={(prefs as any).show_celebrations !== false}
           disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_celebrations" as any)}
         />
         <ToggleRow
           label="Onboarding nudges"
-          description="Gentle prompts like 'Plant a seed' or 'Visit your first tree'"
           checked={prefs.show_onboarding_nudges}
           disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_onboarding_nudges")}
         />
         <ToggleRow
           label="Floating prompts"
-          description="Contextual popups and whisper banners"
           checked={prefs.show_floating_prompts}
           disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_floating_prompts")}
         />
         <ToggleRow
+          label="Minting / NFTree events"
+          description="On-chain anchoring, NFTree generation, Staff ceremonies"
+          checked={prefs.notify_minting_events}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("notify_minting_events")}
+        />
+        <ToggleRow
           label="Companion suggestions"
-          description="Scan, verify, and connect prompts from the Companion controller"
           checked={prefs.show_companion_suggestions}
           disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_companion_suggestions")}
         />
-      </Section>
-
-      <Separator className="bg-border/30" />
+      </SettingsSection>
 
       {/* Actions */}
-      <div className="flex items-center gap-3 pt-2">
+      <div className="flex items-center gap-3 pt-4">
         <Button
           variant="outline"
           size="sm"

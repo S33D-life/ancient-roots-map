@@ -9,13 +9,18 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings, ChevronDown } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
 import { Link } from "react-router-dom";
 import HearthAccountSecurity from "@/components/dashboard/HearthAccountSecurity";
 import PresenceWeatherSettings from "@/components/dashboard/PresenceWeatherSettings";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface VisibleFields {
   bio: boolean;
@@ -168,21 +173,34 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
     }
   };
 
-  const SectionHeader = ({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle?: string }) => (
-    <div className="flex items-center gap-2.5 pt-2 pb-1">
-      <Icon className="w-4 h-4 text-primary/70" />
-      <div>
-        <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
-        {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
-      </div>
-    </div>
-  );
+  /** Collapsible section wrapper — consistent across Settings tab */
+  const SettingsCollapsible = ({ icon: Icon, title, subtitle, defaultOpen = false, children }: {
+    icon: React.ElementType; title: string; subtitle?: string; defaultOpen?: boolean; children: React.ReactNode;
+  }) => {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="w-full group">
+          <div className="flex items-center gap-2.5 py-3 cursor-pointer select-none">
+            <Icon className="w-4 h-4 text-primary/70" />
+            <div className="flex-1 text-left">
+              <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
+              {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
+            </div>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pb-2">
+          {children}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
 
   return (
-    <div className="space-y-10 max-w-lg">
-      {/* ── Profile ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Camera} title="Profile" subtitle="Your identity in the grove" />
+    <div className="space-y-6 max-w-lg">
+      {/* ── Profile — open by default ── */}
+      <SettingsCollapsible icon={Camera} title="Profile" subtitle="Your identity in the grove" defaultOpen>
         <Card className="border-border/50 bg-card/60 backdrop-blur">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-5">
@@ -360,11 +378,10 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
           </div>
         </CardContent>
         </Card>
-      </section>
+      </SettingsCollapsible>
 
-      {/* ── Security & Identity ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Shield} title="Security & Identity" subtitle="Account protection, staff, and wallet" />
+      {/* ── Security & Identity — collapsed ── */}
+      <SettingsCollapsible icon={Shield} title="Security & Identity" subtitle="Account protection, staff, and wallet">
         <HearthAccountSecurity user={user} walletAddress={wallet.address} />
 
         <Card className="border-border/50 bg-card/60 backdrop-blur">
@@ -398,17 +415,15 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         </Card>
 
         <WalletConnect />
-      </section>
+      </SettingsCollapsible>
 
-      {/* ── Preferences ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Settings} title="Preferences" subtitle="Presence, weather, and notifications" />
+      {/* ── Preferences — collapsed ── */}
+      <SettingsCollapsible icon={Settings} title="Preferences" subtitle="Presence, weather, and notifications">
         <PresenceWeatherSettings userId={user.id} />
-      </section>
+      </SettingsCollapsible>
 
-      {/* ── System ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={RefreshCw} title="System" />
+      {/* ── System — collapsed ── */}
+      <SettingsCollapsible icon={RefreshCw} title="System">
         <Card className="border-border/50 bg-card/60 backdrop-blur">
           <CardContent className="p-5 space-y-3">
             <p className="text-xs text-muted-foreground font-serif">
@@ -444,7 +459,7 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
             Sign Out
           </Button>
         </div>
-      </section>
+      </SettingsCollapsible>
     </div>
   );
 };
