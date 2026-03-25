@@ -607,7 +607,6 @@ const ValueTreePage = () => {
               </Card>
             </div>
           </TabsContent>
-          </TabsContent>
         </Tabs>
       </div>
       <Footer />
