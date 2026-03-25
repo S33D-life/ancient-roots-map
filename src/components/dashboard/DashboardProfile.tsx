@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
@@ -168,10 +168,22 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
     }
   };
 
+  const SectionHeader = ({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle?: string }) => (
+    <div className="flex items-center gap-2.5 pt-2 pb-1">
+      <Icon className="w-4 h-4 text-primary/70" />
+      <div>
+        <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
+        {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-8 max-w-lg">
-      {/* Avatar & Name */}
-      <Card className="border-border/50 bg-card/60 backdrop-blur">
+    <div className="space-y-10 max-w-lg">
+      {/* ── Profile ── */}
+      <section className="space-y-4">
+        <SectionHeader icon={Camera} title="Profile" subtitle="Your identity in the grove" />
+        <Card className="border-border/50 bg-card/60 backdrop-blur">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-5">
             <div className="relative group">
@@ -347,98 +359,92 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </section>
 
-      {/* Account & Security */}
-      <HearthAccountSecurity user={user} walletAddress={wallet.address} />
+      {/* ── Security & Identity ── */}
+      <section className="space-y-4">
+        <SectionHeader icon={Shield} title="Security & Identity" subtitle="Account protection, staff, and wallet" />
+        <HearthAccountSecurity user={user} walletAddress={wallet.address} />
 
-      {/* Presence, Notifications & Weather Settings */}
-      <PresenceWeatherSettings userId={user.id} />
+        <Card className="border-border/50 bg-card/60 backdrop-blur">
+          <CardContent className="p-6 space-y-4">
+            <p className="text-xs text-muted-foreground font-serif">
+              Your Staff anchors your identity in the grove. Link or change your active Staff below.
+            </p>
+            <ManualStaffPicker
+              userId={user.id}
+              currentStaffId={(wallet.activeStaff as any)?.id || null}
+              onLinked={(staff) => {
+                if (staff) {
+                  wallet.selectStaff({
+                    code: staff.id,
+                    tokenId: staff.token_id,
+                    speciesId: 0,
+                    circleId: staff.circle_id,
+                    variantId: 0,
+                    staffNumber: staff.staff_number,
+                    isOriginSpiral: staff.is_origin_spiral,
+                    name: staff.species,
+                    species: staff.species,
+                    image: staff.image_url || `/images/staffs/${staff.species_code.toLowerCase()}.jpeg`,
+                  });
+                } else {
+                  wallet.clearActiveStaff();
+                }
+              }}
+            />
+          </CardContent>
+        </Card>
 
-      {/* Staff Identity */}
-      <Card className="border-border/50 bg-card/60 backdrop-blur">
-        <CardContent className="p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-primary" />
-            <h3 className="text-sm uppercase tracking-widest text-primary font-serif">Staff Identity</h3>
-          </div>
-          <p className="text-xs text-muted-foreground font-serif">
-            Your Staff anchors your identity in the grove. Link or change your active Staff below.
-          </p>
-          <ManualStaffPicker
-            userId={user.id}
-            currentStaffId={(wallet.activeStaff as any)?.id || null}
-            onLinked={(staff) => {
-              if (staff) {
-                wallet.selectStaff({
-                  code: staff.id,
-                  tokenId: staff.token_id,
-                  speciesId: 0,
-                  circleId: staff.circle_id,
-                  variantId: 0,
-                  staffNumber: staff.staff_number,
-                  isOriginSpiral: staff.is_origin_spiral,
-                  name: staff.species,
-                  species: staff.species,
-                  image: staff.image_url || `/images/staffs/${staff.species_code.toLowerCase()}.jpeg`,
-                });
-              } else {
-                wallet.clearActiveStaff();
-              }
-            }}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Wallet */}
-      <div>
-        <h3 className="text-sm uppercase tracking-widest text-muted-foreground mb-3 font-serif">Non-Fungible Twig</h3>
         <WalletConnect />
-      </div>
+      </section>
 
-      {/* Force Update */}
-      <Card className="border-border/50 bg-card/60 backdrop-blur">
-        <CardContent className="p-6 space-y-3">
-          <div className="flex items-center gap-2">
-            <RefreshCw className="w-4 h-4 text-muted-foreground" />
-            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-serif">App Version</h3>
-          </div>
-          <p className="text-xs text-muted-foreground font-serif">
-            If the app feels stale or behaves unexpectedly, force a refresh to pull the latest version.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 font-serif text-xs"
-            onClick={() => {
-              // Clear service worker caches and reload
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                  registrations.forEach(r => r.unregister());
-                });
-              }
-              if ('caches' in window) {
-                caches.keys().then(names => {
-                  names.forEach(name => caches.delete(name));
-                });
-              }
-              // Small delay to allow cache clearing before reload
-              setTimeout(() => window.location.reload(), 300);
-            }}
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Get Latest Version
+      {/* ── Preferences ── */}
+      <section className="space-y-4">
+        <SectionHeader icon={Settings} title="Preferences" subtitle="Presence, weather, and notifications" />
+        <PresenceWeatherSettings userId={user.id} />
+      </section>
+
+      {/* ── System ── */}
+      <section className="space-y-4">
+        <SectionHeader icon={RefreshCw} title="System" />
+        <Card className="border-border/50 bg-card/60 backdrop-blur">
+          <CardContent className="p-5 space-y-3">
+            <p className="text-xs text-muted-foreground font-serif">
+              If the app feels stale, force a refresh to pull the latest version.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 font-serif text-xs"
+              onClick={() => {
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(r => r.unregister());
+                  });
+                }
+                if ('caches' in window) {
+                  caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                  });
+                }
+                setTimeout(() => window.location.reload(), 300);
+              }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Get Latest Version
+            </Button>
+          </CardContent>
+        </Card>
+
+        <div className="pt-2">
+          <Button variant="outline" onClick={onSignOut} className="gap-2 text-destructive hover:text-destructive font-serif text-xs">
+            <LogOut className="w-4 h-4" />
+            Sign Out
           </Button>
-        </CardContent>
-      </Card>
-
-      {/* Sign Out */}
-      <div className="pt-4 border-t border-border/30">
-        <Button variant="outline" onClick={onSignOut} className="gap-2 text-destructive hover:text-destructive font-serif text-xs">
-          <LogOut className="w-4 h-4" />
-          Sign Out
-        </Button>
-      </div>
+        </div>
+      </section>
     </div>
   );
 };

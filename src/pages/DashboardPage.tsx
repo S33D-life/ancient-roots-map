@@ -364,26 +364,50 @@ const DashboardPage = () => {
   }
 
   // ── Growth Engine sub-components ──
+  const HearthSectionHeader = ({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle?: string }) => (
+    <div className="flex items-center gap-2.5 pb-1">
+      <Icon className="w-4 h-4 text-primary/70" />
+      <div>
+        <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
+        {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+  );
+
   const GrowthEngineHearth = ({ userId, profile: p }: { userId: string; profile: Profile | null }) => {
-    const { data: streak } = useWandererStreak(userId);
     const { data: quests, initQuests, season } = useSeasonalQuests(userId);
     return (
-      <div className="space-y-8">
+      <div className="space-y-10">
+        {/* Onboarding */}
         <FirstEncounterFunnel userId={userId} />
-        <GroveIdentityCard userId={userId} userName={p?.full_name} />
-        <ContributionPathways />
-        <StreakBadge streak={streak} />
-        <SeasonalQuestCard
-          quests={quests || []}
-          season={season}
-          onInit={() => initQuests.mutate()}
-        />
-        <PresenceSpiralCard userId={userId} />
-        <HearthWarmth userId={userId} />
-        <EarnableToday userId={userId} />
-        <SeedTrailPanel userId={userId} />
-        <ActiveCampaigns />
-        <HearthCrossLinks />
+
+        {/* Identity & Daily Status */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Flame} title="Today" subtitle="Your daily pulse and earnable rewards" />
+          <GroveIdentityCard userId={userId} userName={p?.full_name} />
+          <EarnableToday userId={userId} />
+          <SeedTrailPanel userId={userId} />
+        </section>
+
+        {/* Growth & Quests */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Sprout} title="Growth" subtitle="Quests, campaigns, and contributions" />
+          <SeasonalQuestCard
+            quests={quests || []}
+            season={season}
+            onInit={() => initQuests.mutate()}
+          />
+          <ContributionPathways />
+          <ActiveCampaigns />
+        </section>
+
+        {/* Deeper exploration */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Compass} title="Explore" subtitle="Warmth, presence, and pathways" />
+          <PresenceSpiralCard userId={userId} />
+          <HearthWarmth userId={userId} />
+          <HearthCrossLinks />
+        </section>
       </div>
     );
   };
@@ -392,12 +416,26 @@ const DashboardPage = () => {
     const { data: badges } = useSpeciesBadges(userId);
     const { data: streak } = useWandererStreak(userId);
     return (
-      <div className="space-y-8">
-        <StreakBadge streak={streak} />
-        <SpeciesBadgeList badges={badges || []} />
-        <PersonalLegend userId={userId} />
-        <AncientFriendPassport userId={userId} />
-        <DashboardActivity userId={userId} />
+      <div className="space-y-10">
+        {/* Progress */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Activity} title="Progress" subtitle="Your streak and species milestones" />
+          <StreakBadge streak={streak} />
+          <SpeciesBadgeList badges={badges || []} />
+        </section>
+
+        {/* Legend & Passport */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={BookOpen} title="Your Legend" subtitle="Timeline of your journey through the grove" />
+          <PersonalLegend userId={userId} />
+          <AncientFriendPassport userId={userId} />
+        </section>
+
+        {/* Recent Activity */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Leaf} title="Activity" subtitle="Recent actions and contributions" />
+          <DashboardActivity userId={userId} />
+        </section>
       </div>
     );
   };
