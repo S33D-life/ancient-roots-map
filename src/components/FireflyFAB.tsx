@@ -243,7 +243,7 @@ const FireflyFAB = () => {
   }, [longPress]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    longPress.onPointerUp(e);
+    longPress.onPointerUp();
     if (!isDragging.current) return;
     isDragging.current = false;
     cancelAnimationFrame(rafId.current);
