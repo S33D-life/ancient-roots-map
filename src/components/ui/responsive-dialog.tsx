@@ -1,6 +1,9 @@
 /**
  * ResponsiveDialog — renders a Vaul Drawer on mobile, Radix Dialog on desktop.
  * Provides a single API so consumers don't need to branch.
+ *
+ * Mobile keyboard-aware: uses visualViewport API to detect keyboard and
+ * expand the drawer + adjust layout automatically.
  */
 import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,6 +36,34 @@ interface ResponsiveDialogProps {
   defaultSnapPoint?: number;
 }
 
+/**
+ * Hook to detect mobile keyboard visibility via the Visual Viewport API.
+ * Returns true when the viewport shrinks significantly (keyboard open).
+ */
+function useKeyboardVisible() {
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const threshold = 150; // px reduction to count as keyboard
+    const check = () => {
+      const diff = window.innerHeight - vv.height;
+      setVisible(diff > threshold);
+    };
+
+    vv.addEventListener("resize", check);
+    vv.addEventListener("scroll", check);
+    return () => {
+      vv.removeEventListener("resize", check);
+      vv.removeEventListener("scroll", check);
+    };
+  }, []);
+
+  return visible;
+}
+
 const ResponsiveDialog = ({
   open,
   onOpenChange,
@@ -45,6 +76,14 @@ const ResponsiveDialog = ({
   defaultSnapPoint,
 }: ResponsiveDialogProps) => {
   const isMobile = useIsMobile();
+  const keyboardOpen = useKeyboardVisible();
+
+  // When keyboard opens, force drawer to max snap point
+  const activeSnap = React.useMemo(() => {
+    if (!isMobile || !snapPoints?.length) return defaultSnapPoint;
+    if (keyboardOpen) return snapPoints[snapPoints.length - 1];
+    return defaultSnapPoint;
+  }, [isMobile, keyboardOpen, snapPoints, defaultSnapPoint]);
 
   if (isMobile) {
     return (
@@ -52,22 +91,25 @@ const ResponsiveDialog = ({
         open={open}
         onOpenChange={onOpenChange}
         snapPoints={snapPoints}
-        activeSnapPoint={defaultSnapPoint}
+        activeSnapPoint={activeSnap}
       >
         <DrawerContent
-          className={`max-h-[92dvh] overflow-hidden ${contentClassName ?? ""}`}
-          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+          className={`max-h-[96dvh] overflow-hidden ${contentClassName ?? ""}`}
+          style={{
+            paddingBottom: keyboardOpen ? "8px" : "env(safe-area-inset-bottom, 0px)",
+            transition: "padding-bottom 200ms ease",
+          }}
         >
           {overlay}
           {/* Ambient glow bar */}
           <div
-            className="h-1 w-full"
+            className="h-1 w-full shrink-0"
             style={{
               background:
                 "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)",
             }}
           />
-          <div className="overflow-y-auto flex-1 overscroll-contain">
+          <div className="overflow-y-auto flex-1 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             {(title || subtitle) && (
               <DrawerHeader className="px-5 pt-4 pb-0">
                 {title && (
