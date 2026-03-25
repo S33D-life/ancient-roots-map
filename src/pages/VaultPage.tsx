@@ -9,7 +9,7 @@ import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import PageShell from "@/components/PageShell";
 import ContextualWhisper from "@/components/ContextualWhisper";
-import EcosystemContextBanner from "@/components/EcosystemContextBanner";
+
 import hearthBg from "@/assets/hearth-bg.jpeg";
 import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
