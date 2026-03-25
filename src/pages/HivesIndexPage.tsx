@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PageShell from "@/components/PageShell";
 import AtlasPerspectiveNav from "@/components/atlas/AtlasPerspectiveNav";
 import { getAllHives, type HiveInfo, getHiveForSpecies } from "@/utils/hiveUtils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -222,7 +223,7 @@ const HivesIndexPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-7xl">
+      <PageShell className="container mx-auto px-4 pb-20 max-w-7xl" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Perspective Nav */}
         <div className="mb-4">
           <AtlasPerspectiveNav />
@@ -589,7 +590,7 @@ const HivesIndexPage = () => {
             );
           })()
         )}
-      </div>
+      </PageShell>
       <Footer />
     </div>
   );
