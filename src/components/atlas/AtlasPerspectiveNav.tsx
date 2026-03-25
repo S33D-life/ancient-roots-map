@@ -16,7 +16,7 @@ const PERSPECTIVES = [
   { path: "/atlas/bio-regions", label: "Bioregions", icon: Layers, desc: "Ecological landscapes" },
 ] as const;
 
-const AtlasPerspectiveNav = () => {
+const AtlasPerspectiveNav = ({ showDescriptions = false }: AtlasPerspectiveNavProps) => {
   const { pathname } = useLocation();
 
   const isActive = (path: string) => {
