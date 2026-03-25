@@ -1145,7 +1145,11 @@ const TreeDetailPage = () => {
         treeName={tree?.name}
         type={selectedType}
         meetingId={activeMeeting?.id}
-        onChangeType={openOfferingGateway}
+        onChangeType={() => {
+          // Open gateway first, then close dialog in next frame — no flash
+          setGatewayOpen(true);
+          requestAnimationFrame(() => setAddOfferingOpen(false));
+        }}
       />
 
       <ProposeEditDrawer

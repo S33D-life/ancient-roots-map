@@ -104,14 +104,16 @@ const ResponsiveDialog = ({
           }}
         >
           {overlay}
-          {/* Ambient glow bar */}
-          <div
-            className="h-1 w-full shrink-0"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)",
-            }}
-          />
+          {/* Ambient glow bar — hidden in fullscreen for cleaner immersion */}
+          {!fullscreenMobile && (
+            <div
+              className="h-1 w-full shrink-0"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), hsl(var(--accent) / 0.3), transparent)",
+              }}
+            />
+          )}
           <div className="overflow-y-auto flex-1 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             {(title || subtitle) && (
               <DrawerHeader className="px-5 pt-3 pb-0">
