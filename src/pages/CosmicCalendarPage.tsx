@@ -4,6 +4,7 @@
  * Harmonised with: Map, Blooming Clock, Harvest Exchange, TEOTAG.
  */
 import { useState, useMemo } from "react";
+import Footer from "@/components/Footer";
 import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 import { useCosmicClock, getSolarEvents, getUpcomingLunarEvents, getLunarInfo } from "@/hooks/use-cosmic-clock";
 import { useFoodCycles } from "@/hooks/use-food-cycles";
@@ -446,6 +447,7 @@ const CosmicCalendarPage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

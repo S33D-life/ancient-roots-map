@@ -7,6 +7,7 @@ import { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -892,6 +893,7 @@ const AgentGardenPage = () => {
           </Button>
         </div>
       </main>
+      <Footer />
     </>
   );
 };
