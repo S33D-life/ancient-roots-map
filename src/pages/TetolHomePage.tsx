@@ -1,6 +1,7 @@
 /**
  * TetolHomePage — The TETOL tree diagram as the site homepage / navigation compass.
  * Users navigate the ecosystem by clicking tree nodes.
+ * Light mode: warm botanical canopy experience with layered leaves and sunlight.
  */
 import { useNavigate, Link } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
@@ -33,7 +34,8 @@ const quickLinks = [
   { to: "/roadmap", label: "Roadmap", icon: Map },
 ];
 
-const nodeColors: Record<string, { bg: string; border: string; iconColor: string; glow: string }> = {
+/* Dark mode node colors (unchanged) */
+const nodeColorsDark: Record<string, { bg: string; border: string; iconColor: string; glow: string }> = {
   crown: {
     bg: "hsl(42 60% 18% / 0.6)",
     border: "hsl(42 80% 50% / 0.7)",
@@ -60,31 +62,74 @@ const nodeColors: Record<string, { bg: string; border: string; iconColor: string
   },
 };
 
+/* Light mode node colors — warm botanical tones */
+const nodeColorsLight: Record<string, { bg: string; border: string; iconColor: string; glow: string }> = {
+  crown: {
+    bg: "hsl(42 40% 94% / 0.85)",
+    border: "hsl(42 50% 65% / 0.6)",
+    iconColor: "hsl(42 65% 42%)",
+    glow: "hsl(42 55% 50% / 0.2)",
+  },
+  canopy: {
+    bg: "hsl(110 20% 93% / 0.85)",
+    border: "hsl(120 25% 60% / 0.5)",
+    iconColor: "hsl(120 35% 38%)",
+    glow: "hsl(120 30% 45% / 0.15)",
+  },
+  trunk: {
+    bg: "hsl(30 25% 93% / 0.85)",
+    border: "hsl(30 30% 65% / 0.5)",
+    iconColor: "hsl(30 45% 38%)",
+    glow: "hsl(30 35% 45% / 0.15)",
+  },
+  roots: {
+    bg: "hsl(80 18% 92% / 0.85)",
+    border: "hsl(80 22% 60% / 0.5)",
+    iconColor: "hsl(80 30% 36%)",
+    glow: "hsl(80 25% 42% / 0.15)",
+  },
+};
+
 const LEAF_SHAPES = ["🍃", "🍂", "🌿", "✦"] as const;
+
+/** Depth layers for parallax-like leaf variation */
+type LeafDepth = "near" | "mid" | "far";
 
 const TetolHomePage = () => {
   useDocumentTitle("Home");
   const navigate = useNavigate();
   const [activeNode, setActiveNode] = useState<string | null>(null);
 
+  const isLight = useMemo(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.classList.contains("light");
+  }, []);
+
+  const nodeColors = isLight ? nodeColorsLight : nodeColorsDark;
+
   const handleItemClick = useCallback((to: string) => {
     setActiveNode(to);
-    // Brief glow before navigating — keeps it fast
     setTimeout(() => navigate(to), 120);
   }, [navigate]);
 
   const leaves = useMemo(
     () =>
-      Array.from({ length: 10 }, (_, i) => ({
-        id: i,
-        char: LEAF_SHAPES[i % LEAF_SHAPES.length],
-        left: `${5 + Math.random() * 90}%`,
-        delay: Math.random() * 6,
-        duration: 10 + Math.random() * 8,
-        size: 10 + Math.random() * 8,
-        drift: (Math.random() - 0.5) * 60,
-        startRotation: Math.random() * 360,
-      })),
+      Array.from({ length: 14 }, (_, i) => {
+        const depth: LeafDepth = i < 3 ? "near" : i < 9 ? "mid" : "far";
+        const sizeMap = { near: 16 + Math.random() * 6, mid: 10 + Math.random() * 8, far: 8 + Math.random() * 5 };
+        const durationMap = { near: 14 + Math.random() * 6, mid: 10 + Math.random() * 8, far: 18 + Math.random() * 10 };
+        return {
+          id: i,
+          char: LEAF_SHAPES[i % LEAF_SHAPES.length],
+          left: `${5 + Math.random() * 90}%`,
+          delay: Math.random() * 8,
+          duration: durationMap[depth],
+          size: sizeMap[depth],
+          drift: (Math.random() - 0.5) * (depth === "near" ? 80 : depth === "mid" ? 60 : 40),
+          startRotation: Math.random() * 360,
+          depth,
+        };
+      }),
     []
   );
 
@@ -96,16 +141,23 @@ const TetolHomePage = () => {
       <main
         className="flex-1 flex flex-col items-center relative overflow-hidden pt-content px-safe"
         style={{
-          background:
-            "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))",
+          background: isLight
+            ? "linear-gradient(180deg, hsl(38 35% 95%) 0%, hsl(40 30% 92%) 40%, hsl(36 28% 94%) 100%)"
+            : "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))",
         }}
       >
-        {/* Floating leaves */}
-        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        {/* Layer 1: Canopy silhouette overlay (light only) */}
+        {isLight && <div className="tetol-canopy-overlay" />}
+
+        {/* Layer 1.5: Sunlight shifting layer (light only) */}
+        {isLight && <div className="tetol-sunlight-layer" />}
+
+        {/* Layer 3: Floating leaves — with depth classes in light mode */}
+        <div className="absolute inset-0 pointer-events-none z-20" aria-hidden>
           {leaves.map((l) => (
             <span
               key={l.id}
-              className="absolute"
+              className={`absolute ${isLight ? `tetol-leaf-organic tetol-leaf-${l.depth}` : ""}`}
               style={{
                 left: l.left,
                 top: "-20px",
@@ -114,6 +166,8 @@ const TetolHomePage = () => {
                 animation: `tetol-fall ${l.duration}s linear ${l.delay}s infinite`,
                 "--drift": `${l.drift}px`,
                 "--start-rot": `${l.startRotation}deg`,
+                "--leaf-peak-opacity": l.depth === "near" ? "0.35" : l.depth === "mid" ? "0.22" : "0.1",
+                "--leaf-fade-opacity": l.depth === "near" ? "0.2" : l.depth === "mid" ? "0.12" : "0.05",
               } as React.CSSProperties}
             >
               {l.char}
@@ -121,6 +175,7 @@ const TetolHomePage = () => {
           ))}
         </div>
 
+        {/* Layer 2: Navigation content */}
         <div className="flex flex-col items-center relative z-10 py-12 md:py-16 pb-16 md:pb-20">
           {/* Title with TEOTAG hover */}
           <div className="relative group/title flex flex-col items-center">
@@ -128,7 +183,9 @@ const TetolHomePage = () => {
               className="text-4xl md:text-5xl font-serif tracking-[0.25em] mb-0 cursor-default"
               style={{
                 color: "hsl(var(--primary))",
-                textShadow: "0 0 20px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.25)",
+                textShadow: isLight
+                  ? "0 1px 8px hsl(var(--primary) / 0.15)"
+                  : "0 0 20px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.25)",
               }}
             >
               TETOL
@@ -166,22 +223,23 @@ const TetolHomePage = () => {
               style={{
                 top: "0",
                 bottom: "0",
-                background:
-                  "linear-gradient(180deg, hsl(42 80% 55% / 0.6) 0%, hsl(30 35% 30% / 0.8) 50%, hsl(25 30% 22% / 0.6) 100%)",
+                background: isLight
+                  ? "linear-gradient(180deg, hsl(42 50% 60% / 0.35) 0%, hsl(30 30% 50% / 0.5) 50%, hsl(25 25% 45% / 0.35) 100%)"
+                  : "linear-gradient(180deg, hsl(42 80% 55% / 0.6) 0%, hsl(30 35% 30% / 0.8) 50%, hsl(25 30% 22% / 0.6) 100%)",
               }}
             />
 
             {/* Crown — Golden Dream */}
-            <TreeNode item={treeItems[3]} onClick={handleItemClick} nodeStyle="crown" active={activeNode === treeItems[3].to} />
+            <TreeNode item={treeItems[3]} onClick={handleItemClick} nodeStyle="crown" active={activeNode === treeItems[3].to} colors={nodeColors} isLight={isLight} />
 
             {/* Branch connectors */}
             <BranchLines side="both" />
 
             {/* Canopy — Council of Life */}
-            <TreeNode item={treeItems[2]} onClick={handleItemClick} nodeStyle="canopy" active={activeNode === treeItems[2].to} />
+            <TreeNode item={treeItems[2]} onClick={handleItemClick} nodeStyle="canopy" active={activeNode === treeItems[2].to} colors={nodeColors} isLight={isLight} />
 
             {/* Trunk — Heartwood Library */}
-            <TreeNode item={treeItems[1]} onClick={handleItemClick} nodeStyle="trunk" active={activeNode === treeItems[1].to} />
+            <TreeNode item={treeItems[1]} onClick={handleItemClick} nodeStyle="trunk" active={activeNode === treeItems[1].to} colors={nodeColors} isLight={isLight} />
 
             {/* Root tendrils */}
             <BranchLines side="roots" />
@@ -209,7 +267,7 @@ const TetolHomePage = () => {
             </div>
 
             {/* Roots — Ancient Friends */}
-            <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} />
+            <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} colors={nodeColors} isLight={isLight} />
           </div>
 
           {/* Quick links */}
@@ -220,7 +278,7 @@ const TetolHomePage = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-serif transition-all hover:border-primary/50 hover:bg-primary/10"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-serif transition-all hover:border-primary/50 hover:bg-primary/10 ${isLight ? "tetol-quick-link" : ""}`}
                   style={{
                     borderColor: "hsl(var(--border) / 0.3)",
                     color: "hsl(var(--muted-foreground))",
@@ -246,17 +304,19 @@ interface TreeNodeProps {
   onClick: (to: string) => void;
   nodeStyle: "crown" | "canopy" | "trunk" | "roots";
   active?: boolean;
+  colors: Record<string, { bg: string; border: string; iconColor: string; glow: string }>;
+  isLight: boolean;
 }
 
-const TreeNode = ({ item, onClick, nodeStyle, active }: TreeNodeProps) => {
+const TreeNode = ({ item, onClick, nodeStyle, active, colors, isLight }: TreeNodeProps) => {
   const Icon = item.icon;
-  const colors = nodeColors[nodeStyle];
+  const c = colors[nodeStyle];
 
   return (
     <button
       onClick={() => onClick(item.to)}
       className="relative z-10 flex items-center gap-4 group cursor-pointer bg-transparent border-none py-4 w-full transition-all duration-200"
-      style={active ? { transform: "scale(1.06)", filter: "brightness(1.2)" } : {}}
+      style={active ? { transform: "scale(1.06)", filter: isLight ? "brightness(1.05)" : "brightness(1.2)" } : {}}
     >
       <div className="flex-1 text-right">
         <p
@@ -267,27 +327,28 @@ const TreeNode = ({ item, onClick, nodeStyle, active }: TreeNodeProps) => {
         </p>
         <p
           className="text-[10px] tracking-[0.2em] uppercase font-serif"
-          style={{ color: colors.iconColor, opacity: 0.7 }}
+          style={{ color: c.iconColor, opacity: 0.7 }}
         >
           {item.subtitle}
         </p>
       </div>
 
       <div
-        className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border shrink-0 transition-all duration-500 group-hover:scale-110"
+        className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border shrink-0 transition-all duration-500 group-hover:scale-110 ${isLight ? "tetol-node-circle" : ""}`}
         style={{
-          background: colors.bg,
-          borderColor: colors.border,
-          boxShadow: `0 0 0px ${colors.glow}`,
+          background: c.bg,
+          borderColor: c.border,
+          boxShadow: `0 0 0px ${c.glow}`,
+          ...(isLight ? { backdropFilter: "blur(8px)" } : {}),
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 25px ${colors.glow}`;
+          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 ${isLight ? "16" : "25"}px ${c.glow}`;
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0px ${colors.glow}`;
+          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0px ${c.glow}`;
         }}
       >
-        <Icon className="w-5 h-5 md:w-6 md:h-6" style={{ color: colors.iconColor }} />
+        <Icon className="w-5 h-5 md:w-6 md:h-6" style={{ color: c.iconColor }} />
       </div>
 
       <div className="flex-1" />
