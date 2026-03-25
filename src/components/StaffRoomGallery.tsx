@@ -527,18 +527,35 @@ export default function StaffRoomGallery() {
 
   // ── GALLERY VIEW ──────────────────────────────────────────────
   const GalleryView = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
       {filteredStaffs.map((staff, i) => (
-        <Card key={staff.tokenId} className="border-border/40 hover:border-primary/50 transition-all group cursor-pointer overflow-hidden hover:shadow-[var(--glow-subtle)]"
-          onClick={() => { setActiveIndex(i); setDetailOpen(true); }} role="button" aria-label={`View ${staff.speciesName} staff`}>
-          <CardContent className="p-3 text-center">
-            <div className="w-full aspect-[3/4] rounded-md overflow-hidden border border-border/30 mb-2 group-hover:border-primary/40 transition-colors">
+        <Card
+          key={staff.tokenId}
+          className={cn(
+            "transition-all group cursor-pointer overflow-hidden touch-manipulation",
+            staff.isOrigin
+              ? "border-primary/25 hover:border-primary/50 hover:shadow-[0_4px_20px_hsl(var(--primary)/0.15)]"
+              : "border-border/30 hover:border-border/60 hover:shadow-[0_4px_16px_hsl(var(--foreground)/0.06)]"
+          )}
+          onClick={() => { setActiveIndex(i); setDetailOpen(true); }}
+          role="button"
+          aria-label={`View ${staff.speciesName} staff`}
+        >
+          <CardContent className="p-2.5 md:p-3 text-center">
+            <div className="relative w-full aspect-[3/4] rounded-md overflow-hidden border border-border/20 mb-2 group-hover:border-primary/30 transition-colors">
               <OptimizedImage src={staff.image} alt={`Staff ${staff.code}`} className="w-full h-full" />
+              {staff.isOrigin && (
+                <div className="absolute top-1 right-1">
+                  <Crown className="w-3 h-3 text-primary drop-shadow-sm" />
+                </div>
+              )}
             </div>
-            <p className="text-xs font-serif font-medium text-foreground truncate">
-              {staff.code.includes("-") ? staff.code : staff.speciesName}
+            <p className="text-xs font-serif font-medium text-foreground truncate leading-snug">
+              {staff.speciesName}
             </p>
-            <p className="text-[10px] text-muted-foreground">#{String(staff.tokenId).padStart(3, "0")}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+              {staff.code} · #{String(staff.tokenId).padStart(3, "0")}
+            </p>
           </CardContent>
         </Card>
       ))}
