@@ -187,8 +187,8 @@ const App = () => {
   useConnectionResilience();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      // Listener kept active so auth SDK can process token refresh/sign-out updates.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUserId(session?.user?.id ?? null);
     });
 
     supabase.auth
