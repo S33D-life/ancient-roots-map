@@ -919,7 +919,7 @@ const TreeDetailPage = () => {
                 {userId && (meetingStatus === "active" || meetingStatus === "expiring") && (
                   <Button
                     size="sm"
-                    onClick={() => setAddOfferingOpen(true)}
+                    onClick={openOfferingGateway}
                     className="mt-4 font-serif tracking-wider text-xs gap-1.5"
                   >
                     <Sparkles className="h-3 w-3" />
