@@ -86,11 +86,11 @@ All colors MUST be HSL.
   .tetol-crown { --level-accent: 45 100% 60%; }         /* Radiant gold */
   .tetol-hearth { --level-accent: 15 80% 55%; }         /* Hearth orange */
 
-  .light .tetol-roots { --level-accent: 120 40% 35%; }
-  .light .tetol-heartwood { --level-accent: 28 60% 40%; }
-  .light .tetol-canopy { --level-accent: 195 50% 40%; }
-  .light .tetol-crown { --level-accent: 45 80% 45%; }
-  .light .tetol-hearth { --level-accent: 15 65% 45%; }
+  .light .tetol-roots { --level-accent: 120 35% 32%; }
+  .light .tetol-heartwood { --level-accent: 30 50% 38%; }
+  .light .tetol-canopy { --level-accent: 150 35% 35%; }
+  .light .tetol-crown { --level-accent: 42 65% 42%; }
+  .light .tetol-hearth { --level-accent: 18 55% 42%; }
 
   .light {
     /* ── Botanical Parchment Light Mode ── */
