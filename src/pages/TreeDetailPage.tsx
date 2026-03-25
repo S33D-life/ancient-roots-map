@@ -582,7 +582,7 @@ const TreeDetailPage = () => {
                   progress={relationship}
                   treeName={tree.name}
                   onCoWitness={() => {}}
-                  onMakeOffering={() => setAddOfferingOpen(true)}
+                  onMakeOffering={openOfferingGateway}
                 />
               </Suspense>
             )}
