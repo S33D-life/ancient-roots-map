@@ -301,13 +301,9 @@ const ValueTreePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+      <PageShell className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
         {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
+        <div className="text-center mb-8">
           <span className="text-5xl block mb-3">🌳</span>
           <h1 className="text-3xl md:text-4xl font-serif tracking-wide text-foreground mb-2">
             The S33D Value Tree
