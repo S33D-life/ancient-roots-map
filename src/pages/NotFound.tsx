@@ -15,9 +15,9 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <div className="flex flex-col items-center justify-center px-4 pb-28 md:pb-20 text-center min-h-[70vh]" style={{ paddingTop: 'var(--content-top)' }}>
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-28 md:pb-20 text-center" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Atmospheric glow */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -51,6 +51,7 @@ const NotFound = () => {
           </Button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

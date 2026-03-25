@@ -107,7 +107,7 @@ const MarketDetailPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-3xl">
+      <div className="container mx-auto px-4 pb-20 max-w-3xl" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Breadcrumb */}
         <button
           onClick={() => navigate("/library/rhythms")}
