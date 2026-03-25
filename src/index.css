@@ -279,14 +279,14 @@ All colors MUST be HSL.
     box-shadow: var(--surface-glow, none);
   }
 
-  /* Light-mode card polish — inner highlight + soft edge */
+  /* Light-mode botanical card — parchment surface */
   .light .card-luminous {
-    background: hsl(38 45% 97%);
-    border: 1px solid hsl(35 35% 88%);
+    background: linear-gradient(180deg, hsl(38 35% 96%) 0%, hsl(36 28% 94%) 100%);
+    border: 1px solid hsl(33 25% 84%);
     box-shadow:
       var(--elevation-mid),
       var(--surface-glow),
-      inset 0 0 0 1px hsl(40 60% 96% / 0.5);
+      inset 0 0 0 1px hsl(40 40% 95% / 0.5);
   }
 
   /* Soft glow hover for interactive elements in light mode */
@@ -295,8 +295,8 @@ All colors MUST be HSL.
   }
   .light .glow-hover:hover {
     box-shadow:
-      0 4px 16px hsl(36 70% 50% / 0.12),
-      0 0 0 1px hsl(36 60% 80% / 0.4);
+      0 4px 16px hsl(35 50% 45% / 0.1),
+      0 0 0 1px hsl(35 45% 78% / 0.4);
     transform: translateY(-1px);
   }
   .light .glow-hover:active {
@@ -304,10 +304,10 @@ All colors MUST be HSL.
     box-shadow: var(--elevation-low);
   }
 
-  /* Atmospheric panel background for light mode */
+  /* Atmospheric panel background for light mode — warm parchment */
   .light .panel-atmosphere {
-    background: linear-gradient(180deg, hsl(38 50% 98%) 0%, hsl(40 35% 96%) 100%);
-    border: 1px solid hsl(35 30% 86%);
+    background: linear-gradient(180deg, hsl(38 32% 96%) 0%, hsl(36 25% 93%) 100%);
+    border: 1px solid hsl(33 22% 82%);
     box-shadow: var(--elevation-mid);
   }
 
