@@ -385,7 +385,7 @@ const AuthPage = () => {
   // Reset password screen
   if (view === "reset-password") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'radial-gradient(ellipse at top, hsl(75 20% 14%), hsl(80 15% 10%))' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 bg-background">
         <div className="w-full max-w-sm">
           <div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 md:p-8 shadow-xl space-y-6">
             <div className="text-center space-y-2">
