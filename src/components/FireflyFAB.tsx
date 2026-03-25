@@ -279,6 +279,8 @@ const FireflyFAB = () => {
   const signalHue = dominantType ? SIGNAL_TYPE_HUE[dominantType] : null;
   const hasSignals = unreadCount > 0;
 
+  if (hidden) return null;
+
   return (
     <>
       {/* TEOTAG's Guiding Orb */}
