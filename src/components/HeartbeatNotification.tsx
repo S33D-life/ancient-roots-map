@@ -17,7 +17,6 @@ const HeartbeatNotification = () => {
   const [isPulsing, setIsPulsing] = useState(false);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const { showCelebrations } = useQuietMode();
-  const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const handler = (e: CustomEvent) => {
