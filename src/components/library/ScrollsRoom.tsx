@@ -37,9 +37,6 @@ const ScrollsRoom = () => {
         </div>
       </Link>
 
-      {/* Heart Reservoir Rankings */}
-      <TreeReservoirLeaderboard />
-
       {/* Council of Life Window */}
       <div
         className="relative rounded-xl overflow-hidden cursor-pointer group border border-primary/30 hover:border-primary/60 transition-all duration-500"
