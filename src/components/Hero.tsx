@@ -311,8 +311,8 @@ const Hero = () => {
             </h1>
             <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
             A living atlas of the world's most ancient trees.<br className="hidden sm:inline" />
-            Discover, map, and help protect them.
-          </p>
+            Discover them, share their stories, and help protect them.
+           </p>
 
           {/* CTA buttons — above the fold */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-md sm:max-w-none mx-auto pt-2">

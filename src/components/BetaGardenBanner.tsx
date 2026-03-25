@@ -51,9 +51,9 @@ const BetaGardenBanner = () => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-serif leading-relaxed" style={{ color: "hsl(var(--foreground) / 0.85)" }}>
-                You are exploring an early garden of{" "}
-                <span className="text-primary font-semibold">S33D</span>.{" "}
-                <span className="text-muted-foreground">The forest is still growing.</span>
+                Welcome to{" "}
+                <span className="text-primary font-semibold">S33D</span> — a living atlas of the world's ancient trees.{" "}
+                <span className="text-muted-foreground">We're growing. Explore freely.</span>
               </p>
             </div>
             <button
