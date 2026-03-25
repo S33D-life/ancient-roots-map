@@ -62,7 +62,7 @@ const HeartwoodRoomShell = ({
   }, [handleKeyDown]);
 
   return (
-    <div className="min-h-screen relative" style={{ background: "hsl(20 25% 6%)" }}>
+    <div className="min-h-screen relative botanical-heartwood" style={{ background: "hsl(20 25% 6%)" }}>
       <HeartwoodBackground />
       <Header />
 
