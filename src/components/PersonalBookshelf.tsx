@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen, Plus, Eye, EyeOff, Users, TreeDeciduous, Trash2, Share2,
   FolderOpen, ChevronDown, ChevronRight, Pencil, MessageSquareQuote,
-  StickyNote, Sparkles, BookMarked, Package, Feather
+  StickyNote, Sparkles, BookMarked, Package, Feather, Search,
+  ArrowUpDown, SortAsc, SortDesc
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,15 @@ const filterOptions = [
   { value: "public", label: "Public" },
   { value: "tree-linked", label: "Tree-Linked" },
 ] as const;
+
+type SortOption = "recent" | "title-asc" | "title-desc" | "author-asc";
+
+const sortOptions: { value: SortOption; label: string }[] = [
+  { value: "recent", label: "Recently Added" },
+  { value: "title-asc", label: "Title A → Z" },
+  { value: "title-desc", label: "Title Z → A" },
+  { value: "author-asc", label: "Author A → Z" },
+];
 
 const spineColors = [
   "from-emerald-800 to-emerald-950",
@@ -101,9 +111,26 @@ const DustMotes = () => {
   );
 };
 
+function sortEntries(entries: BookshelfEntry[], sort: SortOption): BookshelfEntry[] {
+  const sorted = [...entries];
+  switch (sort) {
+    case "title-asc":
+      return sorted.sort((a, b) => a.title.localeCompare(b.title));
+    case "title-desc":
+      return sorted.sort((a, b) => b.title.localeCompare(a.title));
+    case "author-asc":
+      return sorted.sort((a, b) => a.author.localeCompare(b.author));
+    case "recent":
+    default:
+      return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+}
+
 const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState<BookshelfVisibility | "all" | "tree-linked">("all");
+  const [sort, setSort] = useState<SortOption>("recent");
+  const [searchQuery, setSearchQuery] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -118,6 +145,18 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
   const { entries, loading, stats, deleteEntry, updateEntry, refetch } = useBookshelf({ userId, filter });
   const { shelves, createShelf, updateShelf, deleteShelf } = useBookshelves(userId);
 
+  // Search + sort entries
+  const processedEntries = useMemo(() => {
+    let result = entries;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(e =>
+        e.title.toLowerCase().includes(q) || e.author.toLowerCase().includes(q)
+      );
+    }
+    return sortEntries(result, sort);
+  }, [entries, searchQuery, sort]);
+
   const handleCreateMultipleShelves = async (names: string[]) => {
     for (const name of names) {
       await createShelf(name);
@@ -130,7 +169,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
     const shelfMap = new Map<string, BookshelfEntry[]>();
     const unshelved: BookshelfEntry[] = [];
 
-    entries.forEach(entry => {
+    processedEntries.forEach(entry => {
       const shelfId = (entry as any).shelf_id;
       if (shelfId) {
         if (!shelfMap.has(shelfId)) shelfMap.set(shelfId, []);
@@ -149,7 +188,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
     }
 
     return groups;
-  }, [entries, shelves]);
+  }, [processedEntries, shelves]);
 
   const toggleShelfCollapse = (shelfId: string) => {
     setCollapsedShelves(prev => {
@@ -215,7 +254,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
     }
   };
 
-  const renderSpineRow = (books: BookshelfEntry[], shelfLabel?: string) => {
+  const renderSpineRow = (books: BookshelfEntry[]) => {
     if (books.length === 0) return null;
 
     return (
@@ -227,7 +266,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
       >
         <div className="px-4 pt-5 pb-3">
           <motion.div
-            className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin"
+            className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin"
             initial="hidden"
             animate="visible"
             variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
@@ -244,12 +283,14 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                   onClick={() => setExpandedId(isExpanded ? null : entry.id)}
                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  whileTap={{ scale: 0.97 }}
-                  className={`relative flex-shrink-0 rounded-sm overflow-hidden transition-all duration-300 ${
-                    isExpanded ? "ring-2 ring-primary/60 ring-offset-2 ring-offset-background" : ""
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`relative flex-shrink-0 rounded-md overflow-hidden transition-all duration-300 touch-manipulation ${
+                    isExpanded
+                      ? "ring-2 ring-primary/60 ring-offset-2 ring-offset-background shadow-[0_4px_20px_hsl(var(--primary)/0.2)]"
+                      : "hover:shadow-[0_4px_16px_hsl(var(--primary)/0.12)]"
                   }`}
-                  style={{ width: isExpanded ? 100 : 44, height: 160 }}
+                  style={{ width: isExpanded ? 100 : 48, minHeight: 160 }}
                   title={`${entry.title} — ${entry.author}`}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-b ${spineColors[colorIdx]}`} />
@@ -258,14 +299,14 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                   <div className="absolute left-1 inset-y-0 w-px bg-white/5" />
 
                   {/* Visibility + physical indicators */}
-                  <div className="absolute top-1 right-1 flex flex-col items-center gap-0.5">
+                  <div className="absolute top-1.5 right-1.5 flex flex-col items-center gap-0.5">
                     <span className="text-white/40">{visibilityIcons[entry.visibility]}</span>
                     {isPhysical && <Package className="h-2.5 w-2.5 text-amber-400/50" />}
                   </div>
 
                   {/* Notes count badge */}
                   {(entry as any).notes_count > 0 && (
-                    <div className="absolute bottom-1 right-1 bg-primary/60 text-white text-[7px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
+                    <div className="absolute bottom-1.5 right-1.5 bg-primary/70 text-white text-[7px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                       {(entry as any).notes_count}
                     </div>
                   )}
@@ -322,30 +363,40 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
         onCreateShelves={handleCreateMultipleShelves}
       />
 
-      {/* Stats bar */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-primary" />
-          <span className="font-serif text-sm text-foreground/80">{stats.total} books</span>
+      {/* ═══ Stats Bar — breathable, clear hierarchy ═══ */}
+      <div
+        className="rounded-xl border border-border/20 p-4"
+        style={{ background: "hsl(var(--card) / 0.3)" }}
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <BookOpen className="h-5 w-5 text-primary" style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.3))" }} />
+          <h3 className="font-serif text-base text-foreground tracking-wide">Your Collection</h3>
         </div>
-        <Badge variant="outline" className="text-[10px] font-serif gap-1">
-          <EyeOff className="h-2.5 w-2.5" /> {stats.private} private
-        </Badge>
-        <Badge variant="outline" className="text-[10px] font-serif gap-1">
-          <Eye className="h-2.5 w-2.5" /> {stats.shared} shared
-        </Badge>
-        <Badge variant="outline" className="text-[10px] font-serif gap-1">
-          <TreeDeciduous className="h-2.5 w-2.5" /> {stats.treeLinked} tree-linked
-        </Badge>
-        <Badge variant="outline" className="text-[10px] font-serif gap-1">
-          <FolderOpen className="h-2.5 w-2.5" /> {shelves.length} {shelves.length === 1 ? "shelf" : "shelves"}
-        </Badge>
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="font-serif text-2xl text-foreground tabular-nums">{stats.total}</span>
+          <span className="text-xs font-serif text-muted-foreground">books</span>
+          <div className="h-4 w-px bg-border/30" />
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant="outline" className="text-[10px] font-serif gap-1 py-0.5">
+              <EyeOff className="h-2.5 w-2.5" /> {stats.private} private
+            </Badge>
+            <Badge variant="outline" className="text-[10px] font-serif gap-1 py-0.5">
+              <Eye className="h-2.5 w-2.5" /> {stats.shared} shared
+            </Badge>
+            <Badge variant="outline" className="text-[10px] font-serif gap-1 py-0.5">
+              <TreeDeciduous className="h-2.5 w-2.5" /> {stats.treeLinked} tree-linked
+            </Badge>
+            <Badge variant="outline" className="text-[10px] font-serif gap-1 py-0.5">
+              <FolderOpen className="h-2.5 w-2.5" /> {shelves.length} {shelves.length === 1 ? "shelf" : "shelves"}
+            </Badge>
+          </div>
+        </div>
       </div>
 
       {/* Quiet doorway to the Living Printing Press */}
       <button
         onClick={() => navigate("/press")}
-        className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border/15 transition-all hover:border-primary/20 group"
+        className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border/15 transition-all hover:border-primary/20 hover:shadow-[0_2px_12px_hsl(var(--primary)/0.08)] group"
         style={{ background: "linear-gradient(135deg, hsl(var(--card) / 0.3), hsl(35 20% 12% / 0.2))" }}
       >
         <Feather className="h-4 w-4 text-primary/40 group-hover:text-primary/60 transition-colors" />
@@ -355,41 +406,85 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
         </div>
       </button>
 
-      {/* Filter + Actions */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-          {filterOptions.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setFilter(opt.value as any)}
-              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-serif whitespace-nowrap transition-all ${
-                filter === opt.value
-                  ? "bg-primary/15 text-primary border border-primary/30"
-                  : "text-muted-foreground hover:text-foreground border border-transparent"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+      {/* ═══ Search + Sort + Filter Bar ═══ */}
+      <div className="space-y-3">
+        {/* Search + Sort row */}
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+            <Input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search by title or author…"
+              className="pl-9 h-9 text-xs font-serif bg-card/30 border-border/20 focus:border-primary/30"
+            />
+          </div>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <SelectTrigger className="w-[140px] h-9 text-[11px] font-serif border-border/20 bg-card/30">
+              <ArrowUpDown className="h-3 w-3 mr-1 text-muted-foreground/50" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map(opt => (
+                <SelectItem key={opt.value} value={opt.value} className="text-xs font-serif">
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex gap-1.5 shrink-0">
-          <Button size="sm" variant="outline" onClick={() => setShelfDialogOpen(true)} className="font-serif text-xs gap-1 h-8">
-            <FolderOpen className="h-3 w-3" /> Shelf
-          </Button>
-          <Button size="sm" onClick={() => setAddOpen(true)} className="font-serif text-xs gap-1 h-8">
-            <Plus className="h-3 w-3" /> Book
-          </Button>
+
+        {/* Filter + Actions */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+            {filterOptions.map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setFilter(opt.value as any)}
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-serif whitespace-nowrap transition-all touch-manipulation ${
+                  filter === opt.value
+                    ? "bg-primary/15 text-primary border border-primary/30"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/30 border border-transparent"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1.5 shrink-0">
+            <Button size="sm" variant="outline" onClick={() => setShelfDialogOpen(true)} className="font-serif text-xs gap-1 h-8">
+              <FolderOpen className="h-3 w-3" /> Shelf
+            </Button>
+            <Button size="sm" onClick={() => setAddOpen(true)} className="font-serif text-xs gap-1 h-8">
+              <Plus className="h-3 w-3" /> Book
+            </Button>
+          </div>
         </div>
       </div>
 
+      {/* Search results indicator */}
+      {searchQuery.trim() && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-serif text-muted-foreground">
+            {processedEntries.length} result{processedEntries.length !== 1 ? "s" : ""} for "{searchQuery}"
+          </p>
+          <button
+            onClick={() => setSearchQuery("")}
+            className="text-[10px] font-serif text-primary hover:text-primary/80 transition-colors"
+          >
+            Clear search
+          </button>
+        </div>
+      )}
+
       {/* Content */}
       {loading ? (
-        <div className="text-center py-12">
+        <div className="text-center py-16">
           <BookOpen className="h-8 w-8 text-muted-foreground/30 mx-auto animate-pulse" />
-          <p className="text-xs text-muted-foreground/50 font-serif mt-2">Loading your shelf…</p>
+          <p className="text-xs text-muted-foreground/50 font-serif mt-3">Loading your shelf…</p>
         </div>
       ) : entries.length === 0 ? (
-        <div className="relative text-center py-16 space-y-3 rounded-xl overflow-hidden"
+        <div className="relative text-center py-20 space-y-4 rounded-xl overflow-hidden"
           style={{
             background: "repeating-linear-gradient(0deg, transparent, transparent 38px, hsl(30 30% 22% / 0.08) 38px, hsl(30 30% 22% / 0.08) 42px)",
           }}
@@ -399,15 +494,20 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
             <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
               <BookMarked className="h-7 w-7 text-primary/40" />
             </div>
-            <p className="text-sm font-serif text-muted-foreground/60 mt-3">Your shelf awaits its first book</p>
-            <p className="text-xs text-muted-foreground/40 font-serif">Books start private. Share when you're ready.</p>
-            <Button variant="outline" size="sm" onClick={() => setAddOpen(true)} className="font-serif text-xs gap-1 mt-3">
+            <p className="text-sm font-serif text-muted-foreground/60 mt-4">Your shelf awaits its first book</p>
+            <p className="text-xs text-muted-foreground/40 font-serif mt-1">Books start private. Share when you're ready.</p>
+            <Button variant="outline" size="sm" onClick={() => setAddOpen(true)} className="font-serif text-xs gap-1 mt-4">
               <Plus className="h-3 w-3" /> Add Your First Book
             </Button>
           </div>
         </div>
+      ) : processedEntries.length === 0 ? (
+        <div className="text-center py-12">
+          <Search className="h-6 w-6 text-muted-foreground/30 mx-auto" />
+          <p className="text-sm font-serif text-muted-foreground/50 mt-3">No books match your search</p>
+        </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           {groupedEntries.map(({ shelf, books }) => {
             if (books.length === 0 && shelf) {
               // Show empty shelf with faint texture
@@ -431,7 +531,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                     }}
                   />
                   {!isCollapsed && (
-                    <div className="text-center py-6 text-xs text-muted-foreground/40 font-serif italic">
+                    <div className="text-center py-8 text-xs text-muted-foreground/40 font-serif italic">
                       This shelf is empty
                     </div>
                   )}
@@ -479,9 +579,9 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           {/* Expanded detail */}
           <AnimatePresence>
             {expandedId && (() => {
-              const entry = entries.find(e => e.id === expandedId);
+              const entry = processedEntries.find(e => e.id === expandedId);
               if (!entry) return null;
-              const colorIdx = entries.indexOf(entry) % spineColors.length;
+              const colorIdx = processedEntries.indexOf(entry) % spineColors.length;
 
               return (
                 <motion.div
@@ -491,35 +591,35 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                   exit={{ opacity: 0, y: -8, height: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="border-border/50 bg-card/40 backdrop-blur overflow-hidden">
+                  <Card className="border-border/40 bg-card/50 backdrop-blur overflow-hidden shadow-sm">
                     <div className="h-0.5" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), transparent)" }} />
-                    <CardContent className="p-5">
-                      <div className="flex gap-4">
-                        <div className={`w-16 h-24 rounded-sm bg-gradient-to-b ${spineColors[colorIdx]} flex items-center justify-center shrink-0 shadow-lg`}>
+                    <CardContent className="p-5 md:p-6">
+                      <div className="flex gap-4 md:gap-5">
+                        <div className={`w-16 h-24 md:w-20 md:h-28 rounded-md bg-gradient-to-b ${spineColors[colorIdx]} flex items-center justify-center shrink-0 shadow-lg`}>
                           <BookOpen className="h-6 w-6 text-white/40" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-serif text-lg text-primary tracking-wide">{entry.title}</h4>
-                          <p className="text-sm text-muted-foreground/70 font-serif">{entry.author}</p>
-                          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                          <h4 className="font-serif text-lg md:text-xl text-primary tracking-wide leading-snug">{entry.title}</h4>
+                          <p className="text-sm text-muted-foreground/70 font-serif mt-0.5">{entry.author}</p>
+                          <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
                             {entry.genre && (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0">{entry.genre}</Badge>
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">{entry.genre}</Badge>
                             )}
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 gap-0.5">
                               {visibilityIcons[entry.visibility]} {visibilityLabels[entry.visibility]}
                             </Badge>
                             {entry.linked_tree_ids?.length > 0 && (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5">
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 gap-0.5">
                                 <TreeDeciduous className="h-2.5 w-2.5" /> {entry.linked_tree_ids.length} tree{entry.linked_tree_ids.length > 1 ? "s" : ""}
                               </Badge>
                             )}
                             {(entry as any).is_physical_copy && (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5 border-amber-500/30 text-amber-600">
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 gap-0.5 border-amber-500/30 text-amber-600">
                                 <Package className="h-2.5 w-2.5" /> Physical
                               </Badge>
                             )}
                             {(entry as any).notes_count > 0 && (
-                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-0.5">
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 gap-0.5">
                                 <StickyNote className="h-2.5 w-2.5" /> {(entry as any).notes_count} note{(entry as any).notes_count > 1 ? "s" : ""}
                               </Badge>
                             )}
@@ -528,41 +628,41 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
                       </div>
 
                       {entry.quote && (
-                        <blockquote className="border-l-2 border-primary/30 pl-3 mt-4 italic text-sm font-serif text-foreground/70 leading-relaxed">
+                        <blockquote className="border-l-2 border-primary/30 pl-4 mt-5 italic text-sm font-serif text-foreground/70 leading-relaxed">
                           "{entry.quote}"
                         </blockquote>
                       )}
 
                       {entry.reflection && (
-                        <p className="text-sm font-serif text-foreground/60 leading-relaxed mt-3">{entry.reflection}</p>
+                        <p className="text-sm font-serif text-foreground/60 leading-relaxed mt-4">{entry.reflection}</p>
                       )}
 
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/20">
+                      <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/20">
                         <p className="text-[10px] text-muted-foreground/50 font-serif">
                           {new Date(entry.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
                         </p>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() => setMusingsBookId(entry.id)}
-                            className="text-muted-foreground/50 hover:text-primary transition-colors"
+                            className="text-muted-foreground/50 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/5"
                             title="Musings & Notes"
                           >
-                            <MessageSquareQuote className="h-3.5 w-3.5" />
+                            <MessageSquareQuote className="h-4 w-4" />
                           </button>
                           {shelves.length > 0 && (
                             <button
                               onClick={() => setAssignShelfBookId(entry.id)}
-                              className="text-muted-foreground/50 hover:text-primary transition-colors"
+                              className="text-muted-foreground/50 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/5"
                               title="Move to shelf"
                             >
-                              <FolderOpen className="h-3.5 w-3.5" />
+                              <FolderOpen className="h-4 w-4" />
                             </button>
                           )}
-                          <button onClick={() => handleShare(entry)} className="text-muted-foreground/50 hover:text-primary transition-colors" title="Toggle visibility">
-                            <Share2 className="h-3.5 w-3.5" />
+                          <button onClick={() => handleShare(entry)} className="text-muted-foreground/50 hover:text-primary transition-colors p-1.5 rounded-lg hover:bg-primary/5" title="Toggle visibility">
+                            <Share2 className="h-4 w-4" />
                           </button>
-                          <button onClick={() => handleDelete(entry.id)} className="text-muted-foreground/50 hover:text-destructive transition-colors" title="Remove">
-                            <Trash2 className="h-3.5 w-3.5" />
+                          <button onClick={() => handleDelete(entry.id)} className="text-muted-foreground/50 hover:text-destructive transition-colors p-1.5 rounded-lg hover:bg-destructive/5" title="Remove">
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
@@ -692,18 +792,18 @@ const ShelfHeader = ({
   onDelete?: () => void;
   onShareShelf?: (vis: string) => void;
 }) => (
-  <div className="flex items-center gap-2 group">
-    <button onClick={onToggle} className="flex items-center gap-1.5 text-foreground/70 hover:text-foreground transition-colors">
+  <div className="flex items-center gap-2 group py-1">
+    <button onClick={onToggle} className="flex items-center gap-1.5 text-foreground/70 hover:text-foreground transition-colors touch-manipulation min-h-[44px]">
       {isCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
       <FolderOpen className="h-3.5 w-3.5 text-primary/60" />
-      <span className="font-serif text-xs tracking-wide">{shelf?.name || "Unshelved"}</span>
+      <span className="font-serif text-sm tracking-wide">{shelf?.name || "Unshelved"}</span>
     </button>
-    <Badge variant="outline" className="text-[9px] px-1.5 py-0 font-serif">{bookCount}</Badge>
+    <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 font-serif">{bookCount}</Badge>
     {shelf && (
-      <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="ml-auto flex items-center gap-1.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
         {onShareShelf && (
           <Select onValueChange={(v) => onShareShelf(v)} defaultValue={shelf.visibility}>
-            <SelectTrigger className="h-5 w-16 text-[9px] font-serif border-none bg-transparent">
+            <SelectTrigger className="h-6 w-16 text-[9px] font-serif border-none bg-transparent">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -715,12 +815,12 @@ const ShelfHeader = ({
           </Select>
         )}
         {onRename && (
-          <button onClick={onRename} className="text-muted-foreground/40 hover:text-primary transition-colors">
+          <button onClick={onRename} className="text-muted-foreground/40 hover:text-primary transition-colors p-1">
             <Pencil className="h-3 w-3" />
           </button>
         )}
         {onDelete && (
-          <button onClick={onDelete} className="text-muted-foreground/40 hover:text-destructive transition-colors">
+          <button onClick={onDelete} className="text-muted-foreground/40 hover:text-destructive transition-colors p-1">
             <Trash2 className="h-3 w-3" />
           </button>
         )}
