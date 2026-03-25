@@ -1,6 +1,6 @@
 /**
  * ScrollsRoom — Standalone room for Scrolls & Records.
- * Contains: Tree Ledger link, Heart Reservoir Rankings, Council embed, Collaborator Volumes.
+ * Contains: Tree Ledger link, Council embed, Collaborator Volumes.
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
