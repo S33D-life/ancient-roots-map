@@ -36,6 +36,8 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Globe, TreePine, Hexagon, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
+import MapGatewayToggle, { type GatewayMode } from "./map/MapGatewayToggle";
+import { useBioregionMapLayer } from "@/hooks/use-bioregion-map-layer";
 import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
@@ -174,6 +176,7 @@ import { TIER_LABELS } from "@/utils/treeCardTypes";
 
 
 /* ── Popup builders + CSS now imported from @/utils/mapPopups and @/styles/map-markers.css ── */
+
 
 
 const btnBase: React.CSSProperties = {
@@ -431,6 +434,21 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   useGroveMapLayer(mapRef.current, showGroves, navigate);
   usePulseMapLayer(mapRef.current, showForestPulse);
   usePathwayMapLayer(mapRef.current, showMycelialPathways, navigate);
+
+  // Gateway mode — Countries / Hives / Bioregions perspective
+  const [gatewayMode, setGatewayMode] = useState<GatewayMode>("countries");
+  const handleGatewayChange = useCallback((mode: GatewayMode) => {
+    setGatewayMode(mode);
+    if (mode === "hives") {
+      batchUpdate({ hiveLayer: true });
+    } else if (mode === "countries") {
+      setLayer("hiveLayer", false);
+    }
+  }, [batchUpdate, setLayer]);
+  const handleBioregionNavigate = useCallback((slug: string) => {
+    navigate(`/atlas/bio-regions/${slug}`);
+  }, [navigate]);
+  useBioregionMapLayer(mapRef.current, gatewayMode === "bioregions", handleBioregionNavigate);
 
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -2784,6 +2802,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
             batchUpdate(updates);
           }}
         />
+      )}
+
+      {/* Gateway Toggle — Countries / Hives / Bioregions */}
+      {!clearView && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-[1001] pointer-events-none"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+        >
+          <MapGatewayToggle mode={gatewayMode} onChange={handleGatewayChange} />
+        </div>
       )}
 
       {/* Discovery cue — hidden in clear view */}
