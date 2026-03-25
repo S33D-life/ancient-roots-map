@@ -321,6 +321,14 @@ const TreeCard = ({
           ) : (
             /* Mapped tree actions (unchanged) */
             <>
+              <QuickSeedButton
+                treeId={tree.id}
+                treeLat={tree.latitude ?? null}
+                treeLng={tree.longitude ?? null}
+                userId={currentUserId}
+                variant="button"
+                className="flex-1"
+              />
               <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
                 <Heart
                   className="w-3.5 h-3.5 transition-all duration-300"
