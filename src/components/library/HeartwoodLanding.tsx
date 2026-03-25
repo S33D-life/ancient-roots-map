@@ -42,7 +42,7 @@ const HeartwoodLanding = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden botanical-heartwood">
       <Header />
       <HeartwoodBackground />
 

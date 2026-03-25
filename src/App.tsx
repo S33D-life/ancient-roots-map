@@ -264,6 +264,7 @@ const App = () => {
     <GlobalErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <div className="botanical-page">
         <Toaster />
         <Sonner />
         <Suspense fallback={null}><StarryNight /></Suspense>
