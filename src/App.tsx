@@ -395,6 +395,7 @@ const App = () => {
           </HiveSeasonProvider>
           </TetolLevelProvider>
         </BrowserRouter>
+        </div>
       </TooltipProvider>
     </QueryClientProvider>
     </GlobalErrorBoundary>
