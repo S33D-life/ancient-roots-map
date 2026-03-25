@@ -333,7 +333,7 @@ const Hero = () => {
         </div>
 
         {/* Bottom stack: Ancient Friend card — simplified */}
-        <div className="flex flex-col items-center gap-4 px-4 mt-auto pb-4">
+        <div className="flex flex-col items-center gap-3 px-4 mt-auto pb-8">
           {/* Living Census — real-time global counter */}
           <LivingCensus />
 

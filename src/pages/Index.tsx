@@ -3,7 +3,6 @@ import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import S33dEntrance from "@/components/S33dEntrance";
-import WelcomeBanner from "@/components/WelcomeBanner";
 import BetaGardenBanner from "@/components/BetaGardenBanner";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useVineFade } from "@/hooks/use-vine-fade";
@@ -74,8 +73,6 @@ const Index = () => {
       <main className="flex-1" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Beta garden tone-setter */}
         <BetaGardenBanner />
-        {/* Welcome orientation for first-time visitors */}
-        <WelcomeBanner />
 
         {/* ── Below-fold sections lazy-loaded for faster FCP ── */}
         <Suspense fallback={<SectionShimmer />}>
