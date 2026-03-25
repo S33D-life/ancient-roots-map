@@ -11,7 +11,7 @@ export type GatewayOfferingType =
   | "photo" | "song" | "book" | "story"
   | "poem" | "quote" | "voice" | "wish"
   | "seasonal_observation" | "encounter" | "gratitude" | "intention"
-  | "nft";
+  | "data" | "nft";
 
 interface OfferingOption {
   type: GatewayOfferingType;
@@ -29,12 +29,20 @@ const PRIMARY: OfferingOption[] = [
 
 const SECONDARY: OfferingOption[] = [
   { type: "poem", emoji: "📜", label: "Poem", subtitle: "Offer something timeless" },
+  { type: "quote", emoji: "💬", label: "Quote", subtitle: "Share a line" },
   { type: "voice", emoji: "🎙️", label: "Voice", subtitle: "Speak your offering" },
+  { type: "wish", emoji: "💫", label: "Wish", subtitle: "Send a wish" },
 ];
 
 const LIVING: OfferingOption[] = [
+  { type: "seasonal_observation", emoji: "🌱", label: "Seasonal Observation", subtitle: "What is changing here?" },
+  { type: "encounter", emoji: "🧭", label: "Encounter Log", subtitle: "What happened here?" },
   { type: "gratitude", emoji: "💓", label: "Gratitude", subtitle: "What are you thankful for?" },
   { type: "intention", emoji: "🔥", label: "Intention", subtitle: "What are you planting forward?" },
+];
+
+const DATA: OfferingOption[] = [
+  { type: "data", emoji: "📐", label: "Tree Notes & Data", subtitle: "Measurements, observations, corrections" },
 ];
 
 interface Props {
@@ -122,7 +130,7 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
               {PRIMARY.map((opt) => renderCard(opt, "lg"))}
             </div>
 
-            {/* Secondary + Living */}
+            {/* Secondary + Living + Data */}
             <button
               onClick={() => setShowMore(!showMore)}
               className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
@@ -144,10 +152,16 @@ const OfferingGateway = ({ open, onClose, onSelect, treeName }: Props) => {
                   {SECONDARY.map((opt) => renderCard(opt, "sm"))}
 
                   {/* Living / contextual */}
-                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-2 px-1">
+                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
                     Living observations
                   </p>
                   {LIVING.map((opt) => renderCard(opt, "sm"))}
+
+                  {/* Data / contribution */}
+                  <p className="text-[10px] font-serif text-muted-foreground/30 uppercase tracking-widest pt-3 px-1">
+                    Data & contribution
+                  </p>
+                  {DATA.map((opt) => renderCard(opt, "sm"))}
                 </motion.div>
               )}
             </AnimatePresence>
