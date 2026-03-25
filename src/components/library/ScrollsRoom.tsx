@@ -4,7 +4,6 @@
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import CollaboratorShelf from "@/components/CollaboratorShelf";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
