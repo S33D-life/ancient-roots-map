@@ -613,15 +613,17 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
                     <Input
                       value={customTitle}
                       onChange={(e) => setCustomTitle(e.target.value)}
+                      onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: "smooth", block: "center" }), 300)}
                       placeholder="Song title *"
-                      className="font-serif text-sm h-9 bg-transparent border-border/30"
+                      className="font-serif text-base sm:text-sm h-10 sm:h-9 bg-transparent border-border/30"
                       autoFocus
                     />
                     <Input
                       value={customArtist}
                       onChange={(e) => setCustomArtist(e.target.value)}
+                      onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: "smooth", block: "center" }), 300)}
                       placeholder="Artist name"
-                      className="font-serif text-xs h-8 bg-transparent border-border/30"
+                      className="font-serif text-base sm:text-sm h-9 sm:h-8 bg-transparent border-border/30"
                     />
                   </div>
                 </div>
