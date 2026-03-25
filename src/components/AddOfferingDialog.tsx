@@ -664,12 +664,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 w-full py-1.5 text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors"
+                className="flex items-center gap-2 w-full py-1 text-[10px] font-serif text-muted-foreground/35 hover:text-muted-foreground/55 transition-colors"
               >
-                <div className="h-px flex-1 bg-border/15" />
-                <ChevronDown className={`w-3 h-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-                <span>Refine offering</span>
-                <div className="h-px flex-1 bg-border/15" />
+                <div className="h-px flex-1 bg-border/10" />
+                <ChevronDown className={`w-2.5 h-2.5 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
+                <span>Options</span>
+                <div className="h-px flex-1 bg-border/10" />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4 pt-3">
