@@ -35,7 +35,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Hexagon, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
