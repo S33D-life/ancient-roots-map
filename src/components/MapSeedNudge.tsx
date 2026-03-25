@@ -5,6 +5,7 @@
  */
 import { useState, useEffect, useMemo } from "react";
 import SeedNudge from "@/components/SeedNudge";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 interface NearbyTree {
   id: string;
