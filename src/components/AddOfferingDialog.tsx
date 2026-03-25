@@ -750,12 +750,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Submit */}
-          <div className="pt-1">
+          {/* Submit — sticky on mobile */}
+          <div className="pt-1 sticky bottom-0 bg-background/80 backdrop-blur-sm pb-2 -mx-1 px-1">
             <Button
               type="submit"
               disabled={loading || uploading}
-              className="w-full font-serif tracking-wider gap-2 h-12 text-sm"
+              className="w-full font-serif tracking-wider gap-2 h-12 text-sm active:scale-[0.98] transition-transform"
               style={{
                 background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
                 boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
