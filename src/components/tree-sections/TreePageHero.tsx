@@ -44,6 +44,8 @@ const TreePageHero = ({
   tree,
   photoUrl,
   onMakeOffering,
+  onAddPhoto,
+  onAddSong,
   onAddWish,
   onViewMap,
   onShare,
