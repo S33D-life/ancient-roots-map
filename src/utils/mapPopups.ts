@@ -62,7 +62,7 @@ export function buildPopupHtml(
         ? "hsl(42,60%,55%)"
         : "hsl(0,0%,55%)";
   const speciesHue = getSpeciesHue(tree.species);
-
+  const hive = getHiveForSpecies(tree.species);
   const ageText = age > 0 ? `🌿 ~${age}y` : "";
   const offeringText =
     offerings > 0 ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span>` : "";
