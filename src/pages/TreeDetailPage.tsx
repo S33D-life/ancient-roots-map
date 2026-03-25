@@ -680,6 +680,15 @@ const TreeDetailPage = () => {
                     onAddOffering={() => setAddOfferingOpen(true)}
                   />
 
+                  {/* Discovery Paths — country, hive, bioregion */}
+                  <Suspense fallback={null}>
+                    <TreeDiscoveryPaths
+                      species={tree.species}
+                      country={tree.nation}
+                      ecoBelonging={ecoBelonging}
+                    />
+                  </Suspense>
+
                   {/* Hive Connections */}
                   <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} />
 
