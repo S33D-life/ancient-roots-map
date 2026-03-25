@@ -113,6 +113,8 @@ export function useNotificationPreferences(userId: string | null) {
             show_onboarding_nudges: data.show_onboarding_nudges ?? true,
             show_floating_prompts: data.show_floating_prompts ?? true,
             show_companion_suggestions: data.show_companion_suggestions ?? true,
+            show_teotag_whispers: (data as any).show_teotag_whispers ?? true,
+            show_celebrations: (data as any).show_celebrations ?? true,
           });
         }
         setLoading(false);
