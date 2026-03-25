@@ -302,7 +302,7 @@ const ValueTreePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <PageShell className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+      <PageShell className="container mx-auto px-4 pb-20 max-w-4xl" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Hero */}
         <div className="text-center mb-8">
           <span className="text-5xl block mb-3">🌳</span>

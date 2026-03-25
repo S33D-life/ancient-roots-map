@@ -53,7 +53,7 @@ const BioRegionsIndexPage = () => {
   return (
     <PageShell>
       <Header />
-      <div className="min-h-screen pb-24 pt-24">
+      <div className="min-h-screen pb-24" style={{ paddingTop: 'var(--content-top)' }}>
         <section className="relative px-4 pt-6 pb-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl mx-auto text-center">
             <div className="mb-3">

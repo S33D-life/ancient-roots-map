@@ -590,7 +590,7 @@ const HivesIndexPage = () => {
             );
           })()
         )}
-      </div>
+      </PageShell>
       <Footer />
     </div>
   );
