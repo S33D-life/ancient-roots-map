@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import StaffQRCode from "@/components/StaffQRCode";
