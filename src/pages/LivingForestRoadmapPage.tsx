@@ -523,7 +523,7 @@ const LivingForestRoadmapPage = () => {
       <div className="min-h-screen flex flex-col relative">
         <Header />
 
-        <main className="flex-1 container mx-auto px-4 pt-24 pb-28 md:pb-12">
+        <main className="flex-1 container mx-auto px-4 pb-28 md:pb-12" style={{ paddingTop: 'var(--content-top)' }}>
           {/* ── Hero ── */}
           <section className="text-center mb-6 max-w-2xl mx-auto">
             <h1 className="text-2xl md:text-3xl font-serif text-foreground mb-2">

@@ -92,7 +92,7 @@ const SupportPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20 space-y-12">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20 space-y-12" style={{ paddingTop: 'var(--content-top)' }}>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* 1. OPENING INVITATION                                  */}

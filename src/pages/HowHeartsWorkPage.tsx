@@ -28,7 +28,7 @@ const HowHeartsWorkPage = () => (
   <div className="min-h-screen bg-background">
     <Header />
     <PageShell>
-      <main className="container max-w-2xl mx-auto px-4 pt-24 pb-24 space-y-8">
+      <main className="container max-w-2xl mx-auto px-4 pb-24 space-y-8" style={{ paddingTop: 'var(--content-top)' }}>
         <div className="text-center space-y-2">
           <Heart className="w-8 h-8 mx-auto text-primary" />
           <h1 className="text-2xl font-serif tracking-wide text-foreground">How S33D Hearts Work</h1>
