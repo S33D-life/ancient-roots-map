@@ -2804,6 +2804,16 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         />
       )}
 
+      {/* Gateway Toggle — Countries / Hives / Bioregions */}
+      {!clearView && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-[1001] pointer-events-none"
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+        >
+          <MapGatewayToggle mode={gatewayMode} onChange={handleGatewayChange} />
+        </div>
+      )}
+
       {/* Discovery cue — hidden in clear view */}
       {discoveryCount > 0 && !clearView && (
         <div
