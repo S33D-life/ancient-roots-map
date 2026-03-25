@@ -452,42 +452,36 @@ const WorldAtlasPage = () => {
     <PageShell>
       <Header />
       <div className="min-h-screen pb-24 pt-16">
-        {/* ─── Hero ─── */}
-        <section className="relative px-4 pt-8 pb-4 text-center overflow-hidden">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-2xl mx-auto">
-            <GlobeDots />
-            <h1 className="text-2xl md:text-4xl font-serif font-bold text-foreground mt-3 mb-2">
+        {/* ─── Perspective Nav ─── */}
+        <section className="px-4 pt-6 pb-2 max-w-2xl mx-auto">
+          <AtlasPerspectiveNav />
+        </section>
+
+        {/* ─── Hero (compressed for mobile) ─── */}
+        <section className="relative px-4 pt-2 pb-3 text-center">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl mx-auto">
+            <h1 className="text-xl md:text-3xl font-serif font-bold text-foreground mb-1">
               World Atlas of Notable Trees
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto mb-5 leading-relaxed italic font-serif">
+            <p className="text-xs md:text-sm text-muted-foreground max-w-sm mx-auto mb-3 leading-relaxed italic font-serif">
               Each country, a chapter. Each tree, a living witness.
             </p>
 
-            {/* Summary stats */}
-            <div className="flex flex-wrap justify-center gap-4 mb-5 text-xs text-muted-foreground">
+            {/* Summary stats — compact */}
+            <div className="flex flex-wrap justify-center gap-3 mb-3 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1"><Globe className="w-3 h-3 text-primary/60" /> {activeCount} countries</span>
               <span className="flex items-center gap-1"><TreeDeciduous className="w-3 h-3 text-primary/60" /> {totalRecords.toLocaleString()} records</span>
               {totalGroves > 0 && <span className="flex items-center gap-1"><Network className="w-3 h-3 text-emerald-500/60" /> {totalGroves} groves</span>}
             </div>
 
-            <div className="flex flex-wrap justify-center gap-3 mb-3">
-              <Button variant="mystical" asChild>
-                <Link to="/map"><Globe className="w-4 h-4 mr-1.5" /> Open Map</Link>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button variant="mystical" size="sm" asChild>
+                <Link to="/map"><Globe className="w-3.5 h-3.5 mr-1" /> Open Map</Link>
               </Button>
-              <Button variant="sacred" onClick={() => document.getElementById("country-gateways")?.scrollIntoView({ behavior: "smooth" })}>
-                <Compass className="w-4 h-4 mr-1.5" /> Begin with a Country
-              </Button>
-              <Button variant="outline" size="sm" asChild className="border-border/20 text-muted-foreground hover:text-primary">
-                <Link to="/atlas/countries"><LayoutGrid className="w-4 h-4 mr-1.5" /> Browse Countries</Link>
+              <Button variant="sacred" size="sm" onClick={() => document.getElementById("country-gateways")?.scrollIntoView({ behavior: "smooth" })}>
+                <Compass className="w-3.5 h-3.5 mr-1" /> Browse Countries
               </Button>
             </div>
-
-            <button
-              onClick={() => document.getElementById("how-it-grows")?.scrollIntoView({ behavior: "smooth" })}
-              className="text-xs text-muted-foreground/50 hover:text-primary transition-colors"
-            >
-              How this Atlas Grows ↓
-            </button>
           </motion.div>
         </section>
 
