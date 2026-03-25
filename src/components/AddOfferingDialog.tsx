@@ -814,7 +814,7 @@ const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onCh
   );
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto py-2 -mx-1 px-1 scrollbar-none">
+    <div className="flex items-center gap-0.5 overflow-x-auto py-1 scrollbar-none">
       {PRIMARY_TYPES.map(renderPill)}
       {!showMore ? (
         <button
