@@ -893,6 +893,7 @@ const AgentGardenPage = () => {
           </Button>
         </div>
       </main>
+      <Footer />
     </>
   );
 };

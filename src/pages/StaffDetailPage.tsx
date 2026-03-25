@@ -774,6 +774,7 @@ export default function StaffDetailPage() {
           50% { opacity: 0.8; transform: scale(1.08); }
         }
       `}</style>
+      <Footer />
     </div>
   );
 }

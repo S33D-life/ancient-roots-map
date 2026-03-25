@@ -447,6 +447,7 @@ const CosmicCalendarPage = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
