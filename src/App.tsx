@@ -16,6 +16,7 @@ import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
 import { CompanionProvider } from "@/contexts/CompanionContext";
+import { QuietModeProvider } from "@/contexts/QuietModeContext";
 import CompanionBridge from "@/components/companion/CompanionBridge";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;

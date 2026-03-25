@@ -161,21 +161,38 @@ const HearthNotificationSettings = ({ userId }: Props) => {
       {/* ── C. Experience & Interface Signals ── */}
       <Section icon={<Sparkles className="w-4 h-4 text-primary" />} title="Experience & Interface">
         <ToggleRow
+          label="TEOTAG guidance whispers"
+          description="Contextual hints and poetic nudges from the guiding orb"
+          checked={(prefs as any).show_teotag_whispers !== false}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("show_teotag_whispers" as any)}
+        />
+        <ToggleRow
+          label="Celebration overlays"
+          description="Heart-earned animations, reward bursts, and milestone toasts"
+          checked={(prefs as any).show_celebrations !== false}
+          disabled={prefs.quiet_mode}
+          onCheckedChange={toggle("show_celebrations" as any)}
+        />
+        <ToggleRow
           label="Onboarding nudges"
           description="Gentle prompts like 'Plant a seed' or 'Visit your first tree'"
           checked={prefs.show_onboarding_nudges}
+          disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_onboarding_nudges")}
         />
         <ToggleRow
           label="Floating prompts"
           description="Contextual popups and whisper banners"
           checked={prefs.show_floating_prompts}
+          disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_floating_prompts")}
         />
         <ToggleRow
           label="Companion suggestions"
           description="Scan, verify, and connect prompts from the Companion controller"
           checked={prefs.show_companion_suggestions}
+          disabled={prefs.quiet_mode}
           onCheckedChange={toggle("show_companion_suggestions")}
         />
       </Section>
