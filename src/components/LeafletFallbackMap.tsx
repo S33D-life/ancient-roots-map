@@ -177,6 +177,21 @@ import { TIER_LABELS } from "@/utils/treeCardTypes";
 
 /* ── Popup builders + CSS now imported from @/utils/mapPopups and @/styles/map-markers.css ── */
 
+  // Gateway mode — Countries / Hives / Bioregions perspective
+  const [gatewayMode, setGatewayMode] = useState<GatewayMode>("countries");
+  const handleGatewayChange = useCallback((mode: GatewayMode) => {
+    setGatewayMode(mode);
+    if (mode === "hives") {
+      batchUpdate({ hiveLayer: true });
+    } else if (mode === "countries") {
+      setLayer("hiveLayer", false);
+    }
+  }, [batchUpdate, setLayer]);
+  const handleBioregionNavigate = useCallback((slug: string) => {
+    navigate(`/atlas/bio-regions/${slug}`);
+  }, [navigate]);
+  useBioregionMapLayer(mapRef.current, gatewayMode === "bioregions", handleBioregionNavigate);
+
 
 const btnBase: React.CSSProperties = {
   background: "hsla(30, 30%, 12%, 0.92)",
