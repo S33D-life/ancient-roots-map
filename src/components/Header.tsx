@@ -185,42 +185,27 @@ const Header = () => {
             </nav>
 
             {/* ═══ RIGHT ZONE: Tools + Heart Jar ═══ */}
-            <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
+            <div className="flex items-center gap-0.5 md:gap-1.5 shrink-0">
               <OfflineIndicator />
 
-              {/* Grouped tools: Search, Theme, Signals */}
-              <div
-                className="flex items-center gap-0.5 rounded-full px-1 py-0.5"
-                style={{
-                  background: "hsl(var(--muted) / 0.15)",
-                  border: "1px solid hsl(var(--border) / 0.08)",
-                }}
+              {/* Search — always visible */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setGlobalSearchOpen(true)}
+                title="Search (⌘K)"
+                className="h-7 w-7 md:h-8 md:w-8 rounded-full hover:bg-accent/20"
               >
-                {/* Search */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setGlobalSearchOpen(true)}
-                  title="Search (⌘K)"
-                  className="h-8 w-8 rounded-full hover:bg-accent/20"
-                >
-                  <Search className="w-3.5 h-3.5 text-foreground/60" />
-                </Button>
+                <Search className="w-3.5 h-3.5 text-foreground/50" />
+              </Button>
 
-                {/* Theme toggle */}
+              {/* Theme toggle — desktop only to reduce mobile crowding */}
+              <div className="hidden md:block">
                 <ThemeToggle />
-
-                {/* Heart Signals bell */}
-                {user && <NotificationBell />}
               </div>
 
-              {/* Divider — subtle vertical line */}
-              {user && (
-                <div
-                  className="w-px h-6 mx-0.5 hidden sm:block"
-                  style={{ background: "hsl(var(--border) / 0.15)" }}
-                />
-              )}
+              {/* Heart Signals bell */}
+              {user && <NotificationBell />}
 
               {/* Heart Jar — primary value indicator */}
               {user && <HeartJar userId={user.id} />}
@@ -232,23 +217,23 @@ const Header = () => {
                 </Button>
               )}
 
-              {/* TEOTAG — guiding intelligence orb → Hearth AI tab. Long-press to restore hidden orb. */}
+              {/* TEOTAG — guiding intelligence orb */}
               <button
                 type="button"
                 onClick={() => { if (!orbRestore.didFire()) navigate("/dashboard?tab=teotag"); }}
                 onPointerDown={orbRestore.onPointerDown}
                 onPointerMove={orbRestore.onPointerMove}
                 onPointerUp={orbRestore.onPointerUp}
-                className="shrink-0 group relative"
+                className="shrink-0 group relative ml-0.5"
                 aria-label="TEOTAG — The Echo of the Ancient Groves. Hold to restore orb."
               >
                 <img
                   src={teotagLogo}
                   alt="TEOTAG"
-                  className="w-8 h-8 md:w-9 md:h-9 rounded-full object-cover transition-all duration-300
-                    group-hover:scale-110 group-hover:shadow-[0_0_14px_hsl(var(--primary)/0.4)]"
+                  className="w-7 h-7 md:w-9 md:h-9 rounded-full object-cover transition-all duration-300
+                    group-hover:scale-105 group-hover:shadow-[0_0_12px_hsl(var(--primary)/0.3)]"
                   style={{
-                    border: "1.5px solid hsl(var(--primary) / 0.25)",
+                    border: "1px solid hsl(var(--primary) / 0.18)",
                   }}
                 />
                 {/* Long-press progress ring for restore */}
