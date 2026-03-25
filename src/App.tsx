@@ -134,6 +134,8 @@ const BioRegionsIndexPage = lazyImportWithRetry(() => import("./pages/BioRegions
 const BioRegionPage = lazyImportWithRetry(() => import("./pages/BioRegionPage"), "bio-region");
 const BioregionCalendarPage = lazyImportWithRetry(() => import("./pages/BioregionCalendarPage"), "bio-calendar");
 const PressPage = lazyImportWithRetry(() => import("./pages/PressPage"), "press");
+const AboutPage = lazyImportWithRetry(() => import("./pages/AboutPage"), "about");
+const PrivacyPage = lazyImportWithRetry(() => import("./pages/PrivacyPage"), "privacy");
 const HongKongAtlasPage = lazyImportWithRetry(() => import("./pages/HongKongAtlasPage"), "hong-kong-atlas");
 const SingaporeAtlasPage = lazyImportWithRetry(() => import("./pages/SingaporeAtlasPage"), "singapore-atlas");
 const JapanAtlasPage = lazyImportWithRetry(() => import("./pages/JapanAtlasPage"), "japan-atlas");
