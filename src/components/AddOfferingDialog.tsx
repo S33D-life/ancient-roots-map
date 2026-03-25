@@ -546,7 +546,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         fullscreenMobile
       >
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-1">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-1">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
           {/* PHOTO: image first, then title */}
