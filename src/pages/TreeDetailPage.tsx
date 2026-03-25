@@ -476,6 +476,8 @@ const TreeDetailPage = () => {
           tree={tree}
           photoUrl={getOfferingsByType("photo")[0]?.media_url || null}
           onMakeOffering={openOfferingGateway}
+          onAddPhoto={() => handleAddOffering("photo")}
+          onAddSong={() => handleAddOffering("song")}
           onAddWish={() => setSectionTab("overview")}
           onViewMap={() => {
             goToTreeOnMap(navigate, {
