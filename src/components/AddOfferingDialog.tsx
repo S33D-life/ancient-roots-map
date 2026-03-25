@@ -464,18 +464,22 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     return (
       <ResponsiveDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
         subtitle="Speak into the canopy — your voice becomes part of this tree"
       >
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-        <div className="mt-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        <div className="mt-2 relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+              </div>
+            </div>
           )}
+          <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
         </div>
       </ResponsiveDialog>
     );
@@ -485,18 +489,22 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     return (
       <ResponsiveDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
         subtitle="Place a story in this Ancient Friend's living archive"
       >
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-        <div className="mt-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
+        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        <div className="mt-2 relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+              </div>
+            </div>
           )}
+          <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
         </div>
       </ResponsiveDialog>
     );
