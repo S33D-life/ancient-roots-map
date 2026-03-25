@@ -20,6 +20,10 @@ import {
   Globe,
   Sprout,
   ChevronRight,
+  Wand2,
+  Crown,
+  ArrowRight,
+  Shield,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
