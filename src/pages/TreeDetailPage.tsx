@@ -95,6 +95,7 @@ const WitnessedBadge = lazy(() => import("@/components/witness/WitnessedBadge"))
 const TreeRelationshipCard = lazy(() => import("@/components/tree-sections/TreeRelationshipCard"));
 const StewardToolsSection = lazy(() => import("@/components/StewardToolsSection"));
 const TreeActivityTimeline = lazy(() => import("@/components/TreeActivityTimeline"));
+const TreeDiscoveryPaths = lazy(() => import("@/components/tree-sections/TreeDiscoveryPaths"));
 import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { useTreeEditPermission } from "@/hooks/use-tree-edit-permission";
 import TabErrorBoundary from "@/components/TabErrorBoundary";
