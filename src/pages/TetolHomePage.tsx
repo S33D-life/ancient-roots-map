@@ -251,6 +251,18 @@ const TetolHomePage = () => {
 
             {/* S33D gateway node — wrapped in Ensō nudge */}
             <div className="relative z-10 py-3 w-full flex flex-col items-center">
+              {/* Start Here cue — new users only, points toward seed */}
+              {isNewUser && (
+                <span
+                  className="absolute right-[calc(50%+42px)] top-1/2 -translate-y-1/2 font-serif text-[11px] tracking-[0.2em] uppercase whitespace-nowrap pointer-events-none select-none"
+                  style={{
+                    color: "hsl(42 70% 60% / 0.8)",
+                    animation: "startHerePulse 3s ease-in-out infinite",
+                  }}
+                >
+                  Start Here <span className="inline-block" style={{ fontSize: "13px" }}>→</span>
+                </span>
+              )}
               <EnsoNudge size={46} offsetY={-10}>
                 <button
                   onClick={() => handleItemClick("/s33d")}
