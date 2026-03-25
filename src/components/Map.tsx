@@ -61,7 +61,7 @@ const Map = memo(({
 
 
   return (
-    <div className="absolute inset-0 z-[1]" style={{ height: "100dvh" }}>
+    <div className="absolute inset-0 z-[1]" style={{ height: "100svh" }}>
       <Suspense
         fallback={
           <div className="absolute inset-0 flex items-center justify-center bg-background">
