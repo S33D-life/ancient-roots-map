@@ -74,7 +74,7 @@ const CouncilOfLifePage = () => {
   const [podModalOpen, setPodModalOpen] = useState(false);
   const [linkedTrees, setLinkedTrees] = useState<Array<{ id: string; name: string; species: string }>>([]);
   const [linkedRegions, setLinkedRegions] = useState<Array<{ id: string; name: string; type: string }>>([]);
-  const [recentSparks, setRecentSparks] = useState<Array<{ id: string; title: string; report_type: string; status: string; upvotes_count: number; created_at: string }>>([]);
+  
 
   // Fetch linked trees and bio-regions for all councils
   useEffect(() => {
