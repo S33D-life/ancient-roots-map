@@ -40,7 +40,7 @@ const MapOnboardingRitual = () => {
     {
       icon: <TreeDeciduous className="w-5 h-5" />,
       title: "Tap any tree.",
-      message: "Meet the tree, leave a photo, poem, or song. Your offering becomes part of its living story.",
+      message: "Meet the tree, plant a seed, or leave a photo, poem, or song. Your actions become part of its living story.",
       cta: "I understand",
     },
     {

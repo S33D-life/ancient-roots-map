@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { to: ROUTES.VALUE_TREE, icon: Leaf, label: "Value Tree", matchPrefixes: ["/value-tree", "/harvest", "/cosmic", "/how-hearts-work", "/patron-offering"] },
   // Center slot reserved for Add button
   { to: ROUTES.LIBRARY, icon: BookOpen, label: "Heartwood", matchPrefixes: ["/library", "/vault", "/dashboard", "/wanderer/", "/staff/", "/ledger"] },
-  { to: ROUTES.COUNCIL, icon: Globe, label: "Council", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas", "/support", "/press", "/groves", "/pulse", "/pathways"] },
+  { to: ROUTES.COUNCIL, icon: Globe, label: "Gather", matchPrefixes: ["/council", "/bug-garden", "/roadmap", "/atlas", "/support", "/press", "/groves", "/pulse", "/pathways"] },
 ] as const;
 
 const BottomNav = () => {
@@ -68,7 +68,7 @@ const BottomNav = () => {
           >
             <Plus className="w-5 h-5" style={{ color: "hsl(var(--primary-foreground))" }} />
           </div>
-          <span className="text-[9px] font-serif tracking-wider text-primary">Add</span>
+          <span className="text-[9px] font-serif tracking-wider text-primary">Add Tree</span>
         </button>
 
         {/* Last two nav items */}
