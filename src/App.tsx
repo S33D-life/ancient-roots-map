@@ -280,6 +280,7 @@ const App = () => {
         <CanopyHeartPulse />
         
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <QuietModeProvider userId={currentUserId}>
           <TetolLevelProvider>
           <HiveSeasonProvider>
           <MapFilterProvider>
