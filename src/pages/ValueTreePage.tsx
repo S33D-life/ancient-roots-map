@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PageShell from "@/components/PageShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card, CardContent } from "@/components/ui/card";
@@ -301,13 +302,9 @@ const ValueTreePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+      <PageShell className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
         {/* Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
+        <div className="text-center mb-8">
           <span className="text-5xl block mb-3">🌳</span>
           <h1 className="text-3xl md:text-4xl font-serif tracking-wide text-foreground mb-2">
             The S33D Value Tree
@@ -318,7 +315,7 @@ const ValueTreePage = () => {
           <p className="text-muted-foreground/50 font-serif max-w-md mx-auto text-[11px] leading-relaxed mt-1.5 italic">
             S33D Hearts are earned through stewardship, not speculation — a commons currency rooted in care.
           </p>
-        </motion.div>
+        </div>
 
         {/* Token legend — simplified labels */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
@@ -604,7 +601,7 @@ const ValueTreePage = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
       <Footer />
     </div>
   );

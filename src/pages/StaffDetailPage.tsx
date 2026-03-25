@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
 import Header from "@/components/Header";
+import PageShell from "@/components/PageShell";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import StaffQRCode from "@/components/StaffQRCode";
 import OptimizedImage from "@/components/OptimizedImage";
@@ -314,12 +315,12 @@ export default function StaffDetailPage() {
   /* ═══════════════════════════════════════════════════════════════
      RENDER — The Vessel
      ═══════════════════════════════════════════════════════════════ */
-  return (
+   return (
     <div className="min-h-screen relative bg-background">
       <HeartwoodBackground />
       <Header />
 
-      <main className="relative z-10 container mx-auto px-4 pt-24 pb-20 max-w-3xl">
+      <PageShell className="relative z-10 container mx-auto px-4 pt-24 pb-20 max-w-3xl" cinematic>
         {/* ── Navigation ──────────────────────────────────────── */}
         <div className="flex items-center justify-between mb-8">
           <Link
@@ -763,7 +764,7 @@ export default function StaffDetailPage() {
             </Button>
           ) : <div />}
         </div>
-      </main>
+      </PageShell>
 
       {/* Breathing aura keyframe */}
       <style>{`
