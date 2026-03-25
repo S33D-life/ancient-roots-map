@@ -702,7 +702,7 @@ export default function StaffRoomGallery() {
                 className="flex items-center gap-1.5 font-serif text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg px-3 py-2"
               >
                 {tab.icon}
-                <span className="hidden xs:inline">{tab.label}</span>
+                <span>{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
