@@ -2,7 +2,7 @@
  * GroveViewOverlay — "Living Earth Mode"
  *
  * A mythic ecological overlay that transforms the map into a breathing,
- * living forest view. Shows Grove Signals panel (including recent/nearby trees),
+ * living forest view. Shows Grove Signals panel (top-right dropdown),
  * mythic time selector, live event stream, and seasonal atmosphere shifts.
  */
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -38,33 +38,45 @@ interface GroveViewOverlayProps {
 
 const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses, onTreeClick }: GroveViewOverlayProps) => {
   const [timeframe, setTimeframe] = useState<MythicTimeframe>("moon");
-  const [signalsExpanded, setSignalsExpanded] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
   const { signals, loading, liveEventCount, eventPulses } = useGroveEvents(timeframe, treeLookup);
 
-  // Tree discovery data (merged from MapTreePanel)
+  // Tree discovery data
   const [treeTab, setTreeTab] = useState<TreeTab>("recent");
   const [recentTrees, setRecentTrees] = useState<TreeItem[]>([]);
   const [nearbyTrees, setNearbyTrees] = useState<TreeItem[]>([]);
 
-  // Drag state for Grove Signals panel
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  // Close panel on outside click
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!panelOpen) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setPanelOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [panelOpen]);
 
-  const onDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    const point = "touches" in e ? e.touches[0] : e;
-    dragRef.current = { startX: point.clientX, startY: point.clientY, origX: dragOffset.x, origY: dragOffset.y };
-  }, [dragOffset]);
+  // Close panel on Escape
+  useEffect(() => {
+    if (!panelOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPanelOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [panelOpen]);
 
-  const onDragMove = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (!dragRef.current) return;
-    const point = "touches" in e ? e.touches[0] : e;
-    setDragOffset({
-      x: dragRef.current.origX + (point.clientX - dragRef.current.startX),
-      y: dragRef.current.origY + (point.clientY - dragRef.current.startY),
-    });
-  }, []);
-
-  const onDragEnd = useCallback(() => { dragRef.current = null; }, []);
+  // Close panel when overlay deactivates
+  useEffect(() => {
+    if (!active) setPanelOpen(false);
+  }, [active]);
 
   useEffect(() => {
     if (!active) return;
@@ -105,7 +117,6 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
 
   const season = useMemo(() => getCurrentSeason(userLat), [userLat]);
   const palette = SEASON_PALETTE[season];
-
   const displayTrees = treeTab === "recent" ? recentTrees : nearbyTrees;
 
   return (
@@ -160,99 +171,67 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
         )}
       </AnimatePresence>
 
-      {/* ── Grove Signals Panel (bottom-left) ── */}
+      {/* ── Grove Signals — top-right toggle + dropdown ── */}
       <AnimatePresence>
         {active && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="absolute left-1/2 z-[1001] w-[min(280px,calc(100vw-2rem))]"
-            style={{
-              bottom: "calc(var(--bottom-nav-height, 3.5rem) + var(--safe-bottom, 8px) + var(--bottom-nav-height, 3.5rem) + 8px)",
-              transform: `translateX(calc(-50% + ${dragOffset.x}px)) translateY(${dragOffset.y}px)`,
-            }}
+          <div
+            ref={panelRef}
+            className="absolute right-3 z-[1001]"
+            style={{ top: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
           >
-            {/* Drag handle */}
-            <div
-              onMouseDown={onDragStart}
-              onMouseMove={onDragMove}
-              onMouseUp={onDragEnd}
-              onMouseLeave={onDragEnd}
-              onTouchStart={onDragStart}
-              onTouchMove={onDragMove}
-              onTouchEnd={onDragEnd}
-              className="flex items-center justify-center py-1 cursor-grab active:cursor-grabbing"
-              style={{
-                background: "hsla(120, 20%, 8%, 0.92)",
-                borderRadius: "12px 12px 0 0",
-                border: "1px solid hsla(120, 30%, 30%, 0.3)",
-                borderBottom: "none",
-                backdropFilter: "blur(12px)",
-                touchAction: "none",
-              }}
-            >
-              <div className="w-8 h-1 rounded-full" style={{ background: "hsla(120, 40%, 50%, 0.35)" }} />
-            </div>
-            {/* Collapse toggle */}
+            {/* Toggle button — matches map control sizing (44px) */}
             <button
-              onClick={() => setSignalsExpanded(v => !v)}
-              className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-serif tracking-wider transition-colors"
+              onClick={() => setPanelOpen(v => !v)}
+              className="flex items-center gap-1.5 h-11 px-3 rounded-full transition-all duration-200 active:scale-95"
               style={{
-                background: "hsla(120, 20%, 8%, 0.92)",
-                color: "hsl(120, 40%, 65%)",
-                border: "1px solid hsla(120, 30%, 30%, 0.3)",
-                borderTop: "none",
-                borderBottom: signalsExpanded ? "none" : undefined,
-                borderRadius: signalsExpanded ? "0" : "0 0 12px 12px",
+                background: panelOpen
+                  ? "hsla(120, 30%, 12%, 0.95)"
+                  : "hsla(30, 20%, 10%, 0.85)",
+                border: panelOpen
+                  ? "1px solid hsla(120, 40%, 40%, 0.5)"
+                  : "1px solid hsla(42, 40%, 30%, 0.4)",
                 backdropFilter: "blur(12px)",
+                color: panelOpen
+                  ? "hsl(120, 50%, 65%)"
+                  : "hsl(42, 60%, 60%)",
+                boxShadow: panelOpen
+                  ? "0 0 12px hsla(120, 50%, 40%, 0.15)"
+                  : "0 2px 8px rgba(0,0,0,0.25)",
               }}
+              aria-label={panelOpen ? "Close Grove Signals" : "Open Grove Signals"}
+              aria-expanded={panelOpen}
             >
-              <span className="flex items-center gap-1.5">
-                <motion.span
-                  animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  🌿
-                </motion.span>
-                Grove Signals
-                {liveEventCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[8px] font-bold"
-                    style={{
-                      background: "hsla(120, 60%, 45%, 0.3)",
-                      color: "hsl(120, 60%, 65%)",
-                      border: "1px solid hsla(120, 50%, 50%, 0.4)",
-                    }}
-                  >
-                    •
-                  </motion.span>
-                )}
-              </span>
-              <span style={{ transform: signalsExpanded ? "rotate(0)" : "rotate(-90deg)", transition: "transform 0.2s" }}>▾</span>
+              <span className="text-sm">🌿</span>
+              <span className="text-[10px] font-serif tracking-wider hidden sm:inline">Signals</span>
+              {liveEventCount > 0 && !panelOpen && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    background: "hsl(120, 55%, 50%)",
+                    boxShadow: "0 0 6px hsla(120, 55%, 50%, 0.6)",
+                  }}
+                />
+              )}
             </button>
 
+            {/* Dropdown panel */}
             <AnimatePresence>
-              {signalsExpanded && (
+              {panelOpen && (
                 <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="overflow-hidden"
+                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                  transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  className="mt-2 rounded-xl overflow-hidden"
+                  style={{
+                    width: "min(280px, calc(100vw - 1.5rem))",
+                    background: "hsla(120, 20%, 8%, 0.94)",
+                    border: "1px solid hsla(120, 30%, 30%, 0.3)",
+                    backdropFilter: "blur(14px)",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px hsla(120, 20%, 20%, 0.1)",
+                  }}
                 >
-                  <div
-                    className="px-3 pb-3 pt-2 space-y-2.5 rounded-b-xl"
-                    style={{
-                      background: "hsla(120, 20%, 8%, 0.92)",
-                      border: "1px solid hsla(120, 30%, 30%, 0.3)",
-                      borderTop: "none",
-                      backdropFilter: "blur(12px)",
-                    }}
-                  >
+                  <div className="px-3 py-3 space-y-2.5 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain">
                     {/* Season indicator */}
                     <div
                       className="text-[9px] font-serif text-center py-1 rounded-md"
@@ -305,24 +284,13 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
                       )}
                     </div>
 
-                    {/* ── Tree Discovery (merged from MapTreePanel) ── */}
+                    {/* Tree Discovery */}
                     <div className="pt-1.5 border-t" style={{ borderColor: "hsla(120, 30%, 30%, 0.2)" }}>
                       <div className="flex gap-1 mb-1.5">
-                        <TreeTabButton
-                          active={treeTab === "recent"}
-                          onClick={() => setTreeTab("recent")}
-                          label="🌱 Recent"
-                          count={recentTrees.length}
-                        />
-                        <TreeTabButton
-                          active={treeTab === "nearby"}
-                          onClick={() => setTreeTab("nearby")}
-                          label="🧭 Awaiting"
-                          count={nearbyTrees.length}
-                        />
+                        <TreeTabButton active={treeTab === "recent"} onClick={() => setTreeTab("recent")} label="🌱 Recent" count={recentTrees.length} />
+                        <TreeTabButton active={treeTab === "nearby"} onClick={() => setTreeTab("nearby")} label="🧭 Awaiting" count={nearbyTrees.length} />
                       </div>
-
-                      <div className="space-y-0.5 max-h-[120px] overflow-y-auto">
+                      <div className="space-y-0.5 max-h-[120px] overflow-y-auto overscroll-contain">
                         {displayTrees.length === 0 ? (
                           <p className="text-[9px] font-serif italic text-center py-2" style={{ color: "hsl(120, 20%, 40%)" }}>
                             {treeTab === "recent" ? "No trees yet" : "All trees have offerings ✦"}
@@ -331,7 +299,7 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
                           displayTrees.map(t => (
                             <button
                               key={t.id}
-                              onClick={() => onTreeClick?.(t.id)}
+                              onClick={() => { onTreeClick?.(t.id); setPanelOpen(false); }}
                               className="w-full text-left px-2 py-1.5 rounded-lg transition-colors min-h-[36px]"
                               style={{ color: "hsl(120, 30%, 60%)" }}
                               onMouseEnter={e => (e.currentTarget.style.background = "hsla(120, 30%, 30%, 0.2)")}
@@ -385,7 +353,7 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
                 </motion.div>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
