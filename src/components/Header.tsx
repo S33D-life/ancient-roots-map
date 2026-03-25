@@ -44,7 +44,7 @@ const DESKTOP_NAV = [
 
 /** Page-context labels — maps route prefixes to a subtle place name shown on mobile */
 const PAGE_CONTEXT: { prefix: string; label: string }[] = [
-  { prefix: "/map", label: "Map Room" },
+  { prefix: "/map", label: "Arboreal Atlas" },
   { prefix: "/tree/", label: "Ancient Friend" },
   { prefix: "/add-tree", label: "Add Tree" },
   { prefix: "/library/staff-room", label: "Staff Room" },
