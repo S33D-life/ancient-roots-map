@@ -543,6 +543,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={titleNode}
         subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
+        fullscreenMobile
       >
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-1">
