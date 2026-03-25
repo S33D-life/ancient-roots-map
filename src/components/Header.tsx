@@ -6,6 +6,7 @@ import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLongPress } from "@/hooks/use-long-press";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
@@ -51,6 +52,14 @@ const Header = () => {
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [orbRestoreProgress, setOrbRestoreProgress] = useState(0);
+
+  const orbRestore = useLongPress({
+    onLongPress: () => window.dispatchEvent(new Event("s33d-orb-restore")),
+    duration: 600,
+    moveThreshold: 10,
+    onProgress: setOrbRestoreProgress,
+  });
 
   // S33D logo click → navigate to TETOL home
   const handleLogoClick = () => {
@@ -223,12 +232,15 @@ const Header = () => {
                 </Button>
               )}
 
-              {/* TEOTAG — guiding intelligence orb → Hearth AI tab */}
+              {/* TEOTAG — guiding intelligence orb → Hearth AI tab. Long-press to restore hidden orb. */}
               <button
                 type="button"
-                onClick={() => navigate("/dashboard?tab=teotag")}
-                className="shrink-0 group"
-                aria-label="TEOTAG — The Echo of the Ancient Groves"
+                onClick={() => { if (!orbRestore.didFire()) navigate("/dashboard?tab=teotag"); }}
+                onPointerDown={orbRestore.onPointerDown}
+                onPointerMove={orbRestore.onPointerMove}
+                onPointerUp={orbRestore.onPointerUp}
+                className="shrink-0 group relative"
+                aria-label="TEOTAG — The Echo of the Ancient Groves. Hold to restore orb."
               >
                 <img
                   src={teotagLogo}
@@ -239,6 +251,24 @@ const Header = () => {
                     border: "1.5px solid hsl(var(--primary) / 0.25)",
                   }}
                 />
+                {/* Long-press progress ring for restore */}
+                {orbRestoreProgress > 0 && orbRestoreProgress < 1 && (
+                  <svg
+                    className="absolute pointer-events-none"
+                    style={{ inset: -3, width: "calc(100% + 6px)", height: "calc(100% + 6px)" }}
+                    viewBox="0 0 40 40"
+                  >
+                    <circle
+                      cx="20" cy="20" r="18"
+                      fill="none"
+                      stroke="hsl(45 90% 60% / 0.6)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeDasharray={`${orbRestoreProgress * 113} 113`}
+                      transform="rotate(-90 20 20)"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           </div>

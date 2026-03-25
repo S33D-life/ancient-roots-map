@@ -29,6 +29,7 @@ import { useAppUpdate } from "@/hooks/use-app-update";
 import { useHeartSignals } from "@/hooks/use-heart-signals";
 import { SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { supabase } from "@/integrations/supabase/client";
+import { useLongPress } from "@/hooks/use-long-press";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
@@ -82,6 +83,23 @@ const FireflyFAB = () => {
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
   const [hovered, setHovered] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [longPressProgress, setLongPressProgress] = useState(0);
+
+  // Listen for restore event from Header TEOTAG button
+  useEffect(() => {
+    const handler = () => setHidden(false);
+    window.addEventListener("s33d-orb-restore", handler);
+    return () => window.removeEventListener("s33d-orb-restore", handler);
+  }, []);
+
+  // Long-press to hide
+  const longPress = useLongPress({
+    onLongPress: () => setHidden(true),
+    duration: 600,
+    moveThreshold: 12,
+    onProgress: setLongPressProgress,
+  });
 
   // Auth state for signals
   const [userId, setUserId] = useState<string | null>(null);
@@ -183,6 +201,7 @@ const FireflyFAB = () => {
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (anyOpenRef.current) return;
+    longPress.onPointerDown(e);
     try {
       isDragging.current = true;
       dragConfirmed.current = false;
@@ -193,7 +212,7 @@ const FireflyFAB = () => {
     } catch {
       isDragging.current = false;
     }
-  }, []);
+  }, [longPress]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
@@ -203,11 +222,14 @@ const FireflyFAB = () => {
 
     if (!dragConfirmed.current && totalMoved.current >= DRAG_THRESHOLD) {
       dragConfirmed.current = true;
+      longPress.cancel(); // Cancel long-press on drag
       if (showDragHint) {
         setShowDragHint(false);
         try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
       }
     }
+
+    longPress.onPointerMove(e);
 
     if (dragConfirmed.current) {
       e.preventDefault();
@@ -218,13 +240,17 @@ const FireflyFAB = () => {
         setXY({ x: nx, y: ny });
       });
     }
-  }, []);
+  }, [longPress]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    longPress.onPointerUp();
     if (!isDragging.current) return;
     isDragging.current = false;
     cancelAnimationFrame(rafId.current);
-    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {};
+
+    // If long-press fired, don't do tap/snap
+    if (longPress.didFire()) return;
 
     try {
       if (totalMoved.current < DRAG_THRESHOLD) {
@@ -233,7 +259,7 @@ const FireflyFAB = () => {
         snapToEdge(xyRef.current.x, xyRef.current.y);
       }
     } catch { /* ignore */ }
-  }, [snapToEdge, handleTap]);
+  }, [snapToEdge, handleTap, longPress]);
 
   const handleSelectAction = useCallback((type: string) => {
     if (type === "signals") {
@@ -252,6 +278,8 @@ const FireflyFAB = () => {
   // Dynamic orb glow based on dominant signal type
   const signalHue = dominantType ? SIGNAL_TYPE_HUE[dominantType] : null;
   const hasSignals = unreadCount > 0;
+
+  if (hidden) return null;
 
   return (
     <>
@@ -376,6 +404,25 @@ const FireflyFAB = () => {
               : "0 0 20px 6px hsl(45 90% 60% / 0.15)",
           }}
         />
+
+        {/* Long-press progress ring */}
+        {longPressProgress > 0 && longPressProgress < 1 && (
+          <svg
+            className="absolute pointer-events-none"
+            style={{ inset: -4, width: FAB_SIZE + 8, height: FAB_SIZE + 8 }}
+            viewBox="0 0 56 56"
+          >
+            <circle
+              cx="28" cy="28" r="25"
+              fill="none"
+              stroke="hsl(45 90% 60% / 0.5)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray={`${longPressProgress * 157} 157`}
+              transform="rotate(-90 28 28)"
+            />
+          </svg>
+        )}
       </button>
 
       {/* One-time drag hint */}
