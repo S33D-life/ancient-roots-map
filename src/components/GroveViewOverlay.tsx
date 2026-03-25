@@ -119,6 +119,9 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
   const palette = SEASON_PALETTE[season];
   const displayTrees = treeTab === "recent" ? recentTrees : nearbyTrees;
 
+  // Early return when inactive — prevents mounting effects and rendering overlay DOM
+  if (!active) return null;
+
   return (
     <>
       {/* Seasonal atmosphere overlay */}
@@ -176,7 +179,7 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
         {active && (
           <div
             ref={panelRef}
-            className="absolute right-3 z-[1001]"
+            className="absolute right-3 z-[1003]"
             style={{ top: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
           >
             {/* Toggle button — matches map control sizing (44px) */}

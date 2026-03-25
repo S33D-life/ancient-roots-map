@@ -3016,6 +3016,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : (btnBase.background as string),
                   }}
                   title="Filters & Layers"
+                  aria-label="Filters & Layers"
                 >
                   <Layers className="w-[18px] h-[18px]" />
                   {(() => {
@@ -3054,6 +3055,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     color: locating ? "hsl(42, 40%, 45%)" : geo.error ? "hsl(0, 50%, 55%)" : located ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
                   }}
                   title={geo.error ? `Location: ${geo.error.message}` : "Locate me"}
+                  aria-label="Locate me"
                 >
                   {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
                 </button>
@@ -3075,6 +3077,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
                   }}
                   title="Add tree"
+                  aria-label="Add tree"
                 >
                   <Plus className="w-[18px] h-[18px]" />
                 </button>
@@ -3086,6 +3089,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
                   }}
                   title="Reset view"
+                  aria-label="Reset view"
                 >
                   <Globe className="w-[18px] h-[18px]" />
                 </button>

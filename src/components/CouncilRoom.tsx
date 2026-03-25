@@ -2,7 +2,7 @@
  * CouncilRoom — Jitsi Meet embed for live Council gatherings.
  * Isolated, reusable, future-ready for Jitsi External API swap.
  */
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Copy, ExternalLink, Maximize2, Minimize2, Radio, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,14 +41,16 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
   const [iframeError, setIframeError] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
+  const iframeLoadedRef = useRef(false);
+
   // Timeout fallback: if iframe hasn't loaded after 10s, show error state
   useEffect(() => {
-    if (iframeLoaded || iframeError) return;
+    if (iframeLoadedRef.current || iframeError) return;
     const timer = setTimeout(() => {
-      if (!iframeLoaded) setIframeError(true);
+      if (!iframeLoadedRef.current) setIframeError(true);
     }, 10000);
     return () => clearTimeout(timer);
-  }, [iframeLoaded, iframeError]);
+  }, [iframeError]);
 
   const roomName = useMemo(() => {
     if (councilTitle) return toRoomSlug(`S33D-${councilTitle}`);
@@ -83,6 +85,7 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
           src={embedUrl}
           className="flex-1 w-full"
           allow="camera; microphone; fullscreen; display-capture"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           allowFullScreen
           title="Council Room"
         />
@@ -174,9 +177,11 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
             src={embedUrl}
             className="w-full min-h-[65vh] md:min-h-[700px]"
             allow="camera; microphone; fullscreen; display-capture"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             allowFullScreen
+            loading="lazy"
             title="Council Room"
-            onLoad={() => setIframeLoaded(true)}
+            onLoad={() => { iframeLoadedRef.current = true; setIframeLoaded(true); }}
             onError={() => setIframeError(true)}
           />
         )}
