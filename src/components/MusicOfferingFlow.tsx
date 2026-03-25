@@ -398,7 +398,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
   const canSubmit = customMode ? customTitle.trim().length > 0 : !!selectedSong;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-2">
       {/* Tree context anchor */}
       {treeName && (
         <p className="text-[10px] font-serif tracking-widest uppercase text-center text-muted-foreground/50">
@@ -412,8 +412,14 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
         <Input
           value={query}
           onChange={(e) => { handleQueryChange(e.target.value); if (selectedSong) { setSelectedSong(null); setCustomMode(false); } }}
+          onFocus={(e) => {
+            // Scroll into view on mobile when keyboard opens
+            setTimeout(() => {
+              e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+          }}
           placeholder="Search or paste a Spotify / YouTube link…"
-          className="pl-11 pr-10 font-serif h-14 text-sm rounded-xl bg-secondary/15 border-border/20
+          className="pl-11 pr-10 font-serif h-14 text-base sm:text-sm rounded-xl bg-secondary/15 border-border/20
             focus:border-primary/40 focus:bg-secondary/25 transition-all placeholder:text-muted-foreground/35"
           autoFocus={!selectedSong}
         />
@@ -493,7 +499,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
 
             {/* Results */}
             {allResults.length > 0 && (
-              <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30 backdrop-blur max-h-[320px] overflow-y-auto">
+              <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30 backdrop-blur max-h-[45vh] overflow-y-auto overscroll-contain">
                 {catalogResults.length > 0 && (
                   <div>
                     <div className="px-3 py-1.5 bg-secondary/15 border-b border-border/15">
@@ -607,15 +613,17 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
                     <Input
                       value={customTitle}
                       onChange={(e) => setCustomTitle(e.target.value)}
+                      onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: "smooth", block: "center" }), 300)}
                       placeholder="Song title *"
-                      className="font-serif text-sm h-9 bg-transparent border-border/30"
+                      className="font-serif text-base sm:text-sm h-10 sm:h-9 bg-transparent border-border/30"
                       autoFocus
                     />
                     <Input
                       value={customArtist}
                       onChange={(e) => setCustomArtist(e.target.value)}
+                      onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: "smooth", block: "center" }), 300)}
                       placeholder="Artist name"
-                      className="font-serif text-xs h-8 bg-transparent border-border/30"
+                      className="font-serif text-base sm:text-sm h-9 sm:h-8 bg-transparent border-border/30"
                     />
                   </div>
                 </div>
@@ -696,9 +704,10 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
+                onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: "smooth", block: "center" }), 300)}
                 placeholder="What does this song mean to you, or to this tree?"
                 rows={2}
-                className="font-serif text-sm leading-relaxed bg-secondary/10 border-border/20 resize-none
+                className="font-serif text-base sm:text-sm leading-relaxed bg-secondary/10 border-border/20 resize-none
                   focus:border-primary/30 transition-all"
               />
             </div>
