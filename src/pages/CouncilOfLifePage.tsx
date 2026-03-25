@@ -7,7 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import TetolBridge from "@/components/TetolBridge";
-import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3, TreePine, MapPin, Sparkles, Bug, Eye, Lightbulb } from "lucide-react";
+import { Maximize2, Minimize2, ScrollText, Users, Podcast, CalendarDays, BarChart3, TreePine, MapPin, Sparkles, Bug, Eye, Lightbulb, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
 import CouncilSparkIcon from "@/components/CouncilSparkIcon";
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
+import CouncilRoom from "@/components/CouncilRoom";
 
 const councilRooms = [
   {
@@ -54,6 +55,12 @@ const councilRooms = [
     description: "Upcoming council dates and details",
     icon: CalendarDays,
     externalUrl: "https://t.me/s33dlife",
+  },
+  {
+    id: "chamber",
+    title: "Council Chamber",
+    description: "Enter the live gathering room",
+    icon: Video,
   },
 ];
 
@@ -134,6 +141,28 @@ const CouncilOfLifePage = () => {
           allowFullScreen
           title={room?.title}
         />
+      </div>
+    );
+  }
+
+  if (activeRoom === "chamber") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header />
+        <main className="pt-28 pb-8 px-4">
+          <div className="max-w-5xl mx-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveRoom(null)}
+              className="text-muted-foreground hover:text-foreground mb-4"
+            >
+              ← Back to Council
+            </Button>
+            <CouncilRoom />
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
