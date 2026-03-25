@@ -4,6 +4,7 @@
  * Renders a floating encounter card with rich visual presence.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { TreeDeciduous, Star, X, Sprout } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
