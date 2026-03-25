@@ -8,6 +8,7 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 const STORAGE_KEY = "s33d-enso-interacted";
 
