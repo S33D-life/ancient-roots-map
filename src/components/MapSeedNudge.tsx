@@ -61,7 +61,9 @@ const MapSeedNudge = ({
     setDismissed(false);
   }, [nearestTree?.id]);
 
-  if (!nearestTree || !userId || dismissed) return null;
+  const { showOnboardingNudges } = useQuietMode();
+
+  if (!nearestTree || !userId || dismissed || !showOnboardingNudges) return null;
 
   return (
     <div className="absolute bottom-28 left-3 right-3 z-[800] pointer-events-auto max-w-sm mx-auto">

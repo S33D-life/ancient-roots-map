@@ -19,6 +19,10 @@ interface JourneyNudgeProps {
 }
 
 const JourneyNudge = ({ icon, message, to, label, delay = 0 }: JourneyNudgeProps) => {
+  const { showOnboardingNudges } = useQuietMode();
+
+  if (!showOnboardingNudges) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}

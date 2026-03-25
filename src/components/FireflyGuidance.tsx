@@ -165,7 +165,9 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
     setShowing(false);
   }, [location.pathname]);
 
-  if (!showing || !message) return null;
+  const { showTeotagWhispers } = useQuietMode();
+
+  if (!showing || !message || !showTeotagWhispers) return null;
 
   // Position whisper bubble near the FAB
   const isRight = fabPosition.x > window.innerWidth / 2;
