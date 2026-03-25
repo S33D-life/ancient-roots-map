@@ -704,9 +704,10 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value.slice(0, 2000))}
+                onFocus={(e) => setTimeout(() => e.target.scrollIntoView({ behavior: "smooth", block: "center" }), 300)}
                 placeholder="What does this song mean to you, or to this tree?"
                 rows={2}
-                className="font-serif text-sm leading-relaxed bg-secondary/10 border-border/20 resize-none
+                className="font-serif text-base sm:text-sm leading-relaxed bg-secondary/10 border-border/20 resize-none
                   focus:border-primary/30 transition-all"
               />
             </div>
