@@ -53,7 +53,7 @@ const HarvestDetailPage = () => {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20 text-center">
+        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20 text-center" style={{ paddingTop: 'var(--content-top)' }}>
           <p className="text-sm text-muted-foreground mt-20">Listing not found.</p>
           <Link to="/harvest" className="text-xs text-primary hover:underline mt-2 inline-block">
             ← Back to Harvest Exchange
