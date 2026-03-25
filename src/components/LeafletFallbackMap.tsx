@@ -3077,6 +3077,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
                   }}
                   title="Add tree"
+                  aria-label="Add tree"
                 >
                   <Plus className="w-[18px] h-[18px]" />
                 </button>
