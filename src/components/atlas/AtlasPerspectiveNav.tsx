@@ -5,10 +5,15 @@
 import { Link, useLocation } from "react-router-dom";
 import { Globe, TreeDeciduous, Layers } from "lucide-react";
 
+interface AtlasPerspectiveNavProps {
+  /** Show one-line descriptions below the pills */
+  showDescriptions?: boolean;
+}
+
 const PERSPECTIVES = [
-  { path: "/atlas", label: "Countries", icon: Globe, desc: "By nation and region" },
-  { path: "/hives", label: "Hives", icon: TreeDeciduous, desc: "By species lineage" },
-  { path: "/atlas/bio-regions", label: "Bioregions", icon: Layers, desc: "By ecology" },
+  { path: "/atlas", label: "Countries", icon: Globe, desc: "Cultural & political gateways" },
+  { path: "/hives", label: "Hives", icon: TreeDeciduous, desc: "Species & botanical families" },
+  { path: "/atlas/bio-regions", label: "Bioregions", icon: Layers, desc: "Ecological landscapes" },
 ] as const;
 
 const AtlasPerspectiveNav = () => {
