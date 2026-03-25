@@ -651,8 +651,12 @@ const TreeDetailPage = () => {
                   {/* Seasonal Moment */}
                   <SeasonalMomentPanel
                     onPromptSelect={(prompt) => {
-                      if (prompt.suggestedType) setActiveTab(prompt.suggestedType);
-                      setAddOfferingOpen(true);
+                      if (prompt.suggestedType) {
+                        setActiveTab(prompt.suggestedType);
+                        handleAddOffering(prompt.suggestedType as OfferingType);
+                      } else {
+                        openOfferingGateway();
+                      }
                     }}
                   />
 
