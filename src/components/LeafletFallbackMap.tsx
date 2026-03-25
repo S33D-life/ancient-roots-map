@@ -3016,6 +3016,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : (btnBase.background as string),
                   }}
                   title="Filters & Layers"
+                  aria-label="Filters & Layers"
                 >
                   <Layers className="w-[18px] h-[18px]" />
                   {(() => {
