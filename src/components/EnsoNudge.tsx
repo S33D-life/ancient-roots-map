@@ -30,11 +30,13 @@ const BRUSH_FILTER_ID = "enso-brush-texture";
 interface EnsoNudgeProps {
   /** Size of the ensō ring (px). Should be larger than the logo. */
   size?: number;
+  /** Vertical offset to center the ring on a specific element (px). Negative = shift up. */
+  offsetY?: number;
   children: React.ReactNode;
   onInteract?: () => void;
 }
 
-export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudgeProps) {
+export default function EnsoNudge({ size = 52, offsetY = 0, children, onInteract }: EnsoNudgeProps) {
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showMicroCopy, setShowMicroCopy] = useState(false);
@@ -78,7 +80,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
               left: "50%",
               top: "50%",
               marginLeft: -size / 2,
-              marginTop: -size / 2,
+              marginTop: -size / 2 + offsetY,
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -89,7 +91,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
               viewBox="0 0 52 52"
               fill="none"
               className="w-full h-full"
-              style={{ filter: "drop-shadow(0 0 6px hsl(42 80% 55% / 0.35))" }}
+              style={{ filter: "drop-shadow(0 0 8px hsl(42 80% 55% / 0.5)) drop-shadow(0 0 16px hsl(42 80% 55% / 0.2))" }}
             >
               {/* Brush texture filter — organic ink displacement */}
               <defs>
@@ -123,12 +125,12 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
             <motion.div
               className="absolute rounded-full"
               style={{
-                inset: "-18%",
-                background: "radial-gradient(circle, hsl(42 80% 55% / 0.18) 0%, hsl(42 70% 50% / 0.08) 45%, transparent 72%)",
+                inset: "-22%",
+                background: "radial-gradient(circle, hsl(42 80% 55% / 0.25) 0%, hsl(42 70% 50% / 0.12) 40%, transparent 70%)",
               }}
               initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: [1, 1.12, 1], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 2.8 }}
+              animate={{ scale: [1, 1.18, 1], opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 2.8 }}
             />
             {/* Inner warm glow hugging the icon */}
             <motion.div
@@ -155,18 +157,20 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
         {children}
       </motion.div>
 
-      {/* Micro-copy: "Begin here" — fades in after 3s, fades out on interact */}
+      {/* Micro-copy: "Begin here" with staff & footprints — fades in after 3s */}
       <AnimatePresence>
         {showMicroCopy && showEnso && !reducedMotion && (
           <motion.span
-            className="absolute right-full mr-2 top-1/2 -translate-y-1/2 whitespace-nowrap text-[8px] font-serif tracking-[0.2em] uppercase select-none pointer-events-none"
-            style={{ color: "hsl(42, 70%, 60%)" }}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 0.7, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
+            className="absolute right-full mr-2 whitespace-nowrap text-[8px] font-serif tracking-[0.2em] uppercase select-none pointer-events-none flex items-center gap-1"
+            style={{ color: "hsl(42, 70%, 60%)", top: `calc(50% + ${offsetY}px)`, transform: "translateY(-50%)" }}
+            initial={{ opacity: 0, x: 4 }}
+            animate={{ opacity: 0.8, x: 0 }}
+            exit={{ opacity: 0, x: -4 }}
             transition={{ duration: 0.8 }}
           >
+            <span className="text-[9px]">🥾</span>
             Begin here
+            <span className="text-[9px]">🪄</span>
           </motion.span>
         )}
       </AnimatePresence>
