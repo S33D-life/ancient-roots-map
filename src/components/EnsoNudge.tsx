@@ -91,7 +91,7 @@ export default function EnsoNudge({ size = 52, offsetY = 0, children, onInteract
               viewBox="0 0 52 52"
               fill="none"
               className="w-full h-full"
-              style={{ filter: "drop-shadow(0 0 6px hsl(42 80% 55% / 0.35))" }}
+              style={{ filter: "drop-shadow(0 0 8px hsl(42 80% 55% / 0.5)) drop-shadow(0 0 16px hsl(42 80% 55% / 0.2))" }}
             >
               {/* Brush texture filter — organic ink displacement */}
               <defs>
