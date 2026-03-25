@@ -76,6 +76,7 @@ const ResponsiveDialog = ({
   overlay,
   snapPoints,
   defaultSnapPoint,
+  fullscreenMobile = false,
 }: ResponsiveDialogProps) => {
   const isMobile = useIsMobile();
   const keyboardOpen = useKeyboardVisible();
