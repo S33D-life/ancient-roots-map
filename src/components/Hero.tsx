@@ -310,7 +310,8 @@ const Hero = () => {
               The Arboreal Atlas of<br />Ancient Friends
             </h1>
             <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            A living atlas of the world's most ancient trees. Map, explore, and protect.
+            A living atlas of the world's most ancient trees.<br className="hidden sm:inline" />
+            Discover, map, and help protect them.
           </p>
 
           {/* CTA buttons — above the fold */}

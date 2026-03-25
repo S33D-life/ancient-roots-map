@@ -42,7 +42,7 @@ const SectionShimmer = () => (
 );
 
 const Index = () => {
-  useDocumentTitle("S33D Gateway");
+  useDocumentTitle("Ancient Friends — A Living Atlas of the World's Oldest Trees");
   const { showEntrance, dismissEntrance } = useEntranceOnce("index");
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
   const { activeSection, scrollToSection } = useTreeScroll();

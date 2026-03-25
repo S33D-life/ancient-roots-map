@@ -36,7 +36,7 @@ const Footer = () => {
           <Dot />
           <Link to="/bug-garden" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
             <Sparkles className="w-3 h-3" />
-            Council Sparks
+            Feedback
           </Link>
           <Dot />
           <span className="text-[10px] text-muted-foreground/40">EST 2016</span>

@@ -87,6 +87,7 @@ const fadeUp = {
 
 /* ── Component ──────────────────────────────────────────────── */
 const SupportPage = () => {
+  useDocumentTitle("Support the Grove");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [signupType, setSignupType] = useState<"testing" | "technical_council" | null>(null);
 
