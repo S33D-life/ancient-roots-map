@@ -24,6 +24,8 @@ const treeItems = [
 ];
 
 const quickLinks = [
+  { to: "/library/music-room", label: "Tree Radio", icon: Smartphone },
+  { to: "/library/staff-room", label: "Staff Room", icon: TreePine },
   { to: "/hives", label: "Species Hives", icon: Hexagon },
   { to: "/value-tree", label: "Value Tree", icon: TreePine },
   { to: "/support", label: "Support", icon: Heart },
