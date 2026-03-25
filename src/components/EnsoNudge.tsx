@@ -30,6 +30,8 @@ const BRUSH_FILTER_ID = "enso-brush-texture";
 interface EnsoNudgeProps {
   /** Size of the ensō ring (px). Should be larger than the logo. */
   size?: number;
+  /** Vertical offset to center the ring on a specific element (px). Negative = shift up. */
+  offsetY?: number;
   children: React.ReactNode;
   onInteract?: () => void;
 }
