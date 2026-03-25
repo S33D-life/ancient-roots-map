@@ -666,7 +666,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               >
                 <div className="h-px flex-1 bg-border/10" />
                 <ChevronDown className={`w-2.5 h-2.5 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-                <span>Options</span>
+                <span>Add details</span>
                 <div className="h-px flex-1 bg-border/10" />
               </button>
             </CollapsibleTrigger>
