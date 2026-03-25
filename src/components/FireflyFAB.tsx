@@ -83,6 +83,23 @@ const FireflyFAB = () => {
   const [pos, setPos] = useState<StoredPos>(loadPos);
   const [xy, setXY] = useState(() => posToXY(pos));
   const [hovered, setHovered] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [longPressProgress, setLongPressProgress] = useState(0);
+
+  // Listen for restore event from Header TEOTAG button
+  useEffect(() => {
+    const handler = () => setHidden(false);
+    window.addEventListener("s33d-orb-restore", handler);
+    return () => window.removeEventListener("s33d-orb-restore", handler);
+  }, []);
+
+  // Long-press to hide
+  const longPress = useLongPress({
+    onLongPress: () => setHidden(true),
+    duration: 600,
+    moveThreshold: 12,
+    onProgress: setLongPressProgress,
+  });
 
   // Auth state for signals
   const [userId, setUserId] = useState<string | null>(null);
