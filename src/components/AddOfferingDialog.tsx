@@ -595,7 +595,6 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                       placeholder="Name this memory"
                       className="bg-secondary/10 border-border/30 font-serif text-base"
                       maxLength={200}
-                      required
                     />
                   </motion.div>
                 )}
