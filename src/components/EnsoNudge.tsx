@@ -80,7 +80,7 @@ export default function EnsoNudge({ size = 52, offsetY = 0, children, onInteract
               left: "50%",
               top: "50%",
               marginLeft: -size / 2,
-              marginTop: -size / 2,
+              marginTop: -size / 2 + offsetY,
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
