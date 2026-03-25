@@ -456,7 +456,7 @@ const WorldAtlasPage = () => {
       <div className="min-h-screen pb-24 pt-16">
         {/* ─── Perspective Nav ─── */}
         <section className="px-4 pt-6 pb-2 max-w-2xl mx-auto">
-          <AtlasPerspectiveNav />
+          <AtlasPerspectiveNav showDescriptions />
         </section>
 
         {/* ─── Hero (compressed for mobile) ─── */}

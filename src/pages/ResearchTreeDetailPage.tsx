@@ -25,6 +25,7 @@ import {
   EmptyWishes,
   EmptyWhispers,
 } from "@/components/tree-sections/ResearchEmptyStates";
+const TreeDiscoveryPaths = lazy(() => import("@/components/tree-sections/TreeDiscoveryPaths"));
 import {
   mapResearchTreeToTreeRow,
   type ResearchOrigin,
@@ -294,6 +295,14 @@ const ResearchTreeDetailPage = () => {
                 </div>
               </motion.div>
             )}
+
+            {/* Discovery Paths */}
+            <Suspense fallback={null}>
+              <TreeDiscoveryPaths
+                species={tree.species}
+                country={tree.nation}
+              />
+            </Suspense>
 
             {/* Hive connections */}
             <TreeHiveConnections species={tree.species} ecoBelonging={[]} />
