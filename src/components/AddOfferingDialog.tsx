@@ -42,8 +42,8 @@ const typeConfig: Record<
   OfferingType,
   { singular: string; contentLabel: string; placeholder: string; emoji: string }
 > = {
-  photo: { singular: "Memory", contentLabel: "Caption", placeholder: "What memory does this capture?", emoji: "📷" },
-  song: { singular: "Song", contentLabel: "Description", placeholder: "Tell us about this song...", emoji: "🎵" },
+  photo: { singular: "Memory", contentLabel: "Caption", placeholder: "What memory does this capture?", emoji: "📸" },
+  song: { singular: "Song", contentLabel: "Description", placeholder: "Paste or search for a song…", emoji: "🎵" },
   poem: { singular: "Poem", contentLabel: "Poem", placeholder: "Write your poem here...", emoji: "📜" },
   story: { singular: "Musing", contentLabel: "Your Thoughts", placeholder: "Share your thoughts about this tree...", emoji: "✍️" },
   nft: { singular: "NFT", contentLabel: "Description", placeholder: "Describe this NFT...", emoji: "✨" },
@@ -53,13 +53,13 @@ const typeConfig: Record<
 
 /** Quick-select offering types — primary first, then secondary */
 const PRIMARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
-  { value: "photo", emoji: "📷", label: "Memory" },
+  { value: "photo", emoji: "📸", label: "Memory" },
+  { value: "song", emoji: "🎵", label: "Song" },
   { value: "story", emoji: "✍️", label: "Musing" },
   { value: "poem", emoji: "📜", label: "Poem" },
 ];
 
 const SECONDARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
-  { value: "song", emoji: "🎵", label: "Song" },
   { value: "voice", emoji: "🎙️", label: "Voice" },
   { value: "book", emoji: "📖", label: "Book" },
   { value: "nft", emoji: "✨", label: "NFT" },
@@ -447,8 +447,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
         subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
-        snapPoints={[0.6, 0.95]}
-        defaultSnapPoint={0.6}
+        fullscreenMobile
       >
         <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
         <div className="mt-2 relative">
@@ -474,6 +473,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
         subtitle="Speak into the canopy — your voice becomes part of this tree"
+        fullscreenMobile
       >
         <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
         <div className="mt-2 relative">
@@ -499,6 +499,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
         subtitle="Place a story in this Ancient Friend's living archive"
+        fullscreenMobile
       >
         <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
         <div className="mt-2 relative">
@@ -543,9 +544,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={titleNode}
         subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
+        fullscreenMobile
       >
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-1">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-1">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
           {/* PHOTO: image first, then title */}
@@ -560,7 +562,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 </div>
               ) : (
                 <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
                     dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/30 hover:border-primary/20"
                   }`}
                   style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
@@ -568,10 +570,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   onDragLeave={() => setDragActive(false)}
                   onDrop={handleDrop}
                 >
-                  <div className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-                    <ImagePlus className="h-7 w-7 text-primary/40" />
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                    <ImagePlus className="h-6 w-6 text-primary/40" />
                   </div>
-                  <p className="text-sm text-muted-foreground/60 font-serif mb-4">Choose a memory to place here</p>
+                  <p className="text-sm text-muted-foreground/60 font-serif mb-3">Choose a memory to place here</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
                       <ImagePlus className="h-3 w-3" /> Gallery
@@ -666,7 +668,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               >
                 <div className="h-px flex-1 bg-border/10" />
                 <ChevronDown className={`w-2.5 h-2.5 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-                <span>Options</span>
+                <span>Add details</span>
                 <div className="h-px flex-1 bg-border/10" />
               </button>
             </CollapsibleTrigger>
@@ -748,12 +750,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Submit */}
-          <div className="pt-1">
+          {/* Submit — sticky on mobile */}
+          <div className="pt-1 sticky bottom-0 bg-background/80 backdrop-blur-sm pb-2 -mx-1 px-1">
             <Button
               type="submit"
               disabled={loading || uploading}
-              className="w-full font-serif tracking-wider gap-2 h-12 text-sm"
+              className="w-full font-serif tracking-wider gap-2 h-12 text-sm active:scale-[0.98] transition-transform"
               style={{
                 background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
                 boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
