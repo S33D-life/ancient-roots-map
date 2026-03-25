@@ -5,7 +5,7 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon } from "lucide-react";
+import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon, Camera, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TreePhotoStatus from "@/components/TreePhotoStatus";
 import type { PhotoProcessingStatus } from "@/utils/backgroundPhotoProcessor";
@@ -28,6 +28,8 @@ interface TreePageHeroProps {
   tree: Tree;
   photoUrl: string | null;
   onMakeOffering: () => void;
+  onAddPhoto?: () => void;
+  onAddSong?: () => void;
   onAddWish: () => void;
   onViewMap: () => void;
   onShare: () => void;
@@ -42,6 +44,8 @@ const TreePageHero = ({
   tree,
   photoUrl,
   onMakeOffering,
+  onAddPhoto,
+  onAddSong,
   onAddWish,
   onViewMap,
   onShare,
@@ -243,6 +247,32 @@ const TreePageHero = ({
               <Heart className="h-4 w-4" /> Add a Wish
             </Button>
           </div>
+
+          {/* Quick shortcuts — direct to flow, skip gateway */}
+          {(onAddPhoto || onAddSong) && (
+            <div className="flex items-center justify-center gap-2 mt-3">
+              {onAddPhoto && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onAddPhoto}
+                  className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
+                >
+                  <Camera className="h-3.5 w-3.5" /> 📸 Photo
+                </Button>
+              )}
+              {onAddSong && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onAddSong}
+                  className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
+                >
+                  <Music className="h-3.5 w-3.5" /> 🎵 Song
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Secondary actions */}
           <div className="flex items-center justify-center gap-2 mt-4">
