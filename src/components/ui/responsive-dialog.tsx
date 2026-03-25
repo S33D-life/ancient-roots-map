@@ -89,15 +89,14 @@ const ResponsiveDialog = ({
   }, [isMobile, keyboardOpen, snapPoints, defaultSnapPoint]);
 
   if (isMobile) {
+    const drawerProps = fullscreenMobile
+      ? { open, onOpenChange }
+      : { open, onOpenChange, snapPoints, activeSnapPoint: activeSnap };
+
     return (
-      <Drawer
-        open={open}
-        onOpenChange={onOpenChange}
-        snapPoints={snapPoints}
-        activeSnapPoint={activeSnap}
-      >
+      <Drawer {...drawerProps}>
         <DrawerContent
-          className={`max-h-[96dvh] overflow-hidden ${contentClassName ?? ""}`}
+          className={`overflow-hidden ${fullscreenMobile ? "h-[100dvh] max-h-[100dvh] rounded-none" : "max-h-[96dvh]"} ${contentClassName ?? ""}`}
           style={{
             paddingBottom: keyboardOpen ? "8px" : "env(safe-area-inset-bottom, 0px)",
             transition: "padding-bottom 200ms ease",
@@ -114,7 +113,7 @@ const ResponsiveDialog = ({
           />
           <div className="overflow-y-auto flex-1 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
             {(title || subtitle) && (
-              <DrawerHeader className="px-5 pt-4 pb-0">
+              <DrawerHeader className="px-5 pt-3 pb-0">
                 {title && (
                   <DrawerTitle className="text-primary font-serif text-xl tracking-wide">
                     {title}
