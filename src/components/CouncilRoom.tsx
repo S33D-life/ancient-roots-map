@@ -85,6 +85,7 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
           src={embedUrl}
           className="flex-1 w-full"
           allow="camera; microphone; fullscreen; display-capture"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
           allowFullScreen
           title="Council Room"
         />
