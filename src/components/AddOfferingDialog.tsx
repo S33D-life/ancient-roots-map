@@ -499,6 +499,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
         subtitle="Place a story in this Ancient Friend's living archive"
+        fullscreenMobile
       >
         <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
         <div className="mt-2 relative">
