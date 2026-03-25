@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PageShell from "@/components/PageShell";
 import AtlasPerspectiveNav from "@/components/atlas/AtlasPerspectiveNav";
 import { getAllHives, type HiveInfo, getHiveForSpecies } from "@/utils/hiveUtils";
 import { Card, CardContent } from "@/components/ui/card";
