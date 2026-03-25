@@ -27,6 +27,8 @@ import { useDataCommons, type AgentProfile, type SparkReport } from "@/hooks/use
 import { SparkSubmitDialog } from "@/components/shared/SparkSubmitDialog";
 import { TaskBoard } from "@/components/agent-garden/TaskBoard";
 import { SubmissionReviewPanel } from "@/components/agent-garden/SubmissionReviewPanel";
+import { ConnectAgentWizard } from "@/components/agent-garden/ConnectAgentWizard";
+import { AgentOverviewTab } from "@/components/agent-garden/AgentOverviewTab";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
