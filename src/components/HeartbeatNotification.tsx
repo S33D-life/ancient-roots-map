@@ -45,7 +45,7 @@ const HeartbeatNotification = () => {
 
   return (
     <AnimatePresence>
-      {visible && batchTotal > 0 && (
+      {visible && batchTotal > 0 && showCelebrations && (
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

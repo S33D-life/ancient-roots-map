@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import { Leaf } from "lucide-react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 interface GuidanceMessage {
   text: string;

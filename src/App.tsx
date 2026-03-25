@@ -240,6 +240,9 @@ const App = () => {
   const CelebrationOverlay = () => {
     const { celebration, dismiss: dismissTree } = useTreeCelebration();
     const { event: contribEvent, dismiss: dismissContrib } = useContributionCelebration();
+    const { showCelebrations } = useQuietMode();
+
+    if (!showCelebrations) return null;
 
     // Tree creation events (legacy)
     if (celebration) {
