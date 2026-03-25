@@ -71,6 +71,9 @@ const TreeLedgerPage = () => {
           loading={loading}
         />
 
+        {/* Richest Reservoirs — Heart Pool Rankings */}
+        <TreeReservoirLeaderboard />
+
         {/* Mode Toggle */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as "explorer" | "spiral")}>
           <TabsList className="mx-auto w-fit">
