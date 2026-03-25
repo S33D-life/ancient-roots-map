@@ -561,7 +561,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                 </div>
               ) : (
                 <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
                     dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/30 hover:border-primary/20"
                   }`}
                   style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
