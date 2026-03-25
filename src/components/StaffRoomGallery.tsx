@@ -928,6 +928,7 @@ export default function StaffRoomGallery() {
                 staff={activeStaff}
                 onViewOnChain={() => { setDetailOpen(false); setOnChainStaff(activeStaff); }}
                 onViewLegend={() => { setDetailOpen(false); routerNavigate(`/staff/${activeStaff.code}`); }}
+                onNavigate={(path) => { setDetailOpen(false); routerNavigate(path); }}
               />
             </div>
           )}
