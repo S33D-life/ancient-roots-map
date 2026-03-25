@@ -550,7 +550,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   // Event pulse layer ref
   const eventPulseLayerRef = useRef<L.LayerGroup | null>(null);
-  const hexBinLayerRef = useRef<L.LayerGroup | null>(null);
+  // hexBinLayerRef now managed by useMapOverlayLayers
   const [currentEventPulses, setCurrentEventPulses] = useState<any[]>([]);
 
   const speciesCounts = useMemo(() => {
