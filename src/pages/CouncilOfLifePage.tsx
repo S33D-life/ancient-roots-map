@@ -56,6 +56,12 @@ const councilRooms = [
     icon: CalendarDays,
     externalUrl: "https://t.me/s33dlife",
   },
+  {
+    id: "chamber",
+    title: "Council Chamber",
+    description: "Enter the live gathering room",
+    icon: Video,
+  },
 ];
 
 const CouncilOfLifePage = () => {
