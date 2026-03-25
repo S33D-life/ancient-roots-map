@@ -113,7 +113,7 @@ const LivingCensus = () => {
   const { stats, pulse } = useLivingCensus();
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto">
+    <div className="relative w-full max-w-2xl mx-auto" data-census>
       {/* Pulse ring on live update */}
       <AnimatePresence>
         {pulse && (
