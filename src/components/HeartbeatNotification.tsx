@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart } from "lucide-react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 const BATCH_WINDOW = 1500;
 const FADE_DELAY = 1200;
