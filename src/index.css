@@ -759,6 +759,74 @@ All colors MUST be HSL.
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   BOTANICAL LIGHT MODE — parchment overlay system
+   CSS-only, lightweight, light mode scoped
+   ═══════════════════════════════════════════════════ */
+
+/* Subtle parchment grain — barely visible organic texture */
+.light .botanical-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 120px 160px at 8% 15%, hsl(90 25% 60% / 0.04), transparent),
+    radial-gradient(ellipse 80px 110px at 92% 25%, hsl(45 35% 55% / 0.03), transparent),
+    radial-gradient(ellipse 100px 140px at 15% 75%, hsl(120 20% 50% / 0.03), transparent),
+    radial-gradient(ellipse 90px 120px at 85% 80%, hsl(35 30% 55% / 0.04), transparent),
+    radial-gradient(ellipse 60px 80px at 50% 50%, hsl(80 20% 55% / 0.02), transparent),
+    radial-gradient(ellipse 80% 70% at 50% 50%, transparent 50%, hsl(30 20% 70% / 0.04) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Stronger botanical overlay for Heartwood / library sections */
+.light .botanical-heartwood::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 150px 200px at 5% 20%, hsl(90 30% 55% / 0.06), transparent),
+    radial-gradient(ellipse 100px 130px at 95% 15%, hsl(35 40% 50% / 0.05), transparent),
+    radial-gradient(ellipse 120px 170px at 10% 80%, hsl(120 25% 45% / 0.05), transparent),
+    radial-gradient(ellipse 80px 100px at 88% 70%, hsl(42 35% 50% / 0.06), transparent),
+    radial-gradient(ellipse 60px 90px at 45% 40%, hsl(80 22% 50% / 0.03), transparent),
+    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, hsl(30 22% 65% / 0.06) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Scroll / archive container — slightly darker parchment panel */
+.light .scroll-panel {
+  background: linear-gradient(180deg, hsl(36 28% 93%) 0%, hsl(34 24% 90%) 100%);
+  border: 1px solid hsl(33 22% 80%);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 2px 8px hsl(30 18% 35% / 0.06),
+    inset 0 1px 0 hsl(40 40% 96% / 0.6),
+    inset 0 -1px 0 hsl(30 20% 70% / 0.15);
+}
+
+/* Parchment card variant */
+.light .parchment-card {
+  background: linear-gradient(175deg, hsl(38 32% 96%) 0%, hsl(36 26% 93.5%) 100%);
+  border: 1px solid hsl(33 20% 83%);
+  box-shadow:
+    0 1px 4px hsl(30 18% 38% / 0.05),
+    inset 0 1px 0 hsl(42 40% 97% / 0.7);
+  border-radius: 0.625rem;
+}
+
+/* Botanical active/glow states — warmth not sharp contrast */
+.light .botanical-glow {
+  box-shadow: 0 0 12px hsl(42 50% 50% / 0.12), 0 0 4px hsl(35 40% 45% / 0.08);
+}
+.light .botanical-glow:hover {
+  box-shadow: 0 0 20px hsl(42 50% 50% / 0.18), 0 0 6px hsl(35 40% 45% / 0.12);
+}
+
 /* Heart Canopy Pulse — one-time glow for anchor trees */
 @keyframes canopy-heart-glow {
   0% { opacity: 0; transform: scale(0.7); }
