@@ -39,6 +39,8 @@ import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import TeotagAITab from "@/components/dashboard/TeotagAITab";
 import HearthNotificationSettings from "@/components/dashboard/HearthNotificationSettings";
+import HearthLocationSettings from "@/components/dashboard/HearthLocationSettings";
+import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { MapPin, Activity } from "lucide-react";
 import { useWandererStreak } from "@/hooks/use-wanderer-streak";
