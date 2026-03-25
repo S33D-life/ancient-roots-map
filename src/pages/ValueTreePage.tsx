@@ -600,7 +600,7 @@ const ValueTreePage = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </PageShell>
       <Footer />
     </div>
   );
