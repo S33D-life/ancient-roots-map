@@ -208,6 +208,8 @@ const TetolHomePage = () => {
               </p>
             )}
             {!isNewUser && <div className="mb-8" />}
+            {/* TEOTAG hover tooltip — hidden for new users */}
+            {!isNewUser && (
             <div className="absolute top-full mt-1 opacity-0 group-hover/title:opacity-100 pointer-events-none group-hover/title:pointer-events-auto transition-all duration-300 z-50 scale-95 group-hover/title:scale-100">
               <div
                 className="flex items-start gap-3 rounded-xl border p-3 max-w-[260px] backdrop-blur-md"
@@ -223,6 +225,7 @@ const TetolHomePage = () => {
                 </p>
               </div>
             </div>
+            )}
           </div>
 
           {/* Tree visualization */}
