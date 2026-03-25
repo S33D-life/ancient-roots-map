@@ -77,64 +77,82 @@ export function buildPopupHtml(
     : "";
 
   const thumbnail = photoUrl
-    ? `<div style="position:relative;width:100%;height:100px;overflow:hidden;border-radius:12px 12px 0 0;">
+    ? `<div style="position:relative;width:100%;height:130px;overflow:hidden;border-radius:14px 14px 0 0;">
         <img src="${escapeHtml(photoUrl)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy" />
-        <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
-        <span style="position:absolute;top:6px;left:6px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}33;backdrop-filter:blur(4px);">${tierLabel}</span>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,hsl(28,18%,9%) 0%,hsla(28,18%,9%,0.4) 40%,transparent 100%);pointer-events:none;"></div>
+        <span style="position:absolute;top:8px;left:8px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.06em;padding:3px 8px;border-radius:6px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}22;backdrop-filter:blur(6px);">${tierLabel}</span>
       </div>`
-    : `<div style="position:relative;width:100%;height:80px;overflow:hidden;border-radius:12px 12px 0 0;background:linear-gradient(135deg,hsl(30,20%,14%),hsl(25,18%,10%));display:flex;align-items:center;justify-content:center;">
-        <svg width="40" height="40" viewBox="0 0 48 48" fill="none" style="opacity:0.3;"><path d="M24 6C24 6 14 16 14 26a10 10 0 0020 0C34 16 24 6 24 6z" fill="hsl(42,50%,45%)"/><rect x="22" y="30" width="4" height="10" rx="2" fill="hsl(30,30%,35%)"/></svg>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:30px;background:linear-gradient(to top,hsl(30,15%,10%),transparent);pointer-events:none;"></div>
-        <span style="position:absolute;top:6px;left:6px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.05em;padding:2px 7px;border-radius:4px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}33;">${tierLabel}</span>
+    : `<div style="position:relative;width:100%;height:90px;overflow:hidden;border-radius:14px 14px 0 0;background:linear-gradient(160deg,hsl(30,18%,13%),hsl(28,15%,9%));display:flex;align-items:center;justify-content:center;">
+        <svg width="36" height="36" viewBox="0 0 48 48" fill="none" style="opacity:0.2;"><path d="M24 6C24 6 14 16 14 26a10 10 0 0020 0C34 16 24 6 24 6z" fill="hsl(42,40%,45%)"/><rect x="22" y="30" width="4" height="10" rx="2" fill="hsl(30,25%,30%)"/></svg>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(to top,hsl(28,18%,9%),transparent);pointer-events:none;"></div>
+        <span style="position:absolute;top:8px;left:8px;font-size:9px;font-family:'Cinzel',serif;letter-spacing:0.06em;padding:3px 8px;border-radius:6px;background:${tierBg};color:${tierColor};border:1px solid ${tierColor}22;">${tierLabel}</span>
       </div>`;
 
   const whisperHref = `/tree/${encodeURIComponent(tree.id)}?whisper=1&context=map`;
-
   const wishBtnId = `wish-${tree.id}`;
 
-  const html = `<div style="padding:0;font-family:'Cinzel',serif;width:240px;background:hsl(30,15%,10%);border-radius:12px;border:1px solid hsla(42,40%,30%,0.4);overflow:hidden;animation:popIn .2s ease-out;">
+  /* ── Metadata line — age · offerings · birdsong · whispers ── */
+  const metaParts = [ageText, offeringText, birdsongLine, whisperLine].filter(Boolean);
+  const metaLine = metaParts.length > 0
+    ? `<div style="display:flex;align-items:center;gap:8px;font-size:10px;font-family:sans-serif;color:hsl(0,0%,50%);margin-top:2px;">${metaParts.map(p => `<span>${p}</span>`).join('<span style="color:hsl(0,0%,30%);">·</span>')}</div>`
+    : "";
+
+  /* ── Location line ── */
+  const locationLine = distKm != null
+    ? `<p style="margin:0;font-size:10px;color:hsl(120,25%,50%);font-family:sans-serif;display:flex;align-items:center;gap:4px;">
+        <span style="opacity:0.7;">📍</span>
+        <span>~${distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
+        <span style="color:hsl(0,0%,35%);">·</span>
+        <span style="color:hsl(0,0%,45%);">~${distKm < 1 ? `${Math.max(1, Math.round(distKm * 1000 / 80))} min walk` : `${Math.round(distKm * 12)} min walk`}</span>
+      </p>`
+    : tree.what3words
+      ? `<p style="margin:0;font-size:10px;color:hsl(42,30%,45%);font-family:sans-serif;opacity:0.8;">📍 /${escapeHtml(tree.what3words)}</p>`
+      : "";
+
+  const html = `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(28,18%,9%);border-radius:14px;border:1px solid hsla(42,30%,30%,0.25);overflow:hidden;box-shadow:0 8px 32px hsla(0,0%,0%,0.45),0 0 0 1px hsla(42,40%,30%,0.08);animation:popIn .2s ease-out;">
     ${thumbnail}
-    <div style="padding:12px 14px 8px;display:flex;flex-direction:column;gap:5px;position:relative;">
-      <div style="position:absolute;top:0;right:0;display:flex;gap:4px;">
-        <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Save to wishes" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.25);background:hsla(42,25%,14%,0.75);color:hsl(42,50%,55%);font-size:14px;cursor:pointer;backdrop-filter:blur(4px);transition:all .2s;">⭐</button>
-        <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:999px;border:1px solid hsla(42,70%,55%,0.35);background:hsla(42,25%,14%,0.75);color:hsl(42,70%,62%);text-decoration:none;font-size:12px;backdrop-filter:blur(4px);">🌬️</a>
+
+    <!-- Content body -->
+    <div style="padding:14px 16px 10px;display:flex;flex-direction:column;gap:6px;position:relative;">
+      <!-- Wish + Whisper icons -->
+      <div style="position:absolute;top:-16px;right:12px;display:flex;gap:5px;">
+        <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Save to wishes" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid hsla(42,50%,45%,0.2);background:hsla(28,18%,12%,0.9);color:hsl(42,40%,52%);font-size:13px;cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;box-shadow:0 2px 8px hsla(0,0%,0%,0.3);">⭐</button>
+        <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid hsla(42,50%,45%,0.2);background:hsla(28,18%,12%,0.9);color:hsl(42,50%,55%);text-decoration:none;font-size:12px;backdrop-filter:blur(6px);box-shadow:0 2px 8px hsla(0,0%,0%,0.3);">🌬️</a>
       </div>
-      <h3 style="margin:0;padding-right:68px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
-      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},45%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>
-      ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:1px 6px;border-radius:4px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.12);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.2);transition:all .2s;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}
-      <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
-        ${ageText ? `<span>${ageText}</span>` : ""}
-        ${offeringText ? `<span>${offeringText}</span>` : ""}
-        ${birdsongLine}
-        ${whisperLine}
-      </div>
-      ${distKm != null
-        ? `<p style="margin:0;font-size:10px;color:hsl(120,35%,55%);font-family:sans-serif;display:flex;align-items:center;gap:4px;">
-            <span>📍</span>
-            <span>~${distKm < 1 ? `${Math.round(distKm * 1000)}m` : `${distKm.toFixed(1)}km`}</span>
-            <span style="color:hsl(0,0%,48%);">·</span>
-            <span style="color:hsl(0,0%,48%);">~${distKm < 1 ? `${Math.max(1, Math.round(distKm * 1000 / 80))} min walk` : `${Math.round(distKm * 12)} min walk`}</span>
-          </p>`
-        : tree.what3words
-          ? `<p style="margin:0;font-size:10px;color:hsl(45,40%,48%);font-family:sans-serif;">📍 /${escapeHtml(tree.what3words)}</p>`
-          : ""
-      }
+
+      <!-- Tree name -->
+      <h3 style="margin:0;padding-right:72px;font-size:16px;color:hsl(42,65%,62%);line-height:1.35;font-weight:700;letter-spacing:0.02em;">${escapeHtml(tree.name)}</h3>
+
+      <!-- Species -->
+      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
+
+      <!-- Hive badge -->
+      ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:2px 7px;border-radius:5px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.08);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.12);transition:all .2s;width:fit-content;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}
+
+      <!-- Metadata -->
+      ${metaLine}
+      ${locationLine}
+
+      <!-- Description -->
       ${desc}
     </div>
-    <div style="padding:0 14px 10px;display:flex;gap:6px;">
-      <button data-plant-seed="${escapeHtml(tree.id)}" data-tree-lat="${tree.latitude}" data-tree-lng="${tree.longitude}" aria-label="Plant seed at this tree" title="Plant a seed" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;padding:8px 0;font-size:11px;color:hsl(120,30%,85%);background:hsla(120,30%,25%,0.3);border:1px solid hsla(120,40%,40%,0.3);border-radius:8px;cursor:pointer;font-family:sans-serif;font-weight:600;letter-spacing:0.04em;transition:all .2s;">🌱 Plant Seed</button>
-      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;font-size:11px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">Meet This Tree ⟶</a>
+
+    <!-- Divider -->
+    <div style="margin:0 16px;height:1px;background:linear-gradient(90deg,transparent,hsla(42,30%,40%,0.15),transparent);"></div>
+
+    <!-- Primary actions -->
+    <div style="padding:10px 16px;display:flex;gap:8px;">
+      <button data-plant-seed="${escapeHtml(tree.id)}" data-tree-lat="${tree.latitude}" data-tree-lng="${tree.longitude}" aria-label="Plant seed at this tree" title="Plant a seed" style="display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:1;padding:10px 0;font-size:11px;color:hsl(120,25%,75%);background:hsla(120,25%,22%,0.25);border:1px solid hsla(120,30%,35%,0.2);border-radius:10px;cursor:pointer;font-family:sans-serif;font-weight:600;letter-spacing:0.03em;transition:all .2s;">🌱 Plant Seed</button>
+      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;font-size:11px;color:hsl(35,20%,10%);background:linear-gradient(135deg,hsl(42,70%,48%),hsl(45,80%,55%));border-radius:10px;text-decoration:none;letter-spacing:0.03em;font-weight:700;font-family:sans-serif;box-shadow:0 2px 10px hsla(42,70%,50%,0.2);">Meet This Tree ⟶</a>
     </div>
-    <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:6px;align-items:center;">
-      <span style="font-size:9px;font-family:sans-serif;color:hsl(42,30%,45%);letter-spacing:0.12em;text-transform:uppercase;">Offerings</span>
-      <div style="display:flex;gap:6px;width:100%;justify-content:center;">
-        <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;height:34px;font-size:10px;text-decoration:none;color:hsl(120,20%,58%);background:hsla(120,20%,30%,0.1);border:1px solid hsla(120,30%,40%,0.15);border-radius:8px;font-family:sans-serif;transition:all .2s;" title="Add Photo">📷 Photo</a>
-        <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;height:34px;font-size:10px;text-decoration:none;color:hsl(200,20%,58%);background:hsla(200,20%,30%,0.1);border:1px solid hsla(200,30%,40%,0.15);border-radius:8px;font-family:sans-serif;transition:all .2s;" title="Add Song">🎵 Song</a>
-        <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;height:34px;font-size:10px;background:hsla(42,20%,30%,0.1);border:1px solid hsla(42,30%,40%,0.15);border-radius:8px;cursor:pointer;color:hsl(42,25%,58%);font-family:sans-serif;transition:all .2s;" title="Share tree link">↗️ Share</button>
-      </div>
+
+    <!-- Secondary offerings row -->
+    <div style="padding:4px 16px 14px;display:flex;gap:6px;justify-content:center;">
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:30px;font-size:9px;text-decoration:none;color:hsl(0,0%,48%);background:transparent;border:1px solid hsla(0,0%,40%,0.12);border-radius:8px;font-family:sans-serif;transition:all .15s;letter-spacing:0.02em;" title="Add Photo">📷 Photo</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:30px;font-size:9px;text-decoration:none;color:hsl(0,0%,48%);background:transparent;border:1px solid hsla(0,0%,40%,0.12);border-radius:8px;font-family:sans-serif;transition:all .15s;letter-spacing:0.02em;" title="Add Song">🎵 Song</a>
+      <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:30px;font-size:9px;background:transparent;border:1px solid hsla(0,0%,40%,0.12);border-radius:8px;cursor:pointer;color:hsl(0,0%,48%);font-family:sans-serif;transition:all .15s;letter-spacing:0.02em;" title="Share">↗️ Share</button>
     </div>
   </div>`;
-
   // Cache the result
   if (POPUP_CACHE.size >= MAX_POPUP_CACHE) {
     const firstKey = POPUP_CACHE.keys().next().value;
