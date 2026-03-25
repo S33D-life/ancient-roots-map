@@ -33,7 +33,7 @@ const BottomNav = () => {
         WebkitBackdropFilter: "blur(24px) saturate(1.3)",
         boxShadow: "0 -2px 16px hsl(var(--background) / 0.4)",
         /* Prevent any parent transform/filter/will-change from creating new stacking context */
-        contain: "layout",
+        contain: "style",
         transform: "none",
         willChange: "auto",
       }}
