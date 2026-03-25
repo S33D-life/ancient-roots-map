@@ -339,7 +339,7 @@ export default function StaffRoomGallery() {
   const routerNavigate = useRouterNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
-  const [viewMode, setViewMode] = useState<ViewMode>("gallery");
+  const [viewMode, setViewMode] = useState<ViewMode>("carousel");
   const [filter, setFilter] = useState<StaffFilter>("all");
   const [activeIndex, setActiveIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
