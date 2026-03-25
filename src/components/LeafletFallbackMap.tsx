@@ -1179,85 +1179,28 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [groveViewActive, currentEventPulses]);
 
-  // ── H3-like hex-binned wanderer presence heatmap ──
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !showHeartGlow) {
-      if (hexBinLayerRef.current && mapRef.current) {
-        mapRef.current.removeLayer(hexBinLayerRef.current);
-        hexBinLayerRef.current = null;
-      }
-      return;
-    }
-
-    const loadHexBins = async () => {
-      // Fetch recent offering locations for density visualization
-      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
-        .from("offerings")
-        .select("tree_id")
-        .gte("created_at", cutoff)
-        .limit(500);
-
-      if (!data || data.length === 0) return;
-
-      // Resolve coordinates via tree lookup
-      const points: { lat: number; lng: number }[] = [];
-      for (const o of data) {
-        const loc = treeLookup.get(o.tree_id);
-        if (loc) points.push(loc);
-      }
-
-      if (points.length === 0) return;
-
-      // Import computeHexBins
-      const { computeHexBins } = await import("@/hooks/use-grove-events");
-      const zoom = map.getZoom();
-      const resolution = zoom >= 10 ? 0.05 : zoom >= 7 ? 0.2 : zoom >= 4 ? 0.5 : 2;
-      const bins = computeHexBins(points, resolution);
-
-      if (hexBinLayerRef.current) map.removeLayer(hexBinLayerRef.current);
-      const hexLayer = L.layerGroup();
-
-      bins.forEach(bin => {
-        const radius = 8 + bin.intensity * 24;
-        const opacity = 0.15 + bin.intensity * 0.45;
-        const icon = L.divIcon({
-          className: "hex-bin-marker",
-          html: `<div style="
-            width:${radius * 2}px;height:${radius * 2}px;border-radius:50%;
-            background:radial-gradient(circle,hsla(42,80%,55%,${opacity}) 0%,hsla(42,70%,45%,${opacity * 0.3}) 60%,transparent 100%);
-            box-shadow:0 0 ${radius}px hsla(42,80%,55%,${opacity * 0.4});
-            transform:translate(-50%,-50%);
-          "></div>`,
-          iconSize: [radius * 2, radius * 2],
-          iconAnchor: [radius, radius],
-        });
-        L.marker([bin.lat, bin.lng], { icon, interactive: false }).addTo(hexLayer);
-      });
-
-      hexLayer.addTo(map);
-      hexBinLayerRef.current = hexLayer;
-    };
-
-    loadHexBins();
-
-    // Refresh on zoom/pan
-    const onMove = () => loadHexBins();
-    const debounced = (() => {
-      let t: ReturnType<typeof setTimeout>;
-      return () => { clearTimeout(t); t = setTimeout(onMove, 800); };
-    })();
-    map.on("moveend", debounced);
-
-    return () => {
-      map.off("moveend", debounced);
-      if (hexBinLayerRef.current && map.hasLayer(hexBinLayerRef.current)) {
-        map.removeLayer(hexBinLayerRef.current);
-        hexBinLayerRef.current = null;
-      }
-    };
-  }, [showHeartGlow, treeLookup]);
+  // ── Overlay layers (Seeds, Root Threads, Offering Glow, Harvest, Ancient, Birdsong, Bloomed Seeds, Seed Trail, Heart Glow) ──
+  // Managed by useMapOverlayLayers hook — wired here to replace inline effects
+  const overlayResults = useMapOverlayLayers({
+    map: mapRef.current,
+    trees,
+    filteredTrees,
+    bloomedSeeds,
+    birdsongHeatPoints,
+    offeringCounts: offeringCountsRef.current,
+    treeLookup,
+    userId,
+    showSeeds,
+    showRootThreads,
+    showOfferingGlow,
+    showHarvestLayer,
+    showAncientHighlight,
+    showBirdsongHeat,
+    showBloomedSeeds,
+    showSeedTrail,
+    showHeartGlow,
+    birdsongSeason,
+  });
 
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
