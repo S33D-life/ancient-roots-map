@@ -1113,6 +1113,27 @@ const TreeDetailPage = () => {
         />
       )}
 
+      <Suspense fallback={null}>
+        <OfferingGateway
+          open={gatewayOpen}
+          onClose={() => setGatewayOpen(false)}
+          onSelect={(type) => {
+            setGatewayOpen(false);
+            // Map gateway types to offering types (gratitude/intention → story)
+            const typeMap: Record<string, OfferingType> = {
+              photo: "photo", song: "song", book: "book", story: "story",
+              poem: "poem", voice: "voice", nft: "nft",
+              quote: "story", wish: "story", gratitude: "story", intention: "story",
+              seasonal_observation: "story", encounter: "story",
+            };
+            const offeringType = typeMap[type] || "story";
+            setSelectedType(offeringType);
+            setTimeout(() => setAddOfferingOpen(true), 150);
+          }}
+          treeName={tree?.name}
+        />
+      </Suspense>
+
       <AddOfferingDialog
         open={addOfferingOpen}
         onOpenChange={setAddOfferingOpen}
