@@ -73,13 +73,13 @@ const FundingFlowDiagram = () => (
       ))}
     </div>
 
-    {/* Nodes */}
+      {/* Nodes */}
     <div className="relative flex items-center justify-between gap-2">
       {[
-        { icon: "🌍", label: "External\nFunding", sub: "Gitcoin · Giveth" },
+        { icon: "🌧️", label: "External\nSupport", sub: "Commons rounds" },
         { icon: "🌱", label: "S33D\nCommons", sub: "Value Tree" },
         { icon: "❤️", label: "Hearts", sub: "Distributed" },
-        { icon: "🌳", label: "Trees &\nContributors", sub: "Impact" },
+        { icon: "🌳", label: "Trees &\nStewards", sub: "Living impact" },
       ].map((node, i) => (
         <motion.div
           key={node.label}
