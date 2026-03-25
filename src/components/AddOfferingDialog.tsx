@@ -517,18 +517,22 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   }
 
   const titleNode = (
-    <span className="flex items-center gap-2">
-      <motion.span
-        className="text-2xl"
-        key={cfg.emoji}
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        {cfg.emoji}
-      </motion.span>
-      {cfg.singular} Offering
-    </span>
+    <div className="space-y-1">
+      <span className="flex items-center gap-2">
+        <motion.span
+          className="text-2xl"
+          key={cfg.emoji}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          {cfg.emoji}
+        </motion.span>
+        {cfg.singular} Offering
+      </span>
+      {/* Inline type switcher — compact, inside header */}
+      <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+    </div>
   );
 
   return (
@@ -540,8 +544,6 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         title={titleNode}
         subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
       >
-        {/* Type switcher */}
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-3">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
