@@ -199,7 +199,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submittingRef.current) return;
+    if (submittingRef.current || loading) return;
     if (!title.trim()) {
       toast({ title: "Missing title", description: "Please provide a title", variant: "destructive" });
       return;
@@ -207,10 +207,23 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
 
+    // Timeout fallback — 30s max
+    const timeout = setTimeout(() => {
+      if (submittingRef.current) {
+        submittingRef.current = false;
+        setLoading(false);
+        setUploading(false);
+        toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" });
+      }
+    }, 30000);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
+        submittingRef.current = false;
+        setLoading(false);
+        clearTimeout(timeout);
         return;
       }
 
@@ -221,6 +234,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
           finalMediaUrl = await uploadFile(selectedFile, user.id);
         } catch (uploadErr: any) {
           toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+          submittingRef.current = false;
+          setLoading(false);
+          setUploading(false);
+          clearTimeout(timeout);
           return;
         } finally {
           setUploading(false);
@@ -283,8 +300,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       return;
     } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
+      toast({ title: "Something went wrong", description: "Try again — your content is still here", variant: "destructive" });
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
       submittingRef.current = false;
     }
