@@ -19,7 +19,7 @@ interface QuickSeedButtonProps {
   className?: string;
 }
 
-const QuickSeedButton = ({
+const QuickSeedButton = memo(({
   treeId,
   treeLat,
   treeLng,
