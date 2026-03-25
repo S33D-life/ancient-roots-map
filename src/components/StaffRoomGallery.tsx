@@ -681,17 +681,7 @@ export default function StaffRoomGallery() {
           <div className="h-px max-w-xs mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(42 85% 55% / 0.4), transparent)" }} />
         </motion.div>
 
-        {/* ═══ Staff Ceremony — shown when no staff connected or user triggers it ═══ */}
-        <AnimatePresence>
-          {(showCeremony || !hasLinkedStaff) && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-              <StaffCeremony
-                onComplete={() => { setShowCeremony(false); setHasLinkedStaff(true); }}
-                onCancel={() => { setShowCeremony(false); setHasLinkedStaff(true); }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Ceremony moved to its own tab */}
 
         {/* ═══ TABBED CONTENT ═══ */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
