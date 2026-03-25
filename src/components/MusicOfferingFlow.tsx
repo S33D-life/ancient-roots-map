@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { parseAppleMusicInput } from "@/utils/appleMusicParser";
 import {
@@ -84,7 +84,7 @@ const ShimmerRow = () => (
 
 /* ---------- Song Row ---------- */
 
-const SongRow = ({
+const SongRow = memo(({
   song,
   isPlaying,
   onSelect,
@@ -144,7 +144,8 @@ const SongRow = ({
       </Badge>
     )}
   </motion.button>
-);
+));
+SongRow.displayName = "SongRow";
 
 /* ---------- Post-Offering Reward Moment ---------- */
 
@@ -394,7 +395,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
     }
   };
 
-  const allResults = [...catalogResults, ...itunesResults];
+  const allResults = useMemo(() => [...catalogResults, ...itunesResults], [catalogResults, itunesResults]);
   const canSubmit = customMode ? customTitle.trim().length > 0 : !!selectedSong;
 
   return (

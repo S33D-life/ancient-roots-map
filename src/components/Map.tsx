@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, lazy, Suspense } from "react";
+import { useEffect, useState, useMemo, lazy, Suspense, memo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
@@ -25,7 +25,7 @@ interface MapProps {
   onJourneyEnd?: () => void;
 }
 
-const Map = ({
+const Map = memo(({
   initialView,
   initialSpecies,
   initialW3w,
@@ -61,7 +61,7 @@ const Map = ({
 
 
   return (
-    <div className="absolute inset-0 z-[1]" style={{ height: "100dvh" }}>
+    <div className="absolute inset-0 z-[1]" style={{ height: "100svh" }}>
       <Suspense
         fallback={
           <div className="absolute inset-0 flex items-center justify-center bg-background">
@@ -94,6 +94,8 @@ const Map = ({
       </Suspense>
     </div>
   );
-};
+});
+
+Map.displayName = "Map";
 
 export default Map;

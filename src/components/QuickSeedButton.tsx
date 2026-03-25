@@ -2,7 +2,7 @@
  * QuickSeedButton — A calm, one-tap seed planting action.
  * Renders inline wherever a tree is encountered.
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, memo } from "react";
 import { Sprout, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ interface QuickSeedButtonProps {
   className?: string;
 }
 
-const QuickSeedButton = ({
+const QuickSeedButton = memo(({
   treeId,
   treeLat,
   treeLng,
@@ -131,6 +131,8 @@ const QuickSeedButton = ({
       {justPlanted ? "Planted!" : "Seed"}
     </Button>
   );
-};
+});
+
+QuickSeedButton.displayName = "QuickSeedButton";
 
 export default QuickSeedButton;
