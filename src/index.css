@@ -86,69 +86,69 @@ All colors MUST be HSL.
   .tetol-crown { --level-accent: 45 100% 60%; }         /* Radiant gold */
   .tetol-hearth { --level-accent: 15 80% 55%; }         /* Hearth orange */
 
-  .light .tetol-roots { --level-accent: 120 40% 35%; }
-  .light .tetol-heartwood { --level-accent: 28 60% 40%; }
-  .light .tetol-canopy { --level-accent: 195 50% 40%; }
-  .light .tetol-crown { --level-accent: 45 80% 45%; }
-  .light .tetol-hearth { --level-accent: 15 65% 45%; }
+  .light .tetol-roots { --level-accent: 120 35% 32%; }
+  .light .tetol-heartwood { --level-accent: 30 50% 38%; }
+  .light .tetol-canopy { --level-accent: 150 35% 35%; }
+  .light .tetol-crown { --level-accent: 42 65% 42%; }
+  .light .tetol-hearth { --level-accent: 18 55% 42%; }
 
   .light {
-    /* Spectral lavender mist — luminous purple atmosphere */
-    --background: 270 25% 97%;
-    --foreground: 260 20% 16%;
+    /* ── Botanical Parchment Light Mode ── */
+    --background: 38 35% 95%;
+    --foreground: 30 18% 18%;
 
-    /* Layered purple card surfaces */
-    --card: 268 30% 98%;
-    --card-foreground: 260 20% 16%;
+    /* Warm parchment card surfaces */
+    --card: 36 30% 96%;
+    --card-foreground: 30 18% 18%;
 
-    --popover: 272 28% 98.5%;
-    --popover-foreground: 260 20% 16%;
+    --popover: 38 28% 97%;
+    --popover-foreground: 30 18% 18%;
 
-    /* Warm amber-gold primary — grounded warmth */
-    --primary: 38 72% 40%;
-    --primary-foreground: 270 30% 98%;
+    /* Warm amber-gold primary — botanical ink */
+    --primary: 35 65% 35%;
+    --primary-foreground: 38 40% 97%;
 
-    /* Soft lilac secondary */
-    --secondary: 268 20% 93%;
-    --secondary-foreground: 260 18% 22%;
+    /* Soft sage secondary */
+    --secondary: 90 14% 90%;
+    --secondary-foreground: 90 18% 25%;
 
-    /* Muted lavender tones */
-    --muted: 270 15% 91%;
-    --muted-foreground: 260 12% 44%;
+    /* Muted parchment tones */
+    --muted: 38 18% 88%;
+    --muted-foreground: 30 14% 42%;
 
-    /* Gold accent on purple — complementary warmth */
-    --accent: 42 65% 45%;
-    --accent-foreground: 270 30% 98%;
+    /* Moss-gold accent — field guide warmth */
+    --accent: 45 55% 42%;
+    --accent-foreground: 38 40% 97%;
 
-    --destructive: 0 62% 48%;
-    --destructive-foreground: 270 30% 98%;
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 38 40% 97%;
 
-    /* Cool purple borders with subtle depth */
-    --border: 268 18% 85%;
-    --input: 270 18% 93%;
-    --ring: 38 72% 40%;
+    /* Warm sepia borders */
+    --border: 35 22% 82%;
+    --input: 38 20% 91%;
+    --ring: 35 65% 35%;
 
-    /* Mystical tokens — purple-light versions */
-    --mystical-glow: 38 60% 44%;
-    --sacred-gold: 42 65% 40%;
-    --ancient-green: 270 12% 90%;
-    --earth-brown: 268 15% 82%;
+    /* Botanical tokens */
+    --mystical-glow: 35 50% 40%;
+    --sacred-gold: 42 55% 38%;
+    --ancient-green: 90 15% 88%;
+    --earth-brown: 30 18% 78%;
 
-    /* Spectral gradients */
-    --gradient-mystical: linear-gradient(135deg, hsl(38 65% 44%), hsl(45 70% 56%));
-    --gradient-forest: linear-gradient(180deg, hsl(268 30% 98%), hsl(272 22% 95%));
-    --gradient-radial: radial-gradient(circle at center, hsl(270 40% 70% / 0.06), transparent);
+    /* Parchment gradients */
+    --gradient-mystical: linear-gradient(135deg, hsl(35 55% 40%), hsl(42 60% 50%));
+    --gradient-forest: linear-gradient(180deg, hsl(38 30% 96%), hsl(36 25% 93%));
+    --gradient-radial: radial-gradient(circle at center, hsl(42 50% 55% / 0.06), transparent);
 
-    /* Soft purple-gold glow */
-    --glow-sacred: 0 0 24px hsl(270 35% 65% / 0.14), 0 0 60px hsl(42 60% 55% / 0.06);
-    --glow-subtle: 0 0 16px hsl(268 30% 60% / 0.1);
+    /* Warm botanical glow */
+    --glow-sacred: 0 0 24px hsl(35 40% 50% / 0.12), 0 0 60px hsl(42 50% 50% / 0.05);
+    --glow-subtle: 0 0 16px hsl(35 30% 50% / 0.08);
 
-    /* Purple-tinted elevation & atmosphere tokens */
-    --elevation-low: 0 1px 3px hsl(268 20% 50% / 0.06), 0 1px 2px hsl(268 20% 50% / 0.03);
-    --elevation-mid: 0 4px 12px hsl(268 20% 45% / 0.07), 0 2px 4px hsl(268 20% 50% / 0.04);
-    --elevation-high: 0 8px 30px hsl(268 20% 40% / 0.09), 0 4px 8px hsl(268 20% 50% / 0.05);
-    --surface-glow: inset 0 1px 0 hsl(272 40% 99% / 0.8);
-    --atmosphere-bg: linear-gradient(180deg, hsl(270 28% 97%) 0%, hsl(272 20% 95%) 50%, hsl(268 25% 96.5%) 100%);
+    /* Parchment elevation tokens */
+    --elevation-low: 0 1px 3px hsl(30 20% 40% / 0.06), 0 1px 2px hsl(30 15% 40% / 0.03);
+    --elevation-mid: 0 4px 12px hsl(30 20% 35% / 0.07), 0 2px 4px hsl(30 15% 40% / 0.04);
+    --elevation-high: 0 8px 30px hsl(30 18% 30% / 0.09), 0 4px 8px hsl(30 15% 40% / 0.05);
+    --surface-glow: inset 0 1px 0 hsl(40 50% 98% / 0.8);
+    --atmosphere-bg: linear-gradient(180deg, hsl(38 32% 95%) 0%, hsl(36 25% 93%) 50%, hsl(40 28% 94%) 100%);
   }
 
   .dark {
@@ -279,14 +279,14 @@ All colors MUST be HSL.
     box-shadow: var(--surface-glow, none);
   }
 
-  /* Light-mode card polish — inner highlight + soft edge */
+  /* Light-mode botanical card — parchment surface */
   .light .card-luminous {
-    background: hsl(38 45% 97%);
-    border: 1px solid hsl(35 35% 88%);
+    background: linear-gradient(180deg, hsl(38 35% 96%) 0%, hsl(36 28% 94%) 100%);
+    border: 1px solid hsl(33 25% 84%);
     box-shadow:
       var(--elevation-mid),
       var(--surface-glow),
-      inset 0 0 0 1px hsl(40 60% 96% / 0.5);
+      inset 0 0 0 1px hsl(40 40% 95% / 0.5);
   }
 
   /* Soft glow hover for interactive elements in light mode */
@@ -295,8 +295,8 @@ All colors MUST be HSL.
   }
   .light .glow-hover:hover {
     box-shadow:
-      0 4px 16px hsl(36 70% 50% / 0.12),
-      0 0 0 1px hsl(36 60% 80% / 0.4);
+      0 4px 16px hsl(35 50% 45% / 0.1),
+      0 0 0 1px hsl(35 45% 78% / 0.4);
     transform: translateY(-1px);
   }
   .light .glow-hover:active {
@@ -304,10 +304,10 @@ All colors MUST be HSL.
     box-shadow: var(--elevation-low);
   }
 
-  /* Atmospheric panel background for light mode */
+  /* Atmospheric panel background for light mode — warm parchment */
   .light .panel-atmosphere {
-    background: linear-gradient(180deg, hsl(38 50% 98%) 0%, hsl(40 35% 96%) 100%);
-    border: 1px solid hsl(35 30% 86%);
+    background: linear-gradient(180deg, hsl(38 32% 96%) 0%, hsl(36 25% 93%) 100%);
+    border: 1px solid hsl(33 22% 82%);
     box-shadow: var(--elevation-mid);
   }
 
@@ -379,15 +379,15 @@ All colors MUST be HSL.
   }
 
   .light header {
-    background: hsl(140 20% 92%) !important;
-    border-bottom-color: hsl(140 20% 78%) !important;
-    box-shadow: 0 1px 4px hsl(140 15% 40% / 0.08) !important;
+    background: hsl(38 28% 93%) !important;
+    border-bottom-color: hsl(33 22% 82%) !important;
+    box-shadow: 0 1px 4px hsl(30 18% 35% / 0.06) !important;
   }
   .light header > div:first-child {
-    opacity: 0.15 !important;
+    opacity: 0.1 !important;
   }
   .light header > div:nth-child(2) {
-    background: linear-gradient(180deg, hsl(140 20% 92% / 0.75), hsl(145 18% 88% / 0.85)) !important;
+    background: linear-gradient(180deg, hsl(38 28% 93% / 0.8), hsl(36 24% 91% / 0.85)) !important;
   }
 
   /* ── Unified loop-closure grid card polish ── */
@@ -757,6 +757,74 @@ All colors MUST be HSL.
   .tab-hidden .leaf-mote {
     animation-play-state: paused !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════
+   BOTANICAL LIGHT MODE — parchment overlay system
+   CSS-only, lightweight, light mode scoped
+   ═══════════════════════════════════════════════════ */
+
+/* Subtle parchment grain — barely visible organic texture */
+.light .botanical-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 120px 160px at 8% 15%, hsl(90 25% 60% / 0.04), transparent),
+    radial-gradient(ellipse 80px 110px at 92% 25%, hsl(45 35% 55% / 0.03), transparent),
+    radial-gradient(ellipse 100px 140px at 15% 75%, hsl(120 20% 50% / 0.03), transparent),
+    radial-gradient(ellipse 90px 120px at 85% 80%, hsl(35 30% 55% / 0.04), transparent),
+    radial-gradient(ellipse 60px 80px at 50% 50%, hsl(80 20% 55% / 0.02), transparent),
+    radial-gradient(ellipse 80% 70% at 50% 50%, transparent 50%, hsl(30 20% 70% / 0.04) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Stronger botanical overlay for Heartwood / library sections */
+.light .botanical-heartwood::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 150px 200px at 5% 20%, hsl(90 30% 55% / 0.06), transparent),
+    radial-gradient(ellipse 100px 130px at 95% 15%, hsl(35 40% 50% / 0.05), transparent),
+    radial-gradient(ellipse 120px 170px at 10% 80%, hsl(120 25% 45% / 0.05), transparent),
+    radial-gradient(ellipse 80px 100px at 88% 70%, hsl(42 35% 50% / 0.06), transparent),
+    radial-gradient(ellipse 60px 90px at 45% 40%, hsl(80 22% 50% / 0.03), transparent),
+    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, hsl(30 22% 65% / 0.06) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Scroll / archive container — slightly darker parchment panel */
+.light .scroll-panel {
+  background: linear-gradient(180deg, hsl(36 28% 93%) 0%, hsl(34 24% 90%) 100%);
+  border: 1px solid hsl(33 22% 80%);
+  border-radius: 0.75rem;
+  box-shadow:
+    0 2px 8px hsl(30 18% 35% / 0.06),
+    inset 0 1px 0 hsl(40 40% 96% / 0.6),
+    inset 0 -1px 0 hsl(30 20% 70% / 0.15);
+}
+
+/* Parchment card variant */
+.light .parchment-card {
+  background: linear-gradient(175deg, hsl(38 32% 96%) 0%, hsl(36 26% 93.5%) 100%);
+  border: 1px solid hsl(33 20% 83%);
+  box-shadow:
+    0 1px 4px hsl(30 18% 38% / 0.05),
+    inset 0 1px 0 hsl(42 40% 97% / 0.7);
+  border-radius: 0.625rem;
+}
+
+/* Botanical active/glow states — warmth not sharp contrast */
+.light .botanical-glow {
+  box-shadow: 0 0 12px hsl(42 50% 50% / 0.12), 0 0 4px hsl(35 40% 45% / 0.08);
+}
+.light .botanical-glow:hover {
+  box-shadow: 0 0 20px hsl(42 50% 50% / 0.18), 0 0 6px hsl(35 40% 45% / 0.12);
 }
 
 /* Heart Canopy Pulse — one-time glow for anchor trees */
