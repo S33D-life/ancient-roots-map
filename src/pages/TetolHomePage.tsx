@@ -302,8 +302,9 @@ const TetolHomePage = () => {
                   <span>{link.label}</span>
                 </Link>
               );
-            })}
+          })}
           </div>
+          )}
         </div>
       </main>
 
