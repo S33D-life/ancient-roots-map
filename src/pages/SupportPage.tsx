@@ -561,27 +561,47 @@ const SupportPage = () => {
         {/* ═══════════════════════════════════════════════════════ */}
         {/* Explore More                                           */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <section className="rounded-xl border border-border/15 bg-card/30 p-4 space-y-3">
-          <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">
-            Explore more
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            <Link to="/value-tree" className="loop-card font-serif block">
-              <span className="text-primary">❤️ Value Tree</span>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5">How Hearts are earned</p>
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* Explore More                                           */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <section className="space-y-4">
+          <div className="rounded-xl border border-primary/15 bg-primary/5 p-4 text-center space-y-2">
+            <p className="text-sm font-serif text-muted-foreground leading-relaxed">
+              Your support — whether through a subscription or a Staff commitment — feeds the{" "}
+              <Link to={ROUTES.VALUE_TREE} className="text-primary hover:underline font-medium">Value Tree</Link>{" "}
+              and nurtures the commons.
+            </p>
+            <Link
+              to={ROUTES.VALUE_TREE}
+              className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+            >
+              <Heart className="w-3 h-3" />
+              Explore how Hearts, Species Hearts & Influence work →
             </Link>
-            <Link to="/council-of-life" className="loop-card font-serif block">
-              <span className="text-primary">🌿 Council</span>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Governance & voice</p>
-            </Link>
-            <Link to="/map" className="loop-card font-serif block">
-              <span className="text-primary">🗺️ Map</span>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find Ancient Friends</p>
-            </Link>
-            <Link to="/atlas" className="loop-card font-serif block">
-              <span className="text-primary">🌍 Atlas</span>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5">Explore by country</p>
-            </Link>
+          </div>
+
+          <div className="rounded-xl border border-border/15 bg-card/30 p-4 space-y-3">
+            <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">
+              Explore more
+            </h2>
+            <div className="grid grid-cols-2 gap-2">
+              <Link to="/value-tree" className="loop-card font-serif block">
+                <span className="text-primary">❤️ Value Tree</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">How Hearts are earned</p>
+              </Link>
+              <Link to="/patron-offering" className="loop-card font-serif block">
+                <span className="text-primary">🪄 Staff Path</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Origin Staff & patronage</p>
+              </Link>
+              <Link to="/council-of-life" className="loop-card font-serif block">
+                <span className="text-primary">🌿 Council</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Governance & voice</p>
+              </Link>
+              <Link to="/map" className="loop-card font-serif block">
+                <span className="text-primary">🗺️ Map</span>
+                <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find Ancient Friends</p>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
