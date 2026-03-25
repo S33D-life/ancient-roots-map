@@ -51,16 +51,21 @@ const typeConfig: Record<
   book: { singular: "Book", contentLabel: "Reflection", placeholder: "Why are you offering this story?", emoji: "📖" },
 };
 
-/** Quick-select offering types shown as pills */
-const QUICK_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
+/** Quick-select offering types — primary first, then secondary */
+const PRIMARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
   { value: "photo", emoji: "📷", label: "Memory" },
   { value: "story", emoji: "✍️", label: "Musing" },
   { value: "poem", emoji: "📜", label: "Poem" },
+];
+
+const SECONDARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
   { value: "song", emoji: "🎵", label: "Song" },
   { value: "voice", emoji: "🎙️", label: "Voice" },
   { value: "book", emoji: "📖", label: "Book" },
   { value: "nft", emoji: "✨", label: "NFT" },
 ];
+
+const QUICK_TYPES = [...PRIMARY_TYPES, ...SECONDARY_TYPES];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
