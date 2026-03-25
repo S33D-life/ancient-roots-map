@@ -107,8 +107,8 @@ const PublicGoodsFunding = () => {
   return (
     <Card className="bg-card/40 backdrop-blur border-border/30 overflow-hidden">
       <div
-        className="h-0.5"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(150 50% 45% / 0.4), hsl(var(--primary) / 0.3), transparent)" }}
+        className="h-px"
+        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent)" }}
       />
       <CardContent className="p-5 sm:p-6 space-y-5">
         {/* Header */}
