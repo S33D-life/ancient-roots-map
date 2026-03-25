@@ -99,6 +99,7 @@ const TetolHomePage = () => {
   useDocumentTitle("Home");
   const navigate = useNavigate();
   const [activeNode, setActiveNode] = useState<string | null>(null);
+  const { isNewUser } = useIsNewUser();
 
   const isLight = useMemo(() => {
     if (typeof document === "undefined") return false;
