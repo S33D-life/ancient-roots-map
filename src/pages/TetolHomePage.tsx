@@ -283,7 +283,8 @@ const TetolHomePage = () => {
             <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} colors={nodeColors} isLight={isLight} />
           </div>
 
-          {/* Quick links */}
+          {/* Quick links — hidden for new users to reduce noise */}
+          {!isNewUser && (
           <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-xs md:max-w-sm">
             {quickLinks.map((link) => {
               const Icon = link.icon;
