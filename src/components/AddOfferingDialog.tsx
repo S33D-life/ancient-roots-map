@@ -310,9 +310,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   // Song offering
   const handleSongComplete = async (data: SelectedSongData) => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || loading) return;
     submittingRef.current = true;
     setLoading(true);
+    const timeout = setTimeout(() => {
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+    }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
@@ -346,8 +349,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally { setLoading(false); submittingRef.current = false; }
+      toast({ title: "Something went wrong", description: "Try again — your selection is still here", variant: "destructive" });
+    } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
   // Voice offering
