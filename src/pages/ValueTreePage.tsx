@@ -301,6 +301,11 @@ const ValueTreePage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+        <EcosystemContextBanner
+          zone="Value Tree"
+          subtitle="How value flows through the ecosystem"
+          parentLink={{ label: "Heartwood", to: "/library" }}
+        />
         {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
