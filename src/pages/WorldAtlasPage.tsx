@@ -477,6 +477,9 @@ const WorldAtlasPage = () => {
               <Button variant="sacred" onClick={() => document.getElementById("country-gateways")?.scrollIntoView({ behavior: "smooth" })}>
                 <Compass className="w-4 h-4 mr-1.5" /> Begin with a Country
               </Button>
+              <Button variant="outline" size="sm" asChild className="border-border/20 text-muted-foreground hover:text-primary">
+                <Link to="/atlas/countries"><LayoutGrid className="w-4 h-4 mr-1.5" /> Browse Countries</Link>
+              </Button>
             </div>
 
             <button
