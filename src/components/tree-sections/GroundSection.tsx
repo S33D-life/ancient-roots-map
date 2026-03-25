@@ -1,13 +1,11 @@
 /**
  * GroundSection — the landing anchor of the Living Tree scroll.
  * Ground = the surface, where the Ancient Friend greets you.
- * Enhanced with earth-surface atmosphere, S33D seed halo, and Ensō nudge.
  */
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Hero from "../Hero";
 import SectionAtmosphere from "./SectionAtmosphere";
-import EnsoNudge from "../EnsoNudge";
 
 const GroundSection = () => (
   <section id="ground" className="relative">
