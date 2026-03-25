@@ -570,10 +570,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   onDragLeave={() => setDragActive(false)}
                   onDrop={handleDrop}
                 >
-                  <div className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-                    <ImagePlus className="h-7 w-7 text-primary/40" />
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                    <ImagePlus className="h-6 w-6 text-primary/40" />
                   </div>
-                  <p className="text-sm text-muted-foreground/60 font-serif mb-4">Choose a memory to place here</p>
+                  <p className="text-sm text-muted-foreground/60 font-serif mb-3">Choose a memory to place here</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
                       <ImagePlus className="h-3 w-3" /> Gallery
