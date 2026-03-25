@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sprout } from "lucide-react";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 
 const LS_KEY = "s33d-beta-banner-dismissed";
 
