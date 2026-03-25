@@ -29,6 +29,7 @@ import { useAppUpdate } from "@/hooks/use-app-update";
 import { useHeartSignals } from "@/hooks/use-heart-signals";
 import { SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { supabase } from "@/integrations/supabase/client";
+import { useLongPress } from "@/hooks/use-long-press";
 
 const BugReportDialog = lazy(() => import("@/components/BugReportDialog"));
 
