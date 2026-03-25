@@ -975,11 +975,6 @@ All colors MUST be HSL.
   50% { opacity: 1; }
 }
 
-/* Ensō directional hints — soft breathing */
-@keyframes ensoDirectionPulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-}
 
 /* Heart Canopy Pulse — one-time glow for anchor trees */
 @keyframes canopy-heart-glow {

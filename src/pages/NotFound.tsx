@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { TreePine, Map, Home, BookOpen, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 
 const NotFound = () => {
@@ -14,9 +15,9 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <div className="flex flex-col items-center justify-center px-4 pt-24 pb-28 md:pb-20 text-center min-h-[70vh]">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-28 md:pb-20 text-center" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Atmospheric glow */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -50,6 +51,7 @@ const NotFound = () => {
           </Button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

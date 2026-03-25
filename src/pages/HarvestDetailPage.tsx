@@ -38,7 +38,7 @@ const HarvestDetailPage = () => {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20">
+        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20" style={{ paddingTop: 'var(--content-top)' }}>
           <div className="space-y-4">
             <div className="h-48 rounded-xl bg-muted/30 animate-pulse" />
             <div className="h-6 w-2/3 rounded bg-muted/30 animate-pulse" />
@@ -53,7 +53,7 @@ const HarvestDetailPage = () => {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20 text-center">
+        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20 text-center" style={{ paddingTop: 'var(--content-top)' }}>
           <p className="text-sm text-muted-foreground mt-20">Listing not found.</p>
           <Link to="/harvest" className="text-xs text-primary hover:underline mt-2 inline-block">
             ← Back to Harvest Exchange
@@ -77,7 +77,7 @@ const HarvestDetailPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20 space-y-6">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20 space-y-6" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Back link */}
         <Link to="/harvest" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />

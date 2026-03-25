@@ -130,7 +130,7 @@ const ReferralsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container max-w-2xl mx-auto px-4 pt-24 pb-20 space-y-6">
+      <main className="container max-w-2xl mx-auto px-4 pb-20 space-y-6" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Back */}
         <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground font-serif">
           <ArrowLeft className="w-4 h-4" /> Back to Hearth

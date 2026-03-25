@@ -85,7 +85,7 @@ export default function PressPage() {
     <div className="min-h-screen relative">
       <HeartwoodBackground />
       <Header />
-      <main className="relative z-10 px-4 pb-20 pt-24 max-w-2xl mx-auto">
+      <main className="relative z-10 px-4 pb-20 max-w-2xl mx-auto" style={{ paddingTop: 'var(--content-top)' }}>
         <AnimatePresence mode="wait">
           {editing ? (
             <PressEditor
