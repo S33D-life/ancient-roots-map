@@ -9,7 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLongPress } from "@/hooks/use-long-press";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
-import { useHeartBalance } from "@/hooks/use-heart-balance";
 import NotificationBell from "./NotificationBell";
 import OfflineIndicator from "./OfflineIndicator";
 import HeartJar from "./economy/HeartJar";

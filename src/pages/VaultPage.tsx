@@ -57,11 +57,6 @@ const VaultPage = () => {
         <PageShell>
         <div className="max-w-5xl mx-auto">
           <TetolBreadcrumb />
-          <EcosystemContextBanner
-            zone="Heartwood Vault"
-            subtitle="Your hearts, encounters, and activity ledger"
-            parentLink={{ label: "Value Tree", to: "/value-tree" }}
-          />
           <DashboardVault userId={userId} />
         </div>
         </PageShell>

@@ -348,11 +348,6 @@ export default function StaffDetailPage() {
           </div>
         </div>
 
-        <EcosystemContextBanner
-          zone="Staff Room"
-          subtitle="Ceremonial origins and stewardship vessels"
-          parentLink={{ label: "Heartwood Library", to: "/library/staff-room" }}
-        />
 
         {/* ════════════════════════════════════════════════════════
            1. VESSEL HEADER
