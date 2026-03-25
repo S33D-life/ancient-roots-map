@@ -63,6 +63,7 @@ const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
 const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
 const SeasonalMomentPanel = lazy(() => import("@/components/SeasonalMomentPanel"));
 const AddOfferingDialog = lazy(() => import("@/components/AddOfferingDialog"));
+const OfferingGateway = lazy(() => import("@/components/OfferingGateway"));
 const ProposeEditDrawer = lazy(() => import("@/components/ProposeEditDrawer"));
 const MeetingTimer = lazy(() => import("@/components/MeetingTimer"));
 const OfferingHistory = lazy(() => import("@/components/OfferingHistory"));
@@ -120,6 +121,7 @@ const TreeDetailPage = () => {
   useDocumentTitle(tree ? `${tree.name} — ${tree.species}` : "Tree");
   const [loading, setLoading] = useState(true);
   const [addOfferingOpen, setAddOfferingOpen] = useState(false);
+  const [gatewayOpen, setGatewayOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<OfferingType>("photo");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
@@ -396,6 +398,10 @@ const TreeDetailPage = () => {
     setAddOfferingOpen(true);
   };
 
+  const openOfferingGateway = () => {
+    setGatewayOpen(true);
+  };
+
   const photoOfferings = getOfferingsByType("photo").filter((o) => o.media_url);
 
   /** Sort offerings by selected mode */
@@ -469,7 +475,7 @@ const TreeDetailPage = () => {
         <TreePageHero
           tree={tree}
           photoUrl={getOfferingsByType("photo")[0]?.media_url || null}
-          onMakeOffering={() => setAddOfferingOpen(true)}
+          onMakeOffering={openOfferingGateway}
           onAddWish={() => setSectionTab("overview")}
           onViewMap={() => {
             goToTreeOnMap(navigate, {
@@ -576,7 +582,7 @@ const TreeDetailPage = () => {
                   progress={relationship}
                   treeName={tree.name}
                   onCoWitness={() => {}}
-                  onMakeOffering={() => setAddOfferingOpen(true)}
+                  onMakeOffering={openOfferingGateway}
                 />
               </Suspense>
             )}
@@ -592,7 +598,7 @@ const TreeDetailPage = () => {
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
-              onAddOffering={() => setAddOfferingOpen(true)}
+              onAddOffering={openOfferingGateway}
               treeName={tree.name}
             />
 
@@ -645,8 +651,12 @@ const TreeDetailPage = () => {
                   {/* Seasonal Moment */}
                   <SeasonalMomentPanel
                     onPromptSelect={(prompt) => {
-                      if (prompt.suggestedType) setActiveTab(prompt.suggestedType);
-                      setAddOfferingOpen(true);
+                      if (prompt.suggestedType) {
+                        setActiveTab(prompt.suggestedType);
+                        handleAddOffering(prompt.suggestedType as OfferingType);
+                      } else {
+                        openOfferingGateway();
+                      }
                     }}
                   />
 
@@ -677,7 +687,7 @@ const TreeDetailPage = () => {
                     species={tree.species}
                     treeId={id!}
                     treeName={tree.name}
-                    onAddOffering={() => setAddOfferingOpen(true)}
+                    onAddOffering={openOfferingGateway}
                   />
 
                   {/* Discovery Paths — country, hive, bioregion */}
@@ -913,7 +923,7 @@ const TreeDetailPage = () => {
                 {userId && (meetingStatus === "active" || meetingStatus === "expiring") && (
                   <Button
                     size="sm"
-                    onClick={() => setAddOfferingOpen(true)}
+                    onClick={openOfferingGateway}
                     className="mt-4 font-serif tracking-wider text-xs gap-1.5"
                   >
                     <Sparkles className="h-3 w-3" />
@@ -1102,6 +1112,27 @@ const TreeDetailPage = () => {
           onChange={setLightboxIndex}
         />
       )}
+
+      <Suspense fallback={null}>
+        <OfferingGateway
+          open={gatewayOpen}
+          onClose={() => setGatewayOpen(false)}
+          onSelect={(type) => {
+            setGatewayOpen(false);
+            // Map gateway types to offering types (gratitude/intention → story)
+            const typeMap: Record<string, OfferingType> = {
+              photo: "photo", song: "song", book: "book", story: "story",
+              poem: "poem", voice: "voice", nft: "nft",
+              quote: "story", wish: "story", gratitude: "story", intention: "story",
+              seasonal_observation: "story", encounter: "story",
+            };
+            const offeringType = typeMap[type] || "story";
+            setSelectedType(offeringType);
+            setTimeout(() => setAddOfferingOpen(true), 150);
+          }}
+          treeName={tree?.name}
+        />
+      </Suspense>
 
       <AddOfferingDialog
         open={addOfferingOpen}

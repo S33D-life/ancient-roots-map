@@ -449,7 +449,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
         fullscreenMobile
       >
-        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        {/* Type pre-selected from gateway — no switcher */}
         <div className="mt-2 relative">
           {loading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
@@ -475,7 +475,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         subtitle="Speak into the canopy — your voice becomes part of this tree"
         fullscreenMobile
       >
-        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        {/* Type pre-selected from gateway — no switcher */}
         <div className="mt-2 relative">
           {loading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
@@ -501,7 +501,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         subtitle="Place a story in this Ancient Friend's living archive"
         fullscreenMobile
       >
-        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        {/* Type pre-selected from gateway — no switcher */}
         <div className="mt-2 relative">
           {loading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
@@ -518,22 +518,18 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   }
 
   const titleNode = (
-    <div className="space-y-1">
-      <span className="flex items-center gap-2">
-        <motion.span
-          className="text-2xl"
-          key={cfg.emoji}
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 300 }}
-        >
-          {cfg.emoji}
-        </motion.span>
-        {cfg.singular} Offering
-      </span>
-      {/* Inline type switcher — compact, inside header */}
-      <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-    </div>
+    <span className="flex items-center gap-2">
+      <motion.span
+        className="text-2xl"
+        key={cfg.emoji}
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        {cfg.emoji}
+      </motion.span>
+      {cfg.singular} Offering
+    </span>
   );
 
   return (
