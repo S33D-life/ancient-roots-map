@@ -695,6 +695,48 @@ export default function StaffRoomGallery() {
 
           {/* ─── PATRONAGE TAB ─── */}
           <TabsContent value="patronage" className="space-y-5 mt-4">
+            {/* Founding Spiral — the 36 handcrafted Origin Staffs */}
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5 }}
+              className="space-y-5"
+            >
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <h3 className="font-serif text-lg text-foreground tracking-wide">The Founding Spiral</h3>
+                </div>
+                <p className="text-xs font-serif text-muted-foreground max-w-md mx-auto leading-relaxed">
+                  36 handcrafted staffs forming the root system of the Ancient Friends ecosystem. Each staff is a founding seed. The 108 Species Staffs form the Origin Circle.
+                </p>
+              </div>
+
+              {/* Claim progress */}
+              <div className="max-w-sm mx-auto">
+                <div className="flex items-center justify-between text-xs font-serif text-muted-foreground mb-1.5">
+                  <span>Staffs Claimed</span>
+                  <span className="text-foreground font-bold">{claimedCount} / 36</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden bg-secondary/50">
+                  <motion.div
+                    className="h-full rounded-full bg-primary"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${Math.min((claimedCount / 36) * 100, 100)}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+
+              <Suspense fallback={<div className="h-48 rounded-2xl bg-card/20 animate-pulse" />}>
+                <LazyCeremonialCircle />
+              </Suspense>
+            </motion.section>
+
+            <SectionDivider />
+
             <div className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-6 space-y-4">
               <div className="text-center space-y-2">
                 <Crown className="w-6 h-6 text-primary mx-auto" style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.4))" }} />
