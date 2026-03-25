@@ -38,7 +38,7 @@ const LazySpiralOfSpecies = lazy(() => import("@/components/staff/SpiralOfSpecie
 const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPanel"));
 const LazyActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 
-type ViewMode = "list" | "gallery" | "fullscreen";
+type ViewMode = "carousel" | "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
 /** Unified staff item for all views */
