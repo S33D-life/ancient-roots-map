@@ -714,7 +714,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             <Button
               type="submit"
               disabled={loading || uploading}
-              className="w-full font-serif tracking-wider gap-2 h-11"
+              className="w-full font-serif tracking-wider gap-2 h-12 text-sm"
               style={{
                 background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
                 boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
@@ -725,8 +725,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {uploading ? "Uploading…" : loading ? "Submitting…" : `Offer ${cfg.singular}`}
+              {uploading ? "Uploading…" : loading ? "Sealing offering…" : treeName ? `Offer to ${treeName}` : `Offer ${cfg.singular}`}
             </Button>
+            {!loading && !uploading && (
+              <p className="text-[10px] text-center text-muted-foreground/40 font-serif mt-2">
+                Your offering becomes part of this tree's living story
+              </p>
+            )}
           </div>
         </form>
       </ResponsiveDialog>
