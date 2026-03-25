@@ -35,6 +35,8 @@ export interface NotificationPreferences {
   show_onboarding_nudges: boolean;
   show_floating_prompts: boolean;
   show_companion_suggestions: boolean;
+  show_teotag_whispers: boolean;
+  show_celebrations: boolean;
 }
 
 const DEFAULTS: NotificationPreferences = {
