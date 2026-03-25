@@ -67,6 +67,13 @@ export function useFirstWalk(): FirstWalkState {
       if (prev.completed.includes(step)) return prev;
       const next = { ...prev, completed: [...prev.completed, step] };
       write(next);
+
+      // Graduate user from "new" state after visiting the map
+      // This progressively unlocks whispers, celebrations, etc.
+      if (step === "visit-map") {
+        try { localStorage.setItem("s33d-user-graduated", "1"); } catch {}
+      }
+
       return next;
     });
   }, []);

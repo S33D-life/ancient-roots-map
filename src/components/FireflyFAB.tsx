@@ -17,6 +17,7 @@
  * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
@@ -111,10 +112,11 @@ const FireflyFAB = () => {
 
   const { signals, unreadCount, dominantType, filter, setFilter, markRead, markAllRead, dismiss } = useHeartSignals(userId);
 
-  // One-time drag hint
+  // One-time drag hint — suppressed for new users to reduce noise
+  const { isNewUser } = useIsNewUser();
   const DRAG_HINT_KEY = "s33d_orb_drag_hint_seen";
   const [showDragHint, setShowDragHint] = useState(() => {
-    try { return !localStorage.getItem(DRAG_HINT_KEY); } catch { return false; }
+    try { return !isNewUser && !localStorage.getItem(DRAG_HINT_KEY); } catch { return false; }
   });
 
   useEffect(() => {

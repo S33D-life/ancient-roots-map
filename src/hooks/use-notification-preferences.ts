@@ -71,8 +71,24 @@ const DEFAULTS: NotificationPreferences = {
   show_celebrations: true,
 };
 
+/**
+ * Defaults for brand-new users — calm entry experience.
+ * Non-essential overlays are OFF until the user graduates.
+ */
+const NEW_USER_DEFAULTS: NotificationPreferences = {
+  ...DEFAULTS,
+  show_floating_prompts: false,
+  show_companion_suggestions: false,
+  show_teotag_whispers: false,
+  show_celebrations: false,
+};
+
 export function useNotificationPreferences(userId: string | null) {
-  const [prefs, setPrefs] = useState<NotificationPreferences>(DEFAULTS);
+  // For anonymous / new users without saved prefs, use the calm defaults
+  const isNew = typeof localStorage !== "undefined" && localStorage.getItem("s33d-user-graduated") !== "1";
+  const initialDefaults = isNew ? NEW_USER_DEFAULTS : DEFAULTS;
+
+  const [prefs, setPrefs] = useState<NotificationPreferences>(initialDefaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 

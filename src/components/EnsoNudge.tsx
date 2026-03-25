@@ -8,6 +8,7 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 const STORAGE_KEY = "s33d-enso-interacted";
 
@@ -37,6 +38,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showMicroCopy, setShowMicroCopy] = useState(false);
+  const { showOnboardingNudges } = useQuietMode();
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
@@ -56,7 +58,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
     }
   }, [hasInteracted, onInteract]);
 
-  const showEnso = isFirstVisit && !hasInteracted;
+  const showEnso = isFirstVisit && !hasInteracted && showOnboardingNudges;
   const reducedMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   return (

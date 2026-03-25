@@ -15,6 +15,7 @@ import Footer from "@/components/Footer";
 import BetaGardenBanner from "@/components/BetaGardenBanner";
 import EnsoNudge from "@/components/EnsoNudge";
 import teotag from "@/assets/teotag-small.webp";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 
 const treeItems = [
   { to: "/map", label: "Ancient Friends", subtitle: "The Roots", icon: TreeDeciduous, zone: "roots" },
@@ -98,6 +99,7 @@ const TetolHomePage = () => {
   useDocumentTitle("Home");
   const navigate = useNavigate();
   const [activeNode, setActiveNode] = useState<string | null>(null);
+  const { isNewUser } = useIsNewUser();
 
   const isLight = useMemo(() => {
     if (typeof document === "undefined") return false;
@@ -196,7 +198,18 @@ const TetolHomePage = () => {
               The Ethereal Tree of Life
             </p>
 
-            {/* TEOTAG hover tooltip */}
+            {/* Calm first-visit CTA hint */}
+            {isNewUser && (
+              <p
+                className="text-[11px] md:text-xs font-serif tracking-wider text-center mb-6"
+                style={{ color: "hsl(var(--muted-foreground) / 0.6)" }}
+              >
+                Begin by visiting a tree ↓
+              </p>
+            )}
+            {!isNewUser && <div className="mb-8" />}
+            {/* TEOTAG hover tooltip — hidden for new users */}
+            {!isNewUser && (
             <div className="absolute top-full mt-1 opacity-0 group-hover/title:opacity-100 pointer-events-none group-hover/title:pointer-events-auto transition-all duration-300 z-50 scale-95 group-hover/title:scale-100">
               <div
                 className="flex items-start gap-3 rounded-xl border p-3 max-w-[260px] backdrop-blur-md"
@@ -212,6 +225,7 @@ const TetolHomePage = () => {
                 </p>
               </div>
             </div>
+            )}
           </div>
 
           {/* Tree visualization */}
@@ -269,7 +283,8 @@ const TetolHomePage = () => {
             <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} colors={nodeColors} isLight={isLight} />
           </div>
 
-          {/* Quick links */}
+          {/* Quick links — hidden for new users to reduce noise */}
+          {!isNewUser && (
           <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-xs md:max-w-sm">
             {quickLinks.map((link) => {
               const Icon = link.icon;
@@ -287,8 +302,9 @@ const TetolHomePage = () => {
                   <span>{link.label}</span>
                 </Link>
               );
-            })}
+          })}
           </div>
+          )}
         </div>
       </main>
 
