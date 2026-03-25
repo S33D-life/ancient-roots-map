@@ -293,7 +293,7 @@ export default function StaffDetailPage() {
   /* ── Not found ─────────────────────────────────────────────── */
   if (!staff) {
     return (
-      <div className="min-h-screen relative" style={{ background: "hsl(20 25% 6%)" }}>
+      <div className="min-h-screen relative bg-background">
         <HeartwoodBackground />
         <Header />
         <div className="relative z-10 container mx-auto px-4 py-16 text-center">
