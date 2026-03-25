@@ -61,6 +61,7 @@ const transparencyItems = [
   "Maintaining the knowledge archive",
   "Supporting community gatherings",
   "Nurturing the wider S33D ecosystem",
+  "Public goods funding rounds amplify community support",
 ];
 
 /* ── Help & contact cards ───────────────────────────────────── */
