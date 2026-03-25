@@ -347,23 +347,14 @@ const ValueTreePage = () => {
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider gap-1.5">
               <Coins className="w-3.5 h-3.5" /> Overview
             </TabsTrigger>
-            <TabsTrigger value="compass" className="font-serif text-xs tracking-wider gap-1.5">
-              <Compass className="w-3.5 h-3.5" /> Compass
-            </TabsTrigger>
             <TabsTrigger value="flow" className="font-serif text-xs tracking-wider gap-1.5">
-              <Wind className="w-3.5 h-3.5" /> Living Flow
+              <Wind className="w-3.5 h-3.5" /> How It Works
             </TabsTrigger>
             <TabsTrigger value="participation" className="font-serif text-xs tracking-wider gap-1.5">
-              <HandHeart className="w-3.5 h-3.5" /> Participation
+              <HandHeart className="w-3.5 h-3.5" /> Participate
             </TabsTrigger>
-            <TabsTrigger value="origin-staff" className="font-serif text-xs tracking-wider gap-1.5">
-              <Crown className="w-3.5 h-3.5" /> Origin Staff
-            </TabsTrigger>
-            <TabsTrigger value="vault" className="font-serif text-xs tracking-wider gap-1.5">
-              <Heart className="w-3.5 h-3.5" /> Vault
-            </TabsTrigger>
-            <TabsTrigger value="philosophy" className="font-serif text-xs tracking-wider gap-1.5">
-              <Leaf className="w-3.5 h-3.5" /> Philosophy
+            <TabsTrigger value="deeper" className="font-serif text-xs tracking-wider gap-1.5">
+              <Compass className="w-3.5 h-3.5" /> Deeper
             </TabsTrigger>
           </TabsList>
 
