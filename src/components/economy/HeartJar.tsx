@@ -159,13 +159,31 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                     <p className="text-[10px] font-serif text-muted-foreground">Your living balances</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="p-1.5 rounded-full transition-colors"
-                  style={{ background: "transparent" }}
-                >
-                  <X className="w-4 h-4 text-muted-foreground" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      const root = document.documentElement;
+                      const isDark = root.classList.contains("dark");
+                      root.classList.toggle("dark", !isDark);
+                      root.classList.toggle("light", isDark);
+                      localStorage.setItem("s33d-theme", isDark ? "light" : "dark");
+                    }}
+                    className="p-1.5 rounded-full transition-colors hover:bg-accent/20 md:hidden"
+                    aria-label="Toggle theme"
+                  >
+                    {document.documentElement.classList.contains("dark")
+                      ? <Sun className="w-3.5 h-3.5 text-amber-400" />
+                      : <Moon className="w-3.5 h-3.5 text-muted-foreground" />
+                    }
+                  </button>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="p-1.5 rounded-full transition-colors"
+                    style={{ background: "transparent" }}
+                  >
+                    <X className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
 
               {/* Quick summary strip */}
