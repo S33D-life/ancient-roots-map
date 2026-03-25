@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, ArrowRight, X, Shield, Sprout } from "lucide-react";
+import { Heart, Sparkles, ArrowRight, X, Shield, Sprout, Sun, Moon } from "lucide-react";
 import { useHeartEconomy } from "@/hooks/use-heart-economy";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import HeartLedgerPanel from "./HeartLedgerPanel";
