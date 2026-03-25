@@ -720,7 +720,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {uploading ? "Uploading..." : `Offer ${cfg.singular}`}
+              {uploading ? "Uploading…" : loading ? "Submitting…" : `Offer ${cfg.singular}`}
             </Button>
           </div>
         </form>
