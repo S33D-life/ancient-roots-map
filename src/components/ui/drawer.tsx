@@ -27,7 +27,7 @@ const DrawerContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { hideHandle?: boolean }
 >(({ className, children, hideHandle, ...props }, ref) => (
   <DrawerPortal>
-    <DrawerOverlay />
+    <DrawerOverlay className={hideHandle ? "bg-transparent" : undefined} />
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
