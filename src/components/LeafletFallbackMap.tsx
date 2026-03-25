@@ -36,6 +36,8 @@ import {
   type BBox,
 } from "@/utils/externalTreeSources";
 import { Navigation, Loader2, Globe, TreePine, Hexagon, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
+import MapGatewayToggle, { type GatewayMode } from "./map/MapGatewayToggle";
+import { useBioregionMapLayer } from "@/hooks/use-bioregion-map-layer";
 import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
