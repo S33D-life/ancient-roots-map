@@ -201,6 +201,7 @@ const FireflyFAB = () => {
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     if (anyOpenRef.current) return;
+    longPress.onPointerDown(e);
     try {
       isDragging.current = true;
       dragConfirmed.current = false;
@@ -211,7 +212,7 @@ const FireflyFAB = () => {
     } catch {
       isDragging.current = false;
     }
-  }, []);
+  }, [longPress]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
