@@ -6,6 +6,7 @@ import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLongPress } from "@/hooks/use-long-press";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import GlobalSearch from "./GlobalSearch";
 import { useHeartBalance } from "@/hooks/use-heart-balance";
