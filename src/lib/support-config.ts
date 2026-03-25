@@ -28,7 +28,7 @@ export const SUPPORT_CONFIG = {
       },
       {
         id: "personal-grove",
-        amount: "£3.33",
+        amount: "£33",
         period: "per month",
         label: "Personal Grove",
         description: "Your own living grove — receive a monthly flow of S33D Hearts, unlock private offerings, and feed the commons ecosystem through your Heartwood Vault.",
