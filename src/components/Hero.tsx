@@ -305,12 +305,10 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-16 text-center flex flex-col items-center justify-center min-h-screen">
         <div className="max-w-4xl mx-auto space-y-4">
-          {/* S33D branding with Ensō nudge for first-time visitors */}
-          <EnsoNudge size={120}>
+          {/* Title — no longer wrapped in Ensō */}
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight cursor-pointer">
               The Arboreal Atlas of<br />Ancient Friends
             </h1>
-          </EnsoNudge>
             <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
             A living atlas of the world's most ancient trees. Map, explore, and protect.
           </p>
@@ -329,6 +327,47 @@ const Hero = () => {
                 Add a Tree
               </Link>
             </Button>
+          </div>
+
+          {/* Ensō compass — living directional marker on the trunk */}
+          <div className="relative flex flex-col items-center pt-6 pb-2">
+            {/* Up hint */}
+            <span
+              className="text-[9px] font-serif tracking-[0.25em] uppercase mb-3 select-none pointer-events-none"
+              style={{
+                color: "hsl(var(--muted-foreground) / 0.35)",
+                animation: "ensoDirectionPulse 4s ease-in-out infinite",
+              }}
+            >
+              ↑ Heartwood · Council · Crown
+            </span>
+
+            {/* The Ensō ring — tappable scroll anchor */}
+            <EnsoNudge size={72} onInteract={() => {
+              const census = document.querySelector('[data-census]');
+              census?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}>
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{
+                  background: "hsl(var(--primary) / 0.08)",
+                  border: "1px solid hsl(var(--primary) / 0.2)",
+                }}
+              >
+                <TreeDeciduous className="w-5 h-5" style={{ color: "hsl(var(--primary) / 0.6)" }} />
+              </div>
+            </EnsoNudge>
+
+            {/* Down hint */}
+            <span
+              className="text-[9px] font-serif tracking-[0.25em] uppercase mt-3 select-none pointer-events-none"
+              style={{
+                color: "hsl(var(--muted-foreground) / 0.35)",
+                animation: "ensoDirectionPulse 4s ease-in-out infinite 2s",
+              }}
+            >
+              Ancient Friends · The Roots ↓
+            </span>
           </div>
 
           {/* Welcome Journey — gentle onboarding for new visitors */}
