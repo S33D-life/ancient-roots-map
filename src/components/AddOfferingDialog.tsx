@@ -199,7 +199,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (submittingRef.current) return;
+    if (submittingRef.current || loading) return;
     if (!title.trim()) {
       toast({ title: "Missing title", description: "Please provide a title", variant: "destructive" });
       return;
@@ -207,10 +207,23 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     submittingRef.current = true;
     setLoading(true);
 
+    // Timeout fallback — 30s max
+    const timeout = setTimeout(() => {
+      if (submittingRef.current) {
+        submittingRef.current = false;
+        setLoading(false);
+        setUploading(false);
+        toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" });
+      }
+    }, 30000);
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" });
+        submittingRef.current = false;
+        setLoading(false);
+        clearTimeout(timeout);
         return;
       }
 
@@ -221,6 +234,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
           finalMediaUrl = await uploadFile(selectedFile, user.id);
         } catch (uploadErr: any) {
           toast({ title: "Upload failed", description: uploadErr.message, variant: "destructive" });
+          submittingRef.current = false;
+          setLoading(false);
+          setUploading(false);
+          clearTimeout(timeout);
           return;
         } finally {
           setUploading(false);
@@ -283,8 +300,9 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       return;
     } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
+      toast({ title: "Something went wrong", description: "Try again — your content is still here", variant: "destructive" });
     } finally {
+      clearTimeout(timeout);
       setLoading(false);
       submittingRef.current = false;
     }
@@ -292,9 +310,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
   // Song offering
   const handleSongComplete = async (data: SelectedSongData) => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || loading) return;
     submittingRef.current = true;
     setLoading(true);
+    const timeout = setTimeout(() => {
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+    }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
@@ -328,15 +349,18 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally { setLoading(false); submittingRef.current = false; }
+      toast({ title: "Something went wrong", description: "Try again — your selection is still here", variant: "destructive" });
+    } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
   // Voice offering
   const handleVoiceComplete = async (data: VoiceOfferingData) => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || loading) return;
     submittingRef.current = true;
     setLoading(true);
+    const timeout = setTimeout(() => {
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+    }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
@@ -362,15 +386,18 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally { setLoading(false); submittingRef.current = false; }
+      toast({ title: "Something went wrong", description: "Try again — your recording is still here", variant: "destructive" });
+    } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
   // Book offering
   const handleBookComplete = async (data: BookOfferingData) => {
-    if (submittingRef.current) return;
+    if (submittingRef.current || loading) return;
     submittingRef.current = true;
     setLoading(true);
+    const timeout = setTimeout(() => {
+      if (submittingRef.current) { submittingRef.current = false; setLoading(false); toast({ title: "Request timed out", description: "Something went wrong — try again", variant: "destructive" }); }
+    }, 30000);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
@@ -399,8 +426,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       resetForm();
       setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
     } catch (err: any) {
-      toast({ title: "Error adding offering", description: err.message, variant: "destructive" });
-    } finally { setLoading(false); submittingRef.current = false; }
+      toast({ title: "Something went wrong", description: "Try again — your entry is still here", variant: "destructive" });
+    } finally { clearTimeout(timeout); setLoading(false); submittingRef.current = false; }
   };
 
   const celebrationOverlay = <OfferingCelebration active={showCelebration} emoji={celebrationMsg.emoji} message={celebrationMsg.message} subtitle={celebrationMsg.subtitle} onComplete={() => setShowCelebration(false)} />;
@@ -410,20 +437,24 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     return (
       <ResponsiveDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
         subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
         snapPoints={[0.6, 0.95]}
         defaultSnapPoint={0.6}
       >
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-        <div className="mt-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <MusicOfferingFlow treeId={treeId} treeName={treeName} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
+        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        <div className="mt-2 relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+              </div>
+            </div>
           )}
+          <MusicOfferingFlow treeId={treeId} treeName={treeName} onComplete={handleSongComplete} onCancel={() => onOpenChange(false)} />
         </div>
       </ResponsiveDialog>
     );
@@ -433,18 +464,22 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     return (
       <ResponsiveDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
         subtitle="Speak into the canopy — your voice becomes part of this tree"
       >
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-        <div className="mt-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
+        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        <div className="mt-2 relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+              </div>
+            </div>
           )}
+          <VoiceOfferingFlow treeId={treeId} onComplete={handleVoiceComplete} onCancel={() => onOpenChange(false)} />
         </div>
       </ResponsiveDialog>
     );
@@ -454,18 +489,22 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     return (
       <ResponsiveDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">📖</span> Book Offering</span>}
         subtitle="Place a story in this Ancient Friend's living archive"
       >
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
-        <div className="mt-2">
-          {loading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : (
-            <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
+        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        <div className="mt-2 relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-xs font-serif text-muted-foreground">Submitting…</p>
+              </div>
+            </div>
           )}
+          <BookOfferingFlow treeId={treeId} onComplete={handleBookComplete} onCancel={() => onOpenChange(false)} />
         </div>
       </ResponsiveDialog>
     );
@@ -490,7 +529,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
     <>
       <ResponsiveDialog
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={titleNode}
         subtitle={`Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
@@ -681,7 +720,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {uploading ? "Uploading..." : `Offer ${cfg.singular}`}
+              {uploading ? "Uploading…" : loading ? "Submitting…" : `Offer ${cfg.singular}`}
             </Button>
           </div>
         </form>
