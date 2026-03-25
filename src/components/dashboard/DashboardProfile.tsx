@@ -9,13 +9,18 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings, ChevronDown } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
 import { Link } from "react-router-dom";
 import HearthAccountSecurity from "@/components/dashboard/HearthAccountSecurity";
 import PresenceWeatherSettings from "@/components/dashboard/PresenceWeatherSettings";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface VisibleFields {
   bio: boolean;
