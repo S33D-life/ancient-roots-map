@@ -598,8 +598,20 @@ const DashboardPage = () => {
 
             <TabsContent value="notifications">
               {user && <HearthNotificationSettings userId={user.id} />}
-              <Separator className="my-6 bg-border/20" />
-              <HearthLocationSettings />
+              <div className="mt-6">
+                <Collapsible>
+                  <CollapsibleTrigger className="w-full group">
+                    <div className="flex items-center gap-2 py-3 cursor-pointer select-none">
+                      <MapPin className="w-4 h-4 text-primary/70" />
+                      <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90 flex-1 text-left">Location Services</h3>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground/50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-2">
+                    <HearthLocationSettings />
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             </TabsContent>
 
             <TabsContent value="profile">
