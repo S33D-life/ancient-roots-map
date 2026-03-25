@@ -222,11 +222,14 @@ const FireflyFAB = () => {
 
     if (!dragConfirmed.current && totalMoved.current >= DRAG_THRESHOLD) {
       dragConfirmed.current = true;
+      longPress.cancel(); // Cancel long-press on drag
       if (showDragHint) {
         setShowDragHint(false);
         try { localStorage.setItem(DRAG_HINT_KEY, "1"); } catch {}
       }
     }
+
+    longPress.onPointerMove(e);
 
     if (dragConfirmed.current) {
       e.preventDefault();
@@ -237,7 +240,7 @@ const FireflyFAB = () => {
         setXY({ x: nx, y: ny });
       });
     }
-  }, []);
+  }, [longPress]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
