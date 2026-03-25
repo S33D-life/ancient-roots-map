@@ -198,7 +198,16 @@ const TetolHomePage = () => {
               The Ethereal Tree of Life
             </p>
 
-            {/* TEOTAG hover tooltip */}
+            {/* Calm first-visit CTA hint */}
+            {isNewUser && (
+              <p
+                className="text-[11px] md:text-xs font-serif tracking-wider text-center mb-6"
+                style={{ color: "hsl(var(--muted-foreground) / 0.6)" }}
+              >
+                Begin by visiting a tree ↓
+              </p>
+            )}
+            {!isNewUser && <div className="mb-8" />}
             <div className="absolute top-full mt-1 opacity-0 group-hover/title:opacity-100 pointer-events-none group-hover/title:pointer-events-auto transition-all duration-300 z-50 scale-95 group-hover/title:scale-100">
               <div
                 className="flex items-start gap-3 rounded-xl border p-3 max-w-[260px] backdrop-blur-md"
