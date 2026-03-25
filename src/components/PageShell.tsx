@@ -14,7 +14,7 @@ interface PageShellProps {
   cinematic?: boolean;
 }
 
-const PageShell = ({ children, className = "", cinematic = false }: PageShellProps) => {
+const PageShell = ({ children, className = "", style, cinematic = false }: PageShellProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: cinematic ? 16 : 8 }}
@@ -25,6 +25,7 @@ const PageShell = ({ children, className = "", cinematic = false }: PageShellPro
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
       className={className}
+      style={style}
     >
       {children}
     </motion.div>
