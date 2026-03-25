@@ -52,6 +52,14 @@ const Header = () => {
   const [guideOpen, setGuideOpen] = useState(false);
   const [guideTab, setGuideTab] = useState<"guide" | "search">("guide");
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [orbRestoreProgress, setOrbRestoreProgress] = useState(0);
+
+  const orbRestore = useLongPress({
+    onLongPress: () => window.dispatchEvent(new Event("s33d-orb-restore")),
+    duration: 600,
+    moveThreshold: 10,
+    onProgress: setOrbRestoreProgress,
+  });
 
   // S33D logo click → navigate to TETOL home
   const handleLogoClick = () => {
