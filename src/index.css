@@ -379,15 +379,15 @@ All colors MUST be HSL.
   }
 
   .light header {
-    background: hsl(140 20% 92%) !important;
-    border-bottom-color: hsl(140 20% 78%) !important;
-    box-shadow: 0 1px 4px hsl(140 15% 40% / 0.08) !important;
+    background: hsl(38 28% 93%) !important;
+    border-bottom-color: hsl(33 22% 82%) !important;
+    box-shadow: 0 1px 4px hsl(30 18% 35% / 0.06) !important;
   }
   .light header > div:first-child {
-    opacity: 0.15 !important;
+    opacity: 0.1 !important;
   }
   .light header > div:nth-child(2) {
-    background: linear-gradient(180deg, hsl(140 20% 92% / 0.75), hsl(145 18% 88% / 0.85)) !important;
+    background: linear-gradient(180deg, hsl(38 28% 93% / 0.8), hsl(36 24% 91% / 0.85)) !important;
   }
 
   /* ── Unified loop-closure grid card polish ── */
