@@ -1125,8 +1125,8 @@ const TreeDetailPage = () => {
             const typeMap: Record<string, OfferingType> = {
               photo: "photo", song: "song", book: "book", story: "story",
               poem: "poem", voice: "voice", nft: "nft",
-              quote: "story", wish: "story", gratitude: "story", intention: "story",
-              seasonal_observation: "story", encounter: "story",
+              quote: "story", wish: "poem", gratitude: "story", intention: "story",
+              seasonal_observation: "story", encounter: "story", data: "story",
             };
             const offeringType = typeMap[type] || "story";
             setSelectedType(offeringType);

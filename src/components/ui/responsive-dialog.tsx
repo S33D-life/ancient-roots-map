@@ -96,6 +96,7 @@ const ResponsiveDialog = ({
     return (
       <Drawer {...drawerProps}>
         <DrawerContent
+          hideHandle={fullscreenMobile}
           className={`overflow-hidden ${fullscreenMobile ? "h-[100dvh] max-h-[100dvh] rounded-none" : "max-h-[96dvh]"} ${contentClassName ?? ""}`}
           style={{
             paddingBottom: keyboardOpen ? "8px" : "env(safe-area-inset-bottom, 0px)",
