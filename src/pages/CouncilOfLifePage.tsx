@@ -145,6 +145,28 @@ const CouncilOfLifePage = () => {
     );
   }
 
+  if (activeRoom === "chamber") {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Header />
+        <main className="pt-28 pb-8 px-4">
+          <div className="max-w-5xl mx-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveRoom(null)}
+              className="text-muted-foreground hover:text-foreground mb-4"
+            >
+              ← Back to Council
+            </Button>
+            <CouncilRoom />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (activeRoom) {
     const room = councilRooms.find((r) => r.id === activeRoom);
     return (
