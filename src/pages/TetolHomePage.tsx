@@ -15,6 +15,7 @@ import Footer from "@/components/Footer";
 import BetaGardenBanner from "@/components/BetaGardenBanner";
 import EnsoNudge from "@/components/EnsoNudge";
 import teotag from "@/assets/teotag-small.webp";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 
 const treeItems = [
   { to: "/map", label: "Ancient Friends", subtitle: "The Roots", icon: TreeDeciduous, zone: "roots" },

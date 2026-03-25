@@ -112,10 +112,11 @@ const FireflyFAB = () => {
 
   const { signals, unreadCount, dominantType, filter, setFilter, markRead, markAllRead, dismiss } = useHeartSignals(userId);
 
-  // One-time drag hint
+  // One-time drag hint — suppressed for new users to reduce noise
+  const { isNewUser } = useIsNewUser();
   const DRAG_HINT_KEY = "s33d_orb_drag_hint_seen";
   const [showDragHint, setShowDragHint] = useState(() => {
-    try { return !localStorage.getItem(DRAG_HINT_KEY); } catch { return false; }
+    try { return !isNewUser && !localStorage.getItem(DRAG_HINT_KEY); } catch { return false; }
   });
 
   useEffect(() => {
