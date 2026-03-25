@@ -107,14 +107,13 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
                 strokeDasharray={ENSO_LENGTH}
                 initial={reducedMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: ENSO_LENGTH }}
                 animate={{
-                  strokeDashoffset: [ENSO_LENGTH, 0, 0, ENSO_LENGTH],
-                  opacity: [0.4, 1, 0.7, 0.4],
+                  strokeDashoffset: [ENSO_LENGTH, 0, 0, 0],
+                  opacity: [0.3, 1, 1, 0.85],
                 }}
                 transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  times: [0, 0.3, 0.7, 1],
+                  duration: 3,
+                  ease: "easeOut",
+                  times: [0, 0.5, 0.8, 1],
                 }}
               />
             </svg>
