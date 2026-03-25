@@ -763,7 +763,7 @@ export default function StaffDetailPage() {
             </Button>
           ) : <div />}
         </div>
-      </main>
+      </PageShell>
 
       {/* Breathing aura keyframe */}
       <style>{`
