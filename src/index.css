@@ -486,6 +486,28 @@ All colors MUST be HSL.
     transform: scale(0.95);
   }
 
+  /* Light-mode glow button — softer, warmer */
+  .light .glow-button {
+    box-shadow:
+      inset 0 0 8px hsl(35 50% 55% / 0.12),
+      0 0 10px hsl(35 45% 50% / 0.15);
+  }
+  .light .glow-button::before {
+    background: radial-gradient(
+      circle,
+      hsl(35 50% 55% / 0.2) 0%,
+      hsl(35 45% 50% / 0.1) 35%,
+      hsl(35 45% 50% / 0.04) 60%,
+      transparent 75%
+    );
+    opacity: 0.6;
+  }
+  .light .glow-button:hover {
+    box-shadow:
+      inset 0 0 12px hsl(35 50% 55% / 0.18),
+      0 0 16px hsl(35 45% 50% / 0.22);
+  }
+
   /* Emerald variant — active / selected state */
   .glow-button--emerald {
     box-shadow:
