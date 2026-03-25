@@ -196,6 +196,7 @@ const App = () => {
       .then(({ data: { session } }) => {
         setCurrentUserId(session?.user?.id ?? null);
         setAuthReady(true);
+      })
       .catch((error) => {
         const message = error instanceof Error ? error.message : "Failed to restore your session";
         setAuthInitError(message);
