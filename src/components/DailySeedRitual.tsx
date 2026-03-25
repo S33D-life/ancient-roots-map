@@ -4,6 +4,7 @@
  * Uses localStorage to fire only once per calendar day.
  */
 import { useState, useEffect } from "react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sprout, MapPin, TreeDeciduous } from "lucide-react";
