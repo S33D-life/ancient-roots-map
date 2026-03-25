@@ -12,11 +12,12 @@ import {
   ChevronDown, ChevronRight, Clock, Check, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
   Bug, UserPlus, Flame, ArrowRight, Loader2, Crown,
-  Wind, HandHeart, Wheat, ArrowLeftRight, Coins, Shield,
+  Wind, HandHeart, Wheat, ArrowLeftRight, Coins, Shield, Compass,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
+const EconomyCompass = lazy(() => import("@/components/economy/EconomyCompass"));
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
 const LivingValueCycle = lazy(() => import("@/components/economy/LivingValueCycle"));
 const YourPlaceInCycle = lazy(() => import("@/components/economy/YourPlaceInCycle"));
@@ -283,7 +284,7 @@ const PARTICIPATION_ACTIONS: ParticipationAction[] = [
 const ValueTreePage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const tabMap: Record<string, string> = { economy: "overview", earn: "participation", how: "flow", chains: "flow" };
+  const tabMap: Record<string, string> = { economy: "overview", earn: "participation", how: "flow", chains: "compass", distribution: "compass" };
   const rawTab = searchParams.get("tab") || "overview";
   const initialTab = tabMap[rawTab] || rawTab;
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -337,6 +338,9 @@ const ValueTreePage = () => {
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider gap-1.5">
               <Coins className="w-3.5 h-3.5" /> Overview
             </TabsTrigger>
+            <TabsTrigger value="compass" className="font-serif text-xs tracking-wider gap-1.5">
+              <Compass className="w-3.5 h-3.5" /> Compass
+            </TabsTrigger>
             <TabsTrigger value="flow" className="font-serif text-xs tracking-wider gap-1.5">
               <Wind className="w-3.5 h-3.5" /> Living Flow
             </TabsTrigger>
@@ -375,6 +379,21 @@ const ValueTreePage = () => {
                 <Suspense fallback={null}>
                   <EcosystemMomentum showDiscovery />
                 </Suspense>
+              </div>
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════ COMPASS ═══════ */}
+          <TabsContent value="compass">
+            <Suspense fallback={<TabLoader />}>
+              <div className="space-y-6">
+                <div className="text-center space-y-2 mb-4">
+                  <h2 className="text-lg font-serif text-foreground">The Distribution Compass</h2>
+                  <p className="text-xs text-muted-foreground font-serif max-w-md mx-auto leading-relaxed">
+                    How 777,777,777 S33D Hearts are allocated, distributed, and routed through the living ecosystem.
+                  </p>
+                </div>
+                <EconomyCompass />
               </div>
             </Suspense>
           </TabsContent>
