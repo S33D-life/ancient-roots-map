@@ -180,7 +180,7 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
           <div
             ref={panelRef}
             className="absolute right-3 z-[1003]"
-            style={{ top: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+            style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 0.5rem)" }}
           >
             {/* Toggle button — matches map control sizing (44px) */}
             <button
