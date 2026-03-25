@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 const EconomyOverview = lazy(() => import("@/components/economy/EconomyOverview"));
+const EconomyCompass = lazy(() => import("@/components/economy/EconomyCompass"));
 const YourRootsPanel = lazy(() => import("@/components/economy/YourRootsPanel"));
 const LivingValueCycle = lazy(() => import("@/components/economy/LivingValueCycle"));
 const YourPlaceInCycle = lazy(() => import("@/components/economy/YourPlaceInCycle"));
