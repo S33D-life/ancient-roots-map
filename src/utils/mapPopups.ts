@@ -120,6 +120,7 @@ export function buildPopupHtml(
       ${desc}
     </div>
     <div style="padding:0 14px 10px;display:flex;gap:6px;">
+      <button data-plant-seed="${escapeHtml(tree.id)}" data-tree-lat="${tree.latitude}" data-tree-lng="${tree.longitude}" aria-label="Plant seed at this tree" title="Plant a seed" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;padding:8px 0;font-size:11px;color:hsl(120,30%,85%);background:hsla(120,30%,25%,0.3);border:1px solid hsla(120,40%,40%,0.3);border-radius:8px;cursor:pointer;font-family:sans-serif;font-weight:600;letter-spacing:0.04em;transition:all .2s;">🌱 Plant Seed</button>
       <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;font-size:11px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(42,88%,50%),hsl(45,100%,60%));border-radius:8px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:sans-serif;">View Details ⟶</a>
     </div>
     <div style="padding:0 14px 12px;display:flex;gap:6px;justify-content:center;">
