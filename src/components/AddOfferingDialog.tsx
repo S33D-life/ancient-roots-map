@@ -414,8 +414,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
         subtitle={treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}
-        snapPoints={[0.5, 0.92]}
-        defaultSnapPoint={0.5}
+        snapPoints={[0.6, 0.95]}
+        defaultSnapPoint={0.6}
       >
         <TypeSwitcher activeType={activeType} onChange={setActiveType} />
         <div className="mt-2">

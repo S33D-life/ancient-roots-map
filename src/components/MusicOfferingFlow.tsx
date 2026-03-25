@@ -398,7 +398,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
   const canSubmit = customMode ? customTitle.trim().length > 0 : !!selectedSong;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-2">
       {/* Tree context anchor */}
       {treeName && (
         <p className="text-[10px] font-serif tracking-widest uppercase text-center text-muted-foreground/50">
