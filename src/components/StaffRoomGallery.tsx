@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
 import JourneyBridge from "@/components/JourneyBridge";
 import { useNavigate as useRouterNavigate, useSearchParams } from "react-router-dom";
@@ -37,7 +38,7 @@ const LazySpiralOfSpecies = lazy(() => import("@/components/staff/SpiralOfSpecie
 const LazyStaffImpactPanel = lazy(() => import("@/components/staff/StaffImpactPanel"));
 const LazyActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 
-type ViewMode = "list" | "gallery" | "fullscreen";
+type ViewMode = "carousel" | "list" | "gallery" | "fullscreen";
 type StaffFilter = "all" | "origin" | "yew" | "oak" | "ash" | "beech" | "holly";
 
 /** Unified staff item for all views */
@@ -338,7 +339,7 @@ export default function StaffRoomGallery() {
   const routerNavigate = useRouterNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
-  const [viewMode, setViewMode] = useState<ViewMode>("gallery");
+  const [viewMode, setViewMode] = useState<ViewMode>("carousel");
   const [filter, setFilter] = useState<StaffFilter>("all");
   const [activeIndex, setActiveIndex] = useState(0);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -354,11 +355,11 @@ export default function StaffRoomGallery() {
   const [claimedCount, setClaimedCount] = useState(0);
 
   // Tab state — derive from search params for deep linking
-  const activeTab = searchParams.get("tab") || "overview";
+  const activeTab = searchParams.get("tab") || "explorer";
   const setActiveTab = useCallback((tab: string) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (tab === "overview") next.delete("tab");
+      if (tab === "explorer") next.delete("tab");
       else next.set("tab", tab);
       return next;
     }, { replace: true });
@@ -459,8 +460,9 @@ export default function StaffRoomGallery() {
   const ViewToggle = () => (
     <div className="flex items-center gap-1 rounded-lg p-1 bg-secondary/50">
       {([
-        { mode: "list" as ViewMode, icon: List, label: "List" },
+        { mode: "carousel" as ViewMode, icon: ChevronRight, label: "Carousel" },
         { mode: "gallery" as ViewMode, icon: LayoutGrid, label: "Gallery" },
+        { mode: "list" as ViewMode, icon: List, label: "List" },
         { mode: "fullscreen" as ViewMode, icon: Maximize, label: "Full Screen" },
       ]).map(({ mode, icon: Icon, label }) => (
         <button
@@ -478,6 +480,110 @@ export default function StaffRoomGallery() {
       ))}
     </div>
   );
+
+  // ── CAROUSEL VIEW ─────────────────────────────────────────────
+  const CarouselView = () => {
+    const [emblaRef, emblaApi] = useEmblaCarousel({
+      align: "center",
+      containScroll: "trimSnaps",
+      loop: false,
+      startIndex: activeIndex,
+    });
+    const [selectedIdx, setSelectedIdx] = useState(activeIndex);
+
+    useEffect(() => {
+      if (!emblaApi) return;
+      const onSelect = () => setSelectedIdx(emblaApi.selectedScrollSnap());
+      emblaApi.on("select", onSelect);
+      return () => { emblaApi.off("select", onSelect); };
+    }, [emblaApi]);
+
+    const currentStaff = filteredStaffs[selectedIdx];
+    const circleLabel = currentStaff?.isOrigin
+      ? "Founding Spiral"
+      : currentStaff?.circle || currentStaff?.code.split("-")[0];
+
+    return (
+      <div className="space-y-4">
+        {/* Progress indicator */}
+        <div className="flex items-center justify-center gap-3 text-xs font-serif text-muted-foreground">
+          <span className="tabular-nums text-foreground font-medium">{selectedIdx + 1} <span className="text-muted-foreground/60">/ {filteredStaffs.length}</span></span>
+          {circleLabel && (
+            <>
+              <span className="text-muted-foreground/30">·</span>
+              <span>{circleLabel}</span>
+            </>
+          )}
+        </div>
+
+        {/* Embla carousel */}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-4" style={{ touchAction: "pan-y pinch-zoom" }}>
+            {filteredStaffs.map((staff, i) => (
+              <div
+                key={staff.tokenId}
+                className="flex-[0_0_72%] sm:flex-[0_0_45%] md:flex-[0_0_30%] min-w-0"
+              >
+                <div
+                  className={cn(
+                    "rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 touch-manipulation",
+                    i === selectedIdx
+                      ? "border-primary/40 shadow-[0_4px_24px_hsl(var(--primary)/0.15)] scale-100"
+                      : "border-border/20 opacity-60 scale-[0.95]"
+                  )}
+                  onClick={() => { setActiveIndex(i); setDetailOpen(true); }}
+                >
+                  {/* Image */}
+                  <div className="aspect-[3/4] overflow-hidden" style={{ background: "hsl(var(--card) / 0.5)" }}>
+                    <img
+                      src={staff.image}
+                      alt={`${staff.speciesName} staff`}
+                      className="w-full h-full object-cover"
+                      loading={Math.abs(i - selectedIdx) < 3 ? "eager" : "lazy"}
+                    />
+                  </div>
+                  {/* Info */}
+                  <div className="p-3 space-y-1" style={{ background: "hsl(var(--card) / 0.8)" }}>
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="font-serif text-sm text-foreground truncate">{staff.speciesName}</h4>
+                      {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground font-mono">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
+                    {staff.length && (
+                      <p className="text-[10px] text-muted-foreground">{staff.length} · {staff.weight}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop nav arrows */}
+        <div className="hidden md:flex items-center justify-center gap-3">
+          <button
+            onClick={() => emblaApi?.scrollPrev()}
+            className="p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+            aria-label="Previous staff"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => emblaApi?.scrollNext()}
+            className="p-2 rounded-full border border-border/30 text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+            aria-label="Next staff"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Tap hint on mobile */}
+        <p className="text-center text-[10px] font-serif text-muted-foreground/50 md:hidden">
+          Swipe to browse · Tap to open
+        </p>
+      </div>
+    );
+  };
 
   // ── LIST VIEW ─────────────────────────────────────────────────
   const ListView = () => (
@@ -647,9 +753,9 @@ export default function StaffRoomGallery() {
 
   // ── TAB DEFINITIONS ───────────────────────────────────────────
   const TABS = [
+    { value: "explorer", label: "Explorer", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
     { value: "overview", label: "Overview", icon: <Compass className="w-3.5 h-3.5" /> },
     { value: "ceremony", label: "Ceremony", icon: <Wand2 className="w-3.5 h-3.5" /> },
-    { value: "explorer", label: "Explorer", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
     { value: "patronage", label: "Patronage", icon: <Crown className="w-3.5 h-3.5" /> },
     { value: "impact", label: "Impact", icon: <TreeDeciduous className="w-3.5 h-3.5" /> },
   ];
@@ -754,6 +860,7 @@ export default function StaffRoomGallery() {
               </div>
             </div>
 
+            {viewMode === "carousel" && <CarouselView />}
             {viewMode === "list" && <ListView />}
             {viewMode === "gallery" && <GalleryView />}
 
