@@ -38,6 +38,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showMicroCopy, setShowMicroCopy] = useState(false);
+  const { showOnboardingNudges } = useQuietMode();
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
