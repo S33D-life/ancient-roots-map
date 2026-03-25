@@ -642,7 +642,6 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                       placeholder={`Name your ${cfg.singular.toLowerCase()}`}
                       className="bg-secondary/10 border-border/30 font-serif"
                       maxLength={200}
-                      required
                     />
                   </motion.div>
                 )}
