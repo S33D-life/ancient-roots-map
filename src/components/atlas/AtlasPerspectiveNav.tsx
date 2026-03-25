@@ -24,7 +24,7 @@ const AtlasPerspectiveNav = ({ showDescriptions = false }: AtlasPerspectiveNavPr
     return pathname.startsWith(path);
   };
 
-  return (
+  const nav = (
     <nav className="flex items-center justify-center gap-1 py-1" aria-label="Atlas perspective">
       {PERSPECTIVES.map((p) => {
         const active = isActive(p.path);
