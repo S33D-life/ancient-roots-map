@@ -475,7 +475,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         subtitle="Speak into the canopy — your voice becomes part of this tree"
         fullscreenMobile
       >
-        <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
+        {/* Type pre-selected from gateway — no switcher */}
         <div className="mt-2 relative">
           {loading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
