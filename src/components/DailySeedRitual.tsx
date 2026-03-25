@@ -37,6 +37,8 @@ const DailySeedRitual = () => {
     setVisible(false);
   };
 
+  if (!showOnboardingNudges) return null;
+
   return (
     <AnimatePresence>
       {visible && (
