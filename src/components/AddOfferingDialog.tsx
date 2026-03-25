@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic, BookOpen, ChevronDown, Settings2 } from "lucide-react";
+import { Loader2, Camera, ImagePlus, X, Sparkles, Search, UserPlus, Mic, BookOpen, ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -543,68 +543,33 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         {/* Type switcher */}
         <TypeSwitcher activeType={activeType} onChange={setActiveType} />
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Seasonal offering prompt */}
-          <SeasonalMomentPanel
-            compact
-            onPromptSelect={(prompt: OfferingPrompt) => {
-              if (prompt.suggestedType) {
-                setActiveType(prompt.suggestedType as OfferingType);
-              }
-            }}
-          />
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={e => setTitle(e.target.value.slice(0, 200))}
-              placeholder={`Name your ${cfg.singular.toLowerCase()}`}
-              className="bg-secondary/20 border-border/50 font-serif"
-              maxLength={200}
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-5 mt-3">
+          {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
-          {/* Content */}
-          <div className="space-y-2">
-            <Label htmlFor="content" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">{cfg.contentLabel}</Label>
-            <Textarea
-              id="content"
-              value={content}
-              onChange={e => setContent(e.target.value.slice(0, 5000))}
-              placeholder={cfg.placeholder}
-              maxLength={5000}
-              className="bg-secondary/20 border-border/50 font-serif min-h-[100px]"
-            />
-          </div>
-
-          {/* Photo upload */}
+          {/* PHOTO: image first, then title */}
           {activeType === "photo" && (
-            <div className="space-y-2">
-              <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Photo</Label>
+            <>
               {previewUrl ? (
-                <div className="relative rounded-lg overflow-hidden border border-border/50">
-                  <img src={previewUrl} alt="Preview" className="w-full max-h-48 object-cover" />
-                  <button type="button" onClick={clearSelectedFile} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 hover:bg-background">
+                <div className="relative rounded-xl overflow-hidden border border-border/30">
+                  <img src={previewUrl} alt="Preview" className="w-full max-h-52 object-cover" />
+                  <button type="button" onClick={clearSelectedFile} className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 hover:bg-background transition-colors">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <div
-                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
-                    dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/40 hover:border-primary/30 hover:bg-primary/[0.02]"
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                    dragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-border/30 hover:border-primary/20"
                   }`}
                   style={{ background: dragActive ? undefined : "radial-gradient(ellipse at 50% 80%, hsl(var(--primary) / 0.03), transparent 70%)" }}
                   onDragOver={e => { e.preventDefault(); setDragActive(true); }}
                   onDragLeave={() => setDragActive(false)}
                   onDrop={handleDrop}
                 >
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
-                    <ImagePlus className="h-6 w-6 text-primary/50" />
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                    <ImagePlus className="h-7 w-7 text-primary/40" />
                   </div>
-                  <p className="text-sm text-muted-foreground/70 font-serif mb-3">Drop a photo here, or choose one</p>
+                  <p className="text-sm text-muted-foreground/60 font-serif mb-4">Choose a memory to place here</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="font-serif text-xs gap-1.5 border-primary/20">
                       <ImagePlus className="h-3 w-3" /> Gallery
@@ -617,45 +582,118 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                   <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
                 </div>
               )}
-            </div>
+              {/* Title appears after photo selected, or always for experienced users */}
+              <AnimatePresence>
+                {(previewUrl || title.length > 0) && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={e => setTitle(e.target.value.slice(0, 200))}
+                      placeholder="Name this memory"
+                      className="bg-secondary/10 border-border/30 font-serif text-base"
+                      maxLength={200}
+                      required
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              {/* Caption — softer, optional feel */}
+              <AnimatePresence>
+                {(previewUrl || content.length > 0) && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <Textarea
+                      id="content"
+                      value={content}
+                      onChange={e => setContent(e.target.value.slice(0, 5000))}
+                      placeholder="What does this capture? (optional)"
+                      maxLength={5000}
+                      className="bg-secondary/10 border-border/30 font-serif min-h-[60px] text-base resize-none"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
           )}
 
-          {/* Media URL for non-photo */}
+          {/* MUSING / POEM / NFT: content-first hero */}
           {activeType !== "photo" && (
-            <div className="space-y-2">
-              <Label htmlFor="media" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Media URL (optional)</Label>
-              <Input id="media" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://..." className="bg-secondary/20 border-border/50 font-serif" />
-            </div>
+            <>
+              {/* The writing area is the hero — big, inviting, immediate */}
+              <Textarea
+                id="content"
+                value={content}
+                onChange={e => setContent(e.target.value.slice(0, 5000))}
+                placeholder={cfg.placeholder}
+                maxLength={5000}
+                className="bg-secondary/10 border-border/30 font-serif min-h-[120px] text-base resize-none"
+                autoFocus
+              />
+
+              {/* Title appears after user starts writing */}
+              <AnimatePresence>
+                {(content.length > 0 || title.length > 0) && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <Input
+                      id="title"
+                      value={title}
+                      onChange={e => setTitle(e.target.value.slice(0, 200))}
+                      placeholder={`Name your ${cfg.singular.toLowerCase()}`}
+                      className="bg-secondary/10 border-border/30 font-serif"
+                      maxLength={200}
+                      required
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* NFT link — shown immediately for NFT type */}
+              {activeType === "nft" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="nft" className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase">NFT Link</Label>
+                  <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link…" className="bg-secondary/10 border-border/30 font-serif" />
+                </div>
+              )}
+            </>
           )}
 
-          {/* NFT link */}
-          {activeType === "nft" && (
-            <div className="space-y-2">
-              <Label htmlFor="nft" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">NFT Link</Label>
-              <Input id="nft" value={nftLink} onChange={e => setNftLink(e.target.value)} placeholder="OpenSea / Rarible link..." className="bg-secondary/20 border-border/50 font-serif" />
-            </div>
-          )}
-
-          {/* Tree role picker — always visible as it's important */}
-          <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
-
-          {/* ─── Collapsible advanced options ─── */}
+          {/* ─── Collapsible: everything secondary ─── */}
           <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 w-full py-2 text-xs font-serif text-muted-foreground/60 hover:text-muted-foreground transition-colors group"
+                className="flex items-center gap-2 w-full py-1.5 text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors"
               >
-                <div className="h-px flex-1 bg-border/20" />
-                <Settings2 className="w-3 h-3" />
-                <span>More options</span>
+                <div className="h-px flex-1 bg-border/15" />
                 <ChevronDown className={`w-3 h-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-                <div className="h-px flex-1 bg-border/20" />
+                <span>Refine offering</span>
+                <div className="h-px flex-1 bg-border/15" />
               </button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-4 pt-2">
+            <CollapsibleContent className="space-y-4 pt-3">
+              {/* Seasonal prompt */}
+              <SeasonalMomentPanel
+                compact
+                onPromptSelect={(prompt: OfferingPrompt) => {
+                  if (prompt.suggestedType) {
+                    setActiveType(prompt.suggestedType as OfferingType);
+                  }
+                }}
+              />
+
+              {/* Tree role */}
+              <TreeRolePicker value={treeRole} onChange={setTreeRole} disabled={loading} />
+
               {/* Quote */}
               <OfferingQuoteInput value={quote} onChange={setQuote} />
+
+              {/* Media URL for non-photo */}
+              {activeType !== "photo" && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="media" className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase">Media URL (optional)</Label>
+                  <Input id="media" value={mediaUrl} onChange={e => setMediaUrl(e.target.value)} placeholder="https://…" className="bg-secondary/10 border-border/30 font-serif" />
+                </div>
+              )}
 
               {/* Visibility (not for photos) */}
               {activeType !== "photo" && (
@@ -663,16 +701,16 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               )}
 
               {/* Staff seal */}
-              <div className="space-y-2">
-                <Label htmlFor="staff" className="font-serif text-xs tracking-wider text-muted-foreground uppercase">Sealed by Staff (optional)</Label>
-                <Input id="staff" value={sealedByStaff} onChange={e => setSealedByStaff(e.target.value)} placeholder="Staff code..." className="bg-secondary/20 border-border/50 font-serif" />
+              <div className="space-y-1.5">
+                <Label htmlFor="staff" className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase">Sealed by Staff (optional)</Label>
+                <Input id="staff" value={sealedByStaff} onChange={e => setSealedByStaff(e.target.value)} placeholder="Staff code…" className="bg-secondary/10 border-border/30 font-serif" />
               </div>
 
               {/* Tag wanderers */}
-              <div className="space-y-2">
-                <Label className="font-serif text-xs tracking-wider text-muted-foreground uppercase flex items-center gap-1"><UserPlus className="h-3 w-3" /> Tag Wanderers</Label>
+              <div className="space-y-1.5">
+                <Label className="font-serif text-[10px] tracking-wider text-muted-foreground/50 uppercase flex items-center gap-1"><UserPlus className="h-3 w-3" /> Tag Wanderers</Label>
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground/40" />
                   <Input
                     value={tagQuery}
                     onChange={e => {
@@ -682,14 +720,14 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                         tagTimerRef.current = setTimeout(() => searchTags(e.target.value), 300);
                       } else { clearTagResults(); }
                     }}
-                    placeholder="Search by name..."
-                    className="bg-secondary/20 border-border/50 font-serif pl-8"
+                    placeholder="Search by name…"
+                    className="bg-secondary/10 border-border/30 font-serif pl-8"
                   />
                 </div>
                 {tagResults.length > 0 && (
-                  <div className="border border-border/50 rounded-lg max-h-32 overflow-y-auto">
+                  <div className="border border-border/30 rounded-lg max-h-32 overflow-y-auto">
                     {tagResults.filter(r => !taggedUsers.find(t => t.id === r.id)).map(r => (
-                      <button key={r.id} type="button" className="flex items-center gap-2 w-full px-3 py-2 hover:bg-secondary/30 text-left" onClick={() => { setTaggedUsers(prev => [...prev, r]); setTagQuery(""); clearTagResults(); }}>
+                      <button key={r.id} type="button" className="flex items-center gap-2 w-full px-3 py-2 hover:bg-secondary/20 text-left" onClick={() => { setTaggedUsers(prev => [...prev, r]); setTagQuery(""); clearTagResults(); }}>
                         <Avatar className="h-5 w-5"><AvatarImage src={r.avatar_url || undefined} /><AvatarFallback className="text-[8px]">{(r.full_name || "?")[0]}</AvatarFallback></Avatar>
                         <span className="text-xs font-serif truncate">{r.full_name || "Unknown"}</span>
                       </button>
@@ -711,7 +749,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
           </Collapsible>
 
           {/* Submit */}
-          <div className="pt-2">
+          <div className="pt-1">
             <Button
               type="submit"
               disabled={loading || uploading}
@@ -729,7 +767,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               {uploading ? "Uploading…" : loading ? "Sealing offering…" : treeName ? `Offer to ${treeName}` : `Offer ${cfg.singular}`}
             </Button>
             {!loading && !uploading && (
-              <p className="text-[10px] text-center text-muted-foreground/40 font-serif mt-2">
+              <p className="text-[10px] text-center text-muted-foreground/30 font-serif mt-2 italic">
                 Your offering becomes part of this tree's living story
               </p>
             )}
