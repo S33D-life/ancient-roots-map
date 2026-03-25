@@ -1,11 +1,11 @@
 /**
- * mapWishHandler — Handles popup wish-star and share button clicks
+ * mapWishHandler — Handles popup wish-star, share, and plant-seed button clicks
  * via event delegation on the map container.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-/** Set up event delegation for popup buttons (wish + share) */
+/** Set up event delegation for popup buttons (wish + share + plant seed) */
 export function setupPopupActions(container: HTMLElement): () => void {
   const handler = async (e: Event) => {
     const target = e.target as HTMLElement;
