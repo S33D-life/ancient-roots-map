@@ -299,9 +299,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
 
-      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed!`, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
+      const treePart = treeName ? ` to ${treeName}` : "";
+      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed${treePart}`, subtitle: "Your offering is now part of this tree's story" });
       setShowCelebration(true);
-      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2400);
       resetForm();
       return;
     } catch (err: any) {
