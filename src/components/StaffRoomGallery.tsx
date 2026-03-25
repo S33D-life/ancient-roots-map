@@ -185,18 +185,39 @@ function CeremonyHistory({ staffCode }: { staffCode: string }) {
   );
 }
 
-function StaffDetailContent({ staff, onViewOnChain, onViewLegend }: { staff: StaffItem; onViewOnChain: () => void; onViewLegend: () => void }) {
+function StaffDetailContent({ staff, onViewOnChain, onViewLegend, onNavigate }: {
+  staff: StaffItem;
+  onViewOnChain: () => void;
+  onViewLegend: () => void;
+  onNavigate?: (path: string) => void;
+}) {
   const counts = getSpeciesStaffCounts();
   const upperCode = staff.isOrigin ? staff.code : staff.code.split("-")[0];
   const total = counts[upperCode] || 1;
 
   return (
-    <div className="space-y-4">
-      <div className="w-full aspect-[3/4] rounded-lg overflow-hidden border border-border/40">
+    <div className="space-y-5">
+      {/* Status badge */}
+      <div className="flex items-center justify-center gap-2">
+        {staff.isOrigin ? (
+          <Badge className="bg-primary/15 text-primary border-primary/30 font-serif text-[10px] gap-1 px-2.5 py-1">
+            <Crown className="w-3 h-3" /> Founding Spiral · #{staff.index + 1}
+          </Badge>
+        ) : (
+          <Badge variant="outline" className="font-serif text-[10px] gap-1 px-2.5 py-1">
+            <Compass className="w-3 h-3" /> Origin Circle · {staff.circle || upperCode}
+          </Badge>
+        )}
+      </div>
+
+      {/* Image */}
+      <div className="w-full aspect-[3/4] rounded-xl overflow-hidden border border-border/30 shadow-lg">
         <img src={staff.image} alt={`${staff.speciesName} staff`} className="w-full h-full object-cover" />
       </div>
+
+      {/* Metadata */}
       <div className="space-y-2 text-sm">
-        <Row label="Code" value={<span className="font-mono">{staff.code}</span>} />
+        <Row label="Code" value={<span className="font-mono text-xs">{staff.code}</span>} />
         <Row label="Species" value={staff.speciesName} />
         <Row label="Token" value={`#${String(staff.tokenId).padStart(3, "0")}`} />
         {staff.length && <Row label="Length" value={staff.length} />}
@@ -204,34 +225,75 @@ function StaffDetailContent({ staff, onViewOnChain, onViewLegend }: { staff: Sta
         <Row label="Collection" value={`${total} staff${total > 1 ? "s" : ""}`} />
         <Row label="Circles" value={getCircleDescription(upperCode)} />
       </div>
-      <p className="text-xs text-muted-foreground italic">
+
+      {/* Lore */}
+      <p className="text-xs text-muted-foreground italic leading-relaxed">
         {staff.isOrigin
-          ? `The ${staff.speciesName} staff — position #${staff.index + 1} on the sacred spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.`
+          ? `The ${staff.speciesName} staff — position #${staff.index + 1} on the founding spiral. Hand-crafted from fallen wood, each staff carries the spirit of its species.`
           : `Circle staff ${staff.code} — one of ${total} ${staff.speciesName} staffs in the Ancient Friends collection.`}
       </p>
+
+      {/* ═══ Connection Links — deep links into the wider ecosystem ═══ */}
+      <div
+        className="rounded-xl border border-border/20 p-3 space-y-2"
+        style={{ background: "hsl(var(--card) / 0.4)" }}
+      >
+        <h4 className="text-[10px] font-serif text-muted-foreground uppercase tracking-wider">Connections</h4>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => onNavigate?.("/map")}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border/20 text-xs font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all touch-manipulation"
+          >
+            <TreeDeciduous className="w-3.5 h-3.5 text-primary/60" />
+            <span>Map Room</span>
+          </button>
+          <button
+            onClick={() => onNavigate?.("/vault")}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border/20 text-xs font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all touch-manipulation"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-primary/60" />
+            <span>Vault</span>
+          </button>
+          <button
+            onClick={() => onNavigate?.("/nftree-studio")}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border/20 text-xs font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all touch-manipulation"
+          >
+            <Wand2 className="w-3.5 h-3.5 text-primary/60" />
+            <span>NFTree Studio</span>
+          </button>
+          <button
+            onClick={() => onNavigate?.("/value-tree")}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-border/20 text-xs font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all touch-manipulation"
+          >
+            <Heart className="w-3.5 h-3.5 text-primary/60" />
+            <span>Value Tree</span>
+          </button>
+        </div>
+      </div>
+
       <div className="flex justify-center">
         <StaffQRCode staffCode={staff.code} size={80} />
       </div>
+
       <CeremonyHistory staffCode={staff.code} />
+
+      {/* Primary action */}
       <Button className="w-full gap-2 font-serif text-sm" onClick={onViewLegend}>
         <ExternalLink className="w-4 h-4" /> View Full Legend
       </Button>
+
+      {/* Secondary actions */}
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={() =>
+        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs h-9 touch-manipulation" onClick={() =>
           handleShare(`${staff.speciesName} Staff`, `${staff.speciesName} staff (${staff.code}) — one of 144 sacred staffs.`)
         }>
           <Share2 className="w-3.5 h-3.5" /> Share
         </Button>
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={onViewOnChain}>
+        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs h-9 touch-manipulation" onClick={onViewOnChain}>
           <Eye className="w-3.5 h-3.5" /> On-Chain
         </Button>
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={onViewLegend}>
-          <ScrollText className="w-3.5 h-3.5" /> Lore Scroll
-        </Button>
-        <Button variant="outline" size="sm" className="gap-2 font-serif text-xs" onClick={onViewLegend}>
-          <TreeDeciduous className="w-3.5 h-3.5" /> Linked Trees
-        </Button>
       </div>
+
       <CuratorAssignPanel staffCode={staff.code} />
     </div>
   );
@@ -421,22 +483,43 @@ export default function StaffRoomGallery() {
   const ListView = () => (
     <div className="space-y-2">
       {filteredStaffs.map((staff, i) => (
-        <div key={staff.tokenId} className="flex items-center gap-4 p-3 rounded-lg border border-border/40 bg-card/50 hover:bg-card/80 cursor-pointer transition-all group"
-          onClick={() => { setActiveIndex(i); setDetailOpen(true); }} role="button" aria-label={`View ${staff.speciesName} staff`}>
-          <div className="w-12 h-16 rounded-md overflow-hidden border border-border/40 flex-shrink-0">
+        <div
+          key={staff.tokenId}
+          className={cn(
+            "flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-all group min-h-[56px] touch-manipulation",
+            staff.isOrigin
+              ? "border-primary/20 bg-primary/[0.03] hover:bg-primary/[0.07] hover:border-primary/40"
+              : "border-border/40 bg-card/50 hover:bg-card/80 hover:border-border/60"
+          )}
+          onClick={() => { setActiveIndex(i); setDetailOpen(true); }}
+          role="button"
+          aria-label={`View ${staff.speciesName} staff`}
+        >
+          <div className="w-12 h-16 rounded-md overflow-hidden border border-border/30 flex-shrink-0 group-hover:border-primary/30 transition-colors shadow-sm">
             <img src={staff.image} alt={staff.speciesName} className="w-full h-full object-cover" loading="lazy" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-serif text-sm text-foreground truncate">{staff.speciesName}</p>
-            <p className="text-xs text-muted-foreground font-mono">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="font-serif text-sm text-foreground truncate">{staff.speciesName}</p>
+              {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
+            </div>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
           </div>
           {staff.length && (
             <div className="hidden sm:block text-right">
-              <p className="text-xs text-muted-foreground">{staff.length}</p>
-              <p className="text-xs text-muted-foreground">{staff.weight}</p>
+              <p className="text-[11px] text-muted-foreground">{staff.length}</p>
+              <p className="text-[11px] text-muted-foreground">{staff.weight}</p>
             </div>
           )}
-          <Badge variant="outline" className="text-[10px] flex-shrink-0">Minted</Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] flex-shrink-0",
+              staff.isOrigin && "border-primary/30 text-primary"
+            )}
+          >
+            {staff.isOrigin ? "Origin" : "Minted"}
+          </Badge>
         </div>
       ))}
     </div>
@@ -444,18 +527,35 @@ export default function StaffRoomGallery() {
 
   // ── GALLERY VIEW ──────────────────────────────────────────────
   const GalleryView = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
       {filteredStaffs.map((staff, i) => (
-        <Card key={staff.tokenId} className="border-border/40 hover:border-primary/50 transition-all group cursor-pointer overflow-hidden hover:shadow-[var(--glow-subtle)]"
-          onClick={() => { setActiveIndex(i); setDetailOpen(true); }} role="button" aria-label={`View ${staff.speciesName} staff`}>
-          <CardContent className="p-3 text-center">
-            <div className="w-full aspect-[3/4] rounded-md overflow-hidden border border-border/30 mb-2 group-hover:border-primary/40 transition-colors">
+        <Card
+          key={staff.tokenId}
+          className={cn(
+            "transition-all group cursor-pointer overflow-hidden touch-manipulation",
+            staff.isOrigin
+              ? "border-primary/25 hover:border-primary/50 hover:shadow-[0_4px_20px_hsl(var(--primary)/0.15)]"
+              : "border-border/30 hover:border-border/60 hover:shadow-[0_4px_16px_hsl(var(--foreground)/0.06)]"
+          )}
+          onClick={() => { setActiveIndex(i); setDetailOpen(true); }}
+          role="button"
+          aria-label={`View ${staff.speciesName} staff`}
+        >
+          <CardContent className="p-2.5 md:p-3 text-center">
+            <div className="relative w-full aspect-[3/4] rounded-md overflow-hidden border border-border/20 mb-2 group-hover:border-primary/30 transition-colors">
               <OptimizedImage src={staff.image} alt={`Staff ${staff.code}`} className="w-full h-full" />
+              {staff.isOrigin && (
+                <div className="absolute top-1 right-1">
+                  <Crown className="w-3 h-3 text-primary drop-shadow-sm" />
+                </div>
+              )}
             </div>
-            <p className="text-xs font-serif font-medium text-foreground truncate">
-              {staff.code.includes("-") ? staff.code : staff.speciesName}
+            <p className="text-xs font-serif font-medium text-foreground truncate leading-snug">
+              {staff.speciesName}
             </p>
-            <p className="text-[10px] text-muted-foreground">#{String(staff.tokenId).padStart(3, "0")}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+              {staff.code} · #{String(staff.tokenId).padStart(3, "0")}
+            </p>
           </CardContent>
         </Card>
       ))}
@@ -602,7 +702,7 @@ export default function StaffRoomGallery() {
                 className="flex items-center gap-1.5 font-serif text-xs data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg px-3 py-2"
               >
                 {tab.icon}
-                <span className="hidden xs:inline">{tab.label}</span>
+                <span>{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -828,6 +928,7 @@ export default function StaffRoomGallery() {
                 staff={activeStaff}
                 onViewOnChain={() => { setDetailOpen(false); setOnChainStaff(activeStaff); }}
                 onViewLegend={() => { setDetailOpen(false); routerNavigate(`/staff/${activeStaff.code}`); }}
+                onNavigate={(path) => { setDetailOpen(false); routerNavigate(path); }}
               />
             </div>
           )}
