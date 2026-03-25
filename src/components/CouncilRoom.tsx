@@ -177,9 +177,11 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
             src={embedUrl}
             className="w-full min-h-[65vh] md:min-h-[700px]"
             allow="camera; microphone; fullscreen; display-capture"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
             allowFullScreen
+            loading="lazy"
             title="Council Room"
-            onLoad={() => setIframeLoaded(true)}
+            onLoad={() => { iframeLoadedRef.current = true; setIframeLoaded(true); }}
             onError={() => setIframeError(true)}
           />
         )}

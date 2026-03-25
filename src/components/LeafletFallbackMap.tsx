@@ -3089,6 +3089,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     color: globeEmphasis ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
                   }}
                   title="Reset view"
+                  aria-label="Reset view"
                 >
                   <Globe className="w-[18px] h-[18px]" />
                 </button>
