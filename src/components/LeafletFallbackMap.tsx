@@ -5,6 +5,7 @@ import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
 import { useMapInit } from "@/hooks/use-map-init";
 import MapContextIndicator from "./MapContextIndicator";
+import MapLoadingOverlay from "./map/MapLoadingOverlay";
 import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
 import { getHiveBySlug } from "@/utils/hiveUtils";
 import L from "leaflet";
