@@ -452,7 +452,7 @@ export default function StaffRoomGallery() {
   // ── FULL-SCREEN VIEW ──────────────────────────────────────────
   const FullScreenView = () => (
     <motion.div className="fixed inset-0 z-[100] flex flex-col"
-      style={{ background: "radial-gradient(ellipse at 30% 70%, hsl(28 25% 10% / 0.95), hsl(80 15% 6% / 0.98))", backdropFilter: "blur(20px)" }}
+      style={{ background: "radial-gradient(ellipse at 30% 70%, hsl(var(--card) / 0.95), hsl(var(--background) / 0.98))", backdropFilter: "blur(20px)" }}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}
       onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <div className="flex items-center justify-between px-4 py-3 z-10">
