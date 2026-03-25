@@ -114,11 +114,11 @@ const PublicGoodsFunding = () => {
         {/* Header */}
         <div className="text-center space-y-1.5">
           <div className="flex items-center justify-center gap-2">
-            <span className="text-lg">🌍</span>
-            <h3 className="text-base font-serif text-foreground">Public Goods Funding</h3>
+            <span className="text-lg">🌧️</span>
+            <h3 className="text-base font-serif text-foreground">Commons Nourishment</h3>
           </div>
           <p className="text-[10px] font-serif text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            S33D participates in regenerative funding rounds. External funding flows into the commons and is distributed as Hearts.
+            Support flows into S33D from many sources — like rain nourishing the forest. It enters the commons and is distributed as Hearts.
           </p>
         </div>
 
