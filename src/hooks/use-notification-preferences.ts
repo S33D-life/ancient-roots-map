@@ -35,6 +35,8 @@ export interface NotificationPreferences {
   show_onboarding_nudges: boolean;
   show_floating_prompts: boolean;
   show_companion_suggestions: boolean;
+  show_teotag_whispers: boolean;
+  show_celebrations: boolean;
 }
 
 const DEFAULTS: NotificationPreferences = {
@@ -65,6 +67,8 @@ const DEFAULTS: NotificationPreferences = {
   show_onboarding_nudges: true,
   show_floating_prompts: true,
   show_companion_suggestions: true,
+  show_teotag_whispers: true,
+  show_celebrations: true,
 };
 
 export function useNotificationPreferences(userId: string | null) {
@@ -109,6 +113,8 @@ export function useNotificationPreferences(userId: string | null) {
             show_onboarding_nudges: data.show_onboarding_nudges ?? true,
             show_floating_prompts: data.show_floating_prompts ?? true,
             show_companion_suggestions: data.show_companion_suggestions ?? true,
+            show_teotag_whispers: (data as any).show_teotag_whispers ?? true,
+            show_celebrations: (data as any).show_celebrations ?? true,
           });
         }
         setLoading(false);

@@ -9,6 +9,7 @@
  * Radix dialogs/drawers/sheets via MutationObserver on `[data-state="open"]`.
  */
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 export type FlowContext =
   | "browse"
@@ -47,9 +48,14 @@ export const useUIFlow = () => useContext(UIFlowContext);
 
 /**
  * Convenience hook — returns true only when popups may render.
+ * Respects both flow-based suppression AND user's quiet mode / floating prompts pref.
  * Components can just: `if (!usePopupGate()) return null;`
  */
-export const usePopupGate = (): boolean => useContext(UIFlowContext).popupsAllowed;
+export const usePopupGate = (): boolean => {
+  const { popupsAllowed: flowAllowed } = useContext(UIFlowContext);
+  const { showFloatingPrompts } = useQuietMode();
+  return flowAllowed && showFloatingPrompts;
+};
 
 export const UIFlowProvider = ({ children }: { children: ReactNode }) => {
   const [context, setContext] = useState<FlowContext>("browse");

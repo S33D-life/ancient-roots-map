@@ -16,12 +16,14 @@ import { TeotagProvider } from "@/contexts/TeotagContext";
 import { HiveSeasonProvider } from "@/contexts/HiveSeasonContext";
 import { SeasonalLensProvider } from "@/contexts/SeasonalLensContext";
 import { CompanionProvider } from "@/contexts/CompanionContext";
+import { QuietModeProvider } from "@/contexts/QuietModeContext";
 import CompanionBridge from "@/components/companion/CompanionBridge";
 
 const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import HeartbeatNotification from "@/components/HeartbeatNotification";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 const StarryNight = lazy(() => import("@/components/StarryNight"));
 
 import DevQAPanel from "@/components/DevQAPanel";
@@ -180,18 +182,20 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 const App = () => {
   const [authReady, setAuthReady] = useState(false);
   const [authInitError, setAuthInitError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Global connection resilience — shows reconnection toasts
   useConnectionResilience();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      // Listener kept active so auth SDK can process token refresh/sign-out updates.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUserId(session?.user?.id ?? null);
     });
 
     supabase.auth
       .getSession()
-      .then(() => {
+      .then(({ data: { session } }) => {
+        setCurrentUserId(session?.user?.id ?? null);
         setAuthReady(true);
       })
       .catch((error) => {
@@ -236,6 +240,9 @@ const App = () => {
   const CelebrationOverlay = () => {
     const { celebration, dismiss: dismissTree } = useTreeCelebration();
     const { event: contribEvent, dismiss: dismissContrib } = useContributionCelebration();
+    const { showCelebrations } = useQuietMode();
+
+    if (!showCelebrations) return null;
 
     // Tree creation events (legacy)
     if (celebration) {
@@ -277,6 +284,7 @@ const App = () => {
         <CanopyHeartPulse />
         
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <QuietModeProvider userId={currentUserId}>
           <TetolLevelProvider>
           <HiveSeasonProvider>
           <MapFilterProvider>
@@ -396,6 +404,7 @@ const App = () => {
           </MapFilterProvider>
           </HiveSeasonProvider>
           </TetolLevelProvider>
+          </QuietModeProvider>
         </BrowserRouter>
         </div>
       </TooltipProvider>

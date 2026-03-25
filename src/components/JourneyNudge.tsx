@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 /**
  * JourneyNudge — a subtle inline prompt that connects
@@ -18,6 +19,10 @@ interface JourneyNudgeProps {
 }
 
 const JourneyNudge = ({ icon, message, to, label, delay = 0 }: JourneyNudgeProps) => {
+  const { showOnboardingNudges } = useQuietMode();
+
+  if (!showOnboardingNudges) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}

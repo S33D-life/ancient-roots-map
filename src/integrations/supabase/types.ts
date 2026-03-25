@@ -4156,9 +4156,11 @@ export type Database = {
           quiet_hours_end: string | null
           quiet_hours_start: string | null
           quiet_mode: boolean
+          show_celebrations: boolean
           show_companion_suggestions: boolean
           show_floating_prompts: boolean
           show_onboarding_nudges: boolean
+          show_teotag_whispers: boolean
           topic_cantons: string[]
           topic_councils: string[]
           topic_countries: string[]
@@ -4188,9 +4190,11 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           quiet_mode?: boolean
+          show_celebrations?: boolean
           show_companion_suggestions?: boolean
           show_floating_prompts?: boolean
           show_onboarding_nudges?: boolean
+          show_teotag_whispers?: boolean
           topic_cantons?: string[]
           topic_councils?: string[]
           topic_countries?: string[]
@@ -4220,9 +4224,11 @@ export type Database = {
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
           quiet_mode?: boolean
+          show_celebrations?: boolean
           show_companion_suggestions?: boolean
           show_floating_prompts?: boolean
           show_onboarding_nudges?: boolean
+          show_teotag_whispers?: boolean
           topic_cantons?: string[]
           topic_councils?: string[]
           topic_countries?: string[]

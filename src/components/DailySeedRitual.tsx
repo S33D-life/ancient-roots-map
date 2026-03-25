@@ -4,6 +4,7 @@
  * Uses localStorage to fire only once per calendar day.
  */
 import { useState, useEffect } from "react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Sprout, MapPin, TreeDeciduous } from "lucide-react";
@@ -14,6 +15,7 @@ const STORAGE_KEY = "s33d-ritual-date";
 
 const DailySeedRitual = () => {
   const [visible, setVisible] = useState(false);
+  const { showOnboardingNudges } = useQuietMode();
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -34,6 +36,8 @@ const DailySeedRitual = () => {
     localStorage.setItem(STORAGE_KEY, today);
     setVisible(false);
   };
+
+  if (!showOnboardingNudges) return null;
 
   return (
     <AnimatePresence>

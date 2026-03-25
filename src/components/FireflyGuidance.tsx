@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useSeasonalSummary } from "@/hooks/use-seasonal-summary";
 import { Leaf } from "lucide-react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 interface GuidanceMessage {
   text: string;
@@ -164,7 +165,9 @@ const FireflyGuidance = ({ fabPosition, visible }: FireflyGuidanceProps) => {
     setShowing(false);
   }, [location.pathname]);
 
-  if (!showing || !message) return null;
+  const { showTeotagWhispers } = useQuietMode();
+
+  if (!showing || !message || !showTeotagWhispers) return null;
 
   // Position whisper bubble near the FAB
   const isRight = fabPosition.x > window.innerWidth / 2;

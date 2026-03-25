@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart } from "lucide-react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 const BATCH_WINDOW = 1500;
 const FADE_DELAY = 1200;
@@ -15,6 +16,7 @@ const HeartbeatNotification = () => {
   const [visible, setVisible] = useState(false);
   const [isPulsing, setIsPulsing] = useState(false);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const { showCelebrations } = useQuietMode();
 
   useEffect(() => {
     const handler = (e: CustomEvent) => {
@@ -42,7 +44,7 @@ const HeartbeatNotification = () => {
 
   return (
     <AnimatePresence>
-      {visible && batchTotal > 0 && (
+      {visible && batchTotal > 0 && showCelebrations && (
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
