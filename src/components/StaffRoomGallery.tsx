@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo, lazy, Suspense } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
 import JourneyBridge from "@/components/JourneyBridge";
 import { useNavigate as useRouterNavigate, useSearchParams } from "react-router-dom";
