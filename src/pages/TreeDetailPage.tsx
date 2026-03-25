@@ -598,7 +598,7 @@ const TreeDetailPage = () => {
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
-              onAddOffering={() => setAddOfferingOpen(true)}
+              onAddOffering={openOfferingGateway}
               treeName={tree.name}
             />
 
