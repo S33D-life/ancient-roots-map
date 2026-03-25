@@ -235,7 +235,7 @@ const Header = () => {
               {/* TEOTAG — guiding intelligence orb → Hearth AI tab. Long-press to restore hidden orb. */}
               <button
                 type="button"
-                onClick={() => navigate("/dashboard?tab=teotag")}
+                onClick={() => { if (!orbRestore.didFire()) navigate("/dashboard?tab=teotag"); }}
                 onPointerDown={orbRestore.onPointerDown}
                 onPointerMove={orbRestore.onPointerMove}
                 onPointerUp={orbRestore.onPointerUp}
