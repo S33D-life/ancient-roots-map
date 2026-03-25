@@ -67,6 +67,8 @@ const DEFAULTS: NotificationPreferences = {
   show_onboarding_nudges: true,
   show_floating_prompts: true,
   show_companion_suggestions: true,
+  show_teotag_whispers: true,
+  show_celebrations: true,
 };
 
 export function useNotificationPreferences(userId: string | null) {
