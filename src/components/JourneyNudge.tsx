@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 
 /**
  * JourneyNudge — a subtle inline prompt that connects
