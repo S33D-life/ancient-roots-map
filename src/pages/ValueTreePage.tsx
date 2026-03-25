@@ -310,23 +310,26 @@ const ValueTreePage = () => {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-10"
+          className="text-center mb-8"
         >
           <span className="text-5xl block mb-3">🌳</span>
           <h1 className="text-3xl md:text-4xl font-serif tracking-wide text-foreground mb-2">
             The S33D Value Tree
           </h1>
           <p className="text-muted-foreground font-serif max-w-lg mx-auto text-sm leading-relaxed">
-            A living current of value — from breath to encounter to harvest. S33D Hearts are the commons currency, earned through stewardship, not speculation.
+            Visit a tree. Leave an offering. Earn hearts. Watch them grow.
+          </p>
+          <p className="text-muted-foreground/50 font-serif max-w-md mx-auto text-[11px] leading-relaxed mt-1.5 italic">
+            S33D Hearts are earned through stewardship, not speculation — a commons currency rooted in care.
           </p>
         </motion.div>
 
-        {/* Token legend */}
+        {/* Token legend — simplified labels */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {[
-            { icon: "❤️", label: "S33D Hearts", sub: "Commons currency", color: "hsl(0, 65%, 55%)" },
-            { icon: "🌿", label: "Species Hearts", sub: "Fractal / hive", color: "hsl(var(--primary))" },
-            { icon: "🛡️", label: "Influence", sub: "Governance voice", color: "hsl(42, 80%, 50%)" },
+            { icon: "❤️", label: "S33D Hearts", sub: "Earned from every action", color: "hsl(0, 65%, 55%)" },
+            { icon: "🌿", label: "Species Hearts", sub: "Routed to botanical hives", color: "hsl(var(--primary))" },
+            { icon: "🛡️", label: "Influence", sub: "Earned through curation", color: "hsl(42, 80%, 50%)" },
           ].map(t => (
             <div key={t.label} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/40 bg-card/30 backdrop-blur-sm">
               <span className="text-lg">{t.icon}</span>
