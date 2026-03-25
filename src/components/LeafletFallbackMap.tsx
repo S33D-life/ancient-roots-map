@@ -5,6 +5,7 @@ import { useGeolocation } from "@/hooks/use-geolocation";
 import { saveMapMemory, restoreMapMemory, clearMapMemory } from "@/hooks/use-map-memory";
 import { useMapInit } from "@/hooks/use-map-init";
 import MapContextIndicator from "./MapContextIndicator";
+import MapLoadingOverlay from "./map/MapLoadingOverlay";
 import { getEntryBySlug, type CountryRegistryEntry } from "@/config/countryRegistry";
 import { getHiveBySlug } from "@/utils/hiveUtils";
 import L from "leaflet";
@@ -2710,6 +2711,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   return (
     <div className={`${className || "absolute inset-0"} ${groveViewActive ? "grove-view-active" : ""}`} style={{ height: '100dvh' }}>
       <div ref={containerRef} className="w-full h-full" style={{ background: groveViewActive ? '#0a120a' : '#f0ede6', transition: 'background 1.2s ease-in-out' }} />
+
+      {/* Loading overlay — warm screen shown until tiles are ready */}
+      <MapLoadingOverlay ready={renderDebug.tileStatus === "loaded" || renderDebug.tileLoads > 3} />
 
       {/* Atmospheric overlay — rendered as React sibling, NOT injected into Leaflet DOM.
           This avoids mix-blend-mode compositing issues on iOS Safari that hide tiles. */}
