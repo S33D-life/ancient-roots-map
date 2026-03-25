@@ -36,7 +36,7 @@ interface EnsoNudgeProps {
   onInteract?: () => void;
 }
 
-export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudgeProps) {
+export default function EnsoNudge({ size = 52, offsetY = 0, children, onInteract }: EnsoNudgeProps) {
   const [isFirstVisit, setIsFirstVisit] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showMicroCopy, setShowMicroCopy] = useState(false);
