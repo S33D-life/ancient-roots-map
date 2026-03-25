@@ -1,84 +1,111 @@
 
 
-# Performance and Stability Polish Pass
+# Pre-Publish Sweep — Stability, Clarity, Readiness
 
-A focused "tighten and tidy" pass targeting the highest-impact, lowest-risk improvements across interaction smoothness, render efficiency, mobile stability, and edge-case resilience.
+After a thorough audit of the codebase, the app is in strong shape. The previous performance pass (memoization, touch-action, CouncilRoom timeout, svh fix) addressed the major concerns. This sweep focuses on the remaining small, low-risk polish items.
 
 ---
 
-## Changes Overview
+## Findings Summary
 
-### 1. Memoize Map.tsx to prevent re-renders from parent state changes
+**Already solid:**
+- Error boundaries in place (MapErrorBoundary, SparkErrorBoundary, GlobalErrorBoundary)
+- `escapeHtml` used in all popup builders — no XSS via user input
+- No service role keys or secrets in client code
+- No stray `console.log` in `.tsx` files (only debug-gated logs in hooks)
+- Jitsi iframe has correct `allow` permissions
+- CouncilRoom has 10s timeout fallback
+- Map uses `100svh` (keyboard-safe)
+- `touch-action: manipulation` on map controls
+- Key components memoized
 
-`src/components/Map.tsx` currently re-renders whenever MapPage state changes (blessing dismiss, journey toggle, etc.). Wrap the component body with `React.memo` and memoize the props object so the heavy `LeafletFallbackMap` subtree is not re-evaluated on unrelated UI toggling.
+---
 
-### 2. Fix GroveViewOverlay N+1 query waterfall
+## Fixes to Apply (7 items)
 
-In `src/components/GroveViewOverlay.tsx` (lines 91-112), the "awaiting visits" fetch runs up to 30 sequential single-row queries in a for-loop. Replace with a single query using a left join or subquery approach — fetch trees with zero offerings in one call. This eliminates a significant latency spike when opening the Grove Signal panel.
+### 1. Fix GroveViewOverlay z-index conflict with AtlasFilter
 
-### 3. Stabilize GroveViewOverlay `onEventPulses` call during render
+Both GroveViewOverlay toggle and AtlasFilter top bar use `z-[1001]`. When both are visible, they can overlap in the top-right corner. The Grove Signal dropdown also uses `z-[1001]` while LiteMapSearch uses `z-[1002]`.
 
-Line 114-116 calls `onEventPulses(eventPulses)` directly during render (not inside useEffect). Move this into a `useEffect` to prevent triggering parent re-renders during the render phase.
+**Fix:** Bump GroveViewOverlay container to `z-[1003]` so it stays above the filter panel backdrop (`z-[1000]`) and search (`z-[1002]`), ensuring the dropdown is always accessible.
 
-### 4. Tighten animation durations for panel transitions
+**File:** `src/components/GroveViewOverlay.tsx` — line 179
 
-Across `GroveViewOverlay`, `AddOfferingDialog`, and `MusicOfferingFlow`:
-- Ensure `AnimatePresence` transitions use `duration: 0.15` to `0.2` (some currently use longer values like 1.5s for atmosphere overlays — those are fine, but panel open/close should be fast).
-- The atmosphere overlays in GroveViewOverlay (lines 126-172) use `duration: 1.5` for fade which is appropriate. No change there.
+### 2. Add missing `aria-label` to map control buttons
 
-### 5. Memoize `SongRow` component
+Several map buttons (Locate, Add tree, Compass reset, Layers) lack `aria-label`. They have `title` but no explicit aria attributes for screen readers.
 
-`src/components/MusicOfferingFlow.tsx` — `SongRow` is already a standalone component but receives new arrow-function props on each render. Wrap `SongRow` with `React.memo` and stabilize the `onSelect`/`onTogglePreview` callbacks with `useCallback` indexed by song ID where they're passed.
+**Fix:** Add `aria-label` to the 4 unlabeled buttons in the map control cluster.
 
-### 6. Add `React.memo` to `QuickSeedButton`
+**File:** `src/components/LeafletFallbackMap.tsx` — lines ~3048-3091
 
-The seed button renders inside every tree card. Memoize it so it doesn't re-render when parent card state changes (e.g. hover, scroll).
+### 3. Prevent GroveViewOverlay from mounting when inactive
 
-### 7. CouncilRoom iframe error handling
+Currently the entire overlay renders `<AnimatePresence>` blocks even when `active` is false (they just animate out). Since the overlay includes two `useEffect` data fetches gated on `active`, the component itself still mounts. Wrapping the outer fragment in a simple `if (!active) return null` early return would prevent the two Supabase queries from even registering their effect hooks.
 
-`src/components/CouncilRoom.tsx` — add an `onError` handler to the iframe and ensure the fallback "Open directly" button is prominent. Currently `iframeError` state exists but may not trigger on all failure modes. Add a 10-second timeout that shows the fallback if `iframeLoaded` hasn't fired.
+**Fix:** Add early return `if (!active) return null` at the top of the component, before the render. The `AnimatePresence` exit animations are not critical enough to justify keeping the component mounted.
 
-### 8. Mobile keyboard: prevent map container from resizing
+**File:** `src/components/GroveViewOverlay.tsx`
 
-In `src/components/Map.tsx`, the container uses `height: 100dvh`. On iOS Safari, `dvh` changes when the keyboard opens, causing the map to resize and potentially trigger tile reloads. Change to `height: 100svh` (smallest viewport height) or use a fixed height captured on mount, so keyboard appearance doesn't trigger map relayout.
+### 4. Stabilize CouncilRoom timeout with ref
 
-### 9. Prevent double-tap zoom on map control buttons
+The `iframeLoaded` check inside the timeout closure captures stale state. If the iframe loads at 9.5s but the timeout fires at 10s, it will still see `false`.
 
-All map control buttons (Eye toggle, Layers, Locate, Add, Compass) should have `touch-action: manipulation` to prevent iOS 300ms tap delay and double-tap zoom interference.
+**Fix:** Use a ref to track loaded state alongside the state variable, so the timeout always checks the current value.
 
-### 10. `allResults` memo in MusicOfferingFlow
+**File:** `src/components/CouncilRoom.tsx` — lines 44-51
 
-Line 397: `const allResults = [...catalogResults, ...itunesResults]` creates a new array every render. Wrap in `useMemo` keyed on both result arrays.
+### 5. Add `sandbox` attribute to Jitsi iframe for security hardening
+
+The Jitsi iframe currently has no `sandbox` attribute. Adding a targeted sandbox improves security.
+
+**Fix:** Add `sandbox="allow-scripts allow-same-origin allow-forms allow-popups"` to both Jitsi iframes.
+
+**File:** `src/components/CouncilRoom.tsx` — lines 82-88, 173-181
+
+### 6. Prevent map popup "Plant Seed" button from firing on map drag
+
+The `data-plant-seed` button in map popups intercepts clicks via event delegation. On mobile, a drag that starts on the button could register as a click.
+
+**Fix:** The existing `setupPopupActions` handler should verify the click target more precisely. Check that `e.target.closest('[data-plant-seed]')` exists before proceeding (likely already done — verify and ensure).
+
+**File:** `src/utils/mapWishHandler.ts` — verify existing guard
+
+### 7. Add `loading="lazy"` to CouncilRoom iframes
+
+The Jitsi embed loads immediately even if the user hasn't scrolled to it. Adding lazy loading defers the heavy iframe until visible.
+
+**Fix:** Add `loading="lazy"` to the non-fullscreen Jitsi iframe.
+
+**File:** `src/components/CouncilRoom.tsx` — line 173
 
 ---
 
 ## Files to modify
 
-| File | Change |
+| File | Changes |
 |---|---|
-| `src/components/Map.tsx` | Memo wrapper, stable height |
-| `src/components/GroveViewOverlay.tsx` | Fix N+1 query, move onEventPulses to useEffect |
-| `src/components/MusicOfferingFlow.tsx` | Memo SongRow, memoize allResults |
-| `src/components/QuickSeedButton.tsx` | Wrap export with React.memo |
-| `src/components/CouncilRoom.tsx` | Add iframe load timeout fallback |
-| `src/components/LeafletFallbackMap.tsx` | Add touch-action: manipulation to control buttons |
+| `src/components/GroveViewOverlay.tsx` | z-index bump, early return when inactive |
+| `src/components/CouncilRoom.tsx` | Ref-based timeout, sandbox attr, lazy loading |
+| `src/components/LeafletFallbackMap.tsx` | aria-labels on 4 control buttons |
+| `src/utils/mapWishHandler.ts` | Verify plant-seed click guard |
 
 ---
 
 ## What this does NOT touch
 
+- No new features
 - No architecture changes
 - No file restructuring
-- No feature removal
-- Console logs are already debug-gated — left as-is
-- No new dependencies
+- No removal of existing functionality
 
-## Expected outcome
+## Confidence level for publish
 
-The app should feel noticeably snappier when:
-1. Toggling Grove Signal panel (faster query + no render-phase side effect)
-2. Opening/closing offering dialogs (tighter transitions)
-3. Scrolling tree cards with seed buttons (memoized)
-4. Using the map while keyboard is open on mobile (stable container)
-5. Tapping map controls on iOS (no 300ms delay)
+**High.** The app has solid error boundaries, input sanitization, proper auth patterns, graceful fallbacks, and memoized rendering. These 7 fixes address the remaining edge cases for a smooth first-user experience.
+
+## Known minor issues (non-blocking)
+
+- `DatasetAtlasPage` uses `dangerouslySetInnerHTML` but content is hardcoded (not user input) — safe, but could be refactored later
+- The `get_trees_without_offerings` RPC may not exist yet — the fallback query handles this gracefully
+- Atmosphere overlays (3 radial gradients) render continuously when Grove View is active — minor GPU cost, acceptable for the visual effect
 
