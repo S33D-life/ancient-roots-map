@@ -296,6 +296,14 @@ const ResearchTreeDetailPage = () => {
               </motion.div>
             )}
 
+            {/* Discovery Paths */}
+            <Suspense fallback={null}>
+              <TreeDiscoveryPaths
+                species={tree.species}
+                country={tree.nation}
+              />
+            </Suspense>
+
             {/* Hive connections */}
             <TreeHiveConnections species={tree.species} ecoBelonging={[]} />
 
