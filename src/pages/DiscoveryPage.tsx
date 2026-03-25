@@ -134,7 +134,7 @@ const DiscoveryPage = () => {
     <>
     <Header />
     <PageShell>
-      <div className="max-w-6xl mx-auto px-4 pt-24 pb-20 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 pb-20 space-y-8" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="font-serif text-3xl md:text-4xl text-primary tracking-wide">
