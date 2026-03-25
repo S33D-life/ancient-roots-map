@@ -142,43 +142,71 @@ const SupportPage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {SUPPORT_CONFIG.recurring.tiers.map((tier) => (
-                <Card
-                  key={tier.id}
-                  className="relative overflow-hidden border-primary/15 hover:border-primary/30 transition-all duration-300 hover:shadow-md"
-                >
-                  <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-                    <span className="text-2xl">{tier.emoji}</span>
-                    <div>
-                      <p className="text-2xl font-serif font-semibold text-foreground">
-                        {tier.amount}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{tier.period}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground/80 leading-relaxed">
-                      {tier.description}
-                    </p>
-                    {tier.stripeLink ? (
-                      <a
-                        href={tier.stripeLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-                      >
-                        <Heart className="w-3.5 h-3.5" />
-                        Subscribe
-                        <ExternalLink className="w-3 h-3 opacity-60" />
-                      </a>
-                    ) : (
-                      <span className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-muted text-muted-foreground text-sm font-medium cursor-default">
-                        <Heart className="w-3.5 h-3.5" />
-                        Coming Soon
-                      </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {SUPPORT_CONFIG.recurring.tiers.map((tier) => {
+                const isFeatured = "featured" in tier && (tier as any).featured;
+                return (
+                  <Card
+                    key={tier.id}
+                    className={`relative overflow-hidden transition-all duration-300 hover:shadow-md ${
+                      isFeatured
+                        ? "border-primary/30 bg-primary/5 hover:border-primary/50 sm:scale-[1.03]"
+                        : "border-primary/15 hover:border-primary/30"
+                    }`}
+                  >
+                    {isFeatured && (
+                      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
                     )}
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+                      <span className="text-2xl">{tier.emoji}</span>
+                      <div>
+                        <p className="text-lg font-serif font-semibold text-foreground">
+                          {tier.label}
+                        </p>
+                        <p className="text-xl font-serif font-bold text-foreground mt-0.5">
+                          {tier.amount}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{tier.period}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground/80 leading-relaxed">
+                        {tier.description}
+                      </p>
+                      {isFeatured && (
+                        <p className="text-[10px] text-primary/70 leading-relaxed italic">
+                          Your subscription feeds your Heartwood Vault and supports the commons ecosystem.
+                        </p>
+                      )}
+                      {tier.stripeLink ? (
+                        <a
+                          href={tier.stripeLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          <Heart className="w-3.5 h-3.5" />
+                          Subscribe
+                          <ExternalLink className="w-3 h-3 opacity-60" />
+                        </a>
+                      ) : (
+                        <span className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-muted text-muted-foreground text-sm font-medium cursor-default">
+                          <Heart className="w-3.5 h-3.5" />
+                          Coming Soon
+                        </span>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-center">
+              <Link
+                to={ROUTES.VALUE_TREE}
+                className="inline-flex items-center gap-1.5 text-[10px] text-primary/60 hover:text-primary transition-colors"
+              >
+                <Heart className="w-2.5 h-2.5" />
+                Want to understand how Hearts work? Visit the Value Tree →
+              </Link>
             </div>
 
             <p className="text-[10px] text-muted-foreground/50 text-center">
@@ -186,6 +214,70 @@ const SupportPage = () => {
             </p>
           </motion.section>
         )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* PATRON / STAFF PATH                                     */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <motion.section
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={1.5}
+          className="space-y-4"
+        >
+          <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-b from-primary/5 to-transparent">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            <CardContent className="p-6 sm:p-8 space-y-5">
+              <div className="flex items-center justify-center gap-3">
+                <Wand2 className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-serif font-medium text-foreground tracking-wide">
+                  Walk the Staff Path
+                </h2>
+                <Crown className="w-4 h-4 text-primary/60" />
+              </div>
+
+              <div className="space-y-3 text-center max-w-md mx-auto">
+                <p className="text-sm font-serif text-muted-foreground leading-relaxed">
+                  Join the <span className="text-foreground font-medium">Spiral of 36</span> and the <span className="text-foreground font-medium">Circles of 108</span>.
+                </p>
+                <p className="text-sm font-serif text-muted-foreground leading-relaxed">
+                  Patrons help steward the Ancient Friends map and receive a ceremonial Origin Staff —
+                  a handcrafted companion connecting you with the living lineage of S33D.
+                </p>
+                <p className="text-xs font-serif text-muted-foreground/70 leading-relaxed">
+                  This is a deeper layer of support — a seed offering into the roots of a living project.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {[
+                  { icon: Shield, text: "Patron NFT" },
+                  { icon: Heart, text: "3,333 Starting Hearts" },
+                  { icon: Wand2, text: "Origin Staff" },
+                ].map((item) => (
+                  <div
+                    key={item.text}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/20 bg-card/30 text-[10px] font-serif text-muted-foreground"
+                  >
+                    <item.icon className="w-3 h-3 text-primary/60" />
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-center">
+                <Link
+                  to="/patron-offering"
+                  className="group inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-all"
+                >
+                  <Wand2 className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-serif text-foreground">Explore the Staff Path</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* 3. WHAT YOUR SUPPORT HELPS GROW                        */}
