@@ -96,7 +96,7 @@ const LEAF_SHAPES = ["🍃", "🍂", "🌿", "✦"] as const;
 type LeafDepth = "near" | "mid" | "far";
 
 const TetolHomePage = () => {
-  useDocumentTitle("Home");
+  useDocumentTitle("S33D — Explore the Living System");
   const navigate = useNavigate();
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const { isNewUser } = useIsNewUser();
