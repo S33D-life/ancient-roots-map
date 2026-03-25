@@ -9,11 +9,12 @@ import TetolBreadcrumb from "@/components/TetolBreadcrumb";
 import DashboardVault from "@/components/dashboard/DashboardVault";
 import PageShell from "@/components/PageShell";
 import ContextualWhisper from "@/components/ContextualWhisper";
+import EcosystemContextBanner from "@/components/EcosystemContextBanner";
 import hearthBg from "@/assets/hearth-bg.jpeg";
 import heartwoodLanding from "@/assets/heartwood-landing.jpeg";
 
 const VaultPage = () => {
-  useDocumentTitle("Vault");
+  useDocumentTitle("Heartwood Vault — Hearts & Activity");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -56,6 +57,11 @@ const VaultPage = () => {
         <PageShell>
         <div className="max-w-5xl mx-auto">
           <TetolBreadcrumb />
+          <EcosystemContextBanner
+            zone="Heartwood Vault"
+            subtitle="Your hearts, encounters, and activity ledger"
+            parentLink={{ label: "Value Tree", to: "/value-tree" }}
+          />
           <DashboardVault userId={userId} />
         </div>
         </PageShell>

@@ -72,23 +72,30 @@ const HeartwoodRoomShell = ({
         onTouchStart={canSwipe ? onTouchStart : undefined}
         onTouchEnd={canSwipe ? onTouchEnd : undefined}
       >
-        {/* Breadcrumb + nav arrows */}
+        {/* Breadcrumb + context + nav arrows */}
         <div className="flex items-center justify-between mb-4">
-          <nav
-            aria-label="Library breadcrumb"
-            className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground/70 select-none"
-          >
-            <Link
-              to="/library"
-              className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded px-1"
+          <div>
+            <nav
+              aria-label="Library breadcrumb"
+              className="flex items-center gap-1.5 text-xs font-serif text-muted-foreground/70 select-none"
             >
-              Heartwood Library
-            </Link>
-            <span className="text-border/50" aria-hidden>›</span>
-            <span className="text-foreground/60 truncate max-w-[200px]" aria-current="page">
-              {roomLabel}
-            </span>
-          </nav>
+              <Link
+                to="/library"
+                className="hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded px-1"
+              >
+                Heartwood Library
+              </Link>
+              <span className="text-border/50" aria-hidden>›</span>
+              <span className="text-foreground/60 truncate max-w-[200px]" aria-current="page">
+                {roomLabel}
+              </span>
+            </nav>
+            <p className="text-[10px] font-serif text-muted-foreground/50 mt-0.5 pl-1 select-none">
+              You are in: <span className="text-foreground/50">{roomLabel}</span>
+              <span className="text-border/40 mx-1">·</span>
+              <span className="italic">Part of the Heartwood Library</span>
+            </p>
+          </div>
 
           <div className="flex items-center gap-1">
             {canSwipe && (

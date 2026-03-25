@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import EcosystemContextBanner from "@/components/EcosystemContextBanner";
 import Header from "@/components/Header";
 import HeartwoodBackground from "@/components/HeartwoodBackground";
 import StaffQRCode from "@/components/StaffQRCode";
@@ -347,6 +348,12 @@ export default function StaffDetailPage() {
           </div>
         </div>
 
+        <EcosystemContextBanner
+          zone="Staff Room"
+          subtitle="Ceremonial origins and stewardship vessels"
+          parentLink={{ label: "Heartwood Library", to: "/library/staff-room" }}
+        />
+
         {/* ════════════════════════════════════════════════════════
            1. VESSEL HEADER
            ════════════════════════════════════════════════════════ */}
@@ -428,6 +435,24 @@ export default function StaffDetailPage() {
                 </Button>
               )}
               <StaffQRCode staffCode={staff.code} size={80} />
+            </div>
+
+            {/* Ecosystem cross-links */}
+            <div className="flex flex-wrap justify-center gap-2 mt-3">
+              <Link
+                to="/value-tree?tab=origin-staff"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/20 text-[10px] font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+              >
+                🌳 Value Tree — Origin Staff
+              </Link>
+              {linkedTrees.length > 0 && (
+                <Link
+                  to={`/map?treeId=${linkedTrees[0].id}&arrival=tree`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/20 text-[10px] font-serif text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+                >
+                  🗺 View on Map
+                </Link>
+              )}
             </div>
           </div>
         </motion.section>

@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import EcosystemContextBanner from "@/components/EcosystemContextBanner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -300,6 +301,11 @@ const ValueTreePage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+        <EcosystemContextBanner
+          zone="Value Tree"
+          subtitle="How value flows through the ecosystem"
+          parentLink={{ label: "Heartwood", to: "/library" }}
+        />
         {/* Hero */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -368,12 +374,15 @@ const ValueTreePage = () => {
 
                 <EconomyOverview />
 
-                {/* System links */}
-                <div className="flex flex-wrap gap-3">
-                  <SystemLink to="/map" label="Ancient Friends Map" icon={<MapPin className="w-3.5 h-3.5 text-primary" />} />
-                  <SystemLink to="/library/staff-room" label="Staff Room" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
-                  <SystemLink to="/council-of-life" label="Council of Life" icon={<Users className="w-3.5 h-3.5 text-primary" />} />
-                  <SystemLink to="/dashboard?tab=vault" label="Heartwood Vault" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
+                {/* Contextual system links — attached to purpose */}
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/50 font-serif">Continue the journey</p>
+                  <div className="flex flex-wrap gap-3">
+                    <SystemLink to="/map" label="Visit an Ancient Friend" icon={<MapPin className="w-3.5 h-3.5 text-primary" />} />
+                    <SystemLink to="/library/gallery" label="Browse Tree Stories" icon={<TreePine className="w-3.5 h-3.5 text-primary" />} />
+                    <SystemLink to="/library/staff-room" label="Staff Room — Ceremonial Origins" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
+                    <SystemLink to="/vault" label="Vault — Your Hearts & Activity" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
+                  </div>
                 </div>
 
                 <Suspense fallback={null}>
