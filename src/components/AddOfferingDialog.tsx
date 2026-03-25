@@ -448,7 +448,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎵</span> Song Offering</span>}
-        subtitle={<>{treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}{onChangeType && <> · <button type="button" onClick={() => { onOpenChange(false); onChangeType(); }} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
+        subtitle={<>{treeName ? `Place a song beneath ${treeName}` : "Let music flow through this Ancient Friend"}{onChangeType && <> · <button type="button" onClick={onChangeType} className="text-[11px] font-serif text-muted-foreground/50 hover:text-primary/70 transition-colors">← Change type</button></>}</>}
         fullscreenMobile
       >
         {/* Type pre-selected from gateway — no switcher */}
