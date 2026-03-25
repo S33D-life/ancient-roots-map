@@ -173,18 +173,32 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
     }
   };
 
-  const SectionHeader = ({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle?: string }) => (
-    <div className="flex items-center gap-2.5 pt-2 pb-1">
-      <Icon className="w-4 h-4 text-primary/70" />
-      <div>
-        <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
-        {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
-      </div>
-    </div>
-  );
+  /** Collapsible section wrapper — consistent across Settings tab */
+  const SettingsCollapsible = ({ icon: Icon, title, subtitle, defaultOpen = false, children }: {
+    icon: React.ElementType; title: string; subtitle?: string; defaultOpen?: boolean; children: React.ReactNode;
+  }) => {
+    const [open, setOpen] = useState(defaultOpen);
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="w-full group">
+          <div className="flex items-center gap-2.5 py-3 cursor-pointer select-none">
+            <Icon className="w-4 h-4 text-primary/70" />
+            <div className="flex-1 text-left">
+              <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
+              {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
+            </div>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pb-2">
+          {children}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
 
   return (
-    <div className="space-y-10 max-w-lg">
+    <div className="space-y-6 max-w-lg">
       {/* ── Profile ── */}
       <section className="space-y-4">
         <SectionHeader icon={Camera} title="Profile" subtitle="Your identity in the grove" />
