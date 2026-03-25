@@ -168,8 +168,18 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
     }
   };
 
+  const SectionHeader = ({ icon: Icon, title, subtitle }: { icon: React.ElementType; title: string; subtitle?: string }) => (
+    <div className="flex items-center gap-2.5 pt-2 pb-1">
+      <Icon className="w-4 h-4 text-primary/70" />
+      <div>
+        <h3 className="font-serif text-sm tracking-[0.12em] uppercase text-primary/90">{title}</h3>
+        {subtitle && <p className="text-[10px] font-serif text-muted-foreground/60 mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="space-y-8 max-w-lg">
+    <div className="space-y-10 max-w-lg">
       {/* Avatar & Name */}
       <Card className="border-border/50 bg-card/60 backdrop-blur">
         <CardContent className="p-6 space-y-6">
