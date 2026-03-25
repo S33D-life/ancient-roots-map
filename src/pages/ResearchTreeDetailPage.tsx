@@ -156,7 +156,7 @@ const ResearchTreeDetailPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-4xl">
+      <div className="container mx-auto px-4 pb-20 max-w-4xl" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 5rem)" }}>
         {/* Back */}
         <button
           onClick={() =>

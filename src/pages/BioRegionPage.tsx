@@ -196,7 +196,7 @@ const BioRegionPage = () => {
   return (
     <PageShell>
       <Header />
-      <div className="min-h-screen pb-24 pt-16">
+      <div className="min-h-screen pb-24" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 4.5rem)" }}>
 
         {/* ═══════ HERO ═══════ */}
         <section className="relative px-4 pt-10 pb-8 overflow-hidden">
