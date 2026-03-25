@@ -416,12 +416,26 @@ const DashboardPage = () => {
     const { data: badges } = useSpeciesBadges(userId);
     const { data: streak } = useWandererStreak(userId);
     return (
-      <div className="space-y-8">
-        <StreakBadge streak={streak} />
-        <SpeciesBadgeList badges={badges || []} />
-        <PersonalLegend userId={userId} />
-        <AncientFriendPassport userId={userId} />
-        <DashboardActivity userId={userId} />
+      <div className="space-y-10">
+        {/* Progress */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Activity} title="Progress" subtitle="Your streak and species milestones" />
+          <StreakBadge streak={streak} />
+          <SpeciesBadgeList badges={badges || []} />
+        </section>
+
+        {/* Legend & Passport */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={BookOpen} title="Your Legend" subtitle="Timeline of your journey through the grove" />
+          <PersonalLegend userId={userId} />
+          <AncientFriendPassport userId={userId} />
+        </section>
+
+        {/* Recent Activity */}
+        <section className="space-y-5">
+          <HearthSectionHeader icon={Leaf} title="Activity" subtitle="Recent actions and contributions" />
+          <DashboardActivity userId={userId} />
+        </section>
       </div>
     );
   };
