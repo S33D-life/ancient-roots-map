@@ -473,6 +473,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         overlay={celebrationOverlay}
         title={<span className="flex items-center gap-2"><span className="text-2xl">🎙️</span> Voice Offering</span>}
         subtitle="Speak into the canopy — your voice becomes part of this tree"
+        fullscreenMobile
       >
         <TypeSwitcher activeType={activeType} onChange={(t) => { if (!loading) setActiveType(t); }} />
         <div className="mt-2 relative">
