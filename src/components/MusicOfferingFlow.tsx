@@ -493,7 +493,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
 
             {/* Results */}
             {allResults.length > 0 && (
-              <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30 backdrop-blur max-h-[320px] overflow-y-auto">
+              <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30 backdrop-blur max-h-[45vh] overflow-y-auto overscroll-contain">
                 {catalogResults.length > 0 && (
                   <div>
                     <div className="px-3 py-1.5 bg-secondary/15 border-b border-border/15">
