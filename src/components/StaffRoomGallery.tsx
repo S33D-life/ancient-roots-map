@@ -860,6 +860,7 @@ export default function StaffRoomGallery() {
               </div>
             </div>
 
+            {viewMode === "carousel" && <CarouselView />}
             {viewMode === "list" && <ListView />}
             {viewMode === "gallery" && <GalleryView />}
 
