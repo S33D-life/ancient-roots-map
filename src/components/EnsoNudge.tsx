@@ -90,12 +90,20 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
               className="w-full h-full"
               style={{ filter: "drop-shadow(0 0 6px hsl(42 80% 55% / 0.35))" }}
             >
+              {/* Brush texture filter — organic ink displacement */}
+              <defs>
+                <filter id={BRUSH_FILTER_ID} x="-10%" y="-10%" width="120%" height="120%">
+                  <feTurbulence type="turbulence" baseFrequency="0.65" numOctaves="3" seed="2" result="noise" />
+                  <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" xChannelSelector="R" yChannelSelector="G" />
+                </filter>
+              </defs>
               <motion.path
                 d={ENSO_PATH}
                 stroke="hsl(42, 75%, 58%)"
-                strokeWidth="1.8"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 fill="none"
+                filter={`url(#${BRUSH_FILTER_ID})`}
                 strokeDasharray={ENSO_LENGTH}
                 initial={reducedMotion ? { strokeDashoffset: 0 } : { strokeDashoffset: ENSO_LENGTH }}
                 animate={{
