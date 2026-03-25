@@ -119,6 +119,9 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
   const palette = SEASON_PALETTE[season];
   const displayTrees = treeTab === "recent" ? recentTrees : nearbyTrees;
 
+  // Early return when inactive — prevents mounting effects and rendering overlay DOM
+  if (!active) return null;
+
   return (
     <>
       {/* Seasonal atmosphere overlay */}
