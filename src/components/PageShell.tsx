@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 interface PageShellProps {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
   /** Slower, more cinematic entrance for feature pages */
   cinematic?: boolean;
 }
