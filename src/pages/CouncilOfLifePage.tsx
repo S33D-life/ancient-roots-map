@@ -16,7 +16,7 @@ import LevelEntrance from "@/components/LevelEntrance";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { HostAPodModal } from "@/components/HostAPodModal";
 import DigitalFireVote from "@/components/DigitalFireVote";
-import CouncilSparkIcon from "@/components/CouncilSparkIcon";
+
 import councilHomeBg from "@/assets/council-home-bg.jpeg";
 import CouncilRoom from "@/components/CouncilRoom";
 
