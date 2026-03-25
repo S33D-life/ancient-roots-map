@@ -1145,6 +1145,7 @@ const TreeDetailPage = () => {
         treeName={tree?.name}
         type={selectedType}
         meetingId={activeMeeting?.id}
+        onChangeType={openOfferingGateway}
       />
 
       <ProposeEditDrawer
