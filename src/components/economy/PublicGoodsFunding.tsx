@@ -128,7 +128,7 @@ const PublicGoodsFunding = () => {
         {/* Funding streams */}
         <div className="space-y-2.5">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground/50 font-serif">
-            Funding Streams
+            Sources of Nourishment
           </p>
           {FUNDING_STREAMS.map((stream, i) => {
             const status = STATUS_STYLES[stream.status];
