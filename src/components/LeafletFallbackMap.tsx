@@ -1199,6 +1199,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     showHeartGlow,
     birdsongSeason,
   });
+  const bloomedSeedCount = overlayResults.bloomedSeedCount;
+  const seedTrailCount = overlayResults.seedTrailCount;
+  // harvestTreeIds for UI is now managed inside the hook
 
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
