@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { SUPPORT_CONFIG } from "@/lib/support-config";
 import {
   Collapsible,
