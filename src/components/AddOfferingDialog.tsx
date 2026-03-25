@@ -36,6 +36,8 @@ interface AddOfferingDialogProps {
   treeName?: string;
   type: OfferingType;
   meetingId?: string | null;
+  /** Called when user wants to return to the gateway to pick a different type */
+  onChangeType?: () => void;
 }
 
 const typeConfig: Record<
