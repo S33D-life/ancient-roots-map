@@ -683,7 +683,7 @@ const TreeDetailPage = () => {
                     species={tree.species}
                     treeId={id!}
                     treeName={tree.name}
-                    onAddOffering={() => setAddOfferingOpen(true)}
+                    onAddOffering={openOfferingGateway}
                   />
 
                   {/* Discovery Paths — country, hive, bioregion */}
