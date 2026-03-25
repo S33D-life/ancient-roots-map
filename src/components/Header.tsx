@@ -128,7 +128,7 @@ const Header = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const heartBalance = useHeartBalance(user?.id ?? null);
+  
 
   return (
     <>
