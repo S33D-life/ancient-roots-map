@@ -153,7 +153,7 @@ export default function ActivityFeed({ limit = 8, userId, compact }: Props) {
                 <p className="text-[10px] text-muted-foreground font-serif italic truncate">{item.detail}</p>
               )}
             </div>
-            <span className="text-[9px] text-muted-foreground/60 font-mono flex-shrink-0 mt-0.5">
+            <span className="text-[9px] text-muted-foreground/80 font-mono flex-shrink-0 mt-0.5">
               {formatDistanceToNow(new Date(item.timestamp), { addSuffix: false })}
             </span>
           </motion.div>
