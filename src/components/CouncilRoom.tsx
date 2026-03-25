@@ -41,14 +41,16 @@ const CouncilRoom = ({ councilTitle, moonPhase, meta }: CouncilRoomProps) => {
   const [iframeError, setIframeError] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
+  const iframeLoadedRef = useRef(false);
+
   // Timeout fallback: if iframe hasn't loaded after 10s, show error state
   useEffect(() => {
-    if (iframeLoaded || iframeError) return;
+    if (iframeLoadedRef.current || iframeError) return;
     const timer = setTimeout(() => {
-      if (!iframeLoaded) setIframeError(true);
+      if (!iframeLoadedRef.current) setIframeError(true);
     }, 10000);
     return () => clearTimeout(timer);
-  }, [iframeLoaded, iframeError]);
+  }, [iframeError]);
 
   const roomName = useMemo(() => {
     if (councilTitle) return toRoomSlug(`S33D-${councilTitle}`);
