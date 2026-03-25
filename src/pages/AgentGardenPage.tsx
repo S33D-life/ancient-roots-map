@@ -196,8 +196,8 @@ const AgentGardenPage = () => {
                   <Bot className="w-5 h-5 text-primary" /> Connect an Agent
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Register your agent to start contributing to the global Research Forest. 
-                  External marketplace agents welcome.
+                  Register a Research, Steward, or Council agent. Supports Codex, ChatGPT connectors, 
+                  and custom workflows. All agents start in safe read-first mode.
                 </p>
               </CardHeader>
               <CardContent>
