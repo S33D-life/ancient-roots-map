@@ -2948,7 +2948,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       {/* Bottom controls: unified Eye toggle + Atlas Filter + locate + add + compass */}
       {(() => {
         const modeAccent = perspective === "personal" ? "120, 50%, 45%" : perspective === "tribe" ? "200, 55%, 50%" : "42, 90%, 55%";
-        const addEmphasis = perspective === "personal";
         const globeEmphasis = perspective === "collective";
 
         // Overlays are visible when NOT in clearView
