@@ -9,6 +9,8 @@ import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 import SendWhisperModal from "@/components/SendWhisperModal";
 import TreeWhisperButton from "@/components/TreeWhisperButton";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
+import QuickSeedButton from "@/components/QuickSeedButton";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export type TreeCardVariant = "gallery" | "compact";
 
