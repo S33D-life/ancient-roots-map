@@ -11,21 +11,12 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 /* ── Funding streams (placeholder data — replace with live data when available) ── */
 const FUNDING_STREAMS = [
   {
-    id: "gitcoin-gg22",
-    source: "Gitcoin",
-    round: "GG22 · Climate Solutions",
-    status: "upcoming" as const,
-    emoji: "🌱",
-    description: "Quadratic funding for regenerative public goods.",
-    link: "https://explorer.gitcoin.co",
-  },
-  {
     id: "community",
     source: "Community",
-    round: "Patron Offerings & Subscriptions",
+    round: "Patron offerings & subscriptions",
     status: "active" as const,
-    emoji: "👑",
-    description: "Direct support flowing into the Heart economy.",
+    emoji: "🌿",
+    description: "Direct nourishment from the people who care for the grove.",
     link: "/support",
     internal: true,
   },
@@ -35,8 +26,17 @@ const FUNDING_STREAMS = [
     round: "S33D on Giveth",
     status: "active" as const,
     emoji: "💚",
-    description: "Crypto donations via Giveth's regenerative platform.",
+    description: "Regenerative donations flowing through the wider commons.",
     link: "https://giveth.io",
+  },
+  {
+    id: "gitcoin-gg22",
+    source: "Gitcoin",
+    round: "Climate Solutions Round",
+    status: "upcoming" as const,
+    emoji: "🌱",
+    description: "Quadratic matching — small gifts grow through collective support.",
+    link: "https://explorer.gitcoin.co",
   },
 ];
 
