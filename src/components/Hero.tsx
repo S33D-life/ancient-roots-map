@@ -305,10 +305,12 @@ const Hero = () => {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-16 text-center flex flex-col items-center justify-center min-h-screen">
         <div className="max-w-4xl mx-auto space-y-4">
-          {/* Branding title */}
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
-            The Arboreal Atlas of<br />Ancient Friends
-          </h1>
+          {/* S33D branding with Ensō nudge for first-time visitors */}
+          <EnsoNudge size={120}>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight cursor-pointer">
+              The Arboreal Atlas of<br />Ancient Friends
+            </h1>
+          </EnsoNudge>
             <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
             A living atlas of the world's most ancient trees. Map, explore, and protect.
           </p>
