@@ -749,28 +749,45 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
 /** Inline type switcher — scrollable pill bar with reduced visual weight */
 const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onChange: (t: OfferingType) => void }) => {
+  const [showMore, setShowMore] = useState(() =>
+    SECONDARY_TYPES.some((t) => t.value === activeType)
+  );
+
   // Persist last-used tab
   useEffect(() => {
     try { localStorage.setItem("s33d-last-offering-type", activeType); } catch {}
   }, [activeType]);
 
+  const renderPill = (t: { value: OfferingType; emoji: string; label: string }) => (
+    <button
+      key={t.value}
+      type="button"
+      onClick={() => onChange(t.value)}
+      className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-serif transition-all duration-200 ${
+        activeType === t.value
+          ? "bg-primary/15 text-primary border border-primary/30"
+          : "text-muted-foreground/50 hover:text-muted-foreground/80 border border-transparent"
+      }`}
+    >
+      <span className="text-sm">{t.emoji}</span>
+      <span className={activeType === t.value ? "font-medium" : ""}>{t.label}</span>
+    </button>
+  );
+
   return (
-    <div className="flex gap-1 overflow-x-auto py-2.5 -mx-1 px-1 scrollbar-none">
-      {QUICK_TYPES.map((t) => (
+    <div className="flex items-center gap-1 overflow-x-auto py-2 -mx-1 px-1 scrollbar-none">
+      {PRIMARY_TYPES.map(renderPill)}
+      {!showMore ? (
         <button
-          key={t.value}
           type="button"
-          onClick={() => onChange(t.value)}
-          className={`shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-serif transition-all duration-200 ${
-            activeType === t.value
-              ? "bg-primary/15 text-primary border border-primary/30"
-              : "text-muted-foreground/40 hover:text-muted-foreground/70 border border-transparent"
-          }`}
+          onClick={() => setShowMore(true)}
+          className="shrink-0 px-2 py-1.5 rounded-full text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/70 border border-dashed border-border/30 transition-all"
         >
-          <span className="text-sm">{t.emoji}</span>
-          <span className={activeType === t.value ? "font-medium" : ""}>{t.label}</span>
+          More…
         </button>
-      ))}
+      ) : (
+        SECONDARY_TYPES.map(renderPill)
+      )}
     </div>
   );
 };
