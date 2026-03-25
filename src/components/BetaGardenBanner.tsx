@@ -16,8 +16,10 @@ function isDismissed(): boolean {
 
 const BetaGardenBanner = () => {
   const [visible, setVisible] = useState(() => !isDismissed());
+  const { isNewUser } = useIsNewUser();
 
-  if (!visible) return null;
+  // Hide for brand-new users — reduce first-load noise
+  if (!visible || isNewUser) return null;
 
   const handleDismiss = () => {
     try { localStorage.setItem(LS_KEY, "1"); } catch {}

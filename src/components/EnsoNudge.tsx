@@ -58,7 +58,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
     }
   }, [hasInteracted, onInteract]);
 
-  const showEnso = isFirstVisit && !hasInteracted;
+  const showEnso = isFirstVisit && !hasInteracted && showOnboardingNudges;
   const reducedMotion = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   return (
