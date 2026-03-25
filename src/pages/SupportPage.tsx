@@ -61,7 +61,7 @@ const transparencyItems = [
   "Maintaining the knowledge archive",
   "Supporting community gatherings",
   "Nurturing the wider S33D ecosystem",
-  "Public goods funding rounds amplify community support",
+  "Commons rounds amplify the reach of community support",
 ];
 
 /* ── Help & contact cards ───────────────────────────────────── */
@@ -405,52 +405,55 @@ const SupportPage = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* Public Goods Funding                                    */}
+        {/* Commons Nourishment — public goods rounds               */}
         {/* ═══════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
           animate="visible"
           variants={fadeUp}
           custom={3.5}
-          className="rounded-xl border border-border/20 bg-card/40 p-5 space-y-3"
+          className="space-y-3"
         >
-          <h2 className="text-sm font-serif font-medium text-foreground flex items-center gap-2">
-            <span>🌍</span> Public Goods Funding
-          </h2>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            S33D participates in public goods funding rounds like Gitcoin and Giveth.
-            Community support increases quadratic matching — even small contributions amplify impact.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="https://explorer.gitcoin.co"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-xs font-serif text-foreground hover:bg-primary/10 transition-colors"
-            >
-              <span>🌱</span> Support on Gitcoin
-              <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
-            </a>
-            <a
-              href={SUPPORT_CONFIG.external.giveth.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-border/30 bg-card/30 text-xs font-serif text-foreground hover:border-primary/20 transition-colors"
-            >
-              <span>💚</span> {SUPPORT_CONFIG.external.giveth.label}
-              <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
-            </a>
+          <div className="flex items-start gap-3 p-4 rounded-xl border border-border/20 bg-card/30">
+            <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 mt-0.5">
+              <Globe className="w-4 h-4 text-primary/70" />
+            </div>
+            <div className="space-y-2.5 flex-1">
+              <div>
+                <p className="text-sm font-medium text-foreground">Support through the wider commons</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                  S33D is part of the regenerative commons. You can also support through
+                  public goods rounds — where even small contributions are amplified by matching.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="https://explorer.gitcoin.co"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors"
+                >
+                  <span>🌱</span> Gitcoin
+                  <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
+                </a>
+                <a
+                  href={SUPPORT_CONFIG.external.giveth.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors"
+                >
+                  <span>💚</span> Giveth
+                  <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
+                </a>
+              </div>
+              <Link
+                to="/value-tree?tab=deeper"
+                className="inline-flex items-center gap-1.5 text-[10px] text-primary/50 hover:text-primary transition-colors"
+              >
+                How commons nourishment flows into Hearts →
+              </Link>
+            </div>
           </div>
-          <p className="text-[9px] text-muted-foreground/50 italic">
-            External funding flows into the S33D commons and is distributed as Hearts through the Value Tree.
-          </p>
-          <Link
-            to="/value-tree?tab=deeper"
-            className="inline-flex items-center gap-1.5 text-[10px] text-primary/60 hover:text-primary transition-colors"
-          >
-            <Heart className="w-2.5 h-2.5" />
-            See how funding flows through the Value Tree →
-          </Link>
         </motion.section>
 
         {/* ═══════════════════════════════════════════════════════ */}

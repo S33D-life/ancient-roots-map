@@ -11,21 +11,12 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 /* ── Funding streams (placeholder data — replace with live data when available) ── */
 const FUNDING_STREAMS = [
   {
-    id: "gitcoin-gg22",
-    source: "Gitcoin",
-    round: "GG22 · Climate Solutions",
-    status: "upcoming" as const,
-    emoji: "🌱",
-    description: "Quadratic funding for regenerative public goods.",
-    link: "https://explorer.gitcoin.co",
-  },
-  {
     id: "community",
     source: "Community",
-    round: "Patron Offerings & Subscriptions",
+    round: "Patron offerings & subscriptions",
     status: "active" as const,
-    emoji: "👑",
-    description: "Direct support flowing into the Heart economy.",
+    emoji: "🌿",
+    description: "Direct nourishment from the people who care for the grove.",
     link: "/support",
     internal: true,
   },
@@ -35,8 +26,17 @@ const FUNDING_STREAMS = [
     round: "S33D on Giveth",
     status: "active" as const,
     emoji: "💚",
-    description: "Crypto donations via Giveth's regenerative platform.",
+    description: "Regenerative donations flowing through the wider commons.",
     link: "https://giveth.io",
+  },
+  {
+    id: "gitcoin-gg22",
+    source: "Gitcoin",
+    round: "Climate Solutions Round",
+    status: "upcoming" as const,
+    emoji: "🌱",
+    description: "Quadratic matching — small gifts grow through collective support.",
+    link: "https://explorer.gitcoin.co",
   },
 ];
 
@@ -73,13 +73,13 @@ const FundingFlowDiagram = () => (
       ))}
     </div>
 
-    {/* Nodes */}
+      {/* Nodes */}
     <div className="relative flex items-center justify-between gap-2">
       {[
-        { icon: "🌍", label: "External\nFunding", sub: "Gitcoin · Giveth" },
+        { icon: "🌧️", label: "External\nSupport", sub: "Commons rounds" },
         { icon: "🌱", label: "S33D\nCommons", sub: "Value Tree" },
         { icon: "❤️", label: "Hearts", sub: "Distributed" },
-        { icon: "🌳", label: "Trees &\nContributors", sub: "Impact" },
+        { icon: "🌳", label: "Trees &\nStewards", sub: "Living impact" },
       ].map((node, i) => (
         <motion.div
           key={node.label}
@@ -107,18 +107,18 @@ const PublicGoodsFunding = () => {
   return (
     <Card className="bg-card/40 backdrop-blur border-border/30 overflow-hidden">
       <div
-        className="h-0.5"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(150 50% 45% / 0.4), hsl(var(--primary) / 0.3), transparent)" }}
+        className="h-px"
+        style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.15), transparent)" }}
       />
       <CardContent className="p-5 sm:p-6 space-y-5">
         {/* Header */}
         <div className="text-center space-y-1.5">
           <div className="flex items-center justify-center gap-2">
-            <span className="text-lg">🌍</span>
-            <h3 className="text-base font-serif text-foreground">Public Goods Funding</h3>
+            <span className="text-lg">🌧️</span>
+            <h3 className="text-base font-serif text-foreground">Commons Nourishment</h3>
           </div>
           <p className="text-[10px] font-serif text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            S33D participates in regenerative funding rounds. External funding flows into the commons and is distributed as Hearts.
+            Support flows into S33D from many sources — like rain nourishing the forest. It enters the commons and is distributed as Hearts.
           </p>
         </div>
 
@@ -128,7 +128,7 @@ const PublicGoodsFunding = () => {
         {/* Funding streams */}
         <div className="space-y-2.5">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground/50 font-serif">
-            Funding Streams
+            Sources of Nourishment
           </p>
           {FUNDING_STREAMS.map((stream, i) => {
             const status = STATUS_STYLES[stream.status];
@@ -170,19 +170,19 @@ const PublicGoodsFunding = () => {
           })}
         </div>
 
-        {/* Public good contribution note */}
+        {/* Impact note */}
         <div className="rounded-lg border border-border/20 bg-secondary/20 p-3 space-y-1.5">
           <p className="text-[10px] font-serif text-foreground flex items-center gap-1.5">
-            <span>✨</span> Your contributions count as public goods
+            <span>✨</span> Every contribution nourishes the commons
           </p>
           <p className="text-[9px] font-serif text-muted-foreground leading-relaxed">
-            Mapping trees, contributing data, and council participation are tracked as public good contributions —
-            building an impact record that supports future retroactive funding.
+            Mapping trees, making offerings, and council participation all build your living impact record —
+            a story of stewardship that grows over time.
           </p>
         </div>
 
         <p className="text-[9px] font-serif text-muted-foreground/50 text-center italic">
-          Funding flows like rain into the roots — nourishing the whole forest.
+          Like rain into roots — nourishing the whole forest.
         </p>
       </CardContent>
     </Card>
