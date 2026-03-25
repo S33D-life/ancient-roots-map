@@ -180,8 +180,10 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
 
   return (
     <div className="space-y-10 max-w-lg">
-      {/* Avatar & Name */}
-      <Card className="border-border/50 bg-card/60 backdrop-blur">
+      {/* ── Profile ── */}
+      <section className="space-y-4">
+        <SectionHeader icon={Camera} title="Profile" subtitle="Your identity in the grove" />
+        <Card className="border-border/50 bg-card/60 backdrop-blur">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-5">
             <div className="relative group">
