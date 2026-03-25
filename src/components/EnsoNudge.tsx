@@ -118,14 +118,28 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
               />
             </svg>
 
-            {/* Glow breathing layer */}
+            {/* Halo glow — appears after ensō draws, pulses to invite click */}
             <motion.div
-              className="absolute inset-0 rounded-full"
+              className="absolute rounded-full"
               style={{
-                background: "radial-gradient(circle, hsl(42 80% 55% / 0.08), transparent 70%)",
+                inset: "-18%",
+                background: "radial-gradient(circle, hsl(42 80% 55% / 0.18) 0%, hsl(42 70% 50% / 0.08) 45%, transparent 72%)",
               }}
-              animate={{ scale: [1, 1.06, 1], opacity: [0.4, 0.7, 0.4] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: [1, 1.12, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 2.8 }}
+            />
+            {/* Inner warm glow hugging the icon */}
+            <motion.div
+              className="absolute rounded-full"
+              style={{
+                inset: "15%",
+                background: "radial-gradient(circle, hsl(42 90% 60% / 0.12), transparent 65%)",
+                boxShadow: "0 0 20px hsl(42 80% 55% / 0.25), inset 0 0 12px hsl(42 80% 55% / 0.15)",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.8, 0.5, 0.8] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 3 }}
             />
           </motion.div>
         )}
