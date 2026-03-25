@@ -751,7 +751,31 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return Array.from(m.values()).sort((a, b) => b.count - a.count);
   }, [trees]);
 
-  /** Visual layer sections for AtlasFilter — reorganised into 6 semantic groups */
+  // ── Overlay layers (Seeds, Root Threads, Offering Glow, Harvest, Ancient, Birdsong, Bloomed Seeds, Seed Trail, Heart Glow) ──
+  const overlayResults = useMapOverlayLayers({
+    map: mapRef.current,
+    trees,
+    filteredTrees,
+    bloomedSeeds,
+    birdsongHeatPoints,
+    offeringCounts,
+    treeLookup,
+    userId,
+    showSeeds,
+    showRootThreads,
+    showOfferingGlow,
+    showHarvestLayer,
+    showAncientHighlight,
+    showBirdsongHeat,
+    showBloomedSeeds,
+    showSeedTrail,
+    showHeartGlow,
+    birdsongSeason,
+  });
+  const bloomedSeedCount = overlayResults.bloomedSeedCount;
+  const seedTrailCount = overlayResults.seedTrailCount;
+  const harvestTreeIds = overlayResults.harvestTreeIds;
+
   const visualSections: VisualLayerSection[] = useMemo(() => [
     {
       key: "trees",
