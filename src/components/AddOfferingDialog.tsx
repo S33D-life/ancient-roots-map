@@ -205,10 +205,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current || loading) return;
-    if (!title.trim()) {
-      toast({ title: "Missing title", description: "Please provide a title", variant: "destructive" });
-      return;
-    }
+
+    // Auto-generate title if the user didn't provide one
+    const resolvedTitle = title.trim() || content.trim().slice(0, 60).replace(/\n/g, " ") || `Untitled ${cfg.singular}`;
+
     submittingRef.current = true;
     setLoading(true);
 
@@ -257,7 +257,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
         tree_id: treeId,
         type: activeType,
-        title: title.trim(),
+        title: resolvedTitle,
         content: content.trim() || null,
         media_url: finalMediaUrl,
         nft_link: activeType === "nft" ? nftLink.trim() || null : null,
@@ -517,18 +517,22 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   }
 
   const titleNode = (
-    <span className="flex items-center gap-2">
-      <motion.span
-        className="text-2xl"
-        key={cfg.emoji}
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        {cfg.emoji}
-      </motion.span>
-      {cfg.singular} Offering
-    </span>
+    <div className="space-y-1">
+      <span className="flex items-center gap-2">
+        <motion.span
+          className="text-2xl"
+          key={cfg.emoji}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          {cfg.emoji}
+        </motion.span>
+        {cfg.singular} Offering
+      </span>
+      {/* Inline type switcher — compact, inside header */}
+      <TypeSwitcher activeType={activeType} onChange={setActiveType} />
+    </div>
   );
 
   return (
@@ -540,10 +544,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         title={titleNode}
         subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
       >
-        {/* Type switcher */}
-        <TypeSwitcher activeType={activeType} onChange={setActiveType} />
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-3">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-1">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
           {/* PHOTO: image first, then title */}
@@ -593,7 +595,6 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                       placeholder="Name this memory"
                       className="bg-secondary/10 border-border/30 font-serif text-base"
                       maxLength={200}
-                      required
                     />
                   </motion.div>
                 )}
@@ -641,7 +642,6 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
                       placeholder={`Name your ${cfg.singular.toLowerCase()}`}
                       className="bg-secondary/10 border-border/30 font-serif"
                       maxLength={200}
-                      required
                     />
                   </motion.div>
                 )}
@@ -662,12 +662,12 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-2 w-full py-1.5 text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors"
+                className="flex items-center gap-2 w-full py-1 text-[10px] font-serif text-muted-foreground/35 hover:text-muted-foreground/55 transition-colors"
               >
-                <div className="h-px flex-1 bg-border/15" />
-                <ChevronDown className={`w-3 h-3 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
-                <span>Refine offering</span>
-                <div className="h-px flex-1 bg-border/15" />
+                <div className="h-px flex-1 bg-border/10" />
+                <ChevronDown className={`w-2.5 h-2.5 transition-transform ${advancedOpen ? "rotate-180" : ""}`} />
+                <span>Options</span>
+                <div className="h-px flex-1 bg-border/10" />
               </button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4 pt-3">
@@ -814,7 +814,7 @@ const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onCh
   );
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto py-2 -mx-1 px-1 scrollbar-none">
+    <div className="flex items-center gap-0.5 overflow-x-auto py-1 scrollbar-none">
       {PRIMARY_TYPES.map(renderPill)}
       {!showMore ? (
         <button
