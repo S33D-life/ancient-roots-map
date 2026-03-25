@@ -18,7 +18,13 @@ const STORAGE_KEY = "s33d-enso-interacted";
 const ENSO_PATH =
   "M 24 2 C 36 1.5 46 8 49 18 C 52 28 47 40 37 46 C 27 52 13 49 6 39 C -1 29 1.5 14 11 6 C 16 2.5 21 2 24 2.2";
 
-const ENSO_LENGTH = 180; // approximate path length
+const ENSO_LENGTH = 180;
+
+/**
+ * Brush-texture filter ID — applied to the ensō stroke for an organic,
+ * ink-on-paper feel via SVG feTurbulence displacement.
+ */
+const BRUSH_FILTER_ID = "enso-brush-texture";
 
 interface EnsoNudgeProps {
   /** Size of the ensō ring (px). Should be larger than the logo. */
