@@ -47,28 +47,28 @@ const NIGHT = {
 
 const DAWN = {
   base: `
-    radial-gradient(ellipse 60% 50% at 50% 40%, hsl(38 35% 82% / 0.6), transparent 70%),
-    radial-gradient(ellipse 80% 70% at 50% 60%, hsl(270 18% 90% / 0.5), transparent 80%),
+    radial-gradient(ellipse 60% 50% at 50% 40%, hsl(38 32% 90% / 0.6), transparent 70%),
+    radial-gradient(ellipse 80% 70% at 50% 60%, hsl(36 25% 88% / 0.5), transparent 80%),
     linear-gradient(180deg,
-      hsl(270 25% 95%) 0%,
-      hsl(38 30% 90%) 25%,
-      hsl(42 35% 88%) 45%,
-      hsl(270 18% 92%) 70%,
-      hsl(268 22% 94%) 100%
+      hsl(38 35% 95%) 0%,
+      hsl(38 30% 91%) 25%,
+      hsl(40 32% 89%) 45%,
+      hsl(36 25% 92%) 70%,
+      hsl(38 28% 94%) 100%
     )
   `,
-  glow: "radial-gradient(ellipse 40% 35% at 50% 35%, hsl(38 60% 65% / 0.12), transparent 70%)",
+  glow: "radial-gradient(ellipse 40% 35% at 50% 35%, hsl(38 55% 65% / 0.1), transparent 70%)",
   moss: `
-    radial-gradient(ellipse 70% 50% at 0% 100%, hsl(120 20% 80% / 0.15), transparent 50%),
-    radial-gradient(ellipse 70% 50% at 100% 100%, hsl(120 20% 80% / 0.15), transparent 50%)
+    radial-gradient(ellipse 70% 50% at 0% 100%, hsl(90 18% 78% / 0.15), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, hsl(90 18% 78% / 0.15), transparent 50%)
   `,
-  vignette: "radial-gradient(ellipse 70% 65% at 50% 45%, transparent 40%, hsl(270 15% 88% / 0.4) 100%)",
-  silhouetteStroke: "hsl(38, 40%, 60%)",
-  silhouetteStroke2: "hsl(38, 30%, 55%)",
+  vignette: "radial-gradient(ellipse 70% 65% at 50% 45%, transparent 40%, hsl(30 18% 82% / 0.3) 100%)",
+  silhouetteStroke: "hsl(35, 35%, 55%)",
+  silhouetteStroke2: "hsl(35, 28%, 50%)",
   silhouetteOpacity: 0.04,
-  moteColor: (opacity: number) => `hsla(38, 50%, 55%, ${opacity})`,
-  hearthGlow: "radial-gradient(ellipse at center, hsl(38 50% 60% / 0.08), hsl(42 40% 70% / 0.03) 50%, transparent 80%)",
-  floorGlow: "radial-gradient(ellipse 60% 100% at 50% 100%, hsl(38 40% 75% / 0.15), transparent 70%)",
+  moteColor: (opacity: number) => `hsla(38, 45%, 50%, ${opacity})`,
+  hearthGlow: "radial-gradient(ellipse at center, hsl(38 45% 60% / 0.07), hsl(42 35% 65% / 0.03) 50%, transparent 80%)",
+  floorGlow: "radial-gradient(ellipse 60% 100% at 50% 100%, hsl(38 35% 72% / 0.12), transparent 70%)",
 };
 
 interface HeartwoodBackgroundProps {

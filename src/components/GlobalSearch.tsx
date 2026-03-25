@@ -220,7 +220,7 @@ const GlobalSearch = ({ open, onClose, embedded, initialFilter, onMapNavigate }:
       className="fixed inset-0 z-[110] flex items-start justify-center pt-[10vh] md:pt-[15vh]"
       onClick={onClose}
       style={{
-        background: "radial-gradient(ellipse at 50% 30%, hsl(80 15% 10% / 0.7), hsl(80 15% 6% / 0.75))",
+        background: "radial-gradient(ellipse at 50% 30%, hsl(var(--card) / 0.85), hsl(var(--background) / 0.88))",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
       }}

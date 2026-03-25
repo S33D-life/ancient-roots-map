@@ -104,7 +104,7 @@ const TetolMenu = ({ open, onClose }: TetolMenuProps) => {
       style={{
         top: '60px',
         background: visible
-          ? "radial-gradient(ellipse at 50% 30%, hsl(80 25% 12% / 0.97), hsl(80 15% 6% / 0.98))"
+          ? "radial-gradient(ellipse at 50% 30%, hsl(var(--card) / 0.97), hsl(var(--background) / 0.98))"
           : "transparent",
         opacity: visible ? 1 : 0,
         backdropFilter: visible ? "blur(20px)" : "none",
