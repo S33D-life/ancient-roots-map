@@ -205,10 +205,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current || loading) return;
-    if (!title.trim()) {
-      toast({ title: "Missing title", description: "Please provide a title", variant: "destructive" });
-      return;
-    }
+
+    // Auto-generate title if the user didn't provide one
+    const resolvedTitle = title.trim() || content.trim().slice(0, 60).replace(/\n/g, " ") || `Untitled ${cfg.singular}`;
+
     submittingRef.current = true;
     setLoading(true);
 
