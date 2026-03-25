@@ -1,10 +1,9 @@
 /**
  * ScrollsRoom — Standalone room for Scrolls & Records.
- * Contains: Tree Ledger link, Heart Reservoir Rankings, Council embed, Collaborator Volumes.
+ * Contains: Tree Ledger link, Council embed, Collaborator Volumes.
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import CollaboratorShelf from "@/components/CollaboratorShelf";
 import councilImage from "@/assets/council-of-life.jpeg";
 import councilLedgerWindow from "@/assets/council-ledger-window.jpeg";
@@ -37,9 +36,6 @@ const ScrollsRoom = () => {
           <p className="text-sm text-foreground/70 mt-1">Open the transparency explorer →</p>
         </div>
       </Link>
-
-      {/* Heart Reservoir Rankings */}
-      <TreeReservoirLeaderboard />
 
       {/* Council of Life Window */}
       <div

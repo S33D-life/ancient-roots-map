@@ -9,6 +9,7 @@ import HeartwoodBackground from "@/components/HeartwoodBackground";
 import LedgerStats from "@/components/ledger/LedgerStats";
 import ExplorerTable from "@/components/ledger/ExplorerTable";
 import SpeciesSpiral from "@/components/ledger/SpeciesSpiral";
+import TreeReservoirLeaderboard from "@/components/TreeReservoirLeaderboard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useTreeLedger } from "@/hooks/use-tree-ledger";
@@ -69,6 +70,9 @@ const TreeLedgerPage = () => {
           windfallsTriggered={windfallsTriggered}
           loading={loading}
         />
+
+        {/* Richest Reservoirs — Heart Pool Rankings */}
+        <TreeReservoirLeaderboard />
 
         {/* Mode Toggle */}
         <Tabs value={mode} onValueChange={(v) => setMode(v as "explorer" | "spiral")}>
