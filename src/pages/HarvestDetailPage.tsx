@@ -38,7 +38,7 @@ const HarvestDetailPage = () => {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pt-24 pb-20">
+        <main className="flex-1 max-w-2xl mx-auto w-full px-4 pb-20" style={{ paddingTop: 'var(--content-top)' }}>
           <div className="space-y-4">
             <div className="h-48 rounded-xl bg-muted/30 animate-pulse" />
             <div className="h-6 w-2/3 rounded bg-muted/30 animate-pulse" />
