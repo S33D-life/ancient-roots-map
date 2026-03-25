@@ -533,6 +533,8 @@ const DashboardPage = () => {
 
             <TabsContent value="notifications">
               {user && <HearthNotificationSettings userId={user.id} />}
+              <Separator className="my-6 bg-border/20" />
+              <HearthLocationSettings />
             </TabsContent>
 
             <TabsContent value="profile">
