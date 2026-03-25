@@ -84,7 +84,11 @@ const NEW_USER_DEFAULTS: NotificationPreferences = {
 };
 
 export function useNotificationPreferences(userId: string | null) {
-  const [prefs, setPrefs] = useState<NotificationPreferences>(DEFAULTS);
+  // For anonymous / new users without saved prefs, use the calm defaults
+  const isNew = typeof localStorage !== "undefined" && localStorage.getItem("s33d-user-graduated") !== "1";
+  const initialDefaults = isNew ? NEW_USER_DEFAULTS : DEFAULTS;
+
+  const [prefs, setPrefs] = useState<NotificationPreferences>(initialDefaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
