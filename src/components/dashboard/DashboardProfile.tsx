@@ -380,9 +380,8 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         </Card>
       </SettingsCollapsible>
 
-      {/* ── Security & Identity ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Shield} title="Security & Identity" subtitle="Account protection, staff, and wallet" />
+      {/* ── Security & Identity — collapsed ── */}
+      <SettingsCollapsible icon={Shield} title="Security & Identity" subtitle="Account protection, staff, and wallet">
         <HearthAccountSecurity user={user} walletAddress={wallet.address} />
 
         <Card className="border-border/50 bg-card/60 backdrop-blur">
@@ -416,17 +415,15 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
         </Card>
 
         <WalletConnect />
-      </section>
+      </SettingsCollapsible>
 
-      {/* ── Preferences ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={Settings} title="Preferences" subtitle="Presence, weather, and notifications" />
+      {/* ── Preferences — collapsed ── */}
+      <SettingsCollapsible icon={Settings} title="Preferences" subtitle="Presence, weather, and notifications">
         <PresenceWeatherSettings userId={user.id} />
-      </section>
+      </SettingsCollapsible>
 
-      {/* ── System ── */}
-      <section className="space-y-4">
-        <SectionHeader icon={RefreshCw} title="System" />
+      {/* ── System — collapsed ── */}
+      <SettingsCollapsible icon={RefreshCw} title="System">
         <Card className="border-border/50 bg-card/60 backdrop-blur">
           <CardContent className="p-5 space-y-3">
             <p className="text-xs text-muted-foreground font-serif">
@@ -462,7 +459,7 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
             Sign Out
           </Button>
         </div>
-      </section>
+      </SettingsCollapsible>
     </div>
   );
 };
