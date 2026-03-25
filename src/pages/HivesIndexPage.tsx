@@ -223,11 +223,16 @@ const HivesIndexPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto px-4 pb-20 max-w-7xl" style={{ paddingTop: 'var(--content-top)' }}>
+        {/* Perspective Nav */}
+        <div className="mb-4">
+          <AtlasPerspectiveNav />
+        </div>
+
         {/* Hero header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif text-primary tracking-wide mb-2">Species Hives</h1>
-          <p className="text-muted-foreground font-serif mb-4 max-w-2xl text-sm leading-relaxed">
-            Living botanical families of the Ancient Friends grove. Each hive holds its own trees, offerings, and ecological wisdom.
+          <h1 className="text-2xl md:text-3xl font-serif text-primary tracking-wide mb-1">Species Hives</h1>
+          <p className="text-muted-foreground font-serif mb-4 max-w-2xl text-xs leading-relaxed">
+            Living botanical families — each hive holds its own trees, offerings, and ecological wisdom.
           </p>
           <WhyThisMatters
             id="hives-intro"
