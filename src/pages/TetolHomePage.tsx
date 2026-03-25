@@ -12,6 +12,7 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BetaGardenBanner from "@/components/BetaGardenBanner";
+import EnsoNudge from "@/components/EnsoNudge";
 import teotag from "@/assets/teotag-small.webp";
 
 const treeItems = [
