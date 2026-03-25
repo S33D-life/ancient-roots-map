@@ -17,6 +17,7 @@
  * - BugReportDialog lazy-mounted only after first open
  */
 import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Z } from "@/lib/z-index";
