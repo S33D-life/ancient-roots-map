@@ -71,6 +71,18 @@ const DEFAULTS: NotificationPreferences = {
   show_celebrations: true,
 };
 
+/**
+ * Defaults for brand-new users — calm entry experience.
+ * Non-essential overlays are OFF until the user graduates.
+ */
+const NEW_USER_DEFAULTS: NotificationPreferences = {
+  ...DEFAULTS,
+  show_floating_prompts: false,
+  show_companion_suggestions: false,
+  show_teotag_whispers: false,
+  show_celebrations: false,
+};
+
 export function useNotificationPreferences(userId: string | null) {
   const [prefs, setPrefs] = useState<NotificationPreferences>(DEFAULTS);
   const [loading, setLoading] = useState(true);
