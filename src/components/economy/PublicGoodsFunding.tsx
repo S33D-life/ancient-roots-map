@@ -170,19 +170,19 @@ const PublicGoodsFunding = () => {
           })}
         </div>
 
-        {/* Public good contribution note */}
+        {/* Impact note */}
         <div className="rounded-lg border border-border/20 bg-secondary/20 p-3 space-y-1.5">
           <p className="text-[10px] font-serif text-foreground flex items-center gap-1.5">
-            <span>✨</span> Your contributions count as public goods
+            <span>✨</span> Every contribution nourishes the commons
           </p>
           <p className="text-[9px] font-serif text-muted-foreground leading-relaxed">
-            Mapping trees, contributing data, and council participation are tracked as public good contributions —
-            building an impact record that supports future retroactive funding.
+            Mapping trees, making offerings, and council participation all build your living impact record —
+            a story of stewardship that grows over time.
           </p>
         </div>
 
         <p className="text-[9px] font-serif text-muted-foreground/50 text-center italic">
-          Funding flows like rain into the roots — nourishing the whole forest.
+          Like rain into roots — nourishing the whole forest.
         </p>
       </CardContent>
     </Card>
