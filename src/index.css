@@ -93,62 +93,62 @@ All colors MUST be HSL.
   .light .tetol-hearth { --level-accent: 15 65% 45%; }
 
   .light {
-    /* Spectral lavender mist — luminous purple atmosphere */
-    --background: 270 25% 97%;
-    --foreground: 260 20% 16%;
+    /* ── Botanical Parchment Light Mode ── */
+    --background: 38 35% 95%;
+    --foreground: 30 18% 18%;
 
-    /* Layered purple card surfaces */
-    --card: 268 30% 98%;
-    --card-foreground: 260 20% 16%;
+    /* Warm parchment card surfaces */
+    --card: 36 30% 96%;
+    --card-foreground: 30 18% 18%;
 
-    --popover: 272 28% 98.5%;
-    --popover-foreground: 260 20% 16%;
+    --popover: 38 28% 97%;
+    --popover-foreground: 30 18% 18%;
 
-    /* Warm amber-gold primary — grounded warmth */
-    --primary: 38 72% 40%;
-    --primary-foreground: 270 30% 98%;
+    /* Warm amber-gold primary — botanical ink */
+    --primary: 35 65% 35%;
+    --primary-foreground: 38 40% 97%;
 
-    /* Soft lilac secondary */
-    --secondary: 268 20% 93%;
-    --secondary-foreground: 260 18% 22%;
+    /* Soft sage secondary */
+    --secondary: 90 14% 90%;
+    --secondary-foreground: 90 18% 25%;
 
-    /* Muted lavender tones */
-    --muted: 270 15% 91%;
-    --muted-foreground: 260 12% 44%;
+    /* Muted parchment tones */
+    --muted: 38 18% 88%;
+    --muted-foreground: 30 14% 42%;
 
-    /* Gold accent on purple — complementary warmth */
-    --accent: 42 65% 45%;
-    --accent-foreground: 270 30% 98%;
+    /* Moss-gold accent — field guide warmth */
+    --accent: 45 55% 42%;
+    --accent-foreground: 38 40% 97%;
 
-    --destructive: 0 62% 48%;
-    --destructive-foreground: 270 30% 98%;
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 38 40% 97%;
 
-    /* Cool purple borders with subtle depth */
-    --border: 268 18% 85%;
-    --input: 270 18% 93%;
-    --ring: 38 72% 40%;
+    /* Warm sepia borders */
+    --border: 35 22% 82%;
+    --input: 38 20% 91%;
+    --ring: 35 65% 35%;
 
-    /* Mystical tokens — purple-light versions */
-    --mystical-glow: 38 60% 44%;
-    --sacred-gold: 42 65% 40%;
-    --ancient-green: 270 12% 90%;
-    --earth-brown: 268 15% 82%;
+    /* Botanical tokens */
+    --mystical-glow: 35 50% 40%;
+    --sacred-gold: 42 55% 38%;
+    --ancient-green: 90 15% 88%;
+    --earth-brown: 30 18% 78%;
 
-    /* Spectral gradients */
-    --gradient-mystical: linear-gradient(135deg, hsl(38 65% 44%), hsl(45 70% 56%));
-    --gradient-forest: linear-gradient(180deg, hsl(268 30% 98%), hsl(272 22% 95%));
-    --gradient-radial: radial-gradient(circle at center, hsl(270 40% 70% / 0.06), transparent);
+    /* Parchment gradients */
+    --gradient-mystical: linear-gradient(135deg, hsl(35 55% 40%), hsl(42 60% 50%));
+    --gradient-forest: linear-gradient(180deg, hsl(38 30% 96%), hsl(36 25% 93%));
+    --gradient-radial: radial-gradient(circle at center, hsl(42 50% 55% / 0.06), transparent);
 
-    /* Soft purple-gold glow */
-    --glow-sacred: 0 0 24px hsl(270 35% 65% / 0.14), 0 0 60px hsl(42 60% 55% / 0.06);
-    --glow-subtle: 0 0 16px hsl(268 30% 60% / 0.1);
+    /* Warm botanical glow */
+    --glow-sacred: 0 0 24px hsl(35 40% 50% / 0.12), 0 0 60px hsl(42 50% 50% / 0.05);
+    --glow-subtle: 0 0 16px hsl(35 30% 50% / 0.08);
 
-    /* Purple-tinted elevation & atmosphere tokens */
-    --elevation-low: 0 1px 3px hsl(268 20% 50% / 0.06), 0 1px 2px hsl(268 20% 50% / 0.03);
-    --elevation-mid: 0 4px 12px hsl(268 20% 45% / 0.07), 0 2px 4px hsl(268 20% 50% / 0.04);
-    --elevation-high: 0 8px 30px hsl(268 20% 40% / 0.09), 0 4px 8px hsl(268 20% 50% / 0.05);
-    --surface-glow: inset 0 1px 0 hsl(272 40% 99% / 0.8);
-    --atmosphere-bg: linear-gradient(180deg, hsl(270 28% 97%) 0%, hsl(272 20% 95%) 50%, hsl(268 25% 96.5%) 100%);
+    /* Parchment elevation tokens */
+    --elevation-low: 0 1px 3px hsl(30 20% 40% / 0.06), 0 1px 2px hsl(30 15% 40% / 0.03);
+    --elevation-mid: 0 4px 12px hsl(30 20% 35% / 0.07), 0 2px 4px hsl(30 15% 40% / 0.04);
+    --elevation-high: 0 8px 30px hsl(30 18% 30% / 0.09), 0 4px 8px hsl(30 15% 40% / 0.05);
+    --surface-glow: inset 0 1px 0 hsl(40 50% 98% / 0.8);
+    --atmosphere-bg: linear-gradient(180deg, hsl(38 32% 95%) 0%, hsl(36 25% 93%) 50%, hsl(40 28% 94%) 100%);
   }
 
   .dark {
