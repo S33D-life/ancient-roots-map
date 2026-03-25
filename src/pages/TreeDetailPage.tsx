@@ -611,6 +611,16 @@ const TreeDetailPage = () => {
               w3w={tree.what3words}
             />
 
+            {/* Nearby Ancient Friends */}
+            <Suspense fallback={null}>
+              <NearbyTreesExplorer
+                treeId={tree.id}
+                lat={tree.latitude}
+                lng={tree.longitude}
+                species={tree.species}
+              />
+            </Suspense>
+
             {/* ═══ SECONDARY ZONE — Collapsed by default ═══ */}
             <Collapsible open={secondaryOpen} onOpenChange={setSecondaryOpen}>
               <CollapsibleTrigger className="w-full">
