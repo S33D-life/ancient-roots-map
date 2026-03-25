@@ -412,8 +412,14 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
         <Input
           value={query}
           onChange={(e) => { handleQueryChange(e.target.value); if (selectedSong) { setSelectedSong(null); setCustomMode(false); } }}
+          onFocus={(e) => {
+            // Scroll into view on mobile when keyboard opens
+            setTimeout(() => {
+              e.target.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+          }}
           placeholder="Search or paste a Spotify / YouTube link…"
-          className="pl-11 pr-10 font-serif h-14 text-sm rounded-xl bg-secondary/15 border-border/20
+          className="pl-11 pr-10 font-serif h-14 text-base sm:text-sm rounded-xl bg-secondary/15 border-border/20
             focus:border-primary/40 focus:bg-secondary/25 transition-all placeholder:text-muted-foreground/35"
           autoFocus={!selectedSong}
         />
