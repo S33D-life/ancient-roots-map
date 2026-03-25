@@ -545,7 +545,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
       >
 
-        <form onSubmit={handleSubmit} className="space-y-5 mt-3">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-1">
           {/* ─── PRIMARY GESTURE — type-specific hero area ─── */}
 
           {/* PHOTO: image first, then title */}
