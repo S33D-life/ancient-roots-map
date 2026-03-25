@@ -108,6 +108,11 @@ const DashboardVault = ({ userId }: Props) => {
     >
       <VaultParticles />
 
+      {/* Context sentence */}
+      <p className="text-[11px] font-serif text-muted-foreground/70 text-center italic leading-relaxed">
+        Every tree mapped, every offering given, every seed planted — it all gathers here.
+      </p>
+
       {/* Personal Contribution Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {[
