@@ -60,7 +60,7 @@ const PublicTesterBlessing = ({ onComplete }: Props) => {
           className="fixed inset-0 z-[100] flex items-center justify-center px-6"
           style={{
             background:
-              "radial-gradient(ellipse at 50% 40%, hsl(80 18% 14%), hsl(80 15% 8%) 70%)",
+              "radial-gradient(ellipse at 50% 40%, hsl(var(--card)), hsl(var(--background)) 70%)",
           }}
         >
           {/* Soft ambient glow */}

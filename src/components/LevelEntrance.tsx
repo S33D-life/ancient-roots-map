@@ -19,7 +19,7 @@ interface LevelEntranceProps {
  */
 const LevelEntrance = ({
   phases,
-  bgColor = "hsl(80 15% 10%)",
+  bgColor = "hsl(var(--background))",
   phaseDuration = 2000,
   fadeDuration = 800,
   onComplete,
