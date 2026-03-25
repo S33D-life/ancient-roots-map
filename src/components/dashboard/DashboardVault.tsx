@@ -267,6 +267,26 @@ const DashboardVault = ({ userId }: Props) => {
           <ActivityFeed userId={userId} limit={6} compact />
         </Suspense>
       </div>
+
+      {/* What's next — gentle invitation back into the world */}
+      <div className="rounded-xl border border-border/20 bg-card/20 p-4 space-y-3">
+        <p className="text-[10px] font-serif text-muted-foreground uppercase tracking-[0.15em]">Continue the journey</p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { emoji: "🗺️", label: "Visit a tree", to: "/map" },
+            { emoji: "🌳", label: "Value Tree", to: "/value-tree" },
+            { emoji: "🐝", label: "Species Hives", to: "/hives" },
+          ].map(link => (
+            <a
+              key={link.to}
+              href={link.to}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/25 bg-card/30 text-[10px] font-serif text-muted-foreground hover:text-foreground hover:border-primary/25 transition-all"
+            >
+              <span>{link.emoji}</span> {link.label}
+            </a>
+          ))}
+        </div>
+      </div>
     </motion.div>
   );
 };
