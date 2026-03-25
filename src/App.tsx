@@ -23,6 +23,7 @@ const GalleryRedirect = () => <Navigate to="/library" replace />;
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import HeartbeatNotification from "@/components/HeartbeatNotification";
+import { useQuietMode } from "@/contexts/QuietModeContext";
 const StarryNight = lazy(() => import("@/components/StarryNight"));
 
 import DevQAPanel from "@/components/DevQAPanel";
