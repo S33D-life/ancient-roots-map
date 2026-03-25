@@ -4,7 +4,7 @@ import { TreeDeciduous, BookOpen, Leaf, Search } from "lucide-react";
 import teotagLogo from "@/assets/teotag-small.webp";
 import s33dHearthLogo from "@/assets/s33d-hearth-logo.png";
 import headerMossWood from "@/assets/header-moss-wood.jpg";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLongPress } from "@/hooks/use-long-press";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -43,6 +43,36 @@ const DESKTOP_NAV = [
   },
 ] as const;
 
+/** Page-context labels — maps route prefixes to a subtle place name shown on mobile */
+const PAGE_CONTEXT: { prefix: string; label: string }[] = [
+  { prefix: "/map", label: "Map Room" },
+  { prefix: "/tree/", label: "Ancient Friend" },
+  { prefix: "/library/staff-room", label: "Staff Room" },
+  { prefix: "/staff/", label: "Staff Room" },
+  { prefix: "/library/music-room", label: "Tree Radio" },
+  { prefix: "/library/greenhouse", label: "Greenhouse" },
+  { prefix: "/library/bookshelf", label: "Bookshelf" },
+  { prefix: "/library", label: "Heartwood" },
+  { prefix: "/vault", label: "Heartwood Vault" },
+  { prefix: "/dashboard", label: "Hearth" },
+  { prefix: "/value-tree", label: "Value Tree" },
+  { prefix: "/hives", label: "Species Hives" },
+  { prefix: "/hive/", label: "Species Hive" },
+  { prefix: "/atlas", label: "World Atlas" },
+  { prefix: "/council", label: "Council" },
+  { prefix: "/roadmap", label: "Roadmap" },
+  { prefix: "/bug-garden", label: "Bug Garden" },
+  { prefix: "/discovery", label: "Discovery" },
+];
+
+function getPageContext(pathname: string): string | null {
+  if (pathname === "/") return null;
+  for (const { prefix, label } of PAGE_CONTEXT) {
+    if (pathname === prefix || pathname.startsWith(prefix)) return label;
+  }
+  return null;
+}
+
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,6 +84,8 @@ const Header = () => {
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [orbRestoreProgress, setOrbRestoreProgress] = useState(0);
 
+  const pageContext = useMemo(() => getPageContext(location.pathname), [location.pathname]);
+
   const orbRestore = useLongPress({
     onLongPress: () => window.dispatchEvent(new Event("s33d-orb-restore")),
     duration: 600,
@@ -61,12 +93,8 @@ const Header = () => {
     onProgress: setOrbRestoreProgress,
   });
 
-  // S33D logo click → navigate to TETOL home
-  const handleLogoClick = () => {
-    navigate("/");
-  };
+  const handleLogoClick = () => navigate("/");
 
-  // Apply saved theme preference on mount
   useEffect(() => {
     const saved = localStorage.getItem("s33d-theme");
     const root = document.documentElement;
@@ -78,7 +106,6 @@ const Header = () => {
     }
   }, []);
 
-  // ⌘K shortcut opens global search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -138,23 +165,35 @@ const Header = () => {
         <div className="relative z-[2] py-2">
           <div className="flex items-center justify-between min-w-0">
 
-            {/* ═══ LEFT ZONE: S33D Logo ═══ */}
-            <button
-              type="button"
-              onClick={handleLogoClick}
-              className="flex items-center gap-0 bg-transparent border-none p-0 shrink-0 group"
-              aria-label="S33D — Navigate to TETOL overview"
-            >
-              <img
-                src={s33dHearthLogo}
-                alt="S33D"
-                className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover transition-all duration-300
-                  group-hover:scale-105 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.3)]"
-                style={{
-                  border: "1.5px solid hsl(var(--primary) / 0.3)",
-                }}
-              />
-            </button>
+            {/* ═══ LEFT ZONE: S33D Logo + page context ═══ */}
+            <div className="flex items-center gap-2 min-w-0 shrink-0">
+              <button
+                type="button"
+                onClick={handleLogoClick}
+                className="flex items-center gap-0 bg-transparent border-none p-0 shrink-0 group"
+                aria-label="S33D — Navigate to TETOL overview"
+              >
+                <img
+                  src={s33dHearthLogo}
+                  alt="S33D"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover transition-all duration-300
+                    group-hover:scale-105 group-hover:shadow-[0_0_16px_hsl(var(--primary)/0.3)]"
+                  style={{
+                    border: "1.5px solid hsl(var(--primary) / 0.3)",
+                  }}
+                />
+              </button>
+
+              {/* Mobile page-context label — visible only on mobile when not on home */}
+              {pageContext && (
+                <span
+                  className="md:hidden text-[11px] font-serif tracking-wide truncate max-w-[120px]"
+                  style={{ color: "hsl(var(--muted-foreground) / 0.7)" }}
+                >
+                  {pageContext}
+                </span>
+              )}
+            </div>
 
             {/* ═══ CENTER: Desktop nav ═══ */}
             <nav className="hidden md:flex items-center gap-4 lg:gap-6">
@@ -199,12 +238,12 @@ const Header = () => {
                 <Search className="w-3.5 h-3.5 text-foreground/50" />
               </Button>
 
-              {/* Theme toggle — desktop only to reduce mobile crowding */}
+              {/* Theme toggle — desktop only */}
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>
 
-              {/* Heart Signals bell */}
+              {/* Heart Signals bell — visually receded on mobile */}
               {user && <NotificationBell />}
 
               {/* Heart Jar — primary value indicator */}
@@ -236,7 +275,6 @@ const Header = () => {
                     border: "1px solid hsl(var(--primary) / 0.18)",
                   }}
                 />
-                {/* Long-press progress ring for restore */}
                 {orbRestoreProgress > 0 && orbRestoreProgress < 1 && (
                   <svg
                     className="absolute pointer-events-none"
