@@ -259,7 +259,7 @@ export default function PressEditor({ initial, userId, onSave, onBack }: PressEd
               exit={{ opacity: 0, y: 10 }}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-lg rounded-xl border border-border/30 p-6 space-y-4"
-              style={{ background: 'hsl(25 18% 10% / 0.95)' }}
+              style={{ background: 'hsl(var(--card) / 0.95)' }}
             >
               <h2 className="font-serif text-lg text-foreground/90 tracking-wide">Preview before publishing</h2>
               <div className="border-l-2 border-primary/30 pl-4 space-y-2">

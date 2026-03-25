@@ -6,7 +6,7 @@ const Footer = () => {
   const Dot = () => <span className="text-border/40 select-none" aria-hidden>·</span>;
 
   return (
-    <footer className="border-t border-border/15 bg-card/15 backdrop-blur-sm mt-12">
+    <footer className="border-t border-border/15 bg-card/40 backdrop-blur-sm mt-12">
       <div className="max-w-7xl mx-auto px-4 py-5 pb-24 md:pb-5 space-y-3">
         {/* Journey Pulse — only shows when logged in */}
         <div className="flex justify-center">

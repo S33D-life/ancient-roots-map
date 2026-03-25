@@ -93,9 +93,9 @@ const HeartwoodLanding = () => {
           <div
             className="relative flex flex-col items-center pt-4 pb-6 rounded-2xl"
             style={{
-              background: 'linear-gradient(180deg, hsl(25 18% 10% / 0.6), hsl(20 15% 8% / 0.3))',
-              borderBottom: '1px solid hsl(42 35% 25% / 0.2)',
-              boxShadow: '0 8px 32px hsl(20 30% 5% / 0.4), inset 0 1px 0 hsl(42 30% 30% / 0.06)',
+              background: 'linear-gradient(180deg, hsl(var(--card) / 0.6), hsl(var(--card) / 0.3))',
+              borderBottom: '1px solid hsl(var(--border) / 0.2)',
+              boxShadow: '0 8px 32px hsl(var(--background) / 0.4), inset 0 1px 0 hsl(var(--border) / 0.06)',
             }}
           >
             <EmberDrift />

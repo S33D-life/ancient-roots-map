@@ -31,7 +31,7 @@ const TreeLoreSection = ({ loreText, elementalSignature, archetype, seasonalTone
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="rounded-xl border border-border/40 overflow-hidden"
-      style={{ background: "linear-gradient(135deg, hsl(75 20% 12% / 0.8), hsl(42 30% 14% / 0.6))" }}
+      style={{ background: "linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(var(--card) / 0.6))" }}
     >
       {/* Decorative top line */}
       <div className="h-px" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), hsl(200 70% 55% / 0.3), transparent)" }} />
