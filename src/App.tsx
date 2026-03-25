@@ -400,6 +400,7 @@ const App = () => {
           </MapFilterProvider>
           </HiveSeasonProvider>
           </TetolLevelProvider>
+          </QuietModeProvider>
         </BrowserRouter>
         </div>
       </TooltipProvider>
