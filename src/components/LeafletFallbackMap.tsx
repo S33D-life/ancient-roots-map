@@ -35,7 +35,7 @@ import {
   type ExternalTreeCandidate,
   type BBox,
 } from "@/utils/externalTreeSources";
-import { Navigation, Loader2, Globe, TreePine, Plus, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
+import { Navigation, Loader2, Globe, TreePine, Hexagon, Layers, Eye, Crosshair, EyeOff } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import GroveViewOverlay from "./GroveViewOverlay";
 import BloomingClockLayer from "./BloomingClockLayer";
@@ -3059,27 +3059,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                 >
                   {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
                 </button>
-                {/* Add tree button — visible on all viewports */}
+                {/* Hive button — navigate to Species Hives */}
                 <button
-                  onClick={() => {
-                    const map = mapRef.current;
-                    if (map) {
-                      const c = map.getCenter();
-                      setAddTreeCoords({ lat: c.lat, lng: c.lng });
-                    } else {
-                      setAddTreeCoords(userLatLng ? { lat: userLatLng[0], lng: userLatLng[1] } : null);
-                    }
-                    setChooserOpen(true);
-                  }}
-                  className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${addEmphasis ? 'glow-button--emerald' : ''} glow-button`}
+                  onClick={() => navigate("/hives")}
+                  className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button"
                   style={{
                     ...btnBase,
-                    color: addEmphasis ? `hsl(${modeAccent})` : "hsl(120, 50%, 55%)",
+                    color: "hsl(42, 60%, 60%)",
                   }}
-                  title="Add tree"
-                  aria-label="Add tree"
+                  title="Species Hives"
+                  aria-label="Species Hives"
                 >
-                  <Plus className="w-[18px] h-[18px]" />
+                  <Hexagon className="w-[18px] h-[18px]" />
                 </button>
                 <button
                   onClick={handleCompassReset}
