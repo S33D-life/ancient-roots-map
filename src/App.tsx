@@ -181,6 +181,7 @@ const PageLoader = () => <PageSkeleton variant="default" />;
 const App = () => {
   const [authReady, setAuthReady] = useState(false);
   const [authInitError, setAuthInitError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Global connection resilience — shows reconnection toasts
   useConnectionResilience();
