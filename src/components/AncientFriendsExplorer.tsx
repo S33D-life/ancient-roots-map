@@ -136,9 +136,9 @@ const TreeCard = ({
         x: isTop ? x : 0,
         rotate: isTop ? rotate : 0,
         ...style,
-        background: "linear-gradient(160deg, hsl(28 30% 12%), hsl(22 25% 8%))",
-        border: "1px solid hsla(42, 40%, 30%, 0.4)",
-        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
+        background: "linear-gradient(160deg, hsl(var(--card)), hsl(var(--background)))",
+        border: "1px solid hsl(var(--border) / 0.4)",
+        boxShadow: "0 25px 50px -12px hsl(var(--background) / 0.5)",
       }}
       drag={isTop ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}

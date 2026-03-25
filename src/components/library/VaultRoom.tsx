@@ -42,8 +42,8 @@ const VaultRoom = () => {
       <div
         className="rounded-2xl border border-amber-600/30 p-6 space-y-4"
         style={{
-          background: "linear-gradient(135deg, hsl(28 30% 12% / 0.9), hsl(22 25% 10% / 0.95))",
-          boxShadow: "0 0 30px hsl(42 70% 40% / 0.15), inset 0 0 20px hsl(42 60% 30% / 0.08)",
+          background: "linear-gradient(135deg, hsl(var(--card) / 0.9), hsl(var(--card) / 0.95))",
+          boxShadow: "0 0 30px hsl(var(--primary) / 0.1), inset 0 0 20px hsl(var(--primary) / 0.05)",
         }}
       >
         <div className="flex items-center gap-2 mb-2">

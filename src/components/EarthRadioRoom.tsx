@@ -414,8 +414,8 @@ const EarthRadioRoom = () => {
             style={{
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
-              background: 'hsl(28 30% 12% / 0.6)',
-              borderColor: 'hsl(42 50% 40% / 0.3)',
+              background: 'hsl(var(--card) / 0.6)',
+              borderColor: 'hsl(var(--border) / 0.3)',
             }}
             whileTap={{ scale: 0.95 }}
           >

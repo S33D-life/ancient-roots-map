@@ -314,7 +314,7 @@ export default function StaffDetailPage() {
      RENDER — The Vessel
      ═══════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen relative" style={{ background: "hsl(20 25% 6%)" }}>
+    <div className="min-h-screen relative bg-background">
       <HeartwoodBackground />
       <Header />
 

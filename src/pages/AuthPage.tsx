@@ -488,10 +488,10 @@ const AuthPage = () => {
   const isForgot = view === "forgot";
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ background: 'radial-gradient(ellipse at top, hsl(75 20% 14%), hsl(80 15% 10%))' }}>
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
       {/* Left branding panel — hidden on mobile */}
       <div className="hidden md:flex md:w-2/5 lg:w-1/3 flex-col items-center justify-center p-10 relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(42 60% 18% / 0.4), hsl(75 20% 10% / 0.8))' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--background) / 0.8))' }} />
         <div className="relative z-10 text-center space-y-6">
           <img src={teotagLogo} alt="S33D" className="w-24 h-24 rounded-full mx-auto border-2 border-primary/40 glow-subtle" />
           <h2 className="text-3xl font-serif tracking-wider">S33D.life</h2>
