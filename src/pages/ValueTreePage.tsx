@@ -31,6 +31,7 @@ const FoundingStaffRoots = lazy(() => import("@/components/economy/FoundingStaff
 const StaffPatronValueCard = lazy(() => import("@/components/economy/StaffPatronValueCard"));
 const FlowOfValue = lazy(() => import("@/components/economy/FlowOfValue"));
 const EncounterEconomyManifesto = lazy(() => import("@/components/economy/EncounterEconomyManifesto"));
+const PublicGoodsFunding = lazy(() => import("@/components/economy/PublicGoodsFunding"));
 
 /* ─── Shared loading fallback ──────────────────────────────── */
 const TabLoader = () => (
@@ -540,6 +541,23 @@ const ValueTreePage = () => {
                         <SystemLink to="/library/staff-room" label="Visit Staff Room" icon={<Crown className="w-3.5 h-3.5" style={{ color: "hsl(42, 80%, 50%)" }} />} />
                         <SystemLink to="/patron-offering" label="Patron Offering" icon={<Heart className="w-3.5 h-3.5" style={{ color: "hsl(0, 65%, 55%)" }} />} />
                       </div>
+                    </Suspense>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Public Goods Funding */}
+              <Collapsible>
+                <CollapsibleTrigger className="w-full flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 hover:border-primary/20 transition-all">
+                  <span className="text-base shrink-0">🌍</span>
+                  <span className="text-sm font-serif text-foreground flex-1 text-left">Public Goods Funding</span>
+                  <span className="text-[9px] font-serif text-muted-foreground/50">Gitcoin · Grants · Matching</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="pt-3">
+                    <Suspense fallback={<TabLoader />}>
+                      <PublicGoodsFunding />
                     </Suspense>
                   </div>
                 </CollapsibleContent>
