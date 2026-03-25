@@ -249,7 +249,7 @@ const LivingArchivePage = () => {
 
       <Header />
 
-      <main className="container mx-auto px-4 pt-24 pb-20 relative z-10">
+      <main className="container mx-auto px-4 pb-20 relative z-10" style={{ paddingTop: 'var(--content-top)' }}>
         <PageShell>
           <div className="max-w-4xl mx-auto space-y-6">
             <TetolBreadcrumb />

@@ -145,7 +145,7 @@ const HiveTreasuryPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pt-24 pb-20 max-w-5xl">
+      <div className="container mx-auto px-4 pb-20 max-w-5xl" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-6 text-sm font-serif text-muted-foreground">
           <Link to="/hives" className="hover:text-primary transition-colors">Species Hives</Link>

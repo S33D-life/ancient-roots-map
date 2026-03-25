@@ -57,7 +57,7 @@ const GoldDivider = () => (
 const PatronOfferingPage = () => (
   <div className="min-h-screen flex flex-col bg-background">
     <Header />
-    <main className="flex-1 w-full max-w-3xl mx-auto px-4 pt-24 pb-20 space-y-0">
+    <main className="flex-1 w-full max-w-3xl mx-auto px-4 pb-20 space-y-0" style={{ paddingTop: 'var(--content-top)' }}>
 
       {/* ═══ SECTION 1 — Introduction ═══ */}
       <motion.section {...fadeUp()} className="text-center space-y-5 py-8">

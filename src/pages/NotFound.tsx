@@ -16,7 +16,7 @@ const NotFound = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="flex flex-col items-center justify-center px-4 pt-24 pb-28 md:pb-20 text-center min-h-[70vh]">
+      <div className="flex flex-col items-center justify-center px-4 pb-28 md:pb-20 text-center min-h-[70vh]" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Atmospheric glow */}
         <div
           className="absolute inset-0 pointer-events-none"

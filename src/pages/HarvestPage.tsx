@@ -35,7 +35,7 @@ const HarvestPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 pt-24 pb-20">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 pb-20" style={{ paddingTop: 'var(--content-top)' }}>
         {/* Hero section */}
         <section className="text-center space-y-3 mb-8">
           <div className="flex justify-center">
