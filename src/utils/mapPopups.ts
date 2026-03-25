@@ -7,6 +7,7 @@ import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/
 import { haversineKm } from "@/utils/mapGeometry";
 import type { ExternalTreeCandidate } from "@/utils/externalTreeSources";
 import { getSourceById } from "@/utils/externalTreeSources";
+import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Rootstone } from "@/data/rootstones";
 
 /* ── Popup HTML cache — avoids rebuilding for the same tree state ── */
@@ -61,7 +62,7 @@ export function buildPopupHtml(
         ? "hsl(42,60%,55%)"
         : "hsl(0,0%,55%)";
   const speciesHue = getSpeciesHue(tree.species);
-
+  const hive = getHiveForSpecies(tree.species);
   const ageText = age > 0 ? `🌿 ~${age}y` : "";
   const offeringText =
     offerings > 0 ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span>` : "";
@@ -100,6 +101,7 @@ export function buildPopupHtml(
       </div>
       <h3 style="margin:0;padding-right:68px;font-size:15px;color:hsl(45,80%,60%);line-height:1.3;font-weight:700;letter-spacing:0.03em;">${escapeHtml(tree.name)}</h3>
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},45%,55%);font-style:italic;">${escapeHtml(tree.species)}</p>
+      ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:1px 6px;border-radius:4px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.12);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.2);transition:all .2s;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}
       <div style="display:flex;gap:10px;font-size:11px;font-family:sans-serif;color:hsl(0,0%,55%);">
         ${ageText ? `<span>${ageText}</span>` : ""}
         ${offeringText ? `<span>${offeringText}</span>` : ""}

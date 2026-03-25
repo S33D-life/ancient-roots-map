@@ -58,6 +58,7 @@ const GroveContext = lazy(() => import("@/components/GroveContext"));
 const TreePulseIndicator = lazy(() => import("@/components/TreePulseIndicator"));
 const PathwayContext = lazy(() => import("@/components/PathwayContext"));
 const BloomingClock = lazy(() => import("@/components/BloomingClock"));
+const NearbyTreesExplorer = lazy(() => import("@/components/NearbyTreesExplorer"));
 const TreeShareCard = lazy(() => import("@/components/TreeShareCard"));
 const GreetingCardDialog = lazy(() => import("@/components/greeting-cards/GreetingCardDialog"));
 const SeasonalMomentPanel = lazy(() => import("@/components/SeasonalMomentPanel"));
@@ -609,6 +610,16 @@ const TreeDetailPage = () => {
               lng={tree.longitude}
               w3w={tree.what3words}
             />
+
+            {/* Nearby Ancient Friends */}
+            <Suspense fallback={null}>
+              <NearbyTreesExplorer
+                treeId={tree.id}
+                lat={tree.latitude}
+                lng={tree.longitude}
+                species={tree.species}
+              />
+            </Suspense>
 
             {/* ═══ SECONDARY ZONE — Collapsed by default ═══ */}
             <Collapsible open={secondaryOpen} onOpenChange={setSecondaryOpen}>
