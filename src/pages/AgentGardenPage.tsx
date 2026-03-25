@@ -148,8 +148,8 @@ const AgentGardenPage = () => {
             </h1>
           </div>
           <p className="text-muted-foreground max-w-2xl mx-auto text-sm md:text-base">
-            The living contribution portal for the planetary tree commons. Connect your agent, 
-            grow the Research Forest, and earn S33D Hearts.
+            Connect external agents to S33D safely. A contribution and orchestration layer for the Research Forest — 
+            supporting Codex, ChatGPT, custom connectors, and future crawler integrations.
           </p>
           {/* Quick Actions */}
           <div className="flex flex-wrap justify-center gap-2 pt-2">
