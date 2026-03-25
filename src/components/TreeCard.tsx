@@ -81,7 +81,7 @@ const TreeCard = ({
   onVerify,
 }: TreeCardProps) => {
   const navigate = useNavigate();
-  const { data: currentUser } = useCurrentUser();
+  const { userId: currentUserId } = useCurrentUser();
   const [whisperOpen, setWhisperOpen] = useState(false);
   const age = tree.estimated_age ?? 0;
   const tier = useMemo(() => getTreeTier(age, offeringCount), [age, offeringCount]);
