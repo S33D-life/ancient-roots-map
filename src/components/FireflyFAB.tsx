@@ -404,6 +404,25 @@ const FireflyFAB = () => {
               : "0 0 20px 6px hsl(45 90% 60% / 0.15)",
           }}
         />
+
+        {/* Long-press progress ring */}
+        {longPressProgress > 0 && longPressProgress < 1 && (
+          <svg
+            className="absolute pointer-events-none"
+            style={{ inset: -4, width: FAB_SIZE + 8, height: FAB_SIZE + 8 }}
+            viewBox="0 0 56 56"
+          >
+            <circle
+              cx="28" cy="28" r="25"
+              fill="none"
+              stroke="hsl(45 90% 60% / 0.5)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray={`${longPressProgress * 157} 157`}
+              transform="rotate(-90 28 28)"
+            />
+          </svg>
+        )}
       </button>
 
       {/* One-time drag hint */}
