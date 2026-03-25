@@ -12,7 +12,7 @@ import {
   ChevronDown, ChevronRight, Clock, Check, Lock,
   Leaf, Sun, Eye, Music, Camera, MapPin, Users, Star,
   Bug, UserPlus, Flame, ArrowRight, Loader2, Crown,
-  Wind, HandHeart, Wheat, ArrowLeftRight, Coins, Shield,
+  Wind, HandHeart, Wheat, ArrowLeftRight, Coins, Shield, Compass,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
