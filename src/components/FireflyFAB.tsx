@@ -243,10 +243,14 @@ const FireflyFAB = () => {
   }, [longPress]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    longPress.onPointerUp(e);
     if (!isDragging.current) return;
     isDragging.current = false;
     cancelAnimationFrame(rafId.current);
-    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {}
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch {};
+
+    // If long-press fired, don't do tap/snap
+    if (longPress.didFire()) return;
 
     try {
       if (totalMoved.current < DRAG_THRESHOLD) {
@@ -255,7 +259,7 @@ const FireflyFAB = () => {
         snapToEdge(xyRef.current.x, xyRef.current.y);
       }
     } catch { /* ignore */ }
-  }, [snapToEdge, handleTap]);
+  }, [snapToEdge, handleTap, longPress]);
 
   const handleSelectAction = useCallback((type: string) => {
     if (type === "signals") {
