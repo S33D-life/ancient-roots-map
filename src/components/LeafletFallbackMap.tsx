@@ -469,10 +469,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
   const [atlasFilterOpen, setAtlasFilterOpen] = useState(false);
-  const [seedTrailCount, setSeedTrailCount] = useState(0);
-  const seedTrailLayerRef = useRef<L.LayerGroup | null>(null);
-  const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
-  const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
+  // seedTrailCount, bloomedSeedCount, and harvestTreeIds are now derived from useMapOverlayLayers
+  // (declared below after the hook call — referenced here as late-bound via overlayResults)
 
   // Blooming Clock — Global Seasonal Atlas
   const { foods: foodCycles, loading: foodCyclesLoading } = useFoodCycles();
