@@ -315,7 +315,7 @@ const ValueTreePage = () => {
           <p className="text-muted-foreground/50 font-serif max-w-md mx-auto text-[11px] leading-relaxed mt-1.5 italic">
             S33D Hearts are earned through stewardship, not speculation — a commons currency rooted in care.
           </p>
-        </motion.div>
+        </div>
 
         {/* Token legend — simplified labels */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
