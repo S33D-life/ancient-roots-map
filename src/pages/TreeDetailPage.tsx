@@ -398,6 +398,10 @@ const TreeDetailPage = () => {
     setAddOfferingOpen(true);
   };
 
+  const openOfferingGateway = () => {
+    setGatewayOpen(true);
+  };
+
   const photoOfferings = getOfferingsByType("photo").filter((o) => o.media_url);
 
   /** Sort offerings by selected mode */
