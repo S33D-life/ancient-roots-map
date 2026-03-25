@@ -969,6 +969,12 @@ All colors MUST be HSL.
   animation-play-state: paused !important;
 }
 
+/* Start Here cue — gentle golden pulse for new users */
+@keyframes startHerePulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 /* Heart Canopy Pulse — one-time glow for anchor trees */
 @keyframes canopy-heart-glow {
   0% { opacity: 0; transform: scale(0.7); }
