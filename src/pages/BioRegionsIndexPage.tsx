@@ -53,35 +53,21 @@ const BioRegionsIndexPage = () => {
     <PageShell>
       <Header />
       <div className="min-h-screen pb-24 pt-16">
-        <section className="relative px-4 pt-10 pb-8">
+        <section className="relative px-4 pt-6 pb-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl mx-auto text-center">
-            <div className="mb-4">
+            <div className="mb-3">
               <AtlasBreadcrumb segments={[{ label: "Bio-Regions" }]} />
             </div>
 
-            <Badge variant="outline" className="mb-3 text-[10px] border-primary/30 text-primary">
-              <Layers className="w-3 h-3 mr-1" /> Ecological Navigation Layer
-            </Badge>
+            <AtlasPerspectiveNav />
 
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground mb-2">
+            <h1 className="text-xl md:text-3xl font-serif font-bold text-foreground mt-3 mb-1">
               Bio-Regions
             </h1>
-            <p className="text-sm text-muted-foreground italic mb-6 max-w-lg mx-auto leading-relaxed">
+            <p className="text-xs text-muted-foreground italic mb-4 max-w-lg mx-auto leading-relaxed">
               Ecological systems rather than political ones — mountains, watersheds,
-              wetlands, and forest biomes that define how life actually organises itself on Earth.
+              wetlands, and forest biomes that define how life organises itself.
             </p>
-
-            <div className="flex flex-wrap justify-center gap-2 mb-6">
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/atlas"><Globe className="w-3.5 h-3.5 mr-1" /> Countries</Link>
-              </Button>
-              <Button variant="outline" size="sm" className="border-primary/30 text-primary" disabled>
-                <Layers className="w-3.5 h-3.5 mr-1" /> Bio-Regions
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/hives"><TreeDeciduous className="w-3.5 h-3.5 mr-1" /> Species Hives</Link>
-              </Button>
-            </div>
           </motion.div>
         </section>
 
