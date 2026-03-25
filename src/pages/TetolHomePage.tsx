@@ -204,12 +204,6 @@ const TetolHomePage = () => {
                   >
                     S33D
                   </span>
-                  <span
-                    className="text-[9px] font-serif"
-                    style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
-                  >
-                    Gateway
-                  </span>
                 </button>
               </EnsoNudge>
             </div>

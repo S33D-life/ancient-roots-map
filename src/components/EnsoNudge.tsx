@@ -131,7 +131,7 @@ export default function EnsoNudge({ size = 52, children, onInteract }: EnsoNudge
       <AnimatePresence>
         {showMicroCopy && showEnso && !reducedMotion && (
           <motion.span
-            className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-serif tracking-[0.2em] uppercase select-none pointer-events-none"
+            className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-serif tracking-[0.2em] uppercase select-none pointer-events-none"
             style={{ color: "hsl(42, 70%, 60%)" }}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 0.7, y: 0 }}
