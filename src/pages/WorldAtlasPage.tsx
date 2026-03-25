@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import PageShell from "@/components/PageShell";
 import Header from "@/components/Header";
 import ContextualWhisper from "@/components/ContextualWhisper";
+import Footer from "@/components/Footer";
 import COUNTRY_REGISTRY, { getEntryByCountry } from "@/config/countryRegistry";
 import { DATASET_CONFIGS, getDatasetsByCountry, type DatasetConfig } from "@/config/datasetIntegration";
 
