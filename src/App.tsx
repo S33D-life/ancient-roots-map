@@ -340,6 +340,7 @@ const App = () => {
                 <Route path="/discovery" element={<DiscoveryPage />} />
                 <Route path="/markets" element={<Navigate to="/library/rhythms" replace />} />
                 <Route path="/markets/:id" element={<MarketDetailPage />} />
+                <Route path="/atlas/countries" element={<AtlasCountryWallPage />} />
                 <Route path="/atlas/pathways/:pathwaySlug" element={<PilgrimagePathwaysPage />} />
                 <Route path="/atlas/hong-kong" element={<HongKongAtlasPage />} />
                 <Route path="/atlas/singapore" element={<SingaporeAtlasPage />} />
