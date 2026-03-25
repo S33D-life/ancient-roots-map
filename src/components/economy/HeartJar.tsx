@@ -126,7 +126,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
         {open && (
           <>
             <motion.div
-              className="fixed inset-0 z-50"
+              className="fixed inset-0 z-[9998]"
               style={{ background: "hsl(var(--background) / 0.6)", backdropFilter: "blur(4px)" }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
