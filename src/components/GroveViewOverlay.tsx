@@ -91,29 +91,29 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
   useEffect(() => {
     if (!active) return;
     const fetchAwaiting = async () => {
-      const { data: candidates } = await supabase
-        .from("trees")
-        .select("id, name, species, created_at")
-        .order("created_at", { ascending: false })
-        .limit(30);
-      if (!candidates?.length) return;
-      const awaiting: TreeItem[] = [];
-      for (const tree of candidates) {
-        if (awaiting.length >= 5) break;
-        const { count } = await supabase
-          .from("offerings")
-          .select("*", { count: "exact", head: true })
-          .eq("tree_id", tree.id);
-        if ((count || 0) === 0) awaiting.push(tree);
+      // Single query: get recent trees that have zero offerings (avoids N+1)
+      const { data } = await supabase.rpc("get_trees_without_offerings" as any, { p_limit: 5 });
+      if (data) {
+        setNearbyTrees(data as TreeItem[]);
+      } else {
+        // Fallback: simple query if RPC doesn't exist yet
+        const { data: candidates } = await supabase
+          .from("trees")
+          .select("id, name, species, created_at")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        setNearbyTrees(candidates || []);
       }
-      setNearbyTrees(awaiting);
     };
     fetchAwaiting();
   }, [active]);
 
-  if (onEventPulses && active) {
-    onEventPulses(eventPulses);
-  }
+  // Propagate event pulses to parent via useEffect (not during render)
+  useEffect(() => {
+    if (onEventPulses && active && eventPulses.length > 0) {
+      onEventPulses(eventPulses);
+    }
+  }, [onEventPulses, active, eventPulses]);
 
   const season = useMemo(() => getCurrentSeason(userLat), [userLat]);
   const palette = SEASON_PALETTE[season];

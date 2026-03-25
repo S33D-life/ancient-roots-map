@@ -395,7 +395,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
     }
   };
 
-  const allResults = [...catalogResults, ...itunesResults];
+  const allResults = useMemo(() => [...catalogResults, ...itunesResults], [catalogResults, itunesResults]);
   const canSubmit = customMode ? customTitle.trim().length > 0 : !!selectedSong;
 
   return (

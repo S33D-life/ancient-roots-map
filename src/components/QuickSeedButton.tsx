@@ -131,6 +131,8 @@ const QuickSeedButton = memo(({
       {justPlanted ? "Planted!" : "Seed"}
     </Button>
   );
-};
+});
+
+QuickSeedButton.displayName = "QuickSeedButton";
 
 export default QuickSeedButton;

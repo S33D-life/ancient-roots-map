@@ -94,6 +94,8 @@ const Map = memo(({
       </Suspense>
     </div>
   );
-};
+});
+
+Map.displayName = "Map";
 
 export default Map;
