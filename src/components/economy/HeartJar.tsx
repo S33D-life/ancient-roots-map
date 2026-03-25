@@ -167,14 +167,14 @@ const HeartJar = ({ userId, className = "" }: Props) => {
                       root.classList.toggle("dark", !isDark);
                       root.classList.toggle("light", isDark);
                       localStorage.setItem("s33d-theme", isDark ? "light" : "dark");
+                      // Force re-render for icon swap
+                      setOpen(o => { setTimeout(() => setOpen(true), 0); return false; });
                     }}
                     className="p-1.5 rounded-full transition-colors hover:bg-accent/20 md:hidden"
                     aria-label="Toggle theme"
                   >
-                    {document.documentElement.classList.contains("dark")
-                      ? <Sun className="w-3.5 h-3.5 text-amber-400" />
-                      : <Moon className="w-3.5 h-3.5 text-muted-foreground" />
-                    }
+                    <Sun className="w-3.5 h-3.5 text-amber-400 dark:block hidden" />
+                    <Moon className="w-3.5 h-3.5 text-muted-foreground dark:hidden block" />
                   </button>
                   <button
                     onClick={() => setOpen(false)}

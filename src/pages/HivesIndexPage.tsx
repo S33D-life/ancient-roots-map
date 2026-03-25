@@ -222,7 +222,7 @@ const HivesIndexPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 pb-20 max-w-7xl" style={{ paddingTop: 'var(--content-top)' }}>
+      <div className="container mx-auto px-4 pt-24 pb-20 max-w-7xl">
         {/* Perspective Nav */}
         <div className="mb-4">
           <AtlasPerspectiveNav />
