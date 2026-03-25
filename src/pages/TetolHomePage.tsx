@@ -186,29 +186,33 @@ const TetolHomePage = () => {
             {/* Root tendrils */}
             <BranchLines side="roots" />
 
-            {/* S33D gateway node */}
-            <button
-              onClick={() => handleItemClick("/s33d")}
-              className="relative z-10 flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none py-3 w-full transition-all duration-200"
-              style={activeNode === "/s33d" ? { transform: "scale(1.08)", filter: "brightness(1.3)" } : {}}
-            >
-              <Sprout
-                className="w-7 h-7 transition-all duration-300 group-hover:scale-110"
-                style={{ color: "hsl(var(--primary))" }}
-              />
-              <span
-                className="font-serif text-xs tracking-[0.3em] uppercase transition-all duration-300 group-hover:tracking-[0.4em]"
-                style={{ color: "hsl(var(--muted-foreground))" }}
-              >
-                S33D
-              </span>
-              <span
-                className="text-[9px] font-serif"
-                style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
-              >
-                Gateway
-              </span>
-            </button>
+            {/* S33D gateway node — wrapped in Ensō nudge */}
+            <div className="relative z-10 py-3 w-full flex flex-col items-center">
+              <EnsoNudge size={120}>
+                <button
+                  onClick={() => handleItemClick("/s33d")}
+                  className="flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none transition-all duration-200"
+                  style={activeNode === "/s33d" ? { transform: "scale(1.08)", filter: "brightness(1.3)" } : {}}
+                >
+                  <Sprout
+                    className="w-7 h-7 transition-all duration-300 group-hover:scale-110"
+                    style={{ color: "hsl(var(--primary))" }}
+                  />
+                  <span
+                    className="font-serif text-xs tracking-[0.3em] uppercase transition-all duration-300 group-hover:tracking-[0.4em]"
+                    style={{ color: "hsl(var(--muted-foreground))" }}
+                  >
+                    S33D
+                  </span>
+                  <span
+                    className="text-[9px] font-serif"
+                    style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
+                  >
+                    Gateway
+                  </span>
+                </button>
+              </EnsoNudge>
+            </div>
 
             {/* Roots — Ancient Friends */}
             <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} />
