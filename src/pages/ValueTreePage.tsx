@@ -338,6 +338,9 @@ const ValueTreePage = () => {
             <TabsTrigger value="overview" className="font-serif text-xs tracking-wider gap-1.5">
               <Coins className="w-3.5 h-3.5" /> Overview
             </TabsTrigger>
+            <TabsTrigger value="compass" className="font-serif text-xs tracking-wider gap-1.5">
+              <Compass className="w-3.5 h-3.5" /> Compass
+            </TabsTrigger>
             <TabsTrigger value="flow" className="font-serif text-xs tracking-wider gap-1.5">
               <Wind className="w-3.5 h-3.5" /> Living Flow
             </TabsTrigger>
