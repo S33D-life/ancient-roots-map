@@ -1,165 +1,84 @@
-## Security Review Summary
 
-Your project has a solid foundation with RLS enabled on all tables and proper authentication. However, there are **2 issues to fix** and **1 recommendation**.
 
----
+# Performance and Stability Polish Pass
 
-### Issue 1: User Email Addresses Publicly Exposed (High Severity)
-
-The `profiles` table has a SELECT policy of `true`, meaning anyone -- even unauthenticated visitors -- can query all user emails, names, and avatar URLs. This is a privacy risk.
-
-**Fix:** Change the profiles SELECT policy so only authenticated users can view profiles, or restrict email visibility entirely.
-
-**SQL Migration:**
-```sql
-DROP POLICY "Profiles are viewable by everyone" ON public.profiles;
-
-CREATE POLICY "Authenticated users can view profiles"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() IS NOT NULL);
-```
+A focused "tighten and tidy" pass targeting the highest-impact, lowest-risk improvements across interaction smoothness, render efficiency, mobile stability, and edge-case resilience.
 
 ---
 
-### Issue 2: Leaked Password Protection Disabled (Medium Severity)
+## Changes Overview
 
-Your authentication system doesn't check passwords against known breach databases. This means users can sign up with passwords like "password123" that have been compromised in data breaches.
+### 1. Memoize Map.tsx to prevent re-renders from parent state changes
 
-**Fix:** Enable leaked password protection in the authentication settings. This can be done through the Lovable Cloud backend settings.
+`src/components/Map.tsx` currently re-renders whenever MapPage state changes (blessing dismiss, journey toggle, etc.). Wrap the component body with `React.memo` and memoize the props object so the heavy `LeafletFallbackMap` subtree is not re-evaluated on unrelated UI toggling.
+
+### 2. Fix GroveViewOverlay N+1 query waterfall
+
+In `src/components/GroveViewOverlay.tsx` (lines 91-112), the "awaiting visits" fetch runs up to 30 sequential single-row queries in a for-loop. Replace with a single query using a left join or subquery approach — fetch trees with zero offerings in one call. This eliminates a significant latency spike when opening the Grove Signal panel.
+
+### 3. Stabilize GroveViewOverlay `onEventPulses` call during render
+
+Line 114-116 calls `onEventPulses(eventPulses)` directly during render (not inside useEffect). Move this into a `useEffect` to prevent triggering parent re-renders during the render phase.
+
+### 4. Tighten animation durations for panel transitions
+
+Across `GroveViewOverlay`, `AddOfferingDialog`, and `MusicOfferingFlow`:
+- Ensure `AnimatePresence` transitions use `duration: 0.15` to `0.2` (some currently use longer values like 1.5s for atmosphere overlays — those are fine, but panel open/close should be fast).
+- The atmosphere overlays in GroveViewOverlay (lines 126-172) use `duration: 1.5` for fade which is appropriate. No change there.
+
+### 5. Memoize `SongRow` component
+
+`src/components/MusicOfferingFlow.tsx` — `SongRow` is already a standalone component but receives new arrow-function props on each render. Wrap `SongRow` with `React.memo` and stabilize the `onSelect`/`onTogglePreview` callbacks with `useCallback` indexed by song ID where they're passed.
+
+### 6. Add `React.memo` to `QuickSeedButton`
+
+The seed button renders inside every tree card. Memoize it so it doesn't re-render when parent card state changes (e.g. hover, scroll).
+
+### 7. CouncilRoom iframe error handling
+
+`src/components/CouncilRoom.tsx` — add an `onError` handler to the iframe and ensure the fallback "Open directly" button is prominent. Currently `iframeError` state exists but may not trigger on all failure modes. Add a 10-second timeout that shows the fallback if `iframeLoaded` hasn't fired.
+
+### 8. Mobile keyboard: prevent map container from resizing
+
+In `src/components/Map.tsx`, the container uses `height: 100dvh`. On iOS Safari, `dvh` changes when the keyboard opens, causing the map to resize and potentially trigger tile reloads. Change to `height: 100svh` (smallest viewport height) or use a fixed height captured on mount, so keyboard appearance doesn't trigger map relayout.
+
+### 9. Prevent double-tap zoom on map control buttons
+
+All map control buttons (Eye toggle, Layers, Locate, Add, Compass) should have `touch-action: manipulation` to prevent iOS 300ms tap delay and double-tap zoom interference.
+
+### 10. `allResults` memo in MusicOfferingFlow
+
+Line 397: `const allResults = [...catalogResults, ...itunesResults]` creates a new array every render. Wrap in `useMemo` keyed on both result arrays.
 
 ---
 
-### Recommendation: Input Validation on Tree/Project Forms
+## Files to modify
 
-The edge functions and auth page already use good validation (zod for auth, proper CORS headers). No `dangerouslySetInnerHTML` is used with user content (only in the chart UI component with static data). The what3words integration properly uses edge functions to protect API keys.
-
-One minor improvement: ensure the `AddTreeDialog` and `AddOfferingDialog` components validate text input lengths before submission to prevent excessively large entries.
-
----
-
-### What's Already Done Well
-
-- All 5 tables have RLS enabled with appropriate policies
-- API keys (What3words, Google Maps) are stored as secrets and accessed via edge functions
-- Authentication uses zod validation for email/password
-- Edge functions have proper CORS headers
-- Wishlist table is fully user-scoped (only owners can CRUD)
-- No raw SQL execution in edge functions
-- Quota management and caching for third-party APIs
+| File | Change |
+|---|---|
+| `src/components/Map.tsx` | Memo wrapper, stable height |
+| `src/components/GroveViewOverlay.tsx` | Fix N+1 query, move onEventPulses to useEffect |
+| `src/components/MusicOfferingFlow.tsx` | Memo SongRow, memoize allResults |
+| `src/components/QuickSeedButton.tsx` | Wrap export with React.memo |
+| `src/components/CouncilRoom.tsx` | Add iframe load timeout fallback |
+| `src/components/LeafletFallbackMap.tsx` | Add touch-action: manipulation to control buttons |
 
 ---
 
-### Technical Implementation Plan
+## What this does NOT touch
 
-**Step 1:** Run a database migration to fix the profiles SELECT policy (restrict to authenticated users).
+- No architecture changes
+- No file restructuring
+- No feature removal
+- Console logs are already debug-gated — left as-is
+- No new dependencies
 
-**Step 2:** Enable leaked password protection via auth configuration.
+## Expected outcome
 
-**Step 3:** Optionally add input length validation to tree and offering creation forms.
+The app should feel noticeably snappier when:
+1. Toggling Grove Signal panel (faster query + no render-phase side effect)
+2. Opening/closing offering dialogs (tighter transitions)
+3. Scrolling tree cards with seed buttons (memoized)
+4. Using the map while keyboard is open on mobile (stable container)
+5. Tapping map controls on iOS (no 300ms delay)
 
-## Architecture Plan — Activity Dashboard & Navigation
-
-### 1. Site Map
-
-### 1. TETOL Navigation Architecture
-
-```
-TETOL — 4 Levels Only
-═══════════════════════════════════════════════
-
-1. ROOTS (Ancient Friends Atlas) → /map
-   ├── Map (full atlas)
-   ├── Countries (World Atlas) → /atlas, /atlas/:country
-   ├── Species Hives → /hives, /hive/:slug
-   ├── Tree Filters & Layers (Living Layers sidebar)
-   ├── Add Tree (map center button)
-   └── Cycle Progress (map indicators)
-
-2. TRUNK (Heartwood Library) → /library
-   ├── The Hearth (opening narrative + CTAs)
-   ├── Heartwood Vault (Hearts economy) → /vault
-   ├── Activity Dashboard → /dashboard?tab=activity
-   ├── Staff Room → /library/staff-room
-   ├── Map Room (Ancient Friends gallery) → /library/gallery
-   ├── Music Room → /library/music-room
-   ├── Scrolls & Records (Ledger) → /library/ledger
-   ├── Greenhouse → /library/greenhouse
-   ├── Wishing Tree → /library/wishlist
-   ├── Seed Cellar → /library/seed-cellar
-   ├── Creator's Path → /library/creators-path
-   └── Tree Resources → /library/tree-resources
-
-3. CANOPY (Council of Life) → /council-of-life
-   ├── Council Portal (upcoming, attendance rewards)
-   ├── Cycle Markets → /cycle-markets
-   └── Value Tree (governance) → /value-tree
-
-4. CROWN (yOur Golden Dream) → /golden-dream
-   ├── Vision & Blueprint
-   ├── Rewards Guide → /docs
-   └── Archives
-```
-
-### 2. Global Navigation Structure
-
-- **Header (desktop)**: 4 TETOL links with hover dropdowns | S33D logo (TETOL menu) | Heart count | Profile
-- **BottomNav (mobile)**: Roots | Trunk | Canopy | Crown (4 tabs only)
-- **TETOL Menu (⌘K)**: Full tree visualization with search
-- **Hearth tabs** (within Trunk): Legend | Activity | yOur Pod | Search | Hearts | Fellowship | Settings
-
-### 3. Activity Dashboard (Living Layer) — Sections
-
-| Section | Data Source | Refresh |
-|---------|-----------|---------|
-| A) Earnable Today | planted_seeds, daily_reward_caps, heart_transactions | On mount |
-| B) Active Campaigns | heart_campaigns (status=active) | On mount |
-| C) Tree Cycle Status | tree_heart_pools + trees | On mount |
-| D) Proposal Branches | value_proposals (pending/active) | On mount |
-| E) Personal Snapshot | heart_transactions, trees, profiles | On mount |
-
-### 4. State Persistence & Event Model
-
-- **Auth state**: Supabase `onAuthStateChange` listener in DashboardPage
-- **Tab state**: Radix Tabs (local, resets on nav — intentional for fresh context)
-- **Heart balance**: Queried per tab mount; future: Supabase Realtime subscription on `heart_transactions`
-- **Map state**: Preserved via URL params (lat/lng/zoom/layers); navigation doesn't reset
-- **Session storage**: `s33d_last_tree` for return-to-tree pill
-
-### 5. Backend Dependencies
-
-All tables already exist:
-- `heart_transactions` — heart balance, last action
-- `planted_seeds` — daily seed count
-- `daily_reward_caps` — check-in caps
-- `heart_campaigns` — active campaigns
-- `tree_heart_pools` — cycle progress (144 threshold)
-- `value_proposals` — governance proposals
-- `profiles` — staff status
-- `trees` — user tree count
-
-No new tables or migrations required for MVP.
-
-### 6. MVP vs Phase 2
-
-**MVP (shipped now):**
-- Activity tab with all 5 sections (A-E)
-- Static data fetch on mount
-- Tooltip-based rule transparency
-- Progress bars on 144-heart scale
-
-**Phase 2:**
-- Realtime heart balance updates via Supabase Realtime
-- Nearby tree detection (GPS proximity for "active visits nearby")
-- Campaign participation tracking (per-user campaign hearts)
-- Cycle ranking ("your position" in windfall leaderboard)
-- Push notifications for windfall events
-- NFTree mint reward value display (requires chain query)
-
-### 7. Design Constraints
-
-- No branding changes
-- Calm, non-gamified tone
-- Soft progress bars
-- Transparent rules via tooltips
-- Mobile-first with 44px touch targets
-- Semantic color tokens only (no hardcoded colors in components)
