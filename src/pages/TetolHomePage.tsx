@@ -25,10 +25,7 @@ const treeItems = [
 
 const quickLinks = [
   { to: "/hives", label: "Species Hives", icon: Hexagon },
-  { to: "/harvest", label: "Harvest Exchange", icon: Apple },
-  { to: "/cosmic", label: "Cosmic Calendar", icon: CalendarDays },
   { to: "/value-tree", label: "Value Tree", icon: TreePine },
-  { to: "/companion", label: "Companion Mode", icon: Smartphone },
   { to: "/support", label: "Support", icon: Heart },
   { to: "/vault", label: "Vault", icon: Sparkles },
   { to: "/roadmap", label: "Roadmap", icon: Map },
