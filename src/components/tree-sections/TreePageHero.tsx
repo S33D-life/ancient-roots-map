@@ -248,6 +248,32 @@ const TreePageHero = ({
             </Button>
           </div>
 
+          {/* Quick shortcuts — direct to flow, skip gateway */}
+          {(onAddPhoto || onAddSong) && (
+            <div className="flex items-center justify-center gap-2 mt-3">
+              {onAddPhoto && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onAddPhoto}
+                  className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
+                >
+                  <Camera className="h-3.5 w-3.5" /> 📸 Photo
+                </Button>
+              )}
+              {onAddSong && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onAddSong}
+                  className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
+                >
+                  <Music className="h-3.5 w-3.5" /> 🎵 Song
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Secondary actions */}
           <div className="flex items-center justify-center gap-2 mt-4">
             <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onViewMap}>
