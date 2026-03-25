@@ -45,6 +45,22 @@ const AtlasPerspectiveNav = ({ showDescriptions = false }: AtlasPerspectiveNavPr
       })}
     </nav>
   );
+
+  if (!showDescriptions) return nav;
+
+  return (
+    <div className="space-y-2">
+      {nav}
+      <div className="flex justify-center gap-4 text-[9px] font-serif text-muted-foreground/50">
+        {PERSPECTIVES.map((p) => (
+          <span key={p.path} className="flex items-center gap-1">
+            <p.icon className="w-2.5 h-2.5" />
+            {p.desc}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default AtlasPerspectiveNav;

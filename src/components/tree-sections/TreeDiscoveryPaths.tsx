@@ -35,7 +35,7 @@ const TreeDiscoveryPaths = ({ species, country, ecoBelonging = [] }: Props) => {
       key: "country",
       to: ROUTES.COUNTRY(countryEntry.slug),
       icon: Globe,
-      label: countryEntry.name,
+      label: countryEntry.country,
       desc: "Country atlas",
       emoji: countryEntry.flag,
     });
