@@ -233,11 +233,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const userAccuracyRef = useRef<L.Circle | null>(null);
   const groveLayerRef = useRef<L.LayerGroup | null>(null);
   const seedLayerRef = useRef<L.LayerGroup | null>(null);
-  const rootThreadLayerRef = useRef<L.LayerGroup | null>(null);
+  // rootThreadLayerRef, offeringGlowLayerRef, birdsongHeatLayerRef now managed by useMapOverlayLayers
   const mycelialNetworkLayerRef = useRef<L.LayerGroup | null>(null);
   const mycelialAnimatedLayerRef = useRef<L.LayerGroup | null>(null);
-  const offeringGlowLayerRef = useRef<L.LayerGroup | null>(null);
-  const birdsongHeatLayerRef = useRef<L.LayerGroup | null>(null);
   const externalLayerRef = useRef<L.LayerGroup | null>(null);
   const researchLayerRef = useRef<L.LayerGroup | null>(null);
   const rootstoneLayerRef = useRef<L.LayerGroup | null>(null);
