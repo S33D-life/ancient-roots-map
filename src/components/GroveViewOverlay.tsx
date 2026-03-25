@@ -234,7 +234,7 @@ const GroveViewOverlay = ({ active, onToggle, userLat, treeLookup, onEventPulses
                     boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px hsla(120, 20%, 20%, 0.1)",
                   }}
                 >
-                  <div className="px-3 py-3 space-y-2.5 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain">
+                  <div className="px-3 py-3 space-y-2.5 max-h-[calc(100svh-8rem)] overflow-y-auto overscroll-contain">
                     {/* Season indicator */}
                     <div
                       className="text-[9px] font-serif text-center py-1 rounded-md"

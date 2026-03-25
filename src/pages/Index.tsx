@@ -2,8 +2,6 @@ import { useCallback, lazy, Suspense } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import S33dEntrance from "@/components/S33dEntrance";
-import WelcomeBanner from "@/components/WelcomeBanner";
 import BetaGardenBanner from "@/components/BetaGardenBanner";
 import { useEntranceOnce } from "@/hooks/use-entrance-once";
 import { useVineFade } from "@/hooks/use-vine-fade";
