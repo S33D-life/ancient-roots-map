@@ -270,7 +270,7 @@ const BugGardenPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container max-w-2xl mx-auto px-4 pt-24 pb-24 space-y-6">
+      <main className="container max-w-2xl mx-auto px-4 pb-24 space-y-6" style={{ paddingTop: 'var(--content-top)' }}">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
