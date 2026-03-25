@@ -104,15 +104,6 @@ const CouncilOfLifePage = () => {
           );
         }
       });
-    // Fetch recent council sparks
-    supabase
-      .from("bug_reports")
-      .select("id, title, report_type, status, upvotes_count, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5)
-      .then(({ data }) => {
-        if (data) setRecentSparks(data as any);
-      });
   }, []);
 
   const handleEntranceComplete = useCallback(() => dismissEntrance(), [dismissEntrance]);
