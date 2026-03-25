@@ -9,6 +9,8 @@ import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 import SendWhisperModal from "@/components/SendWhisperModal";
 import TreeWhisperButton from "@/components/TreeWhisperButton";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
+import QuickSeedButton from "@/components/QuickSeedButton";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export type TreeCardVariant = "gallery" | "compact";
 
@@ -79,6 +81,7 @@ const TreeCard = ({
   onVerify,
 }: TreeCardProps) => {
   const navigate = useNavigate();
+  const { userId: currentUserId } = useCurrentUser();
   const [whisperOpen, setWhisperOpen] = useState(false);
   const age = tree.estimated_age ?? 0;
   const tier = useMemo(() => getTreeTier(age, offeringCount), [age, offeringCount]);
@@ -170,8 +173,16 @@ const TreeCard = ({
             </div>
             {isResearch && <ResearchBadges tree={tree} />}
           </div>
-          {/* Tier badge */}
+          {/* Seed + Tier badges */}
           <div className="self-start flex items-center gap-1.5">
+            <QuickSeedButton
+              treeId={tree.id}
+              treeLat={tree.latitude ?? null}
+              treeLng={tree.longitude ?? null}
+              userId={currentUserId}
+              variant="icon"
+              className="w-7 h-7"
+            />
             <TreeWhisperButton onClick={openWhisper} className="h-7 w-7" />
             <Badge variant="outline" className={`text-[9px] h-5 ${tierStyle.bg} ${tierStyle.text} ${tierStyle.border} font-serif`}>
             {isResearch ? "Seed" : TIER_LABELS[tier]}
@@ -310,6 +321,14 @@ const TreeCard = ({
           ) : (
             /* Mapped tree actions (unchanged) */
             <>
+              <QuickSeedButton
+                treeId={tree.id}
+                treeLat={tree.latitude ?? null}
+                treeLng={tree.longitude ?? null}
+                userId={currentUserId}
+                variant="button"
+                className="flex-1"
+              />
               <Button variant="outline" size="sm" onClick={handleWishlist} className="flex-1 text-xs gap-1.5 font-serif h-8 border-border/30 text-muted-foreground hover:text-primary">
                 <Heart
                   className="w-3.5 h-3.5 transition-all duration-300"
