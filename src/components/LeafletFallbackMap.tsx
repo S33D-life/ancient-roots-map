@@ -3035,6 +3035,19 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                     ) : null;
                   })()}
                 </button>
+                {/* Species Hives — map exploration */}
+                <button
+                  onClick={() => navigate("/hives")}
+                  className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button"
+                  style={{
+                    ...btnBase,
+                    color: "hsl(42, 60%, 60%)",
+                  }}
+                  title="Species Hives"
+                  aria-label="Species Hives"
+                >
+                  <Hexagon className="w-[18px] h-[18px]" />
+                </button>
                 {/* Atlas portal — visible when filter panel is closed */}
                 {!atlasFilterOpen && (
                   <AtlasNavButton btnBase={btnBase} />
@@ -3042,7 +3055,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               </div>
             )}
 
-            {/* Bottom center — hidden in clear view */}
+            {/* Bottom center — Locate + Reset, hidden in clear view */}
             {!clearView && (
               <div className="absolute left-1/2 -translate-x-1/2 z-[1000] flex gap-2.5" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px)" }}>
                 <button
@@ -3057,19 +3070,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
                   aria-label="Locate me"
                 >
                   {locating ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <Crosshair className="w-[18px] h-[18px]" />}
-                </button>
-                {/* Hive button — navigate to Species Hives */}
-                <button
-                  onClick={() => navigate("/hives")}
-                  className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button"
-                  style={{
-                    ...btnBase,
-                    color: "hsl(42, 60%, 60%)",
-                  }}
-                  title="Species Hives"
-                  aria-label="Species Hives"
-                >
-                  <Hexagon className="w-[18px] h-[18px]" />
                 </button>
                 <button
                   onClick={handleCompassReset}
