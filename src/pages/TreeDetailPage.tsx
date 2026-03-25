@@ -475,7 +475,7 @@ const TreeDetailPage = () => {
         <TreePageHero
           tree={tree}
           photoUrl={getOfferingsByType("photo")[0]?.media_url || null}
-          onMakeOffering={() => setAddOfferingOpen(true)}
+          onMakeOffering={openOfferingGateway}
           onAddWish={() => setSectionTab("overview")}
           onViewMap={() => {
             goToTreeOnMap(navigate, {
