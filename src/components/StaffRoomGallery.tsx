@@ -483,22 +483,43 @@ export default function StaffRoomGallery() {
   const ListView = () => (
     <div className="space-y-2">
       {filteredStaffs.map((staff, i) => (
-        <div key={staff.tokenId} className="flex items-center gap-4 p-3 rounded-lg border border-border/40 bg-card/50 hover:bg-card/80 cursor-pointer transition-all group"
-          onClick={() => { setActiveIndex(i); setDetailOpen(true); }} role="button" aria-label={`View ${staff.speciesName} staff`}>
-          <div className="w-12 h-16 rounded-md overflow-hidden border border-border/40 flex-shrink-0">
+        <div
+          key={staff.tokenId}
+          className={cn(
+            "flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-all group min-h-[56px] touch-manipulation",
+            staff.isOrigin
+              ? "border-primary/20 bg-primary/[0.03] hover:bg-primary/[0.07] hover:border-primary/40"
+              : "border-border/40 bg-card/50 hover:bg-card/80 hover:border-border/60"
+          )}
+          onClick={() => { setActiveIndex(i); setDetailOpen(true); }}
+          role="button"
+          aria-label={`View ${staff.speciesName} staff`}
+        >
+          <div className="w-12 h-16 rounded-md overflow-hidden border border-border/30 flex-shrink-0 group-hover:border-primary/30 transition-colors shadow-sm">
             <img src={staff.image} alt={staff.speciesName} className="w-full h-full object-cover" loading="lazy" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-serif text-sm text-foreground truncate">{staff.speciesName}</p>
-            <p className="text-xs text-muted-foreground font-mono">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="font-serif text-sm text-foreground truncate">{staff.speciesName}</p>
+              {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
+            </div>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
           </div>
           {staff.length && (
             <div className="hidden sm:block text-right">
-              <p className="text-xs text-muted-foreground">{staff.length}</p>
-              <p className="text-xs text-muted-foreground">{staff.weight}</p>
+              <p className="text-[11px] text-muted-foreground">{staff.length}</p>
+              <p className="text-[11px] text-muted-foreground">{staff.weight}</p>
             </div>
           )}
-          <Badge variant="outline" className="text-[10px] flex-shrink-0">Minted</Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] flex-shrink-0",
+              staff.isOrigin && "border-primary/30 text-primary"
+            )}
+          >
+            {staff.isOrigin ? "Origin" : "Minted"}
+          </Badge>
         </div>
       ))}
     </div>
