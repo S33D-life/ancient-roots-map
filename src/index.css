@@ -827,6 +827,126 @@ All colors MUST be HSL.
   box-shadow: 0 0 20px hsl(42 50% 50% / 0.18), 0 0 6px hsl(35 40% 45% / 0.12);
 }
 
+/* ═══════════════════════════════════════════════════
+   TETOL LIGHT MODE — botanical canopy experience
+   ═══════════════════════════════════════════════════ */
+
+/* Sunlight shifting through canopy — very subtle */
+@keyframes tetol-sunlight {
+  0%, 100% {
+    background-position: 30% 20%, 70% 80%;
+    opacity: 0.5;
+  }
+  33% {
+    background-position: 45% 25%, 55% 70%;
+    opacity: 0.7;
+  }
+  66% {
+    background-position: 35% 35%, 65% 65%;
+    opacity: 0.55;
+  }
+}
+
+.light .tetol-sunlight-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 300px 400px at 30% 20%, hsl(45 60% 75% / 0.08), transparent),
+    radial-gradient(ellipse 250px 350px at 70% 80%, hsl(42 50% 70% / 0.06), transparent);
+  animation: tetol-sunlight 20s ease-in-out infinite;
+  will-change: background-position, opacity;
+}
+
+/* Canopy silhouette overlay — faint tree shapes */
+.light .tetol-canopy-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    /* Top canopy arch */
+    radial-gradient(ellipse 60% 25% at 50% -5%, hsl(90 30% 45% / 0.06), transparent),
+    /* Left branch cluster */
+    radial-gradient(ellipse 180px 250px at 5% 15%, hsl(100 25% 40% / 0.05), transparent),
+    /* Right branch cluster */
+    radial-gradient(ellipse 160px 220px at 95% 20%, hsl(85 25% 45% / 0.04), transparent),
+    /* Lower left foliage */
+    radial-gradient(ellipse 140px 180px at 8% 70%, hsl(110 20% 42% / 0.04), transparent),
+    /* Lower right foliage */
+    radial-gradient(ellipse 120px 160px at 92% 75%, hsl(95 22% 40% / 0.03), transparent),
+    /* Soft vignette */
+    radial-gradient(ellipse 75% 65% at 50% 50%, transparent 45%, hsl(30 20% 65% / 0.06) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Enhanced tetol-fall for light mode — more organic with blur layers */
+.light .tetol-leaf-near {
+  filter: blur(0px);
+  opacity: 0.35 !important;
+}
+.light .tetol-leaf-mid {
+  filter: blur(0.5px);
+  opacity: 0.22 !important;
+}
+.light .tetol-leaf-far {
+  filter: blur(1.5px);
+  opacity: 0.1 !important;
+}
+
+/* Gentle horizontal sway for leaves */
+@keyframes tetol-fall-sway {
+  0% {
+    transform: translateY(0) translateX(0) rotate(var(--start-rot, 0deg));
+    opacity: 0;
+  }
+  8% { opacity: var(--leaf-peak-opacity, 0.25); }
+  25% { transform: translateY(27vh) translateX(calc(var(--drift, 0px) * 0.4)) rotate(calc(var(--start-rot, 0deg) + 90deg)); }
+  50% { transform: translateY(55vh) translateX(calc(var(--drift, 0px) * -0.3)) rotate(calc(var(--start-rot, 0deg) + 200deg)); }
+  75% { transform: translateY(82vh) translateX(calc(var(--drift, 0px) * 0.6)) rotate(calc(var(--start-rot, 0deg) + 380deg)); }
+  92% { opacity: var(--leaf-fade-opacity, 0.12); }
+  100% {
+    transform: translateY(110vh) translateX(var(--drift, 0px)) rotate(calc(var(--start-rot, 0deg) + 540deg));
+    opacity: 0;
+  }
+}
+
+.light .tetol-leaf-organic {
+  animation-name: tetol-fall-sway !important;
+  animation-timing-function: ease-in-out !important;
+}
+
+/* Light-mode TETOL node styling */
+.light .tetol-node-circle {
+  background: hsl(38 30% 95% / 0.85) !important;
+  border-color: hsl(var(--border)) !important;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px hsl(30 20% 40% / 0.08), inset 0 1px 0 hsl(40 40% 98% / 0.6);
+}
+.light .tetol-node-circle:hover {
+  box-shadow: 0 4px 20px hsl(42 50% 45% / 0.15), inset 0 1px 0 hsl(40 40% 98% / 0.6) !important;
+}
+
+/* Light-mode quick link pills */
+.light .tetol-quick-link {
+  background: hsl(38 28% 95% / 0.7);
+  border-color: hsl(33 22% 82%) !important;
+  backdrop-filter: blur(4px);
+}
+.light .tetol-quick-link:hover {
+  background: hsl(38 30% 92% / 0.85);
+  border-color: hsl(35 40% 65%) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light .tetol-sunlight-layer { animation: none !important; }
+  .light .tetol-leaf-organic { animation-name: tetol-fall !important; }
+}
+.tab-hidden .tetol-sunlight-layer {
+  animation-play-state: paused !important;
+}
+
 /* Heart Canopy Pulse — one-time glow for anchor trees */
 @keyframes canopy-heart-glow {
   0% { opacity: 0; transform: scale(0.7); }
