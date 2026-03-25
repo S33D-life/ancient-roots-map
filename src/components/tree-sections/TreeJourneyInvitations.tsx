@@ -84,6 +84,22 @@ const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLo
           })}
         </div>
       </div>
+
+      {/* Ecosystem connections — subtle cross-links */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        <Link
+          to="/value-tree"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/25 bg-card/20 text-[10px] font-serif text-muted-foreground hover:text-foreground hover:border-primary/25 transition-all"
+        >
+          🌳 Value Tree — How contributions flow
+        </Link>
+        <Link
+          to="/vault"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/25 bg-card/20 text-[10px] font-serif text-muted-foreground hover:text-foreground hover:border-primary/25 transition-all"
+        >
+          ❤️ Vault — Your hearts & activity
+        </Link>
+      </div>
     </section>
   );
 };
