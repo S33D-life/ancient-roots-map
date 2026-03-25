@@ -51,16 +51,21 @@ const typeConfig: Record<
   book: { singular: "Book", contentLabel: "Reflection", placeholder: "Why are you offering this story?", emoji: "📖" },
 };
 
-/** Quick-select offering types shown as pills */
-const QUICK_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
+/** Quick-select offering types — primary first, then secondary */
+const PRIMARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
   { value: "photo", emoji: "📷", label: "Memory" },
   { value: "story", emoji: "✍️", label: "Musing" },
   { value: "poem", emoji: "📜", label: "Poem" },
+];
+
+const SECONDARY_TYPES: { value: OfferingType; emoji: string; label: string }[] = [
   { value: "song", emoji: "🎵", label: "Song" },
   { value: "voice", emoji: "🎙️", label: "Voice" },
   { value: "book", emoji: "📖", label: "Book" },
   { value: "nft", emoji: "✨", label: "NFT" },
 ];
+
+const QUICK_TYPES = [...PRIMARY_TYPES, ...SECONDARY_TYPES];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_UPLOAD_SIZE = 5 * 1024 * 1024;
@@ -294,9 +299,10 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         if (rr && (rr.s33dHearts > 0 || rr.speciesHearts > 0 || rr.influence > 0)) { earnedReward = rr; setRewardResult(rr); }
       }
 
-      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed!`, subtitle: `Your ${cfg.singular.toLowerCase()} has been offered` });
+      const treePart = treeName ? ` to ${treeName}` : "";
+      setCelebrationMsg({ emoji: cfg.emoji, message: `${cfg.singular} sealed${treePart}`, subtitle: "Your offering is now part of this tree's story" });
       setShowCelebration(true);
-      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2000);
+      setTimeout(() => { setShowCelebration(false); if (earnedReward) { setShowRewardReceipt(true); } else { onOpenChange(false); } }, 2400);
       resetForm();
       return;
     } catch (err: any) {
@@ -532,7 +538,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         onOpenChange={(v) => { if (!loading) onOpenChange(v); }}
         overlay={celebrationOverlay}
         title={titleNode}
-        subtitle={`Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
+        subtitle={treeName ? `Offering to ${treeName}` : `Offer ${["a", "e", "i", "o", "u"].includes(cfg.singular[0]?.toLowerCase()) ? "an" : "a"} ${cfg.singular.toLowerCase()} to this Ancient Friend`}
       >
         {/* Type switcher */}
         <TypeSwitcher activeType={activeType} onChange={setActiveType} />
@@ -709,7 +715,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
             <Button
               type="submit"
               disabled={loading || uploading}
-              className="w-full font-serif tracking-wider gap-2 h-11"
+              className="w-full font-serif tracking-wider gap-2 h-12 text-sm"
               style={{
                 background: loading || uploading ? undefined : "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.85))",
                 boxShadow: loading || uploading ? undefined : "0 4px 14px hsl(var(--primary) / 0.25)",
@@ -720,8 +726,13 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {uploading ? "Uploading…" : loading ? "Submitting…" : `Offer ${cfg.singular}`}
+              {uploading ? "Uploading…" : loading ? "Sealing offering…" : treeName ? `Offer to ${treeName}` : `Offer ${cfg.singular}`}
             </Button>
+            {!loading && !uploading && (
+              <p className="text-[10px] text-center text-muted-foreground/40 font-serif mt-2">
+                Your offering becomes part of this tree's living story
+              </p>
+            )}
           </div>
         </form>
       </ResponsiveDialog>
@@ -739,28 +750,45 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
 
 /** Inline type switcher — scrollable pill bar with reduced visual weight */
 const TypeSwitcher = ({ activeType, onChange }: { activeType: OfferingType; onChange: (t: OfferingType) => void }) => {
+  const [showMore, setShowMore] = useState(() =>
+    SECONDARY_TYPES.some((t) => t.value === activeType)
+  );
+
   // Persist last-used tab
   useEffect(() => {
     try { localStorage.setItem("s33d-last-offering-type", activeType); } catch {}
   }, [activeType]);
 
+  const renderPill = (t: { value: OfferingType; emoji: string; label: string }) => (
+    <button
+      key={t.value}
+      type="button"
+      onClick={() => onChange(t.value)}
+      className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-serif transition-all duration-200 ${
+        activeType === t.value
+          ? "bg-primary/15 text-primary border border-primary/30"
+          : "text-muted-foreground/50 hover:text-muted-foreground/80 border border-transparent"
+      }`}
+    >
+      <span className="text-sm">{t.emoji}</span>
+      <span className={activeType === t.value ? "font-medium" : ""}>{t.label}</span>
+    </button>
+  );
+
   return (
-    <div className="flex gap-1 overflow-x-auto py-2.5 -mx-1 px-1 scrollbar-none">
-      {QUICK_TYPES.map((t) => (
+    <div className="flex items-center gap-1 overflow-x-auto py-2 -mx-1 px-1 scrollbar-none">
+      {PRIMARY_TYPES.map(renderPill)}
+      {!showMore ? (
         <button
-          key={t.value}
           type="button"
-          onClick={() => onChange(t.value)}
-          className={`shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-serif transition-all duration-200 ${
-            activeType === t.value
-              ? "bg-primary/15 text-primary border border-primary/30"
-              : "text-muted-foreground/40 hover:text-muted-foreground/70 border border-transparent"
-          }`}
+          onClick={() => setShowMore(true)}
+          className="shrink-0 px-2 py-1.5 rounded-full text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/70 border border-dashed border-border/30 transition-all"
         >
-          <span className="text-sm">{t.emoji}</span>
-          <span className={activeType === t.value ? "font-medium" : ""}>{t.label}</span>
+          More…
         </button>
-      ))}
+      ) : (
+        SECONDARY_TYPES.map(renderPill)
+      )}
     </div>
   );
 };

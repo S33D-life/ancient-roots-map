@@ -107,14 +107,15 @@ const RewardReceipt = ({
                 </motion.div>
               )}
 
-              {/* Journey connection — nudge to hive */}
-              {hive && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.7 }}
-                  className="mt-4"
-                >
+              {/* Journey connections */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                className="mt-4 space-y-2"
+              >
+                {/* Hive link */}
+                {hive && (
                   <Link
                     to={`/hive/${hive.slug}`}
                     onClick={onClose}
@@ -130,8 +131,27 @@ const RewardReceipt = ({
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                   </Link>
-                </motion.div>
-              )}
+                )}
+
+                {/* Ecosystem connections — subtle */}
+                <div className="flex gap-2 justify-center pt-1">
+                  <Link
+                    to="/vault"
+                    onClick={onClose}
+                    className="text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+                  >
+                    ❤️ View in Vault
+                  </Link>
+                  <span className="text-muted-foreground/20">·</span>
+                  <Link
+                    to="/value-tree"
+                    onClick={onClose}
+                    className="text-[10px] font-serif text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+                  >
+                    🌳 Value Tree
+                  </Link>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </motion.div>
