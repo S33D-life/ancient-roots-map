@@ -355,7 +355,7 @@ export default function StaffRoomGallery() {
   const [claimedCount, setClaimedCount] = useState(0);
 
   // Tab state — derive from search params for deep linking
-  const activeTab = searchParams.get("tab") || "overview";
+  const activeTab = searchParams.get("tab") || "explorer";
   const setActiveTab = useCallback((tab: string) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
