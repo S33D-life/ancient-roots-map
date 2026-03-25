@@ -134,7 +134,7 @@ const HeartJar = ({ userId, className = "" }: Props) => {
               onClick={() => setOpen(false)}
             />
             <motion.div
-              className="fixed bottom-0 left-0 right-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-2xl border-t"
+              className="fixed bottom-0 left-0 right-0 z-[9999] max-h-[85vh] overflow-y-auto rounded-t-2xl border-t"
               style={{
                 borderColor: "hsl(var(--border))",
                 background: "hsl(var(--card))",
