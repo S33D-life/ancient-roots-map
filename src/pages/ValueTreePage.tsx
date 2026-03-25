@@ -546,6 +546,23 @@ const ValueTreePage = () => {
                 </CollapsibleContent>
               </Collapsible>
 
+              {/* Public Goods Funding */}
+              <Collapsible>
+                <CollapsibleTrigger className="w-full flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 hover:border-primary/20 transition-all">
+                  <span className="text-base shrink-0">🌍</span>
+                  <span className="text-sm font-serif text-foreground flex-1 text-left">Public Goods Funding</span>
+                  <span className="text-[9px] font-serif text-muted-foreground/50">Gitcoin · Grants · Matching</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground ml-1" />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="pt-3">
+                    <Suspense fallback={<TabLoader />}>
+                      <PublicGoodsFunding />
+                    </Suspense>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
               {/* Philosophy */}
               <Collapsible>
                 <CollapsibleTrigger className="w-full flex items-center gap-2 p-4 rounded-xl border border-border/30 bg-card/30 hover:border-primary/20 transition-all">

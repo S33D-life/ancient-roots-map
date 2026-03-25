@@ -404,29 +404,53 @@ const SupportPage = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════ */}
-        {/* Giveth (External)                                      */}
+        {/* Public Goods Funding                                    */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <section className="rounded-xl border border-border/20 bg-card/40 p-4 space-y-2">
-          <h2 className="text-sm font-serif font-medium text-foreground">
-            Support via Giveth
+        <motion.section
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={3.5}
+          className="rounded-xl border border-border/20 bg-card/40 p-5 space-y-3"
+        >
+          <h2 className="text-sm font-serif font-medium text-foreground flex items-center gap-2">
+            <span>🌍</span> Public Goods Funding
           </h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            S33D is community-funded. Crypto donations are also accepted through Giveth.
+            S33D participates in public goods funding rounds like Gitcoin and Giveth.
+            Community support increases quadratic matching — even small contributions amplify impact.
           </p>
-          <a
-            href={SUPPORT_CONFIG.external.giveth.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="https://explorer.gitcoin.co"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-primary/20 bg-primary/5 text-xs font-serif text-foreground hover:bg-primary/10 transition-colors"
+            >
+              <span>🌱</span> Support on Gitcoin
+              <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
+            </a>
+            <a
+              href={SUPPORT_CONFIG.external.giveth.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-border/30 bg-card/30 text-xs font-serif text-foreground hover:border-primary/20 transition-colors"
+            >
+              <span>💚</span> {SUPPORT_CONFIG.external.giveth.label}
+              <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
+            </a>
+          </div>
+          <p className="text-[9px] text-muted-foreground/50 italic">
+            External funding flows into the S33D commons and is distributed as Hearts through the Value Tree.
+          </p>
+          <Link
+            to="/value-tree?tab=deeper"
+            className="inline-flex items-center gap-1.5 text-[10px] text-primary/60 hover:text-primary transition-colors"
           >
-            <Heart className="w-3 h-3" />
-            {SUPPORT_CONFIG.external.giveth.label}
-            <ExternalLink className="w-3 h-3 text-muted-foreground" />
-          </a>
-          <p className="text-[10px] text-muted-foreground/50">
-            Opens external site — you'll leave s33d.life
-          </p>
-        </section>
+            <Heart className="w-2.5 h-2.5" />
+            See how funding flows through the Value Tree →
+          </Link>
+        </motion.section>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* 5. OTHER WAYS TO SUPPORT                               */}
