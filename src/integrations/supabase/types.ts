@@ -319,11 +319,13 @@ export type Database = {
       agent_profiles: {
         Row: {
           agent_name: string
+          agent_role: string
           agent_type: string
           api_endpoint: string | null
           auth_method: string
           avatar_emoji: string | null
           connected_datasets: string[] | null
+          connection_mode: string
           contributions: number | null
           created_at: string
           creator: string
@@ -345,11 +347,13 @@ export type Database = {
         }
         Insert: {
           agent_name: string
+          agent_role?: string
           agent_type?: string
           api_endpoint?: string | null
           auth_method?: string
           avatar_emoji?: string | null
           connected_datasets?: string[] | null
+          connection_mode?: string
           contributions?: number | null
           created_at?: string
           creator: string
@@ -371,11 +375,13 @@ export type Database = {
         }
         Update: {
           agent_name?: string
+          agent_role?: string
           agent_type?: string
           api_endpoint?: string | null
           auth_method?: string
           avatar_emoji?: string | null
           connected_datasets?: string[] | null
+          connection_mode?: string
           contributions?: number | null
           created_at?: string
           creator?: string
