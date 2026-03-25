@@ -34,6 +34,8 @@ interface ResponsiveDialogProps {
   snapPoints?: number[];
   /** Default snap point index value */
   defaultSnapPoint?: number;
+  /** Force fullscreen on mobile (no partial drawer) */
+  fullscreenMobile?: boolean;
 }
 
 /**
