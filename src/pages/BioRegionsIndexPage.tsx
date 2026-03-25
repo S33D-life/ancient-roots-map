@@ -124,7 +124,7 @@ const BioRegionsIndexPage = () => {
           )}
         </section>
       </div>
-      
+      <Footer />
     </PageShell>
   );
 };
