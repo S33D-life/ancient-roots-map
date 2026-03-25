@@ -378,7 +378,7 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
           </div>
         </CardContent>
         </Card>
-      </section>
+      </SettingsCollapsible>
 
       {/* ── Security & Identity ── */}
       <section className="space-y-4">
