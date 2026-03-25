@@ -454,9 +454,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
-  const harvestLayerRef = useRef<L.LayerGroup | null>(null);
-  const ancientHighlightLayerRef = useRef<L.LayerGroup | null>(null);
+  // harvestTreeIds, harvestLayerRef, ancientHighlightLayerRef now managed by useMapOverlayLayers
   const [rootstoneCountryFilter, setRootstoneCountryFilter] = useState<string | null>(null);
   const [rootstoneTagFilter, setRootstoneTagFilter] = useState<string[]>([]);
   const [rootstoneCount, setRootstoneCount] = useState(0);
