@@ -2,7 +2,7 @@
  * CouncilRoom — Jitsi Meet embed for live Council gatherings.
  * Isolated, reusable, future-ready for Jitsi External API swap.
  */
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Copy, ExternalLink, Maximize2, Minimize2, Radio, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
