@@ -233,11 +233,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const userAccuracyRef = useRef<L.Circle | null>(null);
   const groveLayerRef = useRef<L.LayerGroup | null>(null);
   const seedLayerRef = useRef<L.LayerGroup | null>(null);
-  const rootThreadLayerRef = useRef<L.LayerGroup | null>(null);
+  // rootThreadLayerRef, offeringGlowLayerRef, birdsongHeatLayerRef now managed by useMapOverlayLayers
   const mycelialNetworkLayerRef = useRef<L.LayerGroup | null>(null);
   const mycelialAnimatedLayerRef = useRef<L.LayerGroup | null>(null);
-  const offeringGlowLayerRef = useRef<L.LayerGroup | null>(null);
-  const birdsongHeatLayerRef = useRef<L.LayerGroup | null>(null);
   const externalLayerRef = useRef<L.LayerGroup | null>(null);
   const researchLayerRef = useRef<L.LayerGroup | null>(null);
   const rootstoneLayerRef = useRef<L.LayerGroup | null>(null);
@@ -454,9 +452,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   const [mycelialConnections, setMycelialConnections] = useState<MycelialConnection[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [harvestTreeIds, setHarvestTreeIds] = useState<Set<string>>(new Set());
-  const harvestLayerRef = useRef<L.LayerGroup | null>(null);
-  const ancientHighlightLayerRef = useRef<L.LayerGroup | null>(null);
+  // harvestTreeIds, harvestLayerRef, ancientHighlightLayerRef now managed by useMapOverlayLayers
   const [rootstoneCountryFilter, setRootstoneCountryFilter] = useState<string | null>(null);
   const [rootstoneTagFilter, setRootstoneTagFilter] = useState<string[]>([]);
   const [rootstoneCount, setRootstoneCount] = useState(0);
@@ -469,10 +465,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const [externalTreeCount, setExternalTreeCount] = useState(0);
   const [externalLoading, setExternalLoading] = useState(false);
   const [atlasFilterOpen, setAtlasFilterOpen] = useState(false);
-  const [seedTrailCount, setSeedTrailCount] = useState(0);
-  const seedTrailLayerRef = useRef<L.LayerGroup | null>(null);
-  const [bloomedSeedCount, setBloomedSeedCount] = useState(0);
-  const bloomedSeedLayerRef = useRef<L.LayerGroup | null>(null);
+  // seedTrailCount, bloomedSeedCount, and harvestTreeIds are now derived from useMapOverlayLayers
+  // (declared below after the hook call — referenced here as late-bound via overlayResults)
 
   // Blooming Clock — Global Seasonal Atlas
   const { foods: foodCycles, loading: foodCyclesLoading } = useFoodCycles();
@@ -556,7 +550,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
 
   // Event pulse layer ref
   const eventPulseLayerRef = useRef<L.LayerGroup | null>(null);
-  const hexBinLayerRef = useRef<L.LayerGroup | null>(null);
+  // hexBinLayerRef now managed by useMapOverlayLayers
   const [currentEventPulses, setCurrentEventPulses] = useState<any[]>([]);
 
   const speciesCounts = useMemo(() => {
@@ -753,7 +747,31 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     return Array.from(m.values()).sort((a, b) => b.count - a.count);
   }, [trees]);
 
-  /** Visual layer sections for AtlasFilter — reorganised into 6 semantic groups */
+  // ── Overlay layers (Seeds, Root Threads, Offering Glow, Harvest, Ancient, Birdsong, Bloomed Seeds, Seed Trail, Heart Glow) ──
+  const overlayResults = useMapOverlayLayers({
+    map: mapRef.current,
+    trees,
+    filteredTrees,
+    bloomedSeeds,
+    birdsongHeatPoints,
+    offeringCounts,
+    treeLookup,
+    userId,
+    showSeeds,
+    showRootThreads,
+    showOfferingGlow,
+    showHarvestLayer,
+    showAncientHighlight,
+    showBirdsongHeat,
+    showBloomedSeeds,
+    showSeedTrail,
+    showHeartGlow,
+    birdsongSeason,
+  });
+  const bloomedSeedCount = overlayResults.bloomedSeedCount;
+  const seedTrailCount = overlayResults.seedTrailCount;
+  const harvestTreeIds = overlayResults.harvestTreeIds;
+
   const visualSections: VisualLayerSection[] = useMemo(() => [
     {
       key: "trees",
@@ -1179,86 +1197,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     };
   }, [groveViewActive, currentEventPulses]);
 
-  // ── H3-like hex-binned wanderer presence heatmap ──
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !showHeartGlow) {
-      if (hexBinLayerRef.current && mapRef.current) {
-        mapRef.current.removeLayer(hexBinLayerRef.current);
-        hexBinLayerRef.current = null;
-      }
-      return;
-    }
-
-    const loadHexBins = async () => {
-      // Fetch recent offering locations for density visualization
-      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { data } = await supabase
-        .from("offerings")
-        .select("tree_id")
-        .gte("created_at", cutoff)
-        .limit(500);
-
-      if (!data || data.length === 0) return;
-
-      // Resolve coordinates via tree lookup
-      const points: { lat: number; lng: number }[] = [];
-      for (const o of data) {
-        const loc = treeLookup.get(o.tree_id);
-        if (loc) points.push(loc);
-      }
-
-      if (points.length === 0) return;
-
-      // Import computeHexBins
-      const { computeHexBins } = await import("@/hooks/use-grove-events");
-      const zoom = map.getZoom();
-      const resolution = zoom >= 10 ? 0.05 : zoom >= 7 ? 0.2 : zoom >= 4 ? 0.5 : 2;
-      const bins = computeHexBins(points, resolution);
-
-      if (hexBinLayerRef.current) map.removeLayer(hexBinLayerRef.current);
-      const hexLayer = L.layerGroup();
-
-      bins.forEach(bin => {
-        const radius = 8 + bin.intensity * 24;
-        const opacity = 0.15 + bin.intensity * 0.45;
-        const icon = L.divIcon({
-          className: "hex-bin-marker",
-          html: `<div style="
-            width:${radius * 2}px;height:${radius * 2}px;border-radius:50%;
-            background:radial-gradient(circle,hsla(42,80%,55%,${opacity}) 0%,hsla(42,70%,45%,${opacity * 0.3}) 60%,transparent 100%);
-            box-shadow:0 0 ${radius}px hsla(42,80%,55%,${opacity * 0.4});
-            transform:translate(-50%,-50%);
-          "></div>`,
-          iconSize: [radius * 2, radius * 2],
-          iconAnchor: [radius, radius],
-        });
-        L.marker([bin.lat, bin.lng], { icon, interactive: false }).addTo(hexLayer);
-      });
-
-      hexLayer.addTo(map);
-      hexBinLayerRef.current = hexLayer;
-    };
-
-    loadHexBins();
-
-    // Refresh on zoom/pan
-    const onMove = () => loadHexBins();
-    const debounced = (() => {
-      let t: ReturnType<typeof setTimeout>;
-      return () => { clearTimeout(t); t = setTimeout(onMove, 800); };
-    })();
-    map.on("moveend", debounced);
-
-    return () => {
-      map.off("moveend", debounced);
-      if (hexBinLayerRef.current && map.hasLayer(hexBinLayerRef.current)) {
-        map.removeLayer(hexBinLayerRef.current);
-        hexBinLayerRef.current = null;
-      }
-    };
-  }, [showHeartGlow, treeLookup]);
-
+  // [Overlay hook is called earlier, before visualSections]
   function placeUserMarker(map: L.Map, latlng: [number, number], accuracy?: number) {
     if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
     if (userAccuracyRef.current) map.removeLayer(userAccuracyRef.current);
@@ -1349,448 +1288,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     onJourneyEnd,
   });
 
-  // Render bloomed seed heart markers
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    // Clean up previous seed layer
-    if (seedLayerRef.current) {
-      map.removeLayer(seedLayerRef.current);
-      seedLayerRef.current = null;
-    }
-
-    if (!showSeeds || bloomedSeeds.length === 0) return;
-
-    const seedLayer = L.layerGroup();
-
-    const treeCoordMap: Record<string, { lat: number; lng: number }> = {};
-    trees.forEach((t) => {
-      if (t.latitude && t.longitude) treeCoordMap[t.id] = { lat: t.latitude, lng: t.longitude };
-    });
-
-    const seedsByTree: Record<string, number> = {};
-    bloomedSeeds.forEach((s) => {
-      seedsByTree[s.tree_id] = (seedsByTree[s.tree_id] || 0) + 1;
-    });
-
-    Object.entries(seedsByTree).forEach(([treeId, count]) => {
-      const coords = treeCoordMap[treeId];
-      if (!coords) return;
-
-      const icon = L.divIcon({
-        className: 'seed-heart-leaflet',
-        html: `<span style="font-size:22px;">💚</span>${count > 1 ? `<span class="seed-count">${count}</span>` : ''}`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-      });
-
-      const popupHtml = `<div style="padding:12px;font-family:'Cinzel',serif;min-width:180px;text-align:center;">
-        <p style="margin:0;font-size:20px;">💚</p>
-        <p style="margin:6px 0 2px;font-size:14px;color:hsl(120,50%,60%);font-weight:700;">${count} Bloomed Heart${count !== 1 ? 's' : ''}</p>
-        <p style="margin:0 0 8px;font-size:11px;color:hsl(42,50%,55%);">Ready to collect — visit this tree!</p>
-        <a href="/tree/${encodeURIComponent(treeId)}" style="display:block;padding:8px 0;text-align:center;font-size:12px;color:hsl(80,20%,8%);background:linear-gradient(135deg,hsl(120,50%,45%),hsl(80,60%,50%));border-radius:6px;text-decoration:none;letter-spacing:0.06em;font-weight:600;">Collect Hearts ⟶</a>
-      </div>`;
-
-      L.marker([coords.lat, coords.lng], { icon, zIndexOffset: 500 })
-        .bindPopup(popupHtml, { className: 'atlas-leaflet-popup', maxWidth: 240, closeButton: true })
-        .addTo(seedLayer);
-    });
-
-    seedLayer.addTo(map);
-    seedLayerRef.current = seedLayer;
-
-    return () => {
-      if (map.hasLayer(seedLayer)) map.removeLayer(seedLayer);
-    };
-  }, [bloomedSeeds, trees, showSeeds]);
-
-  // Grove boundaries now handled by useGroveMapLayer hook
-  // (old convex-hull code replaced with detection-based halos + center markers)
-
-  // Draw root threads — golden dashed lines between same-species trees within 80km
-  // Viewport-culled + O(n²) capped to prevent jank with large datasets
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (rootThreadLayerRef.current) {
-      map.removeLayer(rootThreadLayerRef.current);
-      rootThreadLayerRef.current = null;
-    }
-
-    if (!showRootThreads || filteredTrees.length < 2) return;
-
-    const threadLayer = L.layerGroup();
-
-    // Only draw threads for trees visible in the viewport (+ padding)
-    const visible = getVisibleTrees(map, filteredTrees, 0.2);
-    if (visible.length < 2 || visible.length > 400) {
-      // Too many — skip to keep panning smooth
-      threadLayer.addTo(map);
-      rootThreadLayerRef.current = threadLayer;
-      return;
-    }
-
-    const bySpecies: Record<string, Tree[]> = {};
-    visible.forEach((t) => {
-      const key = t.species.toLowerCase();
-      if (!bySpecies[key]) bySpecies[key] = [];
-      bySpecies[key].push(t);
-    });
-
-    const MAX_DIST_KM = 80;
-    const drawn = new Set<string>();
-    const MAX_THREADS = 300; // hard cap for performance
-    let threadCount = 0;
-
-    Object.entries(bySpecies).forEach(([, group]) => {
-      if (group.length < 2 || threadCount >= MAX_THREADS) return;
-
-      for (let i = 0; i < group.length && threadCount < MAX_THREADS; i++) {
-        for (let j = i + 1; j < group.length && threadCount < MAX_THREADS; j++) {
-          const a = group[i];
-          const b = group[j];
-          const dist = haversineKm(a.latitude, a.longitude, b.latitude, b.longitude);
-          if (dist > MAX_DIST_KM) continue;
-
-          const pairKey = [a.id, b.id].sort().join("-");
-          if (drawn.has(pairKey)) continue;
-          drawn.add(pairKey);
-
-          const opacity = Math.max(0.15, 0.6 * (1 - dist / MAX_DIST_KM));
-          const weight = dist < 20 ? 2 : 1.5;
-
-          L.polyline(
-            [[a.latitude, a.longitude], [b.latitude, b.longitude]],
-            {
-              color: "hsl(42, 80%, 55%)",
-              weight,
-              opacity,
-              dashArray: "6 8",
-              interactive: false,
-            }
-          ).addTo(threadLayer);
-          threadCount++;
-        }
-      }
-    });
-
-    threadLayer.addTo(map);
-    rootThreadLayerRef.current = threadLayer;
-
-    return () => {
-      if (map.hasLayer(threadLayer)) map.removeLayer(threadLayer);
-    };
-  }, [filteredTrees, showRootThreads]);
-
-  // Offering glow layer — viewport-culled for performance
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (offeringGlowLayerRef.current) {
-      map.removeLayer(offeringGlowLayerRef.current);
-      offeringGlowLayerRef.current = null;
-    }
-
-    if (!showOfferingGlow) return;
-
-    const glowLayer = L.layerGroup();
-    const currentOfferings = offeringCountsRef.current;
-
-    // Only render glow for trees visible in viewport
-    const visible = getVisibleTrees(map, filteredTrees, 0.05);
-
-    visible.forEach((tree) => {
-      const count = currentOfferings[tree.id] || 0;
-      if (count === 0) return;
-
-      // Radius scales with offering count, capped
-      const radius = Math.min(12 + count * 3, 36);
-      const intensity = Math.min(0.25 + count * 0.08, 0.7);
-
-      // Outer glow ring
-      L.circleMarker([tree.latitude, tree.longitude], {
-        radius: radius + 6,
-        color: "hsl(42, 85%, 55%)",
-        fillColor: "hsl(42, 90%, 60%)",
-        fillOpacity: intensity * 0.3,
-        weight: 0,
-        interactive: false,
-        className: "offering-glow-outer",
-      }).addTo(glowLayer);
-
-      // Inner glow
-      L.circleMarker([tree.latitude, tree.longitude], {
-        radius,
-        color: "hsl(42, 85%, 55%)",
-        fillColor: "hsl(42, 90%, 65%)",
-        fillOpacity: intensity,
-        weight: 1.5,
-        opacity: 0.6,
-        interactive: false,
-        className: "offering-glow-inner",
-      }).addTo(glowLayer);
-
-      // Count badge
-      const badgeIcon = L.divIcon({
-        html: `<span style="
-          background: hsl(42, 80%, 50%);
-          color: hsl(30, 10%, 10%);
-          font-size: 9px;
-          font-weight: 700;
-          border-radius: 50%;
-          width: 18px; height: 18px;
-          display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 0 6px hsla(42, 90%, 55%, 0.6);
-          font-family: monospace;
-        ">${count}</span>`,
-        className: "offering-count-badge",
-        iconSize: L.point(18, 18),
-        iconAnchor: L.point(9, -4),
-      });
-      L.marker([tree.latitude, tree.longitude], { icon: badgeIcon, interactive: false }).addTo(glowLayer);
-    });
-
-    glowLayer.addTo(map);
-    offeringGlowLayerRef.current = glowLayer;
-
-    return () => {
-      if (map.hasLayer(glowLayer)) map.removeLayer(glowLayer);
-    };
-  }, [filteredTrees, showOfferingGlow]);
-
-  // Fetch harvest tree IDs for the harvest layer
-  useEffect(() => {
-    if (!showHarvestLayer) return;
-    const fetchHarvestTrees = async () => {
-      const { data } = await supabase
-        .from("harvest_listings")
-        .select("tree_id")
-        .not("tree_id", "is", null)
-        .in("status", ["available", "upcoming"]);
-      if (data) {
-        setHarvestTreeIds(new Set(data.map(d => d.tree_id).filter(Boolean) as string[]));
-      }
-    };
-    fetchHarvestTrees();
-  }, [showHarvestLayer]);
-
-  // Harvest layer — 🍎 badges on trees with active harvest listings
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (harvestLayerRef.current) {
-      map.removeLayer(harvestLayerRef.current);
-      harvestLayerRef.current = null;
-    }
-
-    if (!showHarvestLayer || harvestTreeIds.size === 0) return;
-
-    const layer = L.layerGroup();
-    const visible = getVisibleTrees(map, filteredTrees, 0.05);
-
-    visible.forEach((tree) => {
-      if (!harvestTreeIds.has(tree.id)) return;
-
-      // Warm glow ring
-      L.circleMarker([tree.latitude, tree.longitude], {
-        radius: 18,
-        color: "hsl(25, 75%, 50%)",
-        fillColor: "hsl(30, 80%, 55%)",
-        fillOpacity: 0.2,
-        weight: 1.5,
-        opacity: 0.5,
-        interactive: false,
-        className: "harvest-glow",
-      }).addTo(layer);
-
-      // Harvest badge
-      const badgeIcon = L.divIcon({
-        html: `<span style="
-          background: hsl(25, 70%, 45%);
-          color: hsl(45, 95%, 90%);
-          font-size: 11px;
-          border-radius: 50%;
-          width: 22px; height: 22px;
-          display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 0 8px hsla(25, 80%, 50%, 0.5);
-          pointer-events: none;
-        ">🍎</span>`,
-        className: "harvest-badge",
-        iconSize: L.point(22, 22),
-        iconAnchor: L.point(11, -6),
-      });
-      L.marker([tree.latitude, tree.longitude], { icon: badgeIcon, interactive: false }).addTo(layer);
-    });
-
-    layer.addTo(map);
-    harvestLayerRef.current = layer;
-
-    return () => {
-      if (map.hasLayer(layer)) map.removeLayer(layer);
-    };
-  }, [filteredTrees, showHarvestLayer, harvestTreeIds]);
-
-  // Ancient tree highlight layer — golden pulse ring around ancient-tier trees
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (ancientHighlightLayerRef.current) {
-      map.removeLayer(ancientHighlightLayerRef.current);
-      ancientHighlightLayerRef.current = null;
-    }
-
-    if (!showAncientHighlight) return;
-
-    const layer = L.layerGroup();
-    const currentOfferings = offeringCountsRef.current;
-    const visible = getVisibleTrees(map, filteredTrees, 0.05);
-
-    visible.forEach((tree) => {
-      const age = tree.estimated_age || 0;
-      const offerings = currentOfferings[tree.id] || 0;
-      const tier = getTreeTier(age, offerings);
-
-      if (tier !== "ancient") return;
-
-      // Outer golden pulse ring
-      L.circleMarker([tree.latitude, tree.longitude], {
-        radius: 24,
-        color: "hsl(42, 90%, 55%)",
-        fillColor: "hsl(42, 85%, 60%)",
-        fillOpacity: 0.15,
-        weight: 2,
-        opacity: 0.6,
-        interactive: false,
-        className: "ancient-highlight-outer",
-      }).addTo(layer);
-
-      // Inner ring
-      L.circleMarker([tree.latitude, tree.longitude], {
-        radius: 16,
-        color: "hsl(42, 80%, 50%)",
-        fillColor: "hsl(42, 90%, 65%)",
-        fillOpacity: 0.25,
-        weight: 1.5,
-        opacity: 0.7,
-        interactive: false,
-        className: "ancient-highlight-inner",
-      }).addTo(layer);
-
-      // Crown badge
-      const crownIcon = L.divIcon({
-        html: `<span style="
-          font-size: 13px;
-          filter: drop-shadow(0 0 4px hsla(42, 90%, 55%, 0.7));
-          pointer-events: none;
-        ">👑</span>`,
-        className: "ancient-crown-badge",
-        iconSize: L.point(18, 18),
-        iconAnchor: L.point(9, 28),
-      });
-      L.marker([tree.latitude, tree.longitude], { icon: crownIcon, interactive: false }).addTo(layer);
-    });
-
-    layer.addTo(map);
-    ancientHighlightLayerRef.current = layer;
-
-    return () => {
-      if (map.hasLayer(layer)) map.removeLayer(layer);
-    };
-  }, [filteredTrees, showAncientHighlight]);
-
-  // Birdsong seasonal heatmap layer
-  const SEASON_COLORS: Record<string, { fill: string; stroke: string; label: string }> = {
-    spring: { fill: "hsla(120, 55%, 50%, 0.35)", stroke: "hsl(120, 55%, 50%)", label: "Spring" },
-    summer: { fill: "hsla(45, 80%, 50%, 0.35)", stroke: "hsl(45, 80%, 50%)", label: "Summer" },
-    autumn: { fill: "hsla(25, 75%, 50%, 0.35)", stroke: "hsl(25, 75%, 50%)", label: "Autumn" },
-    winter: { fill: "hsla(200, 60%, 55%, 0.35)", stroke: "hsl(200, 60%, 55%)", label: "Winter" },
-    unknown: { fill: "hsla(270, 40%, 55%, 0.3)", stroke: "hsl(270, 40%, 55%)", label: "Unknown" },
-  };
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (birdsongHeatLayerRef.current) {
-      map.removeLayer(birdsongHeatLayerRef.current);
-      birdsongHeatLayerRef.current = null;
-    }
-
-    if (!showBirdsongHeat || birdsongHeatPoints.length === 0) return;
-
-    const heatLayer = L.layerGroup();
-
-    // Aggregate by tree+season
-    const grouped: Record<string, { lat: number; lng: number; seasons: Record<string, number> }> = {};
-    birdsongHeatPoints.forEach((pt) => {
-      const key = pt.tree_id;
-      if (!grouped[key]) grouped[key] = { lat: pt.latitude, lng: pt.longitude, seasons: {} };
-      const s = pt.season || "unknown";
-      grouped[key].seasons[s] = (grouped[key].seasons[s] || 0) + 1;
-    });
-
-    Object.values(grouped).forEach((g) => {
-      const totalAtTree = Object.values(g.seasons).reduce((a, b) => a + b, 0);
-      const baseRadius = Math.min(8 + totalAtTree * 2, 28);
-
-      // Draw a circle per season at slight offset for visibility, or stacked
-      let ringIndex = 0;
-      Object.entries(g.seasons).forEach(([season, count]) => {
-        if (birdsongSeason !== "all" && birdsongSeason !== season) return;
-        const colors = SEASON_COLORS[season] || SEASON_COLORS.unknown;
-        const r = baseRadius - ringIndex * 3;
-        const intensity = Math.min(0.2 + count * 0.1, 0.7);
-
-        L.circleMarker([g.lat, g.lng], {
-          radius: r,
-          color: colors.stroke,
-          fillColor: colors.fill,
-          fillOpacity: intensity,
-          weight: 1.5,
-          opacity: 0.7,
-          interactive: false,
-        }).addTo(heatLayer);
-
-        ringIndex++;
-      });
-
-      // Count label
-      const filteredTotal = birdsongSeason === "all"
-        ? totalAtTree
-        : (g.seasons[birdsongSeason] || 0);
-      if (filteredTotal > 0) {
-        const badgeIcon = L.divIcon({
-          html: `<span style="
-            background: hsla(200, 50%, 15%, 0.9);
-            color: hsl(200, 60%, 75%);
-            font-size: 9px;
-            font-weight: 700;
-            border-radius: 50%;
-            width: 18px; height: 18px;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid hsla(200, 50%, 45%, 0.5);
-            font-family: monospace;
-          ">🐦${filteredTotal > 1 ? filteredTotal : ''}</span>`,
-          className: "birdsong-heat-badge",
-          iconSize: L.point(18, 18),
-          iconAnchor: L.point(9, -6),
-        });
-        L.marker([g.lat, g.lng], { icon: badgeIcon, interactive: false }).addTo(heatLayer);
-      }
-    });
-
-    heatLayer.addTo(map);
-    birdsongHeatLayerRef.current = heatLayer;
-
-    return () => {
-      if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
-    };
-  }, [birdsongHeatPoints, showBirdsongHeat, birdsongSeason]);
+  // [Overlay effects for Seeds, Root Threads, Offering Glow, Harvest, Ancient Highlight,
+  //  and Birdsong Heat are now managed by useMapOverlayLayers hook above]
 
   // External trees layer — registry-driven multi-source system
   const enabledSources = useMemo(() => getEnabledSources(), []);
@@ -2409,165 +1908,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     }
   }, [addTreeCoords, watersCommonsPois, showWatersCommons]);
 
-  // ── Bloomed Seeds layer ──
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (bloomedSeedLayerRef.current) {
-      map.removeLayer(bloomedSeedLayerRef.current);
-      bloomedSeedLayerRef.current = null;
-    }
-
-    if (!showBloomedSeeds) { setBloomedSeedCount(0); return; }
-
-    const loadSeeds = async () => {
-      const now = new Date().toISOString();
-      const { data } = await supabase
-        .from("planted_seeds")
-        .select("id, latitude, longitude, tree_id, blooms_at, planter_id")
-        .is("collected_at", null)
-        .lte("blooms_at", now)
-        .not("latitude", "is", null)
-        .not("longitude", "is", null)
-        .limit(200);
-
-      if (!data || data.length === 0) { setBloomedSeedCount(0); return; }
-      setBloomedSeedCount(data.length);
-
-      const layer = L.layerGroup();
-      data.forEach((seed: any) => {
-        const seedIcon = L.divIcon({
-          className: "bloomed-seed-marker",
-          html: `<div style="
-            width: 18px; height: 18px; border-radius: 50%;
-            background: radial-gradient(circle, hsla(120, 70%, 60%, 0.9), hsla(120, 60%, 40%, 0.5));
-            box-shadow: 0 0 12px hsla(120, 70%, 55%, 0.6), 0 0 24px hsla(120, 60%, 50%, 0.3);
-            animation: seedPulse 2s ease-in-out infinite;
-            border: 2px solid hsla(120, 80%, 70%, 0.7);
-          "></div>`,
-          iconSize: [18, 18],
-          iconAnchor: [9, 9],
-        });
-
-        const marker = L.marker([seed.latitude, seed.longitude], { icon: seedIcon });
-        const popup = document.createElement("div");
-        popup.style.cssText = "font-family: serif; text-align: center;";
-        popup.innerHTML = `<div style="font-size:13px;color:hsl(120,50%,40%)">🌱 Bloomed Seed</div>
-          <div style="font-size:10px;color:#888;margin-top:2px">Ready to collect</div>`;
-        marker.bindPopup(popup);
-        layer.addLayer(marker);
-      });
-
-      layer.addTo(map);
-      bloomedSeedLayerRef.current = layer;
-    };
-    loadSeeds();
-
-    return () => {
-      if (bloomedSeedLayerRef.current && map.hasLayer(bloomedSeedLayerRef.current)) {
-        map.removeLayer(bloomedSeedLayerRef.current);
-      }
-    };
-  }, [showBloomedSeeds]);
-
-  // ── Seed Trail layer — user's planted seeds today ──
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (seedTrailLayerRef.current) {
-      map.removeLayer(seedTrailLayerRef.current);
-      seedTrailLayerRef.current = null;
-    }
-
-    if (!showSeedTrail || !userId) { setSeedTrailCount(0); return; }
-
-    const loadTrail = async () => {
-      const midnight = new Date();
-      midnight.setHours(0, 0, 0, 0);
-
-      const { data: seeds } = await supabase
-        .from("planted_seeds")
-        .select("id, tree_id, planted_at, latitude, longitude")
-        .eq("planter_id", userId)
-        .gte("planted_at", midnight.toISOString())
-        .order("planted_at", { ascending: true })
-        .limit(100);
-
-      if (!seeds || seeds.length === 0) { setSeedTrailCount(0); return; }
-
-      // Get tree coords for seeds without lat/lng
-      const needsCoords = seeds.filter((s: any) => !s.latitude || !s.longitude);
-      let treeCoordMap: Record<string, { lat: number; lng: number }> = {};
-      if (needsCoords.length > 0) {
-        const treeIds = [...new Set(needsCoords.map((s: any) => s.tree_id))];
-        const { data: treeData } = await supabase
-          .from("trees")
-          .select("id, latitude, longitude")
-          .in("id", treeIds);
-        (treeData || []).forEach((t: any) => {
-          if (t.latitude && t.longitude) treeCoordMap[t.id] = { lat: t.latitude, lng: t.longitude };
-        });
-      }
-
-      const points: [number, number][] = [];
-      const layer = L.layerGroup();
-
-      setSeedTrailCount(seeds.length);
-
-      seeds.forEach((seed: any, idx: number) => {
-        const lat = seed.latitude || treeCoordMap[seed.tree_id]?.lat;
-        const lng = seed.longitude || treeCoordMap[seed.tree_id]?.lng;
-        if (!lat || !lng) return;
-
-        points.push([lat, lng]);
-
-        // Golden sprout marker
-        const age = (Date.now() - new Date(seed.planted_at).getTime()) / 3600000; // hours
-        const opacity = Math.max(0.4, 1 - age / 24);
-
-        const sproutIcon = L.divIcon({
-          className: "seed-trail-marker",
-          html: `<div style="
-            width: 14px; height: 14px; border-radius: 50%;
-            background: radial-gradient(circle, hsla(42, 85%, 60%, ${opacity}), hsla(42, 70%, 45%, ${opacity * 0.4}));
-            box-shadow: 0 0 8px hsla(42, 80%, 55%, ${opacity * 0.5}), 0 0 16px hsla(42, 70%, 50%, ${opacity * 0.2});
-            border: 1.5px solid hsla(42, 90%, 70%, ${opacity * 0.6});
-            animation: seedTrailPulse 3s ease-in-out infinite;
-            animation-delay: ${idx * 0.2}s;
-          "></div>`,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-        });
-
-        L.marker([lat, lng], { icon: sproutIcon, zIndexOffset: 600 }).addTo(layer);
-      });
-
-      // Draw faint trail line connecting seeds in chronological order
-      if (points.length >= 2) {
-        const trail = L.polyline(points, {
-          color: "hsla(42, 75%, 55%, 0.3)",
-          weight: 2,
-          dashArray: "6,8",
-          lineCap: "round",
-          lineJoin: "round",
-        });
-        layer.addLayer(trail);
-      }
-
-      layer.addTo(map);
-      seedTrailLayerRef.current = layer;
-    };
-
-    loadTrail();
-
-    return () => {
-      if (seedTrailLayerRef.current && map.hasLayer(seedTrailLayerRef.current)) {
-        map.removeLayer(seedTrailLayerRef.current);
-      }
-    };
-  }, [showSeedTrail, userId]);
+  // [Bloomed Seeds and Seed Trail layers are now managed by useMapOverlayLayers hook above]
 
   const handleFindMe = useCallback(async () => {
     if (!mapRef.current) return;
