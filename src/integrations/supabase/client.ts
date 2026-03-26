@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
-import { supabaseEnv } from "@/config/env";
+import { resolveSupabaseEnv, supabaseEnv } from "@/config/env";
 
 const missingEnvError = {
   name: "MissingSupabaseEnvError",
@@ -111,17 +111,19 @@ const createMissingEnvSupabaseClient = () => {
   } as unknown as SupabaseClient<Database>;
 };
 
-const isMissingEnv = !supabaseEnv?.url || !supabaseEnv?.anonKey;
+const resolvedSupabaseEnv = supabaseEnv ?? await resolveSupabaseEnv();
+
+const isMissingEnv = !resolvedSupabaseEnv?.url || !resolvedSupabaseEnv?.anonKey;
 
 if (isMissingEnv) {
   console.warn(
     "[S33D] Supabase env vars missing — running with mock client. Auth and data will not work.",
-    { url: !!supabaseEnv?.url, key: !!supabaseEnv?.anonKey }
+    { url: !!resolvedSupabaseEnv?.url, key: !!resolvedSupabaseEnv?.anonKey }
   );
 }
 
 export const supabase: SupabaseClient<Database> = !isMissingEnv
-  ? createClient<Database>(supabaseEnv.url!, supabaseEnv.anonKey!, {
+  ? createClient<Database>(resolvedSupabaseEnv.url!, resolvedSupabaseEnv.anonKey!, {
       auth: {
         storage: localStorage,
         persistSession: true,

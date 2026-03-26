@@ -48,7 +48,7 @@ interface TeotagGuideProps {
   initialTab?: Tab;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/teotag-guide`;
+const CHAT_URL = "/functions/v1/teotag-guide";
 
 const TeotagGuide = ({ open, onClose, initialTab }: TeotagGuideProps) => {
   const navigate = useNavigate();
