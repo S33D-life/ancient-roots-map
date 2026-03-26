@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import {
   Gift, TreeDeciduous, Heart, Copy, Users, ArrowLeft, Loader2, Sprout, Share2, Milestone,
 } from "lucide-react";
+import TelegramBotLink from "@/components/referrals/TelegramBotLink";
 
 /* ── Milestones — presented as grove growth, not leaderboard ── */
 const MILESTONES = [
