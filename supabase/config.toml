@@ -29,6 +29,3 @@ verify_jwt = false
 
 [functions.mint-nftree]
 verify_jwt = false
-
-[functions.public-runtime-config]
-verify_jwt = false

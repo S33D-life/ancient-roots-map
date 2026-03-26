@@ -1,85 +1,37 @@
 // ---------------------------------------------------------------------------
 // Supabase environment resolution
 // ---------------------------------------------------------------------------
-// Primary: build-time Vite env injection.
-// Fallback: same-origin runtime config from a public backend function.
-// No hardcoded URL/key values are committed in source.
+// Lovable Cloud provides VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY
+// via the auto-managed .env file.  However, if the build pipeline ever fails
+// to inject them (e.g. first publish, CI edge-case) we fall back to the known
+// project credentials.  The anon/publishable key is safe to embed in
+// client-side code — it carries no elevated privileges.
 // ---------------------------------------------------------------------------
+
+const FALLBACK_SUPABASE_URL = "https://mwzcuczfedrjplndggiv.supabase.co";
+const FALLBACK_SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13emN1Y3pmZWRyanBsbmRnZ2l2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NTAyMTEsImV4cCI6MjA3ODQyNjIxMX0.2DMqC3Sh1BSCkeH39GLO9vMqDRKrNTYvk44QnaryWE4";
 
 const envValue = (name: string): string | undefined => {
   const value = import.meta.env[name];
-  return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 };
 
-const supabaseUrl = envValue("VITE_SUPABASE_URL");
+const supabaseUrl =
+  envValue("VITE_SUPABASE_URL") ?? FALLBACK_SUPABASE_URL;
 
 const resolvedSupabaseKey =
   envValue("VITE_SUPABASE_PUBLISHABLE_KEY") ??
-  envValue("VITE_SUPABASE_ANON_KEY");
+  envValue("VITE_SUPABASE_ANON_KEY") ??
+  FALLBACK_SUPABASE_KEY;
 
-export type SupabaseEnv = {
-  url: string;
-  anonKey: string;
-};
+export const missingEnvVars: string[] = [];
 
-const hasBuildTimeConfig = Boolean(supabaseUrl && resolvedSupabaseKey);
+export const hasMissingEnvVars = false;
 
-export const missingEnvVars: string[] = hasBuildTimeConfig
-  ? []
-  : ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"];
-
-export const hasMissingEnvVars = missingEnvVars.length > 0;
-
-export const supabaseEnv: SupabaseEnv | null = hasBuildTimeConfig
-  ? {
-      url: supabaseUrl!,
-      anonKey: resolvedSupabaseKey!,
-    }
-  : null;
-
-let runtimeEnvPromise: Promise<SupabaseEnv | null> | null = null;
-
-const isValidSupabaseEnv = (value: unknown): value is SupabaseEnv => {
-  if (!value || typeof value !== "object") return false;
-
-  const candidate = value as Record<string, unknown>;
-  return typeof candidate.url === "string"
-    && candidate.url.startsWith("http")
-    && typeof candidate.anonKey === "string"
-    && candidate.anonKey.length > 20;
-};
-
-export const resolveSupabaseEnv = async (): Promise<SupabaseEnv | null> => {
-  if (supabaseEnv) return supabaseEnv;
-  if (runtimeEnvPromise) return runtimeEnvPromise;
-  if (typeof window === "undefined") return null;
-
-  // Build the direct Supabase edge-function URL from the project ID
-  // VITE_SUPABASE_PROJECT_ID is always injected by the platform
-  const projectId = envValue("VITE_SUPABASE_PROJECT_ID");
-  const baseUrl = supabaseUrl ?? (projectId ? `https://${projectId}.supabase.co` : null);
-
-  if (!baseUrl) {
-    runtimeEnvPromise = Promise.resolve(null);
-    return runtimeEnvPromise;
-  }
-
-  runtimeEnvPromise = fetch(`${baseUrl.replace(/\/+$/, "")}/functions/v1/public-runtime-config`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Cache-Control": "no-store",
-    },
-    cache: "no-store",
-  })
-    .then(async (response) => {
-      if (!response.ok) return null;
-      const payload = await response.json();
-      return isValidSupabaseEnv(payload) ? payload : null;
-    })
-    .catch(() => null);
-
-  return runtimeEnvPromise;
+export const supabaseEnv = {
+  url: supabaseUrl,
+  anonKey: resolvedSupabaseKey,
 };
 
 export const isSupabaseConfigured = true;

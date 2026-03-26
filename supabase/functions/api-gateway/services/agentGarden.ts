@@ -75,7 +75,7 @@ async function createContribution(params: {
   trustScore?: number | null;
 }) {
   const db = adminClient();
-  const mult = trustMultiplier(params.trustScore ?? null);
+  const mult = trustMultiplier(params.trustScore);
   const hearts = Math.round((params.heartsBase ?? REWARD_TABLE[params.contributionType] ?? 1) * mult);
 
   const { data, error } = await db.from("agent_contribution_events").insert({
