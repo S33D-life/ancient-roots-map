@@ -111,7 +111,7 @@ const createMissingEnvSupabaseClient = () => {
   } as unknown as SupabaseClient<Database>;
 };
 
-export const supabase: SupabaseClient<Database> = supabaseEnv
+export const supabase: SupabaseClient<Database> = supabaseEnv?.url && supabaseEnv?.anonKey
   ? createClient<Database>(supabaseEnv.url, supabaseEnv.anonKey, {
       auth: {
         storage: localStorage,
