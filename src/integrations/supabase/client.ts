@@ -111,12 +111,22 @@ const createMissingEnvSupabaseClient = () => {
   } as unknown as SupabaseClient<Database>;
 };
 
-export const supabase: SupabaseClient<Database> = supabaseEnv?.url && supabaseEnv?.anonKey
-  ? createClient<Database>(supabaseEnv.url, supabaseEnv.anonKey, {
+const isMissingEnv = !supabaseEnv?.url || !supabaseEnv?.anonKey;
+
+if (isMissingEnv) {
+  console.warn(
+    "[S33D] Supabase env vars missing — running with mock client. Auth and data will not work.",
+    { url: !!supabaseEnv?.url, key: !!supabaseEnv?.anonKey }
+  );
+}
+
+export const supabase: SupabaseClient<Database> = !isMissingEnv
+  ? createClient<Database>(supabaseEnv.url!, supabaseEnv.anonKey!, {
       auth: {
         storage: localStorage,
         persistSession: true,
         autoRefreshToken: true,
+        detectSessionInUrl: true,
       },
     })
   : createMissingEnvSupabaseClient();
