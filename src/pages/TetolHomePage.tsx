@@ -265,7 +265,7 @@ const TetolHomePage = () => {
               )}
               <EnsoNudge size={46} offsetY={-10}>
                 <button
-                  onClick={() => handleItemClick("/s33d#ground")}
+                  onClick={() => { setActiveNode("/s33d"); setTimeout(() => navigate({ pathname: "/s33d", hash: "#ground" }), 120); }}
                   className="flex flex-col items-center gap-1 group cursor-pointer bg-transparent border-none transition-all duration-200"
                   style={activeNode === "/s33d" ? { transform: "scale(1.08)", filter: "brightness(1.3)" } : {}}
                 >
