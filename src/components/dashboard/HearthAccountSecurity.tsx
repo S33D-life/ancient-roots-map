@@ -27,6 +27,7 @@ import {
   Link2Off,
   Lock,
 } from "lucide-react";
+import LinkedAccountsSection from "@/components/dashboard/LinkedAccountsSection";
 
 interface HearthAccountSecurityProps {
   user: User;
