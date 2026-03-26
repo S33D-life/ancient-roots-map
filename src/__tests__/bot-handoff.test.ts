@@ -24,13 +24,19 @@ describe("Bot Handoff Helpers", () => {
     localStorageMock.clear();
   });
 
-  describe("intentToPath", () => {
-    it("maps known intents to paths", () => {
+  describe("intentToPath — shared contract alignment", () => {
+    it("maps known intents to canonical paths", () => {
       expect(intentToPath("map")).toBe("/map");
       expect(intentToPath("add-tree")).toBe("/add-tree");
       expect(intentToPath("referrals")).toBe("/referrals");
+      expect(intentToPath("invite")).toBe("/referrals");
       expect(intentToPath("gift")).toBe("/dashboard");
       expect(intentToPath("roadmap")).toBe("/roadmap");
+      expect(intentToPath("support")).toBe("/support");
+      expect(intentToPath("journey")).toBe("/map");
+      expect(intentToPath("atlas")).toBe("/atlas");
+      expect(intentToPath("library")).toBe("/library");
+      expect(intentToPath("dashboard")).toBe("/dashboard");
     });
 
     it("returns /atlas for unknown intent", () => {
@@ -46,6 +52,10 @@ describe("Bot Handoff Helpers", () => {
       expect(intentToPath("map", "//evil.com")).toBe("/map");
       expect(intentToPath("map", "/auth")).toBe("/map");
       expect(intentToPath("map", "https://evil.com")).toBe("/map");
+    });
+
+    it("tree intent falls back to /map (needs ID)", () => {
+      expect(intentToPath("tree")).toBe("/map");
     });
   });
 
@@ -86,9 +96,23 @@ describe("Bot Handoff Helpers", () => {
     });
   });
 
+  describe("Route consistency", () => {
+    it("/map is canonical map route, not /atlas", () => {
+      expect(intentToPath("map")).toBe("/map");
+      expect(intentToPath("journey")).toBe("/map");
+    });
+
+    it("/atlas is country index, separate from map", () => {
+      expect(intentToPath("atlas")).toBe("/atlas");
+    });
+
+    it("support intent routes to /support", () => {
+      expect(intentToPath("support")).toBe("/support");
+    });
+  });
+
   describe("Invite/gift flows unaffected", () => {
     it("invite code is stored independently from handoff", () => {
-      // Simulating what AuthPage does
       store["s33d_invite_code"] = "INV123";
       store["s33d_bot_handoff"] = JSON.stringify({
         source: "telegram",
@@ -117,8 +141,8 @@ describe("Bot Handoff Helpers", () => {
 describe("BOT_CONFIG", () => {
   it("returns null link when env not set", async () => {
     const { BOT_CONFIG } = await import("@/config/bot");
-    // In test env, VITE_TELEGRAM_BOT_USERNAME is not set
     expect(BOT_CONFIG.hasTelegramBot).toBe(false);
+    expect(BOT_CONFIG.hasTelegramAuth).toBe(false);
     expect(BOT_CONFIG.telegramBotLink("test")).toBeNull();
   });
 });
