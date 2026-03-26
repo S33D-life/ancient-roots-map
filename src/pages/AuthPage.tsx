@@ -724,6 +724,8 @@ const AuthPage = () => {
                   <p className="text-xs text-destructive" role="alert">{oauthError}</p>
                 )}
 
+                <TelegramLoginButton />
+
                 <Button variant="outline" className="w-full gap-2" onClick={handleMagicLink} disabled={isLoading}>
                   <Wand2 className="h-4 w-4" />
                   Send Magic Link
