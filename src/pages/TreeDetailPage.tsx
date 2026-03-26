@@ -39,6 +39,7 @@ import { useBloomStatus } from "@/hooks/use-bloom-status";
 import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import { useTreePresence } from "@/hooks/use-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
+import { useTreeProximityGate } from "@/hooks/use-tree-proximity-gate";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
