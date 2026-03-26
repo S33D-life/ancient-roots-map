@@ -1186,7 +1186,7 @@ const TreeDetailPage = () => {
         treeSpecies={tree?.species || ""}
         treeLat={tree?.latitude}
         treeLng={tree?.longitude}
-        onCheckinComplete={refetchCheckins}
+        onCheckinComplete={() => { refetchCheckins(); proximityGate.recordVisitNow(); }}
       />
 
       {tree && (
