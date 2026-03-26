@@ -1,7 +1,9 @@
 // ---------------------------------------------------------------------------
 // Supabase environment resolution
 // ---------------------------------------------------------------------------
-// Uses environment variables only — no hardcoded fallbacks.
+// Primary: build-time Vite env injection.
+// Fallback: same-origin runtime config from a public backend function.
+// No hardcoded URL/key values are committed in source.
 // ---------------------------------------------------------------------------
 
 const envValue = (name: string): string | undefined => {
@@ -15,13 +17,59 @@ const resolvedSupabaseKey =
   envValue("VITE_SUPABASE_PUBLISHABLE_KEY") ??
   envValue("VITE_SUPABASE_ANON_KEY");
 
-export const missingEnvVars: string[] = [];
+export type SupabaseEnv = {
+  url: string;
+  anonKey: string;
+};
 
-export const hasMissingEnvVars = false;
+const hasBuildTimeConfig = Boolean(supabaseUrl && resolvedSupabaseKey);
 
-export const supabaseEnv = {
-  url: supabaseUrl,
-  anonKey: resolvedSupabaseKey,
+export const missingEnvVars: string[] = hasBuildTimeConfig
+  ? []
+  : ["VITE_SUPABASE_URL", "VITE_SUPABASE_PUBLISHABLE_KEY"];
+
+export const hasMissingEnvVars = missingEnvVars.length > 0;
+
+export const supabaseEnv: SupabaseEnv | null = hasBuildTimeConfig
+  ? {
+      url: supabaseUrl!,
+      anonKey: resolvedSupabaseKey!,
+    }
+  : null;
+
+let runtimeEnvPromise: Promise<SupabaseEnv | null> | null = null;
+
+const isValidSupabaseEnv = (value: unknown): value is SupabaseEnv => {
+  if (!value || typeof value !== "object") return false;
+
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.url === "string"
+    && candidate.url.startsWith("http")
+    && typeof candidate.anonKey === "string"
+    && candidate.anonKey.length > 20;
+};
+
+export const resolveSupabaseEnv = async (): Promise<SupabaseEnv | null> => {
+  if (supabaseEnv) return supabaseEnv;
+  if (runtimeEnvPromise) return runtimeEnvPromise;
+  if (typeof window === "undefined") return null;
+
+  runtimeEnvPromise = fetch("/functions/v1/public-runtime-config", {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Cache-Control": "no-store",
+    },
+    cache: "no-store",
+  })
+    .then(async (response) => {
+      if (!response.ok) return null;
+      const payload = await response.json();
+      return isValidSupabaseEnv(payload) ? payload : null;
+    })
+    .catch(() => null);
+
+  return runtimeEnvPromise;
 };
 
 export const isSupabaseConfigured = true;
