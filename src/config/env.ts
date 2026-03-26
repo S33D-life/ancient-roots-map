@@ -54,7 +54,17 @@ export const resolveSupabaseEnv = async (): Promise<SupabaseEnv | null> => {
   if (runtimeEnvPromise) return runtimeEnvPromise;
   if (typeof window === "undefined") return null;
 
-  runtimeEnvPromise = fetch("/functions/v1/public-runtime-config", {
+  // Build the direct Supabase edge-function URL from the project ID
+  // VITE_SUPABASE_PROJECT_ID is always injected by the platform
+  const projectId = envValue("VITE_SUPABASE_PROJECT_ID");
+  const baseUrl = supabaseUrl ?? (projectId ? `https://${projectId}.supabase.co` : null);
+
+  if (!baseUrl) {
+    runtimeEnvPromise = Promise.resolve(null);
+    return runtimeEnvPromise;
+  }
+
+  runtimeEnvPromise = fetch(`${baseUrl.replace(/\/+$/, "")}/functions/v1/public-runtime-config`, {
     method: "GET",
     headers: {
       Accept: "application/json",
