@@ -501,6 +501,7 @@ const TreeDetailPage = () => {
             });
           }}
           onWhisper={() => {
+            if (!proximityGate.isUnlocked) return;
             setWhisperContextLabel("Opened from tree profile hero");
             setWhisperModalOpen(true);
           }}
