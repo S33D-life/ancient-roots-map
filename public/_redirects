@@ -1,6 +1,7 @@
 /version.json /version.json 200
 /assets/* /assets/:splat 200
 /api/identify-tree https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/identify-tree 200
+/functions/v1/* https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/:splat 200
 /api/* /api/:splat 200
 /favicon.ico /favicon.ico 200
 /robots.txt /robots.txt 200
