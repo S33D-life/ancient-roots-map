@@ -92,9 +92,9 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
     }
 
     try {
-      // Only use cached/quick position — don't prompt if not granted
+      // Only check geo if permission already granted — never trigger a prompt
       const permStatus = await navigator.permissions?.query({ name: "geolocation" }).catch(() => null);
-      if (permStatus && permStatus.state === "denied") {
+      if (!permStatus || permStatus.state !== "granted") {
         if (remaining <= 0) setStatus("no_location");
         return;
       }
