@@ -1,13 +1,18 @@
 /**
- * useBotHandoff — parse, persist, and claim bot handoff context.
+ * useBotHandoff — RPC-based bot handoff resolution and claiming.
  *
- * URL contract:
- *   ?source=telegram&bot=openclaw&handoff=<token>&intent=map&invite=...&gift=...&returnTo=...
+ * Canonical entry URL:
+ *   /auth?source=telegram&bot=openclaw&handoff=<token>
  *
- * Flow:
- * 1. On mount, parse params → store in localStorage as `s33d_bot_handoff`
- * 2. Resolve token from Supabase `bot_handoffs` table
- * 3. After auth, call `claimHandoff()` to mark it claimed and route user
+ * Contract:
+ * - `handoff` is the ONLY authoritative lookup key
+ * - URL params (intent, invite, gift, returnTo) are informational / diagnostic only
+ * - App resolves via `resolve_bot_handoff(token)` RPC before auth
+ * - App claims via `claim_bot_handoff(token)` RPC after auth
+ * - Direct client reads/writes to bot_handoffs are forbidden
+ *
+ * Status vocabulary: created → opened → claimed | expired | invalidated
+ * Intent vocabulary: map, add-tree, tree, gift, invite, referrals, roadmap, journey, support, dashboard, atlas, library
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -15,10 +20,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "s33d_bot_handoff";
 
+/* ── Types ─────────────────────────────────────────────── */
+
 export interface BotHandoffContext {
   source: string;
   bot: string | null;
   handoffToken: string | null;
+  /** Informational only — not routing authority */
   intent: string | null;
   invite: string | null;
   gift: string | null;
@@ -26,26 +34,33 @@ export interface BotHandoffContext {
   campaign: string | null;
 }
 
-export interface BotHandoffRecord {
-  id: string;
-  token: string;
-  source: string;
-  bot_name: string | null;
-  intent: string | null;
-  return_to: string | null;
-  invite_code: string | null;
-  gift_code: string | null;
-  campaign: string | null;
-  payload: Record<string, unknown>;
-  claimed_by_user_id: string | null;
-  claimed_at: string | null;
-  expires_at: string;
+/** Resolved handoff record returned by the RPC */
+export interface ResolvedHandoff {
+  ok: boolean;
+  error?: "not_found" | "expired" | "already_claimed" | "invalidated";
+  id?: string;
+  token?: string;
+  source?: string;
+  bot_name?: string | null;
+  intent?: string | null;
+  return_to?: string | null;
+  invite_code?: string | null;
+  gift_code?: string | null;
+  campaign?: string | null;
+  flow_name?: string | null;
+  step_key?: string | null;
+  payload?: Record<string, unknown> | null;
+  status?: string;
+  /** Set on idempotent re-claim */
+  already_yours?: boolean;
 }
 
-/** Valid intents the app can route to */
+/* ── Intent vocabulary ─────────────────────────────────── */
+
 const VALID_INTENTS = new Set([
-  "map", "add-tree", "tree", "referrals", "gift",
+  "map", "add-tree", "tree", "referrals", "gift", "invite",
   "roadmap", "dashboard", "atlas", "library",
+  "journey", "support",
 ]);
 
 function sanitizeIntent(raw: string | null): string | null {
@@ -53,28 +68,38 @@ function sanitizeIntent(raw: string | null): string | null {
   return VALID_INTENTS.has(raw) ? raw : null;
 }
 
-/** Map intent to a route path */
+/* ── Route mapping ─────────────────────────────────────── */
+
+/**
+ * Map an intent to a route path.
+ * /map is the canonical map route (not /atlas — atlas is the country index).
+ */
 export function intentToPath(intent: string | null, returnTo?: string | null): string {
+  // returnTo from RPC is trusted; validate shape only
   if (returnTo) {
-    // Basic safety: must start with / and not //
     if (returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.startsWith("/auth")) {
       return returnTo;
     }
   }
   switch (intent) {
-    case "map": return "/map";
-    case "add-tree": return "/add-tree";
+    case "map":       return "/map";
+    case "add-tree":  return "/add-tree";
+    case "tree":      return "/map"; // tree detail needs an ID; fallback to map
     case "referrals": return "/referrals";
-    case "gift": return "/dashboard";
-    case "roadmap": return "/roadmap";
+    case "invite":    return "/referrals";
+    case "gift":      return "/dashboard";
+    case "roadmap":   return "/roadmap";
     case "dashboard": return "/dashboard";
-    case "atlas": return "/atlas";
-    case "library": return "/library";
-    default: return "/atlas";
+    case "atlas":     return "/atlas";
+    case "library":   return "/library";
+    case "journey":   return "/map";
+    case "support":   return "/support";
+    default:          return "/atlas";
   }
 }
 
-/** Read stored handoff from localStorage */
+/* ── localStorage helpers ──────────────────────────────── */
+
 export function getStoredHandoff(): BotHandoffContext | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -85,23 +110,53 @@ export function getStoredHandoff(): BotHandoffContext | null {
   }
 }
 
-/** Clear stored handoff */
 export function clearStoredHandoff() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
+/* ── Resolve via RPC (pre-auth safe) ───────────────────── */
+
+export async function resolveHandoffToken(token: string): Promise<ResolvedHandoff> {
+  try {
+    const { data, error } = await supabase.rpc("resolve_bot_handoff", { p_token: token });
+    if (error) {
+      console.warn("resolve_bot_handoff RPC error:", error.message);
+      return { ok: false, error: "not_found" };
+    }
+    return (data as unknown as ResolvedHandoff) ?? { ok: false, error: "not_found" };
+  } catch (e) {
+    console.warn("resolve_bot_handoff failed:", e);
+    return { ok: false, error: "not_found" };
+  }
+}
+
+/* ── Claim via RPC (auth required) ─────────────────────── */
+
+export async function claimHandoffToken(token: string): Promise<ResolvedHandoff> {
+  try {
+    const { data, error } = await supabase.rpc("claim_bot_handoff", { p_token: token });
+    if (error) {
+      console.warn("claim_bot_handoff RPC error:", error.message);
+      return { ok: false, error: "not_found" };
+    }
+    return (data as unknown as ResolvedHandoff) ?? { ok: false, error: "not_found" };
+  } catch (e) {
+    console.warn("claim_bot_handoff failed:", e);
+    return { ok: false, error: "not_found" };
+  }
+}
+
+/* ── Main hook ─────────────────────────────────────────── */
+
 export function useBotHandoff() {
   const [searchParams] = useSearchParams();
-  const [handoffRecord, setHandoffRecord] = useState<BotHandoffRecord | null>(null);
+  const [resolvedHandoff, setResolvedHandoff] = useState<ResolvedHandoff | null>(null);
   const [resolved, setResolved] = useState(false);
 
-  // Parse URL params on mount
+  // Parse URL params on mount (informational)
   const context = useMemo<BotHandoffContext | null>(() => {
     const source = searchParams.get("source");
-    if (!source) {
-      // Check localStorage for previously stored handoff
-      return getStoredHandoff();
-    }
+    if (!source) return getStoredHandoff();
     return {
       source,
       bot: searchParams.get("bot"),
@@ -114,90 +169,70 @@ export function useBotHandoff() {
     };
   }, [searchParams]);
 
-  // Store handoff context in localStorage to survive auth redirect
+  // Persist context to survive auth redirect
   useEffect(() => {
     if (context?.source && searchParams.get("source")) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(context));
-
-      // Also store invite/gift codes in their standard keys
-      if (context.invite) {
-        localStorage.setItem("s33d_invite_code", context.invite);
-      }
-      if (context.gift) {
-        localStorage.setItem("s33d_gift_code", context.gift);
-      }
+      if (context.invite) localStorage.setItem("s33d_invite_code", context.invite);
+      if (context.gift) localStorage.setItem("s33d_gift_code", context.gift);
     }
   }, [context, searchParams]);
 
-  // Resolve handoff token from DB
+  // Resolve handoff token via RPC
   useEffect(() => {
     const token = context?.handoffToken;
     if (!token) { setResolved(true); return; }
 
     (async () => {
-      const { data } = await supabase
-        .from("bot_handoffs")
-        .select("*")
-        .eq("token", token)
-        .maybeSingle();
-
-      if (data) {
-        const now = new Date();
-        const expires = new Date(data.expires_at);
-        if (expires > now && !data.claimed_by_user_id) {
-          setHandoffRecord(data as unknown as BotHandoffRecord);
-          // Merge DB-side fields into context
-          if (data.invite_code) localStorage.setItem("s33d_invite_code", data.invite_code);
-          if (data.gift_code) localStorage.setItem("s33d_gift_code", data.gift_code);
-        }
+      const result = await resolveHandoffToken(token);
+      if (result.ok) {
+        setResolvedHandoff(result);
+        // Merge DB-authoritative invite/gift codes
+        if (result.invite_code) localStorage.setItem("s33d_invite_code", result.invite_code);
+        if (result.gift_code) localStorage.setItem("s33d_gift_code", result.gift_code);
       }
       setResolved(true);
     })();
   }, [context?.handoffToken]);
 
-  /** Claim the handoff after auth — mark in DB and clear local state */
-  const claimHandoff = useCallback(async (userId: string) => {
+  /** Claim after auth — uses RPC, not direct update */
+  const claimHandoff = useCallback(async (_userId: string) => {
     const stored = getStoredHandoff();
     const token = stored?.handoffToken || context?.handoffToken;
     if (!token) return;
 
-    await supabase
-      .from("bot_handoffs")
-      .update({
-        claimed_by_user_id: userId,
-        claimed_at: new Date().toISOString(),
-      } as any)
-      .eq("token", token)
-      .is("claimed_by_user_id", null);
-
-    clearStoredHandoff();
+    const result = await claimHandoffToken(token);
+    if (result.ok) {
+      // Update resolved handoff with claim result for routing
+      setResolvedHandoff(prev => prev ? { ...prev, ...result } : result);
+    }
+    // Don't clear yet — BotContinuationBanner may still need it
   }, [context?.handoffToken]);
 
-  /** Get the best post-auth destination based on handoff context */
+  /** Get post-auth destination — ONLY from RPC-resolved data */
   const getDestination = useCallback((): string => {
+    // Trust RPC-resolved handoff over URL params
+    if (resolvedHandoff?.ok) {
+      return intentToPath(resolvedHandoff.intent ?? null, resolvedHandoff.return_to ?? null);
+    }
+    // Fallback: use stored context (informational)
     const stored = getStoredHandoff();
     const c = stored || context;
     if (!c) return "/atlas";
-
-    // DB record may override URL params
-    if (handoffRecord) {
-      return intentToPath(
-        handoffRecord.intent || c.intent,
-        handoffRecord.return_to || c.returnTo,
-      );
-    }
     return intentToPath(c.intent, c.returnTo);
-  }, [context, handoffRecord]);
+  }, [context, resolvedHandoff]);
 
-  const isFromBot = !!(context?.source);
+  const isFromBot = !!context?.source;
   const isTelegram = context?.source === "telegram";
+  const handoffError = resolvedHandoff && !resolvedHandoff.ok ? resolvedHandoff.error : null;
 
   return {
     context,
-    handoffRecord,
+    resolvedHandoff,
     resolved,
     isFromBot,
     isTelegram,
+    handoffError,
     claimHandoff,
     getDestination,
   };

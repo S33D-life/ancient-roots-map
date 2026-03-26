@@ -12,8 +12,9 @@ import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
 import { recordReferral } from "@/hooks/use-referrals";
-import { getStoredHandoff, clearStoredHandoff, intentToPath } from "@/hooks/use-bot-handoff";
+import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
+import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
@@ -224,18 +225,11 @@ const AuthPage = () => {
           }
         }
 
-        // Claim bot handoff if present
+        // Claim bot handoff via RPC if present
         const botHandoff = getStoredHandoff();
         if (botHandoff?.handoffToken && session.user) {
           try {
-            await supabase
-              .from("bot_handoffs")
-              .update({
-                claimed_by_user_id: session.user.id,
-                claimed_at: new Date().toISOString(),
-              } as any)
-              .eq("token", botHandoff.handoffToken)
-              .is("claimed_by_user_id", null);
+            await claimHandoffToken(botHandoff.handoffToken);
           } catch (e) {
             console.warn("Bot handoff claim failed:", e);
           }
@@ -729,6 +723,8 @@ const AuthPage = () => {
                 {oauthError && (
                   <p className="text-xs text-destructive" role="alert">{oauthError}</p>
                 )}
+
+                <TelegramLoginButton />
 
                 <Button variant="outline" className="w-full gap-2" onClick={handleMagicLink} disabled={isLoading}>
                   <Wand2 className="h-4 w-4" />

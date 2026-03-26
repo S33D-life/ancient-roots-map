@@ -27,6 +27,7 @@ import {
   Link2Off,
   Lock,
 } from "lucide-react";
+import LinkedAccountsSection from "@/components/dashboard/LinkedAccountsSection";
 
 interface HearthAccountSecurityProps {
   user: User;
@@ -362,6 +363,10 @@ const HearthAccountSecurity = ({ user, walletAddress }: HearthAccountSecurityPro
 
         <Section icon={ShieldCheck} label="Recovery & Backup" description="Future security options">
           <RecoverySection />
+        </Section>
+
+        <Section icon={Wallet} label="Linked Identities" description="Connected sign-in methods">
+          <LinkedAccountsSection user={user} />
         </Section>
 
         <Section icon={Wallet} label="Wallet Identity" description="On-chain connection status">
