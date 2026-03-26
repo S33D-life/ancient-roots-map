@@ -84,10 +84,11 @@ const AuthPage = () => {
     return raw || "Google sign-in could not complete. Check OAuth redirect settings and try again.";
   };
 
-  // Pre-fill invite code from URL, also capture gift param
+  // Pre-fill invite code from URL, also capture gift param and bot handoff
   useEffect(() => {
     const code = searchParams.get("invite");
     const giftCode = searchParams.get("gift");
+    const source = searchParams.get("source");
     if (code) {
       setInviteCode(code);
       setView("signup"); // auto-switch to signup if arriving via invite
@@ -95,6 +96,16 @@ const AuthPage = () => {
     if (giftCode) {
       localStorage.setItem("s33d_gift_code", giftCode);
       setView("signup");
+    }
+    // Bot handoff: if arriving from Telegram/OpenClaw, store context
+    if (source) {
+      // The useBotHandoff hook in use-bot-handoff.ts handles localStorage
+      // but we also need to pull invite/gift from the handoff params
+      const handoffInvite = searchParams.get("invite");
+      const handoffGift = searchParams.get("gift");
+      if (handoffInvite && !code) setInviteCode(handoffInvite);
+      if (handoffGift) localStorage.setItem("s33d_gift_code", handoffGift);
+      setView("signup"); // default to signup for bot arrivals
     }
   }, [searchParams]);
 
