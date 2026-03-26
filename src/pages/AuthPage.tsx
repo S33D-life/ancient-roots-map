@@ -225,18 +225,11 @@ const AuthPage = () => {
           }
         }
 
-        // Claim bot handoff if present
+        // Claim bot handoff via RPC if present
         const botHandoff = getStoredHandoff();
         if (botHandoff?.handoffToken && session.user) {
           try {
-            await supabase
-              .from("bot_handoffs")
-              .update({
-                claimed_by_user_id: session.user.id,
-                claimed_at: new Date().toISOString(),
-              } as any)
-              .eq("token", botHandoff.handoffToken)
-              .is("claimed_by_user_id", null);
+            await claimHandoffToken(botHandoff.handoffToken);
           } catch (e) {
             console.warn("Bot handoff claim failed:", e);
           }
