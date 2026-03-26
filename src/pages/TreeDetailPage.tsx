@@ -42,6 +42,8 @@ import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
+import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering } from "@/components/tree-detail/TreeDetailSubComponents";
+import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 
 // Lazy-loaded secondary components (modals, panels, below-fold)
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
