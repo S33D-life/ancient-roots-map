@@ -38,6 +38,12 @@ const AuthPage = () => {
   const { toast } = useToast();
 
   const resolvePostAuthPath = useCallback(() => {
+    // Check bot handoff first — it may carry a destination
+    const handoff = getStoredHandoff();
+    if (handoff?.intent || handoff?.returnTo) {
+      return intentToPath(handoff.intent, handoff.returnTo);
+    }
+
     const rawReturnTo = searchParams.get("returnTo");
     if (!rawReturnTo) return "/atlas";
 
