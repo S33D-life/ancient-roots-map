@@ -1095,6 +1095,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_handoffs: {
+        Row: {
+          bot_name: string | null
+          campaign: string | null
+          claimed_at: string | null
+          claimed_by_user_id: string | null
+          created_at: string
+          expires_at: string
+          external_user_hash: string | null
+          gift_code: string | null
+          id: string
+          intent: string | null
+          invite_code: string | null
+          payload: Json | null
+          return_to: string | null
+          source: string
+          token: string
+        }
+        Insert: {
+          bot_name?: string | null
+          campaign?: string | null
+          claimed_at?: string | null
+          claimed_by_user_id?: string | null
+          created_at?: string
+          expires_at?: string
+          external_user_hash?: string | null
+          gift_code?: string | null
+          id?: string
+          intent?: string | null
+          invite_code?: string | null
+          payload?: Json | null
+          return_to?: string | null
+          source?: string
+          token: string
+        }
+        Update: {
+          bot_name?: string | null
+          campaign?: string | null
+          claimed_at?: string | null
+          claimed_by_user_id?: string | null
+          created_at?: string
+          expires_at?: string
+          external_user_hash?: string | null
+          gift_code?: string | null
+          id?: string
+          intent?: string | null
+          invite_code?: string | null
+          payload?: Json | null
+          return_to?: string | null
+          source?: string
+          token?: string
+        }
+        Relationships: []
+      }
       bug_comments: {
         Row: {
           bug_id: string
