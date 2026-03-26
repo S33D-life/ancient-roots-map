@@ -365,6 +365,10 @@ const HearthAccountSecurity = ({ user, walletAddress }: HearthAccountSecurityPro
           <RecoverySection />
         </Section>
 
+        <Section icon={Wallet} label="Linked Identities" description="Connected sign-in methods">
+          <LinkedAccountsSection user={user} />
+        </Section>
+
         <Section icon={Wallet} label="Wallet Identity" description="On-chain connection status">
           <WalletSection walletAddress={walletAddress} />
         </Section>
