@@ -1104,14 +1104,22 @@ export type Database = {
           created_at: string
           expires_at: string
           external_user_hash: string | null
+          flow_name: string | null
           gift_code: string | null
           id: string
           intent: string | null
           invite_code: string | null
+          last_opened_at: string | null
+          message_template_key: string | null
+          open_count: number
           payload: Json | null
+          payload_version: number
           return_to: string | null
           source: string
+          status: string
+          step_key: string | null
           token: string
+          updated_at: string
         }
         Insert: {
           bot_name?: string | null
@@ -1121,14 +1129,22 @@ export type Database = {
           created_at?: string
           expires_at?: string
           external_user_hash?: string | null
+          flow_name?: string | null
           gift_code?: string | null
           id?: string
           intent?: string | null
           invite_code?: string | null
+          last_opened_at?: string | null
+          message_template_key?: string | null
+          open_count?: number
           payload?: Json | null
+          payload_version?: number
           return_to?: string | null
           source?: string
+          status?: string
+          step_key?: string | null
           token: string
+          updated_at?: string
         }
         Update: {
           bot_name?: string | null
@@ -1138,14 +1154,22 @@ export type Database = {
           created_at?: string
           expires_at?: string
           external_user_hash?: string | null
+          flow_name?: string | null
           gift_code?: string | null
           id?: string
           intent?: string | null
           invite_code?: string | null
+          last_opened_at?: string | null
+          message_template_key?: string | null
+          open_count?: number
           payload?: Json | null
+          payload_version?: number
           return_to?: string | null
           source?: string
+          status?: string
+          step_key?: string | null
           token?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1801,6 +1825,48 @@ export type Database = {
           metric_type?: string
           recorded_at?: string
           value?: number
+        }
+        Relationships: []
+      }
+      connected_accounts: {
+        Row: {
+          avatar_url: string | null
+          display_name: string | null
+          id: string
+          linked_at: string
+          provider: string
+          provider_metadata: Json | null
+          provider_user_id: string
+          provider_username: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string
+          linked_at?: string
+          provider: string
+          provider_metadata?: Json | null
+          provider_user_id: string
+          provider_username?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          display_name?: string | null
+          id?: string
+          linked_at?: string
+          provider?: string
+          provider_metadata?: Json | null
+          provider_user_id?: string
+          provider_username?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -8836,6 +8902,7 @@ export type Database = {
         }
         Returns: string
       }
+      claim_bot_handoff: { Args: { p_token: string }; Returns: Json }
       claim_gift_seed: {
         Args: { p_invite_code: string; p_user_id: string }
         Returns: Json
@@ -9029,6 +9096,7 @@ export type Database = {
         }[]
       }
       refresh_trees_map_hot: { Args: never; Returns: undefined }
+      resolve_bot_handoff: { Args: { p_token: string }; Returns: Json }
       retract_influence_vote: {
         Args: { p_user_id: string; p_vote_id: string }
         Returns: undefined
