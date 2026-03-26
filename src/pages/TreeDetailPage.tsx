@@ -39,11 +39,13 @@ import { useBloomStatus } from "@/hooks/use-bloom-status";
 import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import { useTreePresence } from "@/hooks/use-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
+import { useTreeProximityGate } from "@/hooks/use-tree-proximity-gate";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
 import OfferingCard from "@/components/OfferingCard";
 import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
+const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
 
 // Lazy-loaded secondary components (modals, panels, below-fold)
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -185,6 +187,12 @@ const TreeDetailPage = () => {
   });
   const presenceCount = useTreePresenceCount(userId, id);
   const { progress: relationship } = useTreeRelationship(id, userId);
+  const proximityGate = useTreeProximityGate({
+    treeId: id,
+    treeLat: tree?.latitude,
+    treeLng: tree?.longitude,
+    userId,
+  });
 
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
@@ -396,11 +404,13 @@ const TreeDetailPage = () => {
   // getOfferingsByType provided by useOfferings hook
 
   const handleAddOffering = (type: OfferingType) => {
+    if (!proximityGate.isUnlocked) return;
     setSelectedType(type);
     setAddOfferingOpen(true);
   };
 
   const openOfferingGateway = () => {
+    if (!proximityGate.isUnlocked) return;
     setGatewayOpen(true);
   };
 
@@ -491,6 +501,7 @@ const TreeDetailPage = () => {
             });
           }}
           onWhisper={() => {
+            if (!proximityGate.isUnlocked) return;
             setWhisperContextLabel("Opened from tree profile hero");
             setWhisperModalOpen(true);
           }}
@@ -556,6 +567,26 @@ const TreeDetailPage = () => {
           {/* ── OVERVIEW TAB ── */}
           <TabsContent value="overview" className="space-y-8">
             {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
+
+            {/* Proximity Gate Message */}
+            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && (
+              <Suspense fallback={null}>
+                <ProximityGateMessage
+                  status={proximityGate.status}
+                  graceLabel={proximityGate.graceLabel}
+                  treeName={tree?.name}
+                />
+              </Suspense>
+            )}
+            {proximityGate.status === "unlocked_grace" && proximityGate.graceLabel && (
+              <Suspense fallback={null}>
+                <ProximityGateMessage
+                  status={proximityGate.status}
+                  graceLabel={proximityGate.graceLabel}
+                  treeName={tree?.name}
+                />
+              </Suspense>
+            )}
 
             {/* Visit Counter */}
             {checkinStats && (
@@ -1176,7 +1207,7 @@ const TreeDetailPage = () => {
         treeSpecies={tree?.species || ""}
         treeLat={tree?.latitude}
         treeLng={tree?.longitude}
-        onCheckinComplete={refetchCheckins}
+        onCheckinComplete={() => { refetchCheckins(); proximityGate.recordVisitNow(); }}
       />
 
       {tree && (
