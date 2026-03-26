@@ -11,7 +11,8 @@ describe("Map.tsx wrapper", () => {
   it("exports a default component", async () => {
     const mapModule = await import("@/components/Map");
     expect(mapModule.default).toBeDefined();
-    expect(typeof mapModule.default).toBe("function");
+    // memo() wraps components as objects with $$typeof, not plain functions
+    expect(typeof mapModule.default === "function" || typeof mapModule.default === "object").toBe(true);
   });
 });
 
