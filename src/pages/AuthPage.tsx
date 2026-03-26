@@ -12,6 +12,7 @@ import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
 import { recordReferral } from "@/hooks/use-referrals";
+import { getStoredHandoff, clearStoredHandoff, intentToPath } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 
 const emailSchema = z.string().email("Please enter a valid email address");
