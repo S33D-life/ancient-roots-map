@@ -12,8 +12,9 @@ import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
 import { recordReferral } from "@/hooks/use-referrals";
-import { getStoredHandoff, clearStoredHandoff, intentToPath } from "@/hooks/use-bot-handoff";
+import { getStoredHandoff, clearStoredHandoff, intentToPath, claimHandoffToken } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
+import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
