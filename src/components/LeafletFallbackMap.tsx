@@ -1920,7 +1920,10 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       setLocated(true);
       placeUserMarker(map, latlng, result.accuracy);
       // "Awakening" profile — gentle zoom, slightly slower
-      map.flyTo(latlng, 14, { duration: 1.4, easeLinearity: 0.3 });
+      // Zoom closer if already located (double-tap), otherwise gentle first zoom
+      const alreadyNear = located && map.getZoom() >= 13;
+      const targetZoom = alreadyNear ? Math.min(map.getZoom() + 3, 18) : 15;
+      map.flyTo(latlng, targetZoom, { duration: 1.4, easeLinearity: 0.3 });
 
       // Soft awakening ripple at user location
       const ripple = L.circleMarker(latlng, {
