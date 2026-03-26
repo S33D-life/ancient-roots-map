@@ -278,6 +278,7 @@ const ReferralsPage = () => {
                 Generate Invite Link
               </Button>
             )}
+            {inviteCode && <TelegramBotLink inviteCode={inviteCode} />}
             <p className="text-[11px] text-muted-foreground">
               Share this link with friends. When they sign up and map trees, you'll see the impact here.
             </p>
