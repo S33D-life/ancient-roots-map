@@ -303,6 +303,7 @@ const App = () => {
               <ProximityNudge />
               <FirstWalkTrail />
               <DailySeedRitual />
+              <BotContinuationBanner />
             </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
