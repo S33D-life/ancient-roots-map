@@ -568,6 +568,26 @@ const TreeDetailPage = () => {
           <TabsContent value="overview" className="space-y-8">
             {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
 
+            {/* Proximity Gate Message */}
+            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && (
+              <Suspense fallback={null}>
+                <ProximityGateMessage
+                  status={proximityGate.status}
+                  graceLabel={proximityGate.graceLabel}
+                  treeName={tree?.name}
+                />
+              </Suspense>
+            )}
+            {proximityGate.status === "unlocked_grace" && proximityGate.graceLabel && (
+              <Suspense fallback={null}>
+                <ProximityGateMessage
+                  status={proximityGate.status}
+                  graceLabel={proximityGate.graceLabel}
+                  treeName={tree?.name}
+                />
+              </Suspense>
+            )}
+
             {/* Visit Counter */}
             {checkinStats && (
               <div className="flex items-center gap-4 px-4 py-2.5 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
