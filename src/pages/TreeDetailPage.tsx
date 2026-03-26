@@ -187,6 +187,12 @@ const TreeDetailPage = () => {
   });
   const presenceCount = useTreePresenceCount(userId, id);
   const { progress: relationship } = useTreeRelationship(id, userId);
+  const proximityGate = useTreeProximityGate({
+    treeId: id,
+    treeLat: tree?.latitude,
+    treeLng: tree?.longitude,
+    userId,
+  });
 
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
