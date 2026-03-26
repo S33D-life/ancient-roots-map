@@ -404,11 +404,13 @@ const TreeDetailPage = () => {
   // getOfferingsByType provided by useOfferings hook
 
   const handleAddOffering = (type: OfferingType) => {
+    if (!proximityGate.isUnlocked) return;
     setSelectedType(type);
     setAddOfferingOpen(true);
   };
 
   const openOfferingGateway = () => {
+    if (!proximityGate.isUnlocked) return;
     setGatewayOpen(true);
   };
 
