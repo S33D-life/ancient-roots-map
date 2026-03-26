@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import {
   Gift, TreeDeciduous, Heart, Copy, Users, ArrowLeft, Loader2, Sprout, Share2, Milestone,
 } from "lucide-react";
+import TelegramBotLink from "@/components/referrals/TelegramBotLink";
 
 /* ── Milestones — presented as grove growth, not leaderboard ── */
 const MILESTONES = [
@@ -278,6 +279,7 @@ const ReferralsPage = () => {
                 Generate Invite Link
               </Button>
             )}
+            {inviteCode && <TelegramBotLink inviteCode={inviteCode} />}
             <p className="text-[11px] text-muted-foreground">
               Share this link with friends. When they sign up and map trees, you'll see the impact here.
             </p>

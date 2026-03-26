@@ -12,6 +12,7 @@ import { z } from "zod";
 import WalletConnect from "@/components/WalletConnect";
 import teotagLogo from "@/assets/teotag-small.webp";
 import { recordReferral } from "@/hooks/use-referrals";
+import { getStoredHandoff, clearStoredHandoff, intentToPath } from "@/hooks/use-bot-handoff";
 import PasswordStrengthMeter from "@/components/PasswordStrengthMeter";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -37,6 +38,12 @@ const AuthPage = () => {
   const { toast } = useToast();
 
   const resolvePostAuthPath = useCallback(() => {
+    // Check bot handoff first — it may carry a destination
+    const handoff = getStoredHandoff();
+    if (handoff?.intent || handoff?.returnTo) {
+      return intentToPath(handoff.intent, handoff.returnTo);
+    }
+
     const rawReturnTo = searchParams.get("returnTo");
     if (!rawReturnTo) return "/atlas";
 
@@ -77,10 +84,11 @@ const AuthPage = () => {
     return raw || "Google sign-in could not complete. Check OAuth redirect settings and try again.";
   };
 
-  // Pre-fill invite code from URL, also capture gift param
+  // Pre-fill invite code from URL, also capture gift param and bot handoff
   useEffect(() => {
     const code = searchParams.get("invite");
     const giftCode = searchParams.get("gift");
+    const source = searchParams.get("source");
     if (code) {
       setInviteCode(code);
       setView("signup"); // auto-switch to signup if arriving via invite
@@ -88,6 +96,16 @@ const AuthPage = () => {
     if (giftCode) {
       localStorage.setItem("s33d_gift_code", giftCode);
       setView("signup");
+    }
+    // Bot handoff: if arriving from Telegram/OpenClaw, store context
+    if (source) {
+      // The useBotHandoff hook in use-bot-handoff.ts handles localStorage
+      // but we also need to pull invite/gift from the handoff params
+      const handoffInvite = searchParams.get("invite");
+      const handoffGift = searchParams.get("gift");
+      if (handoffInvite && !code) setInviteCode(handoffInvite);
+      if (handoffGift) localStorage.setItem("s33d_gift_code", handoffGift);
+      setView("signup"); // default to signup for bot arrivals
     }
   }, [searchParams]);
 
@@ -204,6 +222,24 @@ const AuthPage = () => {
           } catch (e) {
             console.error("Failed to save pending tree:", e);
           }
+        }
+
+        // Claim bot handoff if present
+        const botHandoff = getStoredHandoff();
+        if (botHandoff?.handoffToken && session.user) {
+          try {
+            await supabase
+              .from("bot_handoffs")
+              .update({
+                claimed_by_user_id: session.user.id,
+                claimed_at: new Date().toISOString(),
+              } as any)
+              .eq("token", botHandoff.handoffToken)
+              .is("claimed_by_user_id", null);
+          } catch (e) {
+            console.warn("Bot handoff claim failed:", e);
+          }
+          // Don't clear yet — BotContinuationBanner may still need it
         }
 
         navigate(resolvePostAuthPath(), { replace: true });

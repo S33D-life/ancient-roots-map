@@ -52,6 +52,7 @@ attachAutoSync();
 const ProximityNudge = lazy(() => import("@/components/ProximityNudge"));
 const FirstWalkTrail = lazy(() => import("@/components/FirstWalkTrail"));
 const DailySeedRitual = lazy(() => import("@/components/DailySeedRitual"));
+const BotContinuationBanner = lazy(() => import("@/components/BotContinuationBanner"));
 
 const lazyImportWithRetry = <T extends ComponentType<any>>(
   importer: () => Promise<{ default: T }>,
@@ -302,6 +303,7 @@ const App = () => {
               <ProximityNudge />
               <FirstWalkTrail />
               <DailySeedRitual />
+              <BotContinuationBanner />
             </Suspense>
             <Suspense fallback={<PageLoader />}>
               <Routes>
