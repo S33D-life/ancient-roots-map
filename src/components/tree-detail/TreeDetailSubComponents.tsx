@@ -9,8 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Offering } from "@/hooks/use-offerings";
 
-const SkystampSeal = (await import("@/components/SkystampSeal")).default ?? (() => null);
-
 /* ---------- Shared Helpers ---------- */
 
 export const shareOffering = async (offering: Offering, treeName?: string) => {
