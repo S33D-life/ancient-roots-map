@@ -268,7 +268,11 @@ Deno.serve(async () => {
         case "gardener":
         case "wanderer":
         case "new": {
-          const flow = command === "wanderer" ? "create_wanderer" : "create_gardener";
+          // /new → neutral "create" flow (user chooses Gardener/Wanderer in-app)
+          // /gardener or /wanderer → pre-selected but still confirmed in-app
+          const flow = command === "wanderer" ? "create_wanderer"
+                     : command === "gardener" ? "create_gardener"
+                     : "create"; // neutral for /new
           try {
             const handoffResp = await supabase.functions.invoke("telegram-handoff", {
               body: {
@@ -281,19 +285,27 @@ Deno.serve(async () => {
 
             const result = handoffResp.data;
             if (result?.ok) {
-              const label = command === "wanderer" ? "Wanderer" : "Gardener";
-              const emoji = command === "wanderer" ? "🧭" : "🌱";
+              const isNeutral = command === "new";
+              const label = command === "wanderer" ? "Wanderer"
+                          : command === "gardener" ? "Gardener"
+                          : "";
+              const emoji = command === "wanderer" ? "🧭" : command === "gardener" ? "🌱" : "🌳";
+              const heading = isNeutral
+                ? "🌳 <b>Create your S33D identity</b>"
+                : `${emoji} <b>Create your ${label} identity</b>`;
+              const cta = isNeutral ? "Choose your path" : "Begin your journey";
+
               await sendMessage(
                 chatId,
-                `${emoji} <b>Create your ${label} identity</b>\n\n` +
+                `${heading}\n\n` +
                 "Open this link to enter S33D:\n\n" +
-                `<a href="${result.handoff_url}">Begin your journey</a>\n\n` +
+                `<a href="${result.handoff_url}">${cta}</a>\n\n` +
                 "⏳ This link expires in 30 minutes.",
                 LOVABLE_API_KEY,
                 TELEGRAM_API_KEY,
                 {
                   inline_keyboard: [[
-                    { text: `${emoji} Begin your journey`, url: result.handoff_url },
+                    { text: `${emoji} ${cta}`, url: result.handoff_url },
                   ]],
                 },
               );
