@@ -277,7 +277,7 @@ const TreePageHero = ({
                   onClick={onAddPhoto}
                   className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
                 >
-                  <Camera className="h-3.5 w-3.5" /> 📸 Photo
+                  <Camera className="h-3.5 w-3.5" /> Photo
                 </Button>
               )}
               {onAddSong && (
@@ -287,7 +287,7 @@ const TreePageHero = ({
                   onClick={onAddSong}
                   className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
                 >
-                  <Music className="h-3.5 w-3.5" /> 🎵 Song
+                  <Music className="h-3.5 w-3.5" /> Song
                 </Button>
               )}
             </div>
