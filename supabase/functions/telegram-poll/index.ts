@@ -288,18 +288,11 @@ Deno.serve(async () => {
                 },
               );
             } else if (result?.error === "already_linked") {
-              const appUrl = Deno.env.get("APP_URL") || "https://s33d.life";
               await sendMessage(
                 chatId,
-                "✅ Your Telegram is already connected to S33D!\n\n" +
-                `<a href="${appUrl}/dashboard">Open your Hearth</a>`,
+                "✅ Your Telegram is already connected to S33D!\n\nUse /login to sign in.",
                 LOVABLE_API_KEY,
                 TELEGRAM_API_KEY,
-                {
-                  inline_keyboard: [[
-                    { text: "🏠 Open Hearth", url: `${appUrl}/dashboard` },
-                  ]],
-                },
               );
             } else {
               await sendMessage(
