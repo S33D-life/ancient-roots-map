@@ -344,13 +344,20 @@ export default function TelegramHandoffPage() {
   }
 
   if (state === "error") {
+    // Differentiate recoverable vs terminal errors
+    const isAlreadyLinked = error?.includes("already connected") || error?.includes("already linked");
+    const isWrongAccount = error?.includes("different Telegram") || error?.includes("Unlink it first");
     return (
       <ErrorState
-        title="Something went awry"
+        title={isAlreadyLinked ? "Already connected" : isWrongAccount ? "Different Telegram linked" : "Something went awry"}
         message={error || "An unexpected error occurred."}
         botLink={botLink}
-        showSignIn
-        onSignIn={() => navigate(ROUTES.AUTH)}
+        showSignIn={isAlreadyLinked}
+        onSignIn={isAlreadyLinked ? () => navigate(ROUTES.AUTH) : undefined}
+        extraAction={isWrongAccount ? {
+          label: "Open settings",
+          onClick: () => navigate(ROUTES.HEARTH),
+        } : undefined}
       />
     );
   }
