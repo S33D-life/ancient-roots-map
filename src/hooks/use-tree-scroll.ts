@@ -43,9 +43,10 @@ export function useTreeScroll() {
     const doScroll = () => {
       const el = document.getElementById("ground");
       if (!el) return false;
-      // Force instant scroll without smooth behavior interference
-      const y = el.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: y, behavior: "instant" as ScrollBehavior });
+      // Center the ground section in viewport for "arrival at the trunk" feel
+      const rect = el.getBoundingClientRect();
+      const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
+      window.scrollTo({ top: Math.max(0, y), behavior: "instant" as ScrollBehavior });
       initialScrollDone.current = true;
       return true;
     };
@@ -76,7 +77,14 @@ export function useTreeScroll() {
       requestAnimationFrame(() => {
         const el = document.getElementById(hash);
         if (el) {
-          el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+          // Center "ground" in viewport for trunk arrival; start-align others
+          if (hash === "ground") {
+            const rect = el.getBoundingClientRect();
+            const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
+            window.scrollTo({ top: Math.max(0, y), behavior: "instant" as ScrollBehavior });
+          } else {
+            el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+          }
           setActiveSection(hash);
           initialScrollDone.current = true;
         }
@@ -139,12 +147,24 @@ export function useTreeScroll() {
       if (hash && SECTION_IDS.includes(hash)) {
         isManualScroll.current = true;
         const el = document.getElementById(hash);
-        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (el) {
+          if (hash === "ground") {
+            const rect = el.getBoundingClientRect();
+            const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
+            window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+          } else {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
         setTimeout(() => { isManualScroll.current = false; }, 1000);
       } else {
         isManualScroll.current = true;
         const el = document.getElementById("ground");
-        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
+          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+        }
         setTimeout(() => { isManualScroll.current = false; }, 1000);
       }
     };
@@ -157,9 +177,16 @@ export function useTreeScroll() {
     isManualScroll.current = true;
     const el = document.getElementById(section);
     if (el) {
-      const headerOffset = 64;
-      const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-      window.scrollTo({ top, behavior: "smooth" });
+      if (section === "ground") {
+        // Center ground in viewport for trunk-arrival feel
+        const rect = el.getBoundingClientRect();
+        const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+      } else {
+        const headerOffset = 64;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
       
       const newHash = section === "ground" ? "" : `#${section}`;
       window.history.pushState(null, "", newHash || window.location.pathname);
