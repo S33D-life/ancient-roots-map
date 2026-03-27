@@ -20,7 +20,7 @@ const GroundSection = () => {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  const ease4 = [0.25, 0.46, 0.45, 0.94] as [number, number, number, number];
+  
 
   return (
     <section id="ground" className="relative">

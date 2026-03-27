@@ -266,8 +266,9 @@ const Hero = () => {
     >
       {/* Background — rotating Ancient Friend portrait */}
       <div
-        className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-[20s] ease-linear"
+        className="absolute inset-0 bg-cover bg-center scale-105 transition-transform ease-linear"
         style={{
+          transitionDuration: '20s',
           backgroundImage: `url(${currentFriend.image})`,
           transform: isHovering ? 'scale(1.08)' : 'scale(1.05)',
         }}
