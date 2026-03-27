@@ -1,6 +1,8 @@
 /**
  * PresenceRitual — 333-second fullscreen focus mode.
  * Any touch/click/key resets the timer. Subtle breathing animation.
+ * Resilient to screen-off / background: uses wall-clock elapsed time
+ * and persists state to sessionStorage so returning from sleep resumes.
  */
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,58 +12,151 @@ import { Textarea } from "@/components/ui/textarea";
 import { Z } from "@/lib/z-index";
 
 const TOTAL = 333;
+const STORAGE_KEY = "s33d_presence_session";
+const MAX_AWAY_MS = 10 * 60 * 1000; // 10 minutes — if away longer, session expires
+
+interface SessionState {
+  startedAt: number; // wall-clock ms when current countdown began
+  treeId?: string;
+}
 
 interface PresenceRitualProps {
   open: boolean;
   treeName: string;
+  treeId?: string;
   onComplete: (reflection?: string) => void;
   onCancel: () => void;
 }
 
-export default function PresenceRitual({ open, treeName, onComplete, onCancel }: PresenceRitualProps) {
+function saveSession(s: SessionState | null) {
+  try {
+    if (s) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    else sessionStorage.removeItem(STORAGE_KEY);
+  } catch {}
+}
+
+function loadSession(): SessionState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+export default function PresenceRitual({ open, treeName, treeId, onComplete, onCancel }: PresenceRitualProps) {
   const [secondsLeft, setSecondsLeft] = useState(TOTAL);
-  const [phase, setPhase] = useState<"counting" | "done" | "reflection">("counting");
+  const [phase, setPhase] = useState<"counting" | "done" | "reflection" | "resuming">("counting");
   const [reflection, setReflection] = useState("");
   const [resetFlash, setResetFlash] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+
+  const startedAtRef = useRef<number>(Date.now());
+  const rafRef = useRef<number | null>(null);
   const lastResetRef = useRef(0);
 
-  // Start / restart timer
-  const startTimer = useCallback(() => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    setSecondsLeft(TOTAL);
-    intervalRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          setPhase("done");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+  // Wall-clock tick — resilient to sleep/background
+  const tick = useCallback(() => {
+    const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+    const remaining = Math.max(0, TOTAL - elapsed);
+    setSecondsLeft(remaining);
+    if (remaining <= 0) {
+      setPhase("done");
+      saveSession(null);
+      return; // stop looping
+    }
+    rafRef.current = requestAnimationFrame(() => {
+      // Use setTimeout for ~1s cadence but driven by wall clock
+      setTimeout(() => tick(), 250);
+    });
   }, []);
+
+  const stopTick = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }, []);
+
+  // Start a fresh countdown
+  const startTimer = useCallback(() => {
+    stopTick();
+    const now = Date.now();
+    startedAtRef.current = now;
+    setSecondsLeft(TOTAL);
+    saveSession({ startedAt: now, treeId });
+    tick();
+  }, [tick, stopTick, treeId]);
+
+  // Resume from saved session
+  const resumeSession = useCallback((saved: SessionState) => {
+    const elapsed = Date.now() - saved.startedAt;
+    if (elapsed > TOTAL * 1000 + 1000) {
+      // Already done
+      setPhase("done");
+      saveSession(null);
+      return;
+    }
+    startedAtRef.current = saved.startedAt;
+    setSecondsLeft(Math.max(0, TOTAL - Math.floor(elapsed / 1000)));
+    setPhase("counting");
+    tick();
+  }, [tick]);
 
   // Init on open
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+
+    setReflection("");
+    setShowExitConfirm(false);
+
+    const saved = loadSession();
+    if (saved && saved.treeId === treeId) {
+      const awayMs = Date.now() - saved.startedAt;
+      if (awayMs < MAX_AWAY_MS + TOTAL * 1000) {
+        // Resumable — show brief "resuming" then continue
+        setPhase("resuming");
+        setTimeout(() => resumeSession(saved), 1200);
+      } else {
+        // Too long, start fresh
+        setPhase("counting");
+        startTimer();
+      }
+    } else {
       setPhase("counting");
-      setReflection("");
       startTimer();
-      // Lock scroll
-      document.body.style.overflow = "hidden";
     }
+
+    document.body.style.overflow = "hidden";
+
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      stopTick();
       document.body.style.overflow = "";
     };
-  }, [open, startTimer]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Any interaction resets (during counting phase)
+  // Visibility change handler — resume on return
+  useEffect(() => {
+    if (!open) return;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && phase === "counting") {
+        // Recalculate from wall clock — timer self-corrects via tick()
+        const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+        if (elapsed >= TOTAL) {
+          stopTick();
+          setPhase("done");
+          setSecondsLeft(0);
+          saveSession(null);
+        }
+        // Otherwise tick() will self-correct on next cycle
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [open, phase, stopTick]);
+
+  // Any interaction resets (during counting phase only)
   const handleInteraction = useCallback(() => {
     if (phase !== "counting") return;
     const now = Date.now();
-    // Debounce resets to 500ms
     if (now - lastResetRef.current < 500) return;
     lastResetRef.current = now;
     setResetFlash(true);
@@ -69,7 +164,7 @@ export default function PresenceRitual({ open, treeName, onComplete, onCancel }:
     setTimeout(() => setResetFlash(false), 600);
   }, [phase, startTimer]);
 
-  // Block navigation
+  // Block navigation during counting
   useEffect(() => {
     if (!open || phase !== "counting") return;
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -79,6 +174,24 @@ export default function PresenceRitual({ open, treeName, onComplete, onCancel }:
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [open, phase]);
+
+  // Handle intentional exit
+  const handleExit = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (phase === "counting" && secondsLeft < TOTAL - 10) {
+      // They've been present >10s — confirm
+      setShowExitConfirm(true);
+    } else {
+      saveSession(null);
+      onCancel();
+    }
+  }, [phase, secondsLeft, onCancel]);
+
+  const confirmExit = useCallback(() => {
+    saveSession(null);
+    stopTick();
+    onCancel();
+  }, [onCancel, stopTick]);
 
   if (!open) return null;
 
@@ -94,18 +207,72 @@ export default function PresenceRitual({ open, treeName, onComplete, onCancel }:
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-background flex flex-col items-center justify-center select-none"
         style={{ zIndex: Z.OVERLAY + 10 }}
-        onPointerDown={handleInteraction}
-        onKeyDown={handleInteraction}
+        onPointerDown={phase === "counting" ? handleInteraction : undefined}
+        onKeyDown={phase === "counting" ? handleInteraction : undefined}
         tabIndex={0}
       >
-        {/* Cancel button - top right, small */}
+        {/* Close button — always visible */}
         <button
-          onClick={(e) => { e.stopPropagation(); onCancel(); }}
-          className="absolute top-4 right-4 p-2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+          onClick={handleExit}
+          className="absolute top-4 right-4 p-2.5 rounded-full bg-muted/30 text-muted-foreground/50 hover:text-muted-foreground hover:bg-muted/50 transition-colors"
           style={{ zIndex: Z.OVERLAY + 11 }}
+          aria-label="Leave Tree Presence"
         >
           <X className="w-5 h-5" />
         </button>
+
+        {/* Exit confirmation overlay */}
+        {showExitConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-background/90 flex flex-col items-center justify-center gap-6 pointer-events-auto"
+            style={{ zIndex: Z.OVERLAY + 12 }}
+          >
+            <TreeDeciduous className="w-10 h-10 text-muted-foreground/40" />
+            <p className="text-sm font-serif text-muted-foreground text-center max-w-xs">
+              Leave your time with <span className="text-primary italic">{treeName}</span>?
+              <br />
+              <span className="text-xs text-muted-foreground/60">Your presence will not be recorded.</span>
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-serif"
+                onClick={() => setShowExitConfirm(false)}
+              >
+                Stay
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-serif text-muted-foreground"
+                onClick={confirmExit}
+              >
+                Leave
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Resuming state */}
+        {phase === "resuming" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center gap-4"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="text-primary/40"
+            >
+              <TreeDeciduous className="w-16 h-16" />
+            </motion.div>
+            <p className="text-sm font-serif text-muted-foreground/60">Resuming presence…</p>
+          </motion.div>
+        )}
 
         {phase === "counting" && (
           <div className="flex flex-col items-center gap-8 pointer-events-none">
