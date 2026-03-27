@@ -4,7 +4,7 @@ import { WifiOff, Wifi, Smartphone, AlertCircle, RotateCcw, Check, Bug, GripVert
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCompanionSession } from "@/hooks/use-companion-session";
-import type { CompanionRoomState, CompanionMode, CompanionSettings } from "@/lib/companion-types";
+import type { CompanionRoomState, CompanionMode, CompanionSettings, CompanionFlowMode } from "@/lib/companion-types";
 import { DEFAULT_SETTINGS } from "@/lib/companion-types";
 import { Input } from "@/components/ui/input";
 import { hapticSuccess, hapticTap } from "@/lib/haptics";
@@ -17,6 +17,8 @@ import PointerPad from "./controllers/PointerPad";
 import FullscreenToggle from "./controllers/FullscreenToggle";
 import ModeSwitch from "./controllers/ModeSwitch";
 import CompanionSettingsPanel from "./controllers/CompanionSettingsPanel";
+import CompanionModeSelector from "./CompanionModeSelector";
+import SharedEncounterView from "./SharedEncounterView";
 
 const STORAGE_KEY_SETTINGS = "s33d-companion-settings";
 const STORAGE_KEY_MODE = "s33d-companion-mode";
@@ -53,6 +55,10 @@ const MAP_ROOMS = new Set(["map", "tree"]);
 export default function CompanionController() {
   const [searchParams] = useSearchParams();
   const urlCode = searchParams.get("code") ?? "";
+  const urlEncounter = searchParams.get("encounter") ?? "";
+  const [flowMode, setFlowMode] = useState<CompanionFlowMode | null>(
+    urlEncounter ? "encounter" : urlCode ? "controller" : null
+  );
   const [codeInput, setCodeInput] = useState(urlCode);
   const [error, setError] = useState("");
   const [autoJoinAttempted, setAutoJoinAttempted] = useState(false);
@@ -131,6 +137,11 @@ export default function CompanionController() {
     else { sendCommand({ type: "drag_start" }); setDragging(true); hapticTap(); }
   };
 
+  const handleBack = () => {
+    if (session) disconnect();
+    setFlowMode(null);
+  };
+
   const renderController = () => {
     switch (fallbackState.room) {
       case "map": case "tree":
@@ -150,12 +161,33 @@ export default function CompanionController() {
     }
   };
 
+  // ── Shared Encounter flow ──
+  if (flowMode === "encounter") {
+    return (
+      <div
+        className="min-h-[100dvh] flex flex-col overflow-hidden"
+        style={{ touchAction: "none", background: "hsl(var(--background))" }}
+      >
+        <header className="flex items-center justify-between px-4 py-2"
+          style={{ borderBottom: "1px solid hsl(var(--border) / 0.15)", background: "hsl(var(--background) / 0.95)", backdropFilter: "blur(8px)" }}>
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-primary" />
+            <span className="text-sm font-serif text-foreground">Shared Encounter</span>
+          </div>
+        </header>
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <SharedEncounterView onBack={handleBack} />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-[100dvh] flex flex-col overflow-hidden transition-colors duration-700"
       style={{
         touchAction: "none",
-        background: isMapMode
+        background: isMapMode && flowMode === "controller" && paired
           ? "linear-gradient(180deg, hsl(120 8% 6%), hsl(var(--background)))"
           : "hsl(var(--background))",
       }}
@@ -165,7 +197,7 @@ export default function CompanionController() {
         className="flex items-center justify-between px-4 py-2"
         style={{
           borderBottom: "1px solid hsl(var(--border) / 0.15)",
-          background: isMapMode
+          background: isMapMode && paired
             ? "hsl(120 8% 7% / 0.9)"
             : "hsl(var(--background) / 0.95)",
           backdropFilter: "blur(8px)",
@@ -173,8 +205,10 @@ export default function CompanionController() {
       >
         <div className="flex items-center gap-2">
           <Smartphone className="w-4 h-4 text-primary" />
-          <span className="text-sm font-serif text-foreground">Companion</span>
-          {isMapMode && (
+          <span className="text-sm font-serif text-foreground">
+            {flowMode === "controller" ? "Controller" : "Companion"}
+          </span>
+          {isMapMode && paired && (
             <span
               className="text-[9px] px-1.5 py-0.5 rounded-full font-serif"
               style={{
@@ -199,9 +233,9 @@ export default function CompanionController() {
               <Bug className="w-3 h-3" />
             </button>
           )}
-          {(paired || session) && (
+          {flowMode === "controller" && (paired || session) && (
             <button
-              onClick={disconnect}
+              onClick={handleBack}
               className={cn(
                 "flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-serif transition-colors min-h-[32px]",
                 paired
@@ -218,11 +252,22 @@ export default function CompanionController() {
 
       <main className="flex-1 flex flex-col overflow-hidden">
         <AnimatePresence mode="wait">
-          {!session ? (
-            /* ── Join ── */
+          {/* ── Mode selector (no flow chosen yet) ── */}
+          {!flowMode && (
+            <CompanionModeSelector
+              key="mode-select"
+              onSelect={(m) => setFlowMode(m)}
+            />
+          )}
+
+          {/* ── Controller flow ── */}
+          {flowMode === "controller" && !session && (
             <motion.div key="join" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               className="flex-1 flex flex-col items-center justify-center p-6">
               <div className="w-full max-w-xs flex flex-col items-center gap-5">
+                <button onClick={handleBack} className="self-start flex items-center gap-1 text-xs text-muted-foreground min-h-[32px]">
+                  ← Back
+                </button>
                 <div className="p-4 rounded-full" style={{ background: "hsl(var(--primary) / 0.08)", border: "1px solid hsl(var(--primary) / 0.15)" }}>
                   <Wifi className="w-8 h-8 text-primary" />
                 </div>
@@ -247,8 +292,9 @@ export default function CompanionController() {
                 </div>
               </div>
             </motion.div>
-          ) : !paired ? (
-            /* ── Connecting ── */
+          )}
+
+          {flowMode === "controller" && session && !paired && (
             <motion.div key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="flex-1 flex flex-col items-center justify-center p-6">
               <div className="flex flex-col items-center gap-4">
@@ -268,13 +314,14 @@ export default function CompanionController() {
                 ) : (
                   <>
                     <p className="text-sm text-muted-foreground font-serif">Connecting to <span className="text-primary font-mono">{session.code}</span>…</p>
-                    <button onClick={disconnect} className="text-xs text-muted-foreground min-h-[36px]">Cancel</button>
+                    <button onClick={handleBack} className="text-xs text-muted-foreground min-h-[36px]">Cancel</button>
                   </>
                 )}
               </div>
             </motion.div>
-          ) : (
-            /* ── Connected ── */
+          )}
+
+          {flowMode === "controller" && paired && (
             <motion.div key="controller" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               className="flex-1 flex flex-col overflow-hidden">
               {/* Status */}
