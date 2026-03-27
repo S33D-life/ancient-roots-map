@@ -1,8 +1,6 @@
 /**
  * LinkedAccountsSection — displays connected identity providers
- * and allows linking/unlinking Telegram.
- *
- * Designed for the Hearth / Account & Security area.
+ * and allows linking/unlinking Telegram via bot-assisted verification.
  */
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +19,7 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
+import TelegramLinkDialog from "@/components/auth/TelegramLinkDialog";
 
 // Inline icons
 const GoogleIcon = ({ className }: { className?: string }) => (
@@ -55,14 +54,17 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [unlinking, setUnlinking] = useState<string | null>(null);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
+  const fetchAccounts = () => {
     getConnectedAccounts().then((data) => {
       setAccounts(data as ConnectedAccount[]);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(() => { fetchAccounts(); }, []);
 
   const handleUnlink = async (accountId: string, provider: string) => {
     setUnlinking(accountId);
@@ -76,17 +78,11 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
     setUnlinking(null);
   };
 
-  const handleLinkTelegram = () => {
-    // TODO: Open Telegram Login Widget or redirect
-    toast({
-      title: "Coming soon",
-      description: "Telegram account linking will be available shortly.",
-    });
+  const handleLinked = () => {
+    fetchAccounts();
   };
 
   const telegramLinked = accounts.some((a) => a.provider === "telegram");
-
-  // Determine Google status from auth provider
   const googleProvider = user.app_metadata?.providers?.includes("google") || user.app_metadata?.provider === "google";
 
   return (
@@ -154,7 +150,7 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
             variant="outline"
             size="sm"
             className="text-xs gap-1 font-serif"
-            onClick={handleLinkTelegram}
+            onClick={() => setLinkDialogOpen(true)}
           >
             <Link2 className="w-3 h-3" />
             Link
@@ -167,6 +163,13 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
           <Loader2 className="w-3 h-3 animate-spin" /> Loading connected accounts…
         </div>
       )}
+
+      {/* Telegram Link Dialog */}
+      <TelegramLinkDialog
+        open={linkDialogOpen}
+        onOpenChange={setLinkDialogOpen}
+        onLinked={handleLinked}
+      />
     </div>
   );
 }
