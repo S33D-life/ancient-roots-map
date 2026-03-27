@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsNewUser } from "@/hooks/use-is-new-user";
+import faceFeminine from "@/assets/teotag-face-feminine.png";
 
 // Ancient Friends gallery — each entry is a painterly tree background
 // linked to a real Ancient Friend in the database
