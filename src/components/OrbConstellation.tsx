@@ -24,29 +24,29 @@ export interface ConstellationAction {
 }
 
 const DEFAULT_ACTIONS: ConstellationAction[] = [
+  { key: "signals", emoji: "🔔", label: "Signals", action: "dialog" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
-  { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
 const MAP_ACTIONS: ConstellationAction[] = [
+  { key: "signals", emoji: "🔔", label: "Signals", action: "dialog" },
   { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
-  { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
   { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
 const TREE_ACTIONS: ConstellationAction[] = [
+  { key: "signals", emoji: "🔔", label: "Signals", action: "dialog" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
-  { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
@@ -149,16 +149,6 @@ export default function OrbConstellation({
   const baseActions = useMemo(() => getActionsForRoute(pathname), [pathname]);
   const actions = useMemo(() => {
     const result = [...baseActions];
-    // Add signals action if there are unread signals
-    if (unreadSignals > 0) {
-      const signalAction: ConstellationAction = {
-        key: "signals",
-        emoji: "✨",
-        label: `Signals (${unreadSignals})`,
-        action: "dialog", // handled via onSelectAction
-      };
-      result.unshift(signalAction);
-    }
     if (updateAvailable) {
       const updateAction: ConstellationAction = {
         key: "update",
@@ -169,7 +159,7 @@ export default function OrbConstellation({
       result.unshift(updateAction);
     }
     return result;
-  }, [baseActions, updateAvailable, unreadSignals]);
+  }, [baseActions, updateAvailable]);
   const layout = useMemo(() => computeLayout(cx, cy, actions.length), [cx, cy, actions.length]);
 
   const handleAction = useCallback(
@@ -355,8 +345,8 @@ export default function OrbConstellation({
                     style={{
                       background: a.key === "update"
                         ? "radial-gradient(circle, hsl(180 70% 55% / 0.25), transparent 70%)"
-                        : a.key === "signals"
-                        ? "radial-gradient(circle, hsl(45 90% 60% / 0.3), transparent 70%)"
+                        : a.key === "signals" && unreadSignals > 0
+                        ? "radial-gradient(circle, hsl(45 90% 60% / 0.35), transparent 70%)"
                         : "radial-gradient(circle, hsl(var(--primary) / 0.12), transparent 70%)",
                       filter: "blur(6px)",
                     }}
@@ -368,21 +358,32 @@ export default function OrbConstellation({
                     style={{
                       background: a.key === "update"
                         ? "hsl(180 25% 15% / 0.95)"
-                        : a.key === "signals"
-                        ? "hsl(45 30% 15% / 0.95)"
                         : "hsl(var(--card) / 0.92)",
                       border: a.key === "update"
                         ? "1px solid hsl(180 60% 50% / 0.4)"
-                        : a.key === "signals"
+                        : a.key === "signals" && unreadSignals > 0
                         ? "1px solid hsl(45 80% 55% / 0.4)"
                         : "1px solid hsl(var(--primary) / 0.25)",
                       backdropFilter: "blur(12px)",
-                      boxShadow: a.key === "signals"
+                      boxShadow: a.key === "signals" && unreadSignals > 0
                         ? "0 2px 16px hsl(45 90% 60% / 0.2), inset 0 0 8px hsl(45 90% 60% / 0.1)"
                         : "0 2px 12px hsl(var(--primary) / 0.1), inset 0 0 8px hsl(var(--primary) / 0.05)",
                     }}
                   >
                     <span className="text-base">{a.emoji}</span>
+                    {/* Unread dot on bell */}
+                    {a.key === "signals" && unreadSignals > 0 && (
+                      <span
+                        className="absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] rounded-full text-[8px] font-bold flex items-center justify-center px-0.5"
+                        style={{
+                          background: "hsl(45 90% 60%)",
+                          color: "hsl(var(--primary-foreground))",
+                          boxShadow: "0 0 8px hsl(45 90% 60% / 0.5)",
+                        }}
+                      >
+                        {unreadSignals > 9 ? "9+" : unreadSignals}
+                      </span>
+                    )}
                   </span>
                   {/* Label — always visible but subtle */}
                   <span
