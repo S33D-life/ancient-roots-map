@@ -193,10 +193,9 @@ Deno.serve(async () => {
             chatId,
             "🌳 <b>Welcome to S33D</b>\n\n" +
             "I can help you enter the living forest.\n\n" +
+            "🔑 /login — Sign in to your S33D account\n" +
             "🔗 /connect — Link your existing S33D account\n" +
-            "🌳 /new — Create a new S33D identity\n" +
-            "🌱 /gardener — Arrive as a Gardener\n" +
-            "🧭 /wanderer — Arrive as a Wanderer\n\n" +
+            "🌳 /new — Create a new S33D identity\n\n" +
             "If you have a verification code from S33D, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
