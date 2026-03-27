@@ -5,13 +5,15 @@
  *   generate_code  → Creates a 6-digit verification code for account linking
  *   check_code     → Polls whether the code has been verified by the bot
  *   claim_code     → Claims a verified code, linking the Telegram identity
- *   signin_handoff → Creates a handoff token for bot-initiated sign-in
  *
  * Security:
  *   - Codes expire after 10 minutes
+ *   - Rate limit: max 5 code generations per user per hour
  *   - Telegram IDs are hashed (SHA-256) before storage in connected_accounts
  *   - One Telegram identity per S33D account (enforced by UNIQUE constraints)
  *   - Duplicate detection: if Telegram already linked to another user, reject
+ *   - Old pending codes are auto-expired on new generation
+ *   - Stale code cleanup: codes older than 1 hour are purged on each generate call
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -20,6 +22,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const MAX_CODES_PER_HOUR = 5;
 
 /** Hash a Telegram user ID for safe storage */
 async function hashTelegramId(telegramId: number | bigint): Promise<string> {
@@ -64,14 +68,37 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Authentication required" }, 401);
         }
 
-        // Expire any existing pending codes for this user
+        // ── Rate limit: max N codes per user per hour ──
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        const { count: recentCount } = await supabase
+          .from("telegram_verification_codes")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("created_at", oneHourAgo);
+
+        if ((recentCount ?? 0) >= MAX_CODES_PER_HOUR) {
+          return jsonResponse({
+            ok: false,
+            error: "Too many verification attempts. Please wait before trying again.",
+          }, 429);
+        }
+
+        // ── Cleanup: expire pending codes and purge old rows ──
         await supabase
           .from("telegram_verification_codes")
           .update({ status: "expired" })
           .eq("user_id", userId)
           .eq("status", "pending");
 
-        // Check if user already has Telegram linked
+        // Purge stale rows older than 1 hour (all statuses except claimed)
+        await supabase
+          .from("telegram_verification_codes")
+          .delete()
+          .eq("user_id", userId)
+          .neq("status", "claimed")
+          .lt("created_at", oneHourAgo);
+
+        // ── Check if already linked ──
         const { data: existing } = await supabase
           .from("connected_accounts")
           .select("id")
@@ -80,9 +107,13 @@ Deno.serve(async (req: Request) => {
           .maybeSingle();
 
         if (existing) {
-          return jsonResponse({ ok: false, error: "Telegram is already linked to your account" });
+          return jsonResponse({
+            ok: false,
+            error: "A Telegram account is already linked. Unlink it first to connect a different one.",
+          });
         }
 
+        // ── Generate new code ──
         const code = generateCode();
 
         const { data: codeRow, error: insertErr } = await supabase
@@ -113,7 +144,6 @@ Deno.serve(async (req: Request) => {
           code: codeRow.code,
           expires_at: codeRow.expires_at,
           bot_username: settings?.bot_username || null,
-          instruction: `Send this code to the S33D bot on Telegram: ${codeRow.code}`,
         });
       }
 
@@ -127,7 +157,7 @@ Deno.serve(async (req: Request) => {
 
         const { data: codeRow } = await supabase
           .from("telegram_verification_codes")
-          .select("*")
+          .select("status, expires_at, telegram_username")
           .eq("id", code_id)
           .eq("user_id", userId)
           .single();
@@ -137,12 +167,12 @@ Deno.serve(async (req: Request) => {
         }
 
         // Check expiry
-        if (new Date(codeRow.expires_at) < new Date()) {
+        if (new Date(codeRow.expires_at) < new Date() && codeRow.status === "pending") {
           await supabase
             .from("telegram_verification_codes")
             .update({ status: "expired" })
             .eq("id", code_id);
-          return jsonResponse({ ok: false, status: "expired", error: "Code has expired" });
+          return jsonResponse({ ok: true, status: "expired" });
         }
 
         return jsonResponse({
@@ -169,14 +199,20 @@ Deno.serve(async (req: Request) => {
           .single();
 
         if (!codeRow) {
-          return jsonResponse({ ok: false, error: "No verified code found. Please wait for bot verification." });
+          return jsonResponse({
+            ok: false,
+            error: "No verified code found. Please send the code to the S33D bot first.",
+          });
         }
 
         if (!codeRow.telegram_user_id) {
-          return jsonResponse({ ok: false, error: "Telegram identity not yet confirmed by bot" });
+          return jsonResponse({
+            ok: false,
+            error: "Telegram identity not yet confirmed. Please send the code to the bot.",
+          });
         }
 
-        // Check if this Telegram ID is already linked to another user
+        // Check for collision: Telegram ID already linked to another user
         const hashedId = await hashTelegramId(codeRow.telegram_user_id);
 
         const { data: existingLink } = await supabase
@@ -188,7 +224,7 @@ Deno.serve(async (req: Request) => {
 
         if (existingLink) {
           if (existingLink.user_id === userId) {
-            // Already linked to this user — idempotent
+            // Already linked to this user — idempotent success
             await supabase
               .from("telegram_verification_codes")
               .update({ status: "claimed", claimed_at: new Date().toISOString() })
@@ -197,7 +233,22 @@ Deno.serve(async (req: Request) => {
           }
           return jsonResponse({
             ok: false,
-            error: "This Telegram account is already linked to a different S33D account",
+            error: "This Telegram account is already connected to a different S33D account. Each Telegram identity can only be linked to one account.",
+          });
+        }
+
+        // Check user doesn't already have a different Telegram linked
+        const { data: userTelegram } = await supabase
+          .from("connected_accounts")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("provider", "telegram")
+          .maybeSingle();
+
+        if (userTelegram) {
+          return jsonResponse({
+            ok: false,
+            error: "You already have a Telegram account linked. Please unlink it first.",
           });
         }
 
@@ -211,20 +262,19 @@ Deno.serve(async (req: Request) => {
             provider_username: codeRow.telegram_username || null,
             display_name: codeRow.telegram_username
               ? `@${codeRow.telegram_username}`
-              : `Telegram User`,
+              : "Telegram User",
             verified_at: new Date().toISOString(),
           });
 
         if (linkErr) {
           console.error("Failed to link Telegram account:", linkErr);
-          // Handle unique constraint violation
           if (linkErr.code === "23505") {
             return jsonResponse({
               ok: false,
-              error: "This Telegram account is already linked",
+              error: "This Telegram account is already linked to an S33D account.",
             });
           }
-          return jsonResponse({ ok: false, error: "Failed to link account" }, 500);
+          return jsonResponse({ ok: false, error: "Failed to link account. Please try again." }, 500);
         }
 
         // Mark code as claimed
