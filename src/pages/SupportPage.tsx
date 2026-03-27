@@ -53,6 +53,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
+import TeotagFace from "@/components/TeotagFace";
 
 /* ── What support nurtures ──────────────────────────────────── */
 const nurtures = [
@@ -742,10 +743,8 @@ const SupportPage = () => {
           >
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm">🌿</span>
-                  </div>
+                <div className="flex items-center gap-3">
+                  <TeotagFace size="sm" variant="auto" delay={0.2} />
                   <p className="text-sm font-serif font-medium text-foreground">TEOTAG</p>
                 </div>
                 <button onClick={() => setTeotag(false)} className="p-1 rounded-lg hover:bg-muted/50 transition-colors">
