@@ -1,12 +1,11 @@
 /**
- * TelegramLoginButton — on the auth page, shown only when BOT_CONFIG.hasTelegramAuth is true.
+ * TelegramLoginButton — "Sign in with Telegram" on the auth page.
  *
- * IMPORTANT: This is NOT a login/sign-in button. Telegram account linking
- * requires an existing authenticated S33D session. On the auth page we show
- * a gentle prompt directing users to sign in first, then link Telegram
- * from their account settings (Hearth → Account & Security).
+ * Opens the bot with /login deep-link. The bot checks if the user's
+ * Telegram is already linked to an S33D account and creates a login
+ * handoff that establishes a session without requiring email/password.
  *
- * This button does NOT open the link dialog — the user must authenticate first.
+ * If Telegram is NOT linked, the bot guides the user to /connect or /new.
  */
 import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
@@ -21,27 +20,20 @@ const TelegramIcon = ({ className }: { className?: string }) => (
 export default function TelegramLoginButton() {
   if (!BOT_CONFIG.hasTelegramAuth) return null;
 
-  const botLink = BOT_CONFIG.telegramBotLink("start");
+  const botLink = BOT_CONFIG.telegramBotLink("login");
 
   return (
-    <div className="flex items-center gap-2 py-2 px-3 rounded-lg border border-border/30 bg-secondary/5">
-      <TelegramIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-      <p className="text-[11px] text-muted-foreground font-serif flex-1">
-        Coming from Telegram? Sign in first, then link your account from your Hearth settings.
-      </p>
-      {botLink && (
-        <a
-          href={botLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0"
-        >
-          <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 text-muted-foreground">
-            <ExternalLink className="w-3 h-3" />
-            Bot
-          </Button>
-        </a>
-      )}
-    </div>
+    <a
+      href={botLink || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block"
+    >
+      <Button variant="outline" className="w-full gap-2" type="button">
+        <TelegramIcon className="h-4 w-4" />
+        Sign in with Telegram
+        <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground/50" />
+      </Button>
+    </a>
   );
 }
