@@ -56,18 +56,16 @@ const AboutPage = () => {
 
           {/* Living scroll — Notion embed */}
           <div className="space-y-3">
-            <p className="text-center text-sm font-serif text-muted-foreground italic">
-              A living scroll of the wider S33D vision
-            </p>
-            <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30">
-              <iframe
-                src="https://tetol.notion.site/ebd//24515b58480d80e7808cdda1195e863a"
-                className="w-full border-0"
-                style={{ height: "min(600px, 70vh)" }}
-                allowFullScreen
-                title="S33D Vision — Notion"
-              />
-            </div>
+            <a
+              href="https://tetol.notion.site/24515b58480d80e7808cdda1195e863a"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-2xl border border-border/30 bg-card/40 px-6 py-10 text-center transition-colors hover:bg-card/60 hover:border-primary/30 space-y-2"
+            >
+              <TreeDeciduous className="w-5 h-5 text-primary mx-auto" />
+              <p className="text-sm font-serif text-foreground">A living scroll of the wider S33D vision</p>
+              <p className="text-[11px] text-muted-foreground">Open in Notion →</p>
+            </a>
           </div>
         </div>
       </main>
