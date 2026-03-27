@@ -91,6 +91,11 @@ const Index = () => {
           <GroundSection />
         </Suspense>
 
+        {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
+        <Suspense fallback={<SectionShimmer />}>
+          <ForestInteractionLayers />
+        </Suspense>
+
         {/* ── Discovery shortcuts — Countries & Hives ── */}
         <DiscoveryRow />
 
