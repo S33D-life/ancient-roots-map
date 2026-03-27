@@ -488,6 +488,8 @@ export default function StaffRoomGallery() {
       containScroll: "trimSnaps",
       loop: false,
       startIndex: 0,
+      dragFree: false,
+      skipSnaps: false,
     });
     const [selectedIdx, setSelectedIdx] = useState(0);
 
@@ -510,6 +512,19 @@ export default function StaffRoomGallery() {
       ? "Founding Spiral"
       : currentStaff?.circle || currentStaff?.code.split("-")[0];
 
+    // Tap-zone navigation: tap left/right 20% of carousel to scroll
+    const handleTapZone = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+      if (!emblaApi) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const zone = x / rect.width;
+      if (zone < 0.2) {
+        emblaApi.scrollPrev();
+      } else if (zone > 0.8) {
+        emblaApi.scrollNext();
+      }
+    }, [emblaApi]);
+
     return (
       <div className="space-y-4">
         {/* Progress indicator */}
@@ -523,46 +538,55 @@ export default function StaffRoomGallery() {
           )}
         </div>
 
-        {/* Embla carousel */}
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex gap-4" style={{ touchAction: "pan-y pinch-zoom" }}>
-            {filteredStaffs.map((staff, i) => (
-              <div
-                key={staff.tokenId}
-                className="flex-[0_0_72%] sm:flex-[0_0_45%] md:flex-[0_0_30%] min-w-0"
-              >
+        {/* Embla carousel with tap zones */}
+        <div className="relative">
+          {/* Invisible tap zones for left/right navigation */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none md:hidden"
+            style={{ pointerEvents: "auto" }}
+            onClick={handleTapZone}
+          />
+
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex gap-4" style={{ touchAction: "pan-y pinch-zoom" }}>
+              {filteredStaffs.map((staff, i) => (
                 <div
-                  className={cn(
-                    "rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 touch-manipulation",
-                    i === selectedIdx
-                      ? "border-primary/40 shadow-[0_4px_24px_hsl(var(--primary)/0.15)] scale-100"
-                      : "border-border/20 opacity-60 scale-[0.95]"
-                  )}
-                  onClick={() => { setActiveIndex(i); setDetailOpen(true); }}
+                  key={staff.tokenId}
+                  className="flex-[0_0_72%] sm:flex-[0_0_45%] md:flex-[0_0_30%] min-w-0"
                 >
-                  {/* Image */}
-                  <div className="aspect-[3/4] overflow-hidden" style={{ background: "hsl(var(--card) / 0.5)" }}>
-                    <img
-                      src={staff.image}
-                      alt={`${staff.speciesName} staff`}
-                      className="w-full h-full object-cover"
-                      loading={Math.abs(i - selectedIdx) < 3 ? "eager" : "lazy"}
-                    />
-                  </div>
-                  {/* Info */}
-                  <div className="p-3 space-y-1" style={{ background: "hsl(var(--card) / 0.8)" }}>
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="font-serif text-sm text-foreground truncate">{staff.speciesName}</h4>
-                      {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground font-mono">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
-                    {staff.length && (
-                      <p className="text-[10px] text-muted-foreground">{staff.length} · {staff.weight}</p>
+                  <div
+                    className={cn(
+                      "rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 touch-manipulation",
+                      i === selectedIdx
+                        ? "border-primary/40 shadow-[0_4px_24px_hsl(var(--primary)/0.15)] scale-100"
+                        : "border-border/20 opacity-60 scale-[0.95]"
                     )}
+                    onClick={(e) => { e.stopPropagation(); setActiveIndex(i); setDetailOpen(true); }}
+                  >
+                    {/* Image */}
+                    <div className="aspect-[3/4] overflow-hidden" style={{ background: "hsl(var(--card) / 0.5)" }}>
+                      <img
+                        src={staff.image}
+                        alt={`${staff.speciesName} staff`}
+                        className="w-full h-full object-cover"
+                        loading={Math.abs(i - selectedIdx) < 3 ? "eager" : "lazy"}
+                      />
+                    </div>
+                    {/* Info */}
+                    <div className="p-3 space-y-1" style={{ background: "hsl(var(--card) / 0.8)" }}>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-serif text-sm text-foreground truncate">{staff.speciesName}</h4>
+                        {staff.isOrigin && <Crown className="w-3 h-3 text-primary shrink-0" />}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground font-mono">{staff.code} · #{String(staff.tokenId).padStart(3, "0")}</p>
+                      {staff.length && (
+                        <p className="text-[10px] text-muted-foreground">{staff.length} · {staff.weight}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -586,7 +610,7 @@ export default function StaffRoomGallery() {
 
         {/* Tap hint on mobile */}
         <p className="text-center text-[10px] font-serif text-muted-foreground/50 md:hidden">
-          Swipe to browse · Tap to open
+          Swipe to browse · Tap edges to skip · Tap card to open
         </p>
       </div>
     );
