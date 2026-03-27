@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserOfferingCount } from "@/repositories/offerings";
-import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users } from "lucide-react";
+import { Archive, Loader2, Wand2, RotateCcw, TreeDeciduous, Music, Heart, Users, Sprout, ScrollText, Activity, Wallet, Gem, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
@@ -23,7 +23,10 @@ import VaultWalletCard from "./vault/VaultWalletCard";
 import VaultTokenWallet from "./vault/VaultTokenWallet";
 import VaultValueTree from "./vault/VaultValueTree";
 import VaultPatronBadge from "./vault/VaultPatronBadge";
+import VaultSection from "./vault/VaultSection";
 import CosmicClock from "@/components/CosmicClock";
+
+const STORAGE_KEY = "s33d_vault_open_section";
 
 interface Props {
   userId: string;
@@ -40,6 +43,19 @@ const DashboardVault = ({ userId }: Props) => {
   const [councilCount, setCouncilCount] = useState(0);
   const wallet = useWallet(userId);
   const speciesTokens = useSpeciesTokens(userId);
+
+  // Persisted open section — only one open at a time
+  const [openSection, setOpenSection] = useState<string | null>(() => {
+    try { return sessionStorage.getItem(STORAGE_KEY); } catch { return null; }
+  });
+
+  const handleToggle = useCallback((id: string) => {
+    setOpenSection(prev => {
+      const next = prev === id ? null : id;
+      try { if (next) sessionStorage.setItem(STORAGE_KEY, next); else sessionStorage.removeItem(STORAGE_KEY); } catch {}
+      return next;
+    });
+  }, []);
 
   const handleSegmentClick = useCallback((label: string) => {
     setHeartFilter(prev => prev === label ? null : label);
@@ -85,7 +101,6 @@ const DashboardVault = ({ userId }: Props) => {
     );
   }
 
-  // Calculate total hearts matching the Header's formula
   const baseHearts = treeCount * 10;
   const milestones: [number, number, number][] = [
     [treeCount, 1, 10], [treeCount, 5, 25], [treeCount, 10, 50],
@@ -101,19 +116,19 @@ const DashboardVault = ({ userId }: Props) => {
 
   return (
     <motion.div
-      className="relative space-y-5"
+      className="relative space-y-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
       <VaultParticles />
 
-      {/* Context sentence */}
+      {/* Context */}
       <p className="text-[11px] font-serif text-muted-foreground/70 text-center italic leading-relaxed">
         Every tree mapped, every offering given, every seed planted — it all gathers here.
       </p>
 
-      {/* Personal Contribution Summary */}
+      {/* Summary stats — always visible */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {[
           { icon: <TreeDeciduous className="w-3.5 h-3.5" />, value: treeCount, label: "Trees Mapped", color: "hsl(120 40% 45%)" },
@@ -133,7 +148,8 @@ const DashboardVault = ({ userId }: Props) => {
           </div>
         ))}
       </div>
-      {/* Section header with Staff identity + wallet status */}
+
+      {/* Section header */}
       <div className="flex items-center gap-2.5">
         <Archive className="w-5 h-5 text-primary" />
         <div className="flex-1">
@@ -145,7 +161,6 @@ const DashboardVault = ({ userId }: Props) => {
             }
           </p>
         </div>
-        {/* Staff + wallet pill */}
         {wallet.activeStaff && (
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
             <Wand2 className="w-3 h-3 text-primary" />
@@ -160,25 +175,125 @@ const DashboardVault = ({ userId }: Props) => {
         )}
       </div>
 
-      {/* Wallet & Staff Identity Card */}
-      <VaultWalletCard wallet={wallet} />
+      {/* ═══ ACCORDION SECTIONS ═══ */}
+      <div className="space-y-2">
 
-      {/* Founding Patron Badge — only if staff holder */}
-      {wallet.activeStaff && (
-        <VaultPatronBadge staff={wallet.activeStaff} userId={userId} />
-      )}
-
-      {/* Re-awaken Staff */}
-      {wallet.activeStaff && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full gap-2 font-serif text-xs border-primary/20 hover:border-primary/40"
-          onClick={() => setShowReawaken(true)}
+        {/* Identity — Wallet + Staff + Patron Badge */}
+        <VaultSection
+          id="identity"
+          icon={<Wallet className="w-4 h-4" />}
+          title="Identity & Staff"
+          subtitle="Wallet, staff patronage, re-awakening"
+          isOpen={openSection === "identity"}
+          onToggle={handleToggle}
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Re-awaken Staff
-        </Button>
-      )}
+          <VaultWalletCard wallet={wallet} />
+          {wallet.activeStaff && <VaultPatronBadge staff={wallet.activeStaff} userId={userId} />}
+          {wallet.activeStaff && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2 font-serif text-xs border-primary/20 hover:border-primary/40"
+              onClick={() => setShowReawaken(true)}
+            >
+              <RotateCcw className="w-3.5 h-3.5" /> Re-awaken Staff
+            </Button>
+          )}
+        </VaultSection>
+
+        {/* Flow — Hearts + Seeds */}
+        <VaultSection
+          id="flow"
+          icon={<Heart className="w-4 h-4" />}
+          title="Flow"
+          subtitle="Hearts, seeds, and the living economy"
+          badge={totalHearts}
+          isOpen={openSection === "flow"}
+          onToggle={handleToggle}
+          accent="0 65% 55%"
+          allowFullscreen
+        >
+          <VaultHeartBalance
+            total={totalHearts}
+            wanderer={heartBreakdown.wanderer}
+            sower={heartBreakdown.sower}
+            windfall={heartBreakdown.windfall}
+            baseHearts={baseHearts}
+            milestoneHearts={milestoneHearts}
+            seedsRemaining={seedsRemaining}
+            activeFilter={heartFilter}
+            onSegmentClick={handleSegmentClick}
+            userId={userId}
+          />
+          <VaultSproutingSeeds seeds={allSeeds} userId={userId} />
+          <VaultTokenWallet
+            totalHearts={totalHearts}
+            speciesBalances={speciesTokens.speciesBalances}
+            totalSpeciesHearts={speciesTokens.totalSpeciesHearts}
+            globalInfluence={speciesTokens.influenceGlobal}
+            influenceByHive={speciesTokens.influenceByHive}
+            history={speciesTokens.history}
+          />
+          <VaultValueTree userId={userId} totalHearts={totalHearts} />
+        </VaultSection>
+
+        {/* Trees — Reservoirs + Lottery */}
+        <VaultSection
+          id="trees"
+          icon={<TreeDeciduous className="w-4 h-4" />}
+          title="Trees"
+          subtitle="Reservoirs and lottery"
+          badge={treeCount}
+          isOpen={openSection === "trees"}
+          onToggle={handleToggle}
+          accent="120 40% 45%"
+        >
+          <VaultTreeReservoirs />
+          <VaultLotteryTracker userId={userId} />
+        </VaultSection>
+
+        {/* Journey — Scrolls + Activity */}
+        <VaultSection
+          id="journey"
+          icon={<ScrollText className="w-4 h-4" />}
+          title="Journey"
+          subtitle="Ledger, activity, and personal story"
+          isOpen={openSection === "journey"}
+          onToggle={handleToggle}
+          allowFullscreen
+        >
+          <VaultHeartLedger
+            userId={userId}
+            externalFilter={heartFilter}
+            onFilterChange={(f) => setHeartFilter(f || null)}
+            compact
+          />
+          <Suspense fallback={null}>
+            <PersonalJourneySummary userId={userId} />
+          </Suspense>
+          <div className="space-y-2">
+            <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Activity</h3>
+            <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+              <ActivityFeed userId={userId} limit={6} compact />
+            </Suspense>
+          </div>
+        </VaultSection>
+
+        {/* Rhythms — Cosmic Clock + Ecosystem */}
+        <VaultSection
+          id="rhythms"
+          icon={<Clock className="w-4 h-4" />}
+          title="Rhythms"
+          subtitle="Cosmic clock and forest momentum"
+          isOpen={openSection === "rhythms"}
+          onToggle={handleToggle}
+        >
+          <CosmicClock variant="full" />
+          <Suspense fallback={null}>
+            <EcosystemMomentum showDiscovery compact={false} />
+          </Suspense>
+        </VaultSection>
+      </div>
 
       {/* Re-awaken overlay */}
       <AnimatePresence>
@@ -202,73 +317,7 @@ const DashboardVault = ({ userId }: Props) => {
         )}
       </AnimatePresence>
 
-      {/* Cosmic Clock */}
-      <CosmicClock variant="full" />
-
-      {/* Primary: Heart Balance Ring */}
-      <VaultHeartBalance
-        total={totalHearts}
-        wanderer={heartBreakdown.wanderer}
-        sower={heartBreakdown.sower}
-        windfall={heartBreakdown.windfall}
-        baseHearts={baseHearts}
-        milestoneHearts={milestoneHearts}
-        seedsRemaining={seedsRemaining}
-        activeFilter={heartFilter}
-        onSegmentClick={handleSegmentClick}
-        userId={userId}
-      />
-
-      {/* Active Seeds / Bloom Timers */}
-      <VaultSproutingSeeds seeds={allSeeds} userId={userId} />
-
-      {/* Your Living Economy — S33D Hearts + Species Hearts + Influence
-          with "Explore the Living Economy" CTA to Value Tree */}
-      <VaultTokenWallet
-        totalHearts={totalHearts}
-        speciesBalances={speciesTokens.speciesBalances}
-        totalSpeciesHearts={speciesTokens.totalSpeciesHearts}
-        globalInfluence={speciesTokens.influenceGlobal}
-        influenceByHive={speciesTokens.influenceByHive}
-        history={speciesTokens.history}
-      />
-
-      {/* S33D Hearts — The Value Tree */}
-      <VaultValueTree userId={userId} totalHearts={totalHearts} />
-
-      {/* Unified Heart Flow Ledger — S33D Hearts + Species Hearts + Influence */}
-      <VaultHeartLedger
-        userId={userId}
-        externalFilter={heartFilter}
-        onFilterChange={(f) => setHeartFilter(f || null)}
-        compact
-      />
-
-      {/* Lottery Tracker */}
-      <VaultLotteryTracker userId={userId} />
-
-      {/* Tree Reservoirs */}
-      <VaultTreeReservoirs />
-
-      {/* Personal Journey Summary */}
-      <Suspense fallback={null}>
-        <PersonalJourneySummary userId={userId} />
-      </Suspense>
-
-      {/* This Week in the Forest */}
-      <Suspense fallback={null}>
-        <EcosystemMomentum showDiscovery compact={false} />
-      </Suspense>
-
-      {/* Recent Activity Feed */}
-      <div className="space-y-2">
-        <h3 className="text-xs font-serif text-muted-foreground uppercase tracking-wider">Recent Activity</h3>
-        <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
-          <ActivityFeed userId={userId} limit={6} compact />
-        </Suspense>
-      </div>
-
-      {/* What's next — gentle invitation back into the world */}
+      {/* Continue the journey */}
       <div className="rounded-xl border border-border/20 bg-card/20 p-4 space-y-3">
         <p className="text-[10px] font-serif text-muted-foreground uppercase tracking-[0.15em]">Continue the journey</p>
         <div className="flex flex-wrap gap-2">
