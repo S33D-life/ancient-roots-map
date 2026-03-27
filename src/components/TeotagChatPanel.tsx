@@ -93,9 +93,28 @@ export default function TeotagChatPanel({
                 <ExternalLink className="w-3 h-3 opacity-40" />
               </a>
 
-              {/* Subtle future hint */}
-              <p className="text-[9px] font-serif text-muted-foreground/30 text-center">
-                In-app voice coming soon
+              {/* Community group */}
+              <div className="h-px w-full" style={{ background: "hsl(var(--border) / 0.08)" }} />
+              <p className="text-[10px] font-serif text-muted-foreground/40 italic text-center">
+                The grove is gathering here
+              </p>
+              <a
+                href="https://t.me/s33dlife"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl text-xs font-serif tracking-wide transition-all duration-300 hover:scale-[1.02]"
+                style={{
+                  background: "hsl(var(--card) / 0.6)",
+                  color: "hsl(var(--foreground) / 0.7)",
+                  border: "1px solid hsl(var(--border) / 0.15)",
+                }}
+              >
+                <Users className="w-3.5 h-3.5" />
+                Join @s33dlife on Telegram
+                <ExternalLink className="w-3 h-3 opacity-30" />
+              </a>
+              <p className="text-[9px] font-serif text-muted-foreground/35 text-center leading-relaxed">
+                Community conversation, support, and forest updates
               </p>
             </div>
           </motion.div>
