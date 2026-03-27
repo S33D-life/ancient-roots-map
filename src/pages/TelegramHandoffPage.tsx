@@ -424,7 +424,11 @@ export default function TelegramHandoffPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleCreateAccount("gardener")}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group"
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group ${
+                  preselectedPath === "gardener"
+                    ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
+                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                }`}
               >
                 <TreePine className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-serif text-foreground">Gardener</span>
@@ -432,7 +436,11 @@ export default function TelegramHandoffPage() {
               </button>
               <button
                 onClick={() => handleCreateAccount("wanderer")}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group"
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group ${
+                  preselectedPath === "wanderer"
+                    ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
+                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                }`}
               >
                 <Compass className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-serif text-foreground">Wanderer</span>
