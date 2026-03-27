@@ -54,6 +54,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
 import TeotagFace from "@/components/TeotagFace";
+import TeotagChatPanel from "@/components/TeotagChatPanel";
 
 /* ── What support nurtures ──────────────────────────────────── */
 const nurtures = [
