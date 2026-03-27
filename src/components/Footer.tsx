@@ -24,11 +24,6 @@ const Footer = () => {
             Support
           </Link>
           <Dot />
-          <Link to="/bug-garden" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <Sparkles className="w-3 h-3" />
-            Feedback
-          </Link>
-          <Dot />
           <Link to="/about" className="hover:text-primary transition-colors">About</Link>
         </div>
 
