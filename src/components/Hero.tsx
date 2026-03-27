@@ -4,8 +4,9 @@ import LivingCensus from "@/components/LivingCensus";
 import WelcomeJourney from "@/components/WelcomeJourney";
 import EnsoNudge from "@/components/EnsoNudge";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 
 // Ancient Friends gallery — each entry is a painterly tree background
 // linked to a real Ancient Friend in the database
