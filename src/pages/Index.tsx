@@ -119,14 +119,7 @@ const Index = () => {
                 <ActivityFeed limit={6} compact />
               </div>
             </div>
-            <div className="section-divider max-w-xl mx-auto" />
-            <div className="max-w-2xl mx-auto px-4 py-6">
-              <div className="rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm p-4">
-                <WhisperEchoesFeed limit={6} />
-              </div>
-            </div>
             <WisdomOfTheGrove />
-            <TetolNavSection />
           </div>
         </Suspense>
       </main>
