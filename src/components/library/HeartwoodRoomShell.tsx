@@ -13,6 +13,9 @@ import CompanionPairDialog from "@/components/companion/CompanionPairDialog";
 import { useSwipeNavigation } from "@/hooks/use-swipe-navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+/** Rooms with internal horizontal gesture content (carousels, sliders) */
+const GESTURE_HEAVY_ROOMS = ["staff-room"];
+
 interface HeartwoodRoomShellProps {
   roomLabel: string;
   children: ReactNode;
@@ -36,11 +39,15 @@ const HeartwoodRoomShell = ({
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < roomSequence.length - 1;
 
-  const { onTouchStart, onTouchEnd } = useSwipeNavigation({
+  // Restrict room-swipe to top 22% of viewport for gesture-heavy rooms
+  const needsZone = currentRoom ? GESTURE_HEAVY_ROOMS.includes(currentRoom) : false;
+
+  const { onTouchStart, onTouchEnd, blockedHint } = useSwipeNavigation({
     items: roomSequence,
     activeItem: currentRoom || "",
     onNavigate: onNavigateRoom || (() => {}),
     threshold: 60,
+    zoneTopPercent: needsZone ? 22 : undefined,
   });
 
   // Keyboard arrow navigation
@@ -142,6 +149,21 @@ const HeartwoodRoomShell = ({
             ))}
           </div>
         )}
+
+        {/* Swipe hint for zone-restricted rooms */}
+        <AnimatePresence>
+          {blockedHint && needsZone && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-serif
+                bg-card/90 backdrop-blur-sm border border-border/30 text-muted-foreground shadow-lg"
+            >
+              Swipe from the top to move between rooms
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Room content with slide transition */}
         {prefersReduced || !canSwipe ? (
