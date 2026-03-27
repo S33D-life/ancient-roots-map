@@ -1,4 +1,4 @@
-import { TreeDeciduous, Sparkles, Heart, Map } from "lucide-react";
+import { TreeDeciduous, Heart, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
 
@@ -22,11 +22,6 @@ const Footer = () => {
           <Link to="/support" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
             <Heart className="w-3 h-3" />
             Support
-          </Link>
-          <Dot />
-          <Link to="/bug-garden" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <Sparkles className="w-3 h-3" />
-            Feedback
           </Link>
           <Dot />
           <Link to="/about" className="hover:text-primary transition-colors">About</Link>

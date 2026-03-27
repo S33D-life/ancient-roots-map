@@ -632,6 +632,25 @@ const SupportPage = () => {
               </div>
             </section>
 
+            {/* Orb feedback explainer */}
+            <section className="rounded-xl border border-primary/15 bg-primary/5 p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <h2 className="text-sm font-serif font-medium text-foreground">Share Feedback & Earn Hearts</h2>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed font-serif">
+                Tap the <strong className="text-foreground">TEOTAG orb</strong> (top-right of any page) to report bugs, suggest improvements, or share ideas. Validated reports earn <span className="text-primary font-medium">S33D Hearts</span> — the commons currency of the ecosystem.
+              </p>
+              <div className="space-y-1.5 text-xs text-muted-foreground">
+                <p className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> Tap the orb → navigate to your Hearth</p>
+                <p className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> Use the Bug Garden to file reports</p>
+                <p className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> Every valid contribution is recognised with Hearts</p>
+              </div>
+              <Link to="/bug-garden" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-serif">
+                <Bug className="w-3 h-3" /> Open the Bug Garden →
+              </Link>
+            </section>
+
             {/* FAQs */}
             <section className="space-y-3">
               <h2 className="text-lg font-serif font-medium text-foreground">Frequently Asked Questions</h2>
