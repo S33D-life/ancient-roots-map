@@ -130,7 +130,7 @@ function AncientFriendsWrapper() {
       tribeUserIds={tribeUserIds}
       treesWithStaff={treesWithStaff}
       staffCodes={staffCodes}
-      onSelectTree={() => {}}
+      onSelectTree={(tree) => navigate(`/tree/${tree.id}`)}
     />
   );
 }
