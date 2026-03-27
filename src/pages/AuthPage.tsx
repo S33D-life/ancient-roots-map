@@ -19,11 +19,18 @@ import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
-type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password";
+type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password" | "reset-success";
+
+// Detect recovery from URL hash before first render to prevent race with SIGNED_IN event
+const detectRecoveryFromHash = (): AuthView => {
+  const hash = window.location.hash;
+  if (hash.includes("type=recovery")) return "reset-password";
+  return "login";
+};
 
 const AuthPage = () => {
   useDocumentTitle("Sign In");
-  const [view, setView] = useState<AuthView>("login");
+  const [view, setView] = useState<AuthView>(detectRecoveryFromHash);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -128,7 +135,7 @@ const AuthPage = () => {
         return;
       }
 
-      if (session && viewRef.current !== "reset-password") {
+      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
         // Record referral on first sign-in if invite code was stored
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
@@ -402,8 +409,7 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      toast({ title: "Password updated", description: "You can now log in with your new password." });
-      navigate("/dashboard");
+      setView("reset-success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not update password";
       toast({ title: "Update failed", description: msg, variant: "destructive" });
@@ -446,6 +452,7 @@ const AuthPage = () => {
                   </button>
                 </div>
                 {fieldErrors.newPassword && <p className="text-xs text-destructive">{fieldErrors.newPassword}</p>}
+                <PasswordStrengthMeter password={newPassword} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirm-new-password" className="text-xs uppercase tracking-wider text-muted-foreground">Confirm New Password</Label>
@@ -466,6 +473,29 @@ const AuthPage = () => {
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating...</> : "Update Password"}
               </Button>
             </form>
+            <button onClick={() => setView("forgot")} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
+              Link expired? Request a new one
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Password reset success screen
+  if (view === "reset-success") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-background">
+        <div className="w-full max-w-sm">
+          <div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 md:p-8 shadow-xl space-y-6 text-center">
+            <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-xl font-serif">Password Updated 🌿</h2>
+            <p className="text-sm text-muted-foreground">Your password has been changed successfully. You're all set.</p>
+            <Button onClick={() => navigate("/dashboard")} className="w-full font-serif">
+              Enter the Grove
+            </Button>
           </div>
         </div>
       </div>
