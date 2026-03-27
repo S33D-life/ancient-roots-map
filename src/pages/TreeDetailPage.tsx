@@ -1251,6 +1251,7 @@ const TreeDetailPage = () => {
       <PresenceRitual
         open={presenceOpen}
         treeName={tree?.name || "Tree"}
+        treeId={id}
         onComplete={async (reflection) => {
           setPresenceOpen(false);
           if (userId && id) {
