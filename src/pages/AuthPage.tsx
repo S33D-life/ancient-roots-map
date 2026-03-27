@@ -19,11 +19,18 @@ import TelegramLoginButton from "@/components/auth/TelegramLoginButton";
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters");
 
-type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password";
+type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password" | "reset-success";
+
+// Detect recovery from URL hash before first render to prevent race with SIGNED_IN event
+const detectRecoveryFromHash = (): AuthView => {
+  const hash = window.location.hash;
+  if (hash.includes("type=recovery")) return "reset-password";
+  return "login";
+};
 
 const AuthPage = () => {
   useDocumentTitle("Sign In");
-  const [view, setView] = useState<AuthView>("login");
+  const [view, setView] = useState<AuthView>(detectRecoveryFromHash);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
