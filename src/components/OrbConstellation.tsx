@@ -180,7 +180,7 @@ export default function OrbConstellation({
         return;
       }
       if (a.action === "capture") {
-        setTimeout(() => captureAndExport({ filename: `s33d-${Date.now()}` }), 200);
+        setTimeout(() => captureAndExport(), 200);
         return;
       }
       if (a.action === "search") {
