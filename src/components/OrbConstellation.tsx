@@ -204,6 +204,7 @@ export default function OrbConstellation({
       <AnimatePresence>
         {open && (
           <motion.div
+            data-capture-exclude
             key="orb-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
