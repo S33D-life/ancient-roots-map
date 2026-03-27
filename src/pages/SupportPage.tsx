@@ -765,9 +765,9 @@ const SupportPage = () => {
                   <Map className="w-3.5 h-3.5 text-primary" />
                   Start with the map
                 </Link>
-                {BOT_CONFIG.telegramGroupLink && (
+                {BOT_CONFIG.hasTelegramBot && (
                   <a
-                    href={BOT_CONFIG.telegramGroupLink}
+                    href={BOT_CONFIG.telegramBotLink("start") || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border/20 hover:border-primary/30 hover:bg-primary/5 transition-all text-xs font-serif text-foreground"
