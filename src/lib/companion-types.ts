@@ -14,6 +14,19 @@ export type CompanionRoom =
 /** Controller interaction modes */
 export type CompanionMode = "trackpad" | "pointer" | "scroll";
 
+/** Top-level companion flow: controller vs shared encounter */
+export type CompanionFlowMode = "controller" | "encounter";
+
+/** Shared encounter state sent between two users */
+export interface SharedEncounterState {
+  treeId: string;
+  treeName: string;
+  participants: { userId: string; displayName: string }[];
+  startedAt: number;
+  heartsMultiplier: number;
+  verified: boolean;
+}
+
 export type CompanionCommand =
   | { type: "zoom_in" }
   | { type: "zoom_out" }
