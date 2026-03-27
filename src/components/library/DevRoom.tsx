@@ -196,6 +196,7 @@ const DevRoom = () => {
           {section === "toolshed" && <ToolshedSection />}
           {section === "skills" && <SkillsSection />}
           {section === "settings" && <SettingsSection />}
+          {section === "telegram" && <TelegramSection />}
         </motion.div>
       </AnimatePresence>
     </div>
