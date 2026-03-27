@@ -277,7 +277,7 @@ Deno.serve(async (req: Request) => {
           user_id: newUser.user.id,
           access_token: magicLink.properties?.access_token,
           refresh_token: magicLink.properties?.refresh_token,
-          identity_path,
+          identity_path: resolvedPath,
         });
       }
 
