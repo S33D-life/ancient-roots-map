@@ -410,11 +410,12 @@ const DashboardPage = () => {
         {/* Onboarding */}
         <FirstEncounterFunnel userId={userId} />
 
-        {/* TEOTAG presence — gentle greeting */}
+        {/* TEOTAG presence — gentle greeting + chat panel */}
         <div className="flex items-center gap-3 py-2">
           <TeotagFace size="sm" delay={0.5} />
           <p className="text-sm font-serif text-muted-foreground/70 italic">{whisper}</p>
         </div>
+        <TeotagChatPanel variant="hearth" defaultOpen={false} />
 
         {/* Identity & Daily Status — always open */}
         <section className="space-y-5">
