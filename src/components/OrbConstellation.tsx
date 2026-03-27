@@ -180,7 +180,7 @@ export default function OrbConstellation({
         return;
       }
       if (a.action === "capture") {
-        setTimeout(() => captureAndExport({ filename: `s33d-${Date.now()}` }), 200);
+        setTimeout(() => captureAndExport(), 200);
         return;
       }
       if (a.action === "search") {
@@ -204,6 +204,7 @@ export default function OrbConstellation({
       <AnimatePresence>
         {open && (
           <motion.div
+            data-capture-exclude
             key="orb-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -221,6 +222,7 @@ export default function OrbConstellation({
       <AnimatePresence>
         {open && (
           <motion.div
+            data-capture-exclude
             key="orb-constellation"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

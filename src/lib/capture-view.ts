@@ -23,6 +23,8 @@ export interface CaptureOptions {
   root?: HTMLElement | null;
   /** Show toast feedback (default true) */
   feedback?: boolean;
+  /** Add subtle S33D watermark to bottom-right (default true) */
+  watermark?: boolean;
 }
 
 export interface CaptureResult {
@@ -40,8 +42,50 @@ const HIDE_SELECTORS = [
   '[role="tooltip"]',
   ".debug",
   ".loading-spinner",
-  "[data-radix-popper-content-wrapper]", // open popovers / tooltips
+  "[data-radix-popper-content-wrapper]",
+  "[data-sonner-toaster]",
 ].join(", ");
+
+/* ------------------------------------------------------------------ */
+/*  Context-aware filename                                             */
+/* ------------------------------------------------------------------ */
+
+function deriveFilename(): string {
+  const path = window.location.pathname;
+  const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+
+  if (path.startsWith("/tree/")) {
+    const nameEl = document.querySelector("h1");
+    const name = nameEl?.textContent?.trim().replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-").toLowerCase().slice(0, 30);
+    return `s33d-tree-${name || "detail"}-${ts}`;
+  }
+  if (path.startsWith("/map")) return `s33d-atlas-${ts}`;
+  if (path.startsWith("/library/staff")) return `s33d-staff-room-${ts}`;
+  if (path.startsWith("/library")) return `s33d-heartwood-${ts}`;
+  if (path.startsWith("/vault") || path.startsWith("/dashboard")) return `s33d-vault-${ts}`;
+  if (path.startsWith("/council")) return `s33d-council-${ts}`;
+  if (path === "/") return `s33d-home-${ts}`;
+  return `s33d-view-${ts}`;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Watermark                                                          */
+/* ------------------------------------------------------------------ */
+
+function addWatermark(canvas: HTMLCanvasElement): void {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const text = "s33d.life";
+  const fontSize = Math.max(12, Math.round(canvas.width * 0.012));
+  ctx.font = `${fontSize}px serif`;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "bottom";
+
+  // Subtle semi-transparent watermark
+  ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+  ctx.fillText(text, canvas.width - fontSize, canvas.height - fontSize * 0.6);
+}
 
 /* ------------------------------------------------------------------ */
 /*  Core capture                                                       */
@@ -51,14 +95,15 @@ export async function captureCurrentView(
   options: CaptureOptions = {},
 ): Promise<CaptureResult | null> {
   const {
-    filename = `s33d-${Date.now()}`,
+    filename: filenameOverride,
     scale = Math.min(2, window.devicePixelRatio || 1),
-    backgroundColor:
-      bgOverride,
+    backgroundColor: bgOverride,
     root,
     feedback = true,
+    watermark = true,
   } = options;
 
+  const filename = filenameOverride || deriveFilename();
   const el = root ?? document.getElementById("s33d-capture-root") ?? document.body;
 
   const bg =
@@ -68,19 +113,21 @@ export async function captureCurrentView(
 
   // --- 1. Enter capture mode: hide transient UI ----
   const hidden: { el: HTMLElement; prev: string }[] = [];
-  el.querySelectorAll(HIDE_SELECTORS).forEach((node) => {
+  document.querySelectorAll(HIDE_SELECTORS).forEach((node) => {
     const h = node as HTMLElement;
     hidden.push({ el: h, prev: h.style.display });
     h.style.display = "none";
   });
   document.documentElement.dataset.captureMode = "1";
 
-  if (feedback) toast.info("Preparing capture…", { duration: 2500 });
+  if (feedback) toast.info("Preparing capture…", { duration: 2000, id: "capture-progress" });
 
   try {
-    // Wait two frames so layout settles
+    // Wait for layout + tile loading to settle
     await new Promise<void>((r) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => setTimeout(r, 100)),
+      ),
     );
 
     const blob = await toBlob(el, {
@@ -98,10 +145,34 @@ export async function captureCurrentView(
 
     if (!blob) throw new Error("Capture returned empty");
 
+    // Apply watermark if requested
+    if (watermark) {
+      try {
+        const img = await createImageBitmap(blob);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        addWatermark(canvas);
+        const watermarkedBlob = await new Promise<Blob | null>((res) =>
+          canvas.toBlob(res, "image/png", 1),
+        );
+        if (watermarkedBlob) {
+          return { blob: watermarkedBlob, filename: `${filename}.png` };
+        }
+      } catch {
+        // Watermark failed — use original blob
+      }
+    }
+
     return { blob, filename: `${filename}.png` };
   } catch (err) {
     console.error("[capture]", err);
-    if (feedback) toast.error("Capture could not complete — try again");
+    if (feedback) {
+      toast.dismiss("capture-progress");
+      toast.error("Capture could not complete — try again", { duration: 3000 });
+    }
     return null;
   } finally {
     // --- Restore hidden elements ---
@@ -148,7 +219,7 @@ export async function shareBlob(
     const file = new File([blob], filename, { type: "image/png" });
     if (!navigator.share || !navigator.canShare?.({ files: [file] }))
       return false;
-    await navigator.share({ files: [file], title: "S33D" });
+    await navigator.share({ files: [file], title: "S33D — Ancient Friends" });
     return true;
   } catch {
     return false;
@@ -167,6 +238,9 @@ export async function captureAndExport(
 
   const { blob, filename } = result;
 
+  // Dismiss the progress toast
+  toast.dismiss("capture-progress");
+
   // Try native share first (mobile), then clipboard, then download
   const shared = await shareBlob(blob, filename);
   if (shared) {
@@ -176,12 +250,13 @@ export async function captureAndExport(
 
   const copied = await copyBlobToClipboard(blob);
   if (copied) {
-    toast.success("Copied to clipboard ✨", { duration: 2000 });
+    // Clipboard worked — also download as backup but only toast about clipboard
+    downloadBlob(blob, filename);
+    toast.success("Copied to clipboard & saved ✨", { duration: 2500 });
+    return;
   }
 
-  // Always download as reliable fallback
+  // Download-only fallback
   downloadBlob(blob, filename);
-  if (!copied) {
-    toast.success("Download ready ✨", { duration: 2000 });
-  }
+  toast.success("Saved to downloads ✨", { duration: 2000 });
 }
