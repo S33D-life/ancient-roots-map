@@ -72,4 +72,6 @@ export const ROUTES = {
   TREE_DATA_COMMONS: "/tree-data-commons",
   /** Agent Garden */
   AGENT_GARDEN: "/agent-garden",
+  /** Telegram Handoff */
+  TELEGRAM_HANDOFF: "/telegram-handoff",
 } as const;
