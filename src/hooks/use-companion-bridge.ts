@@ -4,6 +4,7 @@ import { useCompanion } from "@/contexts/CompanionContext";
 import type { CompanionRoom } from "@/lib/companion-types";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
+import { captureAndExport } from "@/lib/capture-view";
 
 /**
  * useCompanionBridge — desktop-side handler that maps companion commands
