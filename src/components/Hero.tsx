@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsNewUser } from "@/hooks/use-is-new-user";
+import faceFeminine from "@/assets/teotag-face-feminine.png";
 
 // Ancient Friends gallery — each entry is a painterly tree background
 // linked to a real Ancient Friend in the database
@@ -343,13 +344,12 @@ const Hero = () => {
               }
             }}>
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
+                className="w-10 h-10 rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 ring-1 ring-primary/15"
                 style={{
                   background: "hsl(var(--primary) / 0.06)",
-                  border: "1px solid hsl(var(--primary) / 0.15)",
                 }}
               >
-                <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(var(--primary) / 0.5)" }} />
+                <img src={faceFeminine} alt="TEOTAG" className="w-full h-full object-cover object-top" draggable={false} />
               </div>
             </EnsoNudge>
             <NewUserScrollCue />
@@ -428,7 +428,7 @@ function NewUserScrollCue() {
         className="font-serif text-[11px] tracking-wide transition-colors duration-300 group-hover:text-primary"
         style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
       >
-        New here? Begin below
+        New here? Click to begin
       </span>
       <span
         className="text-[10px] transition-transform duration-700"
