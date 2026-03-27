@@ -569,13 +569,24 @@ const SupportPage = () => {
                       <CardContent className="p-4 flex items-start gap-3">
                         <Send className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-sm font-medium text-foreground">Telegram Community</p>
-                          <p className="text-xs text-muted-foreground leading-snug">Join the conversation with fellow stewards.</p>
+                          <p className="text-sm font-medium text-foreground">TEOTAG — Your Guide</p>
+                          <p className="text-xs text-muted-foreground leading-snug">Ask questions, get help, or just say hello. Opens in Telegram.</p>
                         </div>
                       </CardContent>
                     </Card>
                   </a>
                 )}
+                <a href="https://t.me/s33dlife" target="_blank" rel="noopener noreferrer" className="no-underline">
+                  <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
+                    <CardContent className="p-4 flex items-start gap-3">
+                      <Users className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Community · @s33dlife</p>
+                        <p className="text-xs text-muted-foreground leading-snug">Join fellow stewards and wanderers. Opens in Telegram.</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </a>
                 <a href="mailto:hello@s33d.life" className="no-underline">
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
                     <CardContent className="p-4 flex items-start gap-3">

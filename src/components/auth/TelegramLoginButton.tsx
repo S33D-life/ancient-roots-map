@@ -27,7 +27,7 @@ export default function TelegramLoginButton() {
     <div className="flex items-center gap-2 py-2 px-3 rounded-lg border border-border/30 bg-secondary/5">
       <TelegramIcon className="h-4 w-4 text-muted-foreground shrink-0" />
       <p className="text-[11px] text-muted-foreground font-serif flex-1">
-        Have a Telegram account? Sign in first, then link Telegram from your settings.
+        Coming from Telegram? Sign in first, then link your account from your Hearth settings.
       </p>
       {botLink && (
         <a

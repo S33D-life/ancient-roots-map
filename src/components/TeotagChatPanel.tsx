@@ -1,6 +1,8 @@
 /**
  * TeotagChatPanel — a calm, inviting panel for connecting with TEOTAG via Telegram.
- * Designed for the Hearth and Support page. Future-ready for in-app chat / AI guidance.
+ * Designed for Hearth and Support. Future-ready for in-app chat / AI guidance.
+ *
+ * TEOTAG is one guide across the whole ecosystem — Telegram, app, and forest.
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,10 +45,10 @@ export default function TeotagChatPanel({
         <TeotagFace size="sm" delay={0} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-serif text-foreground/80 tracking-wide">
-            Speak with TEOTAG
+            TEOTAG
           </p>
           <p className="text-[10px] font-serif text-muted-foreground/45 leading-relaxed">
-            Questions, guidance, or help finding your way
+            Your guide through the forest
           </p>
         </div>
         <ChevronDown
@@ -72,11 +74,10 @@ export default function TeotagChatPanel({
 
               {/* Gentle prompt */}
               <p className="text-xs font-serif text-muted-foreground/55 leading-relaxed italic">
-                TEOTAG listens through the grove. Open Telegram to begin a quiet conversation
-                — about trees, the ecosystem, or finding your way.
+                Ask about trees, the atlas, offerings, councils — or just say hello. TEOTAG listens.
               </p>
 
-              {/* Primary action */}
+              {/* Primary action — TEOTAG bot */}
               <a
                 href={botLink || "#"}
                 target="_blank"
@@ -89,9 +90,12 @@ export default function TeotagChatPanel({
                 }}
               >
                 <MessageCircle className="w-4 h-4" />
-                Open Telegram
+                Speak with TEOTAG
                 <ExternalLink className="w-3 h-3 opacity-40" />
               </a>
+              <p className="text-[9px] font-serif text-muted-foreground/35 text-center">
+                Opens in Telegram
+              </p>
 
               {/* Community group */}
               <div className="h-px w-full" style={{ background: "hsl(var(--border) / 0.08)" }} />
@@ -110,11 +114,11 @@ export default function TeotagChatPanel({
                 }}
               >
                 <Users className="w-3.5 h-3.5" />
-                Join @s33dlife on Telegram
+                Join @s33dlife
                 <ExternalLink className="w-3 h-3 opacity-30" />
               </a>
               <p className="text-[9px] font-serif text-muted-foreground/35 text-center leading-relaxed">
-                Community conversation, support, and forest updates
+                Community, support, and forest updates · Opens in Telegram
               </p>
             </div>
           </motion.div>

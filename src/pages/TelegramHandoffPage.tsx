@@ -5,8 +5,8 @@
  *   A. Connect existing account (sign in → link Telegram)
  *   B. Create a new S33D account (with an optional first-step suggestion)
  *
- * "Gardener" and "Wanderer" are participation modes, not permanent identities.
- * A user may garden one day and wander the next.
+ * Users are free to wander, tend, explore, and contribute in any way —
+ * there are no permanent roles, only paths through the forest.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveHandoffToken, type ResolvedHandoff } from "@/hooks/use-bot-handoff";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
-import { TreePine, Compass, Loader2, AlertCircle, ArrowRight, ExternalLink, ShieldCheck } from "lucide-react";
+import { TreePine, Compass, Loader2, AlertCircle, ArrowRight, ExternalLink, ShieldCheck, Map } from "lucide-react";
 import { BOT_CONFIG } from "@/config/bot";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
@@ -112,8 +112,8 @@ export default function TelegramHandoffPage() {
 
       toast.success(
         data.already_linked
-          ? "Telegram was already connected"
-          : "Telegram linked successfully"
+          ? "Telegram already woven in"
+          : "Your thread is now woven 🌿"
       );
       setState("success");
       setTimeout(() => navigate(ROUTES.HEARTH), 2500);
@@ -128,16 +128,11 @@ export default function TelegramHandoffPage() {
     setFirstStep(step);
     setState("creating");
 
-    // Map the soft first-step to the identity_path the server expects
     const identity_path = step === "tend" ? "gardener" : "wanderer";
 
     try {
       const { data, error: invokeErr } = await supabase.functions.invoke("telegram-handoff", {
-        body: {
-          action: "create_account",
-          token,
-          identity_path,
-        },
+        body: { action: "create_account", token, identity_path },
       });
 
       if (invokeErr || !data?.ok) {
@@ -159,7 +154,6 @@ export default function TelegramHandoffPage() {
         return;
       }
 
-      // Establish session with the returned tokens
       if (data.access_token && data.refresh_token) {
         const { error: sessionErr } = await supabase.auth.setSession({
           access_token: data.access_token,
@@ -206,11 +200,9 @@ export default function TelegramHandoffPage() {
   const botLink = BOT_CONFIG.telegramBotLink("start");
   const telegramUsername = (handoff?.payload as any)?.telegram_username;
 
-  // Determine if the flow is "connect" or "create"
   const isConnectFlow = flowParam === "connect";
   const isCreateFlow = !flowParam || flowParam === "create" || flowParam === "create_gardener" || flowParam === "create_wanderer";
 
-  // Suggested first step from bot command (soft hint, not identity)
   const suggestedStep = flowParam === "create_gardener" ? "tend" as const
     : flowParam === "create_wanderer" ? "explore" as const
     : null;
@@ -225,7 +217,7 @@ export default function TelegramHandoffPage() {
     return (
       <ErrorState
         title="This path has faded"
-        message="The link has expired. Return to Telegram and ask TEOTAG for a new one."
+        message="The link has expired. Return to TEOTAG in Telegram for a new one."
         botLink={botLink}
       />
     );
@@ -235,7 +227,7 @@ export default function TelegramHandoffPage() {
     return (
       <ErrorState
         title="Path not found"
-        message="This link isn't valid. Return to Telegram and start fresh with TEOTAG."
+        message="This link isn't valid. Return to TEOTAG in Telegram and start fresh."
         botLink={botLink}
       />
     );
@@ -245,7 +237,7 @@ export default function TelegramHandoffPage() {
     return (
       <ErrorState
         title="Already walked"
-        message="This link has already been used. If you need a new path, return to Telegram."
+        message="This link has already been used. Ask TEOTAG in Telegram for a new path."
         botLink={botLink}
         showSignIn
         onSignIn={() => navigate(ROUTES.AUTH)}
@@ -254,7 +246,7 @@ export default function TelegramHandoffPage() {
   }
 
   if (state === "linking" || state === "creating") {
-    return <CenteredLoader text={state === "linking" ? "Weaving your Telegram thread…" : "Preparing the forest…"} />;
+    return <CenteredLoader text={state === "linking" ? "Weaving your thread…" : "Preparing the forest…"} />;
   }
 
   if (state === "confirm_link") {
@@ -264,20 +256,20 @@ export default function TelegramHandoffPage() {
           <ShieldCheck className="w-10 h-10 text-primary mx-auto" />
           <h1 className="text-xl font-serif text-foreground">Confirm Telegram Link</h1>
           <div className="space-y-2 p-4 rounded-xl border border-border/50 bg-card/50">
-            <p className="text-xs text-muted-foreground font-serif">Linking Telegram to:</p>
+            <p className="text-xs text-muted-foreground font-serif">Connecting Telegram to:</p>
             <p className="text-sm font-serif text-foreground font-medium">
               {user?.email || "Your S33D account"}
             </p>
             {telegramUsername && (
               <>
                 <div className="h-px bg-border/30 my-2" />
-                <p className="text-xs text-muted-foreground font-serif">Telegram identity:</p>
+                <p className="text-xs text-muted-foreground font-serif">Telegram:</p>
                 <p className="text-sm font-serif text-foreground">@{telegramUsername}</p>
               </>
             )}
           </div>
           <Button onClick={handleLinkAfterSignin} className="w-full gap-2 font-serif">
-            Confirm & connect
+            Weave this thread
             <ArrowRight className="w-4 h-4" />
           </Button>
           <Button
@@ -289,7 +281,7 @@ export default function TelegramHandoffPage() {
             }}
             className="text-xs text-muted-foreground font-serif"
           >
-            Sign in with a different account
+            Use a different account
           </Button>
         </div>
       </div>
@@ -301,11 +293,11 @@ export default function TelegramHandoffPage() {
       <div className="min-h-screen flex items-center justify-center bg-background px-6">
         <div className="max-w-sm w-full text-center space-y-4">
           <div className="text-4xl">🌿</div>
-          <h1 className="text-xl font-serif text-foreground">Telegram connected</h1>
-          <p className="text-sm text-muted-foreground font-serif">
-            Your Telegram identity is now woven into your S33D journey.
+          <h1 className="text-xl font-serif text-foreground">Your thread is woven</h1>
+          <p className="text-sm text-muted-foreground font-serif leading-relaxed">
+            Telegram and S33D are now connected. TEOTAG will find you in both places.
           </p>
-          <p className="text-xs text-muted-foreground">Entering the forest…</p>
+          <p className="text-xs text-muted-foreground/60 font-serif">Entering the forest…</p>
         </div>
       </div>
     );
@@ -320,7 +312,7 @@ export default function TelegramHandoffPage() {
             Welcome to the forest
           </h1>
           <p className="text-sm text-muted-foreground font-serif leading-relaxed">
-            Your account is ready. You can tend the garden, wander the roots, or do both — the forest is open to you.
+            Your account is ready. Wander the roots, tend the garden, share what you find — all paths are open.
           </p>
           <Button
             onClick={() => navigate(ROUTES.HEARTH)}
@@ -329,14 +321,26 @@ export default function TelegramHandoffPage() {
             Enter your hearth
             <ArrowRight className="w-4 h-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(firstStep === "tend" ? ROUTES.ADD_TREE : ROUTES.ATLAS)}
-            className="text-xs text-muted-foreground font-serif"
-          >
-            {firstStep === "tend" ? "Plant your first tree" : "Explore the atlas"}
-          </Button>
+          <div className="flex justify-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(ROUTES.ADD_TREE)}
+              className="text-xs text-muted-foreground font-serif gap-1"
+            >
+              <TreePine className="w-3 h-3" />
+              Plant a tree
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(ROUTES.ATLAS)}
+              className="text-xs text-muted-foreground font-serif gap-1"
+            >
+              <Map className="w-3 h-3" />
+              Explore the atlas
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -360,99 +364,99 @@ export default function TelegramHandoffPage() {
     );
   }
 
-  // ── Main resolved state: show flow options ──
+  // ── Main resolved state ──
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
       <div className="max-w-sm w-full space-y-8">
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="text-4xl">🌳</div>
-          <h1 className="text-2xl font-serif text-foreground">Welcome to S33D</h1>
+          <h1 className="text-2xl font-serif text-foreground">
+            You've arrived at S33D
+          </h1>
+          <p className="text-sm text-muted-foreground font-serif leading-relaxed">
+            A living map of the world's most ancient trees — tended by people who walk among them.
+          </p>
           {telegramUsername && (
-            <p className="text-sm text-muted-foreground font-serif">
-              Arriving as <span className="text-foreground">@{telegramUsername}</span>
+            <p className="text-xs text-muted-foreground/60 font-serif">
+              Arriving as <span className="text-foreground/80">@{telegramUsername}</span>
             </p>
           )}
-          <p className="text-xs text-muted-foreground font-serif leading-relaxed">
-            TEOTAG has opened a path for you. Choose how you'd like to enter.
-          </p>
         </div>
 
         {/* Flow A: Connect existing account */}
         {isConnectFlow && (
           <div className="space-y-3">
             <h2 className="text-sm font-serif text-foreground/80 text-center">
-              I already have a S33D account
+              Connect your existing account
             </h2>
             <Button
               onClick={handleSignInRedirect}
               variant="outline"
               className="w-full gap-2 font-serif h-12"
             >
-              Sign in & connect Telegram
+              Sign in & weave Telegram
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         )}
 
-        {/* Neutral divider when showing both */}
+        {/* Neutral divider when showing both flows */}
         {!flowParam && (
           <>
             <div className="space-y-3">
-              <h2 className="text-sm font-serif text-foreground/80 text-center">
-                I already have a S33D account
-              </h2>
               <Button
                 onClick={handleSignInRedirect}
                 variant="outline"
-                className="w-full gap-2 font-serif h-12"
+                className="w-full gap-2 font-serif h-11"
               >
-                Sign in & connect Telegram
+                I have an account — sign in
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="h-px flex-1 bg-border/30" />
-              <span className="text-[10px] text-muted-foreground font-serif">or</span>
+              <span className="text-[10px] text-muted-foreground/50 font-serif">or begin fresh</span>
               <div className="h-px flex-1 bg-border/30" />
             </div>
           </>
         )}
 
-        {/* Flow B: Create new account — choose a first step, not a permanent identity */}
+        {/* Flow B: Create new account — two first-step suggestions, not identities */}
         {isCreateFlow && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-serif text-foreground/80 text-center">
-              {flowParam ? "How would you like to begin?" : "I'm new — create my account"}
-            </h2>
-            <p className="text-[10px] text-muted-foreground/60 font-serif text-center leading-relaxed">
-              This is just your first step — you can always do both
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground/60 font-serif text-center leading-relaxed">
+              Choose a first step — you can always change direction
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleCreateAccount("tend")}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group ${
+                className={`flex flex-col items-center gap-2.5 p-5 rounded-xl border transition-all text-center group ${
                   suggestedStep === "tend"
                     ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
-                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                    : "border-border/40 hover:border-primary/30 hover:bg-primary/5"
                 }`}
               >
-                <TreePine className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-serif text-foreground">Tend the garden</span>
-                <span className="text-[10px] text-muted-foreground font-serif">Plant & nurture trees</span>
+                <TreePine className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-serif text-foreground">Begin by planting</span>
+                <span className="text-[10px] text-muted-foreground/60 font-serif leading-relaxed">
+                  Map a tree, share its story
+                </span>
               </button>
               <button
                 onClick={() => handleCreateAccount("explore")}
-                className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group ${
+                className={`flex flex-col items-center gap-2.5 p-5 rounded-xl border transition-all text-center group ${
                   suggestedStep === "explore"
                     ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
-                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                    : "border-border/40 hover:border-primary/30 hover:bg-primary/5"
                 }`}
               >
-                <Compass className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-serif text-foreground">Explore the roots</span>
-                <span className="text-[10px] text-muted-foreground font-serif">Discover & wander</span>
+                <Compass className="w-7 h-7 text-primary group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-serif text-foreground">Begin by exploring</span>
+                <span className="text-[10px] text-muted-foreground/60 font-serif leading-relaxed">
+                  Discover ancient trees nearby
+                </span>
               </button>
             </div>
           </div>
@@ -501,7 +505,7 @@ function ErrorState({
             <a href={botLink} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="w-full gap-2 font-serif">
                 <ExternalLink className="w-4 h-4" />
-                Return to Telegram bot
+                Return to TEOTAG in Telegram
               </Button>
             </a>
           )}
