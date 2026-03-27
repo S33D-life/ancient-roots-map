@@ -214,11 +214,38 @@ const HearthNotificationSettings = ({ userId }: Props) => {
         />
       </SettingsSection>
 
-      {/* Telegram outbound integration */}
-      <SettingsSection icon={Send} title="Telegram Integration">
-        <Suspense fallback={<div className="py-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-muted-foreground" /></div>}>
-          <TelegramSettings />
-        </Suspense>
+      {/* Telegram — minimal presence, settings live in Tap Root */}
+      <SettingsSection icon={Send} title="TEOTAG · Telegram">
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground font-serif leading-relaxed">
+            Connect, ask questions, or continue your journey through TEOTAG on Telegram.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="https://t.me/s33dlifebot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-serif min-h-[32px] transition-colors"
+              style={{
+                background: "hsl(var(--primary) / 0.1)",
+                border: "1px solid hsl(var(--primary) / 0.2)",
+                color: "hsl(var(--primary))",
+              }}
+            >
+              <Send className="w-3 h-3" /> Open TEOTAG
+            </a>
+            <Link
+              to="/library/tap-root"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-serif text-muted-foreground min-h-[32px] transition-colors"
+              style={{
+                background: "hsl(var(--secondary) / 0.15)",
+                border: "1px solid hsl(var(--border) / 0.2)",
+              }}
+            >
+              <Settings className="w-3 h-3" /> Manage in Tap Root
+            </Link>
+          </div>
+        </div>
       </SettingsSection>
 
       {/* Actions */}
