@@ -452,6 +452,7 @@ const AuthPage = () => {
                   </button>
                 </div>
                 {fieldErrors.newPassword && <p className="text-xs text-destructive">{fieldErrors.newPassword}</p>}
+                <PasswordStrengthMeter password={newPassword} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="confirm-new-password" className="text-xs uppercase tracking-wider text-muted-foreground">Confirm New Password</Label>
@@ -472,6 +473,29 @@ const AuthPage = () => {
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating...</> : "Update Password"}
               </Button>
             </form>
+            <button onClick={() => setView("forgot")} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
+              Link expired? Request a new one
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Password reset success screen
+  if (view === "reset-success") {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-background">
+        <div className="w-full max-w-sm">
+          <div className="bg-card/80 backdrop-blur border border-border rounded-2xl p-6 md:p-8 shadow-xl space-y-6 text-center">
+            <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-xl font-serif">Password Updated 🌿</h2>
+            <p className="text-sm text-muted-foreground">Your password has been changed successfully. You're all set.</p>
+            <Button onClick={() => navigate("/dashboard")} className="w-full font-serif">
+              Enter the Grove
+            </Button>
           </div>
         </div>
       </div>
