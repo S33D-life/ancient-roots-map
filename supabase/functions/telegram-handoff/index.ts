@@ -119,10 +119,10 @@ Deno.serve(async (req: Request) => {
 
       /* ────────────────────────────────────────────────────
        * create_account — called by the app frontend after
-       * the user chooses Gardener or Wanderer on the handoff page.
+       * the user chooses their first step on the handoff page.
        *
-       * IMPORTANT: identity_path comes from the request body
-       * (the user's UI choice), NOT from the handoff payload.
+       * identity_path is a soft participation hint ("gardener" or "wanderer"),
+       * NOT a permanent role. Users can always do both.
        * ──────────────────────────────────────────────────── */
       case "create_account": {
         const { token, identity_path } = body;
@@ -131,9 +131,10 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "Token required" }, 400);
         }
 
-        if (!identity_path || !["gardener", "wanderer"].includes(identity_path)) {
-          return jsonResponse({ ok: false, error: "identity_path must be 'gardener' or 'wanderer'" }, 400);
-        }
+        // Accept identity_path as an optional soft hint; default to "wanderer"
+        const resolvedPath = identity_path && ["gardener", "wanderer"].includes(identity_path)
+          ? identity_path
+          : "wanderer";
 
         // Read the handoff directly to check status atomically
         const { data: handoffRow, error: readErr } = await supabase
@@ -221,7 +222,7 @@ Deno.serve(async (req: Request) => {
           user_metadata: {
             source: "telegram",
             telegram_username: payload.telegram_username || null,
-            identity_path, // From the user's UI choice, not the handoff
+            first_step: resolvedPath, // Soft participation hint, not a permanent role
           },
         });
 
@@ -266,7 +267,7 @@ Deno.serve(async (req: Request) => {
             ok: true,
             user_id: newUser.user.id,
             needs_manual_signin: true,
-            identity_path,
+            identity_path: resolvedPath,
             message: "Account created but session link failed. Please sign in.",
           });
         }
@@ -276,7 +277,7 @@ Deno.serve(async (req: Request) => {
           user_id: newUser.user.id,
           access_token: magicLink.properties?.access_token,
           refresh_token: magicLink.properties?.refresh_token,
-          identity_path,
+          identity_path: resolvedPath,
         });
       }
 
