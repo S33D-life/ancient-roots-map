@@ -46,7 +46,7 @@ export default function TeotagChatPanel({
             Speak with TEOTAG
           </p>
           <p className="text-[10px] font-serif text-muted-foreground/45 leading-relaxed">
-            Ask questions, get guidance, or connect through the forest
+            Questions, guidance, or help finding your way
           </p>
         </div>
         <ChevronDown
