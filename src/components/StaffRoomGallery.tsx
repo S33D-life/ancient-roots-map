@@ -14,6 +14,7 @@ import {
   LayoutGrid, Maximize, List, ChevronLeft, ChevronRight, X,
   Share2, Eye, Heart, TreeDeciduous, ScrollText, ExternalLink,
   Wand2, Filter, Sparkles, Shield, Users, Crown, Compass,
+  MapPin, BookOpen,
 } from "lucide-react";
 import {
   getSpiralStaffs, getGridStaffs, getSpeciesStaffCounts,
