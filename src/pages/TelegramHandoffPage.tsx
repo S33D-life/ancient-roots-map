@@ -509,6 +509,11 @@ function ErrorState({
               Sign in to S33D
             </Button>
           )}
+          {extraAction && (
+            <Button variant="ghost" size="sm" onClick={extraAction.onClick} className="font-serif text-xs">
+              {extraAction.label}
+            </Button>
+          )}
         </div>
       </div>
     </div>
