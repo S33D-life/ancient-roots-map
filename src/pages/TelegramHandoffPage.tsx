@@ -480,12 +480,14 @@ function ErrorState({
   botLink,
   showSignIn,
   onSignIn,
+  extraAction,
 }: {
   title: string;
   message: string;
   botLink: string | null;
   showSignIn?: boolean;
   onSignIn?: () => void;
+  extraAction?: { label: string; onClick: () => void };
 }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">

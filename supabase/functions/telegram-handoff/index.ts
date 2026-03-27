@@ -306,17 +306,24 @@ Deno.serve(async (req: Request) => {
         // Read the handoff
         const { data: handoff } = await supabase
           .from("bot_handoffs")
-          .select("id, status, expires_at, payload")
+          .select("id, status, expires_at, payload, claimed_by_user_id")
           .eq("token", token)
           .single();
 
         if (!handoff) {
-          return jsonResponse({ ok: false, error: "Invalid or expired handoff" });
+          return jsonResponse({ ok: false, error: "not_found" });
         }
 
         // Already claimed — check if by same user (idempotent)
         if (handoff.status === "claimed") {
+          if (handoff.claimed_by_user_id === user.id) {
+            return jsonResponse({ ok: true, linked: true, already_linked: true });
+          }
           return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
+        }
+
+        if (handoff.status === "invalidated") {
+          return jsonResponse({ ok: false, error: "invalidated" });
         }
 
         if (new Date(handoff.expires_at) < new Date()) {
@@ -351,7 +358,7 @@ Deno.serve(async (req: Request) => {
         }
 
         if (existingLink && existingLink.user_id === user.id) {
-          // Already linked to this user — idempotent
+          // Already linked to this user — idempotent, claim token
           await supabase
             .from("bot_handoffs")
             .update({ status: "claimed", claimed_by_user_id: user.id, claimed_at: new Date().toISOString() })
@@ -375,6 +382,23 @@ Deno.serve(async (req: Request) => {
           });
         }
 
+        // Atomically claim BEFORE linking (prevents race across tabs)
+        const { data: claimResult, error: claimErr } = await supabase
+          .from("bot_handoffs")
+          .update({
+            status: "claimed",
+            claimed_by_user_id: user.id,
+            claimed_at: new Date().toISOString(),
+          })
+          .eq("token", token)
+          .in("status", ["created", "opened"])
+          .select("id")
+          .maybeSingle();
+
+        if (claimErr || !claimResult) {
+          return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
+        }
+
         // Link the Telegram identity
         const { error: linkErr } = await supabase.from("connected_accounts").insert({
           user_id: user.id,
@@ -386,19 +410,18 @@ Deno.serve(async (req: Request) => {
         });
 
         if (linkErr) {
+          // Rollback claim on link failure
+          await supabase
+            .from("bot_handoffs")
+            .update({ status: "opened", claimed_by_user_id: null, claimed_at: null })
+            .eq("id", claimResult.id);
+
           if (linkErr.code === "23505") {
-            return jsonResponse({ ok: false, error: "This Telegram is already linked to an account." });
+            return jsonResponse({ ok: false, error: "telegram_linked_elsewhere", message: "This Telegram is already linked to an account." });
           }
           return jsonResponse({ ok: false, error: "Failed to link account" }, 500);
         }
 
-        // Claim the handoff
-        await supabase
-          .from("bot_handoffs")
-          .update({ status: "claimed", claimed_by_user_id: user.id, claimed_at: new Date().toISOString() })
-          .eq("id", handoff.id);
-
-        // Return user's email so the handoff page can show which account was linked
         return jsonResponse({
           ok: true,
           linked: true,
