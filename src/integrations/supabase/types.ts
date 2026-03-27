@@ -6678,6 +6678,150 @@ export type Database = {
           },
         ]
       }
+      telegram_bot_state: {
+        Row: {
+          id: number
+          update_offset: number
+          updated_at: string
+        }
+        Insert: {
+          id: number
+          update_offset?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          update_offset?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      telegram_inbound_queue: {
+        Row: {
+          chat_id: number
+          created_at: string
+          from_user_id: number | null
+          from_username: string | null
+          id: string
+          message_text: string | null
+          processed: boolean
+          processed_at: string | null
+          raw_update: Json
+          update_id: number
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          from_user_id?: number | null
+          from_username?: string | null
+          id?: string
+          message_text?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_update: Json
+          update_id: number
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          from_user_id?: number | null
+          from_username?: string | null
+          id?: string
+          message_text?: string | null
+          processed?: boolean
+          processed_at?: string | null
+          raw_update?: Json
+          update_id?: number
+        }
+        Relationships: []
+      }
+      telegram_outbound_log: {
+        Row: {
+          chat_id: string
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          message_text: string
+          metadata: Json | null
+          status: string
+          telegram_message_id: number | null
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          message_text: string
+          metadata?: Json | null
+          status?: string
+          telegram_message_id?: number | null
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          message_text?: string
+          metadata?: Json | null
+          status?: string
+          telegram_message_id?: number | null
+        }
+        Relationships: []
+      }
+      telegram_settings: {
+        Row: {
+          bot_username: string | null
+          chat_id: string | null
+          delivery_mode: string
+          digest_hour: number | null
+          enabled: boolean
+          id: number
+          notify_council_invite: boolean
+          notify_ecosystem_update: boolean
+          notify_heart_milestone: boolean
+          notify_new_tree: boolean
+          notify_offering: boolean
+          notify_whisper: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          bot_username?: string | null
+          chat_id?: string | null
+          delivery_mode?: string
+          digest_hour?: number | null
+          enabled?: boolean
+          id: number
+          notify_council_invite?: boolean
+          notify_ecosystem_update?: boolean
+          notify_heart_milestone?: boolean
+          notify_new_tree?: boolean
+          notify_offering?: boolean
+          notify_whisper?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          bot_username?: string | null
+          chat_id?: string | null
+          delivery_mode?: string
+          digest_hour?: number | null
+          enabled?: boolean
+          id?: number
+          notify_council_invite?: boolean
+          notify_ecosystem_update?: boolean
+          notify_heart_milestone?: boolean
+          notify_new_tree?: boolean
+          notify_offering?: boolean
+          notify_whisper?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       time_tree_entries: {
         Row: {
           created_at: string
