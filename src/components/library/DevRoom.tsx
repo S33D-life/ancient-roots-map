@@ -53,6 +53,7 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "toolshed",        label: "Toolshed",    icon: <Wrench className="w-3.5 h-3.5" /> },
   { key: "skills",          label: "Skills",      icon: <BookOpen className="w-3.5 h-3.5" /> },
   { key: "settings",        label: "Settings",    icon: <Settings className="w-3.5 h-3.5" /> },
+  { key: "telegram",        label: "Telegram",    icon: <Send className="w-3.5 h-3.5" /> },
 ];
 
 /* ── System Map Nodes ── */
