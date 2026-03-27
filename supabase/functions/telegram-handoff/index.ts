@@ -41,7 +41,7 @@ Deno.serve(async (req: Request) => {
     switch (action) {
       /* ────────────────────────────────────────────────────
        * create_handoff — called by telegram-poll when bot
-       * receives /connect, /new, /gardener, /wanderer.
+       * receives /connect, /new, /gardener, /wanderer, /login.
        * Only callable internally (service_role).
        * ──────────────────────────────────────────────────── */
       case "create_handoff": {
@@ -51,8 +51,7 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "telegram_user_id and flow required" }, 400);
         }
 
-        // "create" is the neutral new-identity flow (choice happens in-app)
-        const validFlows = ["connect", "create", "create_gardener", "create_wanderer"];
+        const validFlows = ["connect", "create", "create_gardener", "create_wanderer", "login"];
         if (!validFlows.includes(flow)) {
           return jsonResponse({ ok: false, error: "Invalid flow type" }, 400);
         }
@@ -67,23 +66,32 @@ Deno.serve(async (req: Request) => {
           .eq("provider_user_id", hashedId)
           .maybeSingle();
 
-        if (flow === "connect" && existingLink) {
+        // Login flow REQUIRES an existing link
+        if (flow === "login") {
+          if (!existingLink) {
+            return jsonResponse({
+              ok: false,
+              error: "not_linked",
+              message: "Your Telegram is not yet connected to an S33D account. Use /connect first.",
+            });
+          }
+        } else if (flow === "connect" && existingLink) {
           return jsonResponse({
             ok: false,
             error: "already_linked",
-            message: "Your Telegram is already connected to an S33D account. Open S33D to continue.",
+            message: "Your Telegram is already connected to an S33D account. Use /login to sign in.",
           });
-        }
-
-        if (flow.startsWith("create") && existingLink) {
+        } else if (flow.startsWith("create") && existingLink) {
           return jsonResponse({
             ok: false,
             error: "already_linked",
-            message: "Your Telegram is already connected to an S33D account. Use /connect instead.",
+            message: "Your Telegram is already connected to an S33D account. Use /login to sign in.",
           });
         }
 
-        const flowName = flow === "connect" ? "telegram_connect" : `telegram_${flow}`;
+        const flowName = flow === "connect" ? "telegram_connect"
+          : flow === "login" ? "telegram_login"
+          : `telegram_${flow}`;
 
         const { data: handoff, error: rpcErr } = await supabase.rpc("create_bot_handoff", {
           p_source: "telegram",
