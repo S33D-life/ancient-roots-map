@@ -29,7 +29,7 @@ import {
 const TelegramSettings = lazy(() => import("@/components/settings/TelegramSettings"));
 
 /* ── Types ── */
-type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings";
+type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings" | "telegram";
 
 interface SystemNode {
   id: string;
