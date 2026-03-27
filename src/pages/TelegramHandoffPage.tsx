@@ -207,6 +207,11 @@ export default function TelegramHandoffPage() {
   const isConnectFlow = flowParam === "connect";
   const isCreateFlow = !flowParam || flowParam === "create" || flowParam === "create_gardener" || flowParam === "create_wanderer";
 
+  // Pre-selected identity from bot command (/gardener or /wanderer)
+  const preselectedPath = flowParam === "create_gardener" ? "gardener"
+    : flowParam === "create_wanderer" ? "wanderer"
+    : null;
+
   // ── Render states ──
 
   if (state === "loading" || authLoading) {
@@ -339,13 +344,20 @@ export default function TelegramHandoffPage() {
   }
 
   if (state === "error") {
+    // Differentiate recoverable vs terminal errors
+    const isAlreadyLinked = error?.includes("already connected") || error?.includes("already linked");
+    const isWrongAccount = error?.includes("different Telegram") || error?.includes("Unlink it first");
     return (
       <ErrorState
-        title="Something went awry"
+        title={isAlreadyLinked ? "Already connected" : isWrongAccount ? "Different Telegram linked" : "Something went awry"}
         message={error || "An unexpected error occurred."}
         botLink={botLink}
-        showSignIn
-        onSignIn={() => navigate(ROUTES.AUTH)}
+        showSignIn={isAlreadyLinked}
+        onSignIn={isAlreadyLinked ? () => navigate(ROUTES.AUTH) : undefined}
+        extraAction={isWrongAccount ? {
+          label: "Open settings",
+          onClick: () => navigate(ROUTES.HEARTH),
+        } : undefined}
       />
     );
   }
@@ -419,7 +431,11 @@ export default function TelegramHandoffPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleCreateAccount("gardener")}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group"
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group ${
+                  preselectedPath === "gardener"
+                    ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
+                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                }`}
               >
                 <TreePine className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-serif text-foreground">Gardener</span>
@@ -427,7 +443,11 @@ export default function TelegramHandoffPage() {
               </button>
               <button
                 onClick={() => handleCreateAccount("wanderer")}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all text-center group"
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all text-center group ${
+                  preselectedPath === "wanderer"
+                    ? "border-primary/50 bg-primary/10 ring-1 ring-primary/20"
+                    : "border-border/50 hover:border-primary/30 hover:bg-primary/5"
+                }`}
               >
                 <Compass className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-serif text-foreground">Wanderer</span>
@@ -460,12 +480,14 @@ function ErrorState({
   botLink,
   showSignIn,
   onSignIn,
+  extraAction,
 }: {
   title: string;
   message: string;
   botLink: string | null;
   showSignIn?: boolean;
   onSignIn?: () => void;
+  extraAction?: { label: string; onClick: () => void };
 }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
@@ -485,6 +507,11 @@ function ErrorState({
           {showSignIn && onSignIn && (
             <Button variant="ghost" size="sm" onClick={onSignIn} className="font-serif text-xs">
               Sign in to S33D
+            </Button>
+          )}
+          {extraAction && (
+            <Button variant="ghost" size="sm" onClick={extraAction.onClick} className="font-serif text-xs">
+              {extraAction.label}
             </Button>
           )}
         </div>
