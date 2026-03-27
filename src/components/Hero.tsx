@@ -344,13 +344,12 @@ const Hero = () => {
               }
             }}>
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
+                className="w-10 h-10 rounded-full overflow-hidden cursor-pointer transition-all duration-300 hover:scale-110 ring-1 ring-primary/15"
                 style={{
                   background: "hsl(var(--primary) / 0.06)",
-                  border: "1px solid hsl(var(--primary) / 0.15)",
                 }}
               >
-                <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(var(--primary) / 0.5)" }} />
+                <img src={faceFeminine} alt="TEOTAG" className="w-full h-full object-cover object-top" draggable={false} />
               </div>
             </EnsoNudge>
             <NewUserScrollCue />
