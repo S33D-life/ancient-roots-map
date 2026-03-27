@@ -207,6 +207,11 @@ export default function TelegramHandoffPage() {
   const isConnectFlow = flowParam === "connect";
   const isCreateFlow = !flowParam || flowParam === "create" || flowParam === "create_gardener" || flowParam === "create_wanderer";
 
+  // Pre-selected identity from bot command (/gardener or /wanderer)
+  const preselectedPath = flowParam === "create_gardener" ? "gardener"
+    : flowParam === "create_wanderer" ? "wanderer"
+    : null;
+
   // ── Render states ──
 
   if (state === "loading" || authLoading) {
