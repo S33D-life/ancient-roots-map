@@ -203,6 +203,62 @@ Deno.serve(async () => {
           break;
         }
 
+        case "login": {
+          // Login flow — only works if Telegram is already linked
+          try {
+            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
+              body: {
+                action: "create_handoff",
+                telegram_user_id: telegramUserId,
+                telegram_username: telegramUsername,
+                flow: "login",
+              },
+            });
+
+            const result = handoffResp.data;
+            if (result?.ok) {
+              await sendMessage(
+                chatId,
+                "🔑 <b>Sign in to S33D</b>\n\n" +
+                "Open this link to enter the forest:\n\n" +
+                `<a href="${result.handoff_url}">Sign in to S33D</a>\n\n` +
+                "⏳ This link expires in 30 minutes.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+                {
+                  inline_keyboard: [[
+                    { text: "🌳 Sign in to S33D", url: result.handoff_url },
+                  ]],
+                },
+              );
+            } else if (result?.error === "not_linked") {
+              await sendMessage(
+                chatId,
+                "🌱 Your Telegram isn't linked to an S33D account yet.\n\n" +
+                "Use /connect to link an existing account, or /new to create one.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            } else {
+              await sendMessage(
+                chatId,
+                "❌ Something went wrong. Please try again in a moment.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            }
+          } catch (e) {
+            console.error("Failed to create login handoff:", e);
+            await sendMessage(
+              chatId,
+              "❌ Could not create the link right now. Please try again.",
+              LOVABLE_API_KEY,
+              TELEGRAM_API_KEY,
+            );
+          }
+          break;
+        }
+
         case "connect": {
           // Create a handoff for connecting existing account
           try {
