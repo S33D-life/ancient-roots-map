@@ -92,13 +92,13 @@ const Index = () => {
           <GroundSection />
         </Suspense>
 
+        {/* ── Discovery shortcuts — Countries & Hives ── */}
+        <DiscoveryRow />
+
         {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
         <Suspense fallback={<SectionShimmer />}>
           <ForestInteractionLayers />
         </Suspense>
-
-        {/* ── Discovery shortcuts — Countries & Hives ── */}
-        <DiscoveryRow />
 
         {/* ── ROOTS — Atlas Content (Ancient Friends Network) ── */}
         <Suspense fallback={<SectionShimmer />}>
