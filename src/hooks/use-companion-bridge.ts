@@ -4,6 +4,7 @@ import { useCompanion } from "@/contexts/CompanionContext";
 import type { CompanionRoom } from "@/lib/companion-types";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
+import { captureAndExport } from "@/lib/capture-view";
 
 /**
  * useCompanionBridge — desktop-side handler that maps companion commands
@@ -329,7 +330,10 @@ export function useCompanionBridge() {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_hide" } }));
       },
 
-      onExportView: () => showCommandFeedback("Capture requested"),
+      onExportView: () => {
+        showCommandFeedback("Capturing…");
+        captureAndExport({ filename: `s33d-${Date.now()}` });
+      },
       onOpenPanel: () => {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "open_panel" } }));
         showCommandFeedback("Opening panel");

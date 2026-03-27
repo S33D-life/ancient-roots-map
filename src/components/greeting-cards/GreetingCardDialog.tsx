@@ -50,18 +50,17 @@ const GreetingCardDialog = ({ open, onOpenChange, tree, whispers = [] }: Greetin
     if (!cardRef.current) return;
     setSaving(true);
     try {
-      // Use html2canvas-style approach via canvas API
-      const { default: html2canvas } = await import("html2canvas");
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
-        logging: false,
+      const { toBlob } = await import("html-to-image");
+      const blob = await toBlob(cardRef.current, {
+        pixelRatio: 2,
+        backgroundColor: "transparent",
+        cacheBust: true,
       });
-      const link = document.createElement("a");
-      link.download = `${tree.name.replace(/\s+/g, "-").toLowerCase()}-greeting.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      if (!blob) throw new Error("empty");
+      const dl = document.createElement("a");
+      dl.download = `${tree.name.replace(/\s+/g, "-").toLowerCase()}-greeting.png`;
+      dl.href = URL.createObjectURL(blob);
+      dl.click();
       toast({ title: "Card saved! 🌿" });
     } catch {
       // Fallback: copy card text
