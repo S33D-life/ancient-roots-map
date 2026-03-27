@@ -149,16 +149,6 @@ export default function OrbConstellation({
   const baseActions = useMemo(() => getActionsForRoute(pathname), [pathname]);
   const actions = useMemo(() => {
     const result = [...baseActions];
-    // Add signals action if there are unread signals
-    if (unreadSignals > 0) {
-      const signalAction: ConstellationAction = {
-        key: "signals",
-        emoji: "✨",
-        label: `Signals (${unreadSignals})`,
-        action: "dialog", // handled via onSelectAction
-      };
-      result.unshift(signalAction);
-    }
     if (updateAvailable) {
       const updateAction: ConstellationAction = {
         key: "update",
@@ -169,7 +159,7 @@ export default function OrbConstellation({
       result.unshift(updateAction);
     }
     return result;
-  }, [baseActions, updateAvailable, unreadSignals]);
+  }, [baseActions, updateAvailable]);
   const layout = useMemo(() => computeLayout(cx, cy, actions.length), [cx, cy, actions.length]);
 
   const handleAction = useCallback(
