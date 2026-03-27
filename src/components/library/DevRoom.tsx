@@ -23,11 +23,13 @@ import {
   Zap, Globe, Eye, CheckCircle, Clock, AlertTriangle, Sprout,
   Flower, Leaf, ChevronRight, ExternalLink, Package, Server,
   Code, FileText, Telescope, Users, Scroll, Archive,
-  RefreshCw, Bug, Wrench, Import, Share2, PenTool, Crown
+  RefreshCw, Bug, Wrench, Import, Share2, PenTool, Crown, Send, Loader2
 } from "lucide-react";
 
+const TelegramSettings = lazy(() => import("@/components/settings/TelegramSettings"));
+
 /* ── Types ── */
-type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings";
+type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings" | "telegram";
 
 interface SystemNode {
   id: string;
@@ -51,6 +53,7 @@ const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "toolshed",        label: "Toolshed",    icon: <Wrench className="w-3.5 h-3.5" /> },
   { key: "skills",          label: "Skills",      icon: <BookOpen className="w-3.5 h-3.5" /> },
   { key: "settings",        label: "Settings",    icon: <Settings className="w-3.5 h-3.5" /> },
+  { key: "telegram",        label: "Telegram",    icon: <Send className="w-3.5 h-3.5" /> },
 ];
 
 /* ── System Map Nodes ── */
@@ -193,6 +196,7 @@ const DevRoom = () => {
           {section === "toolshed" && <ToolshedSection />}
           {section === "skills" && <SkillsSection />}
           {section === "settings" && <SettingsSection />}
+          {section === "telegram" && <TelegramSection />}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -863,6 +867,103 @@ function SkillsSection() {
         </p>
       </div>
       <SkillViewer />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   TELEGRAM INTEGRATION
+   ═══════════════════════════════════════════════════ */
+function TelegramSection() {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2">
+          <Send className="w-5 h-5 text-primary" /> Telegram Integration
+        </h2>
+        <p className="text-xs text-muted-foreground/70">
+          TEOTAG connects the S33D ecosystem to Telegram — login, guidance, notifications, and community.
+        </p>
+      </div>
+
+      {/* Open Layer — visible to all */}
+      <Card className="border-border/30 bg-card/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-serif flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary" /> What TEOTAG does
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { emoji: "🔑", title: "Login", desc: "Sign in to S33D via Telegram once linked" },
+              { emoji: "🧭", title: "Guidance", desc: "TEOTAG answers questions and helps you navigate" },
+              { emoji: "🔔", title: "Notifications", desc: "Receive heart milestones, tree alerts, and council updates" },
+              { emoji: "🤝", title: "Community", desc: "Join the @s33dlife group for fellow wanderers" },
+            ].map((item) => (
+              <div key={item.title} className="flex items-start gap-2.5 p-2.5 rounded-lg"
+                style={{ background: "hsl(var(--secondary) / 0.1)", border: "1px solid hsl(var(--border) / 0.1)" }}>
+                <span className="text-lg">{item.emoji}</span>
+                <div>
+                  <p className="text-xs font-serif text-foreground">{item.title}</p>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Separator className="opacity-20" />
+
+          <div className="space-y-2">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-serif">Commands</p>
+            <div className="flex flex-wrap gap-1.5">
+              {["/login", "/connect", "/new", "/help"].map((cmd) => (
+                <span key={cmd} className="px-2 py-1 rounded-md text-xs font-mono"
+                  style={{ background: "hsl(var(--secondary) / 0.15)", border: "1px solid hsl(var(--border) / 0.15)", color: "hsl(var(--primary))" }}>
+                  {cmd}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-1">
+            <a href="https://t.me/s33dlifebot" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-serif min-h-[32px] transition-colors"
+              style={{ background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)", color: "hsl(var(--primary))" }}>
+              <Send className="w-3 h-3" /> Open TEOTAG Bot
+            </a>
+            <a href="https://t.me/s33dlife" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-serif text-muted-foreground min-h-[32px] transition-colors"
+              style={{ background: "hsl(var(--secondary) / 0.15)", border: "1px solid hsl(var(--border) / 0.2)" }}>
+              <Users className="w-3 h-3" /> @s33dlife Group
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Curator Layer — Bot configuration */}
+      <Card className="border-border/30 bg-card/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-serif flex items-center gap-2">
+            <Settings className="w-4 h-4 text-amber-400" /> Bot Configuration
+          </CardTitle>
+          <p className="text-[10px] text-muted-foreground">
+            Notification settings, delivery mode, and integration controls.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<div className="py-6 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-muted-foreground" /></div>}>
+            <TelegramSettings />
+          </Suspense>
+        </CardContent>
+      </Card>
+
+      {/* Return to Hearth */}
+      <div className="text-center pt-2">
+        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-primary transition-colors font-serif">
+          ← Return to Hearth
+        </Link>
+      </div>
     </div>
   );
 }
