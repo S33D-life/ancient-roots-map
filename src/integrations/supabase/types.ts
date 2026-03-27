@@ -9101,6 +9101,22 @@ export type Database = {
         Args: { p_created_at: string; p_influence: number }
         Returns: number
       }
+      create_bot_handoff: {
+        Args: {
+          p_bot_name: string
+          p_campaign?: string
+          p_expires_minutes?: number
+          p_external_user_hash?: string
+          p_flow_name?: string
+          p_gift_code?: string
+          p_intent?: string
+          p_invite_code?: string
+          p_payload?: Json
+          p_return_to?: string
+          p_source: string
+        }
+        Returns: Json
+      }
       get_bio_region_trees: {
         Args: { p_bio_region_id: string }
         Returns: {
