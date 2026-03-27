@@ -399,10 +399,21 @@ const DashboardPage = () => {
 
   const GrowthEngineHearth = ({ userId, profile: p }: { userId: string; profile: Profile | null }) => {
     const { data: quests, initQuests, season } = useSeasonalQuests(userId);
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    const whisper = p?.full_name
+      ? `${greeting}, ${p.full_name.split(" ")[0]}`
+      : `${greeting}, wanderer`;
     return (
       <div className="space-y-8">
         {/* Onboarding */}
         <FirstEncounterFunnel userId={userId} />
+
+        {/* TEOTAG presence — gentle greeting */}
+        <div className="flex items-center gap-3 py-2">
+          <TeotagFace size="sm" delay={0.5} />
+          <p className="text-sm font-serif text-muted-foreground/70 italic">{whisper}</p>
+        </div>
 
         {/* Identity & Daily Status — always open */}
         <section className="space-y-5">
