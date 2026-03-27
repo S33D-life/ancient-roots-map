@@ -4,7 +4,7 @@
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ChevronDown, MessageCircle } from "lucide-react";
+import { ExternalLink, ChevronDown, MessageCircle, Users } from "lucide-react";
 import TeotagFace from "@/components/TeotagFace";
 import { BOT_CONFIG } from "@/config/bot";
 
