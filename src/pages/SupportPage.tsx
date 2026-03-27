@@ -53,6 +53,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
+import TeotagFace from "@/components/TeotagFace";
 
 /* ── What support nurtures ──────────────────────────────────── */
 const nurtures = [
