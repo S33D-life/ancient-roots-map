@@ -187,12 +187,7 @@ const FireflyFAB = () => {
     }
     lastTapTime.current = now;
     debounceRef.current = true;
-    // If there are unread signals, open signal panel; otherwise constellation
-    if (unreadCount > 0) {
-      setSignalPanelOpen(true);
-    } else {
-      setConstellationOpen(true);
-    }
+    setConstellationOpen(true);
     setTimeout(() => { debounceRef.current = false; }, TAP_DEBOUNCE_MS);
   }, [navigate, unreadCount]);
 

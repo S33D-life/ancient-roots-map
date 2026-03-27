@@ -252,8 +252,7 @@ const Header = () => {
                 <ThemeToggle />
               </div>
 
-              {/* Heart Signals bell — visually receded on mobile */}
-              {user && <NotificationBell />}
+              {/* Notifications now centralized in Orb bell arm */}
 
               {/* Heart Jar — primary value indicator */}
               {user && <HeartJar userId={user.id} />}
