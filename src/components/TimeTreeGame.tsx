@@ -604,21 +604,30 @@ const TimeTreeGame = () => {
                 Continue <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
               </Button>
             ) : (
-              <Button
-                variant="mystical"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={handleSubmit}
-                disabled={submitting || !canProceed}
-              >
-                {submitting ? (
-                  "Sealing…"
-                ) : (
-                  <>
-                    <Send className="w-3.5 h-3.5 mr-1" /> Seal this Scroll
-                  </>
+              <>
+                {saveError && (
+                  <p className="text-xs text-destructive text-center mb-2 font-serif leading-relaxed">{saveError}</p>
                 )}
-              </Button>
+                <Button
+                  variant="mystical"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={handleSubmit}
+                  disabled={submitting || !canProceed}
+                >
+                  {submitting ? (
+                    "Saving your scroll…"
+                  ) : saveError ? (
+                    <>
+                      <Send className="w-3.5 h-3.5 mr-1" /> Retry
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5 mr-1" /> Seal this Scroll
+                    </>
+                  )}
+                </Button>
+              </>
             )}
           </div>
         </CardContent>
