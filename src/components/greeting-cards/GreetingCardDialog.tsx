@@ -50,14 +50,15 @@ const GreetingCardDialog = ({ open, onOpenChange, tree, whispers = [] }: Greetin
     if (!cardRef.current) return;
     setSaving(true);
     try {
-      // Use html2canvas-style approach via canvas API
-      const { default: html2canvas } = await import("html2canvas");
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
-        logging: false,
+      const { toBlob } = await import("html-to-image");
+      const blob = await toBlob(cardRef.current, {
+        pixelRatio: 2,
+        backgroundColor: "transparent",
+        cacheBust: true,
       });
+      if (!blob) throw new Error("empty");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
       const link = document.createElement("a");
       link.download = `${tree.name.replace(/\s+/g, "-").toLowerCase()}-greeting.png`;
       link.href = canvas.toDataURL("image/png");
