@@ -409,8 +409,7 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      toast({ title: "Password updated", description: "You can now log in with your new password." });
-      navigate("/dashboard");
+      setView("reset-success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not update password";
       toast({ title: "Update failed", description: msg, variant: "destructive" });
