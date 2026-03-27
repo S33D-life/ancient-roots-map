@@ -11,14 +11,15 @@ import { Z } from "@/lib/z-index";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useState } from "react";
 import teotagLogo from "@/assets/teotag-small.webp";
+import { captureAndExport } from "@/lib/capture-view";
 
 /* ─── Action definitions ─── */
 export interface ConstellationAction {
   key: string;
   emoji: string;
   label: string;
-  /** "nav" navigates, "search" opens search, "dialog" triggers onSelectAction */
-  action: "nav" | "search" | "dialog";
+  /** "nav" navigates, "search" opens search, "dialog" triggers onSelectAction, "capture" triggers screenshot */
+  action: "nav" | "search" | "dialog" | "capture";
   to?: string;
 }
 
@@ -27,7 +28,7 @@ const DEFAULT_ACTIONS: ConstellationAction[] = [
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
   { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
-  { key: "capture", emoji: "📸", label: "Capture", action: "nav", to: "/map?action=capture" },
+  { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
@@ -35,14 +36,14 @@ const MAP_ACTIONS: ConstellationAction[] = [
   { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
-  { key: "capture", emoji: "📸", label: "Capture", action: "nav", to: "/map?action=capture" },
+  { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
 const TREE_ACTIONS: ConstellationAction[] = [
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
-  { key: "capture", emoji: "📸", label: "Capture", action: "nav", to: "/map?action=capture" },
+  { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
   { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
