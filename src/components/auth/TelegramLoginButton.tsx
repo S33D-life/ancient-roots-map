@@ -1,5 +1,5 @@
 /**
- * TelegramLoginButton — "Sign in with Telegram" on the auth page.
+ * TelegramLoginButton — "Continue with Telegram" on the auth page.
  *
  * Opens the bot with /login deep-link. The bot checks if the user's
  * Telegram is already linked to an S33D account and creates a login
@@ -9,7 +9,6 @@
  */
 import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
-import { ExternalLink } from "lucide-react";
 
 const TelegramIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -23,17 +22,21 @@ export default function TelegramLoginButton() {
   const botLink = BOT_CONFIG.telegramBotLink("login");
 
   return (
-    <a
-      href={botLink || "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block"
-    >
-      <Button variant="outline" className="w-full gap-2" type="button">
-        <TelegramIcon className="h-4 w-4" />
-        Sign in with Telegram
-        <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground/50" />
-      </Button>
-    </a>
+    <div className="space-y-1">
+      <a
+        href={botLink || "#"}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block"
+      >
+        <Button variant="outline" className="w-full gap-2" type="button">
+          <TelegramIcon className="h-4 w-4" />
+          Continue with Telegram
+        </Button>
+      </a>
+      <p className="text-[10px] text-muted-foreground text-center">
+        Works once Telegram is linked to your S33D account
+      </p>
+    </div>
   );
 }
