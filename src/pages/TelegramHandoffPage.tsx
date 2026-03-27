@@ -19,7 +19,7 @@ import { BOT_CONFIG } from "@/config/bot";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
 
-type HandoffFlow = "connect" | "create" | "create_gardener" | "create_wanderer";
+type HandoffFlow = "connect" | "create" | "create_gardener" | "create_wanderer" | "login";
 type PageState =
   | "loading"
   | "resolved"
@@ -73,8 +73,16 @@ export default function TelegramHandoffPage() {
   }, [token]);
 
   // When resolved + user already signed in + connect flow → show confirmation
+  // When resolved + login flow → auto-establish session
   useEffect(() => {
     if (state !== "resolved" || authLoading) return;
+
+    // Login flow: auto-establish session (no user needed — the handoff IS the auth)
+    if (flowParam === "login" && token && !user) {
+      handleLoginViaToken();
+      return;
+    }
+
     if (user && flowParam === "connect" && token) {
       setState("confirm_link");
     }
@@ -89,6 +97,61 @@ export default function TelegramHandoffPage() {
       setState("confirm_link");
     }
   }, [authLoading, user, token, state]);
+
+  // Login via Telegram — auto-establish session for already-linked accounts
+  const handleLoginViaToken = useCallback(async () => {
+    if (!token) return;
+    setState("creating"); // reuse the "Preparing the forest…" loader
+
+    try {
+      const { data, error: invokeErr } = await supabase.functions.invoke("telegram-handoff", {
+        body: { action: "login_via_telegram", token },
+      });
+
+      if (invokeErr || !data?.ok) {
+        if (data?.error === "not_linked") {
+          setError("This Telegram is not connected to any S33D account. Sign in with Google or email first, then link Telegram from your Hearth.");
+          setState("error");
+          return;
+        }
+        if (data?.error === "already_claimed") {
+          setState("already_claimed");
+          return;
+        }
+        if (data?.error === "expired") {
+          setState("expired");
+          return;
+        }
+        setError(data?.message || data?.error || "Login failed. Please try again.");
+        setState("error");
+        return;
+      }
+
+      if (data.access_token && data.refresh_token) {
+        const { error: sessionErr } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+
+        if (sessionErr) {
+          console.warn("Telegram login session failed:", sessionErr);
+          setError("Sign-in failed. Please try logging in with Google or email instead.");
+          setState("error");
+          return;
+        }
+
+        toast.success("Welcome back 🌿");
+        navigate(ROUTES.HEARTH, { replace: true });
+        return;
+      }
+
+      setError("Login could not complete. Please try signing in with Google or email.");
+      setState("error");
+    } catch {
+      setError("Connection error. Please try again.");
+      setState("error");
+    }
+  }, [token, navigate]);
 
   const handleLinkAfterSignin = useCallback(async () => {
     if (!token) return;
@@ -200,6 +263,7 @@ export default function TelegramHandoffPage() {
   const botLink = BOT_CONFIG.telegramBotLink("start");
   const telegramUsername = (handoff?.payload as any)?.telegram_username;
 
+  const isLoginFlow = flowParam === "login";
   const isConnectFlow = flowParam === "connect";
   const isCreateFlow = !flowParam || flowParam === "create" || flowParam === "create_gardener" || flowParam === "create_wanderer";
 

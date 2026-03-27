@@ -193,14 +193,69 @@ Deno.serve(async () => {
             chatId,
             "🌳 <b>Welcome to S33D</b>\n\n" +
             "I can help you enter the living forest.\n\n" +
+            "🔑 /login — Sign in to your S33D account\n" +
             "🔗 /connect — Link your existing S33D account\n" +
-            "🌳 /new — Create a new S33D identity\n" +
-            "🌱 /gardener — Arrive as a Gardener\n" +
-            "🧭 /wanderer — Arrive as a Wanderer\n\n" +
+            "🌳 /new — Create a new S33D identity\n\n" +
             "If you have a verification code from S33D, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
           );
+          break;
+        }
+
+        case "login": {
+          // Login flow — only works if Telegram is already linked
+          try {
+            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
+              body: {
+                action: "create_handoff",
+                telegram_user_id: telegramUserId,
+                telegram_username: telegramUsername,
+                flow: "login",
+              },
+            });
+
+            const result = handoffResp.data;
+            if (result?.ok) {
+              await sendMessage(
+                chatId,
+                "🔑 <b>Sign in to S33D</b>\n\n" +
+                "Open this link to enter the forest:\n\n" +
+                `<a href="${result.handoff_url}">Sign in to S33D</a>\n\n` +
+                "⏳ This link expires in 30 minutes.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+                {
+                  inline_keyboard: [[
+                    { text: "🌳 Sign in to S33D", url: result.handoff_url },
+                  ]],
+                },
+              );
+            } else if (result?.error === "not_linked") {
+              await sendMessage(
+                chatId,
+                "🌱 Your Telegram isn't linked to an S33D account yet.\n\n" +
+                "Use /connect to link an existing account, or /new to create one.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            } else {
+              await sendMessage(
+                chatId,
+                "❌ Something went wrong. Please try again in a moment.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            }
+          } catch (e) {
+            console.error("Failed to create login handoff:", e);
+            await sendMessage(
+              chatId,
+              "❌ Could not create the link right now. Please try again.",
+              LOVABLE_API_KEY,
+              TELEGRAM_API_KEY,
+            );
+          }
           break;
         }
 
@@ -233,18 +288,11 @@ Deno.serve(async () => {
                 },
               );
             } else if (result?.error === "already_linked") {
-              const appUrl = Deno.env.get("APP_URL") || "https://s33d.life";
               await sendMessage(
                 chatId,
-                "✅ Your Telegram is already connected to S33D!\n\n" +
-                `<a href="${appUrl}/dashboard">Open your Hearth</a>`,
+                "✅ Your Telegram is already connected to S33D!\n\nUse /login to sign in.",
                 LOVABLE_API_KEY,
                 TELEGRAM_API_KEY,
-                {
-                  inline_keyboard: [[
-                    { text: "🏠 Open Hearth", url: `${appUrl}/dashboard` },
-                  ]],
-                },
               );
             } else {
               await sendMessage(

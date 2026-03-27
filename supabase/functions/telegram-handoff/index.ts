@@ -41,7 +41,7 @@ Deno.serve(async (req: Request) => {
     switch (action) {
       /* ────────────────────────────────────────────────────
        * create_handoff — called by telegram-poll when bot
-       * receives /connect, /new, /gardener, /wanderer.
+       * receives /connect, /new, /gardener, /wanderer, /login.
        * Only callable internally (service_role).
        * ──────────────────────────────────────────────────── */
       case "create_handoff": {
@@ -51,8 +51,7 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ ok: false, error: "telegram_user_id and flow required" }, 400);
         }
 
-        // "create" is the neutral new-identity flow (choice happens in-app)
-        const validFlows = ["connect", "create", "create_gardener", "create_wanderer"];
+        const validFlows = ["connect", "create", "create_gardener", "create_wanderer", "login"];
         if (!validFlows.includes(flow)) {
           return jsonResponse({ ok: false, error: "Invalid flow type" }, 400);
         }
@@ -67,23 +66,32 @@ Deno.serve(async (req: Request) => {
           .eq("provider_user_id", hashedId)
           .maybeSingle();
 
-        if (flow === "connect" && existingLink) {
+        // Login flow REQUIRES an existing link
+        if (flow === "login") {
+          if (!existingLink) {
+            return jsonResponse({
+              ok: false,
+              error: "not_linked",
+              message: "Your Telegram is not yet connected to an S33D account. Use /connect first.",
+            });
+          }
+        } else if (flow === "connect" && existingLink) {
           return jsonResponse({
             ok: false,
             error: "already_linked",
-            message: "Your Telegram is already connected to an S33D account. Open S33D to continue.",
+            message: "Your Telegram is already connected to an S33D account. Use /login to sign in.",
           });
-        }
-
-        if (flow.startsWith("create") && existingLink) {
+        } else if (flow.startsWith("create") && existingLink) {
           return jsonResponse({
             ok: false,
             error: "already_linked",
-            message: "Your Telegram is already connected to an S33D account. Use /connect instead.",
+            message: "Your Telegram is already connected to an S33D account. Use /login to sign in.",
           });
         }
 
-        const flowName = flow === "connect" ? "telegram_connect" : `telegram_${flow}`;
+        const flowName = flow === "connect" ? "telegram_connect"
+          : flow === "login" ? "telegram_login"
+          : `telegram_${flow}`;
 
         const { data: handoff, error: rpcErr } = await supabase.rpc("create_bot_handoff", {
           p_source: "telegram",
@@ -428,6 +436,124 @@ Deno.serve(async (req: Request) => {
           linked: true,
           user_email: user.email,
           telegram_username: payload.telegram_username || null,
+        });
+      }
+
+      /* ────────────────────────────────────────────────────
+       * login_via_telegram — establishes a session for an
+       * already-linked Telegram identity. No auth header needed;
+       * the handoff token + linked identity IS the proof.
+       * ──────────────────────────────────────────────────── */
+      case "login_via_telegram": {
+        const { token } = body;
+
+        if (!token) {
+          return jsonResponse({ ok: false, error: "Token required" }, 400);
+        }
+
+        // Read the handoff
+        const { data: handoffRow, error: readErr } = await supabase
+          .from("bot_handoffs")
+          .select("id, token, status, expires_at, payload, external_user_hash, flow_name, claimed_by_user_id")
+          .eq("token", token)
+          .single();
+
+        if (readErr || !handoffRow) {
+          return jsonResponse({ ok: false, error: "not_found" });
+        }
+
+        if (handoffRow.status === "claimed") {
+          return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
+        }
+        if (handoffRow.status === "invalidated") {
+          return jsonResponse({ ok: false, error: "invalidated" });
+        }
+        if (new Date(handoffRow.expires_at) < new Date()) {
+          return jsonResponse({ ok: false, error: "expired" });
+        }
+
+        // Verify this is a login-flow handoff
+        if (handoffRow.flow_name !== "telegram_login") {
+          return jsonResponse({ ok: false, error: "invalid_flow", message: "This link is not for login." }, 400);
+        }
+
+        const payload = handoffRow.payload as {
+          telegram_user_id?: number;
+          telegram_username?: string;
+        } | null;
+
+        if (!payload?.telegram_user_id) {
+          return jsonResponse({ ok: false, error: "No Telegram identity in handoff" }, 400);
+        }
+
+        const hashedId = await hashTelegramId(payload.telegram_user_id);
+
+        // Look up the linked S33D account
+        const { data: linkedAccount } = await supabase
+          .from("connected_accounts")
+          .select("user_id")
+          .eq("provider", "telegram")
+          .eq("provider_user_id", hashedId)
+          .maybeSingle();
+
+        if (!linkedAccount) {
+          return jsonResponse({
+            ok: false,
+            error: "not_linked",
+            message: "This Telegram is not connected to any S33D account.",
+          });
+        }
+
+        // Atomically claim the handoff
+        const { data: claimResult, error: claimErr } = await supabase
+          .from("bot_handoffs")
+          .update({
+            status: "claimed",
+            claimed_by_user_id: linkedAccount.user_id,
+            claimed_at: new Date().toISOString(),
+          })
+          .eq("token", token)
+          .in("status", ["created", "opened"])
+          .select("id")
+          .maybeSingle();
+
+        if (claimErr || !claimResult) {
+          return jsonResponse({ ok: false, error: "already_claimed", message: "This link has already been used." });
+        }
+
+        // Get user email for magic link generation
+        const { data: { user: linkedUser }, error: userErr } = await supabase.auth.admin.getUserById(linkedAccount.user_id);
+
+        if (userErr || !linkedUser?.email) {
+          // Rollback claim
+          await supabase
+            .from("bot_handoffs")
+            .update({ status: "opened", claimed_by_user_id: null, claimed_at: null })
+            .eq("id", claimResult.id);
+          return jsonResponse({ ok: false, error: "User account not found" }, 500);
+        }
+
+        // Generate a magic link for session establishment
+        const { data: magicLink, error: magicErr } = await supabase.auth.admin.generateLink({
+          type: "magiclink",
+          email: linkedUser.email,
+        });
+
+        if (magicErr || !magicLink) {
+          console.error("Failed to generate login magic link:", magicErr);
+          // Rollback claim
+          await supabase
+            .from("bot_handoffs")
+            .update({ status: "opened", claimed_by_user_id: null, claimed_at: null })
+            .eq("id", claimResult.id);
+          return jsonResponse({ ok: false, error: "Failed to create session" }, 500);
+        }
+
+        return jsonResponse({
+          ok: true,
+          user_id: linkedAccount.user_id,
+          access_token: magicLink.properties?.access_token,
+          refresh_token: magicLink.properties?.refresh_token,
         });
       }
 
