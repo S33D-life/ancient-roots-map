@@ -73,8 +73,16 @@ export default function TelegramHandoffPage() {
   }, [token]);
 
   // When resolved + user already signed in + connect flow → show confirmation
+  // When resolved + login flow → auto-establish session
   useEffect(() => {
     if (state !== "resolved" || authLoading) return;
+
+    // Login flow: auto-establish session (no user needed — the handoff IS the auth)
+    if (flowParam === "login" && token && !user) {
+      handleLoginViaToken();
+      return;
+    }
+
     if (user && flowParam === "connect" && token) {
       setState("confirm_link");
     }
