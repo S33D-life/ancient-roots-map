@@ -267,7 +267,7 @@ Deno.serve(async (req: Request) => {
             ok: true,
             user_id: newUser.user.id,
             needs_manual_signin: true,
-            identity_path,
+            identity_path: resolvedPath,
             message: "Account created but session link failed. Please sign in.",
           });
         }
