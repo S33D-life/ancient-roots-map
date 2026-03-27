@@ -19,6 +19,7 @@ const BottomNav = () => {
 
   return (
     <nav
+      data-capture-exclude
       className={`md:hidden border-t transition-all duration-300 ${isMap ? "opacity-85 hover:opacity-100 focus-within:opacity-100" : ""}`}
       style={{
         position: "fixed",

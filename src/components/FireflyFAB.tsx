@@ -287,6 +287,7 @@ const FireflyFAB = () => {
     <>
       {/* TEOTAG's Guiding Orb */}
       <button
+        data-capture-exclude
         className="fixed flex items-center justify-center rounded-full touch-none select-none
           focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
           group"
