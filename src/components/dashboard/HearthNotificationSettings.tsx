@@ -1,13 +1,16 @@
 /**
  * HearthNotificationSettings — Notification & experience tuning panel for the Hearth.
  * Groups toggles into collapsible sections: essential first, advanced tucked away.
+ * Includes Telegram outbound integration settings.
  */
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useNotificationPreferences, NotificationPreferences } from "@/hooks/use-notification-preferences";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Wind, Bell, Sparkles, RotateCcw, Loader2, ChevronDown } from "lucide-react";
+import { Wind, Bell, Sparkles, RotateCcw, Loader2, ChevronDown, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const TelegramSettings = lazy(() => import("@/components/settings/TelegramSettings"));
 import {
   Collapsible,
   CollapsibleContent,
