@@ -1,4 +1,4 @@
-import { TreeDeciduous, Sparkles, Heart, Map } from "lucide-react";
+import { TreeDeciduous, Heart, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
 
