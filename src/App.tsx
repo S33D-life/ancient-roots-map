@@ -398,6 +398,7 @@ const App = () => {
                 <Route path="/seed-plan-generator" element={<SeedPlanGeneratorPage />} />
                 <Route path="/canopy-projection" element={<CanopyProjectionPage />} />
                 <Route path="/ecosystem" element={<EcosystemMapPage />} />
+                <Route path="/telegram-handoff" element={<TelegramHandoffPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
