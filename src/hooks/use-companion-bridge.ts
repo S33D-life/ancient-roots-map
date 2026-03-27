@@ -332,7 +332,7 @@ export function useCompanionBridge() {
 
       onExportView: () => {
         showCommandFeedback("Capturing…");
-        captureAndExport({ filename: `s33d-${Date.now()}` });
+        captureAndExport();
       },
       onOpenPanel: () => {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "open_panel" } }));
