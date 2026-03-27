@@ -561,8 +561,8 @@ const SupportPage = () => {
             <section className="space-y-4">
               <h2 className="text-lg font-serif font-medium text-foreground">Community & Contact</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {BOT_CONFIG.telegramGroupLink && (
-                  <a href={BOT_CONFIG.telegramGroupLink} target="_blank" rel="noopener noreferrer" className="no-underline">
+                {BOT_CONFIG.hasTelegramBot && (
+                  <a href={BOT_CONFIG.telegramBotLink("start") || "#"} target="_blank" rel="noopener noreferrer" className="no-underline">
                     <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
                       <CardContent className="p-4 flex items-start gap-3">
                         <Send className="w-5 h-5 text-primary shrink-0 mt-0.5" />
