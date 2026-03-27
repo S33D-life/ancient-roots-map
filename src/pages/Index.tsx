@@ -33,6 +33,7 @@ const IdentitySection = lazy(() => import("@/components/HomeSections").then(m =>
 const ParticipationSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.ParticipationSection })));
 const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
+const ForestInteractionLayers = lazy(() => import("@/components/ForestInteractionLayers"));
 
 /** Minimal loading shimmer for lazy sections */
 const SectionShimmer = () => (
