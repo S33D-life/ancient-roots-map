@@ -6822,6 +6822,48 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_verification_codes: {
+        Row: {
+          action: string
+          claimed_at: string | null
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          status: string
+          telegram_user_id: number | null
+          telegram_username: string | null
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          action?: string
+          claimed_at?: string | null
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          status?: string
+          telegram_user_id?: number | null
+          telegram_username?: string | null
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          action?: string
+          claimed_at?: string | null
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          status?: string
+          telegram_user_id?: number | null
+          telegram_username?: string | null
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       time_tree_entries: {
         Row: {
           created_at: string

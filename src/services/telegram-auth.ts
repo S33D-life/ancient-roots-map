@@ -1,24 +1,18 @@
 /**
- * Telegram Auth Service — app-side integration points for Telegram login
- * and account linking.
+ * Telegram Auth Service — client-side integration for Telegram account linking.
  *
- * Architecture:
- * - Telegram login produces a signed payload (from Telegram Login Widget)
- * - Client sends this payload to an edge function for server-side verification
- * - Edge function verifies the hash using the bot token (HMAC-SHA-256)
- * - On success: either signs in or links the Telegram identity
- *
- * Backend assumptions (TODO — edge function not yet built):
- * - Edge function `telegram-auth` accepts POST with Telegram login payload
- * - Verifies hash, then either:
- *   a) Creates/signs in a Supabase user (returns session tokens)
- *   b) Links Telegram to an existing user (requires auth header)
- * - Returns { ok, user_id, session?, error? }
+ * Architecture (bot-assisted verification):
+ * 1. User clicks "Link Telegram" → generates a 6-digit code via edge function
+ * 2. User sends code to S33D Telegram bot
+ * 3. Bot verifies and marks the code as verified
+ * 4. Client polls check_code, then calls claim_code to complete linking
  *
  * Raw Telegram IDs are hashed before storage in connected_accounts.provider_user_id
  */
 
 import { supabase } from "@/integrations/supabase/client";
+
+/* ── Types ── */
 
 export interface TelegramLoginPayload {
   id: number;
@@ -33,58 +27,84 @@ export interface TelegramLoginPayload {
 export interface TelegramAuthResult {
   ok: boolean;
   error?: string;
-  /** Whether a new account was created */
   created?: boolean;
-  /** Whether linking was performed */
   linked?: boolean;
+  already_linked?: boolean;
 }
 
+export interface GenerateCodeResult {
+  ok: boolean;
+  code_id?: string;
+  code?: string;
+  expires_at?: string;
+  bot_username?: string | null;
+  instruction?: string;
+  error?: string;
+}
+
+export interface CheckCodeResult {
+  ok: boolean;
+  status?: "pending" | "verified" | "claimed" | "expired";
+  telegram_username?: string | null;
+  error?: string;
+}
+
+/* ── Verification code flow ── */
+
 /**
- * Link Telegram identity to the currently authenticated user.
- * Calls the telegram-auth edge function with link_mode=true.
- *
- * TODO: Edge function implementation pending.
- * For now this is a stub that returns a clear error.
+ * Generate a verification code for Telegram account linking.
+ * The user must send this code to the S33D bot on Telegram.
  */
-export async function linkTelegramAccount(
-  _payload: TelegramLoginPayload,
-): Promise<TelegramAuthResult> {
+export async function generateVerificationCode(): Promise<GenerateCodeResult> {
   try {
     const { data, error } = await supabase.functions.invoke("telegram-auth", {
-      body: { ..._payload, action: "link" },
+      body: { action: "generate_code" },
     });
     if (error) {
-      console.warn("telegram-auth link error:", error);
-      return { ok: false, error: "Telegram linking is not yet available. Coming soon." };
+      console.warn("telegram-auth generate_code error:", error);
+      return { ok: false, error: "Failed to generate verification code" };
     }
-    return data as TelegramAuthResult;
+    return data as GenerateCodeResult;
   } catch {
-    return { ok: false, error: "Telegram linking is not yet available. Coming soon." };
+    return { ok: false, error: "Failed to generate verification code" };
   }
 }
 
 /**
- * Sign in with Telegram identity.
- * Calls the telegram-auth edge function with action=signin.
- *
- * TODO: Edge function implementation pending.
+ * Check if a verification code has been confirmed by the bot.
  */
-export async function signInWithTelegram(
-  _payload: TelegramLoginPayload,
-): Promise<TelegramAuthResult> {
+export async function checkVerificationCode(codeId: string): Promise<CheckCodeResult> {
   try {
     const { data, error } = await supabase.functions.invoke("telegram-auth", {
-      body: { ..._payload, action: "signin" },
+      body: { action: "check_code", code_id: codeId },
     });
     if (error) {
-      console.warn("telegram-auth signin error:", error);
-      return { ok: false, error: "Telegram sign-in is not yet available. Coming soon." };
+      return { ok: false, error: "Failed to check verification status" };
+    }
+    return data as CheckCodeResult;
+  } catch {
+    return { ok: false, error: "Failed to check verification status" };
+  }
+}
+
+/**
+ * Claim a verified code and link the Telegram identity to the current user.
+ */
+export async function claimVerificationCode(codeId: string): Promise<TelegramAuthResult> {
+  try {
+    const { data, error } = await supabase.functions.invoke("telegram-auth", {
+      body: { action: "claim_code", code_id: codeId },
+    });
+    if (error) {
+      return { ok: false, error: "Failed to link Telegram account" };
     }
     return data as TelegramAuthResult;
   } catch {
-    return { ok: false, error: "Telegram sign-in is not yet available. Coming soon." };
+    return { ok: false, error: "Failed to link Telegram account" };
   }
 }
+
+/* ── Connected accounts ── */
 
 /**
  * Fetch the current user's connected accounts.
