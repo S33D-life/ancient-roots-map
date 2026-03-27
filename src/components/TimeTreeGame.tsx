@@ -582,6 +582,11 @@ const TimeTreeGame = () => {
             </motion.div>
           </AnimatePresence>
 
+          {/* Save error — shown above navigation */}
+          {step === 4 && saveError && (
+            <p className="text-xs text-destructive text-center font-serif leading-relaxed px-2">{saveError}</p>
+          )}
+
           {/* Navigation */}
           <div className="flex items-center justify-between pt-2">
             <Button
@@ -604,30 +609,25 @@ const TimeTreeGame = () => {
                 Continue <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
               </Button>
             ) : (
-              <>
-                {saveError && (
-                  <p className="text-xs text-destructive text-center mb-2 font-serif leading-relaxed">{saveError}</p>
+              <Button
+                variant="mystical"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={handleSubmit}
+                disabled={submitting || !canProceed}
+              >
+                {submitting ? (
+                  "Saving your scroll…"
+                ) : saveError ? (
+                  <>
+                    <Send className="w-3.5 h-3.5 mr-1" /> Retry
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5 mr-1" /> Seal this Scroll
+                  </>
                 )}
-                <Button
-                  variant="mystical"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={handleSubmit}
-                  disabled={submitting || !canProceed}
-                >
-                  {submitting ? (
-                    "Saving your scroll…"
-                  ) : saveError ? (
-                    <>
-                      <Send className="w-3.5 h-3.5 mr-1" /> Retry
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-3.5 h-3.5 mr-1" /> Seal this Scroll
-                    </>
-                  )}
-                </Button>
-              </>
+              </Button>
             )}
           </div>
         </CardContent>
