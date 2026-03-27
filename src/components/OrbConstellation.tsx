@@ -179,6 +179,10 @@ export default function OrbConstellation({
         setTimeout(() => onApplyUpdate(), 120);
         return;
       }
+      if (a.action === "capture") {
+        setTimeout(() => captureAndExport({ filename: `s33d-${Date.now()}` }), 200);
+        return;
+      }
       if (a.action === "search") {
         setTimeout(() => setSearchOpen(true), 120);
       } else if (a.action === "nav" && a.to) {
