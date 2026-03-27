@@ -396,4 +396,61 @@ const Hero = () => {
   );
 };
 
+/** Subtle first-time scroll cue below the tree icon */
+function NewUserScrollCue() {
+  const { isNewUser } = useIsNewUser();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isNewUser) return;
+    const t = setTimeout(() => setVisible(true), 2400);
+    return () => clearTimeout(t);
+  }, [isNewUser]);
+
+  const handleClick = useCallback(() => {
+    const guide = document.getElementById("teotag-guide");
+    if (guide) {
+      const headerOffset = 72;
+      const top = guide.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer group transition-all duration-500"
+      style={{ animation: "fadeIn 1.2s ease-out" }}
+    >
+      <span
+        className="font-serif text-[11px] tracking-wide transition-colors duration-300 group-hover:text-primary"
+        style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
+      >
+        New here? Begin below
+      </span>
+      <span
+        className="text-[10px] transition-transform duration-700"
+        style={{
+          color: "hsl(var(--primary) / 0.35)",
+          animation: "gentleBounce 2.5s ease-in-out infinite",
+        }}
+      >
+        ↓
+      </span>
+      <style>{`
+        @keyframes gentleBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(3px); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </button>
+  );
+}
+
 export default Hero;
