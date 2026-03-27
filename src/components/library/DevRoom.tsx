@@ -23,7 +23,7 @@ import {
   Zap, Globe, Eye, CheckCircle, Clock, AlertTriangle, Sprout,
   Flower, Leaf, ChevronRight, ExternalLink, Package, Server,
   Code, FileText, Telescope, Users, Scroll, Archive,
-  RefreshCw, Bug, Wrench, Import, Share2, PenTool, Crown, Send
+  RefreshCw, Bug, Wrench, Import, Share2, PenTool, Crown, Send, Loader2
 } from "lucide-react";
 
 const TelegramSettings = lazy(() => import("@/components/settings/TelegramSettings"));
