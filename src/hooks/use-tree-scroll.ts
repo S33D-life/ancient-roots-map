@@ -32,6 +32,11 @@ export function useTreeScroll() {
   const initialScrollDone = useRef(false);
   const isManualScroll = useRef(false);
 
+  // Reset scroll state on every mount (new navigation to this page)
+  useEffect(() => {
+    initialScrollDone.current = false;
+  }, []);
+
   // Scroll to Ground on mount — robust multi-attempt approach
   useEffect(() => {
     if (initialScrollDone.current) return;
@@ -43,7 +48,6 @@ export function useTreeScroll() {
     const doScroll = () => {
       const el = document.getElementById("ground");
       if (!el) return false;
-      // Center the ground section in viewport for "arrival at the trunk" feel
       const rect = el.getBoundingClientRect();
       const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
       window.scrollTo({ top: Math.max(0, y), behavior: "instant" as ScrollBehavior });
@@ -51,8 +55,6 @@ export function useTreeScroll() {
       return true;
     };
 
-    // Attempt immediately, then retry with increasing delays
-    // Sections may not have final heights until images/fonts load
     if (!doScroll()) {
       const retries = [50, 150, 400, 800, 1500];
       retries.forEach((ms) => {
@@ -62,9 +64,8 @@ export function useTreeScroll() {
       });
     }
 
-    // Final safety net — re-scroll after fonts and images settle
     const safetyScroll = () => {
-      if (initialScrollDone.current) doScroll(); // re-apply after layout shifts
+      if (initialScrollDone.current) doScroll();
     };
     const safetyTimer = setTimeout(safetyScroll, 2000);
     return () => clearTimeout(safetyTimer);
