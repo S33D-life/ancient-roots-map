@@ -330,7 +330,10 @@ export function useCompanionBridge() {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "pointer_hide" } }));
       },
 
-      onExportView: () => showCommandFeedback("Capture requested"),
+      onExportView: () => {
+        showCommandFeedback("Capturing…");
+        captureAndExport({ filename: `s33d-${Date.now()}` });
+      },
       onOpenPanel: () => {
         window.dispatchEvent(new CustomEvent("s33d-companion-cmd", { detail: { type: "open_panel" } }));
         showCommandFeedback("Opening panel");
