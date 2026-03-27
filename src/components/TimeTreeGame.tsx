@@ -137,36 +137,68 @@ const TimeTreeGame = () => {
     });
   };
 
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const handleSubmit = async () => {
-    if (!userId || !treeName.trim() || !participantOne.trim() || !participantTwo.trim() || !whatShared.trim()) {
-      toast.error("Please complete all required fields");
+    if (submitting) return;
+    setSaveError(null);
+
+    // Pre-save validation
+    const trimmedTree = treeName.trim();
+    const trimmedP1 = participantOne.trim();
+    const trimmedP2 = participantTwo.trim();
+    const trimmedShared = whatShared.trim();
+
+    if (!trimmedTree || !trimmedP1 || !trimmedP2 || !trimmedShared) {
+      const missing: string[] = [];
+      if (!trimmedTree) missing.push("tree name");
+      if (!trimmedP1) missing.push("first participant");
+      if (!trimmedP2) missing.push("second participant");
+      if (!trimmedShared) missing.push("what was shared");
+      setSaveError(`Please complete: ${missing.join(", ")}`);
       return;
     }
 
+    // Auth check — don't lose content
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) {
+      setSaveError("Your session expired. Please sign in again — your scroll content is still here.");
+      return;
+    }
+    const activeUserId = session.user.id;
+
     setSubmitting(true);
+
+    const payload = {
+      user_id: activeUserId,
+      moon_phase: phase,
+      tree_name: trimmedTree,
+      is_tree_real: isTreeReal,
+      participant_one: trimmedP1,
+      participant_two: trimmedP2,
+      what_shared: trimmedShared,
+      where_sitting: whereSitting.trim() || null,
+      emotional_tone: emotionalTone || null,
+    };
+    console.log("TIME_TREE_SCROLL_PAYLOAD", payload);
+
     const { data, error } = await supabase
       .from("time_tree_entries")
-      .insert({
-        user_id: userId,
-        moon_phase: phase,
-        tree_name: treeName.trim(),
-        is_tree_real: isTreeReal,
-        participant_one: participantOne.trim(),
-        participant_two: participantTwo.trim(),
-        what_shared: whatShared.trim(),
-        where_sitting: whereSitting.trim() || null,
-        emotional_tone: emotionalTone || null,
-      })
+      .insert(payload)
       .select()
       .single();
 
     setSubmitting(false);
 
     if (error) {
-      toast.error("Could not save your entry");
+      console.error("TIME_TREE_SCROLL_ERROR", error);
+      setSaveError(error.message?.includes("duplicate")
+        ? "You've already saved a scroll today."
+        : "Could not save your scroll. Your content is still here — please retry.");
       return;
     }
 
+    setSaveError(null);
     setLastEntry(data as TimeTreeEntry);
     setStep(5);
     setAlreadySubmittedToday(true);
@@ -174,11 +206,11 @@ const TimeTreeGame = () => {
     toast.success(`${(data as any).hearts_awarded > 0 ? `+${(data as any).hearts_awarded} Hearts earned` : "Entry saved"}`);
 
     // Loop closure: if this Time Tree entry references a dreamed tree, notify
-    if ((data as any).tree_reference_id && userId) {
+    if ((data as any).tree_reference_id && activeUserId) {
       supabase
         .from("tree_wishlist")
         .select("id, trees(name)")
-        .eq("user_id", userId)
+        .eq("user_id", activeUserId)
         .eq("tree_id", (data as any).tree_reference_id)
         .maybeSingle()
         .then(({ data: dream }) => {
