@@ -76,6 +76,7 @@ const VALID_ROOMS = Object.keys(ROOM_LABELS);
  * AncientFriendsWrapper — self-contained wrapper that fetches its own data.
  */
 function AncientFriendsWrapper() {
+  const navigate = useNavigate();
   const [trees, setTrees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -130,7 +131,7 @@ function AncientFriendsWrapper() {
       tribeUserIds={tribeUserIds}
       treesWithStaff={treesWithStaff}
       staffCodes={staffCodes}
-      onSelectTree={() => {}}
+      onSelectTree={(tree) => navigate(`/tree/${tree.id}`)}
     />
   );
 }
