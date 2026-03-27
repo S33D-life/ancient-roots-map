@@ -214,6 +214,13 @@ const HearthNotificationSettings = ({ userId }: Props) => {
         />
       </SettingsSection>
 
+      {/* Telegram outbound integration */}
+      <SettingsSection icon={Send} title="Telegram Integration">
+        <Suspense fallback={<div className="py-4 text-center"><Loader2 className="w-4 h-4 animate-spin mx-auto text-muted-foreground" /></div>}>
+          <TelegramSettings />
+        </Suspense>
+      </SettingsSection>
+
       {/* Actions */}
       <div className="flex items-center gap-3 pt-4">
         <Button
