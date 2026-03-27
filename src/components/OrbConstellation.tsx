@@ -24,29 +24,29 @@ export interface ConstellationAction {
 }
 
 const DEFAULT_ACTIONS: ConstellationAction[] = [
+  { key: "signals", emoji: "🔔", label: "Signals", action: "dialog" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
-  { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
 const MAP_ACTIONS: ConstellationAction[] = [
+  { key: "signals", emoji: "🔔", label: "Signals", action: "dialog" },
   { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
-  { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
   { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
 const TREE_ACTIONS: ConstellationAction[] = [
+  { key: "signals", emoji: "🔔", label: "Signals", action: "dialog" },
   { key: "whisper", emoji: "🌬️", label: "Whisper", action: "nav", to: "/whispers" },
   { key: "capture", emoji: "📸", label: "Capture", action: "capture" },
   { key: "companion", emoji: "📱", label: "Companion", action: "nav", to: "/companion" },
   { key: "search", emoji: "🔍", label: "Search", action: "search" },
-  { key: "add_tree", emoji: "🌳", label: "Add Tree", action: "nav", to: "/add-tree" },
   { key: "spark", emoji: "🐞", label: "Spark", action: "dialog" },
 ];
 
