@@ -787,9 +787,9 @@ export default function StaffRoomGallery() {
   const TABS = [
     { value: "explorer", label: "Explorer", icon: <LayoutGrid className="w-3.5 h-3.5" /> },
     { value: "overview", label: "Overview", icon: <Compass className="w-3.5 h-3.5" /> },
-    { value: "ceremony", label: "Ceremony", icon: <Wand2 className="w-3.5 h-3.5" /> },
     { value: "impact", label: "Impact", icon: <TreeDeciduous className="w-3.5 h-3.5" /> },
     { value: "patronage", label: "Patronage", icon: <Crown className="w-3.5 h-3.5" /> },
+    { value: "ceremony", label: "Ceremony", icon: <Wand2 className="w-3.5 h-3.5" /> },
   ];
 
   // ── RENDER ─────────────────────────────────────────────────────
