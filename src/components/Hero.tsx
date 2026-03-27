@@ -332,14 +332,18 @@ const Hero = () => {
             </Button>
           </div>
 
-          {/* Ensō compass — subtle living waypoint on the trunk */}
-          <div className="flex justify-center pt-4 pb-1">
+          {/* Ensō compass — scroll to TEOTAG guide */}
+          <div className="flex flex-col items-center pt-4 pb-1 gap-2">
             <EnsoNudge size={56} onInteract={() => {
-              const census = document.querySelector('[data-census]');
-              census?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const guide = document.getElementById("teotag-guide");
+              if (guide) {
+                const headerOffset = 72;
+                const top = guide.getBoundingClientRect().top + window.scrollY - headerOffset;
+                window.scrollTo({ top, behavior: "smooth" });
+              }
             }}>
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
+                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
                 style={{
                   background: "hsl(var(--primary) / 0.06)",
                   border: "1px solid hsl(var(--primary) / 0.15)",
@@ -348,6 +352,7 @@ const Hero = () => {
                 <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(var(--primary) / 0.5)" }} />
               </div>
             </EnsoNudge>
+            <NewUserScrollCue />
           </div>
 
           {/* Welcome Journey — gentle onboarding for new visitors */}

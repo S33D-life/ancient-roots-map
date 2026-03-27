@@ -28,7 +28,7 @@ const GroundSection = () => {
       <Hero />
 
       {/* ── Soil-Level TEOTAG Guide ── */}
-      <div className="relative z-20 -mt-4 md:-mt-8 pb-8 pointer-events-none">
+      <div id="teotag-guide" className="relative z-20 -mt-4 md:-mt-8 pb-8 pointer-events-none">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
