@@ -5,7 +5,7 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon, Camera, Music } from "lucide-react";
+import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon, Camera, Music, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TreePhotoStatus from "@/components/TreePhotoStatus";
 import type { PhotoProcessingStatus } from "@/utils/backgroundPhotoProcessor";
@@ -38,6 +38,10 @@ interface TreePageHeroProps {
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
   onRetryPhoto?: () => void;
+  /** True when offerings/whispers are gated by presence */
+  presenceLocked?: boolean;
+  /** Grace period label e.g. "8h 23m remaining" */
+  graceLabel?: string | null;
 }
 
 const TreePageHero = ({
@@ -54,6 +58,8 @@ const TreePageHero = ({
   ecoBelonging,
   onNavigateHive,
   onRetryPhoto,
+  presenceLocked = false,
+  graceLabel,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -233,10 +239,11 @@ const TreePageHero = ({
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button
               onClick={onMakeOffering}
-              className="font-serif tracking-wider gap-2 glow-subtle"
+              className={`font-serif tracking-wider gap-2 ${presenceLocked ? "opacity-50 cursor-not-allowed" : "glow-subtle"}`}
               size="lg"
+              disabled={presenceLocked}
             >
-              <Sparkles className="h-4 w-4" /> Make an Offering
+              {presenceLocked ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />} Make an Offering
             </Button>
             <Button
               onClick={onAddWish}
@@ -248,8 +255,20 @@ const TreePageHero = ({
             </Button>
           </div>
 
+          {/* Grace indicator beneath CTAs */}
+          {presenceLocked && (
+            <p className="text-[10px] font-serif text-muted-foreground/70 text-center mt-1 flex items-center justify-center gap-1">
+              <Lock className="w-3 h-3" /> Visit this tree to unlock offerings & whispers
+            </p>
+          )}
+          {!presenceLocked && graceLabel && (
+            <p className="text-[10px] font-serif text-primary/70 text-center mt-1">
+              ✨ Grace period — {graceLabel}
+            </p>
+          )}
+
           {/* Quick shortcuts — direct to flow, skip gateway */}
-          {(onAddPhoto || onAddSong) && (
+          {(onAddPhoto || onAddSong) && !presenceLocked && (
             <div className="flex items-center justify-center gap-2 mt-3">
               {onAddPhoto && (
                 <Button
@@ -280,8 +299,14 @@ const TreePageHero = ({
               <Map className="h-3.5 w-3.5" /> View on Atlas
             </Button>
             {onWhisper && (
-              <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onWhisper}>
-                <Wind className="h-3.5 w-3.5" /> Whisper
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`font-serif text-xs gap-1.5 ${presenceLocked ? "opacity-40 cursor-not-allowed" : ""}`}
+                onClick={onWhisper}
+                disabled={presenceLocked}
+              >
+                {presenceLocked ? <Lock className="h-3.5 w-3.5" /> : <Wind className="h-3.5 w-3.5" />} Whisper
               </Button>
             )}
             <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onShare}>
