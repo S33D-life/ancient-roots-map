@@ -92,6 +92,11 @@ const Index = () => {
           <GroundSection />
         </Suspense>
 
+        {/* ── Identity statement ── */}
+        <Suspense fallback={<SectionShimmer />}>
+          <IdentitySection />
+        </Suspense>
+
         {/* ── Discovery shortcuts — Countries & Hives ── */}
         <DiscoveryRow />
 
@@ -104,7 +109,6 @@ const Index = () => {
         <Suspense fallback={<SectionShimmer />}>
           <div id="atlas-content" className="relative overflow-hidden">
             <SectionAtmosphere theme="roots" />
-            <IdentitySection />
             <div className="section-divider max-w-xl mx-auto" />
             <ParticipationSection />
             <SupportDiscoveryRow />
