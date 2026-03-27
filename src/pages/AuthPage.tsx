@@ -248,7 +248,8 @@ const AuthPage = () => {
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+      // Don't redirect if user arrived via recovery link — they need to reset password first
+      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
         navigate(resolvePostAuthPath(), { replace: true });
       }
     });
