@@ -1,13 +1,16 @@
 /**
- * TelegramLoginButton — "Continue with Telegram" on the auth page.
- * Opens the Telegram link dialog for bot-assisted verification.
- * Only shown when BOT_CONFIG.hasTelegramAuth is true.
+ * TelegramLoginButton — on the auth page, shown only when BOT_CONFIG.hasTelegramAuth is true.
+ *
+ * IMPORTANT: This is NOT a login/sign-in button. Telegram account linking
+ * requires an existing authenticated S33D session. On the auth page we show
+ * a gentle prompt directing users to sign in first, then link Telegram
+ * from their account settings (Hearth → Account & Security).
+ *
+ * This button does NOT open the link dialog — the user must authenticate first.
  */
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
-import { Loader2 } from "lucide-react";
-import TelegramLinkDialog from "@/components/auth/TelegramLinkDialog";
+import { ExternalLink } from "lucide-react";
 
 const TelegramIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -16,25 +19,29 @@ const TelegramIcon = ({ className }: { className?: string }) => (
 );
 
 export default function TelegramLoginButton() {
-  const [dialogOpen, setDialogOpen] = useState(false);
-
   if (!BOT_CONFIG.hasTelegramAuth) return null;
 
-  return (
-    <>
-      <Button
-        variant="outline"
-        className="w-full gap-2"
-        onClick={() => setDialogOpen(true)}
-      >
-        <TelegramIcon className="h-4 w-4" />
-        Continue with Telegram
-      </Button>
+  const botLink = BOT_CONFIG.telegramBotLink("start");
 
-      <TelegramLinkDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
-    </>
+  return (
+    <div className="flex items-center gap-2 py-2 px-3 rounded-lg border border-border/30 bg-secondary/5">
+      <TelegramIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+      <p className="text-[11px] text-muted-foreground font-serif flex-1">
+        Have a Telegram account? Sign in first, then link Telegram from your settings.
+      </p>
+      {botLink && (
+        <a
+          href={botLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0"
+        >
+          <Button variant="ghost" size="sm" className="h-7 text-[10px] gap-1 text-muted-foreground">
+            <ExternalLink className="w-3 h-3" />
+            Bot
+          </Button>
+        </a>
+      )}
+    </div>
   );
 }

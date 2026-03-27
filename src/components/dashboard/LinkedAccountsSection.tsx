@@ -1,9 +1,23 @@
 /**
  * LinkedAccountsSection — displays connected identity providers
  * and allows linking/unlinking Telegram via bot-assisted verification.
+ *
+ * IMPORTANT: Telegram linking is NOT a login method. It attaches a verified
+ * Telegram identity to an existing authenticated S33D account.
  */
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { BOT_CONFIG } from "@/config/bot";
 import {
@@ -17,7 +31,6 @@ import {
   Mail,
   Loader2,
   Check,
-  AlertCircle,
 } from "lucide-react";
 import TelegramLinkDialog from "@/components/auth/TelegramLinkDialog";
 
@@ -71,9 +84,16 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
     const ok = await unlinkConnectedAccount(accountId);
     if (ok) {
       setAccounts((prev) => prev.filter((a) => a.id !== accountId));
-      toast({ title: `${provider} unlinked`, description: "Identity disconnected from your account." });
+      toast({
+        title: `${provider} unlinked`,
+        description: "This identity has been disconnected from your S33D account.",
+      });
     } else {
-      toast({ title: "Unlink failed", description: "Please try again.", variant: "destructive" });
+      toast({
+        title: "Could not unlink",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     }
     setUnlinking(null);
   };
@@ -83,16 +103,24 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
   };
 
   const telegramLinked = accounts.some((a) => a.provider === "telegram");
-  const googleProvider = user.app_metadata?.providers?.includes("google") || user.app_metadata?.provider === "google";
+  const googleProvider =
+    user.app_metadata?.providers?.includes("google") ||
+    user.app_metadata?.provider === "google";
 
   return (
     <div className="space-y-3 max-w-sm">
+      {/* Section intro */}
+      <p className="text-[11px] text-muted-foreground font-serif">
+        Identities connected to your S33D account. Linking additional providers
+        helps with account recovery and ecosystem features.
+      </p>
+
       {/* Email identity */}
       <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-secondary/10 p-3">
         <Mail className="w-4 h-4 text-primary/70 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="font-serif text-sm truncate">{user.email}</p>
-          <p className="text-[10px] text-muted-foreground">Email</p>
+          <p className="text-[10px] text-muted-foreground">Email — primary identity</p>
         </div>
         <span className="text-[10px] px-2 py-0.5 rounded-full font-serif bg-primary/15 text-primary">
           <Check className="w-2.5 h-2.5 inline mr-0.5" />Active
@@ -113,7 +141,7 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
         </div>
       )}
 
-      {/* Telegram identity */}
+      {/* Telegram identity — linked */}
       {telegramLinked ? (
         accounts
           .filter((a) => a.provider === "telegram")
@@ -125,26 +153,59 @@ export default function LinkedAccountsSection({ user }: LinkedAccountsSectionPro
                   {a.provider_username ? `@${a.provider_username}` : a.display_name || "Telegram"}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  {a.verified_at ? "Verified" : "Linked"}
+                  {a.verified_at ? "Verified via bot" : "Linked"}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-muted-foreground hover:text-destructive"
-                onClick={() => handleUnlink(a.id, "Telegram")}
-                disabled={unlinking === a.id}
-              >
-                {unlinking === a.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Link2Off className="w-3 h-3" />}
-              </Button>
+              {/* Unlink with confirmation */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs text-muted-foreground hover:text-destructive"
+                    disabled={unlinking === a.id}
+                  >
+                    {unlinking === a.id ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Link2Off className="w-3 h-3" />
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-serif">
+                      Unlink Telegram?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="font-serif text-sm">
+                      This will disconnect{" "}
+                      {a.provider_username ? `@${a.provider_username}` : "your Telegram account"}{" "}
+                      from your S33D identity. You can re-link it later by going through
+                      the verification process again.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="font-serif">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleUnlink(a.id, "Telegram")}
+                      className="font-serif bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Unlink
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))
       ) : BOT_CONFIG.hasTelegramAuth ? (
+        /* Telegram — not linked yet */
         <div className="flex items-center gap-3 rounded-lg border border-border/30 border-dashed bg-secondary/5 p-3">
           <TelegramIcon className="w-4 h-4 text-muted-foreground shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="font-serif text-sm text-muted-foreground">Telegram</p>
-            <p className="text-[10px] text-muted-foreground">Not linked</p>
+            <p className="text-[10px] text-muted-foreground">
+              Link to receive notifications and connect your identity
+            </p>
           </div>
           <Button
             variant="outline"
