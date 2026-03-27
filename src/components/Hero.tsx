@@ -4,8 +4,9 @@ import LivingCensus from "@/components/LivingCensus";
 import WelcomeJourney from "@/components/WelcomeJourney";
 import EnsoNudge from "@/components/EnsoNudge";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsNewUser } from "@/hooks/use-is-new-user";
 
 // Ancient Friends gallery — each entry is a painterly tree background
 // linked to a real Ancient Friend in the database
@@ -331,14 +332,18 @@ const Hero = () => {
             </Button>
           </div>
 
-          {/* Ensō compass — subtle living waypoint on the trunk */}
-          <div className="flex justify-center pt-4 pb-1">
+          {/* Ensō compass — scroll to TEOTAG guide */}
+          <div className="flex flex-col items-center pt-4 pb-1 gap-2">
             <EnsoNudge size={56} onInteract={() => {
-              const census = document.querySelector('[data-census]');
-              census?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const guide = document.getElementById("teotag-guide");
+              if (guide) {
+                const headerOffset = 72;
+                const top = guide.getBoundingClientRect().top + window.scrollY - headerOffset;
+                window.scrollTo({ top, behavior: "smooth" });
+              }
             }}>
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer"
+                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
                 style={{
                   background: "hsl(var(--primary) / 0.06)",
                   border: "1px solid hsl(var(--primary) / 0.15)",
@@ -347,6 +352,7 @@ const Hero = () => {
                 <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(var(--primary) / 0.5)" }} />
               </div>
             </EnsoNudge>
+            <NewUserScrollCue />
           </div>
 
           {/* Welcome Journey — gentle onboarding for new visitors */}
@@ -389,5 +395,62 @@ const Hero = () => {
     </section>
   );
 };
+
+/** Subtle first-time scroll cue below the tree icon */
+function NewUserScrollCue() {
+  const { isNewUser } = useIsNewUser();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isNewUser) return;
+    const t = setTimeout(() => setVisible(true), 2400);
+    return () => clearTimeout(t);
+  }, [isNewUser]);
+
+  const handleClick = useCallback(() => {
+    const guide = document.getElementById("teotag-guide");
+    if (guide) {
+      const headerOffset = 72;
+      const top = guide.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer group transition-all duration-500"
+      style={{ animation: "fadeIn 1.2s ease-out" }}
+    >
+      <span
+        className="font-serif text-[11px] tracking-wide transition-colors duration-300 group-hover:text-primary"
+        style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
+      >
+        New here? Begin below
+      </span>
+      <span
+        className="text-[10px] transition-transform duration-700"
+        style={{
+          color: "hsl(var(--primary) / 0.35)",
+          animation: "gentleBounce 2.5s ease-in-out infinite",
+        }}
+      >
+        ↓
+      </span>
+      <style>{`
+        @keyframes gentleBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(3px); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </button>
+  );
+}
 
 export default Hero;
