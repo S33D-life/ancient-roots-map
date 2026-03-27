@@ -30,6 +30,13 @@ import {
   LifeBuoy,
   Compass,
   Radio,
+  Smartphone,
+  Share,
+  PlusSquare,
+  Wifi,
+  Bell,
+  Zap,
+  Lock,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
