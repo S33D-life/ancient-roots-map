@@ -57,12 +57,10 @@ const GreetingCardDialog = ({ open, onOpenChange, tree, whispers = [] }: Greetin
         cacheBust: true,
       });
       if (!blob) throw new Error("empty");
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      const link = document.createElement("a");
-      link.download = `${tree.name.replace(/\s+/g, "-").toLowerCase()}-greeting.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      const dl = document.createElement("a");
+      dl.download = `${tree.name.replace(/\s+/g, "-").toLowerCase()}-greeting.png`;
+      dl.href = URL.createObjectURL(blob);
+      dl.click();
       toast({ title: "Card saved! 🌿" });
     } catch {
       // Fallback: copy card text
