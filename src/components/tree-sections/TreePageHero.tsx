@@ -38,6 +38,10 @@ interface TreePageHeroProps {
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   onNavigateHive?: (slug: string) => void;
   onRetryPhoto?: () => void;
+  /** True when offerings/whispers are gated by presence */
+  presenceLocked?: boolean;
+  /** Grace period label e.g. "8h 23m remaining" */
+  graceLabel?: string | null;
 }
 
 const TreePageHero = ({
@@ -54,6 +58,8 @@ const TreePageHero = ({
   ecoBelonging,
   onNavigateHive,
   onRetryPhoto,
+  presenceLocked = false,
+  graceLabel,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
