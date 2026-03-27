@@ -38,6 +38,7 @@ import ActiveCampaigns from "@/components/dashboard/ActiveCampaigns";
 import HearthCrossLinks from "@/components/dashboard/HearthCrossLinks";
 import PresenceSpiralCard from "@/components/PresenceSpiralCard";
 import TeotagAITab from "@/components/dashboard/TeotagAITab";
+import TeotagFace from "@/components/TeotagFace";
 import HearthNotificationSettings from "@/components/dashboard/HearthNotificationSettings";
 import HearthLocationSettings from "@/components/dashboard/HearthLocationSettings";
 import { Separator } from "@/components/ui/separator";
