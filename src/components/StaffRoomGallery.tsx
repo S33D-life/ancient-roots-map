@@ -14,6 +14,7 @@ import {
   LayoutGrid, Maximize, List, ChevronLeft, ChevronRight, X,
   Share2, Eye, Heart, TreeDeciduous, ScrollText, ExternalLink,
   Wand2, Filter, Sparkles, Shield, Users, Crown, Compass,
+  MapPin, BookOpen,
 } from "lucide-react";
 import {
   getSpiralStaffs, getGridStaffs, getSpeciesStaffCounts,
@@ -841,6 +842,98 @@ export default function StaffRoomGallery() {
             <Suspense fallback={<div className="h-64 rounded-2xl bg-card/20 animate-pulse" />}>
               <LazySpiralOfSpecies />
             </Suspense>
+
+            {/* ── The Staffs — grounded overview ── */}
+            <motion.section
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.6 }}
+              className="space-y-8 pt-4"
+            >
+              <div className="text-center">
+                <h3 className="font-serif text-xl text-foreground tracking-wide">The Staffs</h3>
+                <div className="h-px max-w-[80px] mx-auto mt-3" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), transparent)" }} />
+              </div>
+
+              {/* A. Core meaning */}
+              <div className="max-w-md mx-auto text-center space-y-2">
+                <span className="text-lg">🌳</span>
+                <p className="text-sm font-serif text-muted-foreground leading-relaxed">
+                  Staffs are guardian markers within the S33D ecosystem.
+                </p>
+                <p className="text-sm font-serif text-muted-foreground leading-relaxed">
+                  Each one carries the presence of a tree<br />and the path of those who walk with it.
+                </p>
+              </div>
+
+              <div className="h-px max-w-[60px] mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.15), transparent)" }} />
+
+              {/* B. Functional role */}
+              <div className="max-w-md mx-auto text-center space-y-3">
+                <span className="text-lg">🗝️</span>
+                <p className="text-xs font-serif text-muted-foreground uppercase tracking-widest">Staffs act as keys to</p>
+                <div className="grid grid-cols-2 gap-2.5 max-w-xs mx-auto">
+                  {[
+                    { icon: <MapPin className="w-3.5 h-3.5" />, text: "Map & mint Ancient Friends" },
+                    { icon: <BookOpen className="w-3.5 h-3.5" />, text: "Curate the Heartwood Library" },
+                    { icon: <Shield className="w-3.5 h-3.5" />, text: "Access & grow the Vault" },
+                    { icon: <Users className="w-3.5 h-3.5" />, text: "Join the living community" },
+                  ].map((item) => (
+                    <div key={item.text} className="flex items-start gap-2 text-left p-2.5 rounded-xl border border-border/15 bg-card/20">
+                      <div className="text-primary mt-0.5 shrink-0">{item.icon}</div>
+                      <p className="text-[11px] font-serif text-muted-foreground leading-snug">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="h-px max-w-[60px] mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.15), transparent)" }} />
+
+              {/* C. System role */}
+              <div className="max-w-md mx-auto text-center space-y-2">
+                <span className="text-lg">❤️</span>
+                <p className="text-xs font-serif text-muted-foreground uppercase tracking-widest">They anchor</p>
+                <div className="space-y-1.5">
+                  <p className="text-sm font-serif text-muted-foreground">Encounters at trees</p>
+                  <p className="text-sm font-serif text-muted-foreground">Records in the Library</p>
+                  <p className="text-sm font-serif text-muted-foreground">Flows of S33D Hearts</p>
+                </div>
+              </div>
+
+              <div className="h-px max-w-[60px] mx-auto" style={{ background: "linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.15), transparent)" }} />
+
+              {/* D. Gentle actions */}
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-serif text-xs gap-1.5 rounded-xl border-border/20"
+                  onClick={() => setActiveTab("explorer")}
+                >
+                  <Wand2 className="w-3.5 h-3.5" />
+                  View your staff
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-serif text-xs gap-1.5 rounded-xl border-border/20"
+                  onClick={() => routerNavigate("/map")}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  Map a tree
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-serif text-xs gap-1.5 rounded-xl border-border/20"
+                  onClick={() => routerNavigate("/library")}
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Enter the Heartwood
+                </Button>
+              </div>
+            </motion.section>
 
           </TabsContent>
 
