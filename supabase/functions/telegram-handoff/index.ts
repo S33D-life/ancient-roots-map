@@ -222,7 +222,7 @@ Deno.serve(async (req: Request) => {
           user_metadata: {
             source: "telegram",
             telegram_username: payload.telegram_username || null,
-            identity_path, // From the user's UI choice, not the handoff
+            first_step: resolvedPath, // Soft participation hint, not a permanent role
           },
         });
 
