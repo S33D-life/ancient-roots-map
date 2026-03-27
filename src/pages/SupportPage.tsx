@@ -648,6 +648,90 @@ const SupportPage = () => {
                 ))}
               </div>
             </section>
+
+            {/* ── Install the App ── */}
+            <section className="space-y-3">
+              <h2 className="text-lg font-serif font-medium text-foreground flex items-center gap-2">
+                <Smartphone className="w-4 h-4 text-primary" /> Install the App
+              </h2>
+              <Card className="border-border/20">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-center gap-4">
+                    <img src="/pwa-icon-192.png" alt="Ancient Friends" className="w-14 h-14 rounded-2xl" />
+                    <div>
+                      <p className="font-serif text-base text-foreground">Ancient Friends</p>
+                      <p className="text-xs text-muted-foreground">A Living Map of Ancient Trees</p>
+                    </div>
+                  </div>
+
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full text-left px-4 py-3 rounded-lg border border-border/20 hover:border-primary/30 transition-colors bg-card/50">
+                      <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Share className="w-3.5 h-3.5 text-primary" /> Safari (iOS)
+                      </span>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 py-3 space-y-2 text-xs text-muted-foreground leading-relaxed">
+                      <p>1. Tap the <strong className="text-foreground">Share</strong> button (square with upward arrow)</p>
+                      <p>2. Scroll down and tap <strong className="text-foreground">Add to Home Screen</strong></p>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <Collapsible>
+                    <CollapsibleTrigger className="w-full text-left px-4 py-3 rounded-lg border border-border/20 hover:border-primary/30 transition-colors bg-card/50">
+                      <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <PlusSquare className="w-3.5 h-3.5 text-primary" /> Chrome (Android)
+                      </span>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 py-3 space-y-2 text-xs text-muted-foreground leading-relaxed">
+                      <p>1. Tap the <strong className="text-foreground">three dots</strong> menu (top-right)</p>
+                      <p>2. Tap <strong className="text-foreground">Add to Home screen</strong></p>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  <div className="space-y-2 pt-1">
+                    <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Why plant?</p>
+                    {[
+                      { icon: Zap, text: "Faster access — one tap from your home screen" },
+                      { icon: Wifi, text: "Works offline — the grove lives in your pocket" },
+                      { icon: Bell, text: "Notifications — when the forest whispers (coming soon)" },
+                    ].map(({ icon: Icon, text }) => (
+                      <div key={text} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Icon className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                        <span>{text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* ── Privacy ── */}
+            <section className="space-y-3">
+              <h2 className="text-lg font-serif font-medium text-foreground flex items-center gap-2">
+                <Lock className="w-4 h-4 text-primary" /> Privacy
+              </h2>
+              <Card className="border-border/20">
+                <CardContent className="p-5 space-y-4 font-serif text-foreground/85 leading-relaxed text-xs">
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-semibold text-foreground">What we collect</p>
+                    <p>When you create an account, we store your email and any profile info you choose to share. Tree mappings and offerings are attributed to your account.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-semibold text-foreground">How we use it</p>
+                    <p>Your data powers the S33D atlas. We do not sell data or run advertising. Tree location data contributes to the open commons.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-semibold text-foreground">Cookies &amp; analytics</p>
+                    <p>Minimal cookies for auth and sessions. Privacy-respecting analytics only. No third-party tracking.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="text-sm font-semibold text-foreground">Your rights</p>
+                    <p>Request deletion anytime by contacting us. Public atlas contributions may remain as anonymous commons data.</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground/50 pt-2">Last updated: March 2026</p>
+                </CardContent>
+              </Card>
+            </section>
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════════════ */}
