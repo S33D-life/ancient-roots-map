@@ -19,7 +19,7 @@ import { BOT_CONFIG } from "@/config/bot";
 import { toast } from "sonner";
 import { ROUTES } from "@/lib/routes";
 
-type HandoffFlow = "connect" | "create" | "create_gardener" | "create_wanderer";
+type HandoffFlow = "connect" | "create" | "create_gardener" | "create_wanderer" | "login";
 type PageState =
   | "loading"
   | "resolved"
