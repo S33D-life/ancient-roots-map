@@ -135,7 +135,7 @@ const AuthPage = () => {
         return;
       }
 
-      if (session && viewRef.current !== "reset-password") {
+      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
         // Record referral on first sign-in if invite code was stored
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
