@@ -4,8 +4,9 @@
  * Called by pg_cron every minute. Polls getUpdates in a loop for ~55s,
  * storing incoming messages in telegram_inbound_queue.
  *
- * Also handles verification code messages: when a user sends a 6-digit code
- * matching a pending verification, marks it as verified with their Telegram identity.
+ * Handles:
+ * - Verification code messages (6-digit codes for account linking)
+ * - Bot commands (/connect, /new, /gardener, /wanderer, /start, /help)
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -16,9 +17,41 @@ const MIN_REMAINING_MS = 5_000;
 /** Check if a message text is a 6-digit verification code */
 function extractVerificationCode(text: string | null): string | null {
   if (!text) return null;
-  // Match standalone 6-digit code, or /verify 123456
   const match = text.trim().match(/^(?:\/verify\s+)?(\d{6})$/);
   return match ? match[1] : null;
+}
+
+/** Extract bot command from message */
+function extractCommand(text: string | null): string | null {
+  if (!text) return null;
+  const match = text.trim().match(/^\/(\w+)(?:\s|$)/);
+  return match ? match[1].toLowerCase() : null;
+}
+
+/** Send a message via the Telegram gateway */
+async function sendMessage(
+  chatId: number,
+  text: string,
+  lovableKey: string,
+  telegramKey: string,
+  replyMarkup?: object,
+) {
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    text,
+    parse_mode: "HTML",
+  };
+  if (replyMarkup) body.reply_markup = replyMarkup;
+
+  await fetch(`${GATEWAY_URL}/sendMessage`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": telegramKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
 }
 
 Deno.serve(async () => {
@@ -47,6 +80,7 @@ Deno.serve(async () => {
 
   let totalProcessed = 0;
   let codesVerified = 0;
+  let commandsHandled = 0;
   let currentOffset: number;
 
   const { data: state, error: stateErr } = await supabase
@@ -96,14 +130,16 @@ Deno.serve(async () => {
       if (!update.message) continue;
 
       const msg = update.message;
+      const isPrivate = msg.chat?.type === "private";
+      const chatId = msg.chat?.id;
+      const telegramUserId = msg.from?.id;
+      const telegramUsername = msg.from?.username || null;
+
+      if (!isPrivate || !chatId || !telegramUserId) continue;
+
+      // ── Check for verification codes ──
       const code = extractVerificationCode(msg.text);
-
-      // Handle verification codes (private messages to the bot)
-      if (code && msg.chat?.type === "private" && msg.from?.id) {
-        const telegramUserId = msg.from.id;
-        const telegramUsername = msg.from.username || null;
-
-        // Find a pending code that matches
+      if (code) {
         const { data: pendingCode } = await supabase
           .from("telegram_verification_codes")
           .select("id, expires_at")
@@ -115,7 +151,6 @@ Deno.serve(async () => {
           .maybeSingle();
 
         if (pendingCode) {
-          // Mark as verified with Telegram identity
           await supabase
             .from("telegram_verification_codes")
             .update({
@@ -128,35 +163,174 @@ Deno.serve(async () => {
 
           codesVerified++;
 
-          // Send confirmation to user via Telegram
-          await fetch(`${GATEWAY_URL}/sendMessage`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "X-Connection-Api-Key": TELEGRAM_API_KEY,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              chat_id: msg.chat.id,
-              text: "✅ <b>Code verified!</b>\n\nReturn to S33D to complete the linking process.",
-              parse_mode: "HTML",
-            }),
-          });
+          await sendMessage(
+            chatId,
+            "✅ <b>Code verified!</b>\n\nReturn to S33D to complete the linking process.",
+            LOVABLE_API_KEY,
+            TELEGRAM_API_KEY,
+          );
         } else {
-          // No matching code — inform the user
-          await fetch(`${GATEWAY_URL}/sendMessage`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${LOVABLE_API_KEY}`,
-              "X-Connection-Api-Key": TELEGRAM_API_KEY,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              chat_id: msg.chat.id,
-              text: "🌱 That code wasn't recognised. Please check it and try again, or generate a new one from S33D.",
-              parse_mode: "HTML",
-            }),
-          });
+          await sendMessage(
+            chatId,
+            "🌱 That code wasn't recognised. Please check it and try again, or generate a new one from S33D.",
+            LOVABLE_API_KEY,
+            TELEGRAM_API_KEY,
+          );
+        }
+        continue;
+      }
+
+      // ── Check for bot commands ──
+      const command = extractCommand(msg.text);
+      if (!command) continue;
+
+      commandsHandled++;
+
+      switch (command) {
+        case "start":
+        case "help": {
+          await sendMessage(
+            chatId,
+            "🌳 <b>Welcome to S33D</b>\n\n" +
+            "I can help you enter the living forest.\n\n" +
+            "🔗 /connect — Link your existing S33D account\n" +
+            "🌱 /gardener — Create a new Gardener identity\n" +
+            "🧭 /wanderer — Create a new Wanderer identity\n\n" +
+            "If you have a verification code from S33D, just send me the 6-digit number.",
+            LOVABLE_API_KEY,
+            TELEGRAM_API_KEY,
+          );
+          break;
+        }
+
+        case "connect": {
+          // Create a handoff for connecting existing account
+          try {
+            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
+              body: {
+                action: "create_handoff",
+                telegram_user_id: telegramUserId,
+                telegram_username: telegramUsername,
+                flow: "connect",
+              },
+            });
+
+            const result = handoffResp.data;
+            if (result?.ok) {
+              await sendMessage(
+                chatId,
+                "🔗 <b>Connect your S33D account</b>\n\n" +
+                "Open this link to sign in and connect your Telegram:\n\n" +
+                `<a href="${result.handoff_url}">Enter S33D</a>\n\n` +
+                "⏳ This link expires in 30 minutes.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+                {
+                  inline_keyboard: [[
+                    { text: "🌳 Enter S33D", url: result.handoff_url },
+                  ]],
+                },
+              );
+            } else if (result?.error === "already_linked") {
+              const appUrl = Deno.env.get("APP_URL") || "https://s33d.life";
+              await sendMessage(
+                chatId,
+                "✅ Your Telegram is already connected to S33D!\n\n" +
+                `<a href="${appUrl}/dashboard">Open your Hearth</a>`,
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+                {
+                  inline_keyboard: [[
+                    { text: "🏠 Open Hearth", url: `${appUrl}/dashboard` },
+                  ]],
+                },
+              );
+            } else {
+              await sendMessage(
+                chatId,
+                "❌ Something went wrong. Please try again in a moment.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            }
+          } catch (e) {
+            console.error("Failed to create connect handoff:", e);
+            await sendMessage(
+              chatId,
+              "❌ Could not create the link right now. Please try again.",
+              LOVABLE_API_KEY,
+              TELEGRAM_API_KEY,
+            );
+          }
+          break;
+        }
+
+        case "gardener":
+        case "wanderer":
+        case "new": {
+          const flow = command === "wanderer" ? "create_wanderer" : "create_gardener";
+          try {
+            const handoffResp = await supabase.functions.invoke("telegram-handoff", {
+              body: {
+                action: "create_handoff",
+                telegram_user_id: telegramUserId,
+                telegram_username: telegramUsername,
+                flow,
+              },
+            });
+
+            const result = handoffResp.data;
+            if (result?.ok) {
+              const label = command === "wanderer" ? "Wanderer" : "Gardener";
+              const emoji = command === "wanderer" ? "🧭" : "🌱";
+              await sendMessage(
+                chatId,
+                `${emoji} <b>Create your ${label} identity</b>\n\n` +
+                "Open this link to enter S33D:\n\n" +
+                `<a href="${result.handoff_url}">Begin your journey</a>\n\n` +
+                "⏳ This link expires in 30 minutes.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+                {
+                  inline_keyboard: [[
+                    { text: `${emoji} Begin your journey`, url: result.handoff_url },
+                  ]],
+                },
+              );
+            } else if (result?.error === "already_linked") {
+              await sendMessage(
+                chatId,
+                "🌿 Your Telegram is already connected to an S33D account.\n\nUse /connect to sign in, or open S33D directly.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            } else {
+              await sendMessage(
+                chatId,
+                "❌ Something went wrong. Please try again in a moment.",
+                LOVABLE_API_KEY,
+                TELEGRAM_API_KEY,
+              );
+            }
+          } catch (e) {
+            console.error("Failed to create new identity handoff:", e);
+            await sendMessage(
+              chatId,
+              "❌ Could not create the link right now. Please try again.",
+              LOVABLE_API_KEY,
+              TELEGRAM_API_KEY,
+            );
+          }
+          break;
+        }
+
+        default: {
+          await sendMessage(
+            chatId,
+            "🌱 I didn't recognise that command.\n\nTry /help to see what I can do.",
+            LOVABLE_API_KEY,
+            TELEGRAM_API_KEY,
+          );
         }
       }
     }
@@ -199,6 +373,6 @@ Deno.serve(async () => {
   }
 
   return new Response(
-    JSON.stringify({ ok: true, processed: totalProcessed, codesVerified, finalOffset: currentOffset }),
+    JSON.stringify({ ok: true, processed: totalProcessed, codesVerified, commandsHandled, finalOffset: currentOffset }),
   );
 });

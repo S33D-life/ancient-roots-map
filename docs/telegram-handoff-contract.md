@@ -115,25 +115,32 @@ To support Telegram as a PRIMARY sign-in method for NEW users:
 - Bot-assisted verification flow (code → bot → verify)
 - Handoff system (`bot_handoffs`) for bot→app transitions
 - Telegram connector gateway for bot API calls
+- **Bot-initiated magic-link handoff** via `telegram-handoff` edge function
+- **Telegram-first account creation** via `create_account` action
+- **Bot commands** (`/connect`, `/gardener`, `/wanderer`) for entry flows
+- **Dedicated handoff page** at `/telegram-handoff`
 
-**Still needed:**
-1. **Unauthenticated code flow** — a `generate_code` variant that works
-   without an active session, creating a temporary pre-auth token
-2. **Account creation via Telegram** — edge function that creates a new
-   Supabase user (email-less or with a placeholder) and issues a session
-   after bot verification
-3. **Session bridge** — secure mechanism to establish a Supabase session
-   from a verified Telegram identity (custom JWT or magic-link style)
-4. **Identity merge** — handle case where Telegram user later adds email/Google,
-   or where an existing email user tries to "login with Telegram"
-5. **Bot-initiated handoff** — bot sends a secure link that pre-authenticates
-   the user into S33D (extends existing `bot_handoffs` system)
+**Architecture — Bot-Initiated Handoff:**
+1. User sends `/connect`, `/gardener`, or `/wanderer` to bot
+2. Bot creates a one-time handoff token (30-min expiry) via `telegram-handoff`
+3. User opens magic link → lands on `/telegram-handoff`
+4. App validates token via `resolve_bot_handoff` RPC
+5. For **connect**: user signs in → Telegram linked to existing account
+6. For **create**: app creates a new account with Telegram linked from start
+7. Session established via admin-generated magic link tokens
 
-**Safest next step:**
-Implement bot-initiated magic-link handoff: bot generates a one-time token →
-user clicks link → app validates token via RPC → session established.
-This reuses the existing `bot_handoffs` infrastructure and avoids inventing
-a parallel auth system.
+**Flows:**
+- `/connect` → sign in to existing S33D account → link Telegram identity
+- `/gardener` → create new account as Gardener → enter at /add-tree
+- `/wanderer` → create new account as Wanderer → enter at /atlas
+- `/new` → alias for `/gardener`
+
+**Security:**
+- Handoff tokens are one-time use, 30-minute expiry
+- Telegram IDs are SHA-256 hashed before storage
+- Collision detection prevents duplicate linking
+- Account creation uses placeholder email (not user-facing)
+- Session tokens generated server-side via admin API
 
 ### Config
 
