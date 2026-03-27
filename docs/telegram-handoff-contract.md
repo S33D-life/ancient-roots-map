@@ -81,19 +81,30 @@ created → opened → claimed
 - UNIQUE(provider, provider_user_id) — one Telegram per app user
 - UNIQUE(user_id, provider) — one account per provider per user
 
-### Backend Assumptions (TODO)
+### Backend — Implemented
 
-Edge function `telegram-auth` needs to:
-1. Accept POST with Telegram login payload + `action` (signin | link)
-2. Verify hash using bot token: `HMAC-SHA-256(data_check_string, SHA-256(bot_token))`
-3. Check `auth_date` is recent (< 1 hour)
-4. For signin: find/create user, return session
-5. For link: verify auth header, insert into `connected_accounts`
+Edge function `telegram-auth` (bot-assisted verification):
+1. `generate_code` — creates a 6-digit verification code (auth required)
+2. `check_code` — polls whether bot has verified the code
+3. `claim_code` — claims a verified code, links Telegram identity to `connected_accounts`
+
+Edge function `telegram-poll` handles verification:
+- Detects 6-digit codes in private messages to the bot
+- Matches against pending codes in `telegram_verification_codes`
+- Marks matched codes as `verified` with Telegram user ID + username
+- Sends confirmation message back to user via bot
+
+Security:
+- Telegram IDs are SHA-256 hashed before storage
+- Codes expire after 10 minutes
+- Duplicate linking prevented by UNIQUE constraints
+- Collision detection: rejects if Telegram already linked to different user
 
 ### Config
 
 - `VITE_TELEGRAM_BOT_USERNAME` — enables all Telegram UI (bot links, login button, linking)
-- Bot token stored as edge function secret (not in client code)
+- Bot token managed via Lovable Telegram connector (not in client code)
+- `telegram_settings.bot_username` — used for bot deep links in verification flow
 
 ## Files
 
@@ -104,5 +115,10 @@ Edge function `telegram-auth` needs to:
 | `src/services/telegram-auth.ts` | Telegram auth/linking service layer |
 | `src/components/BotContinuationBanner.tsx` | Post-auth continuation UX |
 | `src/components/auth/TelegramLoginButton.tsx` | "Continue with Telegram" button |
+| `src/components/auth/TelegramLinkDialog.tsx` | Bot-assisted verification dialog |
 | `src/components/dashboard/LinkedAccountsSection.tsx` | Account linking UI in Hearth |
+| `src/components/settings/TelegramSettings.tsx` | Admin Telegram notification settings |
+| `supabase/functions/telegram-auth/index.ts` | Verification code generation + claiming |
+| `supabase/functions/telegram-notify/index.ts` | Outbound event notifications |
+| `supabase/functions/telegram-poll/index.ts` | Inbound polling + code verification |
 | `src/components/referrals/TelegramBotLink.tsx` | Bot deep-link generation |
