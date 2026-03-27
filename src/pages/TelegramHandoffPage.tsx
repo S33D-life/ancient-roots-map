@@ -263,6 +263,7 @@ export default function TelegramHandoffPage() {
   const botLink = BOT_CONFIG.telegramBotLink("start");
   const telegramUsername = (handoff?.payload as any)?.telegram_username;
 
+  const isLoginFlow = flowParam === "login";
   const isConnectFlow = flowParam === "connect";
   const isCreateFlow = !flowParam || flowParam === "create" || flowParam === "create_gardener" || flowParam === "create_wanderer";
 
