@@ -428,7 +428,7 @@ function NewUserScrollCue() {
         className="font-serif text-[11px] tracking-wide transition-colors duration-300 group-hover:text-primary"
         style={{ color: "hsl(var(--muted-foreground) / 0.5)" }}
       >
-        New here? Begin below
+        New here? Click to begin
       </span>
       <span
         className="text-[10px] transition-transform duration-700"
