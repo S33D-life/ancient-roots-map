@@ -81,7 +81,10 @@ created → opened → claimed
 - UNIQUE(provider, provider_user_id) — one Telegram per app user
 - UNIQUE(user_id, provider) — one account per provider per user
 
-### Backend — Implemented
+### Backend — Implemented (Account Linking Only)
+
+**IMPORTANT**: This is Telegram account LINKING, not login.
+Requires an existing authenticated S33D session.
 
 Edge function `telegram-auth` (bot-assisted verification):
 1. `generate_code` — creates a 6-digit verification code (auth required)
@@ -97,12 +100,44 @@ Edge function `telegram-poll` handles verification:
 Security:
 - Telegram IDs are SHA-256 hashed before storage
 - Codes expire after 10 minutes
+- Rate limit: max 5 code generations per user per hour
+- Stale code cleanup on each generation
 - Duplicate linking prevented by UNIQUE constraints
 - Collision detection: rejects if Telegram already linked to different user
+- Unlink confirmation dialog before disconnect
+
+### What's Needed for True Telegram Login (NOT YET IMPLEMENTED)
+
+To support Telegram as a PRIMARY sign-in method for NEW users:
+
+**Already in place:**
+- `connected_accounts` table with hashed Telegram IDs
+- Bot-assisted verification flow (code → bot → verify)
+- Handoff system (`bot_handoffs`) for bot→app transitions
+- Telegram connector gateway for bot API calls
+
+**Still needed:**
+1. **Unauthenticated code flow** — a `generate_code` variant that works
+   without an active session, creating a temporary pre-auth token
+2. **Account creation via Telegram** — edge function that creates a new
+   Supabase user (email-less or with a placeholder) and issues a session
+   after bot verification
+3. **Session bridge** — secure mechanism to establish a Supabase session
+   from a verified Telegram identity (custom JWT or magic-link style)
+4. **Identity merge** — handle case where Telegram user later adds email/Google,
+   or where an existing email user tries to "login with Telegram"
+5. **Bot-initiated handoff** — bot sends a secure link that pre-authenticates
+   the user into S33D (extends existing `bot_handoffs` system)
+
+**Safest next step:**
+Implement bot-initiated magic-link handoff: bot generates a one-time token →
+user clicks link → app validates token via RPC → session established.
+This reuses the existing `bot_handoffs` infrastructure and avoids inventing
+a parallel auth system.
 
 ### Config
 
-- `VITE_TELEGRAM_BOT_USERNAME` — enables all Telegram UI (bot links, login button, linking)
+- `VITE_TELEGRAM_BOT_USERNAME` — enables all Telegram UI (bot links, linking)
 - Bot token managed via Lovable Telegram connector (not in client code)
 - `telegram_settings.bot_username` — used for bot deep links in verification flow
 
@@ -114,7 +149,7 @@ Security:
 | `src/config/bot.ts` | Feature flags and link generation |
 | `src/services/telegram-auth.ts` | Telegram auth/linking service layer |
 | `src/components/BotContinuationBanner.tsx` | Post-auth continuation UX |
-| `src/components/auth/TelegramLoginButton.tsx` | "Continue with Telegram" button |
+| `src/components/auth/TelegramLoginButton.tsx` | Auth page — info prompt (NOT login) |
 | `src/components/auth/TelegramLinkDialog.tsx` | Bot-assisted verification dialog |
 | `src/components/dashboard/LinkedAccountsSection.tsx` | Account linking UI in Hearth |
 | `src/components/settings/TelegramSettings.tsx` | Admin Telegram notification settings |
