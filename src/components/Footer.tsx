@@ -1,4 +1,4 @@
-import { TreeDeciduous, Smartphone, Sparkles, Heart, Map } from "lucide-react";
+import { TreeDeciduous, Sparkles, Heart, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import JourneyPulse from "@/components/JourneyPulse";
 
@@ -14,11 +14,6 @@ const Footer = () => {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-muted-foreground/70">
-          <div className="flex items-center gap-1.5">
-            <TreeDeciduous className="w-3 h-3 text-primary/60" />
-            <span className="font-serif">s33d.life</span>
-          </div>
-          <Dot />
           <Link to="/roadmap" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
             <Map className="w-3 h-3" />
             Roadmap
@@ -29,21 +24,26 @@ const Footer = () => {
             Support
           </Link>
           <Dot />
-          <Link to="/install" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-            <Smartphone className="w-3 h-3" />
-            Install
-          </Link>
-          <Dot />
           <Link to="/bug-garden" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
             <Sparkles className="w-3 h-3" />
             Feedback
           </Link>
           <Dot />
           <Link to="/about" className="hover:text-primary transition-colors">About</Link>
+        </div>
+
+        <div className="flex items-center justify-center gap-x-2 text-[10px] text-muted-foreground/40">
+          <a
+            href="https://t.me/s33dlife"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 hover:text-primary/60 transition-colors"
+          >
+            <TreeDeciduous className="w-2.5 h-2.5" />
+            <span className="font-serif">s33d.life</span>
+          </a>
           <Dot />
-          <Link to="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
-          <Dot />
-          <span className="text-[10px] text-muted-foreground/40">EST 2016</span>
+          <span>EST 2016</span>
         </div>
       </div>
     </footer>

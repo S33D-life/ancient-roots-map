@@ -3,7 +3,6 @@ import Footer from "@/components/Footer";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { TreeDeciduous, Heart, MapPin, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const AboutPage = () => {
   useDocumentTitle("About — S33D");
@@ -53,6 +52,22 @@ const AboutPage = () => {
                 {label}
               </Link>
             ))}
+          </div>
+
+          {/* Living scroll — Notion embed */}
+          <div className="space-y-3">
+            <p className="text-center text-sm font-serif text-muted-foreground italic">
+              A living scroll of the wider S33D vision
+            </p>
+            <div className="rounded-xl border border-border/20 overflow-hidden bg-card/30">
+              <iframe
+                src="https://tetol.notion.site/ebd//24515b58480d80e7808cdda1195e863a"
+                className="w-full border-0"
+                style={{ height: "min(600px, 70vh)" }}
+                allowFullScreen
+                title="S33D Vision — Notion"
+              />
+            </div>
           </div>
         </div>
       </main>
