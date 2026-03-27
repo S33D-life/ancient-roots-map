@@ -194,8 +194,9 @@ Deno.serve(async () => {
             "🌳 <b>Welcome to S33D</b>\n\n" +
             "I can help you enter the living forest.\n\n" +
             "🔗 /connect — Link your existing S33D account\n" +
-            "🌱 /gardener — Create a new Gardener identity\n" +
-            "🧭 /wanderer — Create a new Wanderer identity\n\n" +
+            "🌳 /new — Create a new S33D identity\n" +
+            "🌱 /gardener — Arrive as a Gardener\n" +
+            "🧭 /wanderer — Arrive as a Wanderer\n\n" +
             "If you have a verification code from S33D, just send me the 6-digit number.",
             LOVABLE_API_KEY,
             TELEGRAM_API_KEY,
