@@ -33,20 +33,31 @@ const GroundSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8, duration: 1.6, ease: "easeOut" }}
-          className="flex flex-col items-center gap-5 pointer-events-auto"
+          className="flex flex-col items-center gap-6 pointer-events-auto px-4"
         >
-          {/* TEOTAG face — emerging from soil */}
+          {/* Arboreal Atlas title — lands at top of viewport */}
+          <motion.h2
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.0, duration: 1.2, ease: "easeOut" }}
+            className="font-serif text-2xl md:text-3xl text-center tracking-wide"
+            style={{ color: "hsl(var(--foreground) / 0.85)" }}
+          >
+            Arboreal Atlas
+          </motion.h2>
+
+          {/* TEOTAG face — masculine / elder, large and prominent */}
           <div className="relative">
             {/* Earthy glow behind face */}
             <div
-              className="absolute inset-0 -inset-x-6 -inset-y-4 rounded-full pointer-events-none"
+              className="absolute inset-0 -inset-x-8 -inset-y-6 rounded-full pointer-events-none"
               style={{
-                background: "radial-gradient(ellipse 80% 70% at 50% 55%, hsl(30 40% 25% / 0.15), transparent 70%)",
-                filter: "blur(16px)",
+                background: "radial-gradient(ellipse 80% 70% at 50% 55%, hsl(30 40% 25% / 0.18), transparent 70%)",
+                filter: "blur(20px)",
               }}
               aria-hidden
             />
-            <TeotagFace size="lg" delay={2.2} />
+            <TeotagFace variant="masculine" size="lg" delay={2.2} className="[&_div]:w-36 [&_div]:h-36 md:[&_div]:w-44 md:[&_div]:h-44" />
           </div>
 
           {/* Invitation text */}
@@ -54,7 +65,7 @@ const GroundSection = () => {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.8, duration: 1, ease: "easeOut" }}
-            className="font-serif text-sm md:text-base text-center max-w-xs leading-relaxed italic"
+            className="font-serif text-base md:text-lg text-center max-w-xs leading-relaxed italic"
             style={{ color: "hsl(var(--muted-foreground) / 0.55)" }}
           >
             The forest opens in two directions
