@@ -100,10 +100,10 @@ const ContributionFeed = ({ contributions, treeId, maxDisplay = 12 }: Props) => 
                 <span className="text-lg shrink-0 mt-0.5">{meta.emoji}</span>
                 <div className="flex-1 min-w-0 space-y-1">
                   {c.title && (
-                    <p className="font-serif text-sm text-foreground font-medium truncate">{c.title}</p>
+                    <p className="font-serif text-sm text-foreground font-medium leading-snug truncate">{c.title}</p>
                   )}
                   {c.content && (
-                    <p className="text-xs text-muted-foreground/80 font-serif line-clamp-2">{c.content}</p>
+                    <p className="text-xs text-muted-foreground/80 font-serif leading-relaxed line-clamp-2">{c.content}</p>
                   )}
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] text-muted-foreground/60 font-mono">

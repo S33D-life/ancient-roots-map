@@ -241,7 +241,7 @@ const TreeCard = ({
       )}
 
       <CardHeader className="cursor-pointer pt-3 pb-2 pr-12" onClick={handleClick}>
-        <CardTitle className="font-serif text-primary line-clamp-1 text-base leading-tight tracking-wide">
+        <CardTitle className="font-serif text-primary line-clamp-1 text-base leading-snug tracking-wide">
           {tree.name}
         </CardTitle>
         <div className="flex items-center gap-2 mt-1">
