@@ -92,14 +92,14 @@ const NotificationBell = () => {
                   onClick={() => handleClick(s)}
                 >
                   <span className="text-lg mt-0.5">{SIGNAL_TYPE_EMOJI[s.signal_type] || "✨"}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-serif ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                   <div className="flex-1 min-w-0 space-y-0.5">
+                    <p className={`text-sm font-serif leading-snug truncate ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                       {s.title}
                     </p>
                     {s.body && (
-                      <p className="text-[11px] text-muted-foreground/70 mt-0.5 line-clamp-2">{s.body}</p>
+                      <p className="text-[11px] text-muted-foreground/70 line-clamp-2 leading-relaxed">{s.body}</p>
                     )}
-                    <p className="text-[9px] text-muted-foreground/50 mt-1 font-mono">
+                    <p className="text-[9px] text-muted-foreground/50 mt-0.5 font-mono">
                       {new Date(s.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>

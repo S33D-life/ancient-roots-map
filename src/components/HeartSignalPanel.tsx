@@ -161,14 +161,14 @@ export default function HeartSignalPanel({
                         )}
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-serif leading-snug ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                       <div className="flex-1 min-w-0 space-y-0.5">
+                        <p className={`text-sm font-serif leading-snug truncate ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                           {s.title}
                         </p>
                         {s.body && (
-                          <p className="text-[11px] text-muted-foreground/70 mt-0.5 line-clamp-2 leading-relaxed">{s.body}</p>
+                          <p className="text-[11px] text-muted-foreground/70 line-clamp-2 leading-relaxed">{s.body}</p>
                         )}
-                        <p className="text-[9px] text-muted-foreground/40 mt-1 font-mono">{timeAgo(s.created_at)}</p>
+                        <p className="text-[9px] text-muted-foreground/40 mt-0.5 font-mono">{timeAgo(s.created_at)}</p>
                       </div>
 
                       <button
