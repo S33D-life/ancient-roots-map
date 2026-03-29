@@ -277,8 +277,25 @@ const AtlasCountryWallPage = () => {
         {/* Tile Grid */}
         <section className="px-4 max-w-6xl mx-auto">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-6 h-6 animate-spin text-primary/40" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border/10 overflow-hidden">
+                  <div className="p-5 pb-4 space-y-3 animate-pulse">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-muted/40 shrink-0" />
+                      <div className="flex-1 space-y-2 pt-1">
+                        <div className="h-3.5 w-3/4 rounded bg-muted/40" />
+                        <div className="h-2.5 w-1/2 rounded bg-muted/30" />
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="h-2.5 w-16 rounded bg-muted/25" />
+                      <div className="h-2.5 w-12 rounded bg-muted/25" />
+                    </div>
+                    <div className="h-2.5 w-full rounded bg-muted/15" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : displayed.length === 0 ? (
             <div className="text-center py-20">
