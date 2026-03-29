@@ -265,7 +265,7 @@ const OfferingQuoteInput = ({ value, onChange }: OfferingQuoteInputProps) => {
               text={value.text.trim()}
               author={value.author.trim() || null}
               source={value.source.trim() || null}
-              collapseAfter={0}
+              maxLines={0}
             />
           </div>
         ) : (
