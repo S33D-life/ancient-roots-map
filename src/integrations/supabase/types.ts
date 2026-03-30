@@ -5726,6 +5726,178 @@ export type Database = {
         }
         Relationships: []
       }
+      seed_libraries: {
+        Row: {
+          address: string | null
+          approved_at: string | null
+          approved_by: string | null
+          city: string | null
+          contact_link: string | null
+          country: string
+          created_at: string
+          description: string | null
+          id: string
+          is_featured: boolean
+          is_hidden: boolean
+          last_community_activity: string | null
+          latitude: number | null
+          library_type: string
+          longitude: number | null
+          name: string
+          photo_url: string | null
+          region: string | null
+          slug: string
+          status: string
+          submitted_by: string | null
+          testimonial_count: number
+          updated_at: string
+          verification_count: number
+          verification_status: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          city?: string | null
+          contact_link?: string | null
+          country: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          is_hidden?: boolean
+          last_community_activity?: string | null
+          latitude?: number | null
+          library_type?: string
+          longitude?: number | null
+          name: string
+          photo_url?: string | null
+          region?: string | null
+          slug: string
+          status?: string
+          submitted_by?: string | null
+          testimonial_count?: number
+          updated_at?: string
+          verification_count?: number
+          verification_status?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          city?: string | null
+          contact_link?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          is_hidden?: boolean
+          last_community_activity?: string | null
+          latitude?: number | null
+          library_type?: string
+          longitude?: number | null
+          name?: string
+          photo_url?: string | null
+          region?: string | null
+          slug?: string
+          status?: string
+          submitted_by?: string | null
+          testimonial_count?: number
+          updated_at?: string
+          verification_count?: number
+          verification_status?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      seed_library_testimonials: {
+        Row: {
+          content: string
+          created_at: string
+          display_name: string | null
+          id: string
+          is_anonymous: boolean
+          is_hidden: boolean
+          library_id: string
+          photo_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_anonymous?: boolean
+          is_hidden?: boolean
+          library_id: string
+          photo_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_anonymous?: boolean
+          is_hidden?: boolean
+          library_id?: string
+          photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seed_library_testimonials_library_id_fkey"
+            columns: ["library_id"]
+            isOneToOne: false
+            referencedRelation: "seed_libraries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seed_library_verifications: {
+        Row: {
+          created_at: string
+          id: string
+          library_id: string
+          note: string | null
+          user_id: string
+          verification_type: string
+          verified_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          library_id: string
+          note?: string | null
+          user_id: string
+          verification_type: string
+          verified_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          library_id?: string
+          note?: string | null
+          user_id?: string
+          verification_type?: string
+          verified_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seed_library_verifications_library_id_fkey"
+            columns: ["library_id"]
+            isOneToOne: false
+            referencedRelation: "seed_libraries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shelf_templates: {
         Row: {
           created_at: string
