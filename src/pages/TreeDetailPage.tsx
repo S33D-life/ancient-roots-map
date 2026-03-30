@@ -31,6 +31,7 @@ import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
 import { useTreeSources } from "@/hooks/use-tree-sources";
 import { useTreeCheckins, useCheckinStats } from "@/hooks/use-tree-checkins";
+import { useTreeCheckinStatus } from "@/hooks/use-tree-checkin-status";
 import { useTreeContributions } from "@/hooks/use-tree-contributions";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import type { Meeting, TimerStatus } from "@/components/MeetingTimer";
