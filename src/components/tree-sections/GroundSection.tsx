@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Hero from "../Hero";
 import SectionAtmosphere from "./SectionAtmosphere";
 import TeotagFace from "../TeotagFace";
-import { usePretextLayout } from "@/hooks/use-pretext-layout";
+
 
 const GroundSection = () => {
   const navigate = useNavigate();
@@ -21,19 +21,8 @@ const GroundSection = () => {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // ── Pretext: balanced layout for "Arboreal Atlas" title ──
-  const atlasLayout = usePretextLayout({
-    text: "Arboreal Atlas",
-    font: '500 clamp(24px, 5vw, 30px) ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 36,
-  });
 
-  // ── Pretext: balanced layout for invitation subtitle ──
-  const subtitleLayout = usePretextLayout({
-    text: "The forest opens in two directions",
-    font: 'italic 16px ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 26,
-  });
+
 
   
 
@@ -50,23 +39,6 @@ const GroundSection = () => {
           transition={{ delay: 1.8, duration: 1.6, ease: "easeOut" }}
           className="flex flex-col items-center gap-6 pointer-events-auto px-4"
         >
-          {/* Arboreal Atlas title — Pretext-balanced wrapping */}
-          <motion.h2
-            ref={atlasLayout.containerRef}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.0, duration: 1.2, ease: "easeOut" }}
-            className="font-serif text-2xl md:text-3xl text-center tracking-wide"
-            style={{
-              color: "hsl(var(--foreground) / 0.85)",
-              ...(atlasLayout.ready && atlasLayout.balancedWidth
-                ? { maxWidth: atlasLayout.balancedWidth, margin: "0 auto" }
-                : {}),
-            }}
-          >
-            Arboreal Atlas
-          </motion.h2>
-
           {/* TEOTAG face — masculine / elder, large and prominent */}
           <div className="relative">
             {/* Earthy glow behind face */}
@@ -81,19 +53,13 @@ const GroundSection = () => {
             <TeotagFace variant="masculine" size="lg" delay={2.2} className="[&_div]:w-36 [&_div]:h-36 md:[&_div]:w-44 md:[&_div]:h-44" />
           </div>
 
-          {/* Invitation text — Pretext-balanced wrapping */}
+          {/* Invitation text */}
           <motion.p
-            ref={subtitleLayout.containerRef}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.8, duration: 1, ease: "easeOut" }}
             className="font-serif text-base md:text-lg text-center max-w-xs leading-relaxed italic"
-            style={{
-              color: "hsl(var(--muted-foreground) / 0.55)",
-              ...(subtitleLayout.ready && subtitleLayout.balancedWidth
-                ? { maxWidth: subtitleLayout.balancedWidth }
-                : {}),
-            }}
+            style={{ color: "hsl(var(--muted-foreground) / 0.55)" }}
           >
             The forest opens in two directions
           </motion.p>
