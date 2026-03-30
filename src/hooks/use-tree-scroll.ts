@@ -144,10 +144,10 @@ export function useTreeScroll() {
   // Handle back/forward navigation
   useEffect(() => {
     const scrollToSoilLevel = (behavior: ScrollBehavior = "smooth") => {
-      const soil = document.getElementById("teotag-guide") || document.getElementById("ground");
-      if (soil) {
-        const headerOffset = 48;
-        const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+      const el = document.getElementById("ground");
+      if (el) {
+        const headerOffset = 56;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top: Math.max(0, top), behavior });
       }
     };
@@ -177,11 +177,10 @@ export function useTreeScroll() {
   const scrollToSection = useCallback((section: TreeSection) => {
     isManualScroll.current = true;
     if (section === "ground") {
-      // Soil-level: position teotag-guide near viewport top
-      const soil = document.getElementById("teotag-guide") || document.getElementById("ground");
-      if (soil) {
-        const headerOffset = 48;
-        const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+      const el = document.getElementById("ground");
+      if (el) {
+        const headerOffset = 56;
+        const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       }
     } else {
