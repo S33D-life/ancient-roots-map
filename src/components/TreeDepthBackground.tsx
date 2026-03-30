@@ -120,6 +120,8 @@ const FloatingParticles = ({ zone, reducedMotion }: { zone: TreeZone; reducedMot
     }));
   }, [zone]);
 
+  if (reducedMotion) return null;
+
   return (
     <>
       {particles.map((p) => (
