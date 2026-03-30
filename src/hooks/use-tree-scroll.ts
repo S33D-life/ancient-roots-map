@@ -75,20 +75,26 @@ export function useTreeScroll() {
   // Handle hash on mount — if URL has a hash, scroll there instead
   useEffect(() => {
     const hash = window.location.hash.replace("#", "") as TreeSection;
-    if (hash && SECTION_IDS.includes(hash)) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById(hash);
-        if (el) {
-          if (hash === "ground") {
-            const headerOffset = 56;
-            const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-            window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
-          } else {
-            el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
-          }
-          setActiveSection(hash);
-          initialScrollDone.current = true;
-        }
+    if (!hash || !SECTION_IDS.includes(hash)) return;
+
+    const scrollToHash = () => {
+      const el = document.getElementById(hash);
+      if (!el) return false;
+      const headerOffset = 56;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
+      setActiveSection(hash);
+      initialScrollDone.current = true;
+      return true;
+    };
+
+    // Try immediately, then retry with increasing delays for first navigation
+    if (!scrollToHash()) {
+      const retries = [50, 150, 400, 800, 1500];
+      retries.forEach((ms) => {
+        setTimeout(() => {
+          if (!initialScrollDone.current) scrollToHash();
+        }, ms);
       });
     }
   }, []);
