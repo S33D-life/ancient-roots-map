@@ -97,12 +97,6 @@ const Index = () => {
         <Suspense fallback={<SectionShimmer />}>
           <GroundSection />
         </Suspense>
-
-        {/* ── Identity statement ── */}
-        <Suspense fallback={<SectionShimmer />}>
-          <IdentitySection />
-        </Suspense>
-
         {/* ── Interaction Layers — Offerings, Whispers, Tree Radio ── */}
         <Suspense fallback={<SectionShimmer />}>
           <ForestInteractionLayers />
