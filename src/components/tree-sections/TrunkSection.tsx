@@ -52,6 +52,7 @@ const TrunkSection = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="heartwood"
       className="flex flex-col items-center justify-center px-6 py-24 md:py-32 relative overflow-hidden"
     >
