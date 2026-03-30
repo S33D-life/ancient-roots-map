@@ -196,12 +196,10 @@ export function useTreeScroll() {
         const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top, behavior: "smooth" });
       }
-    }
     
     const newHash = section === "ground" ? "" : `#${section}`;
     window.history.pushState(null, "", newHash || window.location.pathname);
     setActiveSection(section);
-    }
     setTimeout(() => { isManualScroll.current = false; }, 1200);
   }, []);
 
