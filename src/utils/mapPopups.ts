@@ -109,19 +109,18 @@ export function buildPopupHtml(
       ? `<p style="margin:0;font-size:10px;color:hsl(42,30%,45%);font-family:sans-serif;opacity:0.8;">📍 /${escapeHtml(tree.what3words)}</p>`
       : "";
 
+  const totalVisits = offerings + (birdsongCount ?? 0) + (whisperCount ?? 0);
+  const visitLine = totalVisits > 0
+    ? `<p style="margin:0;font-size:10px;color:hsl(142,30%,55%);font-family:sans-serif;display:flex;align-items:center;gap:4px;">🌿 Visited ${totalVisits} time${totalVisits !== 1 ? "s" : ""}</p>`
+    : "";
+
   const html = `<div style="padding:0;font-family:'Cinzel',serif;width:260px;background:hsl(28,18%,9%);border-radius:14px;border:1px solid hsla(42,30%,30%,0.25);overflow:hidden;box-shadow:0 8px 32px hsla(0,0%,0%,0.45),0 0 0 1px hsla(42,40%,30%,0.08);animation:popIn .2s ease-out;">
     ${thumbnail}
 
     <!-- Content body -->
-    <div style="padding:14px 16px 10px;display:flex;flex-direction:column;gap:6px;position:relative;">
-      <!-- Wish + Whisper icons -->
-      <div style="position:absolute;top:-16px;right:12px;display:flex;gap:5px;">
-        <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Save to wishes" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid hsla(42,50%,45%,0.2);background:hsla(28,18%,12%,0.9);color:hsl(42,40%,52%);font-size:13px;cursor:pointer;backdrop-filter:blur(6px);transition:all .2s;box-shadow:0 2px 8px hsla(0,0%,0%,0.3);">⭐</button>
-        <a href="${whisperHref}" aria-label="Whisper to this tree" title="Whisper to this tree" style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;border:1px solid hsla(42,50%,45%,0.2);background:hsla(28,18%,12%,0.9);color:hsl(42,50%,55%);text-decoration:none;font-size:12px;backdrop-filter:blur(6px);box-shadow:0 2px 8px hsla(0,0%,0%,0.3);">🌬️</a>
-      </div>
-
+    <div style="padding:14px 16px 10px;display:flex;flex-direction:column;gap:6px;">
       <!-- Tree name -->
-      <h3 style="margin:0;padding-right:72px;font-size:16px;color:hsl(42,65%,62%);line-height:1.35;font-weight:700;letter-spacing:0.02em;">${escapeHtml(tree.name)}</h3>
+      <h3 style="margin:0;font-size:16px;color:hsl(42,65%,62%);line-height:1.35;font-weight:700;letter-spacing:0.02em;">${escapeHtml(tree.name)}</h3>
 
       <!-- Species -->
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
@@ -129,28 +128,32 @@ export function buildPopupHtml(
       <!-- Hive badge -->
       ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:2px 7px;border-radius:5px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.08);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.12);transition:all .2s;width:fit-content;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}
 
-      <!-- Metadata -->
+      <!-- Metadata + visit count -->
       ${metaLine}
+      ${visitLine}
       ${locationLine}
 
       <!-- Description -->
       ${desc}
     </div>
 
-    <!-- Divider -->
-    <div style="margin:0 16px;height:1px;background:linear-gradient(90deg,transparent,hsla(42,30%,40%,0.15),transparent);"></div>
-
-    <!-- Primary actions -->
-    <div style="padding:10px 16px;display:flex;gap:8px;">
-      <button data-checkin-tree="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" aria-label="Check in at this tree" title="Check in" style="display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:1;padding:10px 0;font-size:11px;color:hsl(142,50%,70%);background:hsla(142,40%,22%,0.25);border:1px solid hsla(142,40%,35%,0.25);border-radius:10px;cursor:pointer;font-family:sans-serif;font-weight:600;letter-spacing:0.03em;transition:all .2s;">📍 Check In</button>
-      <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;font-size:11px;color:hsl(35,20%,10%);background:linear-gradient(135deg,hsl(42,70%,48%),hsl(45,80%,55%));border-radius:10px;text-decoration:none;letter-spacing:0.03em;font-weight:700;font-family:sans-serif;box-shadow:0 2px 10px hsla(42,70%,50%,0.2);">Meet This Tree ⟶</a>
+    <!-- Primary CTA — Meet This Tree -->
+    <div style="padding:6px 16px 8px;">
+      <a href="/tree/${encodeURIComponent(tree.id)}" style="display:flex;align-items:center;justify-content:center;padding:12px 0;font-size:12px;color:hsl(35,20%,10%);background:linear-gradient(135deg,hsl(42,70%,48%),hsl(45,80%,55%));border-radius:10px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:'Cinzel',serif;box-shadow:0 2px 10px hsla(42,70%,50%,0.25);">Meet This Tree ⟶</a>
     </div>
 
-    <!-- Secondary offerings row -->
-    <div style="padding:4px 16px 14px;display:flex;gap:6px;justify-content:center;">
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:30px;font-size:9px;text-decoration:none;color:hsl(0,0%,48%);background:transparent;border:1px solid hsla(0,0%,40%,0.12);border-radius:8px;font-family:sans-serif;transition:all .15s;letter-spacing:0.02em;" title="Add Photo">📷 Photo</a>
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:30px;font-size:9px;text-decoration:none;color:hsl(0,0%,48%);background:transparent;border:1px solid hsla(0,0%,40%,0.12);border-radius:8px;font-family:sans-serif;transition:all .15s;letter-spacing:0.02em;" title="Add Song">🎵 Song</a>
-      <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:30px;font-size:9px;background:transparent;border:1px solid hsla(0,0%,40%,0.12);border-radius:8px;cursor:pointer;color:hsl(0,0%,48%);font-family:sans-serif;transition:all .15s;letter-spacing:0.02em;" title="Share">↗️ Share</button>
+    <!-- Action row — Check In · Whisper · Wish -->
+    <div style="padding:4px 16px 10px;display:flex;gap:6px;">
+      <button data-checkin-tree="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" aria-label="Check in" title="Check in" style="display:inline-flex;align-items:center;justify-content:center;gap:4px;flex:1;height:34px;font-size:10px;color:hsl(142,50%,65%);background:hsla(142,40%,22%,0.2);border:1px solid hsla(142,40%,35%,0.2);border-radius:8px;cursor:pointer;font-family:sans-serif;font-weight:600;transition:all .2s;">📍 Check In</button>
+      <a href="${whisperHref}" aria-label="Whisper" title="Whisper" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:34px;font-size:10px;text-decoration:none;color:hsl(200,30%,55%);background:transparent;border:1px solid hsla(200,30%,40%,0.15);border-radius:8px;font-family:sans-serif;transition:all .15s;">🌬️ Whisper</a>
+      <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Wish" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:34px;font-size:10px;color:hsl(42,50%,55%);background:transparent;border:1px solid hsla(42,50%,45%,0.15);border-radius:8px;cursor:pointer;font-family:sans-serif;transition:all .15s;">⭐ Wish</button>
+    </div>
+
+    <!-- Secondary row — Photo · Song · Share -->
+    <div style="padding:2px 16px 14px;display:flex;gap:6px;justify-content:center;">
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(0,0%,45%);background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Add Photo">📷 Photo</a>
+      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(0,0%,45%);background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Add Song">🎵 Song</a>
+      <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;cursor:pointer;color:hsl(0,0%,45%);font-family:sans-serif;transition:all .15s;" title="Share">↗️ Share</button>
     </div>
   </div>`;
   // Cache the result
