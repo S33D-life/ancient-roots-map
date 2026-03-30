@@ -182,7 +182,7 @@ const TreePageHero = ({
           <div className="flex items-center justify-center gap-3 mb-2">
             {checkinLight && (
               <Suspense fallback={null}>
-                <TreeCheckinStatusLight light={checkinLight} size="lg" />
+                <TreeCheckinStatusLight light={checkinLight} size="lg" showLabel timeRemaining={graceLabel} />
               </Suspense>
             )}
             <h1 className="text-3xl md:text-5xl font-serif tracking-wide leading-tight">

@@ -621,7 +621,7 @@ const TreeDetailPage = () => {
             <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
               <div className="flex items-center gap-3 min-w-0">
                 <Suspense fallback={null}>
-                  <TreeCheckinStatusLight light={checkinStatus.light} size="lg" showLabel />
+                  <TreeCheckinStatusLight light={checkinStatus.light} size="lg" showLabel timeRemaining={proximityGate.graceLabel} />
                 </Suspense>
                 {checkinStats.lastVisit && (
                   <span className="text-[10px] text-muted-foreground font-mono shrink-0">
