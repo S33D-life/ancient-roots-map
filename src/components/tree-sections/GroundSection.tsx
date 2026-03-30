@@ -31,6 +31,53 @@ const GroundSection = () => {
       <SectionAtmosphere theme="ground" />
       <Hero />
 
+      {/* ── Identity statement — above TEOTAG guide ── */}
+      <div className="relative z-20 py-12 md:py-16">
+        <div className="container mx-auto px-4 text-center max-w-3xl space-y-6">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="font-serif text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground/90 italic"
+          >
+            A living atlas of the world's most remarkable trees — mapped by people who walk among them.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto"
+          >
+            S33D maps ancient trees worldwide, gathers stories from those who visit them,
+            and rewards care with Hearts — tokens of stewardship earned by contributing to the grove.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-wrap justify-center gap-3 pt-4"
+          >
+            {[
+              { icon: MapPin, text: "Map trees" },
+              { icon: ScrollText, text: "Share stories" },
+              { icon: Heart, text: "Earn hearts" },
+              { icon: Users, text: "Join councils" },
+            ].map(({ icon: Icon, text }) => (
+              <span
+                key={text}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif border border-border/40 bg-card/50 backdrop-blur-sm text-foreground/70"
+              >
+                <Icon className="w-3.5 h-3.5 text-primary" />
+                {text}
+              </span>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
       {/* ── Soil-Level TEOTAG Guide ── */}
       <div id="teotag-guide" className="relative z-20 -mt-4 md:-mt-8 pb-8 pointer-events-none">
         <motion.div
