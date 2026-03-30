@@ -34,7 +34,7 @@ const cardVariants = {
 };
 
 const TrunkSection = () => {
-  const depth = useDepthStyle();
+  const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 3 });
 
   const titleLayout = useDepthBalancedText({
     text: "HeARTwood Library",
