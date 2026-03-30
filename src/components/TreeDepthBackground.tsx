@@ -91,43 +91,43 @@ const RootMycelium = memo(({ opacity, progress }: { opacity: number; progress: n
       xmlns="http://www.w3.org/2000/svg"
     >
       {/* Primary root trunks — thick, ancient, asymmetric */}
-      <path d="M180 500 Q160 400 200 330 Q175 260 220 200 Q195 150 240 90 Q225 50 260 10" stroke="hsl(100 22% 18%)" strokeWidth="2.5" fill="none" opacity="0.25" />
-      <path d="M180 500 Q220 420 195 350 Q235 280 210 220 Q240 165 225 120" stroke="hsl(110 18% 16%)" strokeWidth="1.8" fill="none" opacity="0.18" />
-      <path d="M180 500 Q140 430 165 370 Q130 310 155 260" stroke="hsl(95 20% 17%)" strokeWidth="1.2" fill="none" opacity="0.12" />
+      <path d="M180 500 Q160 400 200 330 Q175 260 220 200 Q195 150 240 90 Q225 50 260 10" stroke="hsl(100 30% 35%)" strokeWidth="3" fill="none" opacity="0.5" />
+      <path d="M180 500 Q220 420 195 350 Q235 280 210 220 Q240 165 225 120" stroke="hsl(110 25% 30%)" strokeWidth="2.2" fill="none" opacity="0.4" />
+      <path d="M180 500 Q140 430 165 370 Q130 310 155 260" stroke="hsl(95 28% 32%)" strokeWidth="1.5" fill="none" opacity="0.3" />
 
-      <path d="M650 500 Q630 380 670 300 Q640 220 690 150 Q665 90 710 30" stroke="hsl(90 25% 19%)" strokeWidth="3" fill="none" opacity="0.22" />
-      <path d="M650 500 Q690 400 660 320 Q700 250 675 190 Q710 140 690 90" stroke="hsl(105 20% 17%)" strokeWidth="2" fill="none" opacity="0.16" />
-      <path d="M650 500 Q610 420 640 350 Q600 290 630 240" stroke="hsl(115 18% 15%)" strokeWidth="1.3" fill="none" opacity="0.1" />
+      <path d="M650 500 Q630 380 670 300 Q640 220 690 150 Q665 90 710 30" stroke="hsl(90 32% 33%)" strokeWidth="3.5" fill="none" opacity="0.45" />
+      <path d="M650 500 Q690 400 660 320 Q700 250 675 190 Q710 140 690 90" stroke="hsl(105 25% 30%)" strokeWidth="2.5" fill="none" opacity="0.35" />
+      <path d="M650 500 Q610 420 640 350 Q600 290 630 240" stroke="hsl(115 22% 28%)" strokeWidth="1.8" fill="none" opacity="0.25" />
 
-      <path d="M1100 500 Q1080 390 1120 310 Q1090 240 1130 170 Q1110 110 1150 50" stroke="hsl(108 22% 18%)" strokeWidth="2.2" fill="none" opacity="0.2" />
-      <path d="M1100 500 Q1140 430 1110 360 Q1150 300 1125 250" stroke="hsl(95 18% 16%)" strokeWidth="1.5" fill="none" opacity="0.14" />
-      <path d="M1100 500 Q1060 440 1085 380 Q1050 330 1075 280" stroke="hsl(115 16% 15%)" strokeWidth="1" fill="none" opacity="0.09" />
+      <path d="M1100 500 Q1080 390 1120 310 Q1090 240 1130 170 Q1110 110 1150 50" stroke="hsl(108 28% 32%)" strokeWidth="2.8" fill="none" opacity="0.42" />
+      <path d="M1100 500 Q1140 430 1110 360 Q1150 300 1125 250" stroke="hsl(95 22% 28%)" strokeWidth="2" fill="none" opacity="0.3" />
+      <path d="M1100 500 Q1060 440 1085 380 Q1050 330 1075 280" stroke="hsl(115 20% 26%)" strokeWidth="1.3" fill="none" opacity="0.2" />
 
       {/* Secondary feeder roots — thinner, more organic */}
-      <path d="M400 500 Q390 430 420 380 Q405 330 435 280 Q420 240 450 200" stroke="hsl(100 20% 17%)" strokeWidth="1.2" fill="none" opacity="0.12" />
-      <path d="M900 500 Q910 420 890 360 Q920 300 900 250" stroke="hsl(110 18% 16%)" strokeWidth="1" fill="none" opacity="0.1" />
-      <path d="M1300 500 Q1280 440 1300 390 Q1275 340 1310 290" stroke="hsl(95 16% 15%)" strokeWidth="0.8" fill="none" opacity="0.08" />
+      <path d="M400 500 Q390 430 420 380 Q405 330 435 280 Q420 240 450 200" stroke="hsl(100 25% 30%)" strokeWidth="1.5" fill="none" opacity="0.28" />
+      <path d="M900 500 Q910 420 890 360 Q920 300 900 250" stroke="hsl(110 22% 28%)" strokeWidth="1.3" fill="none" opacity="0.22" />
+      <path d="M1300 500 Q1280 440 1300 390 Q1275 340 1310 290" stroke="hsl(95 20% 27%)" strokeWidth="1" fill="none" opacity="0.18" />
 
       {/* Mycelium web — horizontal connective threads at depth */}
-      <path d="M0 460 Q120 445 250 455 Q400 440 550 458 Q700 442 850 455 Q1000 440 1150 452 Q1300 445 1400 460" stroke="hsl(120 25% 22%)" strokeWidth="0.7" fill="none" opacity="0.1" />
-      <path d="M0 480 Q180 470 360 478 Q540 468 720 480 Q900 470 1080 478 Q1260 470 1400 482" stroke="hsl(110 20% 20%)" strokeWidth="0.5" fill="none" opacity="0.08" />
-      <path d="M100 430 Q280 420 460 432 Q640 418 820 430 Q1000 420 1180 435" stroke="hsl(100 22% 21%)" strokeWidth="0.4" fill="none" opacity="0.06" />
+      <path d="M0 460 Q120 445 250 455 Q400 440 550 458 Q700 442 850 455 Q1000 440 1150 452 Q1300 445 1400 460" stroke="hsl(120 30% 35%)" strokeWidth="1" fill="none" opacity="0.22" />
+      <path d="M0 480 Q180 470 360 478 Q540 468 720 480 Q900 470 1080 478 Q1260 470 1400 482" stroke="hsl(110 25% 32%)" strokeWidth="0.8" fill="none" opacity="0.18" />
+      <path d="M100 430 Q280 420 460 432 Q640 418 820 430 Q1000 420 1180 435" stroke="hsl(100 28% 33%)" strokeWidth="0.6" fill="none" opacity="0.15" />
 
-      {/* Mycelial intersection nodes — subtle living network glows */}
-      <circle cx="200" cy="330" r="3.5" fill="hsl(120 35% 30%)" opacity="0.15">
-        <animate attributeName="opacity" values="0.15;0.28;0.15" dur="6s" repeatCount="indefinite" />
+      {/* Mycelial intersection nodes — living network pulse */}
+      <circle cx="200" cy="330" r="5" fill="hsl(120 40% 40%)" opacity="0.2">
+        <animate attributeName="opacity" values="0.2;0.4;0.2" dur="6s" repeatCount="indefinite" />
       </circle>
-      <circle cx="670" cy="300" r="4" fill="hsl(90 30% 28%)" opacity="0.12">
-        <animate attributeName="opacity" values="0.12;0.22;0.12" dur="8s" repeatCount="indefinite" />
+      <circle cx="670" cy="300" r="6" fill="hsl(90 35% 38%)" opacity="0.18">
+        <animate attributeName="opacity" values="0.18;0.35;0.18" dur="8s" repeatCount="indefinite" />
       </circle>
-      <circle cx="1120" cy="310" r="3" fill="hsl(110 28% 26%)" opacity="0.1">
-        <animate attributeName="opacity" values="0.1;0.2;0.1" dur="7s" repeatCount="indefinite" />
+      <circle cx="1120" cy="310" r="4.5" fill="hsl(110 32% 36%)" opacity="0.15">
+        <animate attributeName="opacity" values="0.15;0.3;0.15" dur="7s" repeatCount="indefinite" />
       </circle>
-      <circle cx="430" cy="380" r="2.5" fill="hsl(105 32% 30%)" opacity="0.08">
-        <animate attributeName="opacity" values="0.08;0.16;0.08" dur="9s" repeatCount="indefinite" />
+      <circle cx="430" cy="380" r="4" fill="hsl(105 38% 38%)" opacity="0.12">
+        <animate attributeName="opacity" values="0.12;0.25;0.12" dur="9s" repeatCount="indefinite" />
       </circle>
-      <circle cx="890" cy="360" r="2" fill="hsl(115 25% 25%)" opacity="0.07">
-        <animate attributeName="opacity" values="0.07;0.14;0.07" dur="5.5s" repeatCount="indefinite" />
+      <circle cx="890" cy="360" r="3.5" fill="hsl(115 30% 35%)" opacity="0.1">
+        <animate attributeName="opacity" values="0.1;0.22;0.1" dur="5.5s" repeatCount="indefinite" />
       </circle>
     </svg>
   );
