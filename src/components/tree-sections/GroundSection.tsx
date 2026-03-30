@@ -21,19 +21,8 @@ const GroundSection = () => {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  // ── Pretext: balanced layout for "Arboreal Atlas" title ──
-  const atlasLayout = usePretextLayout({
-    text: "Arboreal Atlas",
-    font: '500 clamp(24px, 5vw, 30px) ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 36,
-  });
 
-  // ── Pretext: balanced layout for invitation subtitle ──
-  const subtitleLayout = usePretextLayout({
-    text: "The forest opens in two directions",
-    font: 'italic 16px ui-serif, Georgia, "Times New Roman", serif',
-    lineHeight: 26,
-  });
+
 
   
 
