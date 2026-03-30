@@ -30,6 +30,7 @@ const cardVariants = {
 };
 
 const CanopySection = () => {
+  const depth = useDepthStyle();
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 4, direction: -1 });
 
   const titleLayout = useDepthBalancedText({

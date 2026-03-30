@@ -29,6 +29,7 @@ const cardVariants = {
 };
 
 const CrownSection = () => {
+  const depth = useDepthStyle();
   const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 5, direction: -1 });
 
   const titleLayout = useDepthBalancedText({
