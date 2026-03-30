@@ -24,6 +24,7 @@ export interface SeedLibrary {
   status: string;
   verification_status: string;
   is_featured: boolean;
+  is_hidden: boolean;
   verification_count: number;
   testimonial_count: number;
   last_community_activity: string | null;

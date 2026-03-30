@@ -1,13 +1,20 @@
 /**
  * SeedCellarRoom — Standalone room for the Seed Cellar.
- * Extracted from GalleryPage.
+ * Now includes tabs for the embedded Airtable view and the new Seed Library directory.
  */
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
+import SeedLibraryDirectory from "@/components/seed-library/SeedLibraryDirectory";
+import SeedLibraryCuratorPanel from "@/components/seed-library/SeedLibraryCuratorPanel";
+import { useHasRole } from "@/hooks/use-role";
 
 const SeedCellarRoom = () => {
   const [showEmbed, setShowEmbed] = useState(false);
+  const { hasRole: isCurator } = useHasRole("curator");
+  const { hasRole: isKeeper } = useHasRole("keeper");
+  const canModerate = isCurator || isKeeper;
 
   return (
     <div className="space-y-6">
@@ -18,12 +25,12 @@ const SeedCellarRoom = () => {
         <img
           src={seedCellarWindow}
           alt="Seed Cellar"
-          className="w-full h-64 md:h-96 object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-6">
-          <h3 className="text-2xl md:text-3xl font-serif text-primary drop-shadow-lg">🌱 The Seed Cellar</h3>
-          <p className="text-sm text-foreground/70 mt-1 font-serif">
-            {showEmbed ? "Click to close" : "Enter the living data archive"}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col items-center justify-end pb-5">
+          <h3 className="text-xl md:text-2xl font-serif text-primary drop-shadow-lg">🌱 The Seed Cellar</h3>
+          <p className="text-xs text-foreground/70 mt-1 font-serif">
+            {showEmbed ? "Click to close archive" : "Enter the living data archive"}
           </p>
         </div>
       </div>
@@ -40,6 +47,28 @@ const SeedCellarRoom = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Seed Library Directory + Curator Panel */}
+      <Tabs defaultValue="directory" className="w-full">
+        <TabsList className="bg-muted/40 w-full justify-start">
+          <TabsTrigger value="directory" className="text-xs">
+            🌱 Seed Libraries
+          </TabsTrigger>
+          {canModerate && (
+            <TabsTrigger value="moderation" className="text-xs">
+              🔧 Moderation
+            </TabsTrigger>
+          )}
+        </TabsList>
+        <TabsContent value="directory" className="mt-4">
+          <SeedLibraryDirectory />
+        </TabsContent>
+        {canModerate && (
+          <TabsContent value="moderation" className="mt-4">
+            <SeedLibraryCuratorPanel />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 };
