@@ -29,7 +29,22 @@ const cardVariants = {
   }),
 };
 
-const CrownSection = () => (
+const CrownSection = () => {
+  // ── Pretext: balanced wrapping for section title ──
+  const titleLayout = usePretextLayout({
+    text: "yOur Golden Dream",
+    font: '400 clamp(30px, 5vw, 48px) ui-serif, Georgia, "Times New Roman", serif',
+    lineHeight: 52,
+  });
+
+  // ── Pretext: balanced wrapping for description ──
+  const descLayout = usePretextLayout({
+    text: "A living vision shaped by every wanderer who passes through the grove. The dream grows with the tree.",
+    font: '400 clamp(14px, 2vw, 16px) ui-serif, Georgia, "Times New Roman", serif',
+    lineHeight: 28,
+  });
+
+  return (
   <section
     id="golden-dream"
     className="min-h-screen flex flex-col items-center justify-center px-6 py-28 relative overflow-hidden"
@@ -62,13 +77,27 @@ const CrownSection = () => (
       </p>
 
       <h2
+        ref={titleLayout.containerRef}
         className="text-3xl md:text-5xl font-serif tracking-wide leading-tight"
-        style={{ color: "hsl(45 70% 62%)" }}
+        style={{
+          color: "hsl(45 70% 62%)",
+          ...(titleLayout.ready && titleLayout.balancedWidth
+            ? { maxWidth: titleLayout.balancedWidth, margin: "0 auto" }
+            : {}),
+        }}
       >
         yOur Golden Dream
       </h2>
 
-      <p className="text-muted-foreground/60 font-serif text-sm md:text-base max-w-sm mx-auto leading-[1.8]">
+      <p
+        ref={descLayout.containerRef}
+        className="text-muted-foreground/60 font-serif text-sm md:text-base max-w-sm mx-auto leading-[1.8]"
+        style={
+          descLayout.ready && descLayout.balancedWidth
+            ? { maxWidth: descLayout.balancedWidth }
+            : {}
+        }
+      >
         A living vision shaped by every wanderer who passes through the grove.
         The dream grows with the tree.
       </p>
