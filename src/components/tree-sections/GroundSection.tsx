@@ -53,19 +53,13 @@ const GroundSection = () => {
             <TeotagFace variant="masculine" size="lg" delay={2.2} className="[&_div]:w-36 [&_div]:h-36 md:[&_div]:w-44 md:[&_div]:h-44" />
           </div>
 
-          {/* Invitation text — Pretext-balanced wrapping */}
+          {/* Invitation text */}
           <motion.p
-            ref={subtitleLayout.containerRef}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.8, duration: 1, ease: "easeOut" }}
             className="font-serif text-base md:text-lg text-center max-w-xs leading-relaxed italic"
-            style={{
-              color: "hsl(var(--muted-foreground) / 0.55)",
-              ...(subtitleLayout.ready && subtitleLayout.balancedWidth
-                ? { maxWidth: subtitleLayout.balancedWidth }
-                : {}),
-            }}
+            style={{ color: "hsl(var(--muted-foreground) / 0.55)" }}
           >
             The forest opens in two directions
           </motion.p>
