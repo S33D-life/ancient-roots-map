@@ -6,6 +6,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon, Camera, Music, Lock } from "lucide-react";
+import type { CheckinLight } from "@/hooks/use-tree-checkin-status";
 import { Button } from "@/components/ui/button";
 import TreePhotoStatus from "@/components/TreePhotoStatus";
 import type { PhotoProcessingStatus } from "@/utils/backgroundPhotoProcessor";
@@ -21,6 +22,7 @@ import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 
 const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
+const TreeCheckinStatusLight = lazy(() => import("@/components/TreeCheckinStatusLight"));
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
@@ -42,6 +44,8 @@ interface TreePageHeroProps {
   presenceLocked?: boolean;
   /** Grace period label e.g. "8h 23m remaining" */
   graceLabel?: string | null;
+  /** Check-in status light */
+  checkinLight?: CheckinLight;
 }
 
 const TreePageHero = ({
@@ -60,6 +64,7 @@ const TreePageHero = ({
   onRetryPhoto,
   presenceLocked = false,
   graceLabel,
+  checkinLight,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -173,10 +178,17 @@ const TreePageHero = ({
           transition={{ duration: 0.7, delay: 0.2 }}
           className="max-w-2xl mx-auto text-center"
         >
-          {/* Name */}
-          <h1 className="text-3xl md:text-5xl font-serif tracking-wide leading-tight mb-2">
-            {tree.name}
-          </h1>
+          {/* Name + Status Light */}
+          <div className="flex items-center justify-center gap-3 mb-2">
+            {checkinLight && (
+              <Suspense fallback={null}>
+                <TreeCheckinStatusLight light={checkinLight} size="lg" />
+              </Suspense>
+            )}
+            <h1 className="text-3xl md:text-5xl font-serif tracking-wide leading-tight">
+              {tree.name}
+            </h1>
+          </div>
 
           {/* Subtitle / Archetype */}
           {(tree as any).archetype && (

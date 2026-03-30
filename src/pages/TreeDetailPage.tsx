@@ -31,6 +31,7 @@ import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
 import { useTreeSources } from "@/hooks/use-tree-sources";
 import { useTreeCheckins, useCheckinStats } from "@/hooks/use-tree-checkins";
+import { useTreeCheckinStatus } from "@/hooks/use-tree-checkin-status";
 import { useTreeContributions } from "@/hooks/use-tree-contributions";
 import { checkWhispersAtTree, type TreeWhisper } from "@/hooks/use-whispers";
 import type { Meeting, TimerStatus } from "@/components/MeetingTimer";
@@ -78,6 +79,9 @@ const ContributeSourceModal = lazy(() => import("@/components/ContributeSourceMo
 const TreeSourcesDisplay = lazy(() => import("@/components/TreeSourcesDisplay"));
 const CanopyCheckinModal = lazy(() => import("@/components/CanopyCheckinModal"));
 const CanopyVisitsTimeline = lazy(() => import("@/components/CanopyVisitsTimeline"));
+const TreeCheckinStatusLight = lazy(() => import("@/components/TreeCheckinStatusLight"));
+const QuickCheckinButton = lazy(() => import("@/components/QuickCheckinButton"));
+const TreeActivityStats = lazy(() => import("@/components/TreeActivityStats"));
 const TreeMarkets = lazy(() => import("@/components/TreeMarkets"));
 const StewardshipLeaderboard = lazy(() => import("@/components/StewardshipLeaderboard"));
 const LinkedVolumesPanel = lazy(() => import("@/components/LinkedVolumesPanel"));
@@ -192,6 +196,13 @@ const TreeDetailPage = () => {
     treeLat: tree?.latitude,
     treeLng: tree?.longitude,
     userId,
+  });
+  const checkinStatus = useTreeCheckinStatus({
+    treeId: id,
+    userId,
+    createdBy: tree?.created_by,
+    gateStatus: proximityGate.status,
+    graceMs: proximityGate.graceMs,
   });
 
   // Feed TEOTAG context with tree page data (must be above early returns)
@@ -313,6 +324,21 @@ const TreeDetailPage = () => {
         if (regions) setEcoBelonging(regions as Array<{ id: string; name: string; type: string }>);
       }
     };
+
+    // Record digital encounter (fire-and-forget, lightweight)
+    const recordPageView = async () => {
+      const sessionId = sessionStorage.getItem("s33d_session") || (() => {
+        const sid = crypto.randomUUID();
+        sessionStorage.setItem("s33d_session", sid);
+        return sid;
+      })();
+      await supabase.from("tree_page_views" as any).insert({
+        tree_id: id,
+        user_id: userId || null,
+        session_id: sessionId,
+      } as any);
+    };
+    recordPageView();
 
     Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount(), fetchEcoBelonging()]).then(() => setLoading(false));
 
@@ -511,6 +537,7 @@ const TreeDetailPage = () => {
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
           presenceLocked={!proximityGate.isUnlocked && proximityGate.status !== "checking"}
           graceLabel={proximityGate.graceLabel}
+          checkinLight={checkinStatus.light}
           onRetryPhoto={async () => {
             // Re-fetch the tree to get current photo_original_url, then re-trigger processing
             const { data: freshTree } = await supabase.from("trees").select("*").eq("id", tree.id).single();
@@ -590,18 +617,15 @@ const TreeDetailPage = () => {
               </Suspense>
             )}
 
-            {/* Visit Counter */}
-            {checkinStats && (
-              <div className="flex items-center gap-4 px-4 py-2.5 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-primary/70" />
-                  <span className="text-xs font-serif text-foreground/85">
-                    {checkinStats.totalVisits || 0} visit{(checkinStats.totalVisits || 0) !== 1 ? "s" : ""}
-                  </span>
-                </div>
+            {/* Check-In Status + Quick Action */}
+            <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
+              <div className="flex items-center gap-3 min-w-0">
+                <Suspense fallback={null}>
+                  <TreeCheckinStatusLight light={checkinStatus.light} size="lg" showLabel />
+                </Suspense>
                 {checkinStats.lastVisit && (
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    Last: {new Date(checkinStats.lastVisit).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                    Last: {new Date(checkinStats.lastVisit).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   </span>
                 )}
                 {witnessCount > 0 && (
@@ -610,7 +634,43 @@ const TreeDetailPage = () => {
                   </Suspense>
                 )}
               </div>
+              {userId && (
+                <Suspense fallback={null}>
+                  <QuickCheckinButton
+                    treeId={id!}
+                    treeName={tree.name}
+                    userId={userId}
+                    light={checkinStatus.light}
+                    variant="inline"
+                    onComplete={() => {
+                      refetchCheckins();
+                      proximityGate.recordVisitNow();
+                    }}
+                  />
+                </Suspense>
+              )}
+            </div>
+
+            {/* Offering Window Indicator */}
+            {checkinStatus.light === "flashing_green" && proximityGate.graceLabel && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[hsl(30,85%,55%)]/20 bg-[hsl(30,85%,55%)]/5 animate-pulse">
+                <span className="text-xs font-serif text-[hsl(30,85%,55%)]">
+                  ⏳ Offering window closing — {proximityGate.graceLabel}
+                </span>
+              </div>
             )}
+            {checkinStatus.light === "green" && proximityGate.graceLabel && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[hsl(142,60%,45%)]/20 bg-[hsl(142,60%,45%)]/5">
+                <span className="text-xs font-serif text-[hsl(142,60%,45%)]">
+                  ✨ Offerings open — {proximityGate.graceLabel}
+                </span>
+              </div>
+            )}
+
+            {/* Collective Activity Stats */}
+            <Suspense fallback={null}>
+              <TreeActivityStats treeId={id!} />
+            </Suspense>
 
             {/* Relationship Journey Card */}
             {userId && relationship && (

@@ -142,7 +142,7 @@ export function buildPopupHtml(
 
     <!-- Primary actions -->
     <div style="padding:10px 16px;display:flex;gap:8px;">
-      <button data-plant-seed="${escapeHtml(tree.id)}" data-tree-lat="${tree.latitude}" data-tree-lng="${tree.longitude}" aria-label="Plant seed at this tree" title="Plant a seed" style="display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:1;padding:10px 0;font-size:11px;color:hsl(120,25%,75%);background:hsla(120,25%,22%,0.25);border:1px solid hsla(120,30%,35%,0.2);border-radius:10px;cursor:pointer;font-family:sans-serif;font-weight:600;letter-spacing:0.03em;transition:all .2s;">🌱 Plant Seed</button>
+      <button data-checkin-tree="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" aria-label="Check in at this tree" title="Check in" style="display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:1;padding:10px 0;font-size:11px;color:hsl(142,50%,70%);background:hsla(142,40%,22%,0.25);border:1px solid hsla(142,40%,35%,0.25);border-radius:10px;cursor:pointer;font-family:sans-serif;font-weight:600;letter-spacing:0.03em;transition:all .2s;">📍 Check In</button>
       <a href="/tree/${encodeURIComponent(tree.id)}" style="flex:1;display:flex;align-items:center;justify-content:center;padding:10px 0;font-size:11px;color:hsl(35,20%,10%);background:linear-gradient(135deg,hsl(42,70%,48%),hsl(45,80%,55%));border-radius:10px;text-decoration:none;letter-spacing:0.03em;font-weight:700;font-family:sans-serif;box-shadow:0 2px 10px hsla(42,70%,50%,0.2);">Meet This Tree ⟶</a>
     </div>
 

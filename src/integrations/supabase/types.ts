@@ -7731,6 +7731,45 @@ export type Database = {
           },
         ]
       }
+      tree_page_views: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string | null
+          tree_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          tree_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string | null
+          tree_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_page_views_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_page_views_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_presence_completions: {
         Row: {
           completed_at: string
@@ -9218,6 +9257,7 @@ export type Database = {
           tree_id: string
         }[]
       }
+      get_tree_activity_stats: { Args: { p_tree_id: string }; Returns: Json }
       get_tree_bio_regions: {
         Args: { p_tree_id: string }
         Returns: {
