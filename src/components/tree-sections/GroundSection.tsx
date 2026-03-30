@@ -5,7 +5,7 @@
  */
 import { useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, ScrollText, Heart, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Hero from "../Hero";
 import SectionAtmosphere from "./SectionAtmosphere";
