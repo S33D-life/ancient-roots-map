@@ -6,6 +6,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Sparkles, Heart, Share2, Map, Wind, ImageIcon, Camera, Music, Lock } from "lucide-react";
+import type { CheckinLight } from "@/hooks/use-tree-checkin-status";
 import { Button } from "@/components/ui/button";
 import TreePhotoStatus from "@/components/TreePhotoStatus";
 import type { PhotoProcessingStatus } from "@/utils/backgroundPhotoProcessor";
