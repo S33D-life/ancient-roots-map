@@ -9,6 +9,7 @@ import { Sparkles, BookOpen, Cherry, Archive, ArrowRight } from "lucide-react";
 import SectionAtmosphere from "./SectionAtmosphere";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
+import { useParallaxDepth } from "@/hooks/use-parallax-depth";
 
 const ROOMS = [
   { icon: BookOpen, title: "Current Vision", description: "The living S33D blueprint", to: "/golden-dream" },
