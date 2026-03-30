@@ -9,6 +9,7 @@ import { Sparkles, BookOpen, Cherry, Archive, ArrowRight } from "lucide-react";
 import SectionAtmosphere from "./SectionAtmosphere";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
+import { useParallaxDepth } from "@/hooks/use-parallax-depth";
 
 const ROOMS = [
   { icon: BookOpen, title: "Current Vision", description: "The living S33D blueprint", to: "/golden-dream" },
@@ -29,6 +30,7 @@ const cardVariants = {
 
 const CrownSection = () => {
   const depth = useDepthStyle();
+  const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 5, direction: -1 });
 
   const titleLayout = useDepthBalancedText({
     text: "yOur Golden Dream",
@@ -46,6 +48,7 @@ const CrownSection = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="golden-dream"
       className="flex flex-col items-center justify-center px-6 py-24 md:py-32 relative overflow-hidden"
     >
@@ -57,7 +60,7 @@ const CrownSection = () => {
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="relative z-10 max-w-xl text-center space-y-6"
-        style={{ letterSpacing: depth.letterSpacing }}
+        style={{ letterSpacing: depth.letterSpacing, ...parallaxStyle }}
       >
         {/* Zone label */}
         <DepthRevealText

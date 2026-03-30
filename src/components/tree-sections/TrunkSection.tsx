@@ -9,6 +9,7 @@ import { BookOpen, Music, Wand2, ScrollText, Sprout, Lock, ArrowRight } from "lu
 import SectionAtmosphere from "./SectionAtmosphere";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
+import { useParallaxDepth } from "@/hooks/use-parallax-depth";
 
 const LIBRARY_ROOMS = [
   { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
@@ -34,6 +35,7 @@ const cardVariants = {
 
 const TrunkSection = () => {
   const depth = useDepthStyle();
+  const { sectionRef, style: parallaxStyle } = useParallaxDepth({ maxOffset: 3 });
 
   const titleLayout = useDepthBalancedText({
     text: "HeARTwood Library",
@@ -51,6 +53,7 @@ const TrunkSection = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="heartwood"
       className="flex flex-col items-center justify-center px-6 py-24 md:py-32 relative overflow-hidden"
     >
@@ -62,7 +65,7 @@ const TrunkSection = () => {
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="relative z-10 max-w-xl text-center space-y-6"
-        style={{ letterSpacing: depth.letterSpacing }}
+        style={{ letterSpacing: depth.letterSpacing, ...parallaxStyle }}
       >
         <DepthRevealText
           as="p"
