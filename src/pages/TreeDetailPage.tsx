@@ -537,6 +537,7 @@ const TreeDetailPage = () => {
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
           presenceLocked={!proximityGate.isUnlocked && proximityGate.status !== "checking"}
           graceLabel={proximityGate.graceLabel}
+          checkinLight={checkinStatus.light}
           onRetryPhoto={async () => {
             // Re-fetch the tree to get current photo_original_url, then re-trigger processing
             const { data: freshTree } = await supabase.from("trees").select("*").eq("id", tree.id).single();
