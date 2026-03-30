@@ -100,8 +100,6 @@ const CanopyBranches = ({ opacity }: { opacity: number }) => (
 
 /** Floating particles layer — fireflies / spores / light motes */
 const FloatingParticles = ({ zone, reducedMotion }: { zone: TreeZone; reducedMotion: boolean }) => {
-  if (reducedMotion) return null;
-
   const particles = useMemo(() => {
     const configs: Record<TreeZone, { count: number; color: string; size: [number, number]; yRange: [string, string] }> = {
       crown: { count: 5, color: "hsl(45 80% 65%)", size: [2, 4], yRange: ["10%", "40%"] },
