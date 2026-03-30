@@ -34,6 +34,7 @@ const ParticipationSection = lazy(() => import("@/components/HomeSections").then
 const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
 const ForestInteractionLayers = lazy(() => import("@/components/ForestInteractionLayers"));
+const TreeDepthBackground = lazy(() => import("@/components/TreeDepthBackground"));
 
 /** Minimal loading shimmer for lazy sections */
 const SectionShimmer = () => (
@@ -59,6 +60,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative">
+      {/* Scroll-driven tree depth background */}
+      <Suspense fallback={null}>
+        <TreeDepthBackground />
+      </Suspense>
+
       {/* Network Pulse — the tree's nervous system */}
       <Suspense fallback={null}>
         <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
