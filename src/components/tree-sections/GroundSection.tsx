@@ -1,6 +1,7 @@
 /**
  * GroundSection — the soil-level landing of the Living Tree scroll.
  * TEOTAG emerges here as a gentle guide offering two paths.
+ * This is the threshold — the equilibrium point of the tree.
  *
  * PRETEXT: Identity statement uses balanced wrapping.
  * DEPTH-TEXT: Spacing responds to scroll depth — ground is the equilibrium.
@@ -39,78 +40,13 @@ const GroundSection = () => {
       <SectionAtmosphere theme="ground" />
       <Hero />
 
-      {/* ── Identity statement — above TEOTAG guide ── */}
-      <div className="relative z-20 py-12 md:py-16">
-        <div
-          className="container mx-auto px-4 text-center max-w-3xl space-y-6"
-          style={{ letterSpacing: depth.letterSpacing }}
-        >
-          <DepthRevealText
-            as="p"
-            className="font-serif text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground/90 italic"
-            style={{
-              lineHeight: depth.lineHeight,
-              ...(identityLayout.ready && identityLayout.balancedWidth
-                ? { maxWidth: identityLayout.balancedWidth, margin: "0 auto" }
-                : {}),
-            }}
-          >
-            <span ref={identityLayout.containerRef as any}>
-              A living atlas of the world's most remarkable trees — mapped by people who walk among them.
-            </span>
-          </DepthRevealText>
-
-          {/* ── Wonder line — the emotional anchor ── */}
-          <DepthRevealText
-            wonder
-            delay={300}
-            className="font-serif text-lg md:text-xl mx-auto max-w-sm"
-            style={getWonderLineStyle(depth.zone)}
-          >
-            Every tree remembers who visits.
-          </DepthRevealText>
-
-          <DepthRevealText
-            delay={200}
-            className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto"
-            style={{ lineHeight: depth.lineHeight }}
-          >
-            S33D maps ancient trees worldwide, gathers stories from those who visit them,
-            and rewards care with Hearts — tokens of stewardship earned by contributing to the grove.
-          </DepthRevealText>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-wrap justify-center gap-3 pt-4"
-          >
-            {[
-              { icon: MapPin, text: "Map trees" },
-              { icon: ScrollText, text: "Share stories" },
-              { icon: Heart, text: "Earn hearts" },
-              { icon: Users, text: "Join councils" },
-            ].map(({ icon: Icon, text }) => (
-              <span
-                key={text}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif border border-border/40 bg-card/50 backdrop-blur-sm text-foreground/70"
-              >
-                <Icon className="w-3.5 h-3.5 text-primary" />
-                {text}
-              </span>
-            ))}
-          </motion.div>
-        </div>
-      </div>
-
-      {/* ── Soil-Level TEOTAG Guide ── */}
-      <div id="teotag-guide" className="relative z-20 -mt-4 md:-mt-8 pb-8 pointer-events-none">
+      {/* ── Soil-Level TEOTAG Guide — the threshold ── */}
+      <div id="teotag-guide" className="relative z-20 pb-8 pointer-events-none">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8, duration: 1.6, ease: "easeOut" }}
-          className="flex flex-col items-center gap-6 pointer-events-auto px-4"
+          className="flex flex-col items-center gap-5 pointer-events-auto px-4"
         >
           {/* TEOTAG face */}
           <div className="relative">
@@ -204,6 +140,72 @@ const GroundSection = () => {
             </button>
           </motion.div>
         </motion.div>
+      </div>
+
+      {/* ── Identity statement — below TEOTAG, grounding the user ── */}
+      <div className="relative z-20 py-10 md:py-14">
+        <div
+          className="container mx-auto px-4 text-center max-w-3xl space-y-5"
+          style={{ letterSpacing: depth.letterSpacing }}
+        >
+          <DepthRevealText
+            as="p"
+            className="font-serif text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground/80 italic"
+            style={{
+              lineHeight: depth.lineHeight,
+              ...(identityLayout.ready && identityLayout.balancedWidth
+                ? { maxWidth: identityLayout.balancedWidth, margin: "0 auto" }
+                : {}),
+            }}
+          >
+            <span ref={identityLayout.containerRef as any}>
+              A living atlas of the world's most remarkable trees — mapped by people who walk among them.
+            </span>
+          </DepthRevealText>
+
+          {/* Wonder line — the emotional anchor */}
+          <DepthRevealText
+            wonder
+            delay={300}
+            className="font-serif text-lg md:text-xl mx-auto max-w-sm"
+            style={getWonderLineStyle(depth.zone)}
+          >
+            Every tree remembers who visits.
+          </DepthRevealText>
+
+          <DepthRevealText
+            delay={200}
+            className="text-sm md:text-base text-muted-foreground/50 leading-relaxed max-w-xl mx-auto"
+            style={{ lineHeight: depth.lineHeight }}
+          >
+            S33D maps ancient trees worldwide, gathers stories from those who visit them,
+            and rewards care with Hearts — tokens of stewardship earned by contributing to the grove.
+          </DepthRevealText>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-wrap justify-center gap-2 pt-2"
+          >
+            {[
+              { icon: MapPin, text: "Map trees" },
+              { icon: ScrollText, text: "Share stories" },
+              { icon: Heart, text: "Earn hearts" },
+              { icon: Users, text: "Join councils" },
+            ].map(({ icon: Icon, text }) => (
+              <span
+                key={text}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif text-foreground/50"
+                style={{ background: "hsl(var(--foreground) / 0.03)" }}
+              >
+                <Icon className="w-3.5 h-3.5 text-primary/50" />
+                {text}
+              </span>
+            ))}
+          </motion.div>
+        </div>
       </div>
     </section>
   );
