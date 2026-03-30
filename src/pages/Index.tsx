@@ -59,7 +59,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative" style={{
+      background: "linear-gradient(to bottom, hsl(45 30% 92% / 0.04) 0%, transparent 20%, transparent 70%, hsl(25 30% 12% / 0.06) 100%)",
+    }}>
       {/* Scroll-driven tree depth background */}
       <Suspense fallback={null}>
         <TreeDepthBackground />
