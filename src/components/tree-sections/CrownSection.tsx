@@ -138,6 +138,7 @@ const CrownSection = () => {
 
     <div className="vine-divider" />
   </section>
-);
+  );
+};
 
 export default CrownSection;
