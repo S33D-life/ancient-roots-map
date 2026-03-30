@@ -79,6 +79,9 @@ const ContributeSourceModal = lazy(() => import("@/components/ContributeSourceMo
 const TreeSourcesDisplay = lazy(() => import("@/components/TreeSourcesDisplay"));
 const CanopyCheckinModal = lazy(() => import("@/components/CanopyCheckinModal"));
 const CanopyVisitsTimeline = lazy(() => import("@/components/CanopyVisitsTimeline"));
+const TreeCheckinStatusLight = lazy(() => import("@/components/TreeCheckinStatusLight"));
+const QuickCheckinButton = lazy(() => import("@/components/QuickCheckinButton"));
+const TreeActivityStats = lazy(() => import("@/components/TreeActivityStats"));
 const TreeMarkets = lazy(() => import("@/components/TreeMarkets"));
 const StewardshipLeaderboard = lazy(() => import("@/components/StewardshipLeaderboard"));
 const LinkedVolumesPanel = lazy(() => import("@/components/LinkedVolumesPanel"));
