@@ -144,25 +144,25 @@ const BarkGrain = memo(({ opacity }: { opacity: number }) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     {/* Vertical bark ridges — organic, slightly wandering */}
-    <path d="M350 0 Q355 120 345 250 Q355 380 348 500 Q356 630 350 760 Q354 840 350 900" stroke="hsl(28 25% 16%)" strokeWidth="1.2" fill="none" opacity="0.12" />
-    <path d="M380 0 Q375 100 383 220 Q372 340 380 460 Q375 580 382 700 Q377 800 380 900" stroke="hsl(25 22% 14%)" strokeWidth="0.8" fill="none" opacity="0.08" />
+    <path d="M350 0 Q355 120 345 250 Q355 380 348 500 Q356 630 350 760 Q354 840 350 900" stroke="hsl(28 30% 28%)" strokeWidth="1.8" fill="none" opacity="0.3" />
+    <path d="M380 0 Q375 100 383 220 Q372 340 380 460 Q375 580 382 700 Q377 800 380 900" stroke="hsl(25 25% 25%)" strokeWidth="1.2" fill="none" opacity="0.2" />
 
-    <path d="M700 0 Q705 150 695 300 Q708 440 698 580 Q705 720 700 900" stroke="hsl(30 28% 17%)" strokeWidth="1.5" fill="none" opacity="0.1" />
-    <path d="M720 0 Q715 130 725 270 Q712 400 720 530 Q716 670 722 900" stroke="hsl(26 20% 15%)" strokeWidth="0.7" fill="none" opacity="0.07" />
+    <path d="M700 0 Q705 150 695 300 Q708 440 698 580 Q705 720 700 900" stroke="hsl(30 32% 30%)" strokeWidth="2" fill="none" opacity="0.25" />
+    <path d="M720 0 Q715 130 725 270 Q712 400 720 530 Q716 670 722 900" stroke="hsl(26 24% 26%)" strokeWidth="1" fill="none" opacity="0.18" />
 
-    <path d="M1050 0 Q1055 110 1045 230 Q1058 360 1048 490 Q1055 620 1050 750 Q1053 830 1050 900" stroke="hsl(28 24% 16%)" strokeWidth="1" fill="none" opacity="0.09" />
+    <path d="M1050 0 Q1055 110 1045 230 Q1058 360 1048 490 Q1055 620 1050 750 Q1053 830 1050 900" stroke="hsl(28 28% 27%)" strokeWidth="1.5" fill="none" opacity="0.22" />
 
-    {/* Subtle growth rings — very faint horizontal arcs */}
-    <ellipse cx="700" cy="350" rx="280" ry="8" fill="none" stroke="hsl(30 20% 18%)" strokeWidth="0.4" opacity="0.05" />
-    <ellipse cx="700" cy="550" rx="240" ry="6" fill="none" stroke="hsl(28 18% 16%)" strokeWidth="0.3" opacity="0.04" />
+    {/* Growth rings — faint horizontal arcs */}
+    <ellipse cx="700" cy="350" rx="280" ry="8" fill="none" stroke="hsl(30 25% 28%)" strokeWidth="0.6" opacity="0.12" />
+    <ellipse cx="700" cy="550" rx="240" ry="6" fill="none" stroke="hsl(28 22% 26%)" strokeWidth="0.5" opacity="0.1" />
 
-    {/* Knot — one subtle ancient knot */}
-    <circle cx="700" cy="450" r="8" fill="none" stroke="hsl(28 30% 20%)" strokeWidth="0.6" opacity="0.06" />
-    <circle cx="700" cy="450" r="4" fill="hsl(28 25% 15%)" opacity="0.03" />
+    {/* Knot — ancient knot */}
+    <circle cx="700" cy="450" r="8" fill="none" stroke="hsl(28 35% 30%)" strokeWidth="1" opacity="0.15" />
+    <circle cx="700" cy="450" r="4" fill="hsl(28 30% 22%)" opacity="0.08" />
 
     {/* Moss accent on bark */}
-    <ellipse cx="360" cy="400" rx="12" ry="4" fill="hsl(120 22% 22%)" opacity="0.04" />
-    <ellipse cx="1045" cy="500" rx="10" ry="3" fill="hsl(130 20% 20%)" opacity="0.03" />
+    <ellipse cx="360" cy="400" rx="12" ry="4" fill="hsl(120 28% 32%)" opacity="0.1" />
+    <ellipse cx="1045" cy="500" rx="10" ry="3" fill="hsl(130 25% 30%)" opacity="0.08" />
   </svg>
 ));
 BarkGrain.displayName = "BarkGrain";
