@@ -306,7 +306,7 @@ const Hero = () => {
       {isDark ? <FairyDust /> : <FallingLeaves />}
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-16 text-center flex flex-col items-center justify-center min-h-screen">
+      <div className="relative z-10 container mx-auto px-4 py-16 text-center flex flex-col items-center justify-center min-h-[85vh]">
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Title */}
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
