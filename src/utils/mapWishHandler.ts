@@ -60,7 +60,53 @@ export function setupPopupActions(container: HTMLElement): () => void {
       return;
     }
 
-    // Plant seed button
+    // Check-in button
+    const checkinBtn = target.closest<HTMLElement>("[data-checkin-tree]");
+    if (checkinBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const treeId = checkinBtn.dataset.checkinTree;
+      if (!treeId) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.info("Sign in to check in");
+        return;
+      }
+
+      checkinBtn.style.opacity = "0.5";
+      checkinBtn.style.pointerEvents = "none";
+      checkinBtn.textContent = "⏳ Checking in...";
+
+      try {
+        const month = new Date().getMonth();
+        const seasonMap: Record<number, string> = { 0: "bare", 1: "bare", 2: "bud", 3: "bud", 4: "leaf", 5: "blossom", 6: "leaf", 7: "leaf", 8: "fruit", 9: "fruit", 10: "bare", 11: "bare" };
+
+        const { error } = await supabase.from("tree_checkins").insert({
+          tree_id: treeId,
+          user_id: user.id,
+          season_stage: seasonMap[month] || "other",
+          checkin_method: "manual",
+          privacy: "public",
+          canopy_proof: false,
+        });
+
+        if (error) throw error;
+
+        checkinBtn.textContent = "✓ Checked In";
+        checkinBtn.style.opacity = "1";
+        checkinBtn.style.background = "hsla(142,40%,30%,0.4)";
+        checkinBtn.style.borderColor = "hsla(142,50%,50%,0.5)";
+        toast.success("🌳 Checked in!", { description: checkinBtn.dataset.treeName || "Visit recorded" });
+      } catch {
+        toast.error("Check-in failed");
+        checkinBtn.style.opacity = "1";
+        checkinBtn.style.pointerEvents = "auto";
+        checkinBtn.textContent = "📍 Check In";
+      }
+      return;
+    }
+
     const seedBtn = target.closest<HTMLElement>("[data-plant-seed]");
     if (seedBtn) {
       e.preventDefault();
