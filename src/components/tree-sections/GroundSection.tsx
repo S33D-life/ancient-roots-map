@@ -1,7 +1,10 @@
 /**
  * GroundSection — the soil-level landing of the Living Tree scroll.
- * TEOTAG emerges here as a gentle guide offering two paths:
- * descend into roots (primary) or climb into the tree.
+ * TEOTAG emerges here as a gentle guide offering two paths.
+ *
+ * PRETEXT: Identity statement uses balanced wrapping.
+ * DEPTH-TEXT: Spacing responds to scroll depth — ground is the equilibrium.
+ * WONDER LINE: "mapped by people who walk among them" is the wonder moment.
  */
 import { useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -10,21 +13,26 @@ import { useNavigate } from "react-router-dom";
 import Hero from "../Hero";
 import SectionAtmosphere from "./SectionAtmosphere";
 import TeotagFace from "../TeotagFace";
-
+import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
+import DepthRevealText from "./DepthRevealText";
 
 const GroundSection = () => {
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
+  const depth = useDepthStyle();
 
   const scrollToRoots = useCallback(() => {
     const el = document.getElementById("atlas-content");
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-
-
-
-  
+  // ── Pretext: balanced wrapping for identity statement ──
+  const identityLayout = useDepthBalancedText({
+    text: "A living atlas of the world's most remarkable trees — mapped by people who walk among them.",
+    font: '400 italic clamp(18px, 3vw, 28px) ui-serif, Georgia, "Times New Roman", serif',
+    lineHeight: 36,
+    zone: depth.zone,
+  });
 
   return (
     <section id="ground" className="relative">
@@ -33,26 +41,44 @@ const GroundSection = () => {
 
       {/* ── Identity statement — above TEOTAG guide ── */}
       <div className="relative z-20 py-12 md:py-16">
-        <div className="container mx-auto px-4 text-center max-w-3xl space-y-6">
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+        <div
+          className="container mx-auto px-4 text-center max-w-3xl space-y-6"
+          style={{ letterSpacing: depth.letterSpacing }}
+        >
+          <DepthRevealText
+            as="p"
             className="font-serif text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground/90 italic"
+            style={{
+              lineHeight: depth.lineHeight,
+              ...(identityLayout.ready && identityLayout.balancedWidth
+                ? { maxWidth: identityLayout.balancedWidth, margin: "0 auto" }
+                : {}),
+            }}
           >
-            A living atlas of the world's most remarkable trees — mapped by people who walk among them.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            <span ref={identityLayout.containerRef as any}>
+              A living atlas of the world's most remarkable trees — mapped by people who walk among them.
+            </span>
+          </DepthRevealText>
+
+          {/* ── Wonder line — the emotional anchor ── */}
+          <DepthRevealText
+            wonder
+            delay={300}
+            className="font-serif text-lg md:text-xl mx-auto max-w-sm"
+            style={getWonderLineStyle(depth.zone)}
+          >
+            Every tree remembers who visits.
+          </DepthRevealText>
+
+          <DepthRevealText
+            delay={200}
             className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-xl mx-auto"
+            style={{ lineHeight: depth.lineHeight }}
           >
             S33D maps ancient trees worldwide, gathers stories from those who visit them,
             and rewards care with Hearts — tokens of stewardship earned by contributing to the grove.
-          </motion.p>
+          </DepthRevealText>
+
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -86,9 +112,8 @@ const GroundSection = () => {
           transition={{ delay: 1.8, duration: 1.6, ease: "easeOut" }}
           className="flex flex-col items-center gap-6 pointer-events-auto px-4"
         >
-          {/* TEOTAG face — masculine / elder, large and prominent */}
+          {/* TEOTAG face */}
           <div className="relative">
-            {/* Earthy glow behind face */}
             <div
               className="absolute inset-0 -inset-x-8 -inset-y-6 rounded-full pointer-events-none"
               style={{
@@ -101,15 +126,13 @@ const GroundSection = () => {
           </div>
 
           {/* Invitation text */}
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.8, duration: 1, ease: "easeOut" }}
+          <DepthRevealText
+            delay={2800}
             className="font-serif text-base md:text-lg text-center max-w-xs leading-relaxed italic"
             style={{ color: "hsl(var(--muted-foreground) / 0.55)" }}
           >
             The forest opens in two directions
-          </motion.p>
+          </DepthRevealText>
 
           {/* Two pathways */}
           <motion.div
@@ -118,7 +141,7 @@ const GroundSection = () => {
             transition={{ delay: 3.4, duration: 1 }}
             className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 mt-1"
           >
-            {/* DOWN — Explore the Roots (primary) */}
+            {/* DOWN — Explore the Roots */}
             <button
               onClick={scrollToRoots}
               className="group flex flex-col items-center gap-2 bg-transparent border-none cursor-pointer transition-all duration-300"
