@@ -178,10 +178,17 @@ const TreePageHero = ({
           transition={{ duration: 0.7, delay: 0.2 }}
           className="max-w-2xl mx-auto text-center"
         >
-          {/* Name */}
-          <h1 className="text-3xl md:text-5xl font-serif tracking-wide leading-tight mb-2">
-            {tree.name}
-          </h1>
+          {/* Name + Status Light */}
+          <div className="flex items-center justify-center gap-3 mb-2">
+            {checkinLight && (
+              <Suspense fallback={null}>
+                <TreeCheckinStatusLight light={checkinLight} size="lg" />
+              </Suspense>
+            )}
+            <h1 className="text-3xl md:text-5xl font-serif tracking-wide leading-tight">
+              {tree.name}
+            </h1>
+          </div>
 
           {/* Subtitle / Archetype */}
           {(tree as any).archetype && (
