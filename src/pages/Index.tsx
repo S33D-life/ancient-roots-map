@@ -59,7 +59,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative" style={{
+      background: "linear-gradient(to bottom, hsl(45 30% 92% / 0.04) 0%, transparent 20%, transparent 70%, hsl(25 30% 12% / 0.06) 100%)",
+    }}>
       {/* Scroll-driven tree depth background */}
       <Suspense fallback={null}>
         <TreeDepthBackground />
@@ -109,7 +111,16 @@ const Index = () => {
         <Suspense fallback={<SectionShimmer />}>
           <div id="atlas-content" className="relative overflow-hidden">
             <SectionAtmosphere theme="roots" />
-            <div className="section-divider max-w-xl mx-auto" />
+            {/* Organic root-tendril divider */}
+            <div className="relative max-w-md mx-auto my-8" aria-hidden>
+              <svg viewBox="0 0 400 24" className="w-full h-6 opacity-[0.18]" preserveAspectRatio="none">
+                <path d="M0 12 Q40 4, 80 12 T160 12 T240 12 T320 12 T400 12" fill="none" stroke="hsl(25 40% 35%)" strokeWidth="0.8" />
+                <path d="M60 12 Q90 18, 120 12 T180 14 T240 10 T300 12 T360 12" fill="none" stroke="hsl(25 35% 30%)" strokeWidth="0.5" />
+                <circle cx="200" cy="12" r="2" fill="hsl(25 40% 35% / 0.3)" />
+                <circle cx="120" cy="13" r="1.2" fill="hsl(25 40% 35% / 0.2)" />
+                <circle cx="280" cy="11" r="1.2" fill="hsl(25 40% 35% / 0.2)" />
+              </svg>
+            </div>
             <ParticipationSection />
             <SupportDiscoveryRow />
             <div className="section-divider max-w-xl mx-auto" />
