@@ -9,6 +9,7 @@ import { BookOpen, Music, Wand2, ScrollText, Sprout, Lock, ArrowRight } from "lu
 import SectionAtmosphere from "./SectionAtmosphere";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
+import { useParallaxDepth } from "@/hooks/use-parallax-depth";
 
 const LIBRARY_ROOMS = [
   { icon: Wand2, title: "Staff Room", description: "Living wooden staffs", to: "/library/staff-room" },
