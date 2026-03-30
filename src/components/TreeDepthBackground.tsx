@@ -315,12 +315,12 @@ const TreeDepthBackground = () => {
   const c = interpColor(progress);
 
   // ── Layer opacities with wide overlapping bell curves ──
-  // Roots: whisper from 0.35, peak at 0.85, full to 1.0
-  const rootOp = Math.min(1, Math.max(0, (progress - 0.35) / 0.5)) * 0.65;
-  // Bark: present from 0.15 → 0.85, peak at 0.45 (trunk center)
-  const barkOp = bellCurve(progress, 0.1, 0.45, 0.85) * 0.5;
-  // Canopy: lingers from 0 → 0.6, peak at 0.12
-  const canopyOp = Math.min(1, Math.max(0, 1 - progress / 0.55)) * 0.55;
+  // Roots: begin hinting at 0.3, strengthen from 0.5, peak near 1.0
+  const rootOp = Math.min(1, Math.max(0, (progress - 0.3) / 0.5));
+  // Bark: present from 0.1 → 0.85, peak at 0.45 (trunk center)
+  const barkOp = bellCurve(progress, 0.1, 0.45, 0.85);
+  // Canopy: strongest at top, lingers to 0.6
+  const canopyOp = Math.min(1, Math.max(0, 1 - progress / 0.55));
 
   if (!enabled) {
     return <ToggleButton enabled={enabled} onToggle={handleToggle} />;
@@ -329,24 +329,25 @@ const TreeDepthBackground = () => {
   return (
     <>
       <div
-        className="fixed inset-0 z-0 pointer-events-none"
+        className="fixed inset-0 pointer-events-none"
         aria-hidden="true"
         style={{
+          zIndex: 1,
           background: `
-            radial-gradient(ellipse at 50% ${25 + progress * 50}%, hsl(${c.h} ${c.s}% ${c.l + 4}% / 0.12), transparent 55%),
-            radial-gradient(ellipse at ${25 + progress * 25}% ${40 + progress * 35}%, hsl(${c.h} ${Math.max(8, c.s - 8)}% ${c.l + 2}% / 0.06), transparent 45%),
-            linear-gradient(to bottom, hsl(${c.h} ${c.s}% ${c.l}% / 0.02), hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 2)}% / 0.08))
+            radial-gradient(ellipse at 50% ${25 + progress * 50}%, hsl(${c.h} ${c.s}% ${c.l + 6}% / 0.25), transparent 55%),
+            radial-gradient(ellipse at ${25 + progress * 25}% ${40 + progress * 35}%, hsl(${c.h} ${Math.max(12, c.s - 5)}% ${c.l + 3}% / 0.15), transparent 50%),
+            linear-gradient(to bottom, hsl(${c.h} ${c.s}% ${c.l}% / 0.05), hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 2)}% / 0.18))
           `,
         }}
       >
         {/* Layer 1: Canopy — branches + enchanted light (top-anchored, lingers downward) */}
-        <CanopyBranches opacity={canopyOp} progress={progress} />
+        <CanopyBranches opacity={canopyOp * 0.85} progress={progress} />
 
         {/* Layer 2: Bark grain — the tree's living body (centered, fades to edges) */}
-        <BarkGrain opacity={barkOp} />
+        <BarkGrain opacity={barkOp * 0.7} />
 
         {/* Layer 3: Root mycelium — ancient network (bottom-anchored, whispers upward) */}
-        <RootMycelium opacity={rootOp} progress={progress} />
+        <RootMycelium opacity={rootOp * 0.8} progress={progress} />
 
         {/* Layer 4: Sparse floating motes — always present, color shifts with depth */}
         <FloatingMotes progress={progress} reducedMotion={reducedMotion} />
@@ -355,7 +356,7 @@ const TreeDepthBackground = () => {
         <div
           className="absolute inset-0"
           style={{
-            boxShadow: `inset 0 0 ${120 + progress * 80}px ${30 + progress * 30}px hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 3)}% / ${0.15 + progress * 0.25})`,
+            boxShadow: `inset 0 0 ${120 + progress * 80}px ${30 + progress * 30}px hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 3)}% / ${0.2 + progress * 0.3})`,
           }}
         />
       </div>
