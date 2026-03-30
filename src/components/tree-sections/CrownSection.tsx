@@ -1,12 +1,16 @@
 /**
  * CrownSection — inline "yOur Golden Dream" preview for the tree scroll.
  * Crown = brightest, most luminous section. Golden radiance + solarpunk sky.
+ *
+ * PRETEXT INTEGRATION: Section title + description use balanced wrapping
+ * via @chenglou/pretext to avoid orphan lines. CSS remains the visual truth.
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, BookOpen, Cherry, Archive, ArrowRight } from "lucide-react";
 import LeafAtmosphere from "../LeafAtmosphere";
 import SectionAtmosphere from "./SectionAtmosphere";
+import { usePretextLayout } from "@/hooks/use-pretext-layout";
 
 const ROOMS = [
   { icon: BookOpen, title: "Current Vision", description: "The living S33D blueprint", to: "/golden-dream" },
