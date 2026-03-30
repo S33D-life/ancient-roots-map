@@ -325,6 +325,21 @@ const TreeDetailPage = () => {
       }
     };
 
+    // Record digital encounter (fire-and-forget, lightweight)
+    const recordPageView = async () => {
+      const sessionId = sessionStorage.getItem("s33d_session") || (() => {
+        const sid = crypto.randomUUID();
+        sessionStorage.setItem("s33d_session", sid);
+        return sid;
+      })();
+      await supabase.from("tree_page_views" as any).insert({
+        tree_id: id,
+        user_id: userId || null,
+        session_id: sessionId,
+      } as any);
+    };
+    recordPageView();
+
     Promise.all([fetchTree(), fetchMeetings(), fetchBirdsongCount(), fetchEcoBelonging()]).then(() => setLoading(false));
 
     // Realtime subscription for photo processing updates
