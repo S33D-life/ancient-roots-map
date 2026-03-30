@@ -60,7 +60,7 @@ const CanopySection = () => {
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="relative z-10 max-w-xl text-center space-y-6"
-        style={{ letterSpacing: depth.letterSpacing }}
+        style={{ letterSpacing: depth.letterSpacing, ...parallaxStyle }}
       >
         <DepthRevealText
           as="p"
