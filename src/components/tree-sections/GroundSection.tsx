@@ -39,23 +39,6 @@ const GroundSection = () => {
           transition={{ delay: 1.8, duration: 1.6, ease: "easeOut" }}
           className="flex flex-col items-center gap-6 pointer-events-auto px-4"
         >
-          {/* Arboreal Atlas title — Pretext-balanced wrapping */}
-          <motion.h2
-            ref={atlasLayout.containerRef}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.0, duration: 1.2, ease: "easeOut" }}
-            className="font-serif text-2xl md:text-3xl text-center tracking-wide"
-            style={{
-              color: "hsl(var(--foreground) / 0.85)",
-              ...(atlasLayout.ready && atlasLayout.balancedWidth
-                ? { maxWidth: atlasLayout.balancedWidth, margin: "0 auto" }
-                : {}),
-            }}
-          >
-            Arboreal Atlas
-          </motion.h2>
-
           {/* TEOTAG face — masculine / elder, large and prominent */}
           <div className="relative">
             {/* Earthy glow behind face */}
