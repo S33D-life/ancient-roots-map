@@ -183,39 +183,39 @@ const CanopyBranches = memo(({ opacity, progress }: { opacity: number; progress:
       preserveAspectRatio="xMidYMin slice"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Left branch cluster — reaching and asymmetric */}
-      <path d="M120 0 Q155 70 135 145 Q170 210 150 285 Q185 340 165 400" stroke="hsl(138 22% 20%)" strokeWidth="3.5" fill="none" opacity="0.18" />
-      <path d="M120 0 Q90 55 110 115 Q80 165 100 220 Q75 265 95 310" stroke="hsl(148 18% 18%)" strokeWidth="2.2" fill="none" opacity="0.12" />
-      <path d="M155 145 Q200 155 240 140 Q280 130 310 145" stroke="hsl(140 20% 19%)" strokeWidth="1.5" fill="none" opacity="0.1" />
-      {/* Leaf clusters — soft, varied sizes */}
-      <ellipse cx="160" cy="150" rx="30" ry="18" fill="hsl(140 28% 22%)" opacity="0.05" />
-      <ellipse cx="105" cy="120" rx="22" ry="12" fill="hsl(150 22% 20%)" opacity="0.04" />
-      <ellipse cx="250" cy="140" rx="18" ry="10" fill="hsl(135 25% 21%)" opacity="0.035" />
-      <ellipse cx="95" cy="230" rx="16" ry="9" fill="hsl(145 20% 19%)" opacity="0.03" />
+      {/* Left branch cluster */}
+      <path d="M120 0 Q155 70 135 145 Q170 210 150 285 Q185 340 165 400" stroke="hsl(138 28% 32%)" strokeWidth="4" fill="none" opacity="0.35" />
+      <path d="M120 0 Q90 55 110 115 Q80 165 100 220 Q75 265 95 310" stroke="hsl(148 24% 30%)" strokeWidth="2.8" fill="none" opacity="0.28" />
+      <path d="M155 145 Q200 155 240 140 Q280 130 310 145" stroke="hsl(140 25% 30%)" strokeWidth="2" fill="none" opacity="0.22" />
+      {/* Leaf clusters */}
+      <ellipse cx="160" cy="150" rx="30" ry="18" fill="hsl(140 32% 30%)" opacity="0.12" />
+      <ellipse cx="105" cy="120" rx="22" ry="12" fill="hsl(150 28% 28%)" opacity="0.1" />
+      <ellipse cx="250" cy="140" rx="18" ry="10" fill="hsl(135 30% 29%)" opacity="0.09" />
+      <ellipse cx="95" cy="230" rx="16" ry="9" fill="hsl(145 25% 27%)" opacity="0.07" />
 
-      {/* Center branch — taller, reaching further */}
-      <path d="M680 0 Q710 90 690 180 Q720 260 700 340 Q730 400 710 450" stroke="hsl(132 25% 19%)" strokeWidth="3" fill="none" opacity="0.16" />
-      <path d="M680 0 Q650 70 670 140 Q640 200 660 270" stroke="hsl(142 20% 17%)" strokeWidth="2" fill="none" opacity="0.1" />
-      <path d="M690 180 Q740 190 780 175 Q820 170 850 185" stroke="hsl(136 18% 18%)" strokeWidth="1.2" fill="none" opacity="0.08" />
-      <ellipse cx="700" cy="190" rx="35" ry="20" fill="hsl(138 26% 21%)" opacity="0.045" />
-      <ellipse cx="650" cy="150" rx="20" ry="11" fill="hsl(145 22% 19%)" opacity="0.035" />
-      <ellipse cx="790" cy="178" rx="24" ry="13" fill="hsl(132 24% 20%)" opacity="0.03" />
+      {/* Center branch — taller */}
+      <path d="M680 0 Q710 90 690 180 Q720 260 700 340 Q730 400 710 450" stroke="hsl(132 30% 30%)" strokeWidth="3.5" fill="none" opacity="0.32" />
+      <path d="M680 0 Q650 70 670 140 Q640 200 660 270" stroke="hsl(142 24% 28%)" strokeWidth="2.5" fill="none" opacity="0.24" />
+      <path d="M690 180 Q740 190 780 175 Q820 170 850 185" stroke="hsl(136 22% 28%)" strokeWidth="1.5" fill="none" opacity="0.18" />
+      <ellipse cx="700" cy="190" rx="35" ry="20" fill="hsl(138 30% 28%)" opacity="0.1" />
+      <ellipse cx="650" cy="150" rx="20" ry="11" fill="hsl(145 26% 27%)" opacity="0.08" />
+      <ellipse cx="790" cy="178" rx="24" ry="13" fill="hsl(132 28% 28%)" opacity="0.07" />
 
-      {/* Right branch — shorter, lighter */}
-      <path d="M1120 0 Q1145 65 1125 135 Q1150 200 1135 270 Q1160 320 1140 370" stroke="hsl(135 22% 19%)" strokeWidth="2.5" fill="none" opacity="0.14" />
-      <path d="M1120 0 Q1095 50 1110 105 Q1085 155 1105 210" stroke="hsl(145 18% 17%)" strokeWidth="1.6" fill="none" opacity="0.09" />
-      <ellipse cx="1130" cy="140" rx="25" ry="14" fill="hsl(140 24% 20%)" opacity="0.04" />
-      <ellipse cx="1090" cy="110" rx="16" ry="9" fill="hsl(148 20% 18%)" opacity="0.03" />
+      {/* Right branch */}
+      <path d="M1120 0 Q1145 65 1125 135 Q1150 200 1135 270 Q1160 320 1140 370" stroke="hsl(135 28% 30%)" strokeWidth="3" fill="none" opacity="0.3" />
+      <path d="M1120 0 Q1095 50 1110 105 Q1085 155 1105 210" stroke="hsl(145 22% 28%)" strokeWidth="2" fill="none" opacity="0.2" />
+      <ellipse cx="1130" cy="140" rx="25" ry="14" fill="hsl(140 28% 28%)" opacity="0.09" />
+      <ellipse cx="1090" cy="110" rx="16" ry="9" fill="hsl(148 24% 26%)" opacity="0.07" />
 
-      {/* Light rays filtering through leaves — soft, golden, enchanted */}
-      <line x1="320" y1="0" x2="340" y2="450" stroke="hsl(45 55% 58%)" strokeWidth="1.2" opacity="0.03" />
-      <line x1="550" y1="0" x2="540" y2="450" stroke="hsl(48 50% 55%)" strokeWidth="0.8" opacity="0.025" />
-      <line x1="920" y1="0" x2="900" y2="450" stroke="hsl(42 50% 55%)" strokeWidth="1" opacity="0.02" />
-      <line x1="1250" y1="0" x2="1270" y2="450" stroke="hsl(50 45% 52%)" strokeWidth="0.6" opacity="0.018" />
+      {/* Light rays filtering through */}
+      <line x1="320" y1="0" x2="340" y2="450" stroke="hsl(45 60% 60%)" strokeWidth="1.5" opacity="0.08" />
+      <line x1="550" y1="0" x2="540" y2="450" stroke="hsl(48 55% 58%)" strokeWidth="1" opacity="0.06" />
+      <line x1="920" y1="0" x2="900" y2="450" stroke="hsl(42 55% 58%)" strokeWidth="1.2" opacity="0.05" />
+      <line x1="1250" y1="0" x2="1270" y2="450" stroke="hsl(50 50% 55%)" strokeWidth="0.8" opacity="0.04" />
 
-      {/* Dappled light patches — like sunlight on a forest floor far below */}
-      <ellipse cx="350" cy="300" rx="40" ry="20" fill="hsl(45 50% 55%)" opacity="0.015" />
-      <ellipse cx="850" cy="350" rx="50" ry="25" fill="hsl(48 45% 50%)" opacity="0.012" />
+      {/* Dappled light patches */}
+      <ellipse cx="350" cy="300" rx="40" ry="20" fill="hsl(45 55% 58%)" opacity="0.04" />
+      <ellipse cx="850" cy="350" rx="50" ry="25" fill="hsl(48 50% 55%)" opacity="0.03" />
     </svg>
   );
 });
