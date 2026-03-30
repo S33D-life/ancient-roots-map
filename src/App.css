@@ -158,3 +158,32 @@ body.season-winter .vine-divider { --vine-hue: 200; }
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 0.55; transform: scale(1.01); }
 }
+
+/* ── Tree Depth Background — floating particles ── */
+@keyframes tree-depth-float {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0) scale(0.8);
+  }
+  15% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-12px) scale(1.1);
+  }
+  85% {
+    opacity: 0.5;
+  }
+}
+.tree-depth-particle {
+  animation: tree-depth-float 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-depth-particle {
+    animation: none !important;
+    opacity: 0.3;
+  }
+}
