@@ -37,20 +37,25 @@ export function useTreeScroll() {
     initialScrollDone.current = false;
   }, []);
 
-  // Scroll to Ground on mount — robust multi-attempt approach
+  // Scroll to soil level (#teotag-guide) on mount — the earth threshold
+  // This is the central orientation point: Arboreal Atlas title + TEOTAG face
+  // with directional pathways visible (roots below, tree above)
   useEffect(() => {
     if (initialScrollDone.current) return;
     
-    // Check if URL has a hash — if so, skip auto-scroll to ground
+    // Check if URL has a hash — if so, skip auto-scroll to soil level
     const hash = window.location.hash.replace("#", "") as TreeSection;
     if (hash && SECTION_IDS.includes(hash)) return;
 
     const doScroll = () => {
-      const el = document.getElementById("ground");
+      // Primary target: the soil-level threshold (teotag-guide)
+      const el = document.getElementById("teotag-guide") || document.getElementById("ground");
       if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
-      window.scrollTo({ top: Math.max(0, y), behavior: "instant" as ScrollBehavior });
+      // Position the top of teotag-guide near the top of the viewport,
+      // offset slightly so a hint of the Hero remains visible above
+      const headerOffset = 48;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
       initialScrollDone.current = true;
       return true;
     };
@@ -64,10 +69,9 @@ export function useTreeScroll() {
       });
     }
 
-    const safetyScroll = () => {
-      if (initialScrollDone.current) doScroll();
-    };
-    const safetyTimer = setTimeout(safetyScroll, 2000);
+    const safetyTimer = setTimeout(() => {
+      if (!initialScrollDone.current) doScroll();
+    }, 2000);
     return () => clearTimeout(safetyTimer);
   }, []);
 
@@ -78,11 +82,12 @@ export function useTreeScroll() {
       requestAnimationFrame(() => {
         const el = document.getElementById(hash);
         if (el) {
-          // Center "ground" in viewport for trunk arrival; start-align others
           if (hash === "ground") {
-            const rect = el.getBoundingClientRect();
-            const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
-            window.scrollTo({ top: Math.max(0, y), behavior: "instant" as ScrollBehavior });
+            // Soil-level: position teotag-guide near viewport top
+            const soil = document.getElementById("teotag-guide") || el;
+            const headerOffset = 48;
+            const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+            window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
           } else {
             el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
           }
@@ -143,29 +148,29 @@ export function useTreeScroll() {
 
   // Handle back/forward navigation
   useEffect(() => {
+    const scrollToSoilLevel = (behavior: ScrollBehavior = "smooth") => {
+      const soil = document.getElementById("teotag-guide") || document.getElementById("ground");
+      if (soil) {
+        const headerOffset = 48;
+        const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top: Math.max(0, top), behavior });
+      }
+    };
+
     const onPopState = () => {
       const hash = window.location.hash.replace("#", "") as TreeSection;
       if (hash && SECTION_IDS.includes(hash)) {
         isManualScroll.current = true;
-        const el = document.getElementById(hash);
-        if (el) {
-          if (hash === "ground") {
-            const rect = el.getBoundingClientRect();
-            const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
-            window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-          } else {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
+        if (hash === "ground") {
+          scrollToSoilLevel("smooth");
+        } else {
+          const el = document.getElementById(hash);
+          el?.scrollIntoView({ behavior: "smooth", block: "start" });
         }
         setTimeout(() => { isManualScroll.current = false; }, 1000);
       } else {
         isManualScroll.current = true;
-        const el = document.getElementById("ground");
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
-          window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-        }
+        scrollToSoilLevel("smooth");
         setTimeout(() => { isManualScroll.current = false; }, 1000);
       }
     };
@@ -176,23 +181,26 @@ export function useTreeScroll() {
 
   const scrollToSection = useCallback((section: TreeSection) => {
     isManualScroll.current = true;
-    const el = document.getElementById(section);
-    if (el) {
-      if (section === "ground") {
-        // Center ground in viewport for trunk-arrival feel
-        const rect = el.getBoundingClientRect();
-        const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
-        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-      } else {
+    if (section === "ground") {
+      // Soil-level: position teotag-guide near viewport top
+      const soil = document.getElementById("teotag-guide") || document.getElementById("ground");
+      if (soil) {
+        const headerOffset = 48;
+        const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      }
+    } else {
+      const el = document.getElementById(section);
+      if (el) {
         const headerOffset = 64;
         const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top, behavior: "smooth" });
       }
-      
-      const newHash = section === "ground" ? "" : `#${section}`;
-      window.history.pushState(null, "", newHash || window.location.pathname);
-      setActiveSection(section);
     }
+    
+    const newHash = section === "ground" ? "" : `#${section}`;
+    window.history.pushState(null, "", newHash || window.location.pathname);
+    setActiveSection(section);
     setTimeout(() => { isManualScroll.current = false; }, 1200);
   }, []);
 
