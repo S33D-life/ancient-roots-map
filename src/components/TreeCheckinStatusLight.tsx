@@ -14,28 +14,34 @@ interface TreeCheckinStatusLightProps {
   light: CheckinLight;
   size?: "sm" | "md" | "lg";
   showLabel?: boolean;
+  /** Optional formatted time remaining, e.g. "45m" */
+  timeRemaining?: string | null;
   className?: string;
 }
 
-const LIGHT_CONFIG: Record<CheckinLight, { color: string; label: string; animate: boolean }> = {
+const LIGHT_CONFIG: Record<CheckinLight, { color: string; label: string; hint: string; animate: boolean }> = {
   red: {
     color: "bg-destructive/70",
-    label: "Not yet visited",
+    label: "You haven't visited yet",
+    hint: "Check in to begin your connection",
     animate: false,
   },
   orange: {
     color: "bg-[hsl(30,85%,55%)]",
-    label: "Previously visited",
+    label: "You've been here before",
+    hint: "Check in again to leave an offering",
     animate: false,
   },
   green: {
     color: "bg-[hsl(142,60%,45%)]",
-    label: "Active — offerings open",
+    label: "You are here — offering window open",
+    hint: "",
     animate: false,
   },
   flashing_green: {
     color: "bg-[hsl(142,60%,45%)]",
-    label: "Window closing soon",
+    label: "Last chance — offering window closing soon",
+    hint: "",
     animate: true,
   },
 };
@@ -56,13 +62,20 @@ export default function TreeCheckinStatusLight({
   light,
   size = "md",
   showLabel = false,
+  timeRemaining,
   className,
 }: TreeCheckinStatusLightProps) {
   const config = LIGHT_CONFIG[light];
 
+  const labelText = (light === "green" && timeRemaining)
+    ? `You are here — ${timeRemaining} remaining`
+    : (light === "flashing_green" && timeRemaining)
+      ? `Less than ${timeRemaining} to leave an offering`
+      : config.label;
+
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
-      <div className={cn("relative flex items-center justify-center", RING_SIZE_MAP[size])}>
+      <div className={cn("relative flex items-center justify-center shrink-0", RING_SIZE_MAP[size])}>
         {/* Outer glow ring for green states */}
         {(light === "green" || light === "flashing_green") && (
           <div
@@ -84,9 +97,19 @@ export default function TreeCheckinStatusLight({
         />
       </div>
       {showLabel && (
-        <span className="text-[10px] font-serif text-muted-foreground leading-tight">
-          {config.label}
-        </span>
+        <div className="flex flex-col gap-0">
+          <span className={cn(
+            "text-[11px] font-serif leading-tight",
+            light === "flashing_green" ? "text-[hsl(142,60%,55%)] animate-pulse" : "text-muted-foreground"
+          )}>
+            {labelText}
+          </span>
+          {config.hint && (light === "red" || light === "orange") && (
+            <span className="text-[10px] font-serif text-muted-foreground/60 leading-tight">
+              {config.hint}
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
