@@ -44,6 +44,8 @@ interface TreePageHeroProps {
   presenceLocked?: boolean;
   /** Grace period label e.g. "8h 23m remaining" */
   graceLabel?: string | null;
+  /** Check-in status light */
+  checkinLight?: CheckinLight;
 }
 
 const TreePageHero = ({
