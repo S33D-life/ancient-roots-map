@@ -80,10 +80,8 @@ export function useTreeScroll() {
         const el = document.getElementById(hash);
         if (el) {
           if (hash === "ground") {
-            // Soil-level: position teotag-guide near viewport top
-            const soil = document.getElementById("teotag-guide") || el;
-            const headerOffset = 48;
-            const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+            const headerOffset = 56;
+            const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
             window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
           } else {
             el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
