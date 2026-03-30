@@ -9,6 +9,7 @@ import { Leaf, Users, ScrollText, Podcast, CalendarDays, ArrowRight } from "luci
 import SectionAtmosphere from "./SectionAtmosphere";
 import { useDepthBalancedText, useDepthStyle, getWonderLineStyle } from "@/hooks/use-depth-text";
 import DepthRevealText from "./DepthRevealText";
+import { useParallaxDepth } from "@/hooks/use-parallax-depth";
 
 const COUNCIL_LINKS = [
   { icon: ScrollText, title: "Council Records", description: "Past councils & decisions", to: "/council-of-life" },
