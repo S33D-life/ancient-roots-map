@@ -187,3 +187,25 @@ body.season-winter .vine-divider { --vine-hue: 200; }
     opacity: 0.3;
   }
 }
+
+/* ── Depth-aware wonder lines ── */
+.depth-wonder-line {
+  position: relative;
+  font-style: italic;
+  transition: color 0.6s ease, letter-spacing 0.6s ease;
+}
+.depth-wonder-line::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--primary) / 0.15),
+    transparent
+  );
+  pointer-events: none;
+}
