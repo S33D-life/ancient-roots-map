@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Hero from "../Hero";
 import SectionAtmosphere from "./SectionAtmosphere";
 import TeotagFace from "../TeotagFace";
-import { usePretextLayout } from "@/hooks/use-pretext-layout";
+
 
 const GroundSection = () => {
   const navigate = useNavigate();
