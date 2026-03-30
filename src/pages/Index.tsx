@@ -29,7 +29,7 @@ const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
 const WisdomOfTheGrove = lazy(() => import("@/components/WisdomOfTheGrove").then(m => ({ default: m.WisdomOfTheGrove })));
 const TetolBridge = lazy(() => import("@/components/TetolBridge"));
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
-const IdentitySection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.IdentitySection })));
+
 const ParticipationSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.ParticipationSection })));
 const SupportDiscoveryRow = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.SupportDiscoveryRow })));
 const TetolNavSection = lazy(() => import("@/components/HomeSections").then(m => ({ default: m.TetolNavSection })));
