@@ -163,17 +163,17 @@ body.season-winter .vine-divider { --vine-hue: 200; }
 @keyframes tree-depth-float {
   0%, 100% {
     opacity: 0;
-    transform: translateY(0) scale(0.8);
+    transform: translateY(0) scale(0.7);
   }
-  15% {
-    opacity: 0.6;
+  20% {
+    opacity: 0.4;
   }
   50% {
-    opacity: 0.9;
-    transform: translateY(-12px) scale(1.1);
+    opacity: 0.6;
+    transform: translateY(-8px) scale(1);
   }
-  85% {
-    opacity: 0.5;
+  80% {
+    opacity: 0.35;
   }
 }
 .tree-depth-particle {

@@ -1,149 +1,272 @@
 /**
  * TreeDepthBackground — a fixed, scroll-driven atmospheric background
- * that transitions through tree zones as the user climbs or descends.
+ * that renders a single continuous ancient tree organism the user moves through.
  *
- * Layers:
- * 1. Base gradient that shifts hue/luminosity per zone
- * 2. SVG root tendrils (visible at bottom / roots zone)
- * 3. SVG branch/canopy silhouettes (visible at top / crown zone)
- * 4. Parallax particles (fireflies in trunk, spores in roots, light rays in crown)
+ * Architecture:
+ * 1. Interpolated base gradient (continuous color flow, no thresholds)
+ * 2. SVG root mycelium network (fades in from ground, fully present in roots)
+ * 3. SVG bark/heartwood grain (strongest in trunk, whispers outward)
+ * 4. SVG canopy branches + light filtering (strongest in crown/canopy, lingers below)
+ * 5. Sparse floating motes (zone-tinted, very few)
+ * 6. Depth vignette
  *
- * All layers are pointer-events-none. Respects prefers-reduced-motion.
- * User can toggle off via a small button.
+ * All layers overlap significantly so the tree feels whole.
+ * pointer-events-none. Respects prefers-reduced-motion. User toggle persisted.
  */
-import { memo, useEffect, useState, useMemo } from "react";
-import { useScrollDepth, type TreeZone } from "@/hooks/use-scroll-depth";
+import { memo, useEffect, useState, useMemo, useRef, useCallback } from "react";
 
-// ── Zone color definitions (HSL components) ──
-const ZONE_COLORS: Record<TreeZone, { h: number; s: number; l: number }> = {
-  crown: { h: 45, s: 70, l: 12 },
-  canopy: { h: 140, s: 30, l: 10 },
-  trunk: { h: 28, s: 35, l: 10 },
-  ground: { h: 80, s: 15, l: 10 },
-  roots: { h: 20, s: 20, l: 6 },
-};
+// ── Inline scroll depth (avoids extra module, RAF-throttled) ──
+function useScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  const raf = useRef(0);
+  const last = useRef(-1);
 
-function lerpColor(a: typeof ZONE_COLORS.crown, b: typeof ZONE_COLORS.crown, t: number) {
-  return {
-    h: a.h + (b.h - a.h) * t,
-    s: a.s + (b.s - a.s) * t,
-    l: a.l + (b.l - a.l) * t,
-  };
+  const tick = useCallback(() => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    if (Math.abs(p - last.current) > 0.001) {
+      last.current = p;
+      setProgress(p);
+    }
+    raf.current = 0;
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => { if (!raf.current) raf.current = requestAnimationFrame(tick); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    tick();
+    return () => { window.removeEventListener("scroll", onScroll); if (raf.current) cancelAnimationFrame(raf.current); };
+  }, [tick]);
+
+  return progress;
 }
 
-function getInterpolatedColor(progress: number) {
-  const zones: TreeZone[] = ["crown", "canopy", "trunk", "ground", "roots"];
-  const stops = [0, 0.2, 0.45, 0.65, 1];
+// ── Smooth color interpolation across 5 anchor points ──
+type HSL = { h: number; s: number; l: number };
+const ANCHORS: { at: number; color: HSL }[] = [
+  { at: 0,    color: { h: 45,  s: 65, l: 11 } },  // crown — warm gold
+  { at: 0.2,  color: { h: 130, s: 28, l: 10 } },  // canopy — forest green
+  { at: 0.45, color: { h: 28,  s: 32, l: 10 } },  // trunk — warm amber
+  { at: 0.65, color: { h: 60,  s: 12, l: 9  } },  // ground — neutral earth
+  { at: 1,    color: { h: 18,  s: 18, l: 6  } },  // roots — deep loam
+];
 
-  for (let i = 0; i < stops.length - 1; i++) {
-    if (progress <= stops[i + 1]) {
-      const t = (progress - stops[i]) / (stops[i + 1] - stops[i]);
-      return lerpColor(ZONE_COLORS[zones[i]], ZONE_COLORS[zones[i + 1]], t);
+function interpColor(p: number): HSL {
+  for (let i = 0; i < ANCHORS.length - 1; i++) {
+    if (p <= ANCHORS[i + 1].at) {
+      const t = (p - ANCHORS[i].at) / (ANCHORS[i + 1].at - ANCHORS[i].at);
+      const a = ANCHORS[i].color, b = ANCHORS[i + 1].color;
+      return { h: a.h + (b.h - a.h) * t, s: a.s + (b.s - a.s) * t, l: a.l + (b.l - a.l) * t };
     }
   }
-  return ZONE_COLORS.roots;
+  return ANCHORS[ANCHORS.length - 1].color;
 }
 
-// ── SVG Layers ──
-const RootTendrils = ({ opacity }: { opacity: number }) => (
+/** Smooth opacity curve: rises from `start`, peaks at `peak`, fades after `end` */
+function bellCurve(p: number, start: number, peak: number, end: number): number {
+  if (p < start || p > end) return 0;
+  if (p <= peak) return (p - start) / (peak - start);
+  return (end - p) / (end - peak);
+}
+
+// ══════════════════════════════════════════════════
+// SVG LAYERS — designed for overlap and continuity
+// ══════════════════════════════════════════════════
+
+/** Mycelium root network — bottom-anchored, deep and branching */
+const RootMycelium = memo(({ opacity, progress }: { opacity: number; progress: number }) => {
+  // Slow parallax: roots shift slightly upward as user descends
+  const drift = -progress * 15;
+  return (
+    <svg
+      className="absolute bottom-0 left-0 w-full will-change-transform"
+      style={{
+        height: "55%",
+        opacity,
+        transform: `translateY(${drift}px)`,
+        transition: "opacity 1.2s ease",
+      }}
+      viewBox="0 0 1400 500"
+      preserveAspectRatio="xMidYMax slice"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Primary root trunks — thick, ancient, asymmetric */}
+      <path d="M180 500 Q160 400 200 330 Q175 260 220 200 Q195 150 240 90 Q225 50 260 10" stroke="hsl(100 22% 18%)" strokeWidth="2.5" fill="none" opacity="0.25" />
+      <path d="M180 500 Q220 420 195 350 Q235 280 210 220 Q240 165 225 120" stroke="hsl(110 18% 16%)" strokeWidth="1.8" fill="none" opacity="0.18" />
+      <path d="M180 500 Q140 430 165 370 Q130 310 155 260" stroke="hsl(95 20% 17%)" strokeWidth="1.2" fill="none" opacity="0.12" />
+
+      <path d="M650 500 Q630 380 670 300 Q640 220 690 150 Q665 90 710 30" stroke="hsl(90 25% 19%)" strokeWidth="3" fill="none" opacity="0.22" />
+      <path d="M650 500 Q690 400 660 320 Q700 250 675 190 Q710 140 690 90" stroke="hsl(105 20% 17%)" strokeWidth="2" fill="none" opacity="0.16" />
+      <path d="M650 500 Q610 420 640 350 Q600 290 630 240" stroke="hsl(115 18% 15%)" strokeWidth="1.3" fill="none" opacity="0.1" />
+
+      <path d="M1100 500 Q1080 390 1120 310 Q1090 240 1130 170 Q1110 110 1150 50" stroke="hsl(108 22% 18%)" strokeWidth="2.2" fill="none" opacity="0.2" />
+      <path d="M1100 500 Q1140 430 1110 360 Q1150 300 1125 250" stroke="hsl(95 18% 16%)" strokeWidth="1.5" fill="none" opacity="0.14" />
+      <path d="M1100 500 Q1060 440 1085 380 Q1050 330 1075 280" stroke="hsl(115 16% 15%)" strokeWidth="1" fill="none" opacity="0.09" />
+
+      {/* Secondary feeder roots — thinner, more organic */}
+      <path d="M400 500 Q390 430 420 380 Q405 330 435 280 Q420 240 450 200" stroke="hsl(100 20% 17%)" strokeWidth="1.2" fill="none" opacity="0.12" />
+      <path d="M900 500 Q910 420 890 360 Q920 300 900 250" stroke="hsl(110 18% 16%)" strokeWidth="1" fill="none" opacity="0.1" />
+      <path d="M1300 500 Q1280 440 1300 390 Q1275 340 1310 290" stroke="hsl(95 16% 15%)" strokeWidth="0.8" fill="none" opacity="0.08" />
+
+      {/* Mycelium web — horizontal connective threads at depth */}
+      <path d="M0 460 Q120 445 250 455 Q400 440 550 458 Q700 442 850 455 Q1000 440 1150 452 Q1300 445 1400 460" stroke="hsl(120 25% 22%)" strokeWidth="0.7" fill="none" opacity="0.1" />
+      <path d="M0 480 Q180 470 360 478 Q540 468 720 480 Q900 470 1080 478 Q1260 470 1400 482" stroke="hsl(110 20% 20%)" strokeWidth="0.5" fill="none" opacity="0.08" />
+      <path d="M100 430 Q280 420 460 432 Q640 418 820 430 Q1000 420 1180 435" stroke="hsl(100 22% 21%)" strokeWidth="0.4" fill="none" opacity="0.06" />
+
+      {/* Mycelial intersection nodes — subtle living network glows */}
+      <circle cx="200" cy="330" r="3.5" fill="hsl(120 35% 30%)" opacity="0.15">
+        <animate attributeName="opacity" values="0.15;0.28;0.15" dur="6s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="670" cy="300" r="4" fill="hsl(90 30% 28%)" opacity="0.12">
+        <animate attributeName="opacity" values="0.12;0.22;0.12" dur="8s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="1120" cy="310" r="3" fill="hsl(110 28% 26%)" opacity="0.1">
+        <animate attributeName="opacity" values="0.1;0.2;0.1" dur="7s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="430" cy="380" r="2.5" fill="hsl(105 32% 30%)" opacity="0.08">
+        <animate attributeName="opacity" values="0.08;0.16;0.08" dur="9s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="890" cy="360" r="2" fill="hsl(115 25% 25%)" opacity="0.07">
+        <animate attributeName="opacity" values="0.07;0.14;0.07" dur="5.5s" repeatCount="indefinite" />
+      </circle>
+    </svg>
+  );
+});
+RootMycelium.displayName = "RootMycelium";
+
+/** Bark / heartwood grain — vertical wood-flow texture for the trunk zone */
+const BarkGrain = memo(({ opacity }: { opacity: number }) => (
   <svg
-    className="absolute bottom-0 left-0 w-full"
-    style={{ height: "45%", opacity, transition: "opacity 0.8s ease" }}
-    viewBox="0 0 1200 400"
-    preserveAspectRatio="xMidYMax slice"
+    className="absolute inset-0 w-full h-full"
+    style={{ opacity, transition: "opacity 1s ease" }}
+    viewBox="0 0 1400 900"
+    preserveAspectRatio="xMidYMid slice"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Main root tendrils growing upward from bottom */}
-    <path d="M200 400 Q180 320 220 260 Q200 200 240 160 Q220 120 250 80" stroke="hsl(120 25% 20%)" strokeWidth="2" fill="none" opacity="0.3" />
-    <path d="M200 400 Q230 340 210 280 Q240 220 220 170" stroke="hsl(100 20% 18%)" strokeWidth="1.5" fill="none" opacity="0.2" />
-    <path d="M600 400 Q580 300 620 240 Q590 180 630 120 Q610 80 640 40" stroke="hsl(90 30% 22%)" strokeWidth="2.5" fill="none" opacity="0.25" />
-    <path d="M600 400 Q640 330 610 260 Q650 200 620 150" stroke="hsl(110 20% 19%)" strokeWidth="1.5" fill="none" opacity="0.18" />
-    <path d="M1000 400 Q980 310 1020 250 Q990 190 1030 130" stroke="hsl(120 22% 20%)" strokeWidth="2" fill="none" opacity="0.22" />
-    <path d="M1000 400 Q1030 350 1010 290 Q1040 230 1020 180" stroke="hsl(100 18% 17%)" strokeWidth="1.2" fill="none" opacity="0.15" />
-    {/* Mycelium web at base */}
-    <path d="M100 390 Q300 370 500 385 Q700 375 900 390 Q1050 380 1200 395" stroke="hsl(120 30% 25%)" strokeWidth="0.8" fill="none" opacity="0.12" />
-    <path d="M0 395 Q200 380 400 392 Q600 382 800 395 Q1000 385 1200 398" stroke="hsl(110 25% 22%)" strokeWidth="0.6" fill="none" opacity="0.1" />
-    {/* Node dots */}
-    <circle cx="220" cy="260" r="3" fill="hsl(120 40% 35%)" opacity="0.2" />
-    <circle cx="620" cy="240" r="4" fill="hsl(90 35% 30%)" opacity="0.15" />
-    <circle cx="1020" cy="250" r="3" fill="hsl(110 30% 28%)" opacity="0.18" />
+    {/* Vertical bark ridges — organic, slightly wandering */}
+    <path d="M350 0 Q355 120 345 250 Q355 380 348 500 Q356 630 350 760 Q354 840 350 900" stroke="hsl(28 25% 16%)" strokeWidth="1.2" fill="none" opacity="0.12" />
+    <path d="M380 0 Q375 100 383 220 Q372 340 380 460 Q375 580 382 700 Q377 800 380 900" stroke="hsl(25 22% 14%)" strokeWidth="0.8" fill="none" opacity="0.08" />
+
+    <path d="M700 0 Q705 150 695 300 Q708 440 698 580 Q705 720 700 900" stroke="hsl(30 28% 17%)" strokeWidth="1.5" fill="none" opacity="0.1" />
+    <path d="M720 0 Q715 130 725 270 Q712 400 720 530 Q716 670 722 900" stroke="hsl(26 20% 15%)" strokeWidth="0.7" fill="none" opacity="0.07" />
+
+    <path d="M1050 0 Q1055 110 1045 230 Q1058 360 1048 490 Q1055 620 1050 750 Q1053 830 1050 900" stroke="hsl(28 24% 16%)" strokeWidth="1" fill="none" opacity="0.09" />
+
+    {/* Subtle growth rings — very faint horizontal arcs */}
+    <ellipse cx="700" cy="350" rx="280" ry="8" fill="none" stroke="hsl(30 20% 18%)" strokeWidth="0.4" opacity="0.05" />
+    <ellipse cx="700" cy="550" rx="240" ry="6" fill="none" stroke="hsl(28 18% 16%)" strokeWidth="0.3" opacity="0.04" />
+
+    {/* Knot — one subtle ancient knot */}
+    <circle cx="700" cy="450" r="8" fill="none" stroke="hsl(28 30% 20%)" strokeWidth="0.6" opacity="0.06" />
+    <circle cx="700" cy="450" r="4" fill="hsl(28 25% 15%)" opacity="0.03" />
+
+    {/* Moss accent on bark */}
+    <ellipse cx="360" cy="400" rx="12" ry="4" fill="hsl(120 22% 22%)" opacity="0.04" />
+    <ellipse cx="1045" cy="500" rx="10" ry="3" fill="hsl(130 20% 20%)" opacity="0.03" />
   </svg>
-);
+));
+BarkGrain.displayName = "BarkGrain";
 
-const CanopyBranches = ({ opacity }: { opacity: number }) => (
-  <svg
-    className="absolute top-0 left-0 w-full"
-    style={{ height: "40%", opacity, transition: "opacity 0.8s ease" }}
-    viewBox="0 0 1200 350"
-    preserveAspectRatio="xMidYMin slice"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* Branch silhouettes reaching down from top */}
-    <path d="M150 0 Q180 60 160 120 Q190 170 170 220 Q200 260 180 300" stroke="hsl(140 25% 22%)" strokeWidth="3" fill="none" opacity="0.2" />
-    <path d="M150 0 Q120 50 140 100 Q110 140 130 180" stroke="hsl(150 20% 20%)" strokeWidth="2" fill="none" opacity="0.15" />
-    {/* Leaf clusters */}
-    <ellipse cx="170" cy="130" rx="25" ry="15" fill="hsl(140 30% 25%)" opacity="0.06" />
-    <ellipse cx="130" cy="100" rx="18" ry="10" fill="hsl(150 25% 22%)" opacity="0.05" />
+/** Canopy branches + leaf light — top-anchored, enchanted and asymmetric */
+const CanopyBranches = memo(({ opacity, progress }: { opacity: number; progress: number }) => {
+  const drift = progress * 10; // branches drift slightly downward as user climbs
+  return (
+    <svg
+      className="absolute top-0 left-0 w-full will-change-transform"
+      style={{
+        height: "50%",
+        opacity,
+        transform: `translateY(${drift}px)`,
+        transition: "opacity 1.2s ease",
+      }}
+      viewBox="0 0 1400 450"
+      preserveAspectRatio="xMidYMin slice"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Left branch cluster — reaching and asymmetric */}
+      <path d="M120 0 Q155 70 135 145 Q170 210 150 285 Q185 340 165 400" stroke="hsl(138 22% 20%)" strokeWidth="3.5" fill="none" opacity="0.18" />
+      <path d="M120 0 Q90 55 110 115 Q80 165 100 220 Q75 265 95 310" stroke="hsl(148 18% 18%)" strokeWidth="2.2" fill="none" opacity="0.12" />
+      <path d="M155 145 Q200 155 240 140 Q280 130 310 145" stroke="hsl(140 20% 19%)" strokeWidth="1.5" fill="none" opacity="0.1" />
+      {/* Leaf clusters — soft, varied sizes */}
+      <ellipse cx="160" cy="150" rx="30" ry="18" fill="hsl(140 28% 22%)" opacity="0.05" />
+      <ellipse cx="105" cy="120" rx="22" ry="12" fill="hsl(150 22% 20%)" opacity="0.04" />
+      <ellipse cx="250" cy="140" rx="18" ry="10" fill="hsl(135 25% 21%)" opacity="0.035" />
+      <ellipse cx="95" cy="230" rx="16" ry="9" fill="hsl(145 20% 19%)" opacity="0.03" />
 
-    <path d="M700 0 Q720 80 690 150 Q720 210 700 280" stroke="hsl(130 28% 20%)" strokeWidth="2.5" fill="none" opacity="0.18" />
-    <path d="M700 0 Q670 60 690 120 Q660 170 680 220" stroke="hsl(145 22% 19%)" strokeWidth="1.8" fill="none" opacity="0.12" />
-    <ellipse cx="700" cy="160" rx="30" ry="18" fill="hsl(140 28% 23%)" opacity="0.05" />
+      {/* Center branch — taller, reaching further */}
+      <path d="M680 0 Q710 90 690 180 Q720 260 700 340 Q730 400 710 450" stroke="hsl(132 25% 19%)" strokeWidth="3" fill="none" opacity="0.16" />
+      <path d="M680 0 Q650 70 670 140 Q640 200 660 270" stroke="hsl(142 20% 17%)" strokeWidth="2" fill="none" opacity="0.1" />
+      <path d="M690 180 Q740 190 780 175 Q820 170 850 185" stroke="hsl(136 18% 18%)" strokeWidth="1.2" fill="none" opacity="0.08" />
+      <ellipse cx="700" cy="190" rx="35" ry="20" fill="hsl(138 26% 21%)" opacity="0.045" />
+      <ellipse cx="650" cy="150" rx="20" ry="11" fill="hsl(145 22% 19%)" opacity="0.035" />
+      <ellipse cx="790" cy="178" rx="24" ry="13" fill="hsl(132 24% 20%)" opacity="0.03" />
 
-    <path d="M1050 0 Q1070 70 1040 140 Q1060 200 1040 260" stroke="hsl(135 25% 21%)" strokeWidth="2" fill="none" opacity="0.15" />
-    <ellipse cx="1040" cy="150" rx="20" ry="12" fill="hsl(145 25% 20%)" opacity="0.04" />
+      {/* Right branch — shorter, lighter */}
+      <path d="M1120 0 Q1145 65 1125 135 Q1150 200 1135 270 Q1160 320 1140 370" stroke="hsl(135 22% 19%)" strokeWidth="2.5" fill="none" opacity="0.14" />
+      <path d="M1120 0 Q1095 50 1110 105 Q1085 155 1105 210" stroke="hsl(145 18% 17%)" strokeWidth="1.6" fill="none" opacity="0.09" />
+      <ellipse cx="1130" cy="140" rx="25" ry="14" fill="hsl(140 24% 20%)" opacity="0.04" />
+      <ellipse cx="1090" cy="110" rx="16" ry="9" fill="hsl(148 20% 18%)" opacity="0.03" />
 
-    {/* Light rays filtering through */}
-    <line x1="400" y1="0" x2="420" y2="350" stroke="hsl(45 60% 60%)" strokeWidth="1" opacity="0.04" />
-    <line x1="850" y1="0" x2="830" y2="350" stroke="hsl(50 55% 55%)" strokeWidth="0.8" opacity="0.03" />
-  </svg>
-);
+      {/* Light rays filtering through leaves — soft, golden, enchanted */}
+      <line x1="320" y1="0" x2="340" y2="450" stroke="hsl(45 55% 58%)" strokeWidth="1.2" opacity="0.03" />
+      <line x1="550" y1="0" x2="540" y2="450" stroke="hsl(48 50% 55%)" strokeWidth="0.8" opacity="0.025" />
+      <line x1="920" y1="0" x2="900" y2="450" stroke="hsl(42 50% 55%)" strokeWidth="1" opacity="0.02" />
+      <line x1="1250" y1="0" x2="1270" y2="450" stroke="hsl(50 45% 52%)" strokeWidth="0.6" opacity="0.018" />
 
-/** Floating particles layer — fireflies / spores / light motes */
-const FloatingParticles = ({ zone, reducedMotion }: { zone: TreeZone; reducedMotion: boolean }) => {
-  const particles = useMemo(() => {
-    const configs: Record<TreeZone, { count: number; color: string; size: [number, number]; yRange: [string, string] }> = {
-      crown: { count: 5, color: "hsl(45 80% 65%)", size: [2, 4], yRange: ["10%", "40%"] },
-      canopy: { count: 4, color: "hsl(140 35% 50%)", size: [1.5, 3], yRange: ["15%", "45%"] },
-      trunk: { count: 3, color: "hsl(30 50% 55%)", size: [2, 3.5], yRange: ["35%", "65%"] },
-      ground: { count: 2, color: "hsl(42 60% 50%)", size: [1.5, 2.5], yRange: ["50%", "70%"] },
-      roots: { count: 4, color: "hsl(120 30% 40%)", size: [1, 2.5], yRange: ["60%", "90%"] },
-    };
-    const cfg = configs[zone];
-    return Array.from({ length: cfg.count }, (_, i) => ({
-      id: i,
-      left: `${15 + (i * 70) / cfg.count + Math.random() * 10}%`,
-      top: `${parseInt(cfg.yRange[0]) + Math.random() * (parseInt(cfg.yRange[1]) - parseInt(cfg.yRange[0]))}%`,
-      size: cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]),
-      color: cfg.color,
-      delay: i * 1.2 + Math.random() * 2,
-      duration: 4 + Math.random() * 4,
-    }));
-  }, [zone]);
+      {/* Dappled light patches — like sunlight on a forest floor far below */}
+      <ellipse cx="350" cy="300" rx="40" ry="20" fill="hsl(45 50% 55%)" opacity="0.015" />
+      <ellipse cx="850" cy="350" rx="50" ry="25" fill="hsl(48 45% 50%)" opacity="0.012" />
+    </svg>
+  );
+});
+CanopyBranches.displayName = "CanopyBranches";
+
+/** Sparse floating motes — very few, zone-tinted, organic drift */
+const FloatingMotes = memo(({ progress, reducedMotion }: { progress: number; reducedMotion: boolean }) => {
+  const motes = useMemo(() => {
+    // Only 6 motes total across the entire viewport — always present, tint shifts
+    const base = [
+      { left: "12%", top: "18%", size: 2.5, delay: 0, dur: 8 },
+      { left: "78%", top: "25%", size: 2, delay: 2.5, dur: 10 },
+      { left: "35%", top: "55%", size: 1.8, delay: 4, dur: 9 },
+      { left: "62%", top: "68%", size: 2.2, delay: 1.5, dur: 7 },
+      { left: "88%", top: "42%", size: 1.5, delay: 5, dur: 11 },
+      { left: "22%", top: "82%", size: 2, delay: 3, dur: 8.5 },
+    ];
+    return base;
+  }, []);
 
   if (reducedMotion) return null;
 
+  // Color shifts continuously with progress
+  const moteHue = 45 + (progress * 80); // gold → green
+  const moteSat = 40 + (1 - Math.abs(progress - 0.5) * 2) * 20; // brighter near ground
+  const moteLight = 45 - progress * 15; // dimmer in roots
+
   return (
     <>
-      {particles.map((p) => (
+      {motes.map((m, i) => (
         <div
-          key={`${zone}-${p.id}`}
+          key={i}
           className="absolute rounded-full tree-depth-particle"
           style={{
-            left: p.left,
-            top: p.top,
-            width: p.size,
-            height: p.size,
-            backgroundColor: p.color,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
+            left: m.left,
+            top: m.top,
+            width: m.size,
+            height: m.size,
+            backgroundColor: `hsl(${moteHue} ${moteSat}% ${moteLight}%)`,
+            animationDelay: `${m.delay}s`,
+            animationDuration: `${m.dur}s`,
+            transition: "background-color 2s ease",
           }}
         />
       ))}
     </>
   );
-};
+});
+FloatingMotes.displayName = "FloatingMotes";
 
-/** Toggle button for accessibility */
+/** Toggle button */
 const ToggleButton = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
   <button
     onClick={onToggle}
@@ -161,8 +284,11 @@ const ToggleButton = ({ enabled, onToggle }: { enabled: boolean; onToggle: () =>
   </button>
 );
 
+// ═══════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════
 const TreeDepthBackground = () => {
-  const { progress, zone } = useScrollDepth();
+  const progress = useScrollProgress();
   const [enabled, setEnabled] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -174,7 +300,6 @@ const TreeDepthBackground = () => {
     return () => mql.removeEventListener("change", handler);
   }, []);
 
-  // Persist toggle preference
   useEffect(() => {
     const saved = localStorage.getItem("tree-depth-bg");
     if (saved === "off") setEnabled(false);
@@ -186,46 +311,51 @@ const TreeDepthBackground = () => {
     localStorage.setItem("tree-depth-bg", next ? "on" : "off");
   };
 
-  // Compute interpolated background color
-  const bgColor = getInterpolatedColor(progress);
+  // ── Continuous color interpolation ──
+  const c = interpColor(progress);
 
-  // Compute layer opacities based on progress
-  const rootOpacity = Math.max(0, (progress - 0.5) / 0.5); // fade in past ground
-  const canopyOpacity = Math.max(0, 1 - progress / 0.4);    // fade out past canopy
+  // ── Layer opacities with wide overlapping bell curves ──
+  // Roots: whisper from 0.35, peak at 0.85, full to 1.0
+  const rootOp = Math.min(1, Math.max(0, (progress - 0.35) / 0.5)) * 0.65;
+  // Bark: present from 0.15 → 0.85, peak at 0.45 (trunk center)
+  const barkOp = bellCurve(progress, 0.1, 0.45, 0.85) * 0.5;
+  // Canopy: lingers from 0 → 0.6, peak at 0.12
+  const canopyOp = Math.min(1, Math.max(0, 1 - progress / 0.55)) * 0.55;
 
-  if (!enabled && !reducedMotion) {
+  if (!enabled) {
     return <ToggleButton enabled={enabled} onToggle={handleToggle} />;
   }
-  if (reducedMotion && !enabled) return null;
 
   return (
     <>
       <div
-        className="fixed inset-0 z-0 pointer-events-none transition-[background] duration-700"
+        className="fixed inset-0 z-0 pointer-events-none"
         aria-hidden="true"
         style={{
           background: `
-            radial-gradient(ellipse at 50% ${30 + progress * 40}%, hsl(${bgColor.h} ${bgColor.s}% ${bgColor.l + 5}% / 0.15), transparent 60%),
-            radial-gradient(ellipse at ${30 + progress * 20}% ${50 + progress * 30}%, hsl(${bgColor.h} ${Math.max(10, bgColor.s - 10)}% ${bgColor.l + 2}% / 0.08), transparent 50%),
-            linear-gradient(to bottom, hsl(${bgColor.h} ${bgColor.s}% ${bgColor.l}% / 0.03), hsl(${bgColor.h} ${bgColor.s}% ${Math.max(4, bgColor.l - 3)}% / 0.12))
+            radial-gradient(ellipse at 50% ${25 + progress * 50}%, hsl(${c.h} ${c.s}% ${c.l + 4}% / 0.12), transparent 55%),
+            radial-gradient(ellipse at ${25 + progress * 25}% ${40 + progress * 35}%, hsl(${c.h} ${Math.max(8, c.s - 8)}% ${c.l + 2}% / 0.06), transparent 45%),
+            linear-gradient(to bottom, hsl(${c.h} ${c.s}% ${c.l}% / 0.02), hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 2)}% / 0.08))
           `,
         }}
       >
-        {/* Root tendrils — emerge when descending past ground */}
-        <RootTendrils opacity={rootOpacity * 0.7} />
+        {/* Layer 1: Canopy — branches + enchanted light (top-anchored, lingers downward) */}
+        <CanopyBranches opacity={canopyOp} progress={progress} />
 
-        {/* Canopy branches — visible when near crown */}
-        <CanopyBranches opacity={canopyOpacity * 0.6} />
+        {/* Layer 2: Bark grain — the tree's living body (centered, fades to edges) */}
+        <BarkGrain opacity={barkOp} />
 
-        {/* Floating particles — zone-specific */}
-        {!reducedMotion && <FloatingParticles zone={zone} reducedMotion={reducedMotion} />}
+        {/* Layer 3: Root mycelium — ancient network (bottom-anchored, whispers upward) */}
+        <RootMycelium opacity={rootOp} progress={progress} />
 
-        {/* Parallax depth vignette */}
+        {/* Layer 4: Sparse floating motes — always present, color shifts with depth */}
+        <FloatingMotes progress={progress} reducedMotion={reducedMotion} />
+
+        {/* Layer 5: Depth vignette — deepens continuously */}
         <div
           className="absolute inset-0"
           style={{
-            boxShadow: `inset 0 0 ${150 + progress * 100}px ${40 + progress * 40}px hsl(${bgColor.h} ${bgColor.s}% ${Math.max(3, bgColor.l - 4)}% / ${0.2 + progress * 0.3})`,
-            transition: "box-shadow 0.8s ease",
+            boxShadow: `inset 0 0 ${120 + progress * 80}px ${30 + progress * 30}px hsl(${c.h} ${c.s}% ${Math.max(3, c.l - 3)}% / ${0.15 + progress * 0.25})`,
           }}
         />
       </div>
