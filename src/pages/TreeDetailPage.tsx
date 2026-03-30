@@ -197,6 +197,13 @@ const TreeDetailPage = () => {
     treeLng: tree?.longitude,
     userId,
   });
+  const checkinStatus = useTreeCheckinStatus({
+    treeId: id,
+    userId,
+    createdBy: tree?.created_by,
+    gateStatus: proximityGate.status,
+    graceMs: proximityGate.graceMs,
+  });
 
   // Feed TEOTAG context with tree page data (must be above early returns)
   useTeotagPageContext({
