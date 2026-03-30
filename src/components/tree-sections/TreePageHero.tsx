@@ -22,6 +22,7 @@ import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Database } from "@/integrations/supabase/types";
 
 const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
+const TreeCheckinStatusLight = lazy(() => import("@/components/TreeCheckinStatusLight"));
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
