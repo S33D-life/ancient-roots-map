@@ -60,6 +60,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative">
+      {/* Scroll-driven tree depth background */}
+      <Suspense fallback={null}>
+        <TreeDepthBackground />
+      </Suspense>
+
       {/* Network Pulse — the tree's nervous system */}
       <Suspense fallback={null}>
         <NetworkPulseOverlay latestEvent={latestEvent} vitality={vitality} />
