@@ -226,12 +226,12 @@ const FloatingMotes = memo(({ progress, reducedMotion }: { progress: number; red
   const motes = useMemo(() => {
     // Only 6 motes total across the entire viewport — always present, tint shifts
     const base = [
-      { left: "12%", top: "18%", size: 2.5, delay: 0, dur: 8 },
-      { left: "78%", top: "25%", size: 2, delay: 2.5, dur: 10 },
-      { left: "35%", top: "55%", size: 1.8, delay: 4, dur: 9 },
-      { left: "62%", top: "68%", size: 2.2, delay: 1.5, dur: 7 },
-      { left: "88%", top: "42%", size: 1.5, delay: 5, dur: 11 },
-      { left: "22%", top: "82%", size: 2, delay: 3, dur: 8.5 },
+      { left: "12%", top: "18%", size: 3.5, delay: 0, dur: 8 },
+      { left: "78%", top: "25%", size: 3, delay: 2.5, dur: 10 },
+      { left: "35%", top: "55%", size: 2.8, delay: 4, dur: 9 },
+      { left: "62%", top: "68%", size: 3.2, delay: 1.5, dur: 7 },
+      { left: "88%", top: "42%", size: 2.5, delay: 5, dur: 11 },
+      { left: "22%", top: "82%", size: 3, delay: 3, dur: 8.5 },
     ];
     return base;
   }, []);
