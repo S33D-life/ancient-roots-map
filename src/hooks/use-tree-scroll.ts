@@ -37,9 +37,8 @@ export function useTreeScroll() {
     initialScrollDone.current = false;
   }, []);
 
-  // Scroll to soil level (#teotag-guide) on mount — the earth threshold
-  // This is the central orientation point: Arboreal Atlas title + TEOTAG face
-  // with directional pathways visible (roots below, tree above)
+  // Scroll to soil level (#ground) on mount — "The Arboreal Atlas of Ancient Friends"
+  // is the true anchor and should land at the top of the viewport on every load.
   useEffect(() => {
     if (initialScrollDone.current) return;
     
@@ -48,12 +47,10 @@ export function useTreeScroll() {
     if (hash && SECTION_IDS.includes(hash)) return;
 
     const doScroll = () => {
-      // Primary target: the soil-level threshold (teotag-guide)
-      const el = document.getElementById("teotag-guide") || document.getElementById("ground");
+      const el = document.getElementById("ground");
       if (!el) return false;
-      // Position the top of teotag-guide near the top of the viewport,
-      // offset slightly so a hint of the Hero remains visible above
-      const headerOffset = 48;
+      // Position #ground at the top of the viewport, just below the header
+      const headerOffset = 56;
       const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
       window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
       initialScrollDone.current = true;
