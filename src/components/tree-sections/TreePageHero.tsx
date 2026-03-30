@@ -64,6 +64,7 @@ const TreePageHero = ({
   onRetryPhoto,
   presenceLocked = false,
   graceLabel,
+  checkinLight,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
