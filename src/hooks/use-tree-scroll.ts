@@ -82,11 +82,12 @@ export function useTreeScroll() {
       requestAnimationFrame(() => {
         const el = document.getElementById(hash);
         if (el) {
-          // Center "ground" in viewport for trunk arrival; start-align others
           if (hash === "ground") {
-            const rect = el.getBoundingClientRect();
-            const y = rect.top + window.scrollY - (window.innerHeight / 2 - rect.height / 2);
-            window.scrollTo({ top: Math.max(0, y), behavior: "instant" as ScrollBehavior });
+            // Soil-level: position teotag-guide near viewport top
+            const soil = document.getElementById("teotag-guide") || el;
+            const headerOffset = 48;
+            const top = soil.getBoundingClientRect().top + window.scrollY - headerOffset;
+            window.scrollTo({ top: Math.max(0, top), behavior: "instant" as ScrollBehavior });
           } else {
             el.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
           }
