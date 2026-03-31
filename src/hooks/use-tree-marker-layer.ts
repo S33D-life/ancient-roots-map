@@ -123,6 +123,7 @@ export function useTreeMarkerLayer({
             refs.whisperCounts[tree.id] || 0,
             refs.userLatLng,
             getPopupStatusLight(tree.id, tree.latitude, tree.longitude, refs.userLatLng),
+            refs.heartPoolCounts[tree.id] || 0,
           ),
         {
           className: "atlas-leaflet-popup",
