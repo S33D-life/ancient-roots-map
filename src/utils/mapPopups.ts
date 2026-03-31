@@ -70,7 +70,6 @@ export function buildPopupHtml(
   whisperCount?: number,
   userLatLng?: [number, number] | null,
   statusLight?: PopupStatusLight,
-  hasHeartPool?: boolean,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
