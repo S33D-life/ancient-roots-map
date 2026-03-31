@@ -3,8 +3,8 @@
  *
  * Social-media crawlers (Telegram, WhatsApp, Discord, X/Twitter, iMessage)
  * fetch the raw HTML and cannot execute JavaScript. This edge function
- * returns a lightweight HTML page with correct OG tags then redirects
- * browsers to the SPA.
+ * returns a lightweight HTML page with correct OG tags for crawlers,
+ * and transparently serves the SPA for regular browsers.
  *
  * Supported routes:
  *   /                        → homepage defaults
@@ -30,6 +30,42 @@ const APP_URL = "https://ancient-roots-map.lovable.app";
 const DEFAULT_IMAGE = `${APP_URL}/og/s33d-share-default.jpg`;
 const OG_CARD_BASE = `${SUPABASE_URL}/functions/v1/og-card`;
 
+/* ── Bot detection ─────────────────────────────────────── */
+
+const BOT_UA_RE = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp|telegrambot|twitterbot|linkedinbot|discord|embedly|quora|pinterest|redditbot|flipboard|tumblr|bitly|skype|nuzzel|outbrain|w3c_validator|vkshare|slack|preview|fetch|curl|wget|headless|phantom|googlebot|bingbot|yandex|baidu|duckduck|applebot|iamessagebot/i;
+
+function isBot(req: Request): boolean {
+  const ua = req.headers.get("user-agent") || "";
+  return BOT_UA_RE.test(ua);
+}
+
+/* ── SPA proxy for browsers ────────────────────────────── */
+
+let cachedSpaHtml: string | null = null;
+let spaHtmlCachedAt = 0;
+const SPA_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getSpaHtml(): Promise<string> {
+  const now = Date.now();
+  if (cachedSpaHtml && (now - spaHtmlCachedAt) < SPA_CACHE_TTL) {
+    return cachedSpaHtml;
+  }
+  try {
+    const res = await fetch(`${APP_URL}/index.html`, {
+      headers: { "Accept": "text/html" },
+    });
+    if (res.ok) {
+      cachedSpaHtml = await res.text();
+      spaHtmlCachedAt = now;
+      return cachedSpaHtml;
+    }
+  } catch (err) {
+    console.error("[og-proxy] Failed to fetch SPA HTML:", err);
+  }
+  // Minimal fallback — redirect to the SPA
+  return `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${APP_URL}"></head><body></body></html>`;
+}
+
 /* ── Input validation ──────────────────────────────────── */
 
 const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
@@ -46,7 +82,6 @@ function isValidStaffCode(s: string): boolean {
 /** Sanitize path input — strip control chars, limit length */
 function sanitizePath(raw: string): string {
   const cleaned = raw.replace(/[\x00-\x1f\x7f]/g, "").slice(0, 200);
-  // Must start with /
   return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
 }
 
@@ -79,8 +114,6 @@ interface Meta {
 }
 
 function renderHTML(m: Meta): string {
-  // IMPORTANT: og:image content must NOT be HTML-escaped (& must stay &, not &amp;)
-  // because crawlers fetch the URL literally from the content attribute.
   const safeImage = m.image;
   return `<!DOCTYPE html>
 <html lang="en">
@@ -198,6 +231,24 @@ Deno.serve(async (req) => {
   const rawPath = url.searchParams.get("path") || "/";
   const path = sanitizePath(rawPath);
 
+  // For non-bot requests: serve the SPA directly so the router handles the page
+  if (!isBot(req)) {
+    try {
+      const spaHtml = await getSpaHtml();
+      return new Response(spaHtml, {
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-cache, must-revalidate",
+        },
+      });
+    } catch {
+      // Fallback: redirect to the app
+      return Response.redirect(`${APP_URL}${path}`, 302);
+    }
+  }
+
+  // Bot request — return OG-enriched HTML
   try {
     // 1. Static routes
     const staticOverride = STATIC_ROUTES[path];
@@ -346,7 +397,6 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const species = tree.species || "Unknown species";
     const location = tree.country || "Unknown location";
 
-    // Research trees don't have og-card support yet — use image_url or default
     const image = tree.image_url || DEFAULT_IMAGE;
 
     return {

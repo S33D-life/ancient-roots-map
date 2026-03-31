@@ -7,5 +7,11 @@
 /manifest.webmanifest /manifest.webmanifest 200
 /registerSW.js /registerSW.js 200
 /sw.js /sw.js 200
+/og/* /og/:splat 200
+/images/* /images/:splat 200
+
+# Dynamic OG: proxy tree/staff pages through og-proxy for crawler metadata
+/tree/* https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/tree/:splat 200
+/staff/* https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/staff/:splat 200
 
 /* /index.html 200
