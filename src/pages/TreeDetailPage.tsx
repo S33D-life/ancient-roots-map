@@ -105,6 +105,8 @@ const TreeRelationshipCard = lazy(() => import("@/components/tree-sections/TreeR
 const StewardToolsSection = lazy(() => import("@/components/StewardToolsSection"));
 const TreeActivityTimeline = lazy(() => import("@/components/TreeActivityTimeline"));
 const TreeDiscoveryPaths = lazy(() => import("@/components/tree-sections/TreeDiscoveryPaths"));
+const LocationRefinementFlow = lazy(() => import("@/components/LocationRefinementFlow"));
+const LocationConfidenceBadge = lazy(() => import("@/components/LocationConfidenceBadge"));
 import { useTreeRelationship } from "@/hooks/use-tree-relationship";
 import { useTreeEditPermission } from "@/hooks/use-tree-edit-permission";
 import TabErrorBoundary from "@/components/TabErrorBoundary";
@@ -156,6 +158,7 @@ const TreeDetailPage = () => {
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
   const [showLoreWhisper, setShowLoreWhisper] = useState(true);
+  const [refinementOpen, setRefinementOpen] = useState(false);
   const [witnessCount, setWitnessCount] = useState(0);
   const witnessSessionId = searchParams.get("witness") || undefined;
 
@@ -890,6 +893,51 @@ const TreeDetailPage = () => {
                   treeName={tree.name}
                   userId={userId}
                 />
+              </Suspense>
+            )}
+
+            {/* Location Refinement */}
+            {userId && tree && tree.latitude != null && tree.longitude != null && (
+              <Suspense fallback={null}>
+                {refinementOpen ? (
+                  <LocationRefinementFlow
+                    treeId={tree.id}
+                    treeName={tree.name}
+                    treeLat={Number(tree.latitude)}
+                    treeLng={Number(tree.longitude)}
+                    userId={userId}
+                    onComplete={() => setRefinementOpen(false)}
+                    onDismiss={() => setRefinementOpen(false)}
+                  />
+                ) : (
+                  <Card className="bg-card/60 backdrop-blur border-border/40">
+                    <CardContent className="p-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <MapPin className="w-4 h-4 text-primary/60 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-serif text-sm text-foreground">Refine location</p>
+                          <p className="text-xs text-muted-foreground font-serif truncate">
+                            Help pin this tree more precisely
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <LocationConfidenceBadge
+                          confidence={tree.location_confidence}
+                          refinementCount={tree.refinement_count}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="font-serif text-xs"
+                          onClick={() => setRefinementOpen(true)}
+                        >
+                          Refine
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </Suspense>
             )}
 

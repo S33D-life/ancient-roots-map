@@ -156,6 +156,7 @@ const CosmicCalendarPage = lazyImportWithRetry(() => import("./pages/CosmicCalen
 const TreeLedgerPage = lazyImportWithRetry(() => import("./pages/TreeLedgerPage"), "tree-ledger");
 const CalendarSettingsPage = lazyImportWithRetry(() => import("./pages/CalendarSettingsPage"), "calendar-settings");
 const RootstoneImporterPage = lazyImportWithRetry(() => import("./pages/RootstoneImporterPage"), "rootstone-importer");
+const CuratorRefinementReviewPage = lazyImportWithRetry(() => import("./pages/CuratorRefinementReview"), "curator-refinements");
 const WandererProfilePage = lazyImportWithRetry(() => import("./pages/WandererProfilePage"), "wanderer-profile");
 const LivingForestRoadmapPage = lazyImportWithRetry(() => import("./pages/LivingForestRoadmapPage"), "roadmap");
 const PatronOfferingPage = lazyImportWithRetry(() => import("./pages/PatronOfferingPage"), "patron-offering");
@@ -343,6 +344,7 @@ const App = () => {
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/curator" element={<CuratorPage />} />
                 <Route path="/curator/rootstones-import" element={<RootstoneImporterPage />} />
+                <Route path="/curator/refinements" element={<CuratorRefinementReviewPage />} />
                 {ShowDevPanel && <Route path="/sync" element={<SyncDashboardPage />} />}
                 {ShowDevPanel && <Route path="/edit-review" element={<EditReviewPage />} />}
                 <Route path="/hives" element={<HivesIndexPage />} />
