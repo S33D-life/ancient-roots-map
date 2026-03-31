@@ -343,6 +343,7 @@ const App = () => {
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/curator" element={<CuratorPage />} />
                 <Route path="/curator/rootstones-import" element={<RootstoneImporterPage />} />
+                <Route path="/curator/refinements" element={<CuratorRefinementReviewPage />} />
                 {ShowDevPanel && <Route path="/sync" element={<SyncDashboardPage />} />}
                 {ShowDevPanel && <Route path="/edit-review" element={<EditReviewPage />} />}
                 <Route path="/hives" element={<HivesIndexPage />} />
