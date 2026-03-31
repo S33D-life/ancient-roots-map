@@ -6,7 +6,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TreeWhisper, collectPrivateWhisper, collectSharedWhisper } from "@/hooks/use-whispers";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { TreeDeciduous, MessageCircle, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
