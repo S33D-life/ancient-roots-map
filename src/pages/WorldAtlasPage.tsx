@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Globe, TreeDeciduous, MapPin, Eye, Shield, Scroll, Footprints,
-  ChevronRight, Heart, BookOpen, ExternalLink, Sparkles, Compass,
+  ChevronRight, ChevronDown, Heart, BookOpen, ExternalLink, Sparkles, Compass,
   Leaf, Users, Search, X, Map as MapIcon, LayoutGrid, MapPinned,
   Columns, Filter, Network, Earth,
 } from "lucide-react";
