@@ -174,31 +174,32 @@ export function researchTreeOG(tree: {
   };
 }
 
-/* ── Proxy URL builder ──────────────────────────────────── */
+/* ── Canonical share URL builders ────────────────────────── */
 
 /**
- * Build the og-proxy edge function URL for a given route.
- * Use this when constructing share links that need to be crawler-safe.
+ * Build the canonical public share URL for a given route.
+ * Returns a real page URL that works for both users and crawlers.
  */
+export function canonicalShareUrl(route: string): string {
+  return `${APP_URL}${route.startsWith("/") ? "" : "/"}${route}`;
+}
+
+/** @deprecated Use canonicalShareUrl or shareUtils.getShareUrl instead */
 export function ogProxyUrl(route: string): string {
-  return `${APP_URL}/functions/v1/og-proxy?path=${encodeURIComponent(route)}`;
+  return canonicalShareUrl(route);
 }
 
-/**
- * Build a crawler-safe share URL for a tree.
- * When shared in Telegram/WhatsApp/Discord, crawlers will hit the og-proxy
- * which returns proper OG tags, then redirects to the SPA.
- */
+/** Build a share URL for a tree. */
 export function treeShareUrl(treeId: string): string {
-  return ogProxyUrl(`/tree/${treeId}`);
+  return canonicalShareUrl(`/tree/${treeId}`);
 }
 
-/** Build a crawler-safe share URL for a staff page. */
+/** Build a share URL for a staff page. */
 export function staffShareUrl(staffCode: string): string {
-  return ogProxyUrl(`/staff/${staffCode}`);
+  return canonicalShareUrl(`/staff/${staffCode}`);
 }
 
-/** Build a crawler-safe share URL for a research tree. */
+/** Build a share URL for a research tree. */
 export function researchTreeShareUrl(treeId: string): string {
-  return ogProxyUrl(`/tree/research/${treeId}`);
+  return canonicalShareUrl(`/tree/research/${treeId}`);
 }

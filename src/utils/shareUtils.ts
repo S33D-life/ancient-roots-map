@@ -4,11 +4,10 @@
  * Centralised sharing helpers for all entity types.
  *
  * ARCHITECTURE:
- * - Share URLs route through the og-proxy edge function so crawlers
- *   (Telegram, WhatsApp, Discord, X, iMessage) receive proper OG tags.
- * - The og-proxy serves lightweight HTML with OG meta + instant redirect
- *   to the real SPA page, so human visitors land on the app seamlessly.
- *
+ * - Share URLs always point to canonical public pages (e.g. /tree/xxx).
+ * - OG metadata is handled by index.html tags and the og-proxy edge function
+ *   independently — the share URL itself is always the real page.
+ */
  * IMAGE FALLBACK HIERARCHY (per entity):
  *   1. Curated OG card image
  *   2. Generated OG card (future)
