@@ -17,7 +17,7 @@ import {
   hslStringToHue,
 } from "@/components/map/mapMarkerUtils";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
-import { buildPopupHtml } from "@/utils/mapPopups";
+import { buildPopupHtml, getPopupStatusLight } from "@/utils/mapPopups";
 import { haversineKm } from "@/utils/mapGeometry";
 
 interface Tree {
