@@ -128,6 +128,12 @@ export function buildPopupHtml(
       <!-- Species -->
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
 
+      <!-- Status light -->
+      ${statusLight ? `<div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
+        <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${statusLight === "green" ? "hsl(142,60%,45%)" : statusLight === "orange" ? "hsl(30,85%,55%)" : "hsl(0,55%,50%)"};box-shadow:0 0 4px ${statusLight === "green" ? "hsla(142,60%,45%,0.5)" : statusLight === "orange" ? "hsla(30,85%,55%,0.4)" : "transparent"};${statusLight === "green" ? "animation:statusPulse 2s ease-in-out infinite;" : ""}"></span>
+        <span style="font-size:10px;font-family:sans-serif;color:${statusLight === "green" ? "hsl(142,50%,55%)" : statusLight === "orange" ? "hsl(30,70%,60%)" : "hsl(0,0%,50%)"};">${statusLight === "green" ? "Here now" : statusLight === "orange" ? "Recently met" : "Not yet met"}</span>
+      </div>` : ""}
+
       <!-- Hive badge -->
       ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:2px 7px;border-radius:5px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.08);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.12);transition:all .2s;width:fit-content;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}
 
