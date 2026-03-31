@@ -163,17 +163,23 @@ const TreeCard = ({
             <p className="text-[11px] italic truncate" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
               {tree.species}
             </p>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-              {age > 0 && <span>🌿 ~{age}y</span>}
-              {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
-              {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
-              {whisperCount > 0 && (
-                <span className="flex items-center gap-0.5 text-muted-foreground/60" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
-                  <Wind className="w-2.5 h-2.5" /> {whisperCount}
-                </span>
-              )}
+            <div className="flex flex-col gap-1 mt-0.5">
+              {/* Line 1: activity */}
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/80">
+                {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
+                {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
+                {whisperCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                    <Wind className="w-2.5 h-2.5" /> {whisperCount}
+                  </span>
+                )}
+              </div>
+              {/* Line 2: identity */}
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50">
+                {hive && <span>{hive.icon} {hive.displayName}</span>}
+                {age > 0 && <span>🌿 ~{age}y</span>}
+              </div>
             </div>
-            {isResearch && <ResearchBadges tree={tree} />}
           </div>
           {/* Seed + Tier badges */}
           <div className="self-start flex items-center gap-1.5">
