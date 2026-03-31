@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Globe, TreeDeciduous, MapPin, Eye, Shield, Scroll, Footprints,
-  ChevronRight, Heart, BookOpen, ExternalLink, Sparkles, Compass,
+  ChevronRight, ChevronDown, Heart, BookOpen, ExternalLink, Sparkles, Compass,
   Leaf, Users, Search, X, Map as MapIcon, LayoutGrid, MapPinned,
   Columns, Filter, Network, Earth,
 } from "lucide-react";
@@ -285,6 +285,7 @@ const WorldAtlasPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [filter, setFilter] = useState<FilterType>("all");
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [countryListOpen, setCountryListOpen] = useState(true);
   const searchRef = useRef<HTMLInputElement>(null);
   const { focusMap } = useMapFocus();
 
@@ -567,7 +568,188 @@ const WorldAtlasPage = () => {
           </div>
         </section>
 
-        {/* ─── Context Panel ─── */}
+        {/* Context panel moved below country list */}
+
+        <ContextualWhisper id="atlas-search-hint" message="Use the search bar above to find any country, pathway, or tree by name." delay={4000} position="top-center" />
+
+        {/* ─── Country Chapters (collapsible) ─── */}
+        <section id="country-gateways" className="px-4 max-w-4xl mx-auto mb-4">
+          <button
+            onClick={() => setCountryListOpen(prev => !prev)}
+            className="w-full flex items-center justify-between gap-3 py-3 group"
+          >
+            <div className="text-left">
+              <h2 className="text-lg font-serif font-bold text-foreground">Country Chapters</h2>
+              <p className="text-xs text-muted-foreground">
+                {activeCount} active · {totalRecords.toLocaleString()} research records
+                {totalGroves > 0 && ` · ${totalGroves} groves`}
+              </p>
+            </div>
+            <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${countryListOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          <AnimatePresence initial={false}>
+            {countryListOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                {/* View toggle + filters */}
+                <div className="flex items-center justify-end flex-wrap gap-2 mb-4">
+                  <div className="flex items-center bg-muted/30 rounded-lg p-0.5">
+                    <button
+                      onClick={() => setViewMode("map")}
+                      className={`p-1.5 rounded-md transition-all ${viewMode === "map" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                      title="Atlas Map"
+                    >
+                      <Earth className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode("cards")}
+                      className={`p-1.5 rounded-md transition-all ${viewMode === "cards" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                      title="Card View"
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode("hybrid")}
+                      className={`p-1.5 rounded-md transition-all ${viewMode === "hybrid" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                      title="Hybrid View"
+                    >
+                      <Columns className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter chips */}
+                <div className="flex items-center gap-1.5 flex-wrap mb-4">
+                  <Filter className="w-3 h-3 text-muted-foreground/50 mr-1" />
+                  {([
+                    { key: "all", label: "All Regions" },
+                    { key: "active", label: "Active" },
+                    { key: "with-groves", label: "With Groves" },
+                    { key: "pulse", label: "Pulse Active" },
+                  ] as const).map(f => (
+                    <button
+                      key={f.key}
+                      onClick={() => setFilter(f.key)}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
+                        filter === f.key
+                          ? "bg-primary/12 text-primary border border-primary/25"
+                          : "bg-muted/25 text-muted-foreground border border-transparent hover:border-primary/15"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Country Grid */}
+                <div className="mb-6">
+                  {loading ? (
+                    <p className="text-center py-12 text-muted-foreground text-sm font-serif italic">Gathering chapters…</p>
+                  ) : displayedStats.length === 0 ? (
+                    <Card className="border-primary/10">
+                      <CardContent className="py-12 text-center">
+                        <Globe className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground italic font-serif">
+                          {filter !== "all" ? "No regions match this filter." : "The atlas is quiet for now."}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ) : viewMode === "map" ? (
+                    <div className="space-y-6">
+                      <Suspense fallback={<div className="h-[400px] rounded-xl bg-muted/20 animate-pulse" />}>
+                        <GlobalForestAtlasMap countryStats={displayedStats} />
+                      </Suspense>
+                      <Suspense fallback={null}>
+                        <AtlasDiscoveryPanel stats={displayedStats} />
+                      </Suspense>
+                    </div>
+                  ) : viewMode === "cards" ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {displayedStats.map(stat => (
+                        <CountryCard key={stat.country} stat={stat}
+                          isPioneer={stat.country === "South Africa" && stat.status === "active"} />
+                      ))}
+                    </div>
+                  ) : (
+                    /* Hybrid View */
+                    <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4">
+                      <div className="bg-card/30 rounded-xl border border-border/20 p-2 max-h-[60vh] overflow-y-auto space-y-0.5">
+                        {displayedStats.map(stat => (
+                          <MiniMapCard
+                            key={stat.slug}
+                            stat={stat}
+                            isSelected={selectedRegion === stat.slug}
+                            onSelect={() => {
+                              setSelectedRegion(stat.slug);
+                              if (stat.status !== "proposed") {
+                                const reg = getEntryByCountry(stat.country);
+                                if (reg?.defaultMapFocus) {
+                                  focusMap({ type: "area", id: stat.slug, countrySlug: stat.slug, source: "country" });
+                                }
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <div className="min-h-[40vh]">
+                        <AnimatePresence mode="wait">
+                          {selectedStat ? (
+                            <motion.div
+                              key={selectedStat.slug}
+                              initial={{ opacity: 0, x: 8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -8 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <CountryCard stat={selectedStat}
+                                isPioneer={selectedStat.country === "South Africa" && selectedStat.status === "active"} />
+                              {(selectedStat.status === "active" || selectedStat.status === "growing") && (
+                                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                  {[
+                                    { label: "Explore Map", icon: MapPinned, to: "/map" },
+                                    { label: "View Atlas", icon: BookOpen, to: `/atlas/${selectedStat.slug}` },
+                                    { label: "View Groves", icon: Network, to: `/groves` },
+                                  ].map(action => (
+                                    <Link key={action.label} to={action.to}
+                                      className="flex items-center gap-1.5 p-2.5 rounded-lg border border-border/20 bg-card/40 hover:border-primary/20 hover:bg-primary/3 transition-all text-xs text-muted-foreground hover:text-foreground">
+                                      <action.icon className="w-3.5 h-3.5 text-primary/60" />
+                                      {action.label}
+                                    </Link>
+                                  ))}
+                                </div>
+                              )}
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="flex items-center justify-center h-full text-center"
+                            >
+                              <div>
+                                <Compass className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                                <p className="text-sm text-muted-foreground/50 font-serif italic">
+                                  Select a region to explore
+                                </p>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+
+        {/* ─── Context Panel (moved below country list) ─── */}
         <section className="px-4 max-w-2xl mx-auto mb-8">
           <Card className="border-primary/12 bg-card/40 backdrop-blur-sm">
             <CardContent className="p-4 space-y-3">
@@ -590,174 +772,6 @@ const WorldAtlasPage = () => {
               </div>
             </CardContent>
           </Card>
-        </section>
-
-        <ContextualWhisper id="atlas-search-hint" message="Use the search bar above to find any country, pathway, or tree by name." delay={4000} position="top-center" />
-
-        {/* ─── View Toggle + Filters ─── */}
-        <section id="country-gateways" className="px-4 max-w-4xl mx-auto mb-4">
-          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-            <div>
-              <h2 className="text-lg font-serif font-bold text-foreground">Country Chapters</h2>
-              <p className="text-xs text-muted-foreground">
-                {activeCount} active · {totalRecords.toLocaleString()} research records
-                {totalGroves > 0 && ` · ${totalGroves} groves`}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* View toggle */}
-              <div className="flex items-center bg-muted/30 rounded-lg p-0.5">
-                <button
-                  onClick={() => setViewMode("map")}
-                  className={`p-1.5 rounded-md transition-all ${viewMode === "map" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  title="Atlas Map"
-                >
-                  <Earth className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("cards")}
-                  className={`p-1.5 rounded-md transition-all ${viewMode === "cards" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  title="Card View"
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("hybrid")}
-                  className={`p-1.5 rounded-md transition-all ${viewMode === "hybrid" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  title="Hybrid View"
-                >
-                  <Columns className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Filter chips */}
-          <div className="flex items-center gap-1.5 flex-wrap mb-4">
-            <Filter className="w-3 h-3 text-muted-foreground/50 mr-1" />
-            {([
-              { key: "all", label: "All Regions" },
-              { key: "active", label: "Active" },
-              { key: "with-groves", label: "With Groves" },
-              { key: "pulse", label: "Pulse Active" },
-            ] as const).map(f => (
-              <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
-                  filter === f.key
-                    ? "bg-primary/12 text-primary border border-primary/25"
-                    : "bg-muted/25 text-muted-foreground border border-transparent hover:border-primary/15"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── Country Grid (Map, Cards, or Hybrid) ─── */}
-        <section className="px-4 max-w-4xl mx-auto mb-12">
-          {loading ? (
-            <p className="text-center py-12 text-muted-foreground text-sm font-serif italic">Gathering chapters…</p>
-          ) : displayedStats.length === 0 ? (
-            <Card className="border-primary/10">
-              <CardContent className="py-12 text-center">
-                <Globe className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground italic font-serif">
-                  {filter !== "all" ? "No regions match this filter." : "The atlas is quiet for now."}
-                </p>
-              </CardContent>
-            </Card>
-          ) : viewMode === "map" ? (
-            <div className="space-y-6">
-              <Suspense fallback={<div className="h-[400px] rounded-xl bg-muted/20 animate-pulse" />}>
-                <GlobalForestAtlasMap countryStats={displayedStats} />
-              </Suspense>
-              <Suspense fallback={null}>
-                <AtlasDiscoveryPanel stats={displayedStats} />
-              </Suspense>
-            </div>
-          ) : viewMode === "cards" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {displayedStats.map(stat => (
-                <CountryCard key={stat.country} stat={stat}
-                  isPioneer={stat.country === "South Africa" && stat.status === "active"} />
-              ))}
-            </div>
-          ) : (
-            /* Hybrid View: sidebar list + detail card */
-            <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-4">
-              {/* Sidebar list */}
-              <div className="bg-card/30 rounded-xl border border-border/20 p-2 max-h-[60vh] overflow-y-auto space-y-0.5">
-                {displayedStats.map(stat => (
-                  <MiniMapCard
-                    key={stat.slug}
-                    stat={stat}
-                    isSelected={selectedRegion === stat.slug}
-                    onSelect={() => {
-                      setSelectedRegion(stat.slug);
-                      if (stat.status !== "proposed") {
-                        const reg = getEntryByCountry(stat.country);
-                        if (reg?.defaultMapFocus) {
-                          focusMap({ type: "area", id: stat.slug, countrySlug: stat.slug, source: "country" });
-                        }
-                      }
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Detail panel */}
-              <div className="min-h-[40vh]">
-                <AnimatePresence mode="wait">
-                  {selectedStat ? (
-                    <motion.div
-                      key={selectedStat.slug}
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -8 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <CountryCard stat={selectedStat}
-                        isPioneer={selectedStat.country === "South Africa" && selectedStat.status === "active"} />
-
-                      {/* Region exploration paths */}
-                      {(selectedStat.status === "active" || selectedStat.status === "growing") && (
-                        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {[
-                            { label: "Explore Map", icon: MapPinned, to: "/map" },
-                            { label: "View Atlas", icon: BookOpen, to: `/atlas/${selectedStat.slug}` },
-                            { label: "View Groves", icon: Network, to: `/groves` },
-                          ].map(action => (
-                            <Link key={action.label} to={action.to}
-                              className="flex items-center gap-1.5 p-2.5 rounded-lg border border-border/20 bg-card/40 hover:border-primary/20 hover:bg-primary/3 transition-all text-xs text-muted-foreground hover:text-foreground">
-                              <action.icon className="w-3.5 h-3.5 text-primary/60" />
-                              {action.label}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center justify-center h-full text-center"
-                    >
-                      <div>
-                        <Compass className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground/50 font-serif italic">
-                          Select a region to explore
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          )}
         </section>
 
         <ContextualWhisper id="atlas-country-hint" message="Each country is a chapter. Tap one to explore its trees, sources, and stories." delay={10000} position="bottom-center" />
