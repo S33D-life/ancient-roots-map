@@ -80,12 +80,12 @@ export function getCanonicalPath(entity: ShareEntity): string {
 }
 
 /**
- * Get the og-proxy URL for an entity — this is what gets shared.
- * Crawlers hit og-proxy → see OG tags → users get redirected to SPA.
+ * Get the canonical public URL for sharing.
+ * Always returns a real page URL — never an internal edge-function route.
  */
 export function getShareUrl(entity: ShareEntity): string {
   const path = getCanonicalPath(entity);
-  return `${OG_PROXY_BASE}?path=${encodeURIComponent(path)}`;
+  return `${getSiteBase()}${path}`;
 }
 
 /**
