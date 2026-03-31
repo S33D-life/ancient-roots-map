@@ -10,8 +10,13 @@
 /og/* /og/:splat 200
 /images/* /images/:splat 200
 
-# Dynamic OG: proxy tree/staff pages through og-proxy for crawler metadata
+# Dynamic OG: proxy pages through og-proxy for crawler metadata
 /tree/* https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/tree/:splat 200
 /staff/* https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/staff/:splat 200
+/s33d https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/s33d 200
+/library/staff-room https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/library/staff-room 200
+/library https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/library 200
+/council-of-life https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/council-of-life 200
+/hives https://mwzcuczfedrjplndggiv.supabase.co/functions/v1/og-proxy?path=/hives 200
 
 /* /index.html 200
