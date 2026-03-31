@@ -74,12 +74,17 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
       <WindfallCelebration active={showCelebration} onComplete={handleCelebrationComplete} />
       {claimedAmount != null && claimedAmount > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full bg-accent/20 text-accent border border-accent/30"
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full"
+          style={{
+            background: "linear-gradient(135deg, hsl(120 50% 40% / 0.15), hsl(42 60% 45% / 0.15))",
+            color: "hsl(120 45% 55%)",
+            border: "1px solid hsl(120 40% 45% / 0.25)",
+          }}
         >
-          ✨ You claimed {claimedAmount} windfall hearts!
+          💚 {claimedAmount} hearts gathered
         </motion.div>
       )}
 
