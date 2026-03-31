@@ -262,16 +262,13 @@ const TreePageHero = ({
             </Button>
           </div>
 
-          {/* Grace indicator beneath CTAs */}
-          {presenceLocked && (
-            <p className="text-[10px] font-serif text-muted-foreground/70 text-center mt-1 flex items-center justify-center gap-1">
-              <Lock className="w-3 h-3" /> Visit this tree to unlock offerings & whispers
-            </p>
-          )}
-          {!presenceLocked && graceLabel && (
-            <p className="text-[10px] font-serif text-primary/70 text-center mt-1">
-              ✨ Grace period — {graceLabel}
-            </p>
+          {/* Unified Status Row — single source of presence state */}
+          {checkinLight && (
+            <div className="flex items-center justify-center mt-3">
+              <Suspense fallback={null}>
+                <TreeCheckinStatusLight light={checkinLight} size="md" showLabel timeRemaining={graceLabel} />
+              </Suspense>
+            </div>
           )}
 
           {/* Quick shortcuts — direct to flow, skip gateway */}
