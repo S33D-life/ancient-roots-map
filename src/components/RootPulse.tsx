@@ -29,7 +29,7 @@ export default function RootPulse() {
   }, [open]);
 
   return (
-    <div ref={containerRef} className="relative max-w-2xl mx-auto px-4 py-14">
+    <div ref={containerRef} className="relative max-w-2xl mx-auto px-4 py-16">
       {/* ── Entry point: root glyph ── */}
       <RootPulseGlyph
         open={open}

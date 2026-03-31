@@ -92,17 +92,17 @@ export default function RootPulseContent({ prefersReduced }: Props) {
   }, [load]);
 
   const pulseItems = metrics ? [
-    { icon: <TreeDeciduous className="w-3.5 h-3.5" />, value: metrics.trees, label: "trees rooted" },
-    { icon: <Music className="w-3.5 h-3.5" />, value: metrics.offerings, label: "offerings" },
+    { icon: <TreeDeciduous className="w-3.5 h-3.5" />, value: metrics.trees, label: "rooted" },
+    { icon: <Music className="w-3.5 h-3.5" />, value: metrics.offerings, label: "offered" },
     { icon: <Heart className="w-3.5 h-3.5" />, value: metrics.hearts, label: "hearts" },
     { icon: <Hexagon className="w-3.5 h-3.5" />, value: metrics.hives, label: "hives" },
-    { icon: <Users className="w-3.5 h-3.5" />, value: metrics.councils, label: "gatherings" },
+    { icon: <Users className="w-3.5 h-3.5" />, value: metrics.councils, label: "gathered" },
   ] : [];
 
   const stagger = prefersReduced ? 0 : 0.07;
 
   return (
-    <div className="pt-4 pb-2 space-y-6">
+    <div className="pt-5 pb-3 space-y-5">
       {/* Mycelium connector */}
       <div className="flex justify-center" aria-hidden>
         <motion.div
@@ -116,7 +116,7 @@ export default function RootPulseContent({ prefersReduced }: Props) {
 
       {/* ── A. Pulse — current root-state ── */}
       {metrics ? (
-        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2.5">
           {pulseItems.map((item, i) => (
             <motion.div
               key={item.label}
