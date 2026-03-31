@@ -92,11 +92,11 @@ export default function RootPulseContent({ prefersReduced }: Props) {
   }, [load]);
 
   const pulseItems = metrics ? [
-    { icon: <TreeDeciduous className="w-3.5 h-3.5" />, value: metrics.trees, label: "trees rooted" },
-    { icon: <Music className="w-3.5 h-3.5" />, value: metrics.offerings, label: "offerings" },
+    { icon: <TreeDeciduous className="w-3.5 h-3.5" />, value: metrics.trees, label: "rooted" },
+    { icon: <Music className="w-3.5 h-3.5" />, value: metrics.offerings, label: "offered" },
     { icon: <Heart className="w-3.5 h-3.5" />, value: metrics.hearts, label: "hearts" },
     { icon: <Hexagon className="w-3.5 h-3.5" />, value: metrics.hives, label: "hives" },
-    { icon: <Users className="w-3.5 h-3.5" />, value: metrics.councils, label: "gatherings" },
+    { icon: <Users className="w-3.5 h-3.5" />, value: metrics.councils, label: "gathered" },
   ] : [];
 
   const stagger = prefersReduced ? 0 : 0.07;
