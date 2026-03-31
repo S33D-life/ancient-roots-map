@@ -62,7 +62,11 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="rounded-xl border border-primary/20 bg-primary/5 p-4 backdrop-blur-sm"
+        className="rounded-xl border p-4 backdrop-blur-sm"
+        style={{
+          borderColor: "hsl(260 40% 55% / 0.15)",
+          background: "linear-gradient(135deg, hsl(260 40% 50% / 0.06), hsl(200 40% 50% / 0.04))",
+        }}
       >
         <button
           onClick={() => setRevealed(true)}
@@ -71,20 +75,20 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
             style={{
-              background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.1))",
+              background: "linear-gradient(135deg, hsl(260 40% 50% / 0.15), hsl(200 40% 50% / 0.1))",
             }}
           >
-            <MessageCircle className="w-5 h-5 text-primary" />
+            <MessageCircle className="w-5 h-5" style={{ color: "hsl(260 40% 60%)" }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-serif text-primary">
-              You feel something waiting in this tree…
+            <p className="text-sm font-serif" style={{ color: "hsl(260 40% 65%)" }}>
+              A whisper waits in this tree…
             </p>
             <p className="text-[11px] text-muted-foreground font-serif mt-0.5">
-              {uncollected.length} whisper{uncollected.length !== 1 ? "s" : ""} can be collected here
+              {uncollected.length} whisper{uncollected.length !== 1 ? "s" : ""} to receive
             </p>
           </div>
-          <ChevronRight className="w-4 h-4 text-primary/50 shrink-0" />
+          <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "hsl(260 40% 55% / 0.4)" }} />
         </button>
       </motion.div>
     );
