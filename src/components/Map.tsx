@@ -92,6 +92,7 @@ const Map = memo(({
           birdsongCounts={birdsongCounts}
           birdsongHeatPoints={birdsongHeatPoints}
           bloomedSeeds={bloomedSeeds}
+          heartPoolCounts={heartPoolCounts}
           userId={userId}
           initialLat={initialLat}
           initialLng={initialLng}
