@@ -43,6 +43,7 @@ interface MarkerLayerRefs {
   birdsongCounts: Record<string, number>;
   whisperCounts: Record<string, number>;
   treePhotos: Record<string, string>;
+  heartPoolCounts: Record<string, number>;
   userLatLng: [number, number] | null;
 }
 
