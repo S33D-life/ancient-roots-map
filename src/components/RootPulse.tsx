@@ -105,10 +105,10 @@ export default function RootPulse() {
       results.push({ id: `t-${t.id}`, type: "tree", label: t.name || "A new tree", timestamp: t.created_at })
     );
     const { data: recentOfferings } = await supabase
-      .from("offerings").select("id, offering_type, created_at")
+      .from("offerings").select("id, type, created_at")
       .order("created_at", { ascending: false }).limit(3);
     (recentOfferings || []).forEach(o =>
-      results.push({ id: `o-${o.id}`, type: "offering", label: `${o.offering_type || "Offering"} left`, timestamp: o.created_at })
+      results.push({ id: `o-${o.id}`, type: "offering", label: `${o.type || "Offering"} left`, timestamp: o.created_at })
     );
     results.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     setTraces(results.slice(0, 5));
