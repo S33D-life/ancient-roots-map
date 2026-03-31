@@ -52,12 +52,13 @@ export default function CuratorRefinementReview() {
 
   const loadPending = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data: rawData } = await supabase
       .from("tree_location_refinements" as any)
       .select("*")
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(200);
+    const data = (rawData as unknown as RefinementRow[] | null);
 
     if (!data || data.length === 0) {
       setTrees([]);
