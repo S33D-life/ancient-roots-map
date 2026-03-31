@@ -10,6 +10,35 @@ import { getSourceById } from "@/utils/externalTreeSources";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Rootstone } from "@/data/rootstones";
 
+/* ── Proximity status for popup lights ── */
+const PROXIMITY_M = 500;
+const GRACE_HOURS = 12;
+const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
+const VISITS_KEY = "s33d-tree-visits";
+
+/** Derive a quick presence status light for a given tree using localStorage visits + proximity */
+export function getPopupStatusLight(
+  treeId: string,
+  treeLat: number,
+  treeLng: number,
+  userLatLng: [number, number] | null,
+): PopupStatusLight {
+  // Check if user is currently near the tree
+  if (userLatLng) {
+    const distM = haversineKm(userLatLng[0], userLatLng[1], treeLat, treeLng) * 1000;
+    if (distM < PROXIMITY_M) return "green";
+  }
+
+  // Check grace period from localStorage
+  try {
+    const visits = JSON.parse(localStorage.getItem(VISITS_KEY) || "{}");
+    const lastVisit = visits[treeId];
+    if (lastVisit && (Date.now() - lastVisit) < GRACE_MS) return "orange";
+  } catch { /* silent */ }
+
+  return "red";
+}
+
 /* ── Popup HTML cache — avoids rebuilding for the same tree state ── */
 const POPUP_CACHE = new Map<string, string>();
 const MAX_POPUP_CACHE = 200;
