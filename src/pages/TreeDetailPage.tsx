@@ -577,6 +577,64 @@ const TreeDetailPage = () => {
           />
         )}
 
+        {/* ══════ Primary Check-In Prompt ══════ */}
+        {userId && tree && (
+          <Suspense fallback={null}>
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-4 mb-2"
+            >
+              {(() => {
+                const isNearby = proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_grace";
+                const isActive = meetingStatus === "active" || meetingStatus === "expiring";
+                const hasCheckedIn = checkinStats && (checkinStats.totalVisits ?? 0) > 0;
+
+                if (isActive) {
+                  return (
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/20 bg-primary/5">
+                      <span className="relative flex h-2.5 w-2.5 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                      </span>
+                      <p className="text-sm font-serif text-foreground/80">You are here with {tree.name}</p>
+                    </div>
+                  );
+                }
+
+                if (isNearby) {
+                  return (
+                    <button
+                      onClick={() => setCanopyCheckinOpen(true)}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/25 bg-primary/5 hover:bg-primary/10 transition-colors text-left group"
+                    >
+                      <span className="relative flex h-2.5 w-2.5 shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-40" style={{ background: "hsl(120, 50%, 50%)" }} />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ background: "hsl(120, 50%, 50%)" }} />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-serif text-foreground/90 group-hover:text-primary transition-colors">Check in at this tree</p>
+                        <p className="text-[11px] font-serif text-muted-foreground mt-0.5">You are nearby — mark your arrival</p>
+                      </div>
+                      <TreeDeciduous className="w-4 h-4 text-primary/40 shrink-0" />
+                    </button>
+                  );
+                }
+
+                return (
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border/30 bg-secondary/10">
+                    <span className="flex h-2.5 w-2.5 rounded-full shrink-0 bg-muted-foreground/30" />
+                    <p className="text-[12px] font-serif text-muted-foreground/70">
+                      {hasCheckedIn ? `Visited ${checkinStats!.totalVisits} time${checkinStats!.totalVisits !== 1 ? "s" : ""} · visit again to check in` : "Visit this tree to check in"}
+                    </p>
+                  </div>
+                );
+              })()}
+            </motion.div>
+          </Suspense>
+        )}
+
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
