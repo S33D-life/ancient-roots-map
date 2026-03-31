@@ -285,6 +285,7 @@ const WorldAtlasPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("cards");
   const [filter, setFilter] = useState<FilterType>("all");
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [countryListOpen, setCountryListOpen] = useState(true);
   const searchRef = useRef<HTMLInputElement>(null);
   const { focusMap } = useMapFocus();
 
