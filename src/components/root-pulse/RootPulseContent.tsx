@@ -116,7 +116,7 @@ export default function RootPulseContent({ prefersReduced }: Props) {
 
       {/* ── A. Pulse — current root-state ── */}
       {metrics ? (
-        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2.5">
           {pulseItems.map((item, i) => (
             <motion.div
               key={item.label}

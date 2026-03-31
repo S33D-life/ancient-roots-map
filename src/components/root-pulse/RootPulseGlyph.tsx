@@ -20,36 +20,36 @@ export default function RootPulseGlyph({ open, onToggle, prefersReduced }: Props
       aria-label={open ? "Close root pulse" : "Sense the roots"}
       aria-expanded={open}
     >
-      <svg viewBox="0 0 64 80" className="w-9 h-11" aria-hidden>
-        {/* Soft breathing glow */}
+      <svg viewBox="0 0 64 80" className="w-10 h-12" aria-hidden>
+        {/* Soft breathing glow — slower, more organic */}
         {!open && !prefersReduced && (
           <motion.circle
             cx="32" cy="24" r="14"
-            fill="hsl(var(--primary) / 0.05)"
-            animate={{ r: [14, 19, 14], opacity: [0.04, 0.1, 0.04] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            fill="hsl(var(--primary) / 0.04)"
+            animate={{ r: [14, 18, 14], opacity: [0.03, 0.09, 0.03] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
         )}
-        {/* Central seed — slightly larger for tap clarity */}
+        {/* Central seed */}
         <circle
-          cx="32" cy="24" r="3.5"
-          fill={open ? "hsl(var(--primary) / 0.5)" : "hsl(var(--primary) / 0.3)"}
-          style={{ transition: "fill 0.4s ease" }}
+          cx="32" cy="24" r="3"
+          fill={open ? "hsl(var(--primary) / 0.55)" : "hsl(var(--primary) / 0.25)"}
+          style={{ transition: "fill 0.5s ease" }}
         />
         {/* Root tendrils */}
         <path
           d="M32 28 Q27 44, 16 62 M32 28 Q32 46, 32 68 M32 28 Q37 44, 48 62"
           fill="none"
-          stroke="hsl(var(--primary) / 0.16)"
-          strokeWidth="1.1"
+          stroke="hsl(var(--primary) / 0.14)"
+          strokeWidth="1"
           strokeLinecap="round"
         />
-        {/* Fine root hairs — subtle life */}
+        {/* Fine root hairs */}
         <path
           d="M21 52 Q17 56, 12 58 M43 52 Q47 56, 52 58 M27 58 Q23 63, 18 67 M37 58 Q41 63, 46 67"
           fill="none"
-          stroke="hsl(var(--primary) / 0.08)"
-          strokeWidth="0.7"
+          stroke="hsl(var(--primary) / 0.07)"
+          strokeWidth="0.6"
           strokeLinecap="round"
         />
       </svg>
