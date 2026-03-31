@@ -101,16 +101,26 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
-        className="rounded-xl border border-primary/20 bg-card/80 p-5 backdrop-blur-sm space-y-4"
+      className="rounded-xl border p-5 backdrop-blur-sm space-y-4"
+        style={{
+          borderColor: "hsl(260 40% 55% / 0.15)",
+          background: "linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(260 40% 50% / 0.04))",
+        }}
       >
         <div className="flex items-center gap-2">
-          <TreeDeciduous className="w-4 h-4 text-primary" />
+          <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(260 40% 60%)" }} />
           <span className="text-xs font-serif text-muted-foreground tracking-wider uppercase">
             Whisper from the Canopy
           </span>
-          <Badge variant="outline" className="ml-auto text-[9px] font-serif border-primary/20">
+          <span className="ml-auto text-[9px] font-serif px-2 py-0.5 rounded-full"
+            style={{
+              background: "hsl(260 40% 55% / 0.08)",
+              color: "hsl(260 40% 60%)",
+              border: "1px solid hsl(260 40% 55% / 0.15)",
+            }}
+          >
             {current?.recipient_scope === "PUBLIC" ? "Shared" : "Private"}
-          </Badge>
+          </span>
         </div>
 
         {current && !collectedIds.has(current.id) ? (
