@@ -154,7 +154,8 @@ export interface ShareOptions {
 function buildFullShareUrl(opts: ShareOptions): string {
   let url = getShareUrl(opts.entity);
   if (opts.inviteCode) {
-    url += `&invite=${encodeURIComponent(opts.inviteCode)}`;
+    const separator = url.includes("?") ? "&" : "?";
+    url += `${separator}invite=${encodeURIComponent(opts.inviteCode)}`;
   }
   return url;
 }
