@@ -18,7 +18,14 @@
 
 import { APP_URL, DEFAULT_OG_IMAGE } from "@/utils/ogMeta";
 
-const OG_PROXY_BASE = `${APP_URL}/functions/v1/og-proxy`;
+/** Resolve the public site base URL — prefers env var, then APP_URL constant */
+function getSiteBase(): string {
+  try {
+    const env = (import.meta as any)?.env?.VITE_PUBLIC_SITE_URL;
+    if (env) return env.replace(/\/+$/, "");
+  } catch {}
+  return APP_URL;
+}
 
 /* ── Entity types ───────────────────────────────────────── */
 
