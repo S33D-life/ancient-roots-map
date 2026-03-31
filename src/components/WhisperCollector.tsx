@@ -125,7 +125,7 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
 
         {current && !collectedIds.has(current.id) ? (
           <>
-            <div className="border-l-2 border-primary/30 pl-4">
+            <div className="pl-4" style={{ borderLeft: "2px solid hsl(260 40% 55% / 0.2)" }}>
               <p className="text-sm font-serif text-foreground/90 leading-relaxed italic">
                 "{current.message_content}"
               </p>
@@ -133,16 +133,17 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
 
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground font-serif">
-                Sent through {treeName}
+                Through {treeName}
               </span>
               <Button
                 onClick={handleCollect}
                 disabled={collecting}
                 size="sm"
-                className="font-serif text-xs gap-1.5"
+                variant="outline"
+                className="font-serif text-xs gap-1.5 border-primary/20"
               >
                 {collecting ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                Collect Whisper
+                Receive Whisper
               </Button>
             </div>
 
