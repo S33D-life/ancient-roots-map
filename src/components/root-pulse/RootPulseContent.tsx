@@ -102,7 +102,7 @@ export default function RootPulseContent({ prefersReduced }: Props) {
   const stagger = prefersReduced ? 0 : 0.07;
 
   return (
-    <div className="pt-4 pb-2 space-y-6">
+    <div className="pt-5 pb-3 space-y-5">
       {/* Mycelium connector */}
       <div className="flex justify-center" aria-hidden>
         <motion.div
