@@ -43,9 +43,9 @@ export function getPopupStatusLight(
 const POPUP_CACHE = new Map<string, string>();
 const MAX_POPUP_CACHE = 200;
 
-function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null, hasHeartPool: boolean): string {
+function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null): string {
   const dKey = distKm != null ? Math.round(distKm * 10) : "x";
-  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}:${hasHeartPool ? 1 : 0}`;
+  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}`;
 }
 
 export interface PopupTree {
