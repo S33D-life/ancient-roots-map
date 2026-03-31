@@ -180,6 +180,7 @@ const TreeCard = ({
                 {age > 0 && <span>🌿 ~{age}y</span>}
               </div>
             </div>
+            {isResearch && <ResearchBadges tree={tree} />}
           </div>
           {/* Seed + Tier badges */}
           <div className="self-start flex items-center gap-1.5">
