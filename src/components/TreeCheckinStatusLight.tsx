@@ -72,10 +72,12 @@ export default function TreeCheckinStatusLight({
   const config = LIGHT_CONFIG[light];
 
   const labelText = (light === "green" && timeRemaining)
-    ? `You are here — ${timeRemaining} remaining`
+    ? `Here now · ${timeRemaining}`
     : (light === "flashing_green" && timeRemaining)
-      ? `Less than ${timeRemaining} to leave an offering`
-      : config.label;
+      ? `Window closing · ${timeRemaining}`
+      : (light === "orange" && timeRemaining)
+        ? `Recently met · ${timeRemaining}`
+        : config.label;
 
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
