@@ -130,6 +130,7 @@ interface LeafletFallbackMapProps {
   className?: string;
   userId?: string | null;
   bloomedSeeds?: BloomedSeed[];
+  heartPoolCounts?: Record<string, number>;
   initialLat?: number;
   initialLng?: number;
   initialZoom?: number;
@@ -224,7 +225,7 @@ function AtlasNavButton({ btnBase }: { btnBase: React.CSSProperties }) {
   );
 }
 
-const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, initialJourney, initialBbox, onFullscreenToggle, isFullscreen, onJourneyEnd }: LeafletFallbackMapProps) => {
+const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birdsongCounts = {}, birdsongHeatPoints = [], className, userId, bloomedSeeds = [], heartPoolCounts = {}, initialLat, initialLng, initialZoom, initialW3w, initialTreeId, initialCountry, initialHive, initialOrigin, initialJourney, initialBbox, onFullscreenToggle, isFullscreen, onJourneyEnd }: LeafletFallbackMapProps) => {
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -942,6 +943,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   treePhotosRef.current = treePhotos;
   const birdsongCountsRef = useRef(birdsongCounts);
   birdsongCountsRef.current = birdsongCounts;
+  const heartPoolCountsRef = useRef(heartPoolCounts);
+  heartPoolCountsRef.current = heartPoolCounts;
 
   // Whisper counts for map markers
   const { counts: whisperCountsMap } = useWhisperCounts();
@@ -1266,6 +1269,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       birdsongCounts: birdsongCountsRef.current,
       whisperCounts: whisperCountsRef.current,
       treePhotos: treePhotosRef.current,
+      heartPoolCounts: heartPoolCountsRef.current,
       userLatLng,
     },
     userLatLng,

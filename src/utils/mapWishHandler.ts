@@ -183,6 +183,52 @@ export function setupPopupActions(container: HTMLElement): () => void {
       return;
     }
 
+    // Collect hearts button
+    const heartsBtn = target.closest<HTMLElement>("[data-collect-hearts]");
+    if (heartsBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const treeId = heartsBtn.dataset.collectHearts;
+      if (!treeId) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.info("Sign in to collect hearts");
+        return;
+      }
+
+      heartsBtn.style.opacity = "0.5";
+      heartsBtn.style.pointerEvents = "none";
+      heartsBtn.textContent = "⏳ Collecting...";
+
+      try {
+        const { data, error } = await supabase.rpc("claim_windfall_hearts", {
+          p_tree_id: treeId,
+          p_user_id: user.id,
+        });
+        if (error) throw error;
+        const amount = typeof data === "number" ? data : 0;
+        if (amount > 0) {
+          heartsBtn.textContent = `✨ ${amount} hearts collected!`;
+          heartsBtn.style.opacity = "1";
+          heartsBtn.style.background = "hsl(120,50%,40%,0.15)";
+          heartsBtn.style.borderColor = "hsl(120,40%,45%,0.3)";
+          toast.success(`You collected ${amount} heart${amount !== 1 ? "s" : ""}!`, { icon: "💚" });
+          window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
+        } else {
+          heartsBtn.textContent = "No hearts ready yet";
+          heartsBtn.style.opacity = "1";
+          toast("No hearts ready to collect yet", { icon: "🌳" });
+        }
+      } catch {
+        heartsBtn.textContent = "💚 Try again";
+        heartsBtn.style.opacity = "1";
+        heartsBtn.style.pointerEvents = "auto";
+        toast.error("Could not collect hearts");
+      }
+      return;
+    }
+
     // Share button
     const shareBtn = target.closest<HTMLElement>("[data-share-tree]");
     if (shareBtn) {

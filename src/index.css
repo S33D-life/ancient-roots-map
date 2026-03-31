@@ -631,6 +631,19 @@ All colors MUST be HSL.
     border-radius: 50%;
   }
 
+  /* Heart available — subtle green dot indicator for trees with claimable hearts */
+  @keyframes heartPulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsla(120, 50%, 45%, 0); }
+    50%      { box-shadow: 0 0 8px 3px hsla(120, 50%, 45%, 0.12); }
+  }
+  .heart-available {
+    animation: heartPulse 8s ease-in-out infinite;
+    border-radius: 50%;
+  }
+  .heart-available.whisper-glow {
+    animation: whisperBreath 12s ease-in-out infinite, heartPulse 8s ease-in-out infinite;
+  }
+
   body.tree-zone-atlas-content .pulse-heart { animation-duration: 4.2s; }
   body.tree-zone-heartwood .pulse-heart    { animation-duration: 3.6s; }
   body.tree-zone-council .pulse-heart      { animation-duration: 3.2s; }

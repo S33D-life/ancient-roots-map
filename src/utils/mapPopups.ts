@@ -43,9 +43,9 @@ export function getPopupStatusLight(
 const POPUP_CACHE = new Map<string, string>();
 const MAX_POPUP_CACHE = 200;
 
-function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null): string {
+function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null, heartCount?: number): string {
   const dKey = distKm != null ? Math.round(distKm * 10) : "x";
-  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}`;
+  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}:${heartCount ?? 0}`;
 }
 
 export interface PopupTree {
@@ -70,12 +70,13 @@ export function buildPopupHtml(
   whisperCount?: number,
   userLatLng?: [number, number] | null,
   statusLight?: PopupStatusLight,
+  heartCount?: number,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
 
   const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
-  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null);
+  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
@@ -176,8 +177,17 @@ export function buildPopupHtml(
       ${desc}
     </div>
 
+    <!-- Hearts available — collect CTA -->
+    ${(heartCount ?? 0) > 0 && (statusLight === "green" || statusLight === "orange") ? `
+    <div style="padding:4px 16px 6px;">
+      <button data-collect-hearts="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 0;font-size:11px;color:hsl(120,45%,55%);background:hsl(120,50%,40%,0.08);border:1px solid hsl(120,40%,45%,0.2);border-radius:9px;cursor:pointer;font-family:sans-serif;font-weight:600;transition:all .2s;">💚 Collect ${heartCount} Hearts</button>
+    </div>` : (heartCount ?? 0) > 0 ? `
+    <div style="padding:4px 16px 6px;">
+      <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 0;font-size:10px;color:hsl(0,0%,50%);font-family:sans-serif;">💚 ${heartCount} hearts · visit to collect</div>
+    </div>` : ""}
+
     <!-- Primary CTA — Meet This Tree -->
-    <div style="padding:6px 16px 8px;">
+    <div style="padding:4px 16px 8px;">
       <a href="/tree/${encodeURIComponent(tree.id)}" style="display:flex;align-items:center;justify-content:center;padding:12px 0;font-size:12px;color:hsl(35,20%,10%);background:linear-gradient(135deg,hsl(42,70%,48%),hsl(45,80%,55%));border-radius:10px;text-decoration:none;letter-spacing:0.04em;font-weight:700;font-family:'Cinzel',serif;box-shadow:0 2px 10px hsla(42,70%,50%,0.25);">Meet This Tree ⟶</a>
     </div>
 

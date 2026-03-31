@@ -47,6 +47,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
+const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
 
 // Lazy-loaded secondary components (modals, panels, below-fold)
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));
@@ -631,6 +632,25 @@ const TreeDetailPage = () => {
                   </div>
                 );
               })()}
+            </motion.div>
+          </Suspense>
+        )}
+
+        {/* ══════ Collect Hearts CTA ══════ */}
+        {userId && tree && id && (
+          <Suspense fallback={null}>
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+              className="mb-2"
+            >
+              <CollectHeartsButton
+                treeId={id}
+                treeName={tree.name}
+                userId={userId}
+                isEligible={proximityGate.isUnlocked}
+              />
             </motion.div>
           </Suspense>
         )}

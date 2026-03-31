@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfferingCounts } from "@/hooks/use-offering-counts";
 import { useTreeMapData } from "@/hooks/use-tree-map-data";
+import { useQuery } from "@tanstack/react-query";
 
 // The single active renderer — owns all map lifecycle, deep-links, markers, layers
 const LeafletFallbackMap = lazy(() => import("./LeafletFallbackMap"));
@@ -51,6 +52,21 @@ const Map = memo(({
   // Unified offering counts from shared hook
   const { counts: offeringCounts, photos: treePhotos } = useOfferingCounts();
 
+  // Heart pool counts for map popup CTAs
+  const { data: heartPoolCounts = {} } = useQuery({
+    queryKey: ["heart-pool-counts-map"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("tree_heart_pools")
+        .select("tree_id, total_hearts")
+        .gt("total_hearts", 0);
+      const map: Record<string, number> = {};
+      for (const row of data || []) map[row.tree_id] = row.total_hearts;
+      return map;
+    },
+  });
+
   // Get current user
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
@@ -76,6 +92,7 @@ const Map = memo(({
           birdsongCounts={birdsongCounts}
           birdsongHeatPoints={birdsongHeatPoints}
           bloomedSeeds={bloomedSeeds}
+          heartPoolCounts={heartPoolCounts}
           userId={userId}
           initialLat={initialLat}
           initialLng={initialLng}

@@ -2,13 +2,15 @@
  * TreeArrivalPanel — Unified staggered reveal of what awaits at this tree.
  * Order: presence/check-in → hearts → whispers.
  * Only appears when the user is authenticated and something is available.
+ * Uses unified useHeartCollection hook for heart gathering.
  */
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Wind, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { checkWhispersAtTree, type TreeWhisper, collectPrivateWhisper, collectSharedWhisper } from "@/hooks/use-whispers";
+import { useHeartCollection } from "@/hooks/use-heart-collection";
 import { toast } from "sonner";
 
 interface TreeArrivalPanelProps {
@@ -22,11 +24,6 @@ interface TreeArrivalPanelProps {
   onWhisperCollected?: () => void;
 }
 
-interface HeartPoolData {
-  total_hearts: number;
-  windfall_count: number;
-}
-
 export default function TreeArrivalPanel({
   treeId,
   treeName,
@@ -38,14 +35,13 @@ export default function TreeArrivalPanel({
   onWhisperCollected,
 }: TreeArrivalPanelProps) {
   const [whispers, setWhispers] = useState<TreeWhisper[]>([]);
-  const [heartPool, setHeartPool] = useState<HeartPoolData | null>(null);
-  const [claimedHearts, setClaimedHearts] = useState<number | null>(null);
-  const [claimingHearts, setClaimingHearts] = useState(false);
   const [whisperRevealed, setWhisperRevealed] = useState(false);
   const [collectingWhisper, setCollectingWhisper] = useState(false);
   const [collectedWhisperIds, setCollectedWhisperIds] = useState<Set<string>>(new Set());
   const [whisperIndex, setWhisperIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
+
+  const heartCollection = useHeartCollection(treeId, userId, isNearby || isCheckedIn);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 300);
@@ -57,50 +53,30 @@ export default function TreeArrivalPanel({
     checkWhispersAtTree(userId, treeId, treeSpecies).then(setWhispers);
   }, [userId, treeId, treeSpecies]);
 
-  useEffect(() => {
-    supabase
-      .from("tree_heart_pools")
-      .select("total_hearts, windfall_count")
-      .eq("tree_id", treeId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setHeartPool(data);
-      });
-  }, [treeId]);
-
   const uncollectedWhispers = useMemo(
     () => whispers.filter(w => !collectedWhisperIds.has(w.id)),
     [whispers, collectedWhisperIds]
   );
   const currentWhisper = uncollectedWhispers[whisperIndex] || uncollectedWhispers[0];
 
-  const hasHearts = heartPool && heartPool.total_hearts > 0;
+  const hasHearts = heartCollection.pool && heartCollection.pool.totalHearts > 0;
   const hasWhispers = uncollectedWhispers.length > 0;
   const hasAnything = hasHearts || hasWhispers;
 
-  const handleGatherHearts = async () => {
-    if (!userId || claimingHearts) return;
-    setClaimingHearts(true);
-    try {
-      const { data, error } = await supabase.rpc("claim_windfall_hearts", {
-        p_tree_id: treeId,
-        p_user_id: userId,
+  const handleGatherHearts = useCallback(async () => {
+    const amount = await heartCollection.collect();
+    if (amount && amount > 0) {
+      toast.success(`${amount} hearts gathered from this tree`, { icon: "💚" });
+      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
+    } else if (amount === 0) {
+      toast("No hearts ready to gather yet", {
+        icon: "🌳",
+        description: "Hearts accumulate as wanderers visit",
       });
-      if (!error && data && data > 0) {
-        setClaimedHearts(data);
-        toast.success(`${data} hearts gathered from this tree`, { icon: "💚" });
-        setTimeout(() => setClaimedHearts(null), 4000);
-      } else if (!error) {
-        toast("No hearts ready to gather yet", {
-          icon: "🌳",
-          description: "Hearts accumulate as wanderers visit",
-        });
-      }
-    } catch {
+    } else {
       toast.error("Could not gather hearts");
     }
-    setClaimingHearts(false);
-  };
+  }, [heartCollection.collect]);
 
   const handleCollectWhisper = async () => {
     if (!currentWhisper || collectingWhisper) return;
@@ -124,7 +100,7 @@ export default function TreeArrivalPanel({
     setCollectingWhisper(false);
   };
 
-  if (!userId || !hasAnything) return null;
+  if (!userId || (!hasAnything && heartCollection.state !== "loading")) return null;
 
   // Stagger delays: hearts first (0.3s), whispers second (0.5s)
   const heartsDelay = 0.3;
@@ -159,7 +135,7 @@ export default function TreeArrivalPanel({
             animate={{ opacity: 1 }}
             transition={{ delay: heartsDelay, duration: 0.4 }}
             onClick={handleGatherHearts}
-            disabled={claimingHearts}
+            disabled={heartCollection.state === "collecting" || heartCollection.state === "collected"}
             className="w-full flex items-center gap-3 py-3 px-1 text-left transition-colors hover:bg-primary/5 rounded-lg"
           >
             <div
@@ -168,7 +144,7 @@ export default function TreeArrivalPanel({
                 background: "hsl(120 50% 40% / 0.12)",
               }}
             >
-              {claimingHearts ? (
+              {heartCollection.state === "collecting" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
               ) : (
                 <Heart className="w-3.5 h-3.5" style={{ color: "hsl(120 45% 55%)" }} />
@@ -176,13 +152,13 @@ export default function TreeArrivalPanel({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-serif" style={{ color: "hsl(120 45% 55%)" }}>
-                {claimedHearts ? `${claimedHearts} hearts gathered ✨` : "Hearts waiting here"}
+                {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : "Hearts waiting here"}
               </p>
               <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
-                {heartPool!.total_hearts} in this tree's reservoir
+                {heartCollection.pool!.totalHearts} in this tree's reservoir
               </p>
             </div>
-            {!claimedHearts && (
+            {!heartCollection.collectedAmount && (
               <span className="text-[10px] font-serif text-primary/40 shrink-0">Gather</span>
             )}
           </motion.button>
