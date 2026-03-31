@@ -47,6 +47,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
+const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
 
 // Lazy-loaded secondary components (modals, panels, below-fold)
 const ContextualWhisper = lazy(() => import("@/components/ContextualWhisper"));

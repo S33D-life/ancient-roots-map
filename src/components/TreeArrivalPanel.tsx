@@ -135,7 +135,7 @@ export default function TreeArrivalPanel({
             animate={{ opacity: 1 }}
             transition={{ delay: heartsDelay, duration: 0.4 }}
             onClick={handleGatherHearts}
-            disabled={claimingHearts}
+            disabled={heartCollection.state === "collecting" || heartCollection.state === "collected"}
             className="w-full flex items-center gap-3 py-3 px-1 text-left transition-colors hover:bg-primary/5 rounded-lg"
           >
             <div
@@ -144,7 +144,7 @@ export default function TreeArrivalPanel({
                 background: "hsl(120 50% 40% / 0.12)",
               }}
             >
-              {claimingHearts ? (
+              {heartCollection.state === "collecting" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
               ) : (
                 <Heart className="w-3.5 h-3.5" style={{ color: "hsl(120 45% 55%)" }} />
@@ -152,13 +152,13 @@ export default function TreeArrivalPanel({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-serif" style={{ color: "hsl(120 45% 55%)" }}>
-                {claimedHearts ? `${claimedHearts} hearts gathered ✨` : "Hearts waiting here"}
+                {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : "Hearts waiting here"}
               </p>
               <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
-                {heartPool!.total_hearts} in this tree's reservoir
+                {heartCollection.pool!.totalHearts} in this tree's reservoir
               </p>
             </div>
-            {!claimedHearts && (
+            {!heartCollection.collectedAmount && (
               <span className="text-[10px] font-serif text-primary/40 shrink-0">Gather</span>
             )}
           </motion.button>
