@@ -8,12 +8,6 @@
  * - OG metadata is handled by index.html tags and the og-proxy edge function
  *   independently — the share URL itself is always the real page.
  */
- * IMAGE FALLBACK HIERARCHY (per entity):
- *   1. Curated OG card image
- *   2. Generated OG card (future)
- *   3. Best available hero image / photo
- *   4. Global S33D branded share image
- */
 
 import { APP_URL, DEFAULT_OG_IMAGE } from "@/utils/ogMeta";
 
