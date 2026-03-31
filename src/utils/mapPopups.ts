@@ -162,6 +162,8 @@ export function buildPopupHtml(
       ${statusLight ? `<div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
         <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${statusLight === "green" ? "hsl(142,60%,45%)" : statusLight === "orange" ? "hsl(30,85%,55%)" : "hsl(0,55%,50%)"};box-shadow:0 0 4px ${statusLight === "green" ? "hsla(142,60%,45%,0.5)" : statusLight === "orange" ? "hsla(30,85%,55%,0.4)" : "transparent"};${statusLight === "green" ? "animation:statusPulse 2s ease-in-out infinite;" : ""}"></span>
         <span style="font-size:10px;font-family:sans-serif;color:${statusLight === "green" ? "hsl(142,50%,55%)" : statusLight === "orange" ? "hsl(30,70%,60%)" : "hsl(0,0%,50%)"};">${statusLight === "green" ? "Here now" : statusLight === "orange" ? "Recently met" : "Not yet met"}</span>
+        ${(whisperCount ?? 0) > 0 ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:hsl(260,50%,60%);margin-left:3px;box-shadow:0 0 3px hsla(260,50%,60%,0.5);" title="Whisper waiting"></span>' : ""}
+        ${hasHeartPool ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:hsl(42,70%,55%);margin-left:2px;box-shadow:0 0 3px hsla(42,70%,55%,0.4);" title="Hearts in reservoir"></span>' : ""}
       </div>` : ""}
 
       <!-- Hive badge -->
