@@ -240,62 +240,63 @@ const TreeCard = ({
         </div>
       )}
 
-      <CardHeader className="cursor-pointer pt-3 pb-2 pr-12" onClick={handleClick}>
+      <CardHeader className="cursor-pointer pt-3 pb-1.5 pr-12" onClick={handleClick}>
         <CardTitle className="font-serif text-primary line-clamp-1 text-base leading-snug tracking-wide">
           {tree.name}
         </CardTitle>
-        <div className="flex items-center gap-2 mt-1">
-          <Badge variant="outline" className="font-serif text-[11px]" style={{ borderColor: `hsl(${speciesHue}, 35%, 45%)`, color: `hsl(${speciesHue}, 45%, 55%)` }}>
-            {tree.species}
-          </Badge>
-          {age > 0 && (
-            <span className="text-[11px] text-muted-foreground">🌿 ~{age} years</span>
-          )}
-        </div>
+        <p className="text-[11px] italic mt-0.5 font-serif" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
+          {tree.species}
+        </p>
       </CardHeader>
 
       <CardContent className="pt-0">
-        <div className="space-y-2 text-sm cursor-pointer" onClick={handleClick}>
-          {tree.what3words && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate text-xs">/{tree.what3words}</span>
-            </div>
-          )}
-          {tree.description && (
-            <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed">{tree.description}</p>
-          )}
-
-          {/* Research source badges */}
-          {isResearch && <ResearchBadges tree={tree} />}
-
-          {/* Offering + birdsong summary (hidden for unverified research) */}
-          {(!isResearch || tree.research?.verified) && (
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground/70">
-              {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount} offering{offeringCount !== 1 ? "s" : ""}</span>}
-              {birdsongCount > 0 && <span>🐦 {birdsongCount} birdsong{birdsongCount !== 1 ? "s" : ""}</span>}
-              {whisperCount > 0 && (
-                <span className="flex items-center gap-1 text-muted-foreground/50" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
-                  <Wind className="w-3 h-3" /> {whisperCount} whisper{whisperCount !== 1 ? "s" : ""}
-                </span>
+        <div className="cursor-pointer" onClick={handleClick}>
+          {/* Unified metadata cluster */}
+          <div className="flex items-start justify-between gap-3">
+            {/* Left: core metadata stack */}
+            <div className="flex flex-col gap-1 min-w-0">
+              {tree.what3words && (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <MapPin className="w-3 h-3 shrink-0" />
+                  <span className="truncate text-[11px] font-serif">/{tree.what3words}</span>
+                </div>
               )}
-            </div>
-          )}
-
-          {/* Wanderer avatars */}
-          {isClustered && wandererCount > 1 && (
-            <div className="flex items-center gap-1.5 pt-1">
-              <span className="text-[10px] text-muted-foreground/70 font-serif">
-                {wandererCount} wanderer{wandererCount > 1 ? "s" : ""}
-              </span>
-              <div className="flex -space-x-1.5">
-                {cluster!.encounters.slice(0, 3).map((enc) => (
-                  <div key={enc.id} className="w-5 h-5 rounded-full bg-secondary border border-card flex items-center justify-center text-[8px]">
-                    🌳
-                  </div>
-                ))}
+              <div className="flex items-center gap-2 flex-wrap">
+                {age > 0 && (
+                  <span className="text-[11px] text-muted-foreground font-serif">🌿 ~{age} years</span>
+                )}
+                {isClustered && encounterCount > 0 && (
+                  <span className="text-[11px] text-muted-foreground/70 font-serif">
+                    {encounterCount} visit{encounterCount !== 1 ? "s" : ""}
+                  </span>
+                )}
+                {isClustered && wandererCount > 1 && (
+                  <span className="text-[11px] text-muted-foreground/60 font-serif">
+                    · {wandererCount} wanderers
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* Right: offering signals */}
+            {(!isResearch || tree.research?.verified) && (offeringCount > 0 || birdsongCount > 0 || whisperCount > 0) && (
+              <div className="flex items-center gap-2 shrink-0 text-[11px] pt-0.5">
+                {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
+                {birdsongCount > 0 && <span className="text-muted-foreground/60">🐦 {birdsongCount}</span>}
+                {whisperCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-muted-foreground/50" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
+                    <Wind className="w-3 h-3" /> {whisperCount}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Research source badges */}
+          {isResearch && <div className="mt-1.5"><ResearchBadges tree={tree} /></div>}
+
+          {tree.description && (
+            <p className="text-muted-foreground text-xs line-clamp-2 leading-relaxed mt-2">{tree.description}</p>
           )}
         </div>
 
