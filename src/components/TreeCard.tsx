@@ -89,6 +89,7 @@ const TreeCard = ({
   const tierStyle = TIER_COLORS[tier];
   const speciesHue = getSpeciesHue(tree.species);
   const isResearch = !!tree.research?.isResearch;
+  const hive = useMemo(() => getHiveForSpecies(tree.species), [tree.species]);
 
   const isClustered = cluster?.isClustered ?? false;
   const encounterCount = cluster?.encounters?.length ?? 0;
