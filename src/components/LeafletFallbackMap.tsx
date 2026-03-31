@@ -1269,6 +1269,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       birdsongCounts: birdsongCountsRef.current,
       whisperCounts: whisperCountsRef.current,
       treePhotos: treePhotosRef.current,
+      heartPoolCounts: heartPoolCountsRef.current,
       userLatLng,
     },
     userLatLng,
