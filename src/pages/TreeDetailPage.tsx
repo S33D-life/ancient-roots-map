@@ -835,7 +835,7 @@ const TreeDetailPage = () => {
                   treeName={tree.name}
                   treeSpecies={tree.species || ""}
                   userId={userId}
-                  isNearby={proximityGate.status === "near" || proximityGate.status === "at_tree"}
+                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_grace"}
                   isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
                   onCheckIn={() => setCanopyCheckinOpen(true)}
                   onWhisperCollected={() => {
