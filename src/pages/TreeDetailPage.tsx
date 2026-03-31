@@ -827,6 +827,24 @@ const TreeDetailPage = () => {
             {/* Encounter Cluster */}
             <EncounterClusterPanel tree={tree} />
 
+            {/* Tree Arrival Panel — unified staggered reveal */}
+            {userId && tree && (
+              <Suspense fallback={null}>
+                <TreeArrivalPanel
+                  treeId={tree.id}
+                  treeName={tree.name}
+                  treeSpecies={tree.species || ""}
+                  userId={userId}
+                  isNearby={proximityGate.status === "near" || proximityGate.status === "at_tree"}
+                  isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
+                  onCheckIn={() => setCanopyCheckinOpen(true)}
+                  onWhisperCollected={() => {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }}
+                />
+              </Suspense>
+            )}
+
             {!userId && (
               <Card className="bg-secondary/20 border-border/30">
                 <CardContent className="p-6 text-center space-y-2">
