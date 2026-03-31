@@ -160,19 +160,15 @@ export function buildPopupHtml(
 
       <!-- Status + Hive (left) + Metadata (right) -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-        <!-- Left: status + hive -->
-        <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
-          ${statusLight ? `<div style="display:flex;align-items:center;gap:5px;">
-            <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${statusLight === "green" ? "hsl(142,60%,45%)" : statusLight === "orange" ? "hsl(30,85%,55%)" : "hsl(0,55%,50%)"};box-shadow:0 0 4px ${statusLight === "green" ? "hsla(142,60%,45%,0.5)" : statusLight === "orange" ? "hsla(30,85%,55%,0.4)" : "transparent"};${statusLight === "green" ? "animation:statusPulse 2s ease-in-out infinite;" : ""}"></span>
-            <span style="font-size:10px;font-family:sans-serif;color:${statusLight === "green" ? "hsl(142,50%,55%)" : statusLight === "orange" ? "hsl(30,70%,60%)" : "hsl(0,0%,50%)"};">${statusLight === "green" ? "Here now" : statusLight === "orange" ? "Recently met" : "Not yet met"}</span>
-            ${(whisperCount ?? 0) > 0 ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:hsl(260,50%,60%);margin-left:3px;box-shadow:0 0 3px hsla(260,50%,60%,0.5);" title="Whisper waiting"></span>' : ""}
-          </div>` : ""}
-          ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:2px 7px;border-radius:5px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.08);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.12);transition:all .2s;width:fit-content;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}
+        <!-- Left: status + hive — use grid for icon alignment -->
+        <div style="display:grid;grid-template-columns:7px 1fr;gap:4px 5px;align-items:center;min-width:0;">
+          ${statusLight ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${statusLight === "green" ? "hsl(142,60%,45%)" : statusLight === "orange" ? "hsl(30,85%,55%)" : "hsl(0,55%,50%)"};box-shadow:0 0 4px ${statusLight === "green" ? "hsla(142,60%,45%,0.5)" : statusLight === "orange" ? "hsla(30,85%,55%,0.4)" : "transparent"};${statusLight === "green" ? "animation:statusPulse 2s ease-in-out infinite;" : ""}"></span><span style="font-size:10px;font-family:sans-serif;color:${statusLight === "green" ? "hsl(142,50%,55%)" : statusLight === "orange" ? "hsl(30,70%,60%)" : "hsl(0,0%,50%)"};display:flex;align-items:center;gap:3px;">${statusLight === "green" ? "Here now" : statusLight === "orange" ? "Recently met" : "Not yet met"}${(whisperCount ?? 0) > 0 ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:hsl(260,50%,60%);box-shadow:0 0 3px hsla(260,50%,60%,0.5);" title="Whisper waiting"></span>' : ""}</span>` : ""}
+          ${hive ? `<span style="display:flex;align-items:center;justify-content:center;width:7px;font-size:10px;line-height:1;">${hive.icon}</span><a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:2px 7px;border-radius:5px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.08);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.12);transition:all .2s;width:fit-content;">${escapeHtml(hive.displayName)}</a>` : ""}
         </div>
-        <!-- Right: age, offerings, visits -->
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;">
-          ${metaParts.length > 0 ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;font-family:sans-serif;color:hsl(0,0%,50%);">${metaParts.map(p => `<span>${p}</span>`).join('<span style="color:hsl(0,0%,30%);">·</span>')}</div>` : ""}
-          ${totalVisits > 0 ? `<span style="font-size:10px;color:hsl(142,30%,55%);font-family:sans-serif;">🌿 Visited ${totalVisits} time${totalVisits !== 1 ? "s" : ""}</span>` : ""}
+        <!-- Right: age, offerings, visits — use grid for leaf alignment -->
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 4px;align-items:center;flex-shrink:0;justify-items:end;">
+          ${metaParts.length > 0 ? `<span style="font-size:10px;line-height:1;">🌿</span><span style="font-size:10px;font-family:sans-serif;color:hsl(0,0%,50%);display:flex;align-items:center;gap:5px;">${[ageText ? `~${age}y` : "", offeringText].filter(Boolean).join(' <span style="color:hsl(0,0%,30%);">·</span> ')}</span>` : ""}
+          ${totalVisits > 0 ? `<span style="font-size:10px;line-height:1;">🌿</span><span style="font-size:10px;color:hsl(142,30%,55%);font-family:sans-serif;">Visited ${totalVisits} time${totalVisits !== 1 ? "s" : ""}</span>` : ""}
         </div>
       </div>
 
