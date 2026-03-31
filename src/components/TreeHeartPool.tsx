@@ -99,8 +99,8 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           <span className="text-lg">🌳</span>
         </div>
         <div>
-          <h3 className="font-serif text-sm tracking-wide text-foreground">S33D Heart Reservoir</h3>
-          <p className="text-xs text-muted-foreground font-serif">This tree's commons treasury</p>
+          <h3 className="font-serif text-sm tracking-wide text-foreground">Heart Reservoir</h3>
+          <p className="text-xs text-muted-foreground font-serif">Hearts gathered by wanderers at this tree</p>
         </div>
         <div className="ml-auto text-right">
           <p className="font-serif text-lg tabular-nums" style={{ color: "hsl(120 45% 55%)" }}>
