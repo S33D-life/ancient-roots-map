@@ -4,21 +4,21 @@
  * Centralised sharing helpers for all entity types.
  *
  * ARCHITECTURE:
- * - Share URLs route through the og-proxy edge function so crawlers
- *   (Telegram, WhatsApp, Discord, X, iMessage) receive proper OG tags.
- * - The og-proxy serves lightweight HTML with OG meta + instant redirect
- *   to the real SPA page, so human visitors land on the app seamlessly.
- *
- * IMAGE FALLBACK HIERARCHY (per entity):
- *   1. Curated OG card image
- *   2. Generated OG card (future)
- *   3. Best available hero image / photo
- *   4. Global S33D branded share image
+ * - Share URLs always point to canonical public pages (e.g. /tree/xxx).
+ * - OG metadata is handled by index.html tags and the og-proxy edge function
+ *   independently — the share URL itself is always the real page.
  */
 
 import { APP_URL, DEFAULT_OG_IMAGE } from "@/utils/ogMeta";
 
-const OG_PROXY_BASE = `${APP_URL}/functions/v1/og-proxy`;
+/** Resolve the public site base URL — prefers env var, then APP_URL constant */
+function getSiteBase(): string {
+  try {
+    const env = (import.meta as any)?.env?.VITE_PUBLIC_SITE_URL;
+    if (env) return env.replace(/\/+$/, "");
+  } catch {}
+  return APP_URL;
+}
 
 /* ── Entity types ───────────────────────────────────────── */
 
@@ -73,12 +73,12 @@ export function getCanonicalPath(entity: ShareEntity): string {
 }
 
 /**
- * Get the og-proxy URL for an entity — this is what gets shared.
- * Crawlers hit og-proxy → see OG tags → users get redirected to SPA.
+ * Get the canonical public URL for sharing.
+ * Always returns a real page URL — never an internal edge-function route.
  */
 export function getShareUrl(entity: ShareEntity): string {
   const path = getCanonicalPath(entity);
-  return `${OG_PROXY_BASE}?path=${encodeURIComponent(path)}`;
+  return `${getSiteBase()}${path}`;
 }
 
 /**
@@ -89,10 +89,10 @@ export function buildShareUrl(type: ShareEntityType, id: string): string {
 }
 
 /**
- * Get the direct app URL (non-proxy). Use for in-app navigation only.
+ * Get the direct app URL. Same as getShareUrl (canonical page URL).
  */
 export function getDirectUrl(entity: ShareEntity): string {
-  return `${APP_URL}${getCanonicalPath(entity)}`;
+  return getShareUrl(entity);
 }
 
 /* ── Share text builders ────────────────────────────────── */
@@ -147,7 +147,8 @@ export interface ShareOptions {
 function buildFullShareUrl(opts: ShareOptions): string {
   let url = getShareUrl(opts.entity);
   if (opts.inviteCode) {
-    url += `&invite=${encodeURIComponent(opts.inviteCode)}`;
+    const separator = url.includes("?") ? "&" : "?";
+    url += `${separator}invite=${encodeURIComponent(opts.inviteCode)}`;
   }
   return url;
 }
