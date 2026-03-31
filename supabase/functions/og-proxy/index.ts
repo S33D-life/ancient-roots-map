@@ -9,7 +9,11 @@
  * Supported routes:
  *   /                        → homepage defaults
  *   /library/staff-room      → Staff Room landing
+ *   /library                 → Library landing
  *   /map                     → Atlas landing
+ *   /council-of-life         → Council landing
+ *   /hives                   → Hives landing
+ *   /s33d                    → About / threshold page
  *   /tree/<uuid>             → Ancient Friend page (DB lookup)
  *   /tree/research/<uuid>    → Research tree page (DB lookup)
  *   /staff/<code>            → Staff detail page (static data)
@@ -62,7 +66,6 @@ async function getSpaHtml(): Promise<string> {
   } catch (err) {
     console.error("[og-proxy] Failed to fetch SPA HTML:", err);
   }
-  // Minimal fallback — redirect to the SPA
   return `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=${APP_URL}"></head><body></body></html>`;
 }
 
@@ -71,15 +74,9 @@ async function getSpaHtml(): Promise<string> {
 const UUID_RE = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const STAFF_CODE_RE = /^[A-Za-z0-9_-]{1,30}$/;
 
-function isValidUUID(s: string): boolean {
-  return UUID_RE.test(s);
-}
+function isValidUUID(s: string): boolean { return UUID_RE.test(s); }
+function isValidStaffCode(s: string): boolean { return STAFF_CODE_RE.test(s); }
 
-function isValidStaffCode(s: string): boolean {
-  return STAFF_CODE_RE.test(s);
-}
-
-/** Sanitize path input — strip control chars, limit length */
 function sanitizePath(raw: string): string {
   const cleaned = raw.replace(/[\x00-\x1f\x7f]/g, "").slice(0, 200);
   return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
@@ -95,10 +92,8 @@ const STAFF_RE = /^\/staff\/([A-Za-z0-9_-]+)$/;
 
 function esc(s: string): string {
   return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
 
@@ -114,7 +109,6 @@ interface Meta {
 }
 
 function renderHTML(m: Meta): string {
-  const safeImage = m.image;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,18 +118,18 @@ function renderHTML(m: Meta): string {
 
   <meta property="og:title" content="${esc(m.title)}">
   <meta property="og:description" content="${esc(m.description)}">
-  <meta property="og:image" content="${safeImage}">
+  <meta property="og:image" content="${m.image}">
   <meta property="og:image:width" content="${m.imageWidth ?? 1200}">
   <meta property="og:image:height" content="${m.imageHeight ?? 630}">
   <meta property="og:url" content="${esc(m.url)}">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="S33D.life — The Living Atlas of Ancient Friends">
+  <meta property="og:site_name" content="S33D.life">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@s33dlife">
   <meta name="twitter:title" content="${esc(m.title)}">
   <meta name="twitter:description" content="${esc(m.description)}">
-  <meta name="twitter:image" content="${safeImage}">
+  <meta name="twitter:image" content="${m.image}">
 
   <link rel="canonical" href="${esc(m.url)}">
 
@@ -153,7 +147,7 @@ function renderHTML(m: Meta): string {
 const DEFAULT_META: Meta = {
   title: "S33D.life — The Living Atlas of Ancient Friends",
   description:
-    "A globally distributed, locally curated living library mapping ancient trees, gathering wisdom, and weaving a planetary tapestry of seeds, stories, and mystery.",
+    "A living library mapping ancient trees worldwide. Discover, visit, and steward the oldest living beings on Earth.",
   image: DEFAULT_IMAGE,
   url: APP_URL,
   imageWidth: 1200,
@@ -167,36 +161,42 @@ const STATIC_ROUTES: Record<string, Partial<Meta>> = {
   "/library/staff-room": {
     title: "The Staff Room — S33D.life",
     description:
-      "Enter the Staff Room. Craft your living staff, link it to ancient trees, and carry your story forward.",
+      "Craft a living staff from ancient wood. Link it to a tree and carry its story forward.",
     url: `${APP_URL}/library/staff-room`,
   },
   "/map": {
     title: "The Living Atlas — S33D.life",
     description:
-      "Explore the global map of ancient trees. Discover Ancient Friends near you.",
+      "Explore the global map of ancient trees. Find Ancient Friends near you and begin your journey.",
     url: `${APP_URL}/map`,
   },
   "/library": {
     title: "The Library — S33D.life",
     description:
-      "Browse the living library of Ancient Friends — staffs, songs, seeds, and stories.",
+      "Browse the living library — staffs, songs, seeds, stories, and the heartwood of S33D.",
     url: `${APP_URL}/library`,
   },
   "/council-of-life": {
     title: "Council of Life — S33D.life",
     description:
-      "Join the Council of Life. Participate in governance, cast influence, and shape the future of S33D.",
+      "Shape the future of S33D. Participate in governance, cast influence, and grow the atlas together.",
     url: `${APP_URL}/council-of-life`,
   },
   "/hives": {
     title: "Species Hives — S33D.life",
     description:
-      "Explore species-heart economies and hive stewardship across the Ancient Friends network.",
+      "Explore species-heart economies across the Ancient Friends network.",
     url: `${APP_URL}/hives`,
+  },
+  "/s33d": {
+    title: "S33D — Under the Canopy",
+    description:
+      "Stand beneath the canopy. Discover S33D — a living atlas of ancient trees, seeds, stories, and stewardship.",
+    url: `${APP_URL}/s33d`,
   },
 };
 
-/* ── Staff species data (mirrors staffContract config) ──── */
+/* ── Staff species data ─────────────────────────────────── */
 
 const SPECIES_NAMES: Record<string, string> = {
   GOA: "Goat Willow", PLUM: "Plum", BEE: "Beech", RHOD: "Rhododendron",
@@ -220,6 +220,15 @@ function isCircleStaff(code: string): boolean {
   return code.includes("-C") || code.includes("-c");
 }
 
+/* ── Cache-busting helper ──────────────────────────────── */
+
+/** Append a date-based version param so platform caches refresh when data changes */
+function versionedOgCardUrl(type: string, id: string, updatedAt?: string | null): string {
+  const v = updatedAt ? new Date(updatedAt).getTime().toString(36) : "";
+  const vParam = v ? `&v=${v}` : "";
+  return `${OG_CARD_BASE}?type=${type}&id=${encodeURIComponent(id)}${vParam}`;
+}
+
 /* ── Main handler ───────────────────────────────────────── */
 
 Deno.serve(async (req) => {
@@ -231,7 +240,7 @@ Deno.serve(async (req) => {
   const rawPath = url.searchParams.get("path") || "/";
   const path = sanitizePath(rawPath);
 
-  // For non-bot requests: serve the SPA directly so the router handles the page
+  // Non-bot: serve SPA
   if (!isBot(req)) {
     try {
       const spaHtml = await getSpaHtml();
@@ -243,20 +252,17 @@ Deno.serve(async (req) => {
         },
       });
     } catch {
-      // Fallback: redirect to the app
       return Response.redirect(`${APP_URL}${path}`, 302);
     }
   }
 
-  // Bot request — return OG-enriched HTML
+  // Bot: return OG HTML
   try {
-    // 1. Static routes
     const staticOverride = STATIC_ROUTES[path];
     if (staticOverride !== undefined) {
       return respond({ ...DEFAULT_META, ...staticOverride });
     }
 
-    // 2. Research tree page (must match before tree — longer prefix)
     const researchMatch = path.match(RESEARCH_TREE_RE);
     if (researchMatch) {
       const id = researchMatch[1];
@@ -264,7 +270,6 @@ Deno.serve(async (req) => {
       return respond(await fetchResearchTreeMeta(id));
     }
 
-    // 3. Tree detail page
     const treeMatch = path.match(TREE_RE);
     if (treeMatch) {
       const id = treeMatch[1];
@@ -272,7 +277,6 @@ Deno.serve(async (req) => {
       return respond(await fetchTreeMeta(id));
     }
 
-    // 4. Staff detail page
     const staffMatch = path.match(STAFF_RE);
     if (staffMatch) {
       const code = staffMatch[1];
@@ -280,7 +284,6 @@ Deno.serve(async (req) => {
       return respond(buildStaffMeta(code));
     }
 
-    // 5. Fallback
     return respond({ ...DEFAULT_META, url: `${APP_URL}${path}` });
   } catch (err) {
     console.error("[og-proxy] Unhandled error:", err);
@@ -307,7 +310,7 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const [treeRes, mintedRes, staffRes] = await Promise.all([
       supabase
         .from("trees")
-        .select("id, name, species, nation, latitude, longitude, description")
+        .select("id, name, species, nation, latitude, longitude, description, updated_at")
         .eq("id", id)
         .maybeSingle(),
       supabase
@@ -339,28 +342,29 @@ async function fetchTreeMeta(id: string): Promise<Meta> {
     const staffName = staffRes.data?.staff_name || staffRes.data?.staff_code || null;
     const hasStaff = !!staffName;
 
-    // Image: always use og-card which auto-selects variant and fetches its own photo
-    const image = `${OG_CARD_BASE}?type=tree&id=${encodeURIComponent(id)}`;
+    // Cache-busted og-card URL
+    const image = versionedOgCardUrl("tree", id, tree.updated_at);
 
-    // Title: staff-linked NFTree > NFTree > Ancient Friend
+    // Refined titles — shorter, cleaner for unfurl
     let title: string;
     if (isMinted && hasStaff) {
-      title = `${treeName} — Minted with ${staffName} | S33D.life`;
+      title = `${treeName} ⚷ ${staffName} — S33D`;
+    } else if (isMinted) {
+      title = `${treeName} — NFTree | S33D`;
     } else {
-      title = `${treeName} — ${species} | S33D.life`;
+      title = `${treeName} — ${species} | S33D`;
     }
 
-    // Description
-    const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
+    // Refined descriptions — warm, inviting, short
     let desc: string;
     if (tree.description) {
-      desc = tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "");
+      desc = tree.description.slice(0, 140).trim() + (tree.description.length > 140 ? "…" : "");
     } else if (isMinted && hasStaff) {
-      desc = `A staff-linked ${typeLabel} in ${location}. Part of the S33D Living Atlas.`;
+      desc = `An NFTree in ${location}, bound to ${staffName}. Visit on the S33D Living Atlas.`;
     } else if (isMinted) {
-      desc = `A minted ${typeLabel} in ${location}. Part of the S33D Living Atlas.`;
+      desc = `A minted NFTree in ${location}. Visit on the S33D Living Atlas.`;
     } else {
-      desc = `An ${typeLabel} in ${location}. Visit this tree on the S33D Living Atlas.`;
+      desc = `An Ancient Friend in ${location}. Visit this ${species.toLowerCase()} on the S33D Living Atlas.`;
     }
 
     return {
@@ -384,7 +388,7 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
     const { data: tree } = await supabase
       .from("research_trees")
-      .select("id, name, species, country, latitude, longitude, significance, image_url")
+      .select("id, name, species, country, latitude, longitude, significance, image_url, updated_at")
       .eq("id", id)
       .maybeSingle();
 
@@ -396,14 +400,13 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
     const treeName = tree.name || "Research Tree";
     const species = tree.species || "Unknown species";
     const location = tree.country || "Unknown location";
-
     const image = tree.image_url || DEFAULT_IMAGE;
 
     return {
-      title: `${treeName} — ${species} | S33D.life`,
+      title: `${treeName} — ${species} | S33D`,
       description: tree.significance
-        ? tree.significance.slice(0, 155).trim() + (tree.significance.length > 155 ? "…" : "")
-        : `A research-layer tree in ${location}. Discover it on the S33D Living Atlas.`,
+        ? tree.significance.slice(0, 140).trim() + (tree.significance.length > 140 ? "…" : "")
+        : `A research tree in ${location}. Discover it on the S33D Living Atlas.`,
       image,
       url: `${APP_URL}/tree/research/${tree.id}`,
       imageWidth: 1200,
@@ -420,15 +423,15 @@ async function fetchResearchTreeMeta(id: string): Promise<Meta> {
 function buildStaffMeta(code: string): Meta {
   const species = resolveStaffSpecies(code);
   const isCircle = isCircleStaff(code);
-
   const displayCode = code.toUpperCase();
+
   const title = isCircle
-    ? `${displayCode} — ${species} Staff | S33D.life`
-    : `${species} — Origin Staff | S33D.life`;
+    ? `${displayCode} — ${species} Circle Staff | S33D`
+    : `${species} — Origin Staff | S33D`;
 
   const description = isCircle
-    ? `A ${species} circle staff from the S33D Staff Room. Explore its lineage and lore.`
-    : `The ${species} Origin Staff — one of 36 founding staffs in the S33D collection.`;
+    ? `A ${species} circle staff. Explore its lineage and lore in the S33D Staff Room.`
+    : `The ${species} Origin Staff — one of 36 founding staffs. Enter the Staff Room.`;
 
   const image = `${OG_CARD_BASE}?type=staff&id=${encodeURIComponent(code)}`;
 

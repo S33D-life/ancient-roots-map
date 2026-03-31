@@ -2,12 +2,10 @@
  * og-card — Generate 1200×630 Open Graph card images as SVG.
  *
  * Usage:
- *   GET /functions/v1/og-card?type=tree&id=<uuid>
+ *   GET /functions/v1/og-card?type=tree&id=<uuid>[&v=<version>]
  *   GET /functions/v1/og-card?type=staff&id=<code>
- *   GET /functions/v1/og-card?type=lineage&id=<uuid>   (staff-linked NFTree)
  *
- * The "lineage" type auto-detects staff linkage from ceremony_logs/chain_anchors.
- * The "tree" type also auto-upgrades to lineage card when staff data is found.
+ * The ?v= param is used for cache-busting only and ignored in logic.
  *
  * Returns: SVG image (1200×630).
  */
@@ -46,7 +44,6 @@ function truncate(s: string, max: number): string {
   return s.length <= max ? s : s.slice(0, max - 1) + "…";
 }
 
-/** Shared <defs> block for all card types */
 function svgDefs(opts: { hasTreePhoto: boolean; hasStaffInset?: boolean }): string {
   return `<defs>
     <linearGradient id="bgGrad" x1="0" y1="0" x2="0.4" y2="1">
@@ -75,6 +72,11 @@ function svgDefs(opts: { hasTreePhoto: boolean; hasStaffInset?: boolean }): stri
       <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
     </filter>
     ` : ""}
+    <pattern id="treeTexture" patternUnits="userSpaceOnUse" width="60" height="60">
+      <circle cx="30" cy="30" r="0.6" fill="${GOLD}" opacity="0.04"/>
+      <circle cx="10" cy="10" r="0.4" fill="${GOLD}" opacity="0.03"/>
+      <circle cx="50" cy="50" r="0.5" fill="${GOLD}" opacity="0.025"/>
+    </pattern>
   </defs>`;
 }
 
@@ -100,11 +102,29 @@ function photoBlock(photoUrl: string): string {
   <rect x="0" y="0" width="640" height="630" fill="url(#photoFadeBottom)"/>`;
 }
 
-function noPhotoBlock(emoji: string): string {
+/** Beautiful no-photo fallback with organic texture and tree silhouette */
+function noPhotoBlock(name: string, species: string): string {
   return `
-  <circle cx="320" cy="315" r="180" fill="none" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.08"/>
-  <circle cx="320" cy="315" r="120" fill="none" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.06"/>
-  <text x="320" y="330" text-anchor="middle" fill="${MUTED}" font-family="serif" font-size="72" opacity="0.12">${emoji}</text>`;
+  <!-- Organic texture background -->
+  <rect x="0" y="0" width="640" height="630" fill="url(#treeTexture)"/>
+  
+  <!-- Concentric rings — growth rings metaphor -->
+  <circle cx="320" cy="300" r="220" fill="none" stroke="${GOLD}" stroke-width="0.4" stroke-opacity="0.05"/>
+  <circle cx="320" cy="300" r="170" fill="none" stroke="${GOLD}" stroke-width="0.4" stroke-opacity="0.06"/>
+  <circle cx="320" cy="300" r="120" fill="none" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.07"/>
+  <circle cx="320" cy="300" r="70" fill="none" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.08"/>
+  <circle cx="320" cy="300" r="25" fill="${GOLD}" fill-opacity="0.04" stroke="${GOLD}" stroke-width="0.6" stroke-opacity="0.1"/>
+  
+  <!-- Central tree glyph -->
+  <text x="320" y="310" text-anchor="middle" fill="${GOLD}" font-family="serif" font-size="36" opacity="0.15">🌳</text>
+  
+  <!-- Subtle vertical line (trunk metaphor) -->
+  <line x1="320" y1="340" x2="320" y2="520" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.06"/>
+  
+  <!-- First letter watermark -->
+  <text x="320" y="540" text-anchor="middle" fill="${GOLD}" font-family="'Georgia','Times New Roman',serif" font-size="48" font-weight="600" opacity="0.04" letter-spacing="8">
+    ${esc(name.charAt(0).toUpperCase())}
+  </text>`;
 }
 
 /* ── Tree Card (Ancient Friend / NFTree) ────────────────── */
@@ -130,7 +150,7 @@ function treeCardSVG(d: TreeCardData): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   ${svgDefs({ hasTreePhoto: hasPhoto })}
   <rect width="1200" height="630" fill="url(#bgGrad)"/>
-  ${hasPhoto ? photoBlock(d.photoUrl!) : noPhotoBlock("🌳")}
+  ${hasPhoto ? photoBlock(d.photoUrl!) : noPhotoBlock(d.name, d.species)}
 
   <rect x="16" y="16" width="1168" height="598" rx="20" fill="none" stroke="${GOLD}" stroke-opacity="0.08" stroke-width="0.5"/>
 
@@ -149,12 +169,12 @@ function treeCardSVG(d: TreeCardData): string {
 
   ${d.location !== "Unknown location" ? `
   <text x="${textX}" y="${hasPhoto ? 290 : 310}" fill="${MUTED}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="16" letter-spacing="0.5">
-    ${esc(truncate(d.location, 44))}
+    📍 ${esc(truncate(d.location, 40))}
   </text>` : ""}
 
   ${hasStaff ? `
   <text x="${textX}" y="${hasPhoto ? 325 : 345}" fill="${GOLD}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="14" opacity="0.6" letter-spacing="0.5">
-    Minted with ${esc(d.staffName || d.staffCode || "")}
+    ⚷ Bound to ${esc(d.staffName || d.staffCode || "")}
   </text>` : ""}
 
   ${brandingBlock(textX, 530)}
@@ -178,7 +198,7 @@ function lineageCardSVG(d: TreeCardData): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   ${svgDefs({ hasTreePhoto: hasPhoto, hasStaffInset })}
   <rect width="1200" height="630" fill="url(#bgGrad)"/>
-  ${hasPhoto ? photoBlock(d.photoUrl!) : noPhotoBlock("🌳")}
+  ${hasPhoto ? photoBlock(d.photoUrl!) : noPhotoBlock(d.name, d.species)}
 
   <rect x="16" y="16" width="1168" height="598" rx="20" fill="none" stroke="${GOLD}" stroke-opacity="0.1" stroke-width="0.5"/>
 
@@ -204,7 +224,7 @@ function lineageCardSVG(d: TreeCardData): string {
 
   ${d.location !== "Unknown location" ? `
   <text x="${textX}" y="268" fill="${MUTED}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="15" letter-spacing="0.5">
-    ${esc(truncate(d.location, 44))}
+    📍 ${esc(truncate(d.location, 44))}
   </text>` : ""}
 
   <rect x="${textX}" y="320" width="440" height="72" rx="12" fill="${GOLD}" fill-opacity="0.04" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.1"/>
@@ -241,7 +261,12 @@ function staffCardSVG(d: StaffCardData): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   ${svgDefs({ hasTreePhoto: hasPhoto })}
   <rect width="1200" height="630" fill="url(#bgGrad)"/>
-  ${hasPhoto ? photoBlock(d.photoUrl!) : noPhotoBlock("⚡")}
+  ${hasPhoto ? photoBlock(d.photoUrl!) : `
+  <rect x="0" y="0" width="640" height="630" fill="url(#treeTexture)"/>
+  <circle cx="320" cy="300" r="160" fill="none" stroke="${GOLD}" stroke-width="0.4" stroke-opacity="0.06"/>
+  <circle cx="320" cy="300" r="100" fill="none" stroke="${GOLD}" stroke-width="0.5" stroke-opacity="0.07"/>
+  <text x="320" y="315" text-anchor="middle" fill="${GOLD}" font-family="serif" font-size="48" opacity="0.1">⚡</text>
+  `}
 
   <rect x="16" y="16" width="1168" height="598" rx="20" fill="none" stroke="${GOLD}" stroke-opacity="0.08" stroke-width="0.5"/>
 
@@ -256,6 +281,10 @@ function staffCardSVG(d: StaffCardData): string {
   </text>
 
   <rect x="${textX}" y="250" width="280" height="1" rx="0.5" fill="url(#goldLine)"/>
+
+  <text x="${textX}" y="290" fill="${MUTED}" font-family="'Helvetica Neue','Arial',sans-serif" font-size="14" letter-spacing="0.5" opacity="0.6">
+    ${d.isOrigin ? "One of 36 founding staffs" : "From the S33D Staff Room"}
+  </text>
 
   ${brandingBlock(textX, 530)}
   <rect x="${textX}" y="585" width="160" height="1.5" rx="0.75" fill="url(#goldLine)"/>
@@ -310,7 +339,6 @@ async function fetchTreeData(id: string): Promise<TreeCardData> {
         .limit(1).maybeSingle(),
     ]);
 
-    // Ensure photo URLs are absolute
     let photoUrl = photoRes.data?.media_url || null;
     if (photoUrl && !photoUrl.startsWith("http")) {
       photoUrl = `${APP_URL}${photoUrl.startsWith("/") ? "" : "/"}${photoUrl}`;
@@ -345,12 +373,6 @@ function resolveStaffData(code: string): StaffCardData {
 
 /* ── Card selection logic ───────────────────────────────── */
 
-/**
- * Determine which card variant to render:
- *   1. lineage — staff-linked & minted, with staff data
- *   2. nftree  — minted but no staff data
- *   3. tree    — standard Ancient Friend
- */
 function selectCardSVG(d: TreeCardData): string {
   const hasStaff = !!(d.staffCode || d.staffName);
   if (d.isMinted && hasStaff) return lineageCardSVG(d);
@@ -368,19 +390,16 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const type = url.searchParams.get("type") || "tree";
     const id = url.searchParams.get("id");
+    // v param is for cache-busting only — not used in logic
 
     if (!id) {
-      console.warn("[og-card] Missing id parameter");
       return new Response("Missing id parameter", { status: 400, headers: corsHeaders });
     }
 
-    // Validate inputs
     if ((type === "tree" || type === "lineage") && !UUID_RE.test(id)) {
-      console.warn(`[og-card] Invalid UUID: ${id}`);
       return new Response("Invalid id format", { status: 400, headers: corsHeaders });
     }
     if (type === "staff" && !STAFF_CODE_RE.test(id)) {
-      console.warn(`[og-card] Invalid staff code: ${id}`);
       return new Response("Invalid staff code", { status: 400, headers: corsHeaders });
     }
 
@@ -388,8 +407,7 @@ Deno.serve(async (req) => {
     if (type === "staff") {
       svg = staffCardSVG(resolveStaffData(id));
     } else if (type === "lineage") {
-      const data = await fetchTreeData(id);
-      svg = lineageCardSVG(data);
+      svg = lineageCardSVG(await fetchTreeData(id));
     } else {
       svg = selectCardSVG(await fetchTreeData(id));
     }
