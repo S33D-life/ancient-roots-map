@@ -91,20 +91,21 @@ export function treeOG(tree: {
   const hasStaff = !!(tree.staffCode || tree.staffName);
   const isMinted = tree.isMinted ?? false;
 
-  // Title: staff-linked NFTree > NFTree > Ancient Friend
   let title: string;
   if (isMinted && hasStaff) {
-    title = `${treeName} — Minted with ${tree.staffName || tree.staffCode} | S33D.life`;
+    title = `${treeName} ⚷ ${tree.staffName || tree.staffCode} — S33D`;
+  } else if (isMinted) {
+    title = `${treeName} — NFTree | S33D`;
   } else {
-    title = `${treeName} — ${species} | S33D.life`;
+    title = `${treeName} — ${species} | S33D`;
   }
 
   const typeLabel = isMinted ? "NFTree" : "Ancient Friend";
   const desc = tree.description
-    ? tree.description.slice(0, 155).trim() + (tree.description.length > 155 ? "…" : "")
+    ? tree.description.slice(0, 140).trim() + (tree.description.length > 140 ? "…" : "")
     : isMinted && hasStaff
-      ? `A staff-linked ${typeLabel} in ${location}. Part of the S33D Living Atlas.`
-      : `An ${typeLabel} in ${location}. Visit this tree on the S33D Living Atlas.`;
+      ? `An NFTree in ${location}, bound to ${tree.staffName || tree.staffCode}. Visit on the S33D Living Atlas.`
+      : `An ${typeLabel} in ${location}. Visit this ${species.toLowerCase()} on the S33D Living Atlas.`;
 
   // Image: prefer curated OG, then hero photo, then generated og-card as reliable fallback
   const image = resolveImage(tree.ogImage, tree.heroImage, tree.photoUrl, treeOgCardUrl(tree.id));
