@@ -124,15 +124,7 @@ const Index = () => {
             <div className="section-divider max-w-xl mx-auto" />
             <ParticipationSection />
             <SupportDiscoveryRow />
-            <EcosystemPulse />
-            <div className="section-divider max-w-xl mx-auto" />
-            {/* Global Activity Feed */}
-            <div className="max-w-2xl mx-auto px-4 py-6">
-              <div className="rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm p-4 space-y-3">
-                <h3 className="text-sm font-serif text-foreground/80 uppercase tracking-wider">Recent Ecosystem Activity</h3>
-                <ActivityFeed limit={6} compact />
-              </div>
-            </div>
+            <RootPulse />
             <WisdomOfTheGrove />
           </div>
         </Suspense>
