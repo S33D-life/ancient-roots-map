@@ -45,7 +45,7 @@ export interface OGMeta {
 export const DEFAULT_OG: OGMeta = {
   title: "S33D.life — The Living Atlas of Ancient Friends",
   description:
-    "A globally distributed, locally curated living library mapping ancient trees, gathering wisdom, and weaving a planetary tapestry of seeds, stories, and mystery.",
+    "A living library mapping ancient trees worldwide. Discover, visit, and steward the oldest living beings on Earth.",
   image: DEFAULT_OG_IMAGE,
   imageWidth: 1200,
   imageHeight: 630,
