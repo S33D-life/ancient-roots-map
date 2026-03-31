@@ -130,6 +130,7 @@ interface LeafletFallbackMapProps {
   className?: string;
   userId?: string | null;
   bloomedSeeds?: BloomedSeed[];
+  heartPoolCounts?: Record<string, number>;
   initialLat?: number;
   initialLng?: number;
   initialZoom?: number;
