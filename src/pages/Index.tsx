@@ -23,8 +23,7 @@ const TrunkSection = lazy(() => import("@/components/tree-sections/TrunkSection"
 const GroundSection = lazy(() => import("@/components/tree-sections/GroundSection"));
 const SectionAtmosphere = lazy(() => import("@/components/tree-sections/SectionAtmosphere"));
 const EcosystemOverview = lazy(() => import("@/components/EcosystemOverview"));
-const EcosystemPulse = lazy(() => import("@/components/EcosystemPulse"));
-const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
+const RootPulse = lazy(() => import("@/components/RootPulse"));
 const WhisperEchoesFeed = lazy(() => import("@/components/WhisperEchoesFeed"));
 const WisdomOfTheGrove = lazy(() => import("@/components/WisdomOfTheGrove").then(m => ({ default: m.WisdomOfTheGrove })));
 const TetolBridge = lazy(() => import("@/components/TetolBridge"));
@@ -125,15 +124,7 @@ const Index = () => {
             <div className="section-divider max-w-xl mx-auto" />
             <ParticipationSection />
             <SupportDiscoveryRow />
-            <EcosystemPulse />
-            <div className="section-divider max-w-xl mx-auto" />
-            {/* Global Activity Feed */}
-            <div className="max-w-2xl mx-auto px-4 py-6">
-              <div className="rounded-xl border border-border/30 bg-card/50 backdrop-blur-sm p-4 space-y-3">
-                <h3 className="text-sm font-serif text-foreground/80 uppercase tracking-wider">Recent Ecosystem Activity</h3>
-                <ActivityFeed limit={6} compact />
-              </div>
-            </div>
+            <RootPulse />
             <WisdomOfTheGrove />
           </div>
         </Suspense>
