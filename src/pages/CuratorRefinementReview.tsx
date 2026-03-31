@@ -1,6 +1,6 @@
 /**
- * CuratorRefinementReview — lightweight curator page for reviewing
- * location refinement proposals and accepting/rejecting them.
+ * CuratorRefinementReview — curator page for reviewing location refinement
+ * proposals. Archives location history on accept.
  */
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, MapPin, TreeDeciduous, Loader2, ArrowLeft } from "lucide-react";
+import { Check, X, MapPin, TreeDeciduous, Loader2, ArrowLeft, Camera, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { clusterRefinements, CONFIDENCE_LABELS } from "@/utils/locationRefinement";
@@ -26,6 +26,7 @@ interface RefinementRow {
   source_type: string;
   at_trunk: boolean;
   trunk_photo_url: string | null;
+  context_photo_url: string | null;
   note: string | null;
   weight: number;
   status: string;
@@ -38,6 +39,7 @@ interface TreeSummary {
   tree_lat: number;
   tree_lng: number;
   location_confidence: string | null;
+  refinement_count: number;
   refinements: RefinementRow[];
 }
 
@@ -58,7 +60,7 @@ export default function CuratorRefinementReview() {
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(200);
-    const data = (rawData as unknown as RefinementRow[] | null);
+    const data = rawData as unknown as RefinementRow[] | null;
 
     if (!data || data.length === 0) {
       setTrees([]);
@@ -66,11 +68,10 @@ export default function CuratorRefinementReview() {
       return;
     }
 
-    // Group by tree
-    const treeIds = [...new Set((data as RefinementRow[]).map((r) => r.tree_id))];
+    const treeIds = [...new Set(data.map((r) => r.tree_id))];
     const { data: treesData } = await supabase
       .from("trees")
-      .select("id, name, latitude, longitude, location_confidence")
+      .select("id, name, latitude, longitude, location_confidence, refinement_count")
       .in("id", treeIds);
 
     const treeMap = new Map(
@@ -87,7 +88,8 @@ export default function CuratorRefinementReview() {
           tree_lat: Number(t.latitude),
           tree_lng: Number(t.longitude),
           location_confidence: t.location_confidence,
-          refinements: (data as RefinementRow[]).filter((r) => r.tree_id === tid),
+          refinement_count: Number(t.refinement_count) || 0,
+          refinements: data.filter((r) => r.tree_id === tid),
         };
       })
       .filter(Boolean) as TreeSummary[];
@@ -110,8 +112,9 @@ export default function CuratorRefinementReview() {
       if (!user) return;
 
       try {
-        // Update all pending refinements for this tree
         const ids = tree.refinements.map((r) => r.id);
+
+        // Update all pending refinements
         await supabase
           .from("tree_location_refinements" as any)
           .update({
@@ -123,7 +126,6 @@ export default function CuratorRefinementReview() {
           .in("id", ids);
 
         if (action === "accept") {
-          // Compute cluster and update tree position
           const points: RefinementPoint[] = tree.refinements.map((r) => ({
             latitude: Number(r.latitude),
             longitude: Number(r.longitude),
@@ -136,13 +138,32 @@ export default function CuratorRefinementReview() {
 
           const cluster = clusterRefinements(points, tree.tree_lat, tree.tree_lng);
 
+          // Archive current position in location history
+          await supabase
+            .from("tree_location_history" as any)
+            .insert({
+              tree_id: treeId,
+              old_latitude: tree.tree_lat,
+              old_longitude: tree.tree_lng,
+              new_latitude: cluster.centroidLat,
+              new_longitude: cluster.centroidLng,
+              old_confidence: tree.location_confidence || "approximate",
+              new_confidence: cluster.confidence,
+              changed_by: user.id,
+              reason: reviewNote[treeId] || `Accepted ${ids.length} refinement(s)`,
+              refinement_ids: ids,
+            });
+
+          // Cumulative refinement count: existing + new batch
+          const newCount = tree.refinement_count + tree.refinements.length;
+
           await supabase
             .from("trees")
             .update({
               latitude: cluster.centroidLat,
               longitude: cluster.centroidLng,
               location_confidence: cluster.confidence,
-              refinement_count: (tree.refinements.length),
+              refinement_count: newCount,
             })
             .eq("id", treeId);
 
@@ -219,6 +240,7 @@ export default function CuratorRefinementReview() {
             }));
             const cluster = clusterRefinements(points, tree.tree_lat, tree.tree_lng);
             const conf = CONFIDENCE_LABELS[cluster.confidence];
+            const hasAnyPhotos = tree.refinements.some((r) => r.trunk_photo_url || r.context_photo_url);
 
             return (
               <Card key={tree.tree_id} className="border-border/60">
@@ -229,7 +251,10 @@ export default function CuratorRefinementReview() {
                   </CardTitle>
                   <div className="flex flex-wrap gap-2 mt-1">
                     <Badge variant="outline" className="text-[10px] font-serif">
-                      {tree.refinements.length} proposal{tree.refinements.length !== 1 ? "s" : ""}
+                      {tree.refinements.length} pending
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] font-serif">
+                      {tree.refinement_count} total accepted
                     </Badge>
                     <Badge variant="outline" className="text-[10px] font-serif">
                       {cluster.uniqueUsers} wanderer{cluster.uniqueUsers !== 1 ? "s" : ""}
@@ -247,25 +272,52 @@ export default function CuratorRefinementReview() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {/* Per-point detail */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {tree.refinements.map((r) => (
-                      <div
-                        key={r.id}
-                        className="text-[11px] flex items-center gap-2 text-muted-foreground"
-                      >
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        <span className="font-mono">
-                          {Number(r.latitude).toFixed(5)}, {Number(r.longitude).toFixed(5)}
-                        </span>
-                        <span>±{r.accuracy_m ? Math.round(Number(r.accuracy_m)) : "?"}m</span>
-                        {r.at_trunk && (
-                          <Badge className="text-[9px] h-4 px-1" variant="secondary">
-                            trunk
+                      <div key={r.id} className="space-y-1">
+                        <div className="text-[11px] flex items-center gap-2 text-muted-foreground">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="font-mono">
+                            {Number(r.latitude).toFixed(5)}, {Number(r.longitude).toFixed(5)}
+                          </span>
+                          <span>±{r.accuracy_m ? Math.round(Number(r.accuracy_m)) : "?"}m</span>
+                          {r.at_trunk && (
+                            <Badge className="text-[9px] h-4 px-1" variant="secondary">
+                              🌳 trunk
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="text-[9px] h-4 px-1">
+                            {r.source_type === "checkin_passive" ? "check-in" : "manual"}
                           </Badge>
+                          <span className="ml-auto opacity-60">
+                            w:{Number(r.weight).toFixed(1)}
+                          </span>
+                        </div>
+                        {/* Photo thumbnails */}
+                        {(r.trunk_photo_url || r.context_photo_url) && (
+                          <div className="flex gap-1.5 ml-5">
+                            {r.trunk_photo_url && (
+                              <a href={r.trunk_photo_url} target="_blank" rel="noopener noreferrer" className="relative">
+                                <img
+                                  src={r.trunk_photo_url}
+                                  alt="Trunk"
+                                  className="w-12 h-12 rounded object-cover border border-border/40"
+                                />
+                                <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[7px] text-white text-center">trunk</span>
+                              </a>
+                            )}
+                            {r.context_photo_url && (
+                              <a href={r.context_photo_url} target="_blank" rel="noopener noreferrer" className="relative">
+                                <img
+                                  src={r.context_photo_url}
+                                  alt="Context"
+                                  className="w-12 h-12 rounded object-cover border border-border/40"
+                                />
+                                <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[7px] text-white text-center">context</span>
+                              </a>
+                            )}
+                          </div>
                         )}
-                        <span className="ml-auto opacity-60">
-                          w:{Number(r.weight).toFixed(1)}
-                        </span>
                       </div>
                     ))}
                   </div>
