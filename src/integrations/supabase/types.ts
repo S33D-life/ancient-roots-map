@@ -7844,6 +7844,98 @@ export type Database = {
           },
         ]
       }
+      tree_location_refinements: {
+        Row: {
+          accuracy_m: number | null
+          at_trunk: boolean
+          checkin_id: string | null
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          note: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_type: string
+          status: string
+          supporting_photo_url: string | null
+          tree_id: string
+          trunk_photo_url: string | null
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          accuracy_m?: number | null
+          at_trunk?: boolean
+          checkin_id?: string | null
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_type?: string
+          status?: string
+          supporting_photo_url?: string | null
+          tree_id: string
+          trunk_photo_url?: string | null
+          user_id: string
+          weight?: number
+        }
+        Update: {
+          accuracy_m?: number | null
+          at_trunk?: boolean
+          checkin_id?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          note?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_type?: string
+          status?: string
+          supporting_photo_url?: string | null
+          tree_id?: string
+          trunk_photo_url?: string | null
+          user_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_location_refinements_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_location_refinements_checkin_id_fkey"
+            columns: ["checkin_id"]
+            isOneToOne: false
+            referencedRelation: "tree_checkins_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_location_refinements_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_location_refinements_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_merge_history: {
         Row: {
           created_at: string
@@ -8344,6 +8436,7 @@ export type Database = {
           latitude: number | null
           lineage: string | null
           linked_churchyard_id: string | null
+          location_confidence: string | null
           longitude: number | null
           lore_text: string | null
           merged_into_tree_id: string | null
@@ -8357,6 +8450,7 @@ export type Database = {
           project_name: string | null
           project_url: string | null
           radio_theme: string | null
+          refinement_count: number | null
           seasonal_tone: string | null
           source_id: string | null
           source_name: string | null
@@ -8385,6 +8479,7 @@ export type Database = {
           latitude?: number | null
           lineage?: string | null
           linked_churchyard_id?: string | null
+          location_confidence?: string | null
           longitude?: number | null
           lore_text?: string | null
           merged_into_tree_id?: string | null
@@ -8398,6 +8493,7 @@ export type Database = {
           project_name?: string | null
           project_url?: string | null
           radio_theme?: string | null
+          refinement_count?: number | null
           seasonal_tone?: string | null
           source_id?: string | null
           source_name?: string | null
@@ -8426,6 +8522,7 @@ export type Database = {
           latitude?: number | null
           lineage?: string | null
           linked_churchyard_id?: string | null
+          location_confidence?: string | null
           longitude?: number | null
           lore_text?: string | null
           merged_into_tree_id?: string | null
@@ -8439,6 +8536,7 @@ export type Database = {
           project_name?: string | null
           project_url?: string | null
           radio_theme?: string | null
+          refinement_count?: number | null
           seasonal_tone?: string | null
           source_id?: string | null
           source_name?: string | null
