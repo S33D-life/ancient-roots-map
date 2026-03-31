@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind, Eye, Scroll, ExternalLink } from "lucide-react";
+import { getHiveForSpecies } from "@/utils/hiveUtils";
 import { type TreeCardData, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 import SendWhisperModal from "@/components/SendWhisperModal";
@@ -88,6 +89,7 @@ const TreeCard = ({
   const tierStyle = TIER_COLORS[tier];
   const speciesHue = getSpeciesHue(tree.species);
   const isResearch = !!tree.research?.isResearch;
+  const hive = useMemo(() => getHiveForSpecies(tree.species), [tree.species]);
 
   const isClustered = cluster?.isClustered ?? false;
   const encounterCount = cluster?.encounters?.length ?? 0;
@@ -161,15 +163,22 @@ const TreeCard = ({
             <p className="text-[11px] italic truncate" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
               {tree.species}
             </p>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-              {age > 0 && <span>🌿 ~{age}y</span>}
-              {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
-              {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
-              {whisperCount > 0 && (
-                <span className="flex items-center gap-0.5 text-muted-foreground/60" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
-                  <Wind className="w-2.5 h-2.5" /> {whisperCount}
-                </span>
-              )}
+            <div className="flex flex-col gap-1 mt-0.5">
+              {/* Line 1: activity */}
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/80">
+                {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
+                {birdsongCount > 0 && <span>🐦 {birdsongCount}</span>}
+                {whisperCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                    <Wind className="w-2.5 h-2.5" /> {whisperCount}
+                  </span>
+                )}
+              </div>
+              {/* Line 2: identity */}
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50">
+                {hive && <span>{hive.icon} {hive.displayName}</span>}
+                {age > 0 && <span>🌿 ~{age}y</span>}
+              </div>
             </div>
             {isResearch && <ResearchBadges tree={tree} />}
           </div>
@@ -251,45 +260,52 @@ const TreeCard = ({
 
       <CardContent className="pt-0">
         <div className="cursor-pointer" onClick={handleClick}>
-          {/* Unified metadata cluster */}
-          <div className="flex items-start justify-between gap-3">
-            {/* Left: core metadata stack */}
-            <div className="flex flex-col gap-1 min-w-0">
-              {tree.what3words && (
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <MapPin className="w-3 h-3 shrink-0" />
-                  <span className="truncate text-[11px] font-serif">/{tree.what3words}</span>
-                </div>
+          {/* Two-line metadata layout */}
+          <div className="flex flex-col gap-1.5">
+            {/* Line 1: Activity / Presence — brighter */}
+            <div className="flex items-center gap-2 flex-wrap text-[11px]">
+              {isClustered && encounterCount > 0 && (
+                <span className="font-serif text-muted-foreground/80">
+                  🌿 Visited {encounterCount} time{encounterCount !== 1 ? "s" : ""}
+                </span>
               )}
-              <div className="flex items-center gap-2 flex-wrap">
-                {age > 0 && (
-                  <span className="text-[11px] text-muted-foreground font-serif">🌿 ~{age} years</span>
-                )}
-                {isClustered && encounterCount > 0 && (
-                  <span className="text-[11px] text-muted-foreground/70 font-serif">
-                    {encounterCount} visit{encounterCount !== 1 ? "s" : ""}
-                  </span>
-                )}
-                {isClustered && wandererCount > 1 && (
-                  <span className="text-[11px] text-muted-foreground/60 font-serif">
-                    · {wandererCount} wanderers
-                  </span>
-                )}
-              </div>
+              {isClustered && wandererCount > 1 && (
+                <span className="font-serif text-muted-foreground/70">
+                  · {wandererCount} wanderers
+                </span>
+              )}
+              {offeringCount > 0 && (
+                <span className="text-primary/70">✦ {offeringCount}</span>
+              )}
+              {birdsongCount > 0 && (
+                <span className="text-muted-foreground/70">🐦 {birdsongCount}</span>
+              )}
+              {whisperCount > 0 && (
+                <span className="flex items-center gap-0.5 text-muted-foreground/60" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
+                  <Wind className="w-3 h-3" /> {whisperCount}
+                </span>
+              )}
             </div>
 
-            {/* Right: offering signals */}
-            {(!isResearch || tree.research?.verified) && (offeringCount > 0 || birdsongCount > 0 || whisperCount > 0) && (
-              <div className="flex items-center gap-2 shrink-0 text-[11px] pt-0.5">
-                {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
-                {birdsongCount > 0 && <span className="text-muted-foreground/60">🐦 {birdsongCount}</span>}
-                {whisperCount > 0 && (
-                  <span className="flex items-center gap-0.5 text-muted-foreground/50" title={`${whisperCount} whisper${whisperCount !== 1 ? "s" : ""}`}>
-                    <Wind className="w-3 h-3" /> {whisperCount}
-                  </span>
-                )}
-              </div>
-            )}
+            {/* Line 2: Identity / Grounding — softer */}
+            <div className="flex items-center gap-2 flex-wrap text-[11px]">
+              {hive && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] h-5 px-2 font-serif border-border/25 bg-muted/15 text-muted-foreground/60"
+                >
+                  {hive.icon} {hive.displayName}
+                </Badge>
+              )}
+              {age > 0 && (
+                <span className="text-muted-foreground/50 font-serif">🌿 ~{age}y</span>
+              )}
+              {tree.what3words && (
+                <span className="flex items-center gap-1 text-muted-foreground/40 font-serif truncate max-w-[140px]">
+                  <MapPin className="w-3 h-3 shrink-0" />/{tree.what3words}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Research source badges */}
