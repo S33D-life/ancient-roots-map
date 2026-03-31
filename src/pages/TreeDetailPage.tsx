@@ -635,6 +635,25 @@ const TreeDetailPage = () => {
           </Suspense>
         )}
 
+        {/* ══════ Collect Hearts CTA ══════ */}
+        {userId && tree && id && (
+          <Suspense fallback={null}>
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+              className="mb-2"
+            >
+              <CollectHeartsButton
+                treeId={id}
+                treeName={tree.name}
+                userId={userId}
+                isEligible={proximityGate.isUnlocked}
+              />
+            </motion.div>
+          </Suspense>
+        )}
+
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
