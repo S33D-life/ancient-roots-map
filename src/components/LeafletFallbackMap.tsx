@@ -943,6 +943,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   treePhotosRef.current = treePhotos;
   const birdsongCountsRef = useRef(birdsongCounts);
   birdsongCountsRef.current = birdsongCounts;
+  const heartPoolCountsRef = useRef(heartPoolCounts);
+  heartPoolCountsRef.current = heartPoolCounts;
 
   // Whisper counts for map markers
   const { counts: whisperCountsMap } = useWhisperCounts();
