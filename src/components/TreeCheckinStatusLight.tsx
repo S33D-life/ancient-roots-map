@@ -19,28 +19,32 @@ interface TreeCheckinStatusLightProps {
   className?: string;
 }
 
-const LIGHT_CONFIG: Record<CheckinLight, { color: string; label: string; hint: string; animate: boolean }> = {
+const LIGHT_CONFIG: Record<CheckinLight, { color: string; label: string; shortLabel: string; hint: string; animate: boolean }> = {
   red: {
     color: "bg-destructive/70",
-    label: "You haven't visited yet",
+    label: "Not yet met",
+    shortLabel: "Not yet met",
     hint: "Check in to begin your connection",
     animate: false,
   },
   orange: {
     color: "bg-[hsl(30,85%,55%)]",
-    label: "You've been here before",
+    label: "Recently met",
+    shortLabel: "Recently met",
     hint: "Check in again to leave an offering",
     animate: false,
   },
   green: {
     color: "bg-[hsl(142,60%,45%)]",
-    label: "You are here — offering window open",
+    label: "Here now",
+    shortLabel: "Here now",
     hint: "",
     animate: false,
   },
   flashing_green: {
     color: "bg-[hsl(142,60%,45%)]",
-    label: "Last chance — offering window closing soon",
+    label: "Window closing",
+    shortLabel: "Window closing",
     hint: "",
     animate: true,
   },
@@ -68,10 +72,12 @@ export default function TreeCheckinStatusLight({
   const config = LIGHT_CONFIG[light];
 
   const labelText = (light === "green" && timeRemaining)
-    ? `You are here — ${timeRemaining} remaining`
+    ? `Here now · ${timeRemaining}`
     : (light === "flashing_green" && timeRemaining)
-      ? `Less than ${timeRemaining} to leave an offering`
-      : config.label;
+      ? `Window closing · ${timeRemaining}`
+      : (light === "orange" && timeRemaining)
+        ? `Recently met · ${timeRemaining}`
+        : config.label;
 
   return (
     <div className={cn("flex items-center gap-1.5", className)}>

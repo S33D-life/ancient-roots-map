@@ -10,13 +10,42 @@ import { getSourceById } from "@/utils/externalTreeSources";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { Rootstone } from "@/data/rootstones";
 
+/* ── Proximity status for popup lights ── */
+const PROXIMITY_M = 500;
+const GRACE_HOURS = 12;
+const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
+const VISITS_KEY = "s33d-tree-visits";
+
+/** Derive a quick presence status light for a given tree using localStorage visits + proximity */
+export function getPopupStatusLight(
+  treeId: string,
+  treeLat: number,
+  treeLng: number,
+  userLatLng: [number, number] | null,
+): PopupStatusLight {
+  // Check if user is currently near the tree
+  if (userLatLng) {
+    const distM = haversineKm(userLatLng[0], userLatLng[1], treeLat, treeLng) * 1000;
+    if (distM < PROXIMITY_M) return "green";
+  }
+
+  // Check grace period from localStorage
+  try {
+    const visits = JSON.parse(localStorage.getItem(VISITS_KEY) || "{}");
+    const lastVisit = visits[treeId];
+    if (lastVisit && (Date.now() - lastVisit) < GRACE_MS) return "orange";
+  } catch { /* silent */ }
+
+  return "red";
+}
+
 /* ── Popup HTML cache — avoids rebuilding for the same tree state ── */
 const POPUP_CACHE = new Map<string, string>();
 const MAX_POPUP_CACHE = 200;
 
-function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null): string {
+function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null): string {
   const dKey = distKm != null ? Math.round(distKm * 10) : "x";
-  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}`;
+  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}`;
 }
 
 export interface PopupTree {
@@ -30,6 +59,8 @@ export interface PopupTree {
   estimated_age?: number | null;
 }
 
+export type PopupStatusLight = "green" | "orange" | "red" | null;
+
 export function buildPopupHtml(
   tree: PopupTree,
   offerings: number,
@@ -38,12 +69,13 @@ export function buildPopupHtml(
   birdsongCount?: number,
   whisperCount?: number,
   userLatLng?: [number, number] | null,
+  statusLight?: PopupStatusLight,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
 
   const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
-  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm);
+  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
@@ -124,6 +156,12 @@ export function buildPopupHtml(
 
       <!-- Species -->
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
+
+      <!-- Status light -->
+      ${statusLight ? `<div style="display:flex;align-items:center;gap:5px;margin-top:2px;">
+        <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${statusLight === "green" ? "hsl(142,60%,45%)" : statusLight === "orange" ? "hsl(30,85%,55%)" : "hsl(0,55%,50%)"};box-shadow:0 0 4px ${statusLight === "green" ? "hsla(142,60%,45%,0.5)" : statusLight === "orange" ? "hsla(30,85%,55%,0.4)" : "transparent"};${statusLight === "green" ? "animation:statusPulse 2s ease-in-out infinite;" : ""}"></span>
+        <span style="font-size:10px;font-family:sans-serif;color:${statusLight === "green" ? "hsl(142,50%,55%)" : statusLight === "orange" ? "hsl(30,70%,60%)" : "hsl(0,0%,50%)"};">${statusLight === "green" ? "Here now" : statusLight === "orange" ? "Recently met" : "Not yet met"}</span>
+      </div>` : ""}
 
       <!-- Hive badge -->
       ${hive ? `<a href="/hive/${escapeHtml(hive.slug)}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:sans-serif;color:hsl(${escapeHtml(hive.accentHsl)});text-decoration:none;padding:2px 7px;border-radius:5px;background:hsl(${escapeHtml(hive.accentHsl)} / 0.08);border:1px solid hsl(${escapeHtml(hive.accentHsl)} / 0.12);transition:all .2s;width:fit-content;">${hive.icon} ${escapeHtml(hive.displayName)}</a>` : ""}

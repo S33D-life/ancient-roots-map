@@ -597,8 +597,8 @@ const TreeDetailPage = () => {
           <TabsContent value="overview" className="space-y-8">
             {/* ═══ PRIMARY ZONE — Identity, Story, Connection ═══ */}
 
-            {/* Proximity Gate Message */}
-            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && (
+            {/* Proximity Gate — shown only when locked */}
+            {!proximityGate.isUnlocked && proximityGate.status !== "checking" && proximityGate.status !== "unlocked_grace" && (
               <Suspense fallback={null}>
                 <ProximityGateMessage
                   status={proximityGate.status}
@@ -606,65 +606,6 @@ const TreeDetailPage = () => {
                   treeName={tree?.name}
                 />
               </Suspense>
-            )}
-            {proximityGate.status === "unlocked_grace" && proximityGate.graceLabel && (
-              <Suspense fallback={null}>
-                <ProximityGateMessage
-                  status={proximityGate.status}
-                  graceLabel={proximityGate.graceLabel}
-                  treeName={tree?.name}
-                />
-              </Suspense>
-            )}
-
-            {/* Check-In Status + Quick Action */}
-            <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm">
-              <div className="flex items-center gap-3 min-w-0">
-                <Suspense fallback={null}>
-                  <TreeCheckinStatusLight light={checkinStatus.light} size="lg" showLabel timeRemaining={proximityGate.graceLabel} />
-                </Suspense>
-                {checkinStats.lastVisit && (
-                  <span className="text-[10px] text-muted-foreground font-mono shrink-0">
-                    Last: {new Date(checkinStats.lastVisit).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                  </span>
-                )}
-                {witnessCount > 0 && (
-                  <Suspense fallback={null}>
-                    <WitnessedBadge witnessCount={witnessCount} />
-                  </Suspense>
-                )}
-              </div>
-              {userId && (
-                <Suspense fallback={null}>
-                  <QuickCheckinButton
-                    treeId={id!}
-                    treeName={tree.name}
-                    userId={userId}
-                    light={checkinStatus.light}
-                    variant="inline"
-                    onComplete={() => {
-                      refetchCheckins();
-                      proximityGate.recordVisitNow();
-                    }}
-                  />
-                </Suspense>
-              )}
-            </div>
-
-            {/* Offering Window Indicator */}
-            {checkinStatus.light === "flashing_green" && proximityGate.graceLabel && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[hsl(30,85%,55%)]/20 bg-[hsl(30,85%,55%)]/5 animate-pulse">
-                <span className="text-xs font-serif text-[hsl(30,85%,55%)]">
-                  ⏳ Offering window closing — {proximityGate.graceLabel}
-                </span>
-              </div>
-            )}
-            {checkinStatus.light === "green" && proximityGate.graceLabel && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[hsl(142,60%,45%)]/20 bg-[hsl(142,60%,45%)]/5">
-                <span className="text-xs font-serif text-[hsl(142,60%,45%)]">
-                  ✨ Offerings open — {proximityGate.graceLabel}
-                </span>
-              </div>
             )}
 
             {/* Collective Activity Stats */}
