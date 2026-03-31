@@ -40,6 +40,7 @@
 }
 
 @keyframes ancientGlow{0%,100%{filter:drop-shadow(0 0 3px hsla(42,90%,55%,0.25))}50%{filter:drop-shadow(0 0 8px hsla(42,90%,55%,0.6))}}
+@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:0.5}}
 @keyframes popIn{0%{opacity:0;transform:scale(0.88) translateY(8px)}60%{transform:scale(1.02) translateY(-2px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 @keyframes userPulse{0%,100%{box-shadow:0 0 10px hsla(42,90%,55%,0.5),0 0 20px hsla(42,90%,55%,0.15)}50%{box-shadow:0 0 14px hsla(42,90%,55%,0.7),0 0 28px hsla(42,90%,55%,0.25)}}
 .marker-ancient{animation:ancientGlow 3.5s ease-in-out infinite}
