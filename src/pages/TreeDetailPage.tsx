@@ -91,6 +91,7 @@ const SendWhisperModal = lazy(() => import("@/components/SendWhisperModal"));
 const AddContributionPanel = lazy(() => import("@/components/contributions/AddContributionPanel"));
 const ContributionFeed = lazy(() => import("@/components/contributions/ContributionFeed"));
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
+const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
