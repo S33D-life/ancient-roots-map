@@ -121,10 +121,10 @@ const Index = () => {
                 <circle cx="280" cy="11" r="1.2" fill="hsl(25 40% 35% / 0.2)" />
               </svg>
             </div>
+            <EcosystemOverview />
+            <div className="section-divider max-w-xl mx-auto" />
             <ParticipationSection />
             <SupportDiscoveryRow />
-            <div className="section-divider max-w-xl mx-auto" />
-            <EcosystemOverview />
             <EcosystemPulse />
             <div className="section-divider max-w-xl mx-auto" />
             {/* Global Activity Feed */}
