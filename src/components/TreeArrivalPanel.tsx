@@ -100,7 +100,7 @@ export default function TreeArrivalPanel({
     setCollectingWhisper(false);
   };
 
-  if (!userId || !hasAnything) return null;
+  if (!userId || (!hasAnything && heartCollection.state !== "loading")) return null;
 
   // Stagger delays: hearts first (0.3s), whispers second (0.5s)
   const heartsDelay = 0.3;
