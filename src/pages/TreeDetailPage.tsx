@@ -91,6 +91,7 @@ const SendWhisperModal = lazy(() => import("@/components/SendWhisperModal"));
 const AddContributionPanel = lazy(() => import("@/components/contributions/AddContributionPanel"));
 const ContributionFeed = lazy(() => import("@/components/contributions/ContributionFeed"));
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
+const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
@@ -825,6 +826,24 @@ const TreeDetailPage = () => {
 
             {/* Encounter Cluster */}
             <EncounterClusterPanel tree={tree} />
+
+            {/* Tree Arrival Panel — unified staggered reveal */}
+            {userId && tree && (
+              <Suspense fallback={null}>
+                <TreeArrivalPanel
+                  treeId={tree.id}
+                  treeName={tree.name}
+                  treeSpecies={tree.species || ""}
+                  userId={userId}
+                  isNearby={proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_grace"}
+                  isCheckedIn={meetingStatus === "active" || meetingStatus === "expiring"}
+                  onCheckIn={() => setCanopyCheckinOpen(true)}
+                  onWhisperCollected={() => {
+                    checkWhispersAtTree(userId, tree.id, tree.species).then(setAvailableWhispers);
+                  }}
+                />
+              </Suspense>
+            )}
 
             {!userId && (
               <Card className="bg-secondary/20 border-border/30">

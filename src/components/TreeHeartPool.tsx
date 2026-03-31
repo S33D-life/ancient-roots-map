@@ -74,12 +74,17 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
       <WindfallCelebration active={showCelebration} onComplete={handleCelebrationComplete} />
       {claimedAmount != null && claimedAmount > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full bg-accent/20 text-accent border border-accent/30"
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full"
+          style={{
+            background: "linear-gradient(135deg, hsl(120 50% 40% / 0.15), hsl(42 60% 45% / 0.15))",
+            color: "hsl(120 45% 55%)",
+            border: "1px solid hsl(120 40% 45% / 0.25)",
+          }}
         >
-          ✨ You claimed {claimedAmount} windfall hearts!
+          💚 {claimedAmount} hearts gathered
         </motion.div>
       )}
 
@@ -94,8 +99,8 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           <span className="text-lg">🌳</span>
         </div>
         <div>
-          <h3 className="font-serif text-sm tracking-wide text-foreground">S33D Heart Reservoir</h3>
-          <p className="text-xs text-muted-foreground font-serif">This tree's commons treasury</p>
+          <h3 className="font-serif text-sm tracking-wide text-foreground">Heart Reservoir</h3>
+          <p className="text-xs text-muted-foreground font-serif">Hearts gathered by wanderers at this tree</p>
         </div>
         <div className="ml-auto text-right">
           <p className="font-serif text-lg tabular-nums" style={{ color: "hsl(120 45% 55%)" }}>
@@ -122,7 +127,7 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           />
         </div>
         <p className="text-[10px] text-muted-foreground/60 font-serif italic">
-          Every 144 S33D Hearts → 12 released to wanderers
+          Every 144 hearts → 12 released to visiting wanderers
         </p>
       </div>
 

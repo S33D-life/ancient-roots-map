@@ -6,7 +6,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TreeWhisper, collectPrivateWhisper, collectSharedWhisper } from "@/hooks/use-whispers";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { TreeDeciduous, MessageCircle, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -62,7 +61,11 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="rounded-xl border border-primary/20 bg-primary/5 p-4 backdrop-blur-sm"
+        className="rounded-xl border p-4 backdrop-blur-sm"
+        style={{
+          borderColor: "hsl(260 40% 55% / 0.15)",
+          background: "linear-gradient(135deg, hsl(260 40% 50% / 0.06), hsl(200 40% 50% / 0.04))",
+        }}
       >
         <button
           onClick={() => setRevealed(true)}
@@ -71,20 +74,20 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
             style={{
-              background: "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.1))",
+              background: "linear-gradient(135deg, hsl(260 40% 50% / 0.15), hsl(200 40% 50% / 0.1))",
             }}
           >
-            <MessageCircle className="w-5 h-5 text-primary" />
+            <MessageCircle className="w-5 h-5" style={{ color: "hsl(260 40% 60%)" }} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-serif text-primary">
-              You feel something waiting in this tree…
+            <p className="text-sm font-serif" style={{ color: "hsl(260 40% 65%)" }}>
+              A whisper waits in this tree…
             </p>
             <p className="text-[11px] text-muted-foreground font-serif mt-0.5">
-              {uncollected.length} whisper{uncollected.length !== 1 ? "s" : ""} can be collected here
+              {uncollected.length} whisper{uncollected.length !== 1 ? "s" : ""} to receive
             </p>
           </div>
-          <ChevronRight className="w-4 h-4 text-primary/50 shrink-0" />
+          <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "hsl(260 40% 55% / 0.4)" }} />
         </button>
       </motion.div>
     );
@@ -97,21 +100,31 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
-        className="rounded-xl border border-primary/20 bg-card/80 p-5 backdrop-blur-sm space-y-4"
+      className="rounded-xl border p-5 backdrop-blur-sm space-y-4"
+        style={{
+          borderColor: "hsl(260 40% 55% / 0.15)",
+          background: "linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(260 40% 50% / 0.04))",
+        }}
       >
         <div className="flex items-center gap-2">
-          <TreeDeciduous className="w-4 h-4 text-primary" />
+          <TreeDeciduous className="w-4 h-4" style={{ color: "hsl(260 40% 60%)" }} />
           <span className="text-xs font-serif text-muted-foreground tracking-wider uppercase">
             Whisper from the Canopy
           </span>
-          <Badge variant="outline" className="ml-auto text-[9px] font-serif border-primary/20">
+          <span className="ml-auto text-[9px] font-serif px-2 py-0.5 rounded-full"
+            style={{
+              background: "hsl(260 40% 55% / 0.08)",
+              color: "hsl(260 40% 60%)",
+              border: "1px solid hsl(260 40% 55% / 0.15)",
+            }}
+          >
             {current?.recipient_scope === "PUBLIC" ? "Shared" : "Private"}
-          </Badge>
+          </span>
         </div>
 
         {current && !collectedIds.has(current.id) ? (
           <>
-            <div className="border-l-2 border-primary/30 pl-4">
+            <div className="pl-4" style={{ borderLeft: "2px solid hsl(260 40% 55% / 0.2)" }}>
               <p className="text-sm font-serif text-foreground/90 leading-relaxed italic">
                 "{current.message_content}"
               </p>
@@ -119,16 +132,17 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
 
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground font-serif">
-                Sent through {treeName}
+                Through {treeName}
               </span>
               <Button
                 onClick={handleCollect}
                 disabled={collecting}
                 size="sm"
-                className="font-serif text-xs gap-1.5"
+                variant="outline"
+                className="font-serif text-xs gap-1.5 border-primary/20"
               >
                 {collecting ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-                Collect Whisper
+                Receive Whisper
               </Button>
             </div>
 
