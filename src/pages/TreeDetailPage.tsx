@@ -158,6 +158,7 @@ const TreeDetailPage = () => {
   const [ecoBelonging, setEcoBelonging] = useState<Array<{ id: string; name: string; type: string }>>([]);
   const [presenceOpen, setPresenceOpen] = useState(false);
   const [showLoreWhisper, setShowLoreWhisper] = useState(true);
+  const [refinementOpen, setRefinementOpen] = useState(false);
   const [witnessCount, setWitnessCount] = useState(0);
   const witnessSessionId = searchParams.get("witness") || undefined;
 
