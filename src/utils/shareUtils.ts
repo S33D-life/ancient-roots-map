@@ -96,10 +96,10 @@ export function buildShareUrl(type: ShareEntityType, id: string): string {
 }
 
 /**
- * Get the direct app URL (non-proxy). Use for in-app navigation only.
+ * Get the direct app URL. Same as getShareUrl (canonical page URL).
  */
 export function getDirectUrl(entity: ShareEntity): string {
-  return `${APP_URL}${getCanonicalPath(entity)}`;
+  return getShareUrl(entity);
 }
 
 /* ── Share text builders ────────────────────────────────── */
