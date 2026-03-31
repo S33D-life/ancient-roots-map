@@ -30,6 +30,8 @@ export interface PopupTree {
   estimated_age?: number | null;
 }
 
+export type PopupStatusLight = "green" | "orange" | "red" | null;
+
 export function buildPopupHtml(
   tree: PopupTree,
   offerings: number,
@@ -38,6 +40,7 @@ export function buildPopupHtml(
   birdsongCount?: number,
   whisperCount?: number,
   userLatLng?: [number, number] | null,
+  statusLight?: PopupStatusLight,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
