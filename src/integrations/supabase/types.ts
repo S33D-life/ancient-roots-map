@@ -7844,11 +7844,72 @@ export type Database = {
           },
         ]
       }
+      tree_location_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          new_confidence: string | null
+          new_latitude: number
+          new_longitude: number
+          old_confidence: string | null
+          old_latitude: number
+          old_longitude: number
+          reason: string | null
+          refinement_ids: string[] | null
+          tree_id: string
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          new_confidence?: string | null
+          new_latitude: number
+          new_longitude: number
+          old_confidence?: string | null
+          old_latitude: number
+          old_longitude: number
+          reason?: string | null
+          refinement_ids?: string[] | null
+          tree_id: string
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          new_confidence?: string | null
+          new_latitude?: number
+          new_longitude?: number
+          old_confidence?: string | null
+          old_latitude?: number
+          old_longitude?: number
+          reason?: string | null
+          refinement_ids?: string[] | null
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_location_history_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_location_history_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_location_refinements: {
         Row: {
           accuracy_m: number | null
           at_trunk: boolean
           checkin_id: string | null
+          context_photo_url: string | null
           created_at: string
           id: string
           latitude: number
@@ -7869,6 +7930,7 @@ export type Database = {
           accuracy_m?: number | null
           at_trunk?: boolean
           checkin_id?: string | null
+          context_photo_url?: string | null
           created_at?: string
           id?: string
           latitude: number
@@ -7889,6 +7951,7 @@ export type Database = {
           accuracy_m?: number | null
           at_trunk?: boolean
           checkin_id?: string | null
+          context_photo_url?: string | null
           created_at?: string
           id?: string
           latitude?: number
