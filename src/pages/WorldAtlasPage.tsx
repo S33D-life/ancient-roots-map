@@ -567,30 +567,7 @@ const WorldAtlasPage = () => {
           </div>
         </section>
 
-        {/* ─── Context Panel ─── */}
-        <section className="px-4 max-w-2xl mx-auto mb-8">
-          <Card className="border-primary/12 bg-card/40 backdrop-blur-sm">
-            <CardContent className="p-4 space-y-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                This atlas weaves together authoritative tree registers, heritage lists,
-                and ecological records from around the world. A tree becomes an{" "}
-                <span className="text-primary font-medium">Ancient Friend</span> only through in-person presence.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                {[
-                  { icon: Shield, label: "Provenance preserved" },
-                  { icon: Eye, label: "Precision respected" },
-                  { icon: Footprints, label: "Living verification" },
-                ].map(item => (
-                  <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="p-1.5 rounded-md bg-primary/8"><item.icon className="w-3.5 h-3.5 text-primary" /></div>
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+        {/* Context panel moved below country list */}
 
         <ContextualWhisper id="atlas-search-hint" message="Use the search bar above to find any country, pathway, or tree by name." delay={4000} position="top-center" />
 
