@@ -129,8 +129,9 @@ export function useSeedLifeEntries(filters: SeedLifeFilters = {}) {
   return useQuery({
     queryKey: ["seed-life-entries", filters],
     queryFn: async () => {
-      let query = supabase
-        .from("seed_life_entries")
+      let query = (supabase.from as any)(
+        "seed_life_entries",
+      )
         .select("*")
         .order("is_featured", { ascending: false })
         .order("validation_count", { ascending: false })
@@ -155,8 +156,7 @@ export function useSeedLifeFilterOptions() {
   return useQuery({
     queryKey: ["seed-life-filter-options"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("seed_life_entries")
+      const { data, error } = await (supabase.from as any)("seed_life_entries")
         .select("species_group, use_category, region_label")
         .limit(300);
       if (error) throw error;
@@ -176,8 +176,7 @@ export function useSeedLifeEntry(slug: string | undefined) {
     queryKey: ["seed-life-entry", slug],
     queryFn: async () => {
       if (!slug) return null;
-      const { data, error } = await supabase
-        .from("seed_life_entries")
+      const { data, error } = await (supabase.from as any)("seed_life_entries")
         .select("*")
         .eq("slug", slug)
         .maybeSingle();
@@ -193,8 +192,7 @@ export function useSeedLifeGuardians(seedId: string | undefined) {
     queryKey: ["seed-life-guardians", seedId],
     queryFn: async () => {
       if (!seedId) return [] as SeedLifeGuardian[];
-      const { data, error } = await supabase
-        .from("seed_life_guardians")
+      const { data, error } = await (supabase.from as any)("seed_life_guardians")
         .select("id, seed_id, library_id, pod_name, relationship_type, note, created_at, library:seed_libraries(id, slug, name, country, region, city)")
         .eq("seed_id", seedId)
         .order("created_at", { ascending: false });
@@ -210,8 +208,7 @@ export function useSeedLifeNotes(seedId: string | undefined) {
     queryKey: ["seed-life-notes", seedId],
     queryFn: async () => {
       if (!seedId) return [] as SeedLifeNote[];
-      const { data, error } = await supabase
-        .from("seed_life_notes")
+      const { data, error } = await (supabase.from as any)("seed_life_notes")
         .select("*")
         .eq("seed_id", seedId)
         .order("created_at", { ascending: false });
@@ -229,8 +226,7 @@ export function useSeedLifeValidationSummary(targetIds: string[]) {
     queryKey: ["seed-life-validations", userId, targetIds],
     queryFn: async () => {
       if (targetIds.length === 0) return {} as Record<string, SeedLifeValidationSummary>;
-      const { data, error } = await supabase
-        .from("seed_life_validations")
+      const { data, error } = await (supabase.from as any)("seed_life_validations")
         .select("target_id, user_id")
         .in("target_id", targetIds);
       if (error) throw error;
@@ -311,8 +307,7 @@ export function useCreateSeedLifeEntry() {
 
       const slug = generateSlug(input.common_name);
 
-      const { data, error } = await supabase
-        .from("seed_life_entries")
+      const { data, error } = await (supabase.from as any)("seed_life_entries")
         .insert({
           slug,
           common_name: input.common_name.trim(),
@@ -339,7 +334,7 @@ export function useCreateSeedLifeEntry() {
       if (error) throw error;
 
       if (input.guardianLibraryId || input.guardianPodName?.trim()) {
-        const { error: guardianError } = await supabase.from("seed_life_guardians").insert({
+        const { error: guardianError } = await (supabase.from as any)("seed_life_guardians").insert({
           seed_id: data.id,
           library_id: input.guardianLibraryId || null,
           pod_name: input.guardianPodName?.trim() || null,
@@ -368,7 +363,7 @@ export function useAddSeedLifeNote() {
   return useMutation({
     mutationFn: async (input: { seed_id: string; title?: string; content: string; cultivation_stage?: string }) => {
       if (!userId) throw new Error("Must be signed in");
-      const { error } = await supabase.from("seed_life_notes").insert({
+      const { error } = await (supabase.from as any)("seed_life_notes").insert({
         seed_id: input.seed_id,
         user_id: userId,
         title: input.title?.trim() || null,
@@ -392,7 +387,7 @@ export function useAddSeedLifeValidation() {
   return useMutation({
     mutationFn: async (input: { targetType: "seed" | "note"; targetId: string; seedId: string }) => {
       if (!userId) throw new Error("Must be signed in");
-      const { error } = await supabase.from("seed_life_validations").insert({
+      const { error } = await (supabase.from as any)("seed_life_validations").insert({
         target_type: input.targetType,
         target_id: input.targetId,
         user_id: userId,
