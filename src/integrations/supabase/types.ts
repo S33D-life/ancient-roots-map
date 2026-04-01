@@ -5898,6 +5898,218 @@ export type Database = {
           },
         ]
       }
+      seed_life_entries: {
+        Row: {
+          common_name: string
+          created_at: string
+          description: string | null
+          germination_notes: string | null
+          growth_journey: Json
+          id: string
+          image_alt: string | null
+          image_credit: string | null
+          image_path: string | null
+          image_thumb_path: string | null
+          is_featured: boolean
+          is_hidden: boolean
+          latin_name: string | null
+          origin_label: string | null
+          region_label: string | null
+          relationship_notes: Json
+          seed_size: string | null
+          slug: string
+          species_group: string
+          status: string
+          storage_notes: string | null
+          submitted_by: string
+          updated_at: string
+          use_category: string
+          validation_count: number
+          verification_status: string
+        }
+        Insert: {
+          common_name: string
+          created_at?: string
+          description?: string | null
+          germination_notes?: string | null
+          growth_journey?: Json
+          id?: string
+          image_alt?: string | null
+          image_credit?: string | null
+          image_path?: string | null
+          image_thumb_path?: string | null
+          is_featured?: boolean
+          is_hidden?: boolean
+          latin_name?: string | null
+          origin_label?: string | null
+          region_label?: string | null
+          relationship_notes?: Json
+          seed_size?: string | null
+          slug: string
+          species_group: string
+          status?: string
+          storage_notes?: string | null
+          submitted_by: string
+          updated_at?: string
+          use_category: string
+          validation_count?: number
+          verification_status?: string
+        }
+        Update: {
+          common_name?: string
+          created_at?: string
+          description?: string | null
+          germination_notes?: string | null
+          growth_journey?: Json
+          id?: string
+          image_alt?: string | null
+          image_credit?: string | null
+          image_path?: string | null
+          image_thumb_path?: string | null
+          is_featured?: boolean
+          is_hidden?: boolean
+          latin_name?: string | null
+          origin_label?: string | null
+          region_label?: string | null
+          relationship_notes?: Json
+          seed_size?: string | null
+          slug?: string
+          species_group?: string
+          status?: string
+          storage_notes?: string | null
+          submitted_by?: string
+          updated_at?: string
+          use_category?: string
+          validation_count?: number
+          verification_status?: string
+        }
+        Relationships: []
+      }
+      seed_life_guardians: {
+        Row: {
+          added_by: string
+          created_at: string
+          id: string
+          library_id: string | null
+          note: string | null
+          pod_name: string | null
+          relationship_type: string
+          seed_id: string
+          updated_at: string
+        }
+        Insert: {
+          added_by: string
+          created_at?: string
+          id?: string
+          library_id?: string | null
+          note?: string | null
+          pod_name?: string | null
+          relationship_type?: string
+          seed_id: string
+          updated_at?: string
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          library_id?: string | null
+          note?: string | null
+          pod_name?: string | null
+          relationship_type?: string
+          seed_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seed_life_guardians_library_id_fkey"
+            columns: ["library_id"]
+            isOneToOne: false
+            referencedRelation: "seed_libraries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seed_life_guardians_seed_id_fkey"
+            columns: ["seed_id"]
+            isOneToOne: false
+            referencedRelation: "seed_life_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seed_life_notes: {
+        Row: {
+          content: string
+          created_at: string
+          cultivation_stage: string | null
+          id: string
+          is_hidden: boolean
+          seed_id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+          validation_count: number
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          cultivation_stage?: string | null
+          id?: string
+          is_hidden?: boolean
+          seed_id: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          validation_count?: number
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          cultivation_stage?: string | null
+          id?: string
+          is_hidden?: boolean
+          seed_id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          validation_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seed_life_notes_seed_id_fkey"
+            columns: ["seed_id"]
+            isOneToOne: false
+            referencedRelation: "seed_life_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seed_life_validations: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shelf_templates: {
         Row: {
           created_at: string
@@ -9658,6 +9870,10 @@ export type Database = {
         Returns: undefined
       }
       owns_agent: { Args: { _agent_id: string }; Returns: boolean }
+      recompute_seed_life_validation_totals: {
+        Args: { _target_id: string; _target_type: string }
+        Returns: undefined
+      }
       record_referral_secure: {
         Args: { p_invite_code: string; p_invitee_id: string }
         Returns: Json
