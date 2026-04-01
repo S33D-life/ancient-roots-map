@@ -155,16 +155,22 @@ export function useSeedLifeEntries(filters: SeedLifeFilters = {}) {
 export function useSeedLifeFilterOptions() {
   return useQuery({
     queryKey: ["seed-life-filter-options"],
-    queryFn: async () => {
+    queryFn: async (): Promise<SeedLifeFilterOptions> => {
       const { data, error } = await (supabase.from as any)("seed_life_entries")
         .select("species_group, use_category, region_label")
         .limit(300);
       if (error) throw error;
 
+      const rows = (data ?? []) as Array<{
+        species_group?: string | null;
+        use_category?: string | null;
+        region_label?: string | null;
+      }>;
+
       return {
-        species: [...new Set((data ?? []).map((row: any) => row.species_group).filter(Boolean))].sort(),
-        uses: [...new Set((data ?? []).map((row: any) => row.use_category).filter(Boolean))].sort(),
-        regions: [...new Set((data ?? []).map((row: any) => row.region_label).filter(Boolean))].sort(),
+        species: [...new Set(rows.map((row) => row.species_group).filter((value): value is string => Boolean(value)))].sort(),
+        uses: [...new Set(rows.map((row) => row.use_category).filter((value): value is string => Boolean(value)))].sort(),
+        regions: [...new Set(rows.map((row) => row.region_label).filter((value): value is string => Boolean(value)))].sort(),
       } satisfies SeedLifeFilterOptions;
     },
     staleTime: 5 * 60 * 1000,
