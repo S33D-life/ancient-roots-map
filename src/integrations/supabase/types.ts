@@ -5900,6 +5900,7 @@ export type Database = {
       }
       seed_life_entries: {
         Row: {
+          archive_link: string | null
           common_name: string
           created_at: string
           description: string | null
@@ -5928,6 +5929,7 @@ export type Database = {
           verification_status: string
         }
         Insert: {
+          archive_link?: string | null
           common_name: string
           created_at?: string
           description?: string | null
@@ -5956,6 +5958,7 @@ export type Database = {
           verification_status?: string
         }
         Update: {
+          archive_link?: string | null
           common_name?: string
           created_at?: string
           description?: string | null
