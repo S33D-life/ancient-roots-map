@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import seedCellarWindow from "@/assets/seed-cellar-window.png";
 import SeedLibraryDirectory from "@/components/seed-library/SeedLibraryDirectory";
 import SeedLibraryCuratorPanel from "@/components/seed-library/SeedLibraryCuratorPanel";
+import SeedLifeGallery from "@/components/seed-library/SeedLifeGallery";
 import { useHasRole } from "@/hooks/use-role";
 
 const SeedCellarRoom = () => {
@@ -54,6 +55,9 @@ const SeedCellarRoom = () => {
           <TabsTrigger value="directory" className="text-xs">
             🌱 Seed Libraries
           </TabsTrigger>
+          <TabsTrigger value="gallery" className="text-xs">
+            🌰 Seed Life Gallery
+          </TabsTrigger>
           {canModerate && (
             <TabsTrigger value="moderation" className="text-xs">
               🔧 Moderation
@@ -62,6 +66,9 @@ const SeedCellarRoom = () => {
         </TabsList>
         <TabsContent value="directory" className="mt-4">
           <SeedLibraryDirectory />
+        </TabsContent>
+        <TabsContent value="gallery" className="mt-4">
+          <SeedLifeGallery />
         </TabsContent>
         {canModerate && (
           <TabsContent value="moderation" className="mt-4">
