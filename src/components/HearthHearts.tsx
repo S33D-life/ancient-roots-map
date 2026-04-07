@@ -131,7 +131,7 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
           <p className="text-xs font-serif text-muted-foreground/50">No heart activity yet</p>
           <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Visit a tree to earn your first hearts</p>
         </div>
-      )
+      )}
 
       {/* Gift Seed Inbox */}
       <div className="pt-2">
