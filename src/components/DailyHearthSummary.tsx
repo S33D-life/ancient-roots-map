@@ -30,10 +30,10 @@ export default function DailyHearthSummary({ userId }: DailyHearthSummaryProps) 
           .eq("user_id", userId)
           .gte("created_at", isoStart),
         supabase
-          .from("whisper_receipts")
+          .from("tree_whisper_collections")
           .select("id")
-          .eq("recipient_user_id", userId)
-          .gte("received_at", isoStart),
+          .eq("collected_by_user_id", userId)
+          .gte("collected_at", isoStart),
       ]);
 
       const hearts = (heartsRes.data || []).reduce((s, h) => s + (h.amount || 0), 0);
