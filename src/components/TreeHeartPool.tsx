@@ -13,11 +13,9 @@ interface TreeHeartPoolProps {
 
 const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
   const [pool, setPool] = useState<{ total_hearts: number; windfall_count: number; last_windfall_at: string | null } | null>(null);
-  const [claimedAmount, setClaimedAmount] = useState<number | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevWindfallCount = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const hasClaimedRef = useRef(false);
 
   const fetchPool = useCallback(async () => {
     const { data } = await supabase
@@ -43,24 +41,9 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
     prevWindfallCount.current = pool.windfall_count;
   }, [pool?.windfall_count]);
 
-  // Try to claim pending windfall on visit (once)
-  useEffect(() => {
-    if (!userId || !pool || pool.total_hearts === 0 || hasClaimedRef.current) return;
-    hasClaimedRef.current = true;
-
-    const claimWindfall = async () => {
-      const { data, error } = await supabase.rpc("claim_windfall_hearts", {
-        p_tree_id: treeId,
-        p_user_id: userId,
-      });
-      if (!error && data && data > 0) {
-        setClaimedAmount(data);
-        setShowCelebration(true);
-        setTimeout(() => setClaimedAmount(null), 5000);
-      }
-    };
-    claimWindfall();
-  }, [treeId, userId, pool?.total_hearts]);
+  // Auto-claim is intentionally removed here.
+  // Heart collection is handled exclusively through CollectHeartsButton
+  // and the unified useHeartCollection hook to prevent bypassing eligibility.
 
   const handleCelebrationComplete = useCallback(() => setShowCelebration(false), []);
 
@@ -72,21 +55,6 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
   return (
     <div className="relative rounded-xl border border-border overflow-hidden bg-card/60 backdrop-blur p-5">
       <WindfallCelebration active={showCelebration} onComplete={handleCelebrationComplete} />
-      {claimedAmount != null && claimedAmount > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full"
-          style={{
-            background: "linear-gradient(135deg, hsla(140, 35%, 30%, 0.15), hsla(42, 60%, 45%, 0.15))",
-            color: "hsl(140 40% 55%)",
-            border: "1px solid hsla(140, 35%, 40%, 0.25)",
-          }}
-        >
-          {claimedAmount} hearts gathered ✨
-        </motion.div>
-      )}
 
       <div className="flex items-center gap-3 mb-3">
         <div
