@@ -13,6 +13,9 @@ import { checkWhispersAtTree, type TreeWhisper, collectPrivateWhisper, collectSh
 import { useHeartCollection } from "@/hooks/use-heart-collection";
 import { canCollect, getHeartPoolGuidance } from "@/utils/heartPoolState";
 import { toast } from "sonner";
+import { hapticSuccess, hapticTap } from "@/lib/haptics";
+import HeartCollectAnimation from "@/components/HeartCollectAnimation";
+import GraceCountdown from "@/components/GraceCountdown";
 
 interface TreeArrivalPanelProps {
   treeId: string;
@@ -67,8 +70,10 @@ export default function TreeArrivalPanel({
   const hasAnything = hasHearts || hasWhispers;
 
   const handleGatherHearts = useCallback(async () => {
+    hapticTap();
     const amount = await heartCollection.collect();
     if (amount && amount > 0) {
+      hapticSuccess();
       toast.success(`${amount} hearts gathered from this tree`, { icon: "💚" });
       window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
     } else if (amount === 0) {
