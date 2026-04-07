@@ -97,16 +97,15 @@ export function useTreeMarkerLayer({
             return h ? hslStringToHue(h.accentHsl) : undefined;
           })()
         : undefined;
-      const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue);
-      const wCount = refs.whisperCounts[tree.id] || 0;
       const hCount = refs.heartPoolCounts[tree.id] || 0;
+      const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue, hCount);
+      const wCount = refs.whisperCounts[tree.id] || 0;
 
       const marker = L.marker([tree.latitude, tree.longitude], { icon });
       marker.on("add", () => {
         const el = (marker as any)._icon;
         if (!el) return;
         if (wCount > 0) el.classList.add("whisper-glow");
-        if (hCount > 0) el.classList.add("heart-available");
       });
       (marker as any)._treeLineage = (tree as any).lineage || null;
       (marker as any)._treeSpecies = tree.species || null;
