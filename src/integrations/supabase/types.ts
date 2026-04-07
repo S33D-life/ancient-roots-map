@@ -9924,6 +9924,32 @@ export type Database = {
         Returns: undefined
       }
       owns_agent: { Args: { _agent_id: string }; Returns: boolean }
+      plant_hearts_at_tree: {
+        Args: {
+          p_amount: number
+          p_asset_type?: string
+          p_species_key?: string
+          p_tree_id: string
+          p_user_id: string
+        }
+        Returns: {
+          amount: number
+          asset_type: string
+          created_at: string
+          id: string
+          last_accrual_at: string
+          last_visit_at: string | null
+          species_key: string | null
+          tree_id: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tree_value_roots"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       recompute_seed_life_validation_totals: {
         Args: { _target_id: string; _target_type: string }
         Returns: undefined
