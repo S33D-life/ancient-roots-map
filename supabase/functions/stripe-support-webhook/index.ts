@@ -84,8 +84,11 @@ Deno.serve(async (req) => {
       const hearts = calculateGratitudeHearts(amountMinor);
       const idempotencyKey = `support_gratitude:${sessionId}`;
 
-      // Update or insert contribution
+      // Update or insert contribution, capturing the record UUID
+      let contributionId: string;
+
       if (existing) {
+        contributionId = existing.id;
         await supabase
           .from("value_contributions")
           .update({
@@ -97,7 +100,7 @@ Deno.serve(async (req) => {
           })
           .eq("id", existing.id);
       } else {
-        await supabase.from("value_contributions").insert({
+        const { data: inserted } = await supabase.from("value_contributions").insert({
           user_id: userId,
           rail: "stripe",
           rail_session_id: sessionId,
@@ -109,11 +112,11 @@ Deno.serve(async (req) => {
           hearts_granted_at: new Date().toISOString(),
           rail_subscription_id: (session.subscription as string) || null,
           metadata: session.metadata || {},
-        });
+        }).select("id").single();
+        contributionId = inserted?.id || "00000000-0000-0000-0000-000000000000";
       }
 
       // Grant gratitude hearts via heart_ledger ONLY (idempotent via unique key)
-      // heart_transactions is optional/legacy — skip to avoid duplicates
       const { error: ledgerErr } = await supabase.from("heart_ledger").insert({
         user_id: userId,
         amount: hearts,
@@ -121,7 +124,7 @@ Deno.serve(async (req) => {
         currency_type: "S33D",
         source: "stripe_contribution",
         entity_type: "value_contribution",
-        entity_id: sessionId,
+        entity_id: contributionId,
         status: "confirmed",
         chain_state: "offchain",
         idempotency_key: idempotencyKey,
@@ -129,6 +132,7 @@ Deno.serve(async (req) => {
           amount_minor: amountMinor,
           currency: session.currency,
           contribution_mode: session.mode,
+          rail_session_id: sessionId,
         },
       });
 
