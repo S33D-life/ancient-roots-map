@@ -82,7 +82,6 @@ export async function plantHearts(params: {
   amount: number;
   speciesKey?: string;
 }): Promise<TreeRoot | null> {
-  // In-flight guard
   const key = `${params.userId}:${params.treeId}`;
   if (_inflightPlant.has(key)) return null;
   _inflightPlant.add(key);
@@ -109,11 +108,20 @@ export async function plantHearts(params: {
     });
 
     if (error) {
-      console.warn("[rootingService.plantHearts]", error.message);
+      console.warn("[rootingService.plantHearts] RPC failed, attempting refund", error.message);
+      // Refund: credit back the spent hearts
+      await earnHearts({
+        userId: params.userId,
+        amount: params.amount,
+        transactionType: "refund",
+        entityType: "tree_root",
+        entityId: params.treeId,
+        source: "rooting_refund",
+        metadata: { reason: "plant_rpc_failed" },
+      });
       return null;
     }
 
-    // RPC returns array; take the first (only) row
     const root = Array.isArray(data) ? data[0] : data;
     return (root as unknown as TreeRoot) || null;
   } finally {
@@ -126,7 +134,6 @@ export async function collectGrowth(
   userId: string,
   treeId: string
 ): Promise<{ growth: number; root: TreeRoot } | null> {
-  // In-flight guard: prevent double-collect from rapid taps
   const key = `${userId}:${treeId}`;
   if (_inflightCollect.has(key)) return null;
   _inflightCollect.add(key);
@@ -142,11 +149,9 @@ export async function collectGrowth(
     const now = new Date().toISOString();
     const { data: updatedRoot, error: updateErr } = await supabase
       .from("tree_value_roots")
-      .update({
-        last_accrual_at: now,
-        last_visit_at: now,
-      } as any)
+      .update({ last_accrual_at: now, last_visit_at: now })
       .eq("id", root.id)
+      .eq("user_id", userId) // ensure ownership
       .select()
       .single();
 
@@ -170,8 +175,9 @@ export async function collectGrowth(
       // Rollback accrual reset on earn failure
       await supabase
         .from("tree_value_roots")
-        .update({ last_accrual_at: root.last_accrual_at } as any)
-        .eq("id", root.id);
+        .update({ last_accrual_at: root.last_accrual_at })
+        .eq("id", root.id)
+        .eq("user_id", userId);
       return null;
     }
 
