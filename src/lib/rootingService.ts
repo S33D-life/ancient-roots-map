@@ -44,6 +44,9 @@ export function calculateGrowth(root: TreeRoot): number {
   return Math.floor(rawGrowth);
 }
 
+// ── In-flight guards ───────────────────────────────────────
+const _inflightCollect = new Set<string>();
+
 // ── Queries ────────────────────────────────────────────────
 export async function getUserRoots(userId: string): Promise<TreeRoot[]> {
   const { data } = await supabase
@@ -77,11 +80,14 @@ export async function plantHearts(params: {
   amount: number;
   speciesKey?: string;
 }): Promise<TreeRoot | null> {
-  // 1. Deduct from balance via existing spend system
+  // 1. Check for existing root first
+  const existing = await getTreeRoot(params.userId, params.treeId);
+
+  // 2. Deduct from balance via existing spend system
   const spent = await spendHearts({
     userId: params.userId,
     amount: params.amount,
-    transactionType: "lock_stake", // reuse existing type
+    transactionType: "spend_gift", // closest existing type for planting
     entityType: "tree_root",
     entityId: params.treeId,
     metadata: { action: "plant_hearts", species_key: params.speciesKey },
@@ -89,38 +95,45 @@ export async function plantHearts(params: {
 
   if (!spent) return null;
 
-  // 2. Upsert root record
+  if (existing) {
+    // ADD to existing root — never overwrite
+    const newAmount = existing.amount + params.amount;
+    const { data, error } = await supabase
+      .from("tree_value_roots")
+      .update({
+        amount: newAmount,
+        species_key: params.speciesKey || existing.species_key,
+        last_visit_at: new Date().toISOString(),
+      } as any)
+      .eq("id", existing.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.warn("[rootingService.plantHearts] update failed", error.message);
+      return null;
+    }
+    return data as unknown as TreeRoot;
+  }
+
+  // 3. Create new root
   const { data, error } = await supabase
     .from("tree_value_roots")
-    .upsert(
-      {
-        user_id: params.userId,
-        tree_id: params.treeId,
-        asset_type: "s33d_heart",
-        amount: params.amount,
-        species_key: params.speciesKey || null,
-        last_accrual_at: new Date().toISOString(),
-        last_visit_at: new Date().toISOString(),
-      } as any,
-      { onConflict: "user_id,tree_id,asset_type" }
-    )
+    .insert({
+      user_id: params.userId,
+      tree_id: params.treeId,
+      asset_type: "s33d_heart",
+      amount: params.amount,
+      species_key: params.speciesKey || null,
+      last_accrual_at: new Date().toISOString(),
+      last_visit_at: new Date().toISOString(),
+    } as any)
     .select()
     .single();
 
   if (error) {
-    console.warn("[rootingService.plantHearts]", error.message);
+    console.warn("[rootingService.plantHearts] insert failed", error.message);
     return null;
-  }
-
-  // If user already had a root, add to existing amount
-  if (data && (data as any).amount !== params.amount) {
-    const { data: updated } = await supabase
-      .from("tree_value_roots")
-      .update({ amount: (data as any).amount + params.amount } as any)
-      .eq("id", (data as any).id)
-      .select()
-      .single();
-    return (updated as unknown as TreeRoot) || (data as unknown as TreeRoot);
   }
 
   return data as unknown as TreeRoot;
@@ -131,38 +144,60 @@ export async function collectGrowth(
   userId: string,
   treeId: string
 ): Promise<{ growth: number; root: TreeRoot } | null> {
-  const root = await getTreeRoot(userId, treeId);
-  if (!root) return null;
+  // In-flight guard: prevent double-collect from rapid taps
+  const key = `${userId}:${treeId}`;
+  if (_inflightCollect.has(key)) return null;
+  _inflightCollect.add(key);
 
-  const growth = calculateGrowth(root);
-  if (growth <= 0) return { growth: 0, root };
+  try {
+    const root = await getTreeRoot(userId, treeId);
+    if (!root) return null;
 
-  // Credit growth to user's balance
-  const earned = await earnHearts({
-    userId,
-    amount: growth,
-    transactionType: "earn_contribution",
-    entityType: "tree_root_growth",
-    entityId: treeId,
-    source: "rooting",
-    metadata: { root_id: root.id, planted: root.amount },
-  });
+    const growth = calculateGrowth(root);
+    if (growth <= 0) return { growth: 0, root };
 
-  if (!earned) return null;
+    // Reset accrual baseline FIRST to prevent double-credit
+    const now = new Date().toISOString();
+    const { data: updatedRoot, error: updateErr } = await supabase
+      .from("tree_value_roots")
+      .update({
+        last_accrual_at: now,
+        last_visit_at: now,
+      } as any)
+      .eq("id", root.id)
+      .select()
+      .single();
 
-  // Reset accrual baseline
-  const { data } = await supabase
-    .from("tree_value_roots")
-    .update({
-      last_accrual_at: new Date().toISOString(),
-      last_visit_at: new Date().toISOString(),
-    } as any)
-    .eq("id", root.id)
-    .select()
-    .single();
+    if (updateErr) {
+      console.warn("[rootingService.collectGrowth] reset failed", updateErr.message);
+      return null;
+    }
 
-  return {
-    growth,
-    root: (data as unknown as TreeRoot) || root,
-  };
+    // Credit growth to user's balance
+    const earned = await earnHearts({
+      userId,
+      amount: growth,
+      transactionType: "earn_contribution", // existing type, entity_type disambiguates
+      entityType: "tree_root_growth",
+      entityId: treeId,
+      source: "rooting",
+      metadata: { root_id: root.id, planted: root.amount },
+    });
+
+    if (!earned) {
+      // Rollback accrual reset on earn failure
+      await supabase
+        .from("tree_value_roots")
+        .update({ last_accrual_at: root.last_accrual_at } as any)
+        .eq("id", root.id);
+      return null;
+    }
+
+    return {
+      growth,
+      root: (updatedRoot as unknown as TreeRoot) || root,
+    };
+  } finally {
+    _inflightCollect.delete(key);
+  }
 }
