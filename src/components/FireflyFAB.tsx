@@ -110,7 +110,28 @@ const FireflyFAB = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const { signals, unreadCount, dominantType, filter, setFilter, markRead, markAllRead, dismiss } = useHeartSignals(userId);
+  const heartSignals = useHeartSignals(userId);
+  const { whisperSignals, whisperCount } = useWhisperSignals(userId);
+
+  // Merge whisper signals into the unified signal list
+  const mergedSignals = useMemo(() => {
+    const all = [...(whisperSignals as any[]), ...heartSignals.signals];
+    all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return all;
+  }, [whisperSignals, heartSignals.signals]);
+
+  const unreadCount = heartSignals.unreadCount + whisperCount;
+  const dominantType = useMemo(() => {
+    if (whisperCount > 0 && whisperCount >= (heartSignals.unreadCount || 0)) return "whisper" as const;
+    return heartSignals.dominantType;
+  }, [whisperCount, heartSignals.unreadCount, heartSignals.dominantType]);
+
+  const { filter, setFilter, markRead, markAllRead, dismiss } = heartSignals;
+  const signals = useMemo(() => {
+    if (filter === "all") return mergedSignals;
+    if (filter === "whisper") return whisperSignals as any[];
+    return heartSignals.signals.filter((s: any) => s.signal_type === filter);
+  }, [filter, mergedSignals, whisperSignals, heartSignals.signals]);
 
   // One-time drag hint — suppressed for new users to reduce noise
   const { isNewUser } = useIsNewUser();
