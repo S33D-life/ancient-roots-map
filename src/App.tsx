@@ -328,6 +328,7 @@ const App = () => {
                 <Route path="/ledger" element={realm(<TreeLedgerPage />, "trunk")} />
                 <Route path="/gallery" element={<GalleryRedirect />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/reset-password" element={<AuthPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/golden-dream" element={realm(<GoldenDreamPage />, "crown")} />
                 <Route path="/council-of-life" element={realm(<CouncilOfLifePage />, "canopy")} />
