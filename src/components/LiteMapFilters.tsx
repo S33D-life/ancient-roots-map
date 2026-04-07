@@ -202,7 +202,7 @@ const LiteMapFilters = ({
   return (
     <>
       {/* ── Top bar: Mode Capsule + Filters ── */}
-      <div className="absolute top-[4.5rem] left-3 right-3 z-[1000] flex flex-col gap-2 animate-fade-in">
+      <div className="absolute left-3 right-3 z-[1000] flex flex-col gap-2 animate-fade-in" style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 5rem)" }}>
         {/* Mode Capsule — unified segmented control */}
         <div className="flex items-center gap-2">
           <div
