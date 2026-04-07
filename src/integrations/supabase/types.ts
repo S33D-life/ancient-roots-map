@@ -8491,6 +8491,57 @@ export type Database = {
           },
         ]
       }
+      tree_value_roots: {
+        Row: {
+          amount: number
+          asset_type: string
+          created_at: string
+          id: string
+          last_accrual_at: string
+          last_visit_at: string | null
+          species_key: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          asset_type?: string
+          created_at?: string
+          id?: string
+          last_accrual_at?: string
+          last_visit_at?: string | null
+          species_key?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          asset_type?: string
+          created_at?: string
+          id?: string
+          last_accrual_at?: string
+          last_visit_at?: string | null
+          species_key?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_value_roots_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_value_roots_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees_map_hot"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_whisper_collections: {
         Row: {
           collected_at: string
