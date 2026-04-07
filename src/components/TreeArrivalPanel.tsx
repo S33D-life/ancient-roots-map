@@ -47,6 +47,8 @@ export default function TreeArrivalPanel({
   const [mounted, setMounted] = useState(false);
 
   const heartCollection = useHeartCollection(treeId, userId, isNearby || isCheckedIn);
+  const { affinities } = useSpeciesResonance(userId);
+  const speciesHint = treeSpecies ? getSpeciesHint(treeSpecies, affinities) : null;
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 300);
