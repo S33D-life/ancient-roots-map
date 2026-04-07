@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { checkWhispersAtTree, type TreeWhisper, collectPrivateWhisper, collectSharedWhisper } from "@/hooks/use-whispers";
 import { useHeartCollection } from "@/hooks/use-heart-collection";
+import { canCollect, getHeartPoolGuidance } from "@/utils/heartPoolState";
 import { toast } from "sonner";
 
 interface TreeArrivalPanelProps {
