@@ -1,4 +1,6 @@
 import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
+import { useSignalFieldLayer } from "@/hooks/use-signal-field-layer";
+import { useMemoryTrailLayer } from "@/hooks/use-memory-trail-layer";
 import { useMapOverlayLayers } from "@/hooks/use-map-overlay-layers";
 import { useTreeMarkerLayer } from "@/hooks/use-tree-marker-layer";
 import { useMapLayerState, type LayerKey } from "@/hooks/use-map-layer-state";
@@ -370,6 +372,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const clearView = layers.clearView;
   const showDreamTrees = layers.dreamTrees;
   const showDreamOfferings = layers.dreamOfferings;
+  const showSignalField = layers.signalField;
+  const showMemoryTrail = layers.memoryTrail;
 
   // Broadcast clearView state so external panels (MapTreePanel) can hide
   useEffect(() => {
@@ -504,6 +508,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     map: mapRef.current,
     showDreamTrees,
     showDreamOfferings,
+  });
+
+  // Signal Field — canvas overlay showing heart + whisper density
+  useSignalFieldLayer({
+    map: mapRef.current,
+    trees: filteredTrees,
+    heartPoolCounts: heartPoolCountsRef.current,
+    whisperCounts: whisperCountsRef.current,
+    enabled: showSignalField,
+  });
+
+  // Memory Trail — soft polyline connecting recently visited trees
+  const { hasTrail: memoryTrailActive } = useMemoryTrailLayer({
+    map: mapRef.current,
+    userId: userId || null,
+    enabled: showMemoryTrail,
   });
 
   const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
