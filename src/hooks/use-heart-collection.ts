@@ -1,48 +1,27 @@
 /**
  * useHeartCollection — unified hook for heart collection eligibility + action.
- * Checks 12-hour visit window + available hearts in tree pool.
- * Used across map popups, preview cards, and tree detail page.
+ * Now delegates to heartPoolState.ts for the single eligibility function.
  */
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  deriveHeartPoolStatus,
+  canCollect,
+  type HeartPoolStatus,
+  isWithinGracePeriod,
+} from "@/utils/heartPoolState";
 
-const GRACE_HOURS = 12;
-const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
-const VISITS_KEY = "s33d-tree-visits";
-
-export type HeartCollectionState =
-  | "loading"
-  | "eligible"           // at tree or within 12h, hearts available
-  | "no_hearts"          // eligible but no hearts in pool
-  | "not_eligible"       // not at tree / window expired
-  | "collected"          // just collected
-  | "collecting"         // in progress
-  | "error";
+export type HeartCollectionState = HeartPoolStatus;
 
 export interface HeartPoolInfo {
   totalHearts: number;
   windfallCount: number;
 }
 
-function getLastVisit(treeId: string): number | null {
-  try {
-    const visits = JSON.parse(localStorage.getItem(VISITS_KEY) || "{}");
-    return visits[treeId] ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function isWithinGrace(treeId: string): boolean {
-  const lastVisit = getLastVisit(treeId);
-  if (!lastVisit) return false;
-  return (Date.now() - lastVisit) < GRACE_MS;
-}
-
 export function useHeartCollection(
   treeId: string | undefined,
   userId: string | null,
-  /** True when proximity gate says user is near or in grace */
+  /** True when proximity gate says user is near or checked in */
   isEligible: boolean,
 ) {
   const [pool, setPool] = useState<HeartPoolInfo | null>(null);
@@ -66,28 +45,33 @@ export function useHeartCollection(
     fetchPool();
   }, [fetchPool]);
 
-  // Derive state
+  // Derive state using the unified function
   useEffect(() => {
     if (poolLoading) { setState("loading"); return; }
-    if (!userId || !treeId) { setState("not_eligible"); return; }
     if (collectedAmount !== null) { setState("collected"); return; }
 
-    const hasHearts = pool && pool.totalHearts > 0;
-    // Check eligibility: either proximity-gate says yes, or localStorage grace
-    const eligible = isEligible || isWithinGrace(treeId);
-
-    if (!eligible) {
-      setState("not_eligible");
-    } else if (hasHearts) {
-      setState("eligible");
-    } else {
-      setState("no_hearts");
-    }
+    const status = deriveHeartPoolStatus({
+      userId,
+      treeId,
+      poolHearts: pool?.totalHearts ?? 0,
+      isNearTree: isEligible,
+    });
+    setState(status);
   }, [poolLoading, userId, treeId, pool, isEligible, collectedAmount]);
 
-  // Collect action — deduplicated
+  // Collect action
   const collect = useCallback(async () => {
     if (!userId || !treeId || state === "collecting") return null;
+    
+    // Double-check eligibility before attempting
+    const currentStatus = deriveHeartPoolStatus({
+      userId,
+      treeId,
+      poolHearts: pool?.totalHearts ?? 0,
+      isNearTree: isEligible,
+    });
+    if (!canCollect(currentStatus)) return null;
+
     setState("collecting");
     try {
       const { data, error } = await supabase.rpc("claim_windfall_hearts", {
@@ -95,26 +79,24 @@ export function useHeartCollection(
         p_user_id: userId,
       });
       if (error) {
-        setState("error");
+        setState("visible_not_collectable");
         return null;
       }
       const amount = typeof data === "number" ? data : 0;
       if (amount > 0) {
         setCollectedAmount(amount);
         setState("collected");
-        // Refresh pool after collection
         setTimeout(fetchPool, 1500);
         return amount;
       } else {
-        // No hearts actually claimable (already claimed or threshold not met)
         setState("no_hearts");
         return 0;
       }
     } catch {
-      setState("error");
+      setState("visible_not_collectable");
       return null;
     }
-  }, [userId, treeId, state, fetchPool]);
+  }, [userId, treeId, state, fetchPool, pool, isEligible]);
 
   // Reset collected state after timeout
   useEffect(() => {
@@ -135,7 +117,6 @@ export function useHeartCollection(
 
 /**
  * Lightweight check for map popups — no hook, just async function.
- * Returns number of available hearts for a tree.
  */
 export async function getTreeHeartPoolCount(treeId: string): Promise<number> {
   const { data } = await supabase
