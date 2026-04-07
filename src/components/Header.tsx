@@ -247,10 +247,8 @@ const Header = () => {
                 <Search className="w-3.5 h-3.5 text-foreground/50" />
               </Button>
 
-              {/* Theme toggle — desktop only */}
-              <div className="hidden md:block">
-                <ThemeToggle />
-              </div>
+              {/* Theme toggle */}
+              <ThemeToggle />
 
               {/* Notifications now centralized in Orb bell arm */}
 
