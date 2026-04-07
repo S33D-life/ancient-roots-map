@@ -41,6 +41,12 @@ if (_recoveryDetected) {
 
 const AuthPage = () => {
   useDocumentTitle("Sign In");
+  // Also detect if we landed on /reset-password directly
+  const isResetRoute = window.location.pathname === "/reset-password";
+  if (isResetRoute && !_recoveryDetected) {
+    _recoveryDetected = true;
+    sessionStorage.setItem("s33d_recovery_active", "1");
+  }
   const [view, setView] = useState<AuthView>(_recoveryDetected ? "reset-password" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
