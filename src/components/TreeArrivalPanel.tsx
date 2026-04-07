@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { hapticSuccess, hapticTap } from "@/lib/haptics";
 import HeartCollectAnimation from "@/components/HeartCollectAnimation";
 import GraceCountdown from "@/components/GraceCountdown";
+import { useSpeciesResonance, getSpeciesHint } from "@/hooks/use-species-resonance";
 
 interface TreeArrivalPanelProps {
   treeId: string;
