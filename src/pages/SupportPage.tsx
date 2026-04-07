@@ -166,6 +166,7 @@ const SupportPage = () => {
         {([
           { key: "one-time" as SupportMode, label: "One-Time", icon: Heart },
           { key: "monthly" as SupportMode, label: "Monthly", icon: Leaf },
+          { key: "staff" as SupportMode, label: "Staff Path", icon: Wand2 },
           { key: "crypto" as SupportMode, label: "Crypto", icon: Wallet },
         ]).map(({ key, label, icon: Icon }) => (
           <button
