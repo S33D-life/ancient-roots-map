@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings, ChevronDown } from "lucide-react";
+import { Loader2, LogOut, Save, Camera, Eye, EyeOff, Shield, RefreshCw, Settings, ChevronDown, Download } from "lucide-react";
 import WalletConnect from "@/components/WalletConnect";
 import { useWallet, type CachedStaff } from "@/hooks/use-wallet";
 import ManualStaffPicker from "@/components/ManualStaffPicker";
@@ -420,6 +420,23 @@ const DashboardProfile = ({ user, profile, onProfileUpdate, onSignOut }: Dashboa
       {/* ── Preferences — collapsed ── */}
       <SettingsCollapsible icon={Settings} title="Preferences" subtitle="Presence, weather, and notifications">
         <PresenceWeatherSettings userId={user.id} />
+      </SettingsCollapsible>
+
+      {/* ── Sovereign Data — collapsed ── */}
+      <SettingsCollapsible icon={Download} title="My Sovereign Data" subtitle="Download and carry your personal record">
+        <Card className="border-border/50 bg-card/60 backdrop-blur">
+          <CardContent className="p-5 space-y-3">
+            <p className="text-xs text-muted-foreground font-serif leading-relaxed">
+              Export a complete copy of your personal record — encounters, contributions, hearts, and activity across S33D. Your data is yours to carry.
+            </p>
+            <Link to="/living-archive">
+              <Button variant="outline" size="sm" className="gap-2 font-serif text-xs w-full">
+                <Download className="w-3.5 h-3.5" />
+                Open My Sovereign Data
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </SettingsCollapsible>
 
       {/* ── System — collapsed ── */}

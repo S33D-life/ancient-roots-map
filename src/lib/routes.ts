@@ -74,4 +74,6 @@ export const ROUTES = {
   AGENT_GARDEN: "/agent-garden",
   /** Telegram Handoff */
   TELEGRAM_HANDOFF: "/telegram-handoff",
+  /** My Sovereign Data — personal data export */
+  SOVEREIGN_DATA: "/living-archive",
 } as const;
