@@ -3,6 +3,7 @@
  *
  * Reuses existing heart balance/transaction system for debits and credits.
  * Growth is calculated on-demand (open / collect), never polled.
+ * Planting uses an atomic DB function to prevent race conditions.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { spendHearts, earnHearts } from "@/lib/heartService";
@@ -45,6 +46,7 @@ export function calculateGrowth(root: TreeRoot): number {
 }
 
 // ── In-flight guards ───────────────────────────────────────
+const _inflightPlant = new Set<string>();
 const _inflightCollect = new Set<string>();
 
 // ── Queries ────────────────────────────────────────────────
@@ -73,70 +75,50 @@ export async function getTreeRoot(
   return (data as unknown as TreeRoot) || null;
 }
 
-// ── Plant ──────────────────────────────────────────────────
+// ── Plant (atomic) ─────────────────────────────────────────
 export async function plantHearts(params: {
   userId: string;
   treeId: string;
   amount: number;
   speciesKey?: string;
 }): Promise<TreeRoot | null> {
-  // 1. Check for existing root first
-  const existing = await getTreeRoot(params.userId, params.treeId);
+  // In-flight guard
+  const key = `${params.userId}:${params.treeId}`;
+  if (_inflightPlant.has(key)) return null;
+  _inflightPlant.add(key);
 
-  // 2. Deduct from balance via existing spend system
-  const spent = await spendHearts({
-    userId: params.userId,
-    amount: params.amount,
-    transactionType: "spend_gift", // closest existing type for planting
-    entityType: "tree_root",
-    entityId: params.treeId,
-    metadata: { action: "plant_hearts", species_key: params.speciesKey },
-  });
+  try {
+    // 1. Deduct from balance via existing spend system
+    const spent = await spendHearts({
+      userId: params.userId,
+      amount: params.amount,
+      transactionType: "spend_plant_hearts",
+      entityType: "tree_root",
+      entityId: params.treeId,
+      metadata: { action: "plant_hearts", species_key: params.speciesKey },
+    });
 
-  if (!spent) return null;
+    if (!spent) return null;
 
-  if (existing) {
-    // ADD to existing root — never overwrite
-    const newAmount = existing.amount + params.amount;
-    const { data, error } = await supabase
-      .from("tree_value_roots")
-      .update({
-        amount: newAmount,
-        species_key: params.speciesKey || existing.species_key,
-        last_visit_at: new Date().toISOString(),
-      } as any)
-      .eq("id", existing.id)
-      .select()
-      .single();
+    // 2. Atomic upsert via DB function — safely increments existing roots
+    const { data, error } = await supabase.rpc("plant_hearts_at_tree", {
+      p_user_id: params.userId,
+      p_tree_id: params.treeId,
+      p_amount: params.amount,
+      p_species_key: params.speciesKey || null,
+    });
 
     if (error) {
-      console.warn("[rootingService.plantHearts] update failed", error.message);
+      console.warn("[rootingService.plantHearts]", error.message);
       return null;
     }
-    return data as unknown as TreeRoot;
+
+    // RPC returns array; take the first (only) row
+    const root = Array.isArray(data) ? data[0] : data;
+    return (root as unknown as TreeRoot) || null;
+  } finally {
+    _inflightPlant.delete(key);
   }
-
-  // 3. Create new root
-  const { data, error } = await supabase
-    .from("tree_value_roots")
-    .insert({
-      user_id: params.userId,
-      tree_id: params.treeId,
-      asset_type: "s33d_heart",
-      amount: params.amount,
-      species_key: params.speciesKey || null,
-      last_accrual_at: new Date().toISOString(),
-      last_visit_at: new Date().toISOString(),
-    } as any)
-    .select()
-    .single();
-
-  if (error) {
-    console.warn("[rootingService.plantHearts] insert failed", error.message);
-    return null;
-  }
-
-  return data as unknown as TreeRoot;
 }
 
 // ── Collect growth ─────────────────────────────────────────
@@ -177,7 +159,7 @@ export async function collectGrowth(
     const earned = await earnHearts({
       userId,
       amount: growth,
-      transactionType: "earn_contribution", // existing type, entity_type disambiguates
+      transactionType: "earn_root_growth",
       entityType: "tree_root_growth",
       entityId: treeId,
       source: "rooting",
