@@ -116,6 +116,8 @@ const SupportPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [signupType, setSignupType] = useState<"testing" | "technical_council" | null>(null);
   const [teotag, setTeotag] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
 
   const [activeTab, setActiveTab] = useState(() => {
     try { return localStorage.getItem(TAB_STORAGE_KEY) || "give"; } catch { return "give"; }
@@ -124,6 +126,41 @@ const SupportPage = () => {
   useEffect(() => {
     try { localStorage.setItem(TAB_STORAGE_KEY, activeTab); } catch {}
   }, [activeTab]);
+
+  // Handle Stripe success/cancel redirects
+  useEffect(() => {
+    const result = searchParams.get("result");
+    if (result === "success") {
+      toast.success("Thank you for helping this garden grow", {
+        icon: "🌱",
+        description: "You've received hearts in gratitude",
+        duration: 6000,
+      });
+      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: {} }));
+    } else if (result === "cancelled") {
+      toast("Support cancelled — no worries", { icon: "🍃" });
+    }
+  }, [searchParams]);
+
+  const handleCheckout = async (amountMinor: number, mode: "one_time" | "recurring", tierId?: string) => {
+    const key = tierId || String(amountMinor);
+    setCheckoutLoading(key);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast("Sign in to support the garden", { icon: "🔑" });
+        return;
+      }
+      const url = await createSupportCheckout({ amount: amountMinor, mode, tierId });
+      if (url) {
+        window.location.href = url;
+      } else {
+        toast.error("Could not start checkout");
+      }
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
