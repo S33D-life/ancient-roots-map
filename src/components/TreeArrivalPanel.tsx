@@ -137,9 +137,9 @@ export default function TreeArrivalPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: heartsDelay, duration: 0.4 }}
-            onClick={handleGatherHearts}
-            disabled={heartCollection.state === "collecting" || heartCollection.state === "collected"}
-            className="w-full flex items-center gap-3 py-3 px-1 text-left transition-colors hover:bg-primary/5 rounded-lg"
+            onClick={isHeartCollectable ? handleGatherHearts : undefined}
+            disabled={!isHeartCollectable || heartCollection.state === "collecting" || heartCollection.state === "collected"}
+            className={`w-full flex items-center gap-3 py-3 px-1 text-left transition-colors rounded-lg ${isHeartCollectable ? "hover:bg-primary/5 cursor-pointer" : "cursor-default"}`}
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
@@ -155,13 +155,13 @@ export default function TreeArrivalPanel({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-serif" style={{ color: "hsl(140 40% 55%)" }}>
-                {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : "Hearts waiting here"}
+                {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : heartGuidance}
               </p>
               <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
                 {heartCollection.pool!.totalHearts} in this tree's reservoir
               </p>
             </div>
-            {!heartCollection.collectedAmount && (
+            {isHeartCollectable && !heartCollection.collectedAmount && (
               <span className="text-[10px] font-serif text-primary/40 shrink-0">Gather</span>
             )}
           </motion.button>
