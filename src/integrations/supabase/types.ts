@@ -9095,6 +9095,57 @@ export type Database = {
         }
         Relationships: []
       }
+      value_contributions: {
+        Row: {
+          amount_minor: number
+          contribution_mode: string
+          created_at: string
+          currency: string
+          hearts_granted: number
+          hearts_granted_at: string | null
+          id: string
+          metadata: Json | null
+          rail: string
+          rail_session_id: string | null
+          rail_subscription_id: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_minor?: number
+          contribution_mode?: string
+          created_at?: string
+          currency?: string
+          hearts_granted?: number
+          hearts_granted_at?: string | null
+          id?: string
+          metadata?: Json | null
+          rail?: string
+          rail_session_id?: string | null
+          rail_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_minor?: number
+          contribution_mode?: string
+          created_at?: string
+          currency?: string
+          hearts_granted?: number
+          hearts_granted_at?: string | null
+          id?: string
+          metadata?: Json | null
+          rail?: string
+          rail_session_id?: string | null
+          rail_subscription_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       value_proposal_supports: {
         Row: {
           created_at: string

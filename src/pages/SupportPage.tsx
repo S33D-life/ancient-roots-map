@@ -37,8 +37,9 @@ import {
   Bell,
   Zap,
   Lock,
+  Loader2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { SUPPORT_CONFIG } from "@/lib/support-config";
@@ -62,6 +63,9 @@ import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
 import TeotagFace from "@/components/TeotagFace";
 import TeotagChatPanel from "@/components/TeotagChatPanel";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { createSupportCheckout } from "@/lib/supportService";
 
 /* ── What support nurtures ──────────────────────────────────── */
 const nurtures = [
@@ -112,6 +116,8 @@ const SupportPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [signupType, setSignupType] = useState<"testing" | "technical_council" | null>(null);
   const [teotag, setTeotag] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
 
   const [activeTab, setActiveTab] = useState(() => {
     try { return localStorage.getItem(TAB_STORAGE_KEY) || "give"; } catch { return "give"; }
@@ -120,6 +126,41 @@ const SupportPage = () => {
   useEffect(() => {
     try { localStorage.setItem(TAB_STORAGE_KEY, activeTab); } catch {}
   }, [activeTab]);
+
+  // Handle Stripe success/cancel redirects
+  useEffect(() => {
+    const result = searchParams.get("result");
+    if (result === "success") {
+      toast.success("Thank you for helping this garden grow", {
+        icon: "🌱",
+        description: "You've received hearts in gratitude",
+        duration: 6000,
+      });
+      window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: {} }));
+    } else if (result === "cancelled") {
+      toast("Support cancelled — no worries", { icon: "🍃" });
+    }
+  }, [searchParams]);
+
+  const handleCheckout = async (amountMinor: number, mode: "one_time" | "recurring", tierId?: string) => {
+    const key = tierId || String(amountMinor);
+    setCheckoutLoading(key);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast("Sign in to support the garden", { icon: "🔑" });
+        return;
+      }
+      const url = await createSupportCheckout({ amount: amountMinor, mode, tierId });
+      if (url) {
+        window.location.href = url;
+      } else {
+        toast.error("Could not start checkout");
+      }
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -208,15 +249,18 @@ const SupportPage = () => {
                               Your subscription feeds your Heartwood Vault and supports the commons ecosystem.
                             </p>
                           )}
-                          {tier.stripeLink ? (
-                            <a href={tier.stripeLink} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                              <Heart className="w-3.5 h-3.5" /> Subscribe <ExternalLink className="w-3 h-3 opacity-60" />
-                            </a>
-                          ) : (
-                            <span className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-muted text-muted-foreground text-sm font-medium cursor-default">
-                              <Heart className="w-3.5 h-3.5" /> Coming Soon
-                            </span>
-                          )}
+                          <button
+                            onClick={() => handleCheckout(tier.amountMinor, "recurring", tier.id)}
+                            disabled={checkoutLoading === tier.id}
+                            className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
+                          >
+                            {checkoutLoading === tier.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Heart className="w-3.5 h-3.5" />
+                            )}
+                            {checkoutLoading === tier.id ? "Opening…" : "Support"}
+                          </button>
                         </CardContent>
                       </Card>
                     );
@@ -308,54 +352,55 @@ const SupportPage = () => {
               </ul>
             </motion.section>
 
-            {/* Fiat one-off / monthly */}
-            {SUPPORT_CONFIG.fiat.enabled && (
-              <section className="space-y-3">
+            {/* One-off support */}
+            {SUPPORT_CONFIG.oneOff.enabled && (
+              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-primary" />
-                  <h2 className="text-lg font-serif font-medium text-foreground">One-Off Support</h2>
+                  <h2 className="text-lg font-serif font-medium text-foreground">Offer a One-Time Gift</h2>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {SUPPORT_CONFIG.fiat.oneOff && (
-                    <a href={SUPPORT_CONFIG.fiat.oneOff} target="_blank" rel="noopener noreferrer" className="no-underline">
-                      <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                        <CardContent className="p-4 flex flex-col gap-1 items-center text-center">
-                          <Heart className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium text-foreground">One-off Gift</span>
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">Opens Stripe <ExternalLink className="w-2.5 h-2.5" /></span>
-                        </CardContent>
-                      </Card>
-                    </a>
-                  )}
-                  {SUPPORT_CONFIG.fiat.monthly && (
-                    <a href={SUPPORT_CONFIG.fiat.monthly} target="_blank" rel="noopener noreferrer" className="no-underline">
-                      <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                        <CardContent className="p-4 flex flex-col gap-1 items-center text-center">
-                          <Heart className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium text-foreground">Monthly Gift</span>
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">Opens Stripe <ExternalLink className="w-2.5 h-2.5" /></span>
-                        </CardContent>
-                      </Card>
-                    </a>
-                  )}
+                <p className="text-xs text-muted-foreground leading-relaxed">Choose an amount or enter your own. Every offering helps the grove grow.</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {SUPPORT_CONFIG.oneOff.presets.map((amount, i) => (
+                    <button
+                      key={amount}
+                      onClick={() => handleCheckout(amount, "one_time")}
+                      disabled={checkoutLoading === String(amount)}
+                      className="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-primary/15 bg-card/50 hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer disabled:opacity-60"
+                    >
+                      {checkoutLoading === String(amount) ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      ) : (
+                        <Heart className="w-4 h-4 text-primary/60" />
+                      )}
+                      <span className="text-sm font-serif font-semibold text-foreground">{SUPPORT_CONFIG.oneOff.labels[i]}</span>
+                      <span className="text-[10px] text-muted-foreground">one time</span>
+                    </button>
+                  ))}
                 </div>
-              </section>
+                <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments. You'll receive hearts in gratitude.</p>
+              </motion.section>
             )}
 
-            {/* Crypto */}
+            {/* Crypto pathways */}
             {SUPPORT_CONFIG.crypto.enabled && (
-              <section className="space-y-3">
+              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3.5} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Wallet className="w-4 h-4 text-primary" />
-                  <h2 className="text-lg font-serif font-medium text-foreground">Crypto</h2>
+                  <h2 className="text-lg font-serif font-medium text-foreground">Support with Crypto</h2>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">Send supported assets directly. Only send the correct token to each address.</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Send supported assets directly. Contributions will be acknowledged once confirmed on-chain.
+                </p>
                 <div className="space-y-3">
                   {SUPPORT_CONFIG.crypto.wallets.map((w) => (
                     <CryptoWalletCard key={w.symbol} {...w} />
                   ))}
                 </div>
-              </section>
+                <p className="text-[10px] text-muted-foreground/40 text-center">
+                  On-chain confirmation coming soon. Your support will be recognised.
+                </p>
+              </motion.section>
             )}
 
             {/* Commons Nourishment */}

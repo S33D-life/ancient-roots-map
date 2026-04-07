@@ -11,39 +11,40 @@ export const SUPPORT_CONFIG = {
       {
         id: "weekly",
         amount: "£3.33",
+        amountMinor: 333,
         period: "per week",
         label: "Weekly Seed",
         description: "A gentle weekly rhythm of support — like rain nurturing the grove.",
-        stripeLink: "", // Stripe payment link URL — set when ready
         emoji: "🌱",
       },
       {
         id: "monthly",
         amount: "£3.33",
+        amountMinor: 333,
         period: "per month",
         label: "Monthly Root",
         description: "Steady monthly support that helps the roots grow deeper.",
-        stripeLink: "", // Stripe payment link URL — set when ready
         emoji: "🌿",
       },
       {
         id: "personal-grove",
         amount: "£33",
+        amountMinor: 3300,
         period: "per month",
         label: "Personal Grove",
         description: "Your own living grove — receive a monthly flow of S33D Hearts, unlock private offerings, and feed the commons ecosystem through your Heartwood Vault.",
-        stripeLink: "", // Stripe payment link URL — set when ready
         emoji: "🌳",
         featured: true,
       },
     ],
   },
 
-  /** Fiat donation links (Stripe Payment Links or similar) */
-  fiat: {
-    oneOff: "", // Stripe payment link URL — set when ready
-    monthly: "", // Stripe subscription link URL — set when ready
-    enabled: false, // flip when Stripe links are configured
+  /** One-off support */
+  oneOff: {
+    enabled: true,
+    presets: [333, 1100, 3300], // in pence
+    labels: ["£3.33", "£11", "£33"],
+    minAmount: 100, // £1 minimum
   },
 
   /** Crypto wallet addresses */
@@ -62,9 +63,7 @@ export const SUPPORT_CONFIG = {
         network: "Bitcoin Mainnet",
       },
     ] as const,
-    checkoutUrl: "",
-    checkoutLabel: "",
-    enabled: false,
+    enabled: true,
   },
 
   /** External donation rails */
