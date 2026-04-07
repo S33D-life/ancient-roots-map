@@ -79,12 +79,12 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           exit={{ opacity: 0, scale: 0.9 }}
           className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full"
           style={{
-            background: "linear-gradient(135deg, hsl(120 50% 40% / 0.15), hsl(42 60% 45% / 0.15))",
-            color: "hsl(120 45% 55%)",
-            border: "1px solid hsl(120 40% 45% / 0.25)",
+            background: "linear-gradient(135deg, hsla(140, 35%, 30%, 0.15), hsla(42, 60%, 45%, 0.15))",
+            color: "hsl(140 40% 55%)",
+            border: "1px solid hsla(140, 35%, 40%, 0.25)",
           }}
         >
-          💚 {claimedAmount} hearts gathered
+          {claimedAmount} hearts gathered ✨
         </motion.div>
       )}
 
@@ -92,8 +92,8 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
           style={{
-            background: "linear-gradient(135deg, hsl(120 50% 40% / 0.3), hsl(42 60% 45% / 0.3))",
-            border: "1.5px solid hsl(120 40% 45% / 0.4)",
+            background: "linear-gradient(135deg, hsla(140, 35%, 30%, 0.3), hsla(42, 60%, 45%, 0.3))",
+            border: "1.5px solid hsla(140, 35%, 40%, 0.4)",
           }}
         >
           <span className="text-lg">🌳</span>
@@ -103,10 +103,10 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           <p className="text-xs text-muted-foreground font-serif">Hearts gathered by wanderers at this tree</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="font-serif text-lg tabular-nums" style={{ color: "hsl(120 45% 55%)" }}>
+          <p className="font-serif text-lg tabular-nums" style={{ color: "hsl(140 40% 55%)" }}>
             {pool.total_hearts}
           </p>
-          <p className="text-[10px] text-muted-foreground font-serif">🌳 S33D Hearts</p>
+          <p className="text-[10px] text-muted-foreground font-serif">S33D Hearts</p>
         </div>
       </div>
 
@@ -119,7 +119,7 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
           <motion.div
             className="h-full rounded-full"
             style={{
-              background: "linear-gradient(90deg, hsl(120 50% 40%), hsl(42 70% 50%))",
+              background: "linear-gradient(90deg, hsl(140 40% 38%), hsl(42 70% 50%))",
             }}
             initial={{ width: 0 }}
             animate={{ width: `${progressPct}%` }}

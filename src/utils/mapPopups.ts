@@ -178,13 +178,19 @@ export function buildPopupHtml(
       ${desc}
     </div>
 
-    <!-- Hearts available — collect CTA -->
+    <!-- Hearts available — collect CTA or guidance -->
     ${(heartCount ?? 0) > 0 && (statusLight === "green" || statusLight === "orange") ? `
     <div style="padding:4px 16px 6px;">
-      <button data-collect-hearts="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 0;font-size:11px;color:hsl(120,45%,55%);background:hsl(120,50%,40%,0.08);border:1px solid hsl(120,40%,45%,0.2);border-radius:9px;cursor:pointer;font-family:sans-serif;font-weight:600;transition:all .2s;">💚 Collect ${heartCount} Hearts</button>
+      <button data-collect-hearts="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 0;font-size:11px;color:hsl(140,40%,58%);background:hsla(140,35%,30%,0.08);border:1px solid hsla(140,35%,40%,0.18);border-radius:9px;cursor:pointer;font-family:sans-serif;font-weight:600;transition:all .2s;">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="hsl(140,45%,50%)" style="flex-shrink:0;"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 0 1 8 4.5 3.5 3.5 0 0 1 13.5 7C13.5 10.5 8 14 8 14z"/></svg>
+        ${heartCount} heart${heartCount !== 1 ? "s" : ""} waiting — collect now
+      </button>
     </div>` : (heartCount ?? 0) > 0 ? `
     <div style="padding:4px 16px 6px;">
-      <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 0;font-size:10px;color:hsl(0,0%,50%);font-family:sans-serif;">💚 ${heartCount} hearts · visit to collect</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding:8px 0;font-size:10px;color:hsl(0,0%,48%);font-family:sans-serif;">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="hsl(0,0%,42%)" style="flex-shrink:0;opacity:0.6;"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 0 1 8 4.5 3.5 3.5 0 0 1 13.5 7C13.5 10.5 8 14 8 14z"/></svg>
+        ${heartCount} heart${heartCount !== 1 ? "s" : ""} · visit to collect
+      </div>
     </div>` : ""}
 
     <!-- Primary CTA — Meet This Tree -->

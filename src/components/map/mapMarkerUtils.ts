@@ -2,6 +2,9 @@
  * Map marker utilities — extracted from LeafletFallbackMap.
  * Contains SVG generation, icon caching, tier classification,
  * and viewport-culling helpers.
+ *
+ * Heart pool indicators use structured HTML layers instead of emoji
+ * for calm, integrated visuals.
  */
 import L from "leaflet";
 import { type TreeTier, getTreeTier, getSpeciesHue } from "@/utils/treeCardTypes";
@@ -122,28 +125,32 @@ export function getOrCreateIcon(
   const hue = hiveHue !== undefined ? hiveHue : getSpeciesHue(species);
   const hasBirdsong = (birdsongCount ?? 0) > 0;
   const hearts = heartPoolCount ?? 0;
+  const heartTier = hearts > 10 ? "hi" : hearts > 0 ? "lo" : "0";
   const cacheKey = `${tier}-${hue}-${hasBirdsong ? birdsongCount : 0}-${
     hiveHue !== undefined ? "h" : "s"
-  }-hp${hearts > 0 ? (hearts > 10 ? "hi" : "lo") : "0"}`;
+  }-hp${heartTier}`;
   if (ICON_CACHE[cacheKey]) return ICON_CACHE[cacheKey];
 
   const size = MARKER_SIZES[tier];
   const uri = getSvgDataUri(tier, species, hiveHue);
+
+  // Birdsong badge — structured element
   const birdBadge = hasBirdsong
     ? `<span class="birdsong-badge" style="position:absolute;top:-4px;right:-6px;display:flex;align-items:center;gap:1px;background:hsla(200,60%,18%,0.92);border:1.5px solid hsla(200,50%,45%,0.6);border-radius:99px;padding:1px 4px;font-size:9px;font-family:sans-serif;color:hsl(200,60%,70%);line-height:1;white-space:nowrap;pointer-events:none;"><span style="font-size:10px;">🐦</span>${
         birdsongCount! > 1 ? birdsongCount : ""
       }</span>`
     : "";
 
-  // Heart pool glow — rendered as a CSS class + count badge
+  // Heart pool indicator — calm, integrated design
+  // Uses a small SVG heart + count instead of emoji
   const heartGlowClass = hearts > 0 ? (hearts > 10 ? " heart-pool-strong" : " heart-pool-soft") : "";
   const heartBadge = hearts > 0
-    ? `<span class="heart-pool-badge" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:hsla(120,45%,18%,0.92);border:1px solid hsla(120,45%,40%,0.5);border-radius:99px;padding:1px 5px;font-size:8px;font-family:sans-serif;color:hsl(120,55%,65%);line-height:1;white-space:nowrap;pointer-events:none;">💚${hearts > 1 ? hearts : ""}</span>`
+    ? `<span class="heart-pool-badge" style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:hsla(140,30%,14%,0.94);border:1px solid hsla(140,40%,35%,0.35);border-radius:99px;padding:1.5px 5px;font-size:8px;font-family:sans-serif;color:hsl(140,40%,58%);line-height:1;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px);"><svg width="8" height="8" viewBox="0 0 16 16" fill="hsl(140,45%,50%)" style="flex-shrink:0;opacity:0.85;"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 0 1 8 4.5 3.5 3.5 0 0 1 13.5 7C13.5 10.5 8 14 8 14z"/></svg>${hearts > 1 ? `<span>${hearts}</span>` : ""}</span>`
     : "";
 
   const icon = L.divIcon({
     className: "leaflet-tree-marker",
-    html: `<div style="position:relative;display:inline-block;"><div class="marker-wrap marker-${tier}${heartGlowClass} ${
+    html: `<div class="tree-marker-root" style="position:relative;display:inline-block;" data-hearts="${hearts}"><div class="marker-wrap marker-${tier}${heartGlowClass} ${
       tier === "ancient" ? "marker-ancient" : ""
     }" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;"></div>${birdBadge}${heartBadge}</div>`,
     iconSize: [size + 8, size + 12],

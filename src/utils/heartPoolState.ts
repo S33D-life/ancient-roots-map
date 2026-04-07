@@ -73,16 +73,17 @@ export function canCollect(status: HeartPoolStatus): boolean {
   return status === "available_here_now" || status === "available_within_12h";
 }
 
-/** Human-readable guidance for non-collectable states */
+/** Human-readable guidance — single source of truth for all surfaces */
 export function getHeartPoolGuidance(status: HeartPoolStatus, poolHearts: number): string {
+  const p = poolHearts !== 1 ? "s" : "";
   switch (status) {
     case "available_here_now":
-      return `${poolHearts} heart${poolHearts !== 1 ? "s" : ""} waiting for you`;
+      return `${poolHearts} heart${p} waiting here`;
     case "available_within_12h":
-      return `${poolHearts} heart${poolHearts !== 1 ? "s" : ""} · collect within your window`;
+      return `${poolHearts} heart${p} · collect within your window`;
     case "visible_not_collectable":
       return poolHearts > 0
-        ? `${poolHearts} heart${poolHearts !== 1 ? "s" : ""} · visit to collect`
+        ? `${poolHearts} heart${p} · visit to collect`
         : "Hearts accumulate as wanderers visit";
     case "no_hearts":
       return "No hearts available right now";

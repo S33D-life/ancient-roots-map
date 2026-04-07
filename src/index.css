@@ -631,35 +631,43 @@ All colors MUST be HSL.
     border-radius: 50%;
   }
 
-  /* Heart Pool visual system — tree-centric glow states */
-  @keyframes heartPoolPulse {
-    0%, 100% { box-shadow: 0 0 0 0 hsla(120, 50%, 45%, 0); }
-    50%      { box-shadow: 0 0 6px 2px hsla(120, 50%, 45%, 0.1); }
+  /* Heart Pool visual system — tree-centric root glow */
+  @keyframes heartPoolBreath {
+    0%, 100% { box-shadow: 0 0 0 0 hsla(140, 40%, 40%, 0); }
+    50%      { box-shadow: 0 0 5px 2px hsla(140, 40%, 40%, 0.08); }
   }
-  @keyframes heartPoolPulseStrong {
-    0%, 100% { box-shadow: 0 0 0 0 hsla(120, 55%, 45%, 0); }
-    40%      { box-shadow: 0 0 10px 4px hsla(120, 55%, 45%, 0.15); }
-    60%      { box-shadow: 0 0 14px 6px hsla(120, 55%, 45%, 0.08); }
+  @keyframes heartPoolBreathStrong {
+    0%, 100% { box-shadow: 0 0 0 0 hsla(140, 45%, 42%, 0); }
+    50%      { box-shadow: 0 0 8px 3px hsla(140, 45%, 42%, 0.12); }
   }
   /* Soft glow — 1-10 hearts */
   .heart-pool-soft {
-    animation: heartPoolPulse 6s ease-in-out infinite;
+    animation: heartPoolBreath 7s ease-in-out infinite;
     border-radius: 50%;
   }
   /* Stronger glow — 10+ hearts */
   .heart-pool-strong {
-    animation: heartPoolPulseStrong 4s ease-in-out infinite;
+    animation: heartPoolBreathStrong 5s ease-in-out infinite;
     border-radius: 50%;
   }
   /* Legacy compat */
   .heart-available {
-    animation: heartPoolPulse 6s ease-in-out infinite;
+    animation: heartPoolBreath 7s ease-in-out infinite;
     border-radius: 50%;
   }
+  /* Heart pool badge subtle entrance */
+  .heart-pool-badge {
+    animation: heartBadgeFadeIn 0.6s ease-out;
+  }
+  @keyframes heartBadgeFadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(3px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  /* Coexist with whisper glow */
   .heart-available.whisper-glow,
   .heart-pool-soft.whisper-glow,
   .heart-pool-strong.whisper-glow {
-    animation: whisperBreath 12s ease-in-out infinite, heartPoolPulse 6s ease-in-out infinite;
+    animation: whisperBreath 12s ease-in-out infinite, heartPoolBreath 7s ease-in-out infinite;
   }
 
   body.tree-zone-atlas-content .pulse-heart { animation-duration: 4.2s; }
