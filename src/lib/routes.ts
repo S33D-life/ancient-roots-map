@@ -52,6 +52,8 @@ export const ROUTES = {
   WANDERER: (id: string) => `/wanderer/${id}` as const,
   /** Authentication */
   AUTH: "/auth",
+  /** Password reset */
+  RESET_PASSWORD: "/reset-password",
   /** Add tree */
   ADD_TREE: "/add-tree",
   /** Bug garden */

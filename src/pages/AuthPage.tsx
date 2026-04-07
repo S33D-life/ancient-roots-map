@@ -21,16 +21,33 @@ const passwordSchema = z.string().min(6, "Password must be at least 6 characters
 
 type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password" | "reset-success";
 
-// Detect recovery from URL hash before first render to prevent race with SIGNED_IN event
+// Detect recovery from URL hash OR query params before first render
+// This must run synchronously before any auth listener fires
 const detectRecoveryFromHash = (): AuthView => {
   const hash = window.location.hash;
-  if (hash.includes("type=recovery")) return "reset-password";
+  const search = window.location.search;
+  if (hash.includes("type=recovery") || search.includes("type=recovery")) return "reset-password";
   return "login";
 };
 
+// Persistent flag: once we detect recovery, keep it until the flow completes.
+// This survives the Supabase SDK consuming the hash fragment.
+let _recoveryDetected = detectRecoveryFromHash() === "reset-password";
+if (_recoveryDetected) {
+  sessionStorage.setItem("s33d_recovery_active", "1");
+} else if (sessionStorage.getItem("s33d_recovery_active") === "1") {
+  _recoveryDetected = true;
+}
+
 const AuthPage = () => {
   useDocumentTitle("Sign In");
-  const [view, setView] = useState<AuthView>(detectRecoveryFromHash);
+  // Also detect if we landed on /reset-password directly
+  const isResetRoute = window.location.pathname === "/reset-password";
+  if (isResetRoute && !_recoveryDetected) {
+    _recoveryDetected = true;
+    sessionStorage.setItem("s33d_recovery_active", "1");
+  }
+  const [view, setView] = useState<AuthView>(_recoveryDetected ? "reset-password" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -121,21 +138,31 @@ const AuthPage = () => {
   const viewRef = useRef(view);
   useEffect(() => { viewRef.current = view; }, [view]);
 
+  // Helper: is the current flow a password recovery flow?
+  const isRecoveryFlow = () =>
+    viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
+    sessionStorage.getItem("s33d_recovery_active") === "1";
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Handle password recovery redirect — show reset form instead of navigating away
       if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("s33d_recovery_active", "1");
         setView("reset-password");
         return;
       }
 
       // Handle session expiry gracefully
       if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        sessionStorage.removeItem("s33d_recovery_active");
         setView("login");
         return;
       }
 
-      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
+      // Block all navigation when in recovery flow — user must complete password reset first
+      if (isRecoveryFlow()) return;
+
+      if (session) {
         // Record referral on first sign-in if invite code was stored
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
@@ -178,9 +205,7 @@ const AuthPage = () => {
             delete pendingTree._photoBase64;
             delete pendingTree._photoDate;
 
-            // Strip species_ai_* fields that don't exist in the DB schema yet —
-            // they are preserved in localStorage for future use but must not be
-            // sent to the insert call.
+            // Strip species_ai_* fields that don't exist in the DB schema yet
             delete pendingTree.species_ai_predictions;
             delete pendingTree.species_ai_selected;
             delete pendingTree.species_ai_provider;
@@ -249,7 +274,8 @@ const AuthPage = () => {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       // Don't redirect if user arrived via recovery link — they need to reset password first
-      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
+      if (isRecoveryFlow()) return;
+      if (session) {
         navigate(resolvePostAuthPath(), { replace: true });
       }
     });
@@ -338,7 +364,7 @@ const AuthPage = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
       setView("reset-sent");
@@ -410,6 +436,8 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+      // Clear recovery flag — flow is complete
+      sessionStorage.removeItem("s33d_recovery_active");
       setView("reset-success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not update password";
@@ -474,7 +502,7 @@ const AuthPage = () => {
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating...</> : "Update Password"}
               </Button>
             </form>
-            <button onClick={() => setView("forgot")} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
+            <button onClick={() => { sessionStorage.removeItem("s33d_recovery_active"); setView("forgot"); }} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
               Link expired? Request a new one
             </button>
           </div>
