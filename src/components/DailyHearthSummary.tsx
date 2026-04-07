@@ -23,20 +23,19 @@ export default function DailyHearthSummary({ userId }: DailyHearthSummaryProps) 
     const isoStart = todayStart.toISOString();
 
     const fetchSummary = async () => {
-      const [heartsRes, whispersRes] = await Promise.all([
-        supabase
-          .from("heart_transactions")
-          .select("amount")
-          .eq("user_id", userId)
-          .gte("created_at", isoStart),
-        supabase
-          .from("tree_whisper_collections")
-          .select("id")
-          .eq("collected_by_user_id", userId)
-          .gte("collected_at", isoStart),
-      ]);
+      const heartsRes = await supabase
+        .from("heart_transactions")
+        .select("amount")
+        .eq("user_id", userId)
+        .gte("created_at", isoStart);
 
-      const hearts = (heartsRes.data || []).reduce((s, h) => s + (h.amount || 0), 0);
+      const whispersRes = await supabase
+        .from("tree_whisper_collections")
+        .select("id")
+        .eq("collected_by_user_id", userId)
+        .gte("collected_at", isoStart);
+
+      const hearts = (heartsRes.data || []).reduce((s: number, h: any) => s + (h.amount || 0), 0);
       const whispers = whispersRes.data?.length || 0;
 
       setSummary({ heartsToday: hearts, whispersToday: whispers });
