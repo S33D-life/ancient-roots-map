@@ -313,7 +313,10 @@ const AtlasFilter = ({
   return (
     <>
       {/* ══ Top bar: Mode Capsule + Count + Fullscreen ══ */}
-      <div className="absolute top-3 left-3 right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in">
+      <div
+        className="absolute left-3 right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in"
+        style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 0.5rem)" }}
+      >
         <div className="flex items-center gap-2">
           {/* Mode Capsule */}
           <div
