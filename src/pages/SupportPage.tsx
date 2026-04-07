@@ -249,15 +249,18 @@ const SupportPage = () => {
                               Your subscription feeds your Heartwood Vault and supports the commons ecosystem.
                             </p>
                           )}
-                          {tier.stripeLink ? (
-                            <a href={tier.stripeLink} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                              <Heart className="w-3.5 h-3.5" /> Subscribe <ExternalLink className="w-3 h-3 opacity-60" />
-                            </a>
-                          ) : (
-                            <span className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-muted text-muted-foreground text-sm font-medium cursor-default">
-                              <Heart className="w-3.5 h-3.5" /> Coming Soon
-                            </span>
-                          )}
+                          <button
+                            onClick={() => handleCheckout(tier.amountMinor, "recurring", tier.id)}
+                            disabled={checkoutLoading === tier.id}
+                            className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
+                          >
+                            {checkoutLoading === tier.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Heart className="w-3.5 h-3.5" />
+                            )}
+                            {checkoutLoading === tier.id ? "Opening…" : "Support"}
+                          </button>
                         </CardContent>
                       </Card>
                     );
