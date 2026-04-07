@@ -224,7 +224,7 @@ export default function TreeArrivalPanel({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-serif" style={{ color: "hsl(260 40% 65%)" }}>
-                    A whisper waits in this tree…
+                    {isNearby || isCheckedIn ? "Something waits for you here…" : "A whisper lingers…"}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
                     {isNearby || isCheckedIn ? "Tap to reveal" : "Visit this tree to receive"}

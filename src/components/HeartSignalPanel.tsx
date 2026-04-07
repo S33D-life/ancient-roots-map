@@ -254,6 +254,15 @@ export default function HeartSignalPanel({
                             <p className="text-[9px] text-muted-foreground/40 mt-0.5 font-mono">{timeAgo(s.created_at)}</p>
                           </>
                         )}
+                        {/* Navigate to tree CTA */}
+                        {s.deep_link && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onClose(); setTimeout(() => navigate(s.deep_link!), 150); }}
+                            className="mt-1 text-[9px] font-serif text-primary/50 hover:text-primary transition-colors"
+                          >
+                            View tree →
+                          </button>
+                        )}
                       </div>
 
                       <button
