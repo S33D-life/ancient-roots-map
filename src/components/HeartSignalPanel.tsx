@@ -2,6 +2,10 @@
  * HeartSignalPanel — the unified signal center for the Orb.
  * Shows filtered heart signals with poetic language, deep links, and soft animations.
  * Now includes whisper waiting cards with delivery condition guidance.
+ *
+ * IMPORTANT: Whisper signals use "acknowledged" semantics — clicking navigates
+ * but does NOT mark the whisper as "read". Only actual tree-level collection
+ * marks a whisper as read. This preserves the ritual of arrival.
  */
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +30,7 @@ interface HeartSignalPanelProps {
   onDismiss: (id: string) => void;
 }
 
-/** Resolve sender display name from profiles */
+/** Resolve sender display names from profiles */
 function useSenderNames(signals: HeartSignal[]) {
   const [names, setNames] = useState<Record<string, string>>({});
 
@@ -34,19 +38,53 @@ function useSenderNames(signals: HeartSignal[]) {
     const senderIds = signals
       .filter(s => s.signal_type === "whisper" && (s.metadata as any)?.sender_user_id)
       .map(s => (s.metadata as any).sender_user_id as string);
-    
+
     const unique = [...new Set(senderIds)].filter(id => !names[id]);
     if (unique.length === 0) return;
 
     supabase
       .from("profiles")
-      .select("id, display_name, grove_name")
+      .select("id, full_name")
       .in("id", unique)
       .then(({ data }) => {
         if (!data) return;
         const map: Record<string, string> = { ...names };
         data.forEach((p: any) => {
-          map[p.id] = p.display_name || p.grove_name || "A wanderer";
+          map[p.id] = p.full_name || "A wanderer";
+        });
+        setNames(map);
+      });
+  }, [signals]);
+
+  return names;
+}
+
+/** Resolve tree names for specific-tree whispers */
+function useTreeNames(signals: HeartSignal[]) {
+  const [names, setNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const treeIds = signals
+      .filter(s =>
+        s.signal_type === "whisper" &&
+        (s.metadata as any)?.delivery_scope === "SPECIFIC_TREE" &&
+        s.related_tree_id
+      )
+      .map(s => s.related_tree_id!)
+      .filter(id => !names[id]);
+
+    const unique = [...new Set(treeIds)];
+    if (unique.length === 0) return;
+
+    supabase
+      .from("trees")
+      .select("id, name")
+      .in("id", unique)
+      .then(({ data }) => {
+        if (!data) return;
+        const map: Record<string, string> = { ...names };
+        data.forEach((t: any) => {
+          if (t.name) map[t.id] = t.name;
         });
         setNames(map);
       });
@@ -68,9 +106,14 @@ export default function HeartSignalPanel({
 }: HeartSignalPanelProps) {
   const navigate = useNavigate();
   const senderNames = useSenderNames(signals);
+  const treeNames = useTreeNames(signals);
 
   const handleClick = (s: HeartSignal) => {
-    onMarkRead(s.id);
+    // For whisper signals: do NOT mark as read — whispers are only
+    // "read" when collected at a tree. We just navigate.
+    if (s.signal_type !== "whisper") {
+      onMarkRead(s.id);
+    }
     if (s.deep_link) {
       onClose();
       setTimeout(() => navigate(s.deep_link!), 150);
@@ -197,7 +240,7 @@ export default function HeartSignalPanel({
                       <div className="flex-1 min-w-0 space-y-0.5">
                         {/* Whisper-specific enriched card */}
                         {s.signal_type === "whisper" ? (
-                          <WhisperSignalCard signal={s} senderNames={senderNames} timeAgo={timeAgo} />
+                          <WhisperSignalCard signal={s} senderNames={senderNames} treeNames={treeNames} timeAgo={timeAgo} />
                         ) : (
                           <>
                             <p className={`text-sm font-serif leading-snug truncate ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
@@ -240,9 +283,10 @@ export default function HeartSignalPanel({
 }
 
 /* ── Whisper-specific signal card ── */
-function WhisperSignalCard({ signal, senderNames, timeAgo }: {
+function WhisperSignalCard({ signal, senderNames, treeNames, timeAgo }: {
   signal: HeartSignal;
   senderNames: Record<string, string>;
+  treeNames: Record<string, string>;
   timeAgo: (iso: string) => string;
 }) {
   const meta = signal.metadata as any;
@@ -251,16 +295,27 @@ function WhisperSignalCard({ signal, senderNames, timeAgo }: {
   const deliveryScope = meta?.delivery_scope;
   const speciesKey = meta?.delivery_species_key;
 
-  // Delivery condition label
-  let deliveryLabel = signal.body || "Waiting to be received";
-  if (deliveryScope === "SPECIFIC_TREE" && signal.related_tree_id) {
-    deliveryLabel = signal.body || "Waiting at a specific tree";
-  }
+  // Resolve real tree name for specific-tree whispers
+  const treeName = signal.related_tree_id ? treeNames[signal.related_tree_id] : null;
 
   // Format species key nicely
   const speciesLabel = speciesKey
     ? speciesKey.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
     : null;
+
+  // Guidance text based on delivery scope
+  let guidanceText: string;
+  if (deliveryScope === "SPECIFIC_TREE") {
+    guidanceText = treeName
+      ? `Visit ${treeName} to receive it`
+      : "Visit this tree to receive it";
+  } else if (deliveryScope === "SPECIES_MATCH") {
+    guidanceText = speciesLabel
+      ? `Receive at any ${speciesLabel} tree`
+      : "Receive at a matching species";
+  } else {
+    guidanceText = "Receive at the next tree you visit";
+  }
 
   return (
     <div className="space-y-1">
@@ -283,7 +338,7 @@ function WhisperSignalCard({ signal, senderNames, timeAgo }: {
               border: "1px solid hsl(210 40% 55% / 0.12)",
             }}
           >
-            🌳 At a specific tree
+            🌳 {treeName || "A specific tree"}
           </span>
         )}
         {deliveryScope === "SPECIES_MATCH" && speciesLabel && (
@@ -314,7 +369,7 @@ function WhisperSignalCard({ signal, senderNames, timeAgo }: {
 
       {/* Delivery guidance text */}
       <p className="text-[11px] text-muted-foreground/60 leading-relaxed font-serif italic">
-        {deliveryLabel}
+        {guidanceText}
       </p>
 
       <p className="text-[9px] text-muted-foreground/40 font-mono">{timeAgo(signal.created_at)}</p>
