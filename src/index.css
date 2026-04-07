@@ -1007,15 +1007,21 @@ All colors MUST be HSL.
   box-shadow: 0 4px 20px hsl(42 50% 45% / 0.15), inset 0 1px 0 hsl(40 40% 98% / 0.6) !important;
 }
 
-/* Light-mode quick link pills */
-.light .tetol-quick-link {
-  background: hsl(38 28% 95% / 0.7);
-  border-color: hsl(33 22% 82%) !important;
-  backdrop-filter: blur(4px);
+/* Tetol shortcut breathing animation */
+@keyframes tetol-shortcut-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
-.light .tetol-quick-link:hover {
-  background: hsl(38 30% 92% / 0.85);
-  border-color: hsl(35 40% 65%) !important;
+.tetol-shortcut {
+  animation: tetol-shortcut-breathe 4s ease-in-out infinite;
+}
+.light .tetol-shortcut {
+  background: hsl(38 28% 95% / 0.6) !important;
+  border-color: hsl(33 22% 82% / 0.5) !important;
+}
+.light .tetol-shortcut:hover {
+  background: hsl(38 30% 92% / 0.85) !important;
+  border-color: hsl(35 40% 65% / 0.6) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
