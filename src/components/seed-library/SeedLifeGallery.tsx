@@ -386,6 +386,23 @@ export default function SeedLifeGallery() {
         </div>
       </div>
 
+      {show3D && (
+        <div className="rounded-[1.75rem] border border-border/60 bg-card/40 p-4 md:p-5 backdrop-blur-sm">
+          <Suspense
+            fallback={
+              <div className="h-[24rem] flex items-center justify-center">
+                <div className="text-center space-y-2 animate-pulse">
+                  <div className="w-8 h-8 mx-auto rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                  <p className="text-xs text-muted-foreground font-serif">Loading 3D viewer…</p>
+                </div>
+              </div>
+            }
+          >
+            <SeedModelViewer onFallbackToImages={() => setShow3D(false)} />
+          </Suspense>
+        </div>
+      )}
+
       <div className="rounded-[1.5rem] border border-border/60 bg-card/35 p-4 backdrop-blur-sm space-y-3">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(150px,1fr))]">
           <div className="relative">
