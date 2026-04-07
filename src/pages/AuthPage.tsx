@@ -430,6 +430,8 @@ const AuthPage = () => {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
+      // Clear recovery flag — flow is complete
+      sessionStorage.removeItem("s33d_recovery_active");
       setView("reset-success");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not update password";
