@@ -97,6 +97,7 @@ export function useTreeMarkerLayer({
             return h ? hslStringToHue(h.accentHsl) : undefined;
           })()
         : undefined;
+      const hCount = refs.heartPoolCounts[tree.id] || 0;
       const icon = getOrCreateIcon(tier, tree.species, bCount, hiveHue, hCount);
       const wCount = refs.whisperCounts[tree.id] || 0;
 
