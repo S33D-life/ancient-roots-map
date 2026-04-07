@@ -17,6 +17,7 @@ import type { HeartSignal, HeartSignalFilter } from "@/lib/heart-signal-types";
 import { SIGNAL_FILTER_OPTIONS, SIGNAL_TYPE_EMOJI, SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { Z } from "@/lib/z-index";
 import { supabase } from "@/integrations/supabase/client";
+import { navigateToSignalTree } from "@/utils/signalNavigation";
 
 interface HeartSignalPanelProps {
   open: boolean;

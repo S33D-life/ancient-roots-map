@@ -400,7 +400,41 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       }
     };
     window.addEventListener("s33d-companion-cmd", handler);
-    return () => window.removeEventListener("s33d-companion-cmd", handler);
+
+    // Signal navigation — fly to tree + open popup when triggered from signal panel
+    const signalHandler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail?.treeId) return;
+      const t = trees.find((tr: any) => tr.id === detail.treeId);
+      if (!t) return;
+
+      map.flyTo([t.latitude, t.longitude], 17, { duration: 1.4, easeLinearity: 0.25 });
+
+      // After fly completes, open popup + brief highlight
+      setTimeout(() => {
+        if (!clusterRef.current) return;
+        clusterRef.current.eachLayer((layer: any) => {
+          const ll = layer.getLatLng?.();
+          if (ll && Math.abs(ll.lat - t.latitude) < 0.0001 && Math.abs(ll.lng - t.longitude) < 0.0001) {
+            clusterRef.current!.zoomToShowLayer(layer, () => {
+              layer.openPopup();
+              // Brief golden pulse on the marker
+              const el = (layer as any)._icon;
+              if (el) {
+                el.classList.add("signal-arrival-pulse");
+                setTimeout(() => el.classList.remove("signal-arrival-pulse"), 2500);
+              }
+            });
+          }
+        });
+      }, 1500);
+    };
+    window.addEventListener("s33d-signal-fly-to", signalHandler);
+
+    return () => {
+      window.removeEventListener("s33d-companion-cmd", handler);
+      window.removeEventListener("s33d-signal-fly-to", signalHandler);
+    };
   }, [trees]);
 
   // Listen for BottomNav FAB tap to open the chooser
