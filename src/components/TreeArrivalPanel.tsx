@@ -88,6 +88,7 @@ export default function TreeArrivalPanel({
 
   const handleCollectWhisper = async () => {
     if (!currentWhisper || collectingWhisper) return;
+    hapticTap();
     setCollectingWhisper(true);
     let error;
     if (currentWhisper.recipient_scope === "PRIVATE") {
