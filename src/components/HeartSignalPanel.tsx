@@ -1,15 +1,18 @@
 /**
  * HeartSignalPanel — the unified signal center for the Orb.
  * Shows filtered heart signals with poetic language, deep links, and soft animations.
+ * Now includes whisper waiting cards with delivery condition guidance.
  */
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCheck, Filter } from "lucide-react";
+import { X, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import type { HeartSignal, HeartSignalFilter } from "@/lib/heart-signal-types";
 import { SIGNAL_FILTER_OPTIONS, SIGNAL_TYPE_EMOJI, SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { Z } from "@/lib/z-index";
+import { supabase } from "@/integrations/supabase/client";
 
 interface HeartSignalPanelProps {
   open: boolean;
@@ -21,6 +24,35 @@ interface HeartSignalPanelProps {
   onMarkRead: (id: string) => void;
   onMarkAllRead: () => void;
   onDismiss: (id: string) => void;
+}
+
+/** Resolve sender display name from profiles */
+function useSenderNames(signals: HeartSignal[]) {
+  const [names, setNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const senderIds = signals
+      .filter(s => s.signal_type === "whisper" && (s.metadata as any)?.sender_user_id)
+      .map(s => (s.metadata as any).sender_user_id as string);
+    
+    const unique = [...new Set(senderIds)].filter(id => !names[id]);
+    if (unique.length === 0) return;
+
+    supabase
+      .from("profiles")
+      .select("id, display_name, grove_name")
+      .in("id", unique)
+      .then(({ data }) => {
+        if (!data) return;
+        const map: Record<string, string> = { ...names };
+        data.forEach((p: any) => {
+          map[p.id] = p.display_name || p.grove_name || "A wanderer";
+        });
+        setNames(map);
+      });
+  }, [signals]);
+
+  return names;
 }
 
 export default function HeartSignalPanel({
@@ -35,6 +67,7 @@ export default function HeartSignalPanel({
   onDismiss,
 }: HeartSignalPanelProps) {
   const navigate = useNavigate();
+  const senderNames = useSenderNames(signals);
 
   const handleClick = (s: HeartSignal) => {
     onMarkRead(s.id);
@@ -161,14 +194,21 @@ export default function HeartSignalPanel({
                         )}
                       </div>
 
-                       <div className="flex-1 min-w-0 space-y-0.5">
-                        <p className={`text-sm font-serif leading-snug truncate ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                          {s.title}
-                        </p>
-                        {s.body && (
-                          <p className="text-[11px] text-muted-foreground/70 line-clamp-2 leading-relaxed">{s.body}</p>
+                      <div className="flex-1 min-w-0 space-y-0.5">
+                        {/* Whisper-specific enriched card */}
+                        {s.signal_type === "whisper" ? (
+                          <WhisperSignalCard signal={s} senderNames={senderNames} timeAgo={timeAgo} />
+                        ) : (
+                          <>
+                            <p className={`text-sm font-serif leading-snug truncate ${!s.is_read ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+                              {s.title}
+                            </p>
+                            {s.body && (
+                              <p className="text-[11px] text-muted-foreground/70 line-clamp-2 leading-relaxed">{s.body}</p>
+                            )}
+                            <p className="text-[9px] text-muted-foreground/40 mt-0.5 font-mono">{timeAgo(s.created_at)}</p>
+                          </>
                         )}
-                        <p className="text-[9px] text-muted-foreground/40 mt-0.5 font-mono">{timeAgo(s.created_at)}</p>
                       </div>
 
                       <button
@@ -183,7 +223,7 @@ export default function HeartSignalPanel({
               )}
             </ScrollArea>
 
-            {/* Footer — link to full Heartwood */}
+            {/* Footer */}
             <div className="px-4 py-2 border-t border-border/15 text-center">
               <button
                 onClick={() => { onClose(); setTimeout(() => navigate("/library"), 150); }}
@@ -196,5 +236,88 @@ export default function HeartSignalPanel({
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+/* ── Whisper-specific signal card ── */
+function WhisperSignalCard({ signal, senderNames, timeAgo }: {
+  signal: HeartSignal;
+  senderNames: Record<string, string>;
+  timeAgo: (iso: string) => string;
+}) {
+  const meta = signal.metadata as any;
+  const senderId = meta?.sender_user_id;
+  const senderName = senderId ? senderNames[senderId] : null;
+  const deliveryScope = meta?.delivery_scope;
+  const speciesKey = meta?.delivery_species_key;
+
+  // Delivery condition label
+  let deliveryLabel = signal.body || "Waiting to be received";
+  if (deliveryScope === "SPECIFIC_TREE" && signal.related_tree_id) {
+    deliveryLabel = signal.body || "Waiting at a specific tree";
+  }
+
+  // Format species key nicely
+  const speciesLabel = speciesKey
+    ? speciesKey.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
+    : null;
+
+  return (
+    <div className="space-y-1">
+      {/* Sender line */}
+      <p className="text-sm font-serif leading-snug text-foreground font-medium">
+        {senderName
+          ? `Whisper from ${senderName}`
+          : "A whisper waits for you"
+        }
+      </p>
+
+      {/* Delivery condition — styled as a subtle guidance tag */}
+      <div className="flex items-center gap-1.5">
+        {deliveryScope === "SPECIFIC_TREE" && (
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full"
+            style={{
+              background: "hsl(210 50% 60% / 0.08)",
+              color: "hsl(210 45% 60%)",
+              border: "1px solid hsl(210 40% 55% / 0.12)",
+            }}
+          >
+            🌳 At a specific tree
+          </span>
+        )}
+        {deliveryScope === "SPECIES_MATCH" && speciesLabel && (
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full"
+            style={{
+              background: "hsl(120 40% 50% / 0.08)",
+              color: "hsl(120 35% 55%)",
+              border: "1px solid hsl(120 35% 50% / 0.12)",
+            }}
+          >
+            🌿 Any {speciesLabel}
+          </span>
+        )}
+        {deliveryScope === "ANY_TREE" && (
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full"
+            style={{
+              background: "hsl(45 60% 55% / 0.08)",
+              color: "hsl(45 50% 55%)",
+              border: "1px solid hsl(45 50% 50% / 0.12)",
+            }}
+          >
+            🌲 Any tree
+          </span>
+        )}
+      </div>
+
+      {/* Delivery guidance text */}
+      <p className="text-[11px] text-muted-foreground/60 leading-relaxed font-serif italic">
+        {deliveryLabel}
+      </p>
+
+      <p className="text-[9px] text-muted-foreground/40 font-mono">{timeAgo(signal.created_at)}</p>
+    </div>
   );
 }
