@@ -51,6 +51,7 @@ import BloomingClockParticles from "./BloomingClockParticles";
 import BloomingClockSigils from "./BloomingClockSigils";
 import BloomingClockHivePanel from "./BloomingClockHivePanel";
 import AtlasFilter, { type VisualLayerSection, type PerspectivePreset } from "./AtlasFilter";
+import MapControlPanel from "./MapControlPanel";
 
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
@@ -2292,7 +2293,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* GroveView Living Earth Mode */}
+      {/* GroveView Living Earth Mode — atmosphere only (signals in MapControlPanel) */}
       <GroveViewOverlay
         active={groveViewActive}
         onToggle={() => toggle("groveView")}
@@ -2301,6 +2302,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onEventPulses={setCurrentEventPulses}
         onTreeClick={(treeId) => navigate(`/tree/${treeId}`)}
       />
+
+      {/* Unified Map Control Panel — Legend + Signals + Layers entry */}
+      {!clearView && (
+        <MapControlPanel
+          groveActive={groveViewActive}
+          userLat={userLatLng?.[0]}
+          treeLookup={treeLookup}
+          onEventPulses={setCurrentEventPulses}
+          onTreeClick={(treeId) => navigate(`/tree/${treeId}`)}
+          onOpenLayers={() => setAtlasFilterOpen(true)}
+          layersPanelOpen={atlasFilterOpen}
+          activeCount={(() => {
+            const al = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
+            return al + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
+          })()}
+        />
+      )}
 
       {/* Blooming Clock — Global Seasonal Atlas */}
       <BloomingClockLayer
@@ -2440,52 +2458,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
               </button>
             </div>
 
-            {/* Left column — stacked above the Eye toggle, hidden in clear view */}
+            {/* Left column — Atlas nav only, hidden in clear view (Layers button now in MapControlPanel) */}
             {!clearView && (
               <div className="absolute left-3 z-[1000] flex flex-col-reverse gap-2" style={{ bottom: "calc(3.5rem + max(env(safe-area-inset-bottom, 0px), 8px) + 12px + 3rem)" }}>
-                <button
-                  onClick={() => setAtlasFilterOpen(!atlasFilterOpen)}
-                  className={`relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 ${atlasFilterOpen ? 'glow-button--emerald' : ''} glow-button`}
-                  style={{
-                    ...btnBase,
-                    color: atlasFilterOpen ? `hsl(${modeAccent})` : "hsl(42, 60%, 60%)",
-                    background: atlasFilterOpen ? `hsla(${modeAccent.split(',')[0]}, 50%, 20%, 0.95)` : (btnBase.background as string),
-                  }}
-                  title="Filters & Layers"
-                  aria-label="Filters & Layers"
-                >
-                  <Layers className="w-[18px] h-[18px]" />
-                  {(() => {
-                    const activeLayers = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
-                    const totalActive = activeLayers + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
-                    return totalActive > 0 ? (
-                      <span
-                        className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
-                        style={{
-                          background: `hsl(${modeAccent})`,
-                          color: "hsl(30, 20%, 10%)",
-                          boxShadow: `0 0 6px hsla(${modeAccent}, 0.4)`,
-                        }}
-                      >
-                        {totalActive}
-                      </span>
-                    ) : null;
-                  })()}
-                </button>
-                {/* Species Hives — map exploration */}
-                <button
-                  onClick={() => navigate("/hives")}
-                  className="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90 glow-button"
-                  style={{
-                    ...btnBase,
-                    color: "hsl(42, 60%, 60%)",
-                  }}
-                  title="Species Hives"
-                  aria-label="Species Hives"
-                >
-                  <Hexagon className="w-[18px] h-[18px]" />
-                </button>
-                {/* Atlas portal — visible when filter panel is closed */}
                 {!atlasFilterOpen && (
                   <AtlasNavButton btnBase={btnBase} />
                 )}
