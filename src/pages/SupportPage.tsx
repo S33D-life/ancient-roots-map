@@ -385,7 +385,7 @@ const SupportPage = () => {
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments. You'll receive hearts in gratitude.</p>
+                <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments via Stripe.</p>
               </motion.section>
             )}
 
