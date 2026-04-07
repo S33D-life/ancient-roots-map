@@ -13,7 +13,6 @@ interface TreeHeartPoolProps {
 
 const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
   const [pool, setPool] = useState<{ total_hearts: number; windfall_count: number; last_windfall_at: string | null } | null>(null);
-  const [claimedAmount, setClaimedAmount] = useState<number | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
   const prevWindfallCount = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
