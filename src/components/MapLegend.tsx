@@ -58,10 +58,11 @@ export default function MapLegend() {
               backdropFilter: "blur(12px)",
             }}
           >
-            <LegendRow emoji="💚" label="Hearts available" color="140 40% 55%" />
-            <LegendRow emoji="🌬️" label="Whisper present" color="260 40% 60%" />
-            <LegendRow emoji="🐦" label="Birdsong recorded" color="200 60% 55%" />
             <LegendRow emoji="✨" label="Ancient tree" color="42 80% 55%" />
+            <LegendRow emoji="💚" label="Hearts available" color="140 40% 55%" />
+            <LegendRow emoji="🌬️" label="Whisper waiting" color="260 40% 60%" />
+            <LegendRow emoji="🌱" label="Seed planted" color="120 50% 50%" />
+            <LegendRow emoji="🐦" label="Birdsong recorded" color="200 60% 55%" />
           </motion.div>
         )}
       </AnimatePresence>

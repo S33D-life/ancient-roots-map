@@ -90,14 +90,17 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
         <Heart className="w-6 h-6 text-primary fill-primary/30" />
         <div className="text-center">
           <p className="text-2xl font-serif text-primary">{total}</p>
-          <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50">S33D Hearts — Your Total</p>
+          <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50">S33D Hearts</p>
         </div>
       </div>
+
+      {/* Species Resonance — identity before history */}
+      {affinities.length > 0 && <SpeciesResonanceCard affinities={affinities} />}
 
       {/* Recent activity */}
       {recent.length > 0 ? (
         <div className="space-y-1">
-          <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50 mb-2">Recent Heart Activity</p>
+          <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50 mb-2">Recent Activity</p>
           {recent.map((h) => {
             const cfg = TYPE_CONFIG[h.heart_type] || TYPE_CONFIG.wanderer;
             const Icon = cfg.icon;
@@ -126,12 +129,9 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
         <div className="text-center py-6">
           <Heart className="w-8 h-8 mx-auto mb-2 text-muted-foreground/20" />
           <p className="text-xs font-serif text-muted-foreground/50">No heart activity yet</p>
-          <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Visit a tree, add an offering, or plant a seed to earn your first hearts</p>
+          <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Visit a tree to earn your first hearts</p>
         </div>
       )}
-
-      {/* Species Resonance */}
-      {affinities.length > 0 && <SpeciesResonanceCard affinities={affinities} />}
 
       {/* Gift Seed Inbox */}
       <div className="pt-2">

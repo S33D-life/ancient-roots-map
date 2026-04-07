@@ -246,10 +246,10 @@ export default function TreeArrivalPanel({
                   exit={{ opacity: 0, y: -6 }}
                   className="py-3 px-1 space-y-3"
                 >
-                  <div className="flex items-center gap-2">
-                    <Wind className="w-3 h-3" style={{ color: "hsl(260 40% 60%)" }} />
-                    <span className="text-[10px] font-serif text-muted-foreground/60 tracking-wider uppercase">
-                      Whisper from the Canopy
+                    <div className="flex items-center gap-2">
+                     <Wind className="w-3 h-3" style={{ color: "hsl(260 40% 60%)" }} />
+                     <span className="text-[10px] font-serif text-muted-foreground/60 tracking-wider uppercase">
+                       Whisper
                     </span>
                     <span
                       className="ml-auto text-[9px] font-serif px-2 py-0.5 rounded-full"
