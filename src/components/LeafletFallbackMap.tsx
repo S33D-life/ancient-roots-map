@@ -510,22 +510,6 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
     showDreamOfferings,
   });
 
-  // Signal Field — canvas overlay showing heart + whisper density
-  useSignalFieldLayer({
-    map: mapRef.current,
-    trees: filteredTrees,
-    heartPoolCounts: heartPoolCountsRef.current,
-    whisperCounts: whisperCountsRef.current,
-    enabled: showSignalField,
-  });
-
-  // Memory Trail — soft polyline connecting recently visited trees
-  const { hasTrail: memoryTrailActive } = useMemoryTrailLayer({
-    map: mapRef.current,
-    userId: userId || null,
-    enabled: showMemoryTrail,
-  });
-
   const { fruitingHives, getStatusForFamily } = useHiveSeasonalStatus(bloomMonth);
   const { activeHiveFamily, setActiveHive } = useHiveSeasonFilter();
   const [fruitPreview, setFruitPreview] = useState<{
