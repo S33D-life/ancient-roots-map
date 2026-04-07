@@ -1,4 +1,6 @@
 import { useEffect, useRef, useCallback, useState, useMemo, memo } from "react";
+import { useSignalFieldLayer } from "@/hooks/use-signal-field-layer";
+import { useMemoryTrailLayer } from "@/hooks/use-memory-trail-layer";
 import { useMapOverlayLayers } from "@/hooks/use-map-overlay-layers";
 import { useTreeMarkerLayer } from "@/hooks/use-tree-marker-layer";
 import { useMapLayerState, type LayerKey } from "@/hooks/use-map-layer-state";
@@ -370,6 +372,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const clearView = layers.clearView;
   const showDreamTrees = layers.dreamTrees;
   const showDreamOfferings = layers.dreamOfferings;
+  const showSignalField = layers.signalField;
+  const showMemoryTrail = layers.memoryTrail;
 
   // Broadcast clearView state so external panels (MapTreePanel) can hide
   useEffect(() => {
@@ -891,6 +895,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "tribe-activity", label: "⊛ Tribe Activity", active: showTribeActivity, toggle: () => toggle("tribeActivity"), accent: "260, 55%, 70%" },
         { key: "dream-trees", label: "🌙 Dream Trees", active: showDreamTrees, toggle: () => toggle("dreamTrees"), extra: showDreamTrees ? (dreamTreeCount > 0 ? `${dreamTreeCount}` : "—") : undefined, accent: "280, 55%, 65%" },
         { key: "dream-offerings", label: "✨ Dream Offerings", active: showDreamOfferings, toggle: () => toggle("dreamOfferings"), extra: showDreamOfferings ? (dreamOfferingCount > 0 ? `${dreamOfferingCount}` : "—") : undefined, accent: "42, 80%, 65%" },
+        { key: "signal-field", label: "🌊 Signal Field", description: "Soft density overlay for hearts + whispers", active: showSignalField, toggle: () => toggle("signalField"), accent: "140, 40%, 55%" },
+        { key: "memory-trail", label: "🥾 My Trail", description: "Path between your recently visited trees", active: showMemoryTrail, toggle: () => toggle("memoryTrail"), extra: showMemoryTrail && memoryTrailActive ? "active" : undefined, accent: "42, 60%, 50%" },
       ],
     },
     {
@@ -950,6 +956,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const { counts: whisperCountsMap } = useWhisperCounts();
   const whisperCountsRef = useRef(whisperCountsMap);
   whisperCountsRef.current = whisperCountsMap;
+
+  // Signal Field — canvas overlay showing heart + whisper density
+  useSignalFieldLayer({
+    map: mapRef.current,
+    trees: filteredTrees,
+    heartPoolCounts: heartPoolCountsRef.current,
+    whisperCounts: whisperCountsRef.current,
+    enabled: showSignalField,
+  });
+
+  // Memory Trail — soft polyline connecting recently visited trees
+  const { hasTrail: memoryTrailActive } = useMemoryTrailLayer({
+    map: mapRef.current,
+    userId: userId || null,
+    enabled: showMemoryTrail,
+  });
 
   // atmosphereReady and renderDebug are now provided by useMapInit (declared above)
   const [seasonClass, setSeasonClass] = useState("");

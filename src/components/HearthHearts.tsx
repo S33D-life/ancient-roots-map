@@ -4,6 +4,8 @@ import { Heart, TreeDeciduous, Sprout, Sparkles, Gift } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import GiftSeedInbox from "@/components/GiftSeedInbox";
 import DailyHearthSummary from "@/components/DailyHearthSummary";
+import SpeciesResonanceCard from "@/components/SpeciesResonanceCard";
+import { useSpeciesResonance } from "@/hooks/use-species-resonance";
 
 interface HeartActivity {
   id: string;
@@ -30,6 +32,7 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
   const [total, setTotal] = useState(0);
   const [recent, setRecent] = useState<HeartActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const { affinities } = useSpeciesResonance(userId);
 
   useEffect(() => {
     const fetchHearts = async () => {
@@ -126,6 +129,9 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
           <p className="text-[10px] font-serif text-muted-foreground/30 mt-1">Visit a tree, add an offering, or plant a seed to earn your first hearts</p>
         </div>
       )}
+
+      {/* Species Resonance */}
+      {affinities.length > 0 && <SpeciesResonanceCard affinities={affinities} />}
 
       {/* Gift Seed Inbox */}
       <div className="pt-2">

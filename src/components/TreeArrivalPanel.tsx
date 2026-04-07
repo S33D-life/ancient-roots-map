@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { hapticSuccess, hapticTap } from "@/lib/haptics";
 import HeartCollectAnimation from "@/components/HeartCollectAnimation";
 import GraceCountdown from "@/components/GraceCountdown";
+import { useSpeciesResonance, getSpeciesHint } from "@/hooks/use-species-resonance";
 
 interface TreeArrivalPanelProps {
   treeId: string;
@@ -46,6 +47,8 @@ export default function TreeArrivalPanel({
   const [mounted, setMounted] = useState(false);
 
   const heartCollection = useHeartCollection(treeId, userId, isNearby || isCheckedIn);
+  const { affinities } = useSpeciesResonance(userId);
+  const speciesHint = treeSpecies ? getSpeciesHint(treeSpecies, affinities) : null;
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 300);
@@ -134,6 +137,9 @@ export default function TreeArrivalPanel({
             ? "This tree holds something for you"
             : "Waiting at this tree"}
         </p>
+        {speciesHint && (
+          <p className="text-[10px] font-serif text-primary/40 mt-0.5 italic">{speciesHint}</p>
+        )}
       </div>
 
       <div className="px-4 pb-4 pt-2 space-y-0">
