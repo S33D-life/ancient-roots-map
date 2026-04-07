@@ -372,6 +372,13 @@ export default function SeedLifeGallery() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant={show3D ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShow3D((v) => !v)}
+            >
+              <Box className="w-4 h-4 mr-1" /> {show3D ? "3D View" : "3D View"}
+            </Button>
             <Button onClick={() => setShowSubmit(true)}>
               <Plus className="w-4 h-4 mr-1" /> Add a seed
             </Button>
