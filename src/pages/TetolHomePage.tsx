@@ -7,8 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
-  Sprout, Heart, TreeDeciduous, Sparkles, Crown, Leaf,
-  Hexagon, Apple, CalendarDays, TreePine, Map, Smartphone,
+  Sprout, Heart, TreeDeciduous, Crown, Leaf,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
