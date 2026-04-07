@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2, Bot } from "lucide-react";
+import { Map, BookOpen, Leaf, Archive, Globe, TreePine, Heart, Wand2, Bot, Download } from "lucide-react";
 import { ROUTES } from "@/lib/routes";
 
 const links = [
@@ -12,6 +12,7 @@ const links = [
   { to: ROUTES.STAFF_ROOM, icon: Wand2, label: "Staff Room", sub: "Founding circle" },
   { to: ROUTES.AGENT_GARDEN, icon: Bot, label: "Agent Garden", sub: "AI contributors" },
   { to: ROUTES.SUPPORT, icon: Heart, label: "Support", sub: "Nurture S33D" },
+  { to: "/living-archive", icon: Download, label: "My Data", sub: "Sovereign export" },
 ];
 
 const HearthCrossLinks = () => (
