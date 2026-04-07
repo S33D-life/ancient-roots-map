@@ -141,17 +141,17 @@ export default function TreeArrivalPanel({
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
               style={{
-                background: "hsl(120 50% 40% / 0.12)",
+                background: "hsl(140 40% 40% / 0.12)",
               }}
             >
               {heartCollection.state === "collecting" ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
               ) : (
-                <Heart className="w-3.5 h-3.5" style={{ color: "hsl(120 45% 55%)" }} />
+                <Heart className="w-3.5 h-3.5" style={{ color: "hsl(140 40% 55%)" }} />
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-serif" style={{ color: "hsl(120 45% 55%)" }}>
+              <p className="text-sm font-serif" style={{ color: "hsl(140 40% 55%)" }}>
                 {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : "Hearts waiting here"}
               </p>
               <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">

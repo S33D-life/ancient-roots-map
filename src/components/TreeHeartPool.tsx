@@ -17,7 +17,6 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
   const [showCelebration, setShowCelebration] = useState(false);
   const prevWindfallCount = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const hasClaimedRef = useRef(false);
 
   const fetchPool = useCallback(async () => {
     const { data } = await supabase
