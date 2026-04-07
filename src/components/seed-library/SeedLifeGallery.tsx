@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Search, Plus, ImagePlus, Leaf, Sparkles, Upload, Sprout } from "lucide-react";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { Search, Plus, ImagePlus, Leaf, Sparkles, Upload, Sprout, Box } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -330,10 +330,13 @@ function SeedLifeSubmitDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   );
 }
 
+const SeedModelViewer = lazy(() => import("./seed-3d/SeedModelViewer"));
+
 export default function SeedLifeGallery() {
   const [filters, setFilters] = useState<SeedLifeFilters>({});
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
+  const [show3D, setShow3D] = useState(false);
 
   const { data: seeds = [], isLoading } = useSeedLifeEntries(filters);
   const { data: filterOptions } = useSeedLifeFilterOptions();
@@ -369,12 +372,36 @@ export default function SeedLifeGallery() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant={show3D ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShow3D((v) => !v)}
+            >
+              <Box className="w-4 h-4 mr-1" /> {show3D ? "3D View" : "3D View"}
+            </Button>
             <Button onClick={() => setShowSubmit(true)}>
               <Plus className="w-4 h-4 mr-1" /> Add a seed
             </Button>
           </div>
         </div>
       </div>
+
+      {show3D && (
+        <div className="rounded-[1.75rem] border border-border/60 bg-card/40 p-4 md:p-5 backdrop-blur-sm">
+          <Suspense
+            fallback={
+              <div className="h-[24rem] flex items-center justify-center">
+                <div className="text-center space-y-2 animate-pulse">
+                  <div className="w-8 h-8 mx-auto rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                  <p className="text-xs text-muted-foreground font-serif">Loading 3D viewer…</p>
+                </div>
+              </div>
+            }
+          >
+            <SeedModelViewer onFallbackToImages={() => setShow3D(false)} />
+          </Suspense>
+        </div>
+      )}
 
       <div className="rounded-[1.5rem] border border-border/60 bg-card/35 p-4 backdrop-blur-sm space-y-3">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(150px,1fr))]">
