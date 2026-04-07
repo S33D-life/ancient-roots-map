@@ -37,8 +37,9 @@ import {
   Bell,
   Zap,
   Lock,
+  Loader2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ROUTES } from "@/lib/routes";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { SUPPORT_CONFIG } from "@/lib/support-config";
@@ -62,6 +63,9 @@ import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
 import TeotagFace from "@/components/TeotagFace";
 import TeotagChatPanel from "@/components/TeotagChatPanel";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { createSupportCheckout } from "@/lib/supportService";
 
 /* ── What support nurtures ──────────────────────────────────── */
 const nurtures = [
