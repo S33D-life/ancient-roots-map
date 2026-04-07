@@ -21,6 +21,7 @@ export type HeartTransactionType =
   | "earn_windfall"
   | "earn_patron_grant"
   | "earn_root_growth"        // Hearts grown at a rooted tree
+  | "earn_support_gratitude"  // Hearts gifted in gratitude for garden support
   // Purchasing
   | "purchase_bundle"
   | "purchase_single"
@@ -144,4 +145,5 @@ export const ACTION_TO_TXN_TYPE: Record<string, HeartTransactionType> = {
   curation: "earn_curation",
   plant_hearts: "spend_plant_hearts",
   root_growth: "earn_root_growth",
+  support_gratitude: "earn_support_gratitude",
 };
