@@ -127,18 +127,25 @@ const SupportPage = () => {
     try { localStorage.setItem(TAB_STORAGE_KEY, activeTab); } catch {}
   }, [activeTab]);
 
-  // Handle Stripe success/cancel redirects
+  // Handle Stripe success/cancel redirects — show once only
   useEffect(() => {
     const result = searchParams.get("result");
+    if (!result) return;
+    // Clear params so refresh doesn't re-trigger
+    const url = new URL(window.location.href);
+    url.searchParams.delete("result");
+    url.searchParams.delete("session_id");
+    window.history.replaceState({}, "", url.pathname);
+
     if (result === "success") {
       toast.success("Thank you for helping this garden grow", {
         icon: "🌱",
-        description: "You've received hearts in gratitude",
+        description: "Your support nourishes the grove",
         duration: 6000,
       });
       window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: {} }));
     } else if (result === "cancelled") {
-      toast("Support cancelled — no worries", { icon: "🍃" });
+      toast("No worries — the grove is patient", { icon: "🍃" });
     }
   }, [searchParams]);
 
