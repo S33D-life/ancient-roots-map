@@ -454,6 +454,7 @@ export default function TreeArrivalPanel({
           userId={userId}
           treeName={treeName}
           isPlanting={rooting.isPlanting}
+          existingAmount={rooting.root?.amount}
         />
       )}
     </>
