@@ -476,8 +476,9 @@ const AtlasFilter = ({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="absolute top-0 right-0 bottom-0 z-[1002] w-[310px] max-w-[85vw] flex flex-col"
+              className="absolute right-0 bottom-0 z-[1002] w-[310px] max-w-[85vw] flex flex-col"
               style={{
+                top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px))",
                 background: "hsla(30, 18%, 8%, 0.97)",
                 borderLeft: "1px solid hsla(42, 40%, 30%, 0.3)",
                 boxShadow: "-4px 0 24px rgba(0,0,0,0.4)",
