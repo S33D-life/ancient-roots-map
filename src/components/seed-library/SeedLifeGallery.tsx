@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Search, Plus, ImagePlus, Leaf, Sparkles, Upload, Sprout } from "lucide-react";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { Search, Plus, ImagePlus, Leaf, Sparkles, Upload, Sprout, Box } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
