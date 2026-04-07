@@ -2,6 +2,9 @@
  * useWhisperSignals — bridges waiting whispers into the Heart Signal system.
  * Converts uncollected whispers into synthetic HeartSignal-shaped items
  * so they appear naturally in the unified notification panel and orb.
+ *
+ * Tree names and sender names are resolved in the panel itself via
+ * useTreeNames / useSenderNames hooks — this bridge focuses on structure.
  */
 import { useMemo } from "react";
 import { useWaitingWhispers, type TreeWhisper } from "@/hooks/use-whispers";
@@ -12,7 +15,6 @@ export interface WhisperSignalItem extends HeartSignal {
   /** Original whisper data for rich rendering */
   _whisper: TreeWhisper;
   _deliveryInfo: WhisperDeliveryInfo;
-  _senderName: string | null;
 }
 
 /**
@@ -46,6 +48,8 @@ export function useWhisperSignals(userId: string | null) {
           : w.delivery_scope === "ANY_TREE"
             ? "/map"
             : null,
+        // Whisper signals are never "read" via the notification panel.
+        // They stay unread until collected at a tree.
         is_read: false,
         dismissed: false,
         metadata: {
@@ -53,11 +57,11 @@ export function useWhisperSignals(userId: string | null) {
           sender_user_id: w.sender_user_id,
           delivery_scope: w.delivery_scope,
           delivery_species_key: w.delivery_species_key,
+          delivery_tree_id: w.delivery_tree_id,
         },
         created_at: w.created_at,
         _whisper: w,
         _deliveryInfo: deliveryInfo,
-        _senderName: null, // Will be enriched by the panel
       };
     });
   }, [whispers, userId]);
