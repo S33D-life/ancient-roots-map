@@ -3,7 +3,7 @@
  * Users navigate the ecosystem by clicking tree nodes.
  * Light mode: warm botanical canopy experience with layered leaves and sunlight.
  */
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMemo, useState, useCallback } from "react";
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import {
@@ -25,15 +25,6 @@ const treeItems = [
   { to: "/golden-dream", label: "yOur Golden Dream", subtitle: "The Crown", icon: Crown, zone: "crown" },
 ];
 
-const quickLinks = [
-  { to: "/library/music-room", label: "Tree Radio", icon: Smartphone },
-  { to: "/library/staff-room", label: "Staff Room", icon: TreePine },
-  { to: "/hives", label: "Species Hives", icon: Hexagon },
-  { to: "/value-tree", label: "Value Tree", icon: TreePine },
-  { to: "/support", label: "Support", icon: Heart },
-  { to: "/vault", label: "Vault", icon: Sparkles },
-  { to: "/roadmap", label: "Roadmap", icon: Map },
-];
 
 /* Dark mode node colors (unchanged) */
 const nodeColorsDark: Record<string, { bg: string; border: string; iconColor: string; glow: string }> = {
