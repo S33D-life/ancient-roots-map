@@ -25,7 +25,7 @@ export default function MapLoadingOverlay({ ready }: MapLoadingOverlayProps) {
     <div
       className="absolute inset-0 z-[500] flex flex-col items-center justify-center pointer-events-none"
       style={{
-        background: "linear-gradient(180deg, hsl(35 25% 92%) 0%, hsl(30 15% 88%) 100%)",
+        background: "hsl(var(--background))",
         opacity: ready ? 0 : 1,
         transition: "opacity 0.8s ease-out",
       }}
@@ -41,18 +41,17 @@ export default function MapLoadingOverlay({ ready }: MapLoadingOverlayProps) {
           className="animate-pulse"
           style={{ animationDuration: "2.4s" }}
         >
-          <circle cx="24" cy="24" r="18" fill="hsl(42 30% 78% / 0.4)" />
+          <circle cx="24" cy="24" r="18" fill="hsl(var(--muted) / 0.4)" />
           <path
             d="M24 8 C20 16, 14 18, 14 24 C14 30, 18 34, 24 38 C30 34, 34 30, 34 24 C34 18, 28 16, 24 8Z"
-            fill="hsl(120 25% 35% / 0.7)"
+            fill="hsl(var(--primary) / 0.5)"
           />
-          <rect x="23" y="34" width="2" height="6" rx="1" fill="hsl(30 30% 35% / 0.6)" />
+          <rect x="23" y="34" width="2" height="6" rx="1" fill="hsl(var(--muted-foreground) / 0.4)" />
         </svg>
       </div>
 
       <p
-        className="font-serif text-sm tracking-wide"
-        style={{ color: "hsl(30 15% 35%)" }}
+        className="font-serif text-sm tracking-wide text-muted-foreground"
       >
         Locating Ancient Friends…
       </p>
