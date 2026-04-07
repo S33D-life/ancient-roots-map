@@ -14,6 +14,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BetaGardenBanner from "@/components/BetaGardenBanner";
 import EnsoNudge from "@/components/EnsoNudge";
+import TetolQuickShortcuts from "@/components/TetolQuickShortcuts";
 import teotag from "@/assets/teotag-small.webp";
 import { useIsNewUser } from "@/hooks/use-is-new-user";
 
@@ -287,28 +288,8 @@ const TetolHomePage = () => {
             <TreeNode item={treeItems[0]} onClick={handleItemClick} nodeStyle="roots" active={activeNode === treeItems[0].to} colors={nodeColors} isLight={isLight} />
           </div>
 
-          {/* Quick links — hidden for new users to reduce noise */}
-          {!isNewUser && (
-          <div className="flex flex-wrap justify-center gap-2 mt-8 max-w-xs md:max-w-sm">
-            {quickLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-serif transition-all hover:border-primary/50 hover:bg-primary/10 ${isLight ? "tetol-quick-link" : ""}`}
-                  style={{
-                    borderColor: "hsl(var(--border) / 0.3)",
-                    color: "hsl(var(--muted-foreground))",
-                  }}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{link.label}</span>
-                </Link>
-              );
-          })}
-          </div>
-          )}
+          {/* Quick shortcuts — tools resting in the roots */}
+          {!isNewUser && <TetolQuickShortcuts isLight={isLight} />}
         </div>
       </main>
 
