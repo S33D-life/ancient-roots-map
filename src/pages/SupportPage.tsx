@@ -98,7 +98,7 @@ const fadeUp = {
 };
 
 const TAB_STORAGE_KEY = "s33d_support_tab";
-type SupportMode = "one-time" | "monthly" | "crypto";
+type SupportMode = "one-time" | "monthly" | "staff" | "crypto";
 
 /* ── Component ──────────────────────────────────────────────── */
 const SupportPage = () => {
