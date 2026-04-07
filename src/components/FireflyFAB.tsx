@@ -16,7 +16,7 @@
  * - e.currentTarget for pointer capture (no conflicts)
  * - BugReportDialog lazy-mounted only after first open
  */
-import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, lazy, Suspense } from "react";
 import { useIsNewUser } from "@/hooks/use-is-new-user";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +28,7 @@ import HeartSignalPanel from "@/components/HeartSignalPanel";
 import { useSeasonalLens } from "@/contexts/SeasonalLensContext";
 import { useAppUpdate } from "@/hooks/use-app-update";
 import { useHeartSignals } from "@/hooks/use-heart-signals";
+import { useWhisperSignals } from "@/hooks/use-whisper-signals";
 import { SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { supabase } from "@/integrations/supabase/client";
 import { useLongPress } from "@/hooks/use-long-press";
