@@ -13,6 +13,9 @@ import { checkWhispersAtTree, type TreeWhisper, collectPrivateWhisper, collectSh
 import { useHeartCollection } from "@/hooks/use-heart-collection";
 import { canCollect, getHeartPoolGuidance } from "@/utils/heartPoolState";
 import { toast } from "sonner";
+import { hapticSuccess, hapticTap } from "@/lib/haptics";
+import HeartCollectAnimation from "@/components/HeartCollectAnimation";
+import GraceCountdown from "@/components/GraceCountdown";
 
 interface TreeArrivalPanelProps {
   treeId: string;
@@ -67,8 +70,10 @@ export default function TreeArrivalPanel({
   const hasAnything = hasHearts || hasWhispers;
 
   const handleGatherHearts = useCallback(async () => {
+    hapticTap();
     const amount = await heartCollection.collect();
     if (amount && amount > 0) {
+      hapticSuccess();
       toast.success(`${amount} hearts gathered from this tree`, { icon: "💚" });
       window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
     } else if (amount === 0) {
@@ -83,6 +88,7 @@ export default function TreeArrivalPanel({
 
   const handleCollectWhisper = async () => {
     if (!currentWhisper || collectingWhisper) return;
+    hapticTap();
     setCollectingWhisper(true);
     let error;
     if (currentWhisper.recipient_scope === "PRIVATE") {
@@ -133,38 +139,48 @@ export default function TreeArrivalPanel({
       <div className="px-4 pb-4 pt-2 space-y-0">
         {/* ── Hearts — stagger 1 ── */}
         {hasHearts && (
-          <motion.button
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: heartsDelay, duration: 0.4 }}
-            onClick={isHeartCollectable ? handleGatherHearts : undefined}
-            disabled={!isHeartCollectable || heartCollection.state === "collecting" || heartCollection.state === "collected"}
-            className={`w-full flex items-center gap-3 py-3 px-1 text-left transition-colors rounded-lg ${isHeartCollectable ? "hover:bg-primary/5 cursor-pointer" : "cursor-default"}`}
+            className="relative"
           >
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-              style={{
-                background: "hsl(140 40% 40% / 0.12)",
-              }}
+            <HeartCollectAnimation amount={heartCollection.collectedAmount} />
+            <button
+              onClick={isHeartCollectable ? handleGatherHearts : undefined}
+              disabled={!isHeartCollectable || heartCollection.state === "collecting" || heartCollection.state === "collected"}
+              className={`w-full flex items-center gap-3 py-3 px-1 text-left transition-colors rounded-lg ${isHeartCollectable ? "hover:bg-primary/5 cursor-pointer" : "cursor-default"}`}
             >
-              {heartCollection.state === "collecting" ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-              ) : (
-                <Heart className="w-3.5 h-3.5" style={{ color: "hsl(140 40% 55%)" }} />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  background: "hsl(140 40% 40% / 0.12)",
+                }}
+              >
+                {heartCollection.state === "collecting" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                ) : (
+                  <Heart className="w-3.5 h-3.5" style={{ color: "hsl(140 40% 55%)" }} />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-serif" style={{ color: "hsl(140 40% 55%)" }}>
+                  {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : heartGuidance}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="text-[10px] text-muted-foreground/60 font-serif">
+                    {heartCollection.pool!.totalHearts} in this tree's reservoir
+                  </p>
+                  {heartCollection.state === "available_within_12h" && (
+                    <GraceCountdown treeId={treeId} />
+                  )}
+                </div>
+              </div>
+              {isHeartCollectable && !heartCollection.collectedAmount && (
+                <span className="text-[10px] font-serif text-primary/40 shrink-0">Gather</span>
               )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-serif" style={{ color: "hsl(140 40% 55%)" }}>
-                {heartCollection.collectedAmount ? `${heartCollection.collectedAmount} hearts gathered ✨` : heartGuidance}
-              </p>
-              <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
-                {heartCollection.pool!.totalHearts} in this tree's reservoir
-              </p>
-            </div>
-            {isHeartCollectable && !heartCollection.collectedAmount && (
-              <span className="text-[10px] font-serif text-primary/40 shrink-0">Gather</span>
-            )}
-          </motion.button>
+            </button>
+          </motion.div>
         )}
 
         {/* Soft divider between hearts and whispers */}
@@ -208,7 +224,7 @@ export default function TreeArrivalPanel({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-serif" style={{ color: "hsl(260 40% 65%)" }}>
-                    A whisper waits in this tree…
+                    {isNearby || isCheckedIn ? "Something waits for you here…" : "A whisper lingers…"}
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
                     {isNearby || isCheckedIn ? "Tap to reveal" : "Visit this tree to receive"}

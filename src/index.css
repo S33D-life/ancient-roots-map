@@ -670,6 +670,24 @@ All colors MUST be HSL.
     animation: whisperBreath 12s ease-in-out infinite, heartPoolBreath 7s ease-in-out infinite;
   }
 
+  /* Tree status ring — subtle ring around marker for hearts/whispers */
+  .tree-marker-root[data-hearts]:not([data-hearts="0"]) .marker-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1.5px solid hsla(140, 40%, 50%, 0.25);
+    pointer-events: none;
+  }
+  .tree-marker-root .marker-wrap.whisper-glow::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1.5px solid hsla(260, 40%, 60%, 0.2);
+    pointer-events: none;
+  }
+
   body.tree-zone-atlas-content .pulse-heart { animation-duration: 4.2s; }
   body.tree-zone-heartwood .pulse-heart    { animation-duration: 3.6s; }
   body.tree-zone-council .pulse-heart      { animation-duration: 3.2s; }

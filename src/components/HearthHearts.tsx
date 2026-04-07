@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Heart, TreeDeciduous, Sprout, Sparkles, Gift } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import GiftSeedInbox from "@/components/GiftSeedInbox";
+import DailyHearthSummary from "@/components/DailyHearthSummary";
 
 interface HeartActivity {
   id: string;
@@ -78,6 +79,9 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Daily summary */}
+      <DailyHearthSummary userId={userId} />
+
       {/* Total heart counter */}
       <div className="flex items-center justify-center gap-3 py-4 rounded-xl bg-card/40 border border-border/20">
         <Heart className="w-6 h-6 text-primary fill-primary/30" />
