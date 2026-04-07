@@ -166,7 +166,7 @@ export default function HeartSignalPanel({
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/20">
               <div className="flex items-center gap-2">
                 <span className="text-base">✨</span>
-                <h3 className="text-sm font-serif tracking-wider text-foreground">Heart Signals</h3>
+                <h3 className="text-sm font-serif tracking-wider text-foreground">Signals</h3>
                 {unreadCount > 0 && (
                   <span
                     className="min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1"
@@ -210,8 +210,10 @@ export default function HeartSignalPanel({
             <ScrollArea className="flex-1 max-h-[50vh]">
               {signals.length === 0 ? (
                 <div className="py-12 text-center">
-                  <span className="text-3xl block mb-3">🌿</span>
-                  <p className="text-xs text-muted-foreground font-serif">The forest is quiet… for now</p>
+                  <span className="text-3xl block mb-3">{filter === "whisper" ? "🌬️" : "🌿"}</span>
+                  <p className="text-xs text-muted-foreground font-serif">
+                    {filter === "whisper" ? "No whispers waiting right now" : "The forest is quiet… for now"}
+                  </p>
                 </div>
               ) : (
                 <div className="divide-y divide-border/10">
@@ -295,84 +297,56 @@ function WhisperSignalCard({ signal, senderNames, treeNames, timeAgo }: {
   const deliveryScope = meta?.delivery_scope;
   const speciesKey = meta?.delivery_species_key;
 
-  // Resolve real tree name for specific-tree whispers
   const treeName = signal.related_tree_id ? treeNames[signal.related_tree_id] : null;
 
-  // Format species key nicely
   const speciesLabel = speciesKey
     ? speciesKey.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())
     : null;
 
-  // Guidance text based on delivery scope
-  let guidanceText: string;
-  if (deliveryScope === "SPECIFIC_TREE") {
-    guidanceText = treeName
-      ? `Visit ${treeName} to receive it`
-      : "Visit this tree to receive it";
-  } else if (deliveryScope === "SPECIES_MATCH") {
-    guidanceText = speciesLabel
-      ? `Receive at any ${speciesLabel} tree`
-      : "Receive at a matching species";
-  } else {
-    guidanceText = "Receive at the next tree you visit";
-  }
+  // Tag config based on delivery scope
+  const tagConfig = deliveryScope === "SPECIFIC_TREE"
+    ? { emoji: "🌳", label: treeName || "A specific tree", hue: "210" }
+    : deliveryScope === "SPECIES_MATCH"
+    ? { emoji: "🌿", label: speciesLabel ? `Any ${speciesLabel}` : "Species match", hue: "140" }
+    : { emoji: "🌲", label: "Any tree", hue: "45" };
+
+  // Guidance line
+  const guidanceText = deliveryScope === "SPECIFIC_TREE"
+    ? (treeName ? `Visit ${treeName} to receive it` : "Visit this tree to receive it")
+    : deliveryScope === "SPECIES_MATCH"
+    ? (speciesLabel ? `Receive at any ${speciesLabel} tree` : "Receive at a matching species")
+    : "Receive at the next tree you visit";
 
   return (
-    <div className="space-y-1">
-      {/* Sender line */}
-      <p className="text-sm font-serif leading-snug text-foreground font-medium">
+    <div className="space-y-1.5">
+      {/* 1. Sender line */}
+      <p className="text-[13px] font-serif leading-snug text-foreground font-medium">
         {senderName
           ? `Whisper from ${senderName}`
           : "A whisper waits for you"
         }
       </p>
 
-      {/* Delivery condition — styled as a subtle guidance tag */}
-      <div className="flex items-center gap-1.5">
-        {deliveryScope === "SPECIFIC_TREE" && (
-          <span
-            className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full"
-            style={{
-              background: "hsl(210 50% 60% / 0.08)",
-              color: "hsl(210 45% 60%)",
-              border: "1px solid hsl(210 40% 55% / 0.12)",
-            }}
-          >
-            🌳 {treeName || "A specific tree"}
-          </span>
-        )}
-        {deliveryScope === "SPECIES_MATCH" && speciesLabel && (
-          <span
-            className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full"
-            style={{
-              background: "hsl(120 40% 50% / 0.08)",
-              color: "hsl(120 35% 55%)",
-              border: "1px solid hsl(120 35% 50% / 0.12)",
-            }}
-          >
-            🌿 Any {speciesLabel}
-          </span>
-        )}
-        {deliveryScope === "ANY_TREE" && (
-          <span
-            className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full"
-            style={{
-              background: "hsl(45 60% 55% / 0.08)",
-              color: "hsl(45 50% 55%)",
-              border: "1px solid hsl(45 50% 50% / 0.12)",
-            }}
-          >
-            🌲 Any tree
-          </span>
-        )}
-      </div>
+      {/* 2. Delivery tag — quiet pill */}
+      <span
+        className="inline-flex items-center gap-1 text-[10px] font-serif px-2 py-0.5 rounded-full max-w-full"
+        style={{
+          background: `hsl(${tagConfig.hue} 30% 50% / 0.07)`,
+          color: `hsl(${tagConfig.hue} 30% 55%)`,
+          border: `1px solid hsl(${tagConfig.hue} 25% 50% / 0.10)`,
+        }}
+      >
+        <span className="shrink-0">{tagConfig.emoji}</span>
+        <span className="truncate">{tagConfig.label}</span>
+      </span>
 
-      {/* Delivery guidance text */}
-      <p className="text-[11px] text-muted-foreground/60 leading-relaxed font-serif italic">
+      {/* 3. Guidance */}
+      <p className="text-[11px] text-muted-foreground/55 leading-relaxed font-serif italic">
         {guidanceText}
       </p>
 
-      <p className="text-[9px] text-muted-foreground/40 font-mono">{timeAgo(signal.created_at)}</p>
+      {/* 4. Time */}
+      <p className="text-[9px] text-muted-foreground/35 font-mono">{timeAgo(signal.created_at)}</p>
     </div>
   );
 }
