@@ -55,7 +55,7 @@ export default function DailyHearthSummary({ userId }: DailyHearthSummaryProps) 
       }}
     >
       <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50 mb-2">
-        Today
+        Today's Journey
       </p>
       <div className="flex items-center gap-4">
         {summary.heartsToday > 0 && (
