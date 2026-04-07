@@ -17,6 +17,7 @@ import type { HeartSignal, HeartSignalFilter } from "@/lib/heart-signal-types";
 import { SIGNAL_FILTER_OPTIONS, SIGNAL_TYPE_EMOJI, SIGNAL_TYPE_HUE } from "@/lib/heart-signal-types";
 import { Z } from "@/lib/z-index";
 import { supabase } from "@/integrations/supabase/client";
+import { navigateToSignalTree } from "@/utils/signalNavigation";
 
 interface HeartSignalPanelProps {
   open: boolean;
@@ -114,10 +115,8 @@ export default function HeartSignalPanel({
     if (s.signal_type !== "whisper") {
       onMarkRead(s.id);
     }
-    if (s.deep_link) {
-      onClose();
-      setTimeout(() => navigate(s.deep_link!), 150);
-    }
+    // Use signal-aware navigation: fly-to on map, deep-link elsewhere
+    navigateToSignalTree(s, navigate, onClose);
   };
 
   const timeAgo = (iso: string) => {
