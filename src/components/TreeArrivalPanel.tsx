@@ -137,6 +137,9 @@ export default function TreeArrivalPanel({
             ? "This tree holds something for you"
             : "Waiting at this tree"}
         </p>
+        {speciesHint && (
+          <p className="text-[10px] font-serif text-primary/40 mt-0.5 italic">{speciesHint}</p>
+        )}
       </div>
 
       <div className="px-4 pb-4 pt-2 space-y-0">
