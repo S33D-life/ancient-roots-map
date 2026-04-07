@@ -471,6 +471,7 @@ const SupportPage = () => {
             <AnimatePresence mode="wait">
               {supportMode === "one-time" && <OneTimeContent key="one-time" />}
               {supportMode === "monthly" && <MonthlyContent key="monthly" />}
+              {supportMode === "staff" && <StaffPathContent key="staff" />}
               {supportMode === "crypto" && <CryptoContent key="crypto" />}
             </AnimatePresence>
 
