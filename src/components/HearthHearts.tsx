@@ -44,7 +44,6 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
         .limit(10);
 
       const items = data || [];
-      const sum = items.reduce((s, h) => s + (h.amount || 0), 0);
 
       // Use materialized balance for total (scales to 10k+ users)
       const { data: balanceData } = await supabase
