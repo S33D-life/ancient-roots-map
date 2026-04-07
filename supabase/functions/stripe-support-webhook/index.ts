@@ -4,7 +4,12 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import Stripe from "https://esm.sh/stripe@17.7.0?target=deno";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   apiVersion: "2025-03-31.basil",
@@ -77,6 +82,7 @@ Deno.serve(async (req) => {
 
       const amountMinor = session.amount_total || 0;
       const hearts = calculateGratitudeHearts(amountMinor);
+      const idempotencyKey = `support_gratitude:${sessionId}`;
 
       // Update or insert contribution
       if (existing) {
@@ -87,7 +93,7 @@ Deno.serve(async (req) => {
             amount_minor: amountMinor,
             hearts_granted: hearts,
             hearts_granted_at: new Date().toISOString(),
-            rail_subscription_id: session.subscription as string || null,
+            rail_subscription_id: (session.subscription as string) || null,
           })
           .eq("id", existing.id);
       } else {
@@ -101,23 +107,14 @@ Deno.serve(async (req) => {
           status: "confirmed",
           hearts_granted: hearts,
           hearts_granted_at: new Date().toISOString(),
-          rail_subscription_id: session.subscription as string || null,
+          rail_subscription_id: (session.subscription as string) || null,
           metadata: session.metadata || {},
         });
       }
 
-      // Grant gratitude hearts via heart_transactions + heart_ledger
-      // Using idempotency key to prevent duplicates
-      const idempotencyKey = `support_gratitude:${sessionId}`;
-
-      await supabase.from("heart_transactions").insert({
-        user_id: userId,
-        tree_id: "00000000-0000-0000-0000-000000000000",
-        heart_type: "earn_support_gratitude",
-        amount: hearts,
-      });
-
-      await supabase.from("heart_ledger").insert({
+      // Grant gratitude hearts via heart_ledger ONLY (idempotent via unique key)
+      // heart_transactions is optional/legacy — skip to avoid duplicates
+      const { error: ledgerErr } = await supabase.from("heart_ledger").insert({
         user_id: userId,
         amount: hearts,
         transaction_type: "earn_support_gratitude",
@@ -134,6 +131,15 @@ Deno.serve(async (req) => {
           contribution_mode: session.mode,
         },
       });
+
+      if (ledgerErr) {
+        // If idempotency_key unique violation, that's expected on replays
+        if (ledgerErr.code === "23505") {
+          console.log("[webhook] Ledger entry already exists (idempotent), skipping");
+        } else {
+          console.error("[webhook] Ledger insert error:", ledgerErr);
+        }
+      }
 
       console.log(`[webhook] Confirmed contribution ${sessionId}, granted ${hearts} hearts to ${userId}`);
     }
