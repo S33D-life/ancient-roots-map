@@ -257,40 +257,53 @@ export default function TreeArrivalPanel({
               transition={{ delay: rootingDelay, duration: 0.4 }}
             >
               {rooting.root ? (
-                /* User has roots here */
-                <button
-                  onClick={rooting.canCollect ? handleCollectGrowth : undefined}
-                  disabled={rooting.isCollecting}
-                  className={`w-full flex items-center gap-3 py-3 px-1 text-left transition-colors rounded-lg ${
-                    rooting.canCollect ? "hover:bg-primary/5 cursor-pointer" : "cursor-default"
-                  }`}
-                >
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "hsl(90 35% 45% / 0.12)" }}
+                /* User has roots here — show status + collect OR plant more */
+                <div className="space-y-0">
+                  <button
+                    onClick={rooting.canCollect && rooting.growth > 0 ? handleCollectGrowth : undefined}
+                    disabled={rooting.isCollecting}
+                    className={`w-full flex items-center gap-3 py-3 px-1 text-left transition-colors rounded-lg ${
+                      rooting.canCollect && rooting.growth > 0 ? "hover:bg-primary/5 cursor-pointer" : "cursor-default"
+                    }`}
                   >
-                    {rooting.isCollecting ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                    ) : (
-                      <Sprout className="w-3.5 h-3.5" style={{ color: "hsl(90 35% 50%)" }} />
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                      style={{ background: "hsl(90 35% 45% / 0.12)" }}
+                    >
+                      {rooting.isCollecting ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                      ) : (
+                        <Sprout className="w-3.5 h-3.5" style={{ color: "hsl(90 35% 50%)" }} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-serif" style={{ color: "hsl(90 35% 50%)" }}>
+                        {rooting.root.amount} heart{rooting.root.amount !== 1 ? "s" : ""} planted here
+                      </p>
+                      <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
+                        {rooting.growth > 0
+                          ? `${rooting.growth} heart${rooting.growth !== 1 ? "s" : ""} have grown · ready to receive`
+                          : "Growing slowly…"}
+                      </p>
+                    </div>
+                    {rooting.canCollect && rooting.growth > 0 && (
+                      <span className="text-[10px] font-serif text-primary/40 shrink-0">Receive</span>
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-serif" style={{ color: "hsl(90 35% 50%)" }}>
-                      {rooting.root.amount} heart{rooting.root.amount !== 1 ? "s" : ""} growing here
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
-                      {rooting.growth > 0
-                        ? `${rooting.growth} heart${rooting.growth !== 1 ? "s" : ""} ready to receive`
-                        : "Growing slowly…"}
-                    </p>
-                  </div>
-                  {rooting.canCollect && rooting.growth > 0 && (
-                    <span className="text-[10px] font-serif text-primary/40 shrink-0">Receive</span>
+                  </button>
+                  {/* Plant more — small, secondary action */}
+                  {rooting.canPlant && (
+                    <button
+                      onClick={() => setPlantModalOpen(true)}
+                      className="w-full flex items-center gap-2 py-1.5 px-1 pl-12 text-left transition-colors hover:bg-primary/5 rounded-lg cursor-pointer"
+                    >
+                      <span className="text-[10px] font-serif text-muted-foreground/50 hover:text-muted-foreground/70 transition-colors">
+                        Plant more hearts
+                      </span>
+                    </button>
                   )}
-                </button>
+                </div>
               ) : rooting.canPlant ? (
-                /* Eligible to plant */
+                /* Eligible to plant — first time */
                 <button
                   onClick={() => setPlantModalOpen(true)}
                   className="w-full flex items-center gap-3 py-3 px-1 text-left transition-colors hover:bg-primary/5 rounded-lg cursor-pointer"
@@ -303,7 +316,7 @@ export default function TreeArrivalPanel({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-serif" style={{ color: "hsl(90 35% 55%)" }}>
-                      You can plant hearts at this tree
+                      Plant hearts at this tree
                     </p>
                     <p className="text-[10px] text-muted-foreground/60 font-serif mt-0.5">
                       They will grow while you're away
@@ -441,6 +454,7 @@ export default function TreeArrivalPanel({
           userId={userId}
           treeName={treeName}
           isPlanting={rooting.isPlanting}
+          existingAmount={rooting.root?.amount}
         />
       )}
     </>

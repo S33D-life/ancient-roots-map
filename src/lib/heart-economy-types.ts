@@ -20,6 +20,7 @@ export type HeartTransactionType =
   | "earn_streak_bonus"
   | "earn_windfall"
   | "earn_patron_grant"
+  | "earn_root_growth"        // Hearts grown at a rooted tree
   // Purchasing
   | "purchase_bundle"
   | "purchase_single"
@@ -29,6 +30,7 @@ export type HeartTransactionType =
   | "spend_skin_unlock"
   | "spend_gift"
   | "spend_market_stake"
+  | "spend_plant_hearts"      // Hearts planted at a tree
   // Admin / System
   | "refund"
   | "admin_grant"
@@ -140,4 +142,6 @@ export const ACTION_TO_TXN_TYPE: Record<string, HeartTransactionType> = {
   mapping: "earn_tree_mapping",
   offering: "earn_offering",
   curation: "earn_curation",
+  plant_hearts: "spend_plant_hearts",
+  root_growth: "earn_root_growth",
 };
