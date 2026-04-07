@@ -1,16 +1,12 @@
 /**
  * SpeciesResonanceCard — calm Hearth card showing species affinity.
- * No gamification, just gentle awareness.
+ * No gamification, just gentle awareness of where you return.
  */
 import { TreeDeciduous } from "lucide-react";
-import type { SpeciesAffinity } from "@/hooks/use-species-resonance";
+import { formatSpeciesName, type SpeciesAffinity } from "@/hooks/use-species-resonance";
 
 interface SpeciesResonanceCardProps {
   affinities: SpeciesAffinity[];
-}
-
-function formatSpecies(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
 export default function SpeciesResonanceCard({ affinities }: SpeciesResonanceCardProps) {
@@ -27,23 +23,23 @@ export default function SpeciesResonanceCard({ affinities }: SpeciesResonanceCar
       <div className="flex items-center gap-2">
         <TreeDeciduous className="w-3.5 h-3.5 text-primary/60" />
         <p className="text-[10px] font-serif tracking-[0.15em] uppercase text-muted-foreground/50">
-          Species Affinity
+          Your Trees
         </p>
       </div>
 
       <div className="space-y-1.5">
         {affinities.slice(0, 3).map((a, i) => {
-          const opacity = 1 - i * 0.2;
+          const opacity = 1 - i * 0.15;
           return (
             <div key={a.species} className="flex items-center gap-2.5">
-              <span className="text-xs" style={{ opacity }}>🌿</span>
+              <span className="text-xs shrink-0" style={{ opacity }}>🌿</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-serif text-foreground/80 truncate" style={{ opacity }}>
-                  {formatSpecies(a.species)}
+                  {formatSpeciesName(a.species)}
                 </p>
               </div>
               <span className="text-[10px] font-serif text-muted-foreground/40 shrink-0">
-                {a.visits} visit{a.visits !== 1 ? "s" : ""}
+                {a.visits} {a.visits === 1 ? "visit" : "visits"}
               </span>
             </div>
           );
