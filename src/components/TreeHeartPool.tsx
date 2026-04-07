@@ -43,24 +43,9 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
     prevWindfallCount.current = pool.windfall_count;
   }, [pool?.windfall_count]);
 
-  // Try to claim pending windfall on visit (once)
-  useEffect(() => {
-    if (!userId || !pool || pool.total_hearts === 0 || hasClaimedRef.current) return;
-    hasClaimedRef.current = true;
-
-    const claimWindfall = async () => {
-      const { data, error } = await supabase.rpc("claim_windfall_hearts", {
-        p_tree_id: treeId,
-        p_user_id: userId,
-      });
-      if (!error && data && data > 0) {
-        setClaimedAmount(data);
-        setShowCelebration(true);
-        setTimeout(() => setClaimedAmount(null), 5000);
-      }
-    };
-    claimWindfall();
-  }, [treeId, userId, pool?.total_hearts]);
+  // Auto-claim is intentionally removed here.
+  // Heart collection is handled exclusively through CollectHeartsButton
+  // and the unified useHeartCollection hook to prevent bypassing eligibility.
 
   const handleCelebrationComplete = useCallback(() => setShowCelebration(false), []);
 
