@@ -41,7 +41,7 @@ if (_recoveryDetected) {
 
 const AuthPage = () => {
   useDocumentTitle("Sign In");
-  const [view, setView] = useState<AuthView>(detectRecoveryFromHash);
+  const [view, setView] = useState<AuthView>(_recoveryDetected ? "reset-password" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
