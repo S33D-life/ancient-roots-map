@@ -32,6 +32,7 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
   const [total, setTotal] = useState(0);
   const [recent, setRecent] = useState<HeartActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const { affinities } = useSpeciesResonance(userId);
 
   useEffect(() => {
     const fetchHearts = async () => {
