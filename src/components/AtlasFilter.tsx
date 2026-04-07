@@ -8,7 +8,7 @@
  * Visual layer toggles (seeds, groves, hive colours, research etc.) are passed
  * as props from the map renderer since they control renderer-specific layers.
  */
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Filter, X, Leaf, GitBranch, FolderTree, RotateCcw,
@@ -157,6 +157,17 @@ export interface AtlasFilterProps {
 const chipBase = "shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95 border backdrop-blur-sm";
 const chipActive = "bg-primary/20 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]";
 const chipInactive = "bg-card/80 text-muted-foreground border-border/60 shadow-sm hover:bg-accent/30 hover:text-foreground";
+const LEGEND_STORAGE_KEY = "s33d-map-legend-collapsed";
+const LEGEND_STATE_EVENT = "s33d-map-legend-state";
+const TOP_CONTROL_ROW = "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)";
+
+function loadLegendCollapsed(): boolean {
+  try {
+    return localStorage.getItem(LEGEND_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 function hslStringToHue(hsl: string): number {
   const m = hsl.match(/(\d+)/);
@@ -198,6 +209,19 @@ const AtlasFilter = ({
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [hiveBlendMode, setHiveBlendMode] = useState<"exact" | "blend">("blend");
   const [selectedHiveFamilies, setSelectedHiveFamilies] = useState<Set<string>>(new Set());
+  const [legendCollapsed, setLegendCollapsed] = useState(loadLegendCollapsed);
+
+  useEffect(() => {
+    const handleLegendState = (event: Event) => {
+      const detail = (event as CustomEvent<{ collapsed?: boolean }>).detail;
+      if (typeof detail?.collapsed === "boolean") {
+        setLegendCollapsed(detail.collapsed);
+      }
+    };
+
+    window.addEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
+    return () => window.removeEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
+  }, []);
 
   // Count active visual layers for badge
   const activeLayerCount = useMemo(() =>
@@ -309,18 +333,22 @@ const AtlasFilter = ({
   }, [onSpeciesChange, onLineageChange, onProjectChange, resetGlobalFilters]);
 
   const activeAccent = PERSPECTIVES.find(p => p.key === perspective)?.accent || "42, 90%, 55%";
+  const mobileFilterLeft = legendCollapsed ? "7.35rem" : "9.9rem";
 
   return (
     <>
       {/* ══ Top bar: Mode Capsule + Count + Fullscreen ══ */}
       <div
-        className="absolute left-3 right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in"
-        style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 0.5rem)" }}
+        className="absolute left-[var(--map-filter-mobile-left)] right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in sm:left-3"
+        style={{
+          top: TOP_CONTROL_ROW,
+          ["--map-filter-mobile-left" as string]: mobileFilterLeft,
+        } as CSSProperties}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           {/* Mode Capsule */}
           <div
-            className="flex items-center rounded-full p-[3px] backdrop-blur-md shrink-0"
+            className="flex min-w-0 flex-1 items-center overflow-x-auto rounded-full p-[3px] backdrop-blur-md [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{
               background: "hsla(30, 25%, 10%, 0.88)",
               border: `1px solid hsla(${activeAccent}, 0.25)`,
@@ -366,7 +394,7 @@ const AtlasFilter = ({
             key={totalVisible}
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="shrink-0 tabular-nums px-2.5 py-1.5 rounded-full text-[10px] font-serif backdrop-blur-md"
+            className="hidden shrink-0 tabular-nums rounded-full px-2.5 py-1.5 text-[10px] font-serif backdrop-blur-md sm:inline-flex"
             style={{
               background: "hsla(30, 25%, 10%, 0.85)",
               color: `hsl(${activeAccent})`,
@@ -382,7 +410,7 @@ const AtlasFilter = ({
             <motion.button
               whileTap={{ scale: 0.93 }}
               onClick={onFullscreenToggle}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-serif backdrop-blur-md transition-all duration-200"
+              className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-serif backdrop-blur-md transition-all duration-200 md:flex"
               style={{
                 background: isFullscreen ? `hsla(${activeAccent}, 0.15)` : "hsla(30, 25%, 10%, 0.85)",
                 color: isFullscreen ? `hsl(${activeAccent})` : "hsla(42, 30%, 55%, 0.7)",
@@ -401,7 +429,7 @@ const AtlasFilter = ({
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="flex items-center gap-1.5 overflow-x-auto pl-1"
+              className="flex min-w-0 items-center gap-1.5 overflow-x-auto pl-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: "none" }}
             >
               {GROVE_SCALES.map(g => (
