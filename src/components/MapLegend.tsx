@@ -23,8 +23,11 @@ export default function MapLegend() {
 
   return (
     <div
-      className="absolute top-16 left-3 z-[15] select-none"
-      style={{ pointerEvents: "auto" }}
+      className="absolute left-3 z-[15] select-none"
+      style={{
+        pointerEvents: "auto",
+        top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)",
+      }}
     >
       <button
         onClick={toggle}
