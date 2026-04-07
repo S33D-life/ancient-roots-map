@@ -51,6 +51,7 @@ import BloomingClockParticles from "./BloomingClockParticles";
 import BloomingClockSigils from "./BloomingClockSigils";
 import BloomingClockHivePanel from "./BloomingClockHivePanel";
 import AtlasFilter, { type VisualLayerSection, type PerspectivePreset } from "./AtlasFilter";
+import MapControlPanel from "./MapControlPanel";
 
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
@@ -2292,7 +2293,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         </div>
       )}
 
-      {/* GroveView Living Earth Mode */}
+      {/* GroveView Living Earth Mode — atmosphere only (signals in MapControlPanel) */}
       <GroveViewOverlay
         active={groveViewActive}
         onToggle={() => toggle("groveView")}
@@ -2301,6 +2302,23 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         onEventPulses={setCurrentEventPulses}
         onTreeClick={(treeId) => navigate(`/tree/${treeId}`)}
       />
+
+      {/* Unified Map Control Panel — Legend + Signals + Layers entry */}
+      {!clearView && (
+        <MapControlPanel
+          groveActive={groveViewActive}
+          userLat={userLatLng?.[0]}
+          treeLookup={treeLookup}
+          onEventPulses={setCurrentEventPulses}
+          onTreeClick={(treeId) => navigate(`/tree/${treeId}`)}
+          onOpenLayers={() => setAtlasFilterOpen(true)}
+          layersPanelOpen={atlasFilterOpen}
+          activeCount={(() => {
+            const al = visualSections.reduce((s, sec) => s + sec.layers.filter(l => l.active).length, 0);
+            return al + (species.length > 0 ? 1 : 0) + (ageBand !== "all" ? 1 : 0) + (girthBand !== "all" ? 1 : 0) + (lineageFilter !== "all" ? 1 : 0) + (projectFilter !== "all" ? 1 : 0);
+          })()}
+        />
+      )}
 
       {/* Blooming Clock — Global Seasonal Atlas */}
       <BloomingClockLayer

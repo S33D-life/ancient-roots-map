@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from "react";
-import MapLegend from "@/components/MapLegend";
+// MapLegend merged into MapControlPanel
 import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ActiveFilterChips from "@/components/ActiveFilterChips";
@@ -82,7 +82,7 @@ const MapPageFull = () => {
         <Map initialView={selectedView} initialSpecies={selectedSpecies} initialW3w={paramW3w} initialLat={paramLat} initialLng={paramLng} initialZoom={paramZoom} initialTreeId={paramTreeId} initialCountry={paramCountry} initialHive={paramHive} initialOrigin={paramArrival || undefined} initialJourney={paramJourney} initialBbox={paramBbox} onFullscreenToggle={toggleFullscreen} isFullscreen={isFullscreen} onJourneyEnd={() => setJourneyActive(false)} />
       </MapErrorBoundary>
       <MapOfflineOverlay />
-      {!safeDisableNonessentialOverlays && !isFullscreen && !showBlessing && <MapLegend />}
+      {/* MapLegend + Signals now unified in MapControlPanel inside the map */}
       <MapJourneyOverlay active={journeyActive} />
       
       
