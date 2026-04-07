@@ -23,7 +23,7 @@ export default function MapLegend() {
 
   return (
     <div
-      className="absolute top-3 left-3 z-[15] select-none"
+      className="absolute top-16 left-3 z-[15] select-none"
       style={{ pointerEvents: "auto" }}
     >
       <button
