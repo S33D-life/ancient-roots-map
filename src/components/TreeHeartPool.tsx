@@ -55,21 +55,6 @@ const TreeHeartPool = ({ treeId, userId }: TreeHeartPoolProps) => {
   return (
     <div className="relative rounded-xl border border-border overflow-hidden bg-card/60 backdrop-blur p-5">
       <WindfallCelebration active={showCelebration} onComplete={handleCelebrationComplete} />
-      {claimedAmount != null && claimedAmount > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-          className="absolute top-2 right-2 z-10 font-serif text-xs px-3 py-1.5 rounded-full"
-          style={{
-            background: "linear-gradient(135deg, hsla(140, 35%, 30%, 0.15), hsla(42, 60%, 45%, 0.15))",
-            color: "hsl(140 40% 55%)",
-            border: "1px solid hsla(140, 35%, 40%, 0.25)",
-          }}
-        >
-          {claimedAmount} hearts gathered ✨
-        </motion.div>
-      )}
 
       <div className="flex items-center gap-3 mb-3">
         <div
