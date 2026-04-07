@@ -955,6 +955,22 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const whisperCountsRef = useRef(whisperCountsMap);
   whisperCountsRef.current = whisperCountsMap;
 
+  // Signal Field — canvas overlay showing heart + whisper density
+  useSignalFieldLayer({
+    map: mapRef.current,
+    trees: filteredTrees,
+    heartPoolCounts: heartPoolCountsRef.current,
+    whisperCounts: whisperCountsRef.current,
+    enabled: showSignalField,
+  });
+
+  // Memory Trail — soft polyline connecting recently visited trees
+  const { hasTrail: memoryTrailActive } = useMemoryTrailLayer({
+    map: mapRef.current,
+    userId: userId || null,
+    enabled: showMemoryTrail,
+  });
+
   // atmosphereReady and renderDebug are now provided by useMapInit (declared above)
   const [seasonClass, setSeasonClass] = useState("");
 
