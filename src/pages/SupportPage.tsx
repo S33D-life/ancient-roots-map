@@ -317,6 +317,101 @@ const SupportPage = () => {
     </motion.div>
   );
 
+  /* ── Staff Path content ── */
+  const StaffPathContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6 max-w-md mx-auto"
+    >
+      <div className="text-center space-y-2">
+        <div className="flex justify-center gap-2 items-center">
+          <Wand2 className="w-5 h-5 text-primary" />
+          <h2 className="text-lg font-serif font-medium text-foreground">The Staff Path</h2>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          A deeper way to support S33D — rooted in stewardship, story, and the long arc of the garden.
+        </p>
+      </div>
+
+      {/* What the staffs are */}
+      <div className="space-y-3 p-5 rounded-xl border border-primary/15 bg-gradient-to-b from-primary/5 to-transparent">
+        <p className="text-sm font-serif text-foreground leading-relaxed">
+          Each of the <span className="font-medium">36 Origin Staffs</span> is a handcrafted guardian marker — a living symbol that connects its holder to the wider S33D ecosystem.
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Staffs are not collectibles. They are keys — to mapping, to library curation, to council participation, and to the heart flow that sustains the grove.
+        </p>
+      </div>
+
+      {/* How hearts connect */}
+      <div className="space-y-2 px-1">
+        <p className="text-xs text-muted-foreground leading-relaxed text-center">
+          When you walk the Staff Path, your support nourishes the wider heart flow — hearts circulate through the ecosystem in gratitude, participation, and stewardship.
+        </p>
+      </div>
+
+      {/* What patrons receive */}
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {[
+          { icon: Wand2, text: "Origin Staff" },
+          { icon: Heart, text: "3,333 Starting Hearts" },
+          { icon: Shield, text: "Founding Patron" },
+        ].map((item) => (
+          <div key={item.text} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/20 bg-card/30 text-[10px] font-serif text-muted-foreground">
+            <item.icon className="w-3 h-3 text-primary/60" /> {item.text}
+          </div>
+        ))}
+      </div>
+
+      {/* Linked pathways */}
+      <div className="grid grid-cols-1 gap-3">
+        <Link
+          to="/patron-offering"
+          className="group flex items-center gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all"
+        >
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Crown className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-serif font-medium text-foreground">Explore the Staff Path</p>
+            <p className="text-[10px] text-muted-foreground">Begin the patron journey</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+
+        <Link
+          to="/library/staff-room"
+          className="group flex items-center gap-3 p-4 rounded-xl border border-border/20 bg-card/30 hover:border-primary/20 transition-all"
+        >
+          <div className="w-10 h-10 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+            <Wand2 className="w-5 h-5 text-primary/70" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-serif font-medium text-foreground">Enter the Staff Room</p>
+            <p className="text-[10px] text-muted-foreground">See the 144 staffs and their keepers</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+
+        <Link
+          to={ROUTES.VALUE_TREE}
+          className="group flex items-center gap-3 p-4 rounded-xl border border-border/20 bg-card/30 hover:border-primary/20 transition-all"
+        >
+          <div className="w-10 h-10 rounded-full bg-muted/40 flex items-center justify-center shrink-0">
+            <Heart className="w-5 h-5 text-primary/70" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-serif font-medium text-foreground">See How Hearts Flow</p>
+            <p className="text-[10px] text-muted-foreground">The living economy of the grove</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+        </Link>
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
