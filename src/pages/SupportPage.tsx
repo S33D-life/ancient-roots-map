@@ -352,54 +352,55 @@ const SupportPage = () => {
               </ul>
             </motion.section>
 
-            {/* Fiat one-off / monthly */}
-            {SUPPORT_CONFIG.fiat.enabled && (
-              <section className="space-y-3">
+            {/* One-off support */}
+            {SUPPORT_CONFIG.oneOff.enabled && (
+              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-primary" />
-                  <h2 className="text-lg font-serif font-medium text-foreground">One-Off Support</h2>
+                  <h2 className="text-lg font-serif font-medium text-foreground">Offer a One-Time Gift</h2>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {SUPPORT_CONFIG.fiat.oneOff && (
-                    <a href={SUPPORT_CONFIG.fiat.oneOff} target="_blank" rel="noopener noreferrer" className="no-underline">
-                      <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                        <CardContent className="p-4 flex flex-col gap-1 items-center text-center">
-                          <Heart className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium text-foreground">One-off Gift</span>
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">Opens Stripe <ExternalLink className="w-2.5 h-2.5" /></span>
-                        </CardContent>
-                      </Card>
-                    </a>
-                  )}
-                  {SUPPORT_CONFIG.fiat.monthly && (
-                    <a href={SUPPORT_CONFIG.fiat.monthly} target="_blank" rel="noopener noreferrer" className="no-underline">
-                      <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                        <CardContent className="p-4 flex flex-col gap-1 items-center text-center">
-                          <Heart className="w-5 h-5 text-primary" />
-                          <span className="text-sm font-medium text-foreground">Monthly Gift</span>
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">Opens Stripe <ExternalLink className="w-2.5 h-2.5" /></span>
-                        </CardContent>
-                      </Card>
-                    </a>
-                  )}
+                <p className="text-xs text-muted-foreground leading-relaxed">Choose an amount or enter your own. Every offering helps the grove grow.</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {SUPPORT_CONFIG.oneOff.presets.map((amount, i) => (
+                    <button
+                      key={amount}
+                      onClick={() => handleCheckout(amount, "one_time")}
+                      disabled={checkoutLoading === String(amount)}
+                      className="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-primary/15 bg-card/50 hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer disabled:opacity-60"
+                    >
+                      {checkoutLoading === String(amount) ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      ) : (
+                        <Heart className="w-4 h-4 text-primary/60" />
+                      )}
+                      <span className="text-sm font-serif font-semibold text-foreground">{SUPPORT_CONFIG.oneOff.labels[i]}</span>
+                      <span className="text-[10px] text-muted-foreground">one time</span>
+                    </button>
+                  ))}
                 </div>
-              </section>
+                <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments. You'll receive hearts in gratitude.</p>
+              </motion.section>
             )}
 
-            {/* Crypto */}
+            {/* Crypto pathways */}
             {SUPPORT_CONFIG.crypto.enabled && (
-              <section className="space-y-3">
+              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3.5} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Wallet className="w-4 h-4 text-primary" />
-                  <h2 className="text-lg font-serif font-medium text-foreground">Crypto</h2>
+                  <h2 className="text-lg font-serif font-medium text-foreground">Support with Crypto</h2>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">Send supported assets directly. Only send the correct token to each address.</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Send supported assets directly. Contributions will be acknowledged once confirmed on-chain.
+                </p>
                 <div className="space-y-3">
                   {SUPPORT_CONFIG.crypto.wallets.map((w) => (
                     <CryptoWalletCard key={w.symbol} {...w} />
                   ))}
                 </div>
-              </section>
+                <p className="text-[10px] text-muted-foreground/40 text-center">
+                  On-chain confirmation coming soon. Your support will be recognised.
+                </p>
+              </motion.section>
             )}
 
             {/* Commons Nourishment */}
