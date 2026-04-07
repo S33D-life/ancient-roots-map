@@ -502,7 +502,7 @@ const AuthPage = () => {
                 {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Updating...</> : "Update Password"}
               </Button>
             </form>
-            <button onClick={() => setView("forgot")} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
+            <button onClick={() => { sessionStorage.removeItem("s33d_recovery_active"); setView("forgot"); }} className="text-xs text-muted-foreground hover:text-primary text-center w-full transition-colors">
               Link expired? Request a new one
             </button>
           </div>
