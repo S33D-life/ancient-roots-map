@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, X, ChevronDown, Leaf, GitBranch, FolderTree, RotateCcw, Circle, TreePine, ExternalLink, Maximize2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -92,6 +92,17 @@ interface LiteMapFiltersProps {
 const chipBase = "shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95 border backdrop-blur-sm";
 const chipActive = "bg-primary/20 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]";
 const chipInactive = "bg-card/80 text-muted-foreground border-border/60 shadow-sm hover:bg-accent/30 hover:text-foreground";
+const LEGEND_STORAGE_KEY = "s33d-map-legend-collapsed";
+const LEGEND_STATE_EVENT = "s33d-map-legend-state";
+const TOP_CONTROL_ROW = "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)";
+
+function loadLegendCollapsed(): boolean {
+  try {
+    return localStorage.getItem(LEGEND_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 const LiteMapFilters = ({
   species,
@@ -121,6 +132,19 @@ const LiteMapFilters = ({
   const panelOpen = controlledRefineOpen ?? internalPanelOpen;
   const setPanelOpen = onRefineOpenChange ?? setInternalPanelOpen;
   const [familyFilter, setFamilyFilter] = useState<string | null>(null);
+  const [legendCollapsed, setLegendCollapsed] = useState(loadLegendCollapsed);
+
+  useEffect(() => {
+    const handleLegendState = (event: Event) => {
+      const detail = (event as CustomEvent<{ collapsed?: boolean }>).detail;
+      if (typeof detail?.collapsed === "boolean") {
+        setLegendCollapsed(detail.collapsed);
+      }
+    };
+
+    window.addEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
+    return () => window.removeEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
+  }, []);
 
   const isAllSpecies = species.length === 0;
   const hasActiveFilters = !isAllSpecies || lineageFilter !== "all" || projectFilter !== "all" || groveScale !== "all" || ageBand !== "all" || girthBand !== "all";
@@ -198,15 +222,22 @@ const LiteMapFilters = ({
   ].filter(Boolean).length;
 
   const activeAccent = PERSPECTIVES.find(p => p.key === perspective)?.accent || "42, 90%, 55%";
+  const mobileFilterLeft = legendCollapsed ? "7.35rem" : "9.9rem";
 
   return (
     <>
       {/* ── Top bar: Mode Capsule + Filters ── */}
-      <div className="absolute left-3 right-3 z-[1000] flex flex-col gap-2 animate-fade-in" style={{ top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 5rem)" }}>
+      <div
+        className="absolute left-[var(--map-filter-mobile-left)] right-3 z-[1000] flex flex-col gap-2 animate-fade-in sm:left-3"
+        style={{
+          top: TOP_CONTROL_ROW,
+          ["--map-filter-mobile-left" as string]: mobileFilterLeft,
+        } as CSSProperties}
+      >
         {/* Mode Capsule — unified segmented control */}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           <div
-            className="flex items-center rounded-full p-[3px] backdrop-blur-md shrink-0"
+            className="flex min-w-0 flex-1 items-center rounded-full p-[3px] backdrop-blur-md overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{
               background: "hsla(30, 25%, 10%, 0.88)",
               border: `1px solid hsla(${activeAccent}, 0.25)`,
@@ -249,7 +280,7 @@ const LiteMapFilters = ({
             key={totalVisible}
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            className="shrink-0 tabular-nums px-2.5 py-1.5 rounded-full text-[10px] font-serif backdrop-blur-md"
+            className="hidden shrink-0 tabular-nums px-2.5 py-1.5 rounded-full text-[10px] font-serif backdrop-blur-md sm:inline-flex"
             style={{
               background: "hsla(30, 25%, 10%, 0.85)",
               color: `hsl(${activeAccent})`,
@@ -266,7 +297,7 @@ const LiteMapFilters = ({
             <motion.button
               whileTap={{ scale: 0.93 }}
               onClick={onFullscreenToggle}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-serif backdrop-blur-md transition-all duration-200"
+              className="hidden items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-serif backdrop-blur-md transition-all duration-200 md:flex"
               style={{
                 background: isFullscreen ? `hsla(${activeAccent}, 0.15)` : "hsla(30, 25%, 10%, 0.85)",
                 color: isFullscreen ? `hsl(${activeAccent})` : "hsla(42, 30%, 55%, 0.7)",
@@ -286,7 +317,7 @@ const LiteMapFilters = ({
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="flex items-center gap-1.5 overflow-x-auto pl-1"
+              className="flex min-w-0 items-center gap-1.5 overflow-x-auto pl-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {/* Grove scale chips */}
@@ -377,9 +408,11 @@ const LiteMapFilters = ({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute z-[1000] px-2.5 py-0.5 rounded-full text-[9px] font-serif"
+            className="absolute z-[1000] hidden rounded-full px-2.5 py-0.5 text-[9px] font-serif sm:block"
             style={{
-              top: hasActiveFilters || groveScale !== "all" ? "8.5rem" : "7rem",
+              top: hasActiveFilters || groveScale !== "all"
+                ? "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 6rem)"
+                : "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 3.75rem)",
               left: "0.75rem",
               background: `hsla(${activeAccent}, 0.1)`,
               color: `hsl(${activeAccent})`,

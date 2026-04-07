@@ -2,18 +2,28 @@
  * MapLegend — subtle, toggleable legend for map signal types.
  * Remembers collapsed state via localStorage.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 const STORAGE_KEY = "s33d-map-legend-collapsed";
+const LEGEND_STATE_EVENT = "s33d-map-legend-state";
 
 function loadCollapsed(): boolean {
   try { return localStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
 }
 
+function emitLegendState(collapsed: boolean) {
+  window.dispatchEvent(new CustomEvent(LEGEND_STATE_EVENT, { detail: { collapsed } }));
+  window.dispatchEvent(new Event("s33d-map-layout-changed"));
+}
+
 export default function MapLegend() {
   const [collapsed, setCollapsed] = useState(loadCollapsed);
+
+  useEffect(() => {
+    emitLegendState(collapsed);
+  }, [collapsed]);
 
   const toggle = () => {
     const next = !collapsed;
@@ -23,7 +33,7 @@ export default function MapLegend() {
 
   return (
     <div
-      className="absolute left-3 z-[15] select-none"
+      className="absolute left-3 z-[1005] select-none"
       style={{
         pointerEvents: "auto",
         top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)",
@@ -31,6 +41,7 @@ export default function MapLegend() {
     >
       <button
         onClick={toggle}
+        aria-expanded={!collapsed}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-serif tracking-wide transition-colors"
         style={{
           background: "hsl(var(--card) / 0.88)",
