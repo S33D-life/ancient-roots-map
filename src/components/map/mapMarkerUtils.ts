@@ -116,13 +116,15 @@ export function getOrCreateIcon(
   tier: Tier,
   species: string,
   birdsongCount?: number,
-  hiveHue?: number
+  hiveHue?: number,
+  heartPoolCount?: number
 ): L.DivIcon {
   const hue = hiveHue !== undefined ? hiveHue : getSpeciesHue(species);
   const hasBirdsong = (birdsongCount ?? 0) > 0;
+  const hearts = heartPoolCount ?? 0;
   const cacheKey = `${tier}-${hue}-${hasBirdsong ? birdsongCount : 0}-${
     hiveHue !== undefined ? "h" : "s"
-  }`;
+  }-hp${hearts > 0 ? (hearts > 10 ? "hi" : "lo") : "0"}`;
   if (ICON_CACHE[cacheKey]) return ICON_CACHE[cacheKey];
 
   const size = MARKER_SIZES[tier];
@@ -132,12 +134,19 @@ export function getOrCreateIcon(
         birdsongCount! > 1 ? birdsongCount : ""
       }</span>`
     : "";
+
+  // Heart pool glow — rendered as a CSS class + count badge
+  const heartGlowClass = hearts > 0 ? (hearts > 10 ? " heart-pool-strong" : " heart-pool-soft") : "";
+  const heartBadge = hearts > 0
+    ? `<span class="heart-pool-badge" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;background:hsla(120,45%,18%,0.92);border:1px solid hsla(120,45%,40%,0.5);border-radius:99px;padding:1px 5px;font-size:8px;font-family:sans-serif;color:hsl(120,55%,65%);line-height:1;white-space:nowrap;pointer-events:none;">💚${hearts > 1 ? hearts : ""}</span>`
+    : "";
+
   const icon = L.divIcon({
     className: "leaflet-tree-marker",
-    html: `<div style="position:relative;display:inline-block;"><div class="marker-wrap marker-${tier} ${
+    html: `<div style="position:relative;display:inline-block;"><div class="marker-wrap marker-${tier}${heartGlowClass} ${
       tier === "ancient" ? "marker-ancient" : ""
-    }" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;"></div>${birdBadge}</div>`,
-    iconSize: [size + 8, size + 8],
+    }" style="width:${size}px;height:${size}px;background-image:url('${uri}');background-size:contain;cursor:pointer;"></div>${birdBadge}${heartBadge}</div>`,
+    iconSize: [size + 8, size + 12],
     iconAnchor: [(size + 8) / 2, (size + 8) / 2],
   });
   ICON_CACHE[cacheKey] = icon;
