@@ -130,6 +130,9 @@ const HearthHearts = ({ userId }: HearthHeartsProps) => {
         </div>
       )}
 
+      {/* Species Resonance */}
+      {affinities.length > 0 && <SpeciesResonanceCard affinities={affinities} />}
+
       {/* Gift Seed Inbox */}
       <div className="pt-2">
         <div className="flex items-center gap-2 mb-3">
