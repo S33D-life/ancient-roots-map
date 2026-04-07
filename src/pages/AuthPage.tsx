@@ -21,12 +21,23 @@ const passwordSchema = z.string().min(6, "Password must be at least 6 characters
 
 type AuthView = "login" | "signup" | "forgot" | "magic-sent" | "reset-sent" | "verify-email" | "reset-password" | "reset-success";
 
-// Detect recovery from URL hash before first render to prevent race with SIGNED_IN event
+// Detect recovery from URL hash OR query params before first render
+// This must run synchronously before any auth listener fires
 const detectRecoveryFromHash = (): AuthView => {
   const hash = window.location.hash;
-  if (hash.includes("type=recovery")) return "reset-password";
+  const search = window.location.search;
+  if (hash.includes("type=recovery") || search.includes("type=recovery")) return "reset-password";
   return "login";
 };
+
+// Persistent flag: once we detect recovery, keep it until the flow completes.
+// This survives the Supabase SDK consuming the hash fragment.
+let _recoveryDetected = detectRecoveryFromHash() === "reset-password";
+if (_recoveryDetected) {
+  sessionStorage.setItem("s33d_recovery_active", "1");
+} else if (sessionStorage.getItem("s33d_recovery_active") === "1") {
+  _recoveryDetected = true;
+}
 
 const AuthPage = () => {
   useDocumentTitle("Sign In");
