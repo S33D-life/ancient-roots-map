@@ -59,7 +59,6 @@ import SupportSignupForm from "@/components/support/SupportSignupForm";
 import CryptoWalletCard from "@/components/support/CryptoWalletCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { BOT_CONFIG } from "@/config/bot";
 import TeotagFace from "@/components/TeotagFace";
 import TeotagChatPanel from "@/components/TeotagChatPanel";
@@ -69,21 +68,11 @@ import { createSupportCheckout } from "@/lib/supportService";
 
 /* ── What support nurtures ──────────────────────────────────── */
 const nurtures = [
-  { icon: Globe, label: "Expanding the Ancient Friends map", description: "Mapping and celebrating ancient trees across the world." },
-  { icon: BookOpen, label: "Growing the Heartwood library", description: "A living archive of knowledge, stories, and offerings." },
-  { icon: Users, label: "Council of Life gatherings", description: "Community gatherings that nurture ecological wisdom." },
-  { icon: Sprout, label: "Building S33D tools & platform", description: "The technology that connects trees, people, and stories." },
-  { icon: TreeDeciduous, label: "Protecting ancient trees", description: "Supporting research, mapping, and stewardship." },
-];
-
-/* ── How support is used ────────────────────────────────────── */
-const transparencyItems = [
-  "Platform development and hosting",
-  "Research, mapping, and field work",
-  "Maintaining the knowledge archive",
-  "Supporting community gatherings",
-  "Nurturing the wider S33D ecosystem",
-  "Commons rounds amplify the reach of community support",
+  { icon: Globe, label: "Expanding the Ancient Friends map" },
+  { icon: BookOpen, label: "Growing the Heartwood library" },
+  { icon: Users, label: "Council of Life gatherings" },
+  { icon: Sprout, label: "Building S33D tools & platform" },
+  { icon: TreeDeciduous, label: "Protecting ancient trees" },
 ];
 
 /* ── Help & contact cards ───────────────────────────────────── */
@@ -109,6 +98,7 @@ const fadeUp = {
 };
 
 const TAB_STORAGE_KEY = "s33d_support_tab";
+type SupportMode = "one-time" | "monthly" | "crypto";
 
 /* ── Component ──────────────────────────────────────────────── */
 const SupportPage = () => {
@@ -118,6 +108,7 @@ const SupportPage = () => {
   const [teotag, setTeotag] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
+  const [supportMode, setSupportMode] = useState<SupportMode>("one-time");
 
   const [activeTab, setActiveTab] = useState(() => {
     try { return localStorage.getItem(TAB_STORAGE_KEY) || "give"; } catch { return "give"; }
@@ -131,7 +122,6 @@ const SupportPage = () => {
   useEffect(() => {
     const result = searchParams.get("result");
     if (!result) return;
-    // Clear params so refresh doesn't re-trigger
     const url = new URL(window.location.href);
     url.searchParams.delete("result");
     url.searchParams.delete("session_id");
@@ -169,6 +159,163 @@ const SupportPage = () => {
     }
   };
 
+  /* ── Support mode selector pill ── */
+  const SupportModeSelector = () => (
+    <div className="flex justify-center">
+      <div className="inline-flex rounded-xl bg-muted/40 p-1 gap-0.5">
+        {([
+          { key: "one-time" as SupportMode, label: "One-Time", icon: Heart },
+          { key: "monthly" as SupportMode, label: "Monthly", icon: Leaf },
+          { key: "crypto" as SupportMode, label: "Crypto", icon: Wallet },
+        ]).map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setSupportMode(key)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-serif transition-all duration-200 ${
+              supportMode === key
+                ? "bg-background shadow-sm text-foreground"
+                : "text-muted-foreground hover:text-foreground/70"
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  /* ── One-time offering content ── */
+  const OneTimeContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-5"
+    >
+      <div className="text-center space-y-1">
+        <h2 className="text-lg font-serif font-medium text-foreground">Offer a Gift</h2>
+        <p className="text-xs text-muted-foreground">Choose an amount. Every offering helps the grove grow.</p>
+      </div>
+      <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+        {SUPPORT_CONFIG.oneOff.presets.map((amount, i) => (
+          <button
+            key={amount}
+            onClick={() => handleCheckout(amount, "one_time")}
+            disabled={checkoutLoading === String(amount)}
+            className="flex flex-col items-center gap-2 p-5 rounded-xl border border-primary/15 bg-card/50 hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer disabled:opacity-60"
+          >
+            {checkoutLoading === String(amount) ? (
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+            ) : (
+              <Heart className="w-4 h-4 text-primary/60" />
+            )}
+            <span className="text-base font-serif font-semibold text-foreground">{SUPPORT_CONFIG.oneOff.labels[i]}</span>
+          </button>
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground/50 text-center">Secure payment via Stripe.</p>
+    </motion.div>
+  );
+
+  /* ── Monthly support content ── */
+  const MonthlyContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-5"
+    >
+      <div className="text-center space-y-1">
+        <h2 className="text-lg font-serif font-medium text-foreground">Plant a Seed of Support</h2>
+        <p className="text-xs text-muted-foreground">Choose the rhythm that feels right for you.</p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {SUPPORT_CONFIG.recurring.tiers.map((tier) => {
+          const isFeatured = "featured" in tier && (tier as any).featured;
+          return (
+            <Card
+              key={tier.id}
+              className={`relative overflow-hidden transition-all duration-300 hover:shadow-md ${
+                isFeatured
+                  ? "border-primary/30 bg-primary/5 hover:border-primary/50 sm:scale-[1.03]"
+                  : "border-primary/15 hover:border-primary/30"
+              }`}
+            >
+              {isFeatured && (
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+              )}
+              <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+                <span className="text-2xl">{tier.emoji}</span>
+                <div>
+                  <p className="text-base font-serif font-semibold text-foreground">{tier.label}</p>
+                  <p className="text-xl font-serif font-bold text-foreground mt-0.5">{tier.amount}</p>
+                  <p className="text-xs text-muted-foreground">{tier.period}</p>
+                </div>
+                <p className="text-xs text-muted-foreground/80 leading-relaxed">{tier.description}</p>
+                <button
+                  onClick={() => handleCheckout(tier.amountMinor, "recurring", tier.id)}
+                  disabled={checkoutLoading === tier.id}
+                  className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
+                >
+                  {checkoutLoading === tier.id ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Heart className="w-3.5 h-3.5" />
+                  )}
+                  {checkoutLoading === tier.id ? "Opening…" : "Support"}
+                </button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments via Stripe. Cancel anytime.</p>
+    </motion.div>
+  );
+
+  /* ── Crypto offering content ── */
+  const CryptoContent = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-5"
+    >
+      <div className="text-center space-y-1">
+        <h2 className="text-lg font-serif font-medium text-foreground">Crypto Offering</h2>
+        <p className="text-xs text-muted-foreground">Send supported assets directly. Contributions are acknowledged once confirmed on-chain.</p>
+      </div>
+      <div className="space-y-3 max-w-sm mx-auto">
+        {SUPPORT_CONFIG.crypto.wallets.map((w) => (
+          <CryptoWalletCard key={w.symbol} {...w} />
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground/40 text-center">
+        On-chain confirmation coming soon. Your support will be recognised.
+      </p>
+
+      {/* Commons / Giveth */}
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-border/20 bg-card/30 max-w-sm mx-auto">
+        <Globe className="w-5 h-5 text-primary/70 shrink-0 mt-0.5" />
+        <div className="space-y-2 flex-1">
+          <p className="text-sm font-medium text-foreground">Support through the commons</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Small contributions are amplified by matching through public goods rounds.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <a href="https://explorer.gitcoin.co" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors">
+              🌱 Gitcoin <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
+            </a>
+            <a href={SUPPORT_CONFIG.external.giveth.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors">
+              💚 Giveth <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -180,7 +327,7 @@ const SupportPage = () => {
           animate="visible"
           variants={fadeUp}
           custom={0}
-          className="space-y-4 text-center mb-8"
+          className="space-y-3 text-center mb-8"
         >
           <div className="flex justify-center">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -190,13 +337,13 @@ const SupportPage = () => {
           <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-foreground leading-snug">
             Nurture the Grove
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-md mx-auto">
-            S33D is growing a living network that connects Ancient Friends, the Heartwood library,
-            Council of Life gatherings, and the wider regenerative ecosystem.
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Support the growth of S33D through an offering, monthly support, or crypto contribution.
+            Hearts are gifted in gratitude.
           </p>
         </motion.section>
 
-        {/* ── Tabs ── */}
+        {/* ── Top-level tabs ── */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="w-full grid grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl">
             <TabsTrigger value="give" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
@@ -221,89 +368,32 @@ const SupportPage = () => {
           {/* ═══════════════════════════════════════════════════════ */}
           <TabsContent value="give" className="space-y-10 mt-0">
 
-            {/* Recurring tiers */}
-            {SUPPORT_CONFIG.recurring.enabled && (
-              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={1} className="space-y-5">
-                <div className="text-center space-y-1">
-                  <h2 className="text-lg font-serif font-medium text-foreground">Plant a Seed of Support</h2>
-                  <p className="text-xs text-muted-foreground">Choose the rhythm that feels right for you.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {SUPPORT_CONFIG.recurring.tiers.map((tier) => {
-                    const isFeatured = "featured" in tier && (tier as any).featured;
-                    return (
-                      <Card
-                        key={tier.id}
-                        className={`relative overflow-hidden transition-all duration-300 hover:shadow-md ${
-                          isFeatured
-                            ? "border-primary/30 bg-primary/5 hover:border-primary/50 sm:scale-[1.03]"
-                            : "border-primary/15 hover:border-primary/30"
-                        }`}
-                      >
-                        {isFeatured && (
-                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-                        )}
-                        <CardContent className="p-5 flex flex-col items-center text-center gap-3">
-                          <span className="text-2xl">{tier.emoji}</span>
-                          <div>
-                            <p className="text-lg font-serif font-semibold text-foreground">{tier.label}</p>
-                            <p className="text-xl font-serif font-bold text-foreground mt-0.5">{tier.amount}</p>
-                            <p className="text-xs text-muted-foreground">{tier.period}</p>
-                          </div>
-                          <p className="text-xs text-muted-foreground/80 leading-relaxed">{tier.description}</p>
-                          {isFeatured && (
-                            <p className="text-[10px] text-primary/70 leading-relaxed italic">
-                              Your subscription feeds your Heartwood Vault and supports the commons ecosystem.
-                            </p>
-                          )}
-                          <button
-                            onClick={() => handleCheckout(tier.amountMinor, "recurring", tier.id)}
-                            disabled={checkoutLoading === tier.id}
-                            className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60"
-                          >
-                            {checkoutLoading === tier.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Heart className="w-3.5 h-3.5" />
-                            )}
-                            {checkoutLoading === tier.id ? "Opening…" : "Support"}
-                          </button>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-                <div className="flex justify-center">
-                  <Link to={ROUTES.VALUE_TREE} className="inline-flex items-center gap-1.5 text-[10px] text-primary/60 hover:text-primary transition-colors">
-                    <Heart className="w-2.5 h-2.5" /> Want to understand how Hearts work? Visit the Value Tree →
-                  </Link>
-                </div>
-                <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments via Stripe. Cancel anytime.</p>
-              </motion.section>
-            )}
+            {/* ── Support mode selector ── */}
+            <SupportModeSelector />
 
-            {/* Staff Path / Patron */}
-            <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={1.5} className="space-y-4">
+            {/* ── Active support content ── */}
+            <AnimatePresence mode="wait">
+              {supportMode === "one-time" && <OneTimeContent key="one-time" />}
+              {supportMode === "monthly" && <MonthlyContent key="monthly" />}
+              {supportMode === "crypto" && <CryptoContent key="crypto" />}
+            </AnimatePresence>
+
+            {/* ── Divider ── */}
+            <div className="h-px bg-border/20" />
+
+            {/* ── Staff Path / Patron ── */}
+            <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={2} className="space-y-4">
               <Card className="relative overflow-hidden border-primary/20 bg-gradient-to-b from-primary/5 to-transparent">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                <CardContent className="p-6 sm:p-8 space-y-5">
+                <CardContent className="p-6 space-y-4">
                   <div className="flex items-center justify-center gap-3">
                     <Wand2 className="w-5 h-5 text-primary" />
                     <h2 className="text-lg font-serif font-medium text-foreground tracking-wide">Walk the Staff Path</h2>
                     <Crown className="w-4 h-4 text-primary/60" />
                   </div>
-                  <div className="space-y-3 text-center max-w-md mx-auto">
-                    <p className="text-sm font-serif text-muted-foreground leading-relaxed">
-                      Join the <span className="text-foreground font-medium">Spiral of 36</span> and the <span className="text-foreground font-medium">Circles of 108</span>.
-                    </p>
-                    <p className="text-sm font-serif text-muted-foreground leading-relaxed">
-                      Patrons help steward the Ancient Friends map and receive a ceremonial Origin Staff —
-                      a handcrafted companion connecting you with the living lineage of S33D.
-                    </p>
-                    <p className="text-xs font-serif text-muted-foreground/70 leading-relaxed">
-                      This is a deeper layer of support — a seed offering into the roots of a living project.
-                    </p>
-                  </div>
+                  <p className="text-sm font-serif text-muted-foreground leading-relaxed text-center max-w-md mx-auto">
+                    Join the <span className="text-foreground font-medium">Spiral of 36</span> — patrons help steward the Ancient Friends map and receive a ceremonial Origin Staff.
+                  </p>
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     {[
                       { icon: Shield, text: "Patron NFT" },
@@ -326,177 +416,83 @@ const SupportPage = () => {
               </Card>
             </motion.section>
 
-            {/* What your support helps grow */}
-            <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={2} className="space-y-4">
-              <h2 className="text-lg font-serif font-medium text-foreground text-center">What Your Support Helps Grow</h2>
-              <div className="space-y-3">
-                {nurtures.map((item, i) => (
-                  <motion.div key={item.label} variants={fadeUp} custom={2.5 + i * 0.3} className="flex items-start gap-3 p-3 rounded-xl border border-border/20 bg-card/50">
-                    <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 mt-0.5">
-                      <item.icon className="w-4 h-4 text-primary/70" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{item.label}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
-                    </div>
-                  </motion.div>
+            {/* ── What your support helps grow ── */}
+            <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3} className="space-y-3">
+              <h2 className="text-sm font-serif font-medium text-foreground text-center">What Your Support Helps Grow</h2>
+              <div className="flex flex-wrap justify-center gap-2">
+                {nurtures.map((item) => (
+                  <div key={item.label} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-border/15 bg-card/40 text-xs text-muted-foreground">
+                    <item.icon className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                    {item.label}
+                  </div>
                 ))}
               </div>
             </motion.section>
 
-            {/* Transparency */}
-            <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={4} className="rounded-xl border border-border/20 bg-card/40 p-5 space-y-3">
-              <h2 className="text-sm font-serif font-medium text-foreground flex items-center gap-2">
-                <Heart className="w-3.5 h-3.5 text-primary" /> Transparency
-              </h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">We believe in openness. Here is how your support is used:</p>
-              <ul className="space-y-1.5">
-                {transparencyItems.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> {item}
-                  </li>
-                ))}
-              </ul>
-            </motion.section>
-
-            {/* One-off support */}
-            {SUPPORT_CONFIG.oneOff.enabled && (
-              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3} className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-primary" />
-                  <h2 className="text-lg font-serif font-medium text-foreground">Offer a One-Time Gift</h2>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">Choose an amount or enter your own. Every offering helps the grove grow.</p>
-                <div className="grid grid-cols-3 gap-3">
-                  {SUPPORT_CONFIG.oneOff.presets.map((amount, i) => (
-                    <button
-                      key={amount}
-                      onClick={() => handleCheckout(amount, "one_time")}
-                      disabled={checkoutLoading === String(amount)}
-                      className="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-primary/15 bg-card/50 hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer disabled:opacity-60"
-                    >
-                      {checkoutLoading === String(amount) ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      ) : (
-                        <Heart className="w-4 h-4 text-primary/60" />
-                      )}
-                      <span className="text-sm font-serif font-semibold text-foreground">{SUPPORT_CONFIG.oneOff.labels[i]}</span>
-                      <span className="text-[10px] text-muted-foreground">one time</span>
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[10px] text-muted-foreground/50 text-center">Secure payments via Stripe.</p>
-              </motion.section>
-            )}
-
-            {/* Crypto pathways */}
-            {SUPPORT_CONFIG.crypto.enabled && (
-              <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3.5} className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-primary" />
-                  <h2 className="text-lg font-serif font-medium text-foreground">Support with Crypto</h2>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Send supported assets directly. Contributions will be acknowledged once confirmed on-chain.
-                </p>
-                <div className="space-y-3">
-                  {SUPPORT_CONFIG.crypto.wallets.map((w) => (
-                    <CryptoWalletCard key={w.symbol} {...w} />
-                  ))}
-                </div>
-                <p className="text-[10px] text-muted-foreground/40 text-center">
-                  On-chain confirmation coming soon. Your support will be recognised.
-                </p>
-              </motion.section>
-            )}
-
-            {/* Commons Nourishment */}
-            <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={3.5} className="space-y-3">
-              <div className="flex items-start gap-3 p-4 rounded-xl border border-border/20 bg-card/30">
-                <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 mt-0.5">
-                  <Globe className="w-4 h-4 text-primary/70" />
-                </div>
-                <div className="space-y-2.5 flex-1">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Support through the wider commons</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                      S33D is part of the regenerative commons. You can also support through public goods rounds — where even small contributions are amplified by matching.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <a href="https://explorer.gitcoin.co" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors">
-                      <span>🌱</span> Gitcoin <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
-                    </a>
-                    <a href={SUPPORT_CONFIG.external.giveth.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-border/30 bg-card/30 text-[11px] font-serif text-foreground hover:border-primary/20 transition-colors">
-                      <span>💚</span> Giveth <ExternalLink className="w-2.5 h-2.5 text-muted-foreground/40" />
-                    </a>
-                  </div>
-                  <Link to="/value-tree?tab=deeper" className="inline-flex items-center gap-1.5 text-[10px] text-primary/50 hover:text-primary transition-colors">
-                    How commons nourishment flows into Hearts →
-                  </Link>
-                </div>
-              </div>
-            </motion.section>
-
-            {/* Other ways to support */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
-                <h2 className="text-lg font-serif font-medium text-foreground">Other Ways to Nurture the Grove</h2>
-              </div>
+            {/* ── Other ways ── */}
+            <section className="space-y-3">
+              <h2 className="text-sm font-serif font-medium text-foreground text-center">Other Ways to Help</h2>
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={() => setSignupType("testing")} className="text-left">
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                    <CardContent className="p-4 flex flex-col gap-2">
+                    <CardContent className="p-4 flex flex-col gap-1.5">
                       <TestTube className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium text-foreground">Join Testing Group</span>
-                      <p className="text-xs text-muted-foreground leading-snug">Help find bugs and refine S33D.</p>
+                      <span className="text-sm font-medium text-foreground">Join Testing</span>
+                      <p className="text-[10px] text-muted-foreground">Help find bugs and refine S33D.</p>
                     </CardContent>
                   </Card>
                 </button>
                 <button onClick={() => setSignupType("technical_council")} className="text-left">
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                    <CardContent className="p-4 flex flex-col gap-2">
+                    <CardContent className="p-4 flex flex-col gap-1.5">
                       <Wrench className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium text-foreground">Join Technical Council</span>
-                      <p className="text-xs text-muted-foreground leading-snug">Shape S33D's direction with your skills.</p>
+                      <span className="text-sm font-medium text-foreground">Technical Council</span>
+                      <p className="text-[10px] text-muted-foreground">Shape S33D's direction.</p>
                     </CardContent>
                   </Card>
                 </button>
                 <Link to={ROUTES.MAP} className="no-underline">
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                    <CardContent className="p-4 flex flex-col gap-2">
+                    <CardContent className="p-4 flex flex-col gap-1.5">
                       <Map className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium text-foreground">Help Map Trees</span>
-                      <p className="text-xs text-muted-foreground leading-snug">Add trees to the global atlas.</p>
+                      <span className="text-sm font-medium text-foreground">Map Trees</span>
+                      <p className="text-[10px] text-muted-foreground">Add trees to the global atlas.</p>
                     </CardContent>
                   </Card>
                 </Link>
                 <Link to="/bug-garden" className="no-underline">
                   <Card className="hover:border-primary/40 transition-colors cursor-pointer h-full">
-                    <CardContent className="p-4 flex flex-col gap-2">
+                    <CardContent className="p-4 flex flex-col gap-1.5">
                       <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium text-foreground">Help Verify & Curate</span>
-                      <p className="text-xs text-muted-foreground leading-snug">Review reports and quality-check data.</p>
+                      <span className="text-sm font-medium text-foreground">Verify & Curate</span>
+                      <p className="text-[10px] text-muted-foreground">Review reports and data.</p>
                     </CardContent>
                   </Card>
                 </Link>
               </div>
             </section>
 
-            {/* Hearts & Value Tree */}
-            <section className="rounded-xl border border-primary/15 bg-primary/5 p-4 space-y-2">
-              <div className="flex items-center gap-2">
-                <Heart className="w-4 h-4 text-primary" />
-                <h2 className="text-sm font-serif font-medium text-foreground">Earn Hearts</h2>
+            {/* ── Explore more ── */}
+            <section className="rounded-xl border border-border/15 bg-card/30 p-4 space-y-3">
+              <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">Explore more</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <Link to="/value-tree" className="loop-card font-serif block">
+                  <span className="text-primary">❤️ Value Tree</span>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5">How Hearts are earned</p>
+                </Link>
+                <Link to="/patron-offering" className="loop-card font-serif block">
+                  <span className="text-primary">🪄 Staff Path</span>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5">Origin Staff & patronage</p>
+                </Link>
+                <Link to="/council-of-life" className="loop-card font-serif block">
+                  <span className="text-primary">🌿 Council</span>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5">Governance & voice</p>
+                </Link>
+                <Link to="/map" className="loop-card font-serif block">
+                  <span className="text-primary">🗺️ Map</span>
+                  <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find Ancient Friends</p>
+                </Link>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Validated bug reports, UX refinements, tree suggestions, and insights may earn Hearts —
-                the commons currency of the S33D ecosystem.
-              </p>
-              <Link to={ROUTES.VALUE_TREE_EARN} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                Learn how rewards work →
-              </Link>
             </section>
 
             {/* Pitch Deck */}
@@ -518,41 +514,6 @@ const SupportPage = () => {
                 )}
               </section>
             )}
-
-            {/* Explore more */}
-            <section className="space-y-4">
-              <div className="rounded-xl border border-primary/15 bg-primary/5 p-4 text-center space-y-2">
-                <p className="text-sm font-serif text-muted-foreground leading-relaxed">
-                  Your support — whether through a subscription or a Staff commitment — feeds the{" "}
-                  <Link to={ROUTES.VALUE_TREE} className="text-primary hover:underline font-medium">Value Tree</Link>{" "}
-                  and nurtures the commons.
-                </p>
-                <Link to={ROUTES.VALUE_TREE} className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline">
-                  <Heart className="w-3 h-3" /> Explore how Hearts, Species Hearts & Influence work →
-                </Link>
-              </div>
-              <div className="rounded-xl border border-border/15 bg-card/30 p-4 space-y-3">
-                <h2 className="font-serif text-xs tracking-[0.15em] uppercase text-muted-foreground/50">Explore more</h2>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link to="/value-tree" className="loop-card font-serif block">
-                    <span className="text-primary">❤️ Value Tree</span>
-                    <p className="text-[10px] text-muted-foreground/50 mt-0.5">How Hearts are earned</p>
-                  </Link>
-                  <Link to="/patron-offering" className="loop-card font-serif block">
-                    <span className="text-primary">🪄 Staff Path</span>
-                    <p className="text-[10px] text-muted-foreground/50 mt-0.5">Origin Staff & patronage</p>
-                  </Link>
-                  <Link to="/council-of-life" className="loop-card font-serif block">
-                    <span className="text-primary">🌿 Council</span>
-                    <p className="text-[10px] text-muted-foreground/50 mt-0.5">Governance & voice</p>
-                  </Link>
-                  <Link to="/map" className="loop-card font-serif block">
-                    <span className="text-primary">🗺️ Map</span>
-                    <p className="text-[10px] text-muted-foreground/50 mt-0.5">Find Ancient Friends</p>
-                  </Link>
-                </div>
-              </div>
-            </section>
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════════════ */}
@@ -560,7 +521,6 @@ const SupportPage = () => {
           {/* ═══════════════════════════════════════════════════════ */}
           <TabsContent value="receive" className="space-y-8 mt-0">
 
-            {/* Reassurance header */}
             <motion.section initial="hidden" animate="visible" variants={fadeUp} custom={0} className="text-center space-y-2">
               <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
                 We're here to help. Whether you're new or returning, these paths lead to support.
@@ -629,7 +589,7 @@ const SupportPage = () => {
                         <Send className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="text-sm font-medium text-foreground">TEOTAG — Your Guide</p>
-                          <p className="text-xs text-muted-foreground leading-snug">Ask questions, get help, or just say hello. Opens in Telegram.</p>
+                          <p className="text-xs text-muted-foreground leading-snug">Ask questions, get help, or just say hello.</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -641,7 +601,7 @@ const SupportPage = () => {
                       <Users className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                       <div>
                         <p className="text-sm font-medium text-foreground">Community · @s33dlife</p>
-                        <p className="text-xs text-muted-foreground leading-snug">Join fellow stewards and wanderers. Opens in Telegram.</p>
+                        <p className="text-xs text-muted-foreground leading-snug">Join fellow stewards and wanderers.</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -684,20 +644,15 @@ const SupportPage = () => {
               </div>
             </section>
 
-            {/* Orb feedback explainer */}
+            {/* Orb feedback */}
             <section className="rounded-xl border border-primary/15 bg-primary/5 p-5 space-y-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <h2 className="text-sm font-serif font-medium text-foreground">Share Feedback & Earn Hearts</h2>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed font-serif">
-                Tap the <strong className="text-foreground">TEOTAG orb</strong> (top-right of any page) to report bugs, suggest improvements, or share ideas. Validated reports earn <span className="text-primary font-medium">S33D Hearts</span> — the commons currency of the ecosystem.
+                Tap the <strong className="text-foreground">TEOTAG orb</strong> to report bugs, suggest improvements, or share ideas. Validated reports earn <span className="text-primary font-medium">S33D Hearts</span>.
               </p>
-              <div className="space-y-1.5 text-xs text-muted-foreground">
-                <p className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> Tap the orb → navigate to your Hearth</p>
-                <p className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> Use the Bug Garden to file reports</p>
-                <p className="flex items-center gap-2"><ChevronRight className="w-3 h-3 text-primary/50 shrink-0" /> Every valid contribution is recognised with Hearts</p>
-              </div>
               <Link to="/bug-garden" className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-serif">
                 <Bug className="w-3 h-3" /> Open the Bug Garden →
               </Link>
@@ -720,7 +675,7 @@ const SupportPage = () => {
               </div>
             </section>
 
-            {/* ── Install the App ── */}
+            {/* Install the App */}
             <section className="space-y-3">
               <h2 className="text-lg font-serif font-medium text-foreground flex items-center gap-2">
                 <Smartphone className="w-4 h-4 text-primary" /> Install the App
@@ -734,7 +689,6 @@ const SupportPage = () => {
                       <p className="text-xs text-muted-foreground">A Living Map of Ancient Trees</p>
                     </div>
                   </div>
-
                   <Collapsible>
                     <CollapsibleTrigger className="w-full text-left px-4 py-3 rounded-lg border border-border/20 hover:border-primary/30 transition-colors bg-card/50">
                       <span className="text-sm font-medium text-foreground flex items-center gap-2">
@@ -742,11 +696,10 @@ const SupportPage = () => {
                       </span>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 py-3 space-y-2 text-xs text-muted-foreground leading-relaxed">
-                      <p>1. Tap the <strong className="text-foreground">Share</strong> button (square with upward arrow)</p>
+                      <p>1. Tap the <strong className="text-foreground">Share</strong> button</p>
                       <p>2. Scroll down and tap <strong className="text-foreground">Add to Home Screen</strong></p>
                     </CollapsibleContent>
                   </Collapsible>
-
                   <Collapsible>
                     <CollapsibleTrigger className="w-full text-left px-4 py-3 rounded-lg border border-border/20 hover:border-primary/30 transition-colors bg-card/50">
                       <span className="text-sm font-medium text-foreground flex items-center gap-2">
@@ -754,11 +707,10 @@ const SupportPage = () => {
                       </span>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 py-3 space-y-2 text-xs text-muted-foreground leading-relaxed">
-                      <p>1. Tap the <strong className="text-foreground">three dots</strong> menu (top-right)</p>
+                      <p>1. Tap the <strong className="text-foreground">three dots</strong> menu</p>
                       <p>2. Tap <strong className="text-foreground">Add to Home screen</strong></p>
                     </CollapsibleContent>
                   </Collapsible>
-
                   <div className="space-y-2 pt-1">
                     <p className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground/50">Why plant?</p>
                     {[
@@ -776,7 +728,7 @@ const SupportPage = () => {
               </Card>
             </section>
 
-            {/* ── Privacy ── */}
+            {/* Privacy */}
             <section className="space-y-3">
               <h2 className="text-lg font-serif font-medium text-foreground flex items-center gap-2">
                 <Lock className="w-4 h-4 text-primary" /> Privacy
@@ -815,7 +767,6 @@ const SupportPage = () => {
               </p>
             </motion.section>
 
-            {/* Active needs */}
             <section className="space-y-4">
               <h2 className="text-lg font-serif font-medium text-foreground flex items-center gap-2">
                 <Radio className="w-4 h-4 text-primary" /> Active Needs
@@ -835,7 +786,6 @@ const SupportPage = () => {
                     </Link>
                   </CardContent>
                 </Card>
-
                 <Card className="border-border/20">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
@@ -850,7 +800,6 @@ const SupportPage = () => {
                     </button>
                   </CardContent>
                 </Card>
-
                 <Card className="border-border/20">
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center gap-2">
@@ -868,31 +817,25 @@ const SupportPage = () => {
               </div>
             </section>
 
-            {/* Recent milestones */}
             <section className="space-y-4">
               <h2 className="text-lg font-serif font-medium text-foreground flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" /> Recent Growth
               </h2>
               <div className="rounded-xl border border-border/20 bg-card/40 p-4 space-y-3">
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="text-lg">🌳</span>
-                  <span>Telegram identity handoff now live — enter S33D from the bot</span>
-                </div>
-                <div className="h-px bg-border/20" />
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="text-lg">📸</span>
-                  <span>Orb capture refined for social sharing</span>
-                </div>
-                <div className="h-px bg-border/20" />
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="text-lg">🔔</span>
-                  <span>Notification bell integrated into the orb</span>
-                </div>
-                <div className="h-px bg-border/20" />
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="text-lg">🌿</span>
-                  <span>Presence-rooted offerings with 12-hour grace</span>
-                </div>
+                {[
+                  { emoji: "🌳", text: "Telegram identity handoff now live" },
+                  { emoji: "📸", text: "Orb capture refined for social sharing" },
+                  { emoji: "🔔", text: "Notification bell integrated into the orb" },
+                  { emoji: "🌿", text: "Presence-rooted offerings with 12-hour grace" },
+                ].map((item, i) => (
+                  <div key={i}>
+                    {i > 0 && <div className="h-px bg-border/20 mb-3" />}
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="text-lg">{item.emoji}</span>
+                      <span>{item.text}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="text-center">
                 <Link to={ROUTES.ROADMAP} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
