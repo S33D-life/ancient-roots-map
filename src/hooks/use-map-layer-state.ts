@@ -47,7 +47,9 @@ export type LayerKey =
   | "forestPulse"
   | "mycelialPathways"
   | "dreamTrees"
-  | "dreamOfferings";
+  | "dreamOfferings"
+  | "signalField"
+  | "memoryTrail";
 
 export type LayerState = Record<LayerKey, boolean>;
 
@@ -108,6 +110,8 @@ function getInitialState(): LayerState {
     mycelialPathways: false,
     dreamTrees: false,
     dreamOfferings: false,
+    signalField: false,
+    memoryTrail: false,
   };
 }
 
