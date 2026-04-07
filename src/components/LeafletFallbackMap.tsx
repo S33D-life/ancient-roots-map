@@ -895,6 +895,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         { key: "tribe-activity", label: "⊛ Tribe Activity", active: showTribeActivity, toggle: () => toggle("tribeActivity"), accent: "260, 55%, 70%" },
         { key: "dream-trees", label: "🌙 Dream Trees", active: showDreamTrees, toggle: () => toggle("dreamTrees"), extra: showDreamTrees ? (dreamTreeCount > 0 ? `${dreamTreeCount}` : "—") : undefined, accent: "280, 55%, 65%" },
         { key: "dream-offerings", label: "✨ Dream Offerings", active: showDreamOfferings, toggle: () => toggle("dreamOfferings"), extra: showDreamOfferings ? (dreamOfferingCount > 0 ? `${dreamOfferingCount}` : "—") : undefined, accent: "42, 80%, 65%" },
+        { key: "signal-field", label: "🌊 Signal Field", description: "Soft density overlay for hearts + whispers", active: showSignalField, toggle: () => toggle("signalField"), accent: "140, 40%, 55%" },
+        { key: "memory-trail", label: "🥾 My Trail", description: "Path between your recently visited trees", active: showMemoryTrail, toggle: () => toggle("memoryTrail"), extra: showMemoryTrail && memoryTrailActive ? "active" : undefined, accent: "42, 60%, 50%" },
       ],
     },
     {
