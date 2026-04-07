@@ -9,7 +9,8 @@ export type HeartSignalType =
   | "offering"    // offerings made/received
   | "encounter"   // check-ins, canopy proofs
   | "council"     // governance, fountain events
-  | "ledger";     // vault, patron claims, system
+  | "ledger"      // vault, patron claims, system
+  | "whisper";    // whispers waiting / received
 
 export interface HeartSignal {
   id: string;
@@ -32,6 +33,7 @@ export type HeartSignalFilter = "all" | HeartSignalType;
 export const SIGNAL_FILTER_OPTIONS: { value: HeartSignalFilter; label: string; emoji: string }[] = [
   { value: "all",       label: "All Signals",  emoji: "✨" },
   { value: "tree",      label: "Trees",        emoji: "🌳" },
+  { value: "whisper",   label: "Whispers",     emoji: "🌬️" },
   { value: "offering",  label: "Offerings",    emoji: "🎁" },
   { value: "encounter", label: "Encounters",   emoji: "👣" },
   { value: "council",   label: "Council",      emoji: "🌿" },
@@ -46,6 +48,7 @@ export const SIGNAL_TYPE_EMOJI: Record<HeartSignalType, string> = {
   encounter: "👣",
   council: "🌿",
   ledger: "💎",
+  whisper: "🌬️",
 };
 
 export const SIGNAL_TYPE_HUE: Record<HeartSignalType, string> = {
@@ -55,4 +58,5 @@ export const SIGNAL_TYPE_HUE: Record<HeartSignalType, string> = {
   encounter: "200 60% 55%",
   council:   "160 50% 50%",
   ledger:    "270 45% 60%",
+  whisper:   "210 50% 60%",
 };
