@@ -262,11 +262,11 @@ const LivingArchivePage = () => {
               className="text-center space-y-2"
             >
               <h1 className="text-3xl md:text-4xl font-serif text-primary tracking-wide drop-shadow-[0_0_20px_hsl(var(--primary)/0.4)]">
-                Living Archive Vault
+                My Sovereign Data
               </h1>
               <p className="text-muted-foreground font-serif text-sm max-w-lg mx-auto">
-                Your personal atlas — a sacred record of every tree mapped, every offering made, every heart earned.
-                Digital sovereignty, preserved in roots.
+                Download and carry your personal record — every tree mapped, every offering made, every heart earned.
+                Your data is yours.
               </p>
             </motion.div>
 
