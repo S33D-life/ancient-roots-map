@@ -132,21 +132,31 @@ const AuthPage = () => {
   const viewRef = useRef(view);
   useEffect(() => { viewRef.current = view; }, [view]);
 
+  // Helper: is the current flow a password recovery flow?
+  const isRecoveryFlow = () =>
+    viewRef.current === "reset-password" || viewRef.current === "reset-success" ||
+    sessionStorage.getItem("s33d_recovery_active") === "1";
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       // Handle password recovery redirect — show reset form instead of navigating away
       if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("s33d_recovery_active", "1");
         setView("reset-password");
         return;
       }
 
       // Handle session expiry gracefully
       if (event === "SIGNED_OUT" || (event === "TOKEN_REFRESHED" && !session)) {
+        sessionStorage.removeItem("s33d_recovery_active");
         setView("login");
         return;
       }
 
-      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
+      // Block all navigation when in recovery flow — user must complete password reset first
+      if (isRecoveryFlow()) return;
+
+      if (session) {
         // Record referral on first sign-in if invite code was stored
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
@@ -189,9 +199,7 @@ const AuthPage = () => {
             delete pendingTree._photoBase64;
             delete pendingTree._photoDate;
 
-            // Strip species_ai_* fields that don't exist in the DB schema yet —
-            // they are preserved in localStorage for future use but must not be
-            // sent to the insert call.
+            // Strip species_ai_* fields that don't exist in the DB schema yet
             delete pendingTree.species_ai_predictions;
             delete pendingTree.species_ai_selected;
             delete pendingTree.species_ai_provider;
@@ -260,7 +268,8 @@ const AuthPage = () => {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       // Don't redirect if user arrived via recovery link — they need to reset password first
-      if (session && viewRef.current !== "reset-password" && viewRef.current !== "reset-success") {
+      if (isRecoveryFlow()) return;
+      if (session) {
         navigate(resolvePostAuthPath(), { replace: true });
       }
     });
