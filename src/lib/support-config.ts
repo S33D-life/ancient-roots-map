@@ -53,13 +53,13 @@ export const SUPPORT_CONFIG = {
       {
         label: "Ethereum (ETH)",
         symbol: "ETH",
-        address: "0x1234...your-eth-address",
+        address: "0xcCD48aBd02Dc780EDF6018CeB5aa0619203B4FA8",
         network: "Ethereum Mainnet / Base / Arbitrum",
       },
       {
         label: "Bitcoin (BTC)",
         symbol: "BTC",
-        address: "bc1q...your-btc-address",
+        address: "bc1qkvc3a3ulh9xyfk30775cn48lla45fazwg85z3s",
         network: "Bitcoin Mainnet",
       },
     ] as const,
