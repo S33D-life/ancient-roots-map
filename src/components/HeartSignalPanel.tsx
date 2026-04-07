@@ -115,10 +115,8 @@ export default function HeartSignalPanel({
     if (s.signal_type !== "whisper") {
       onMarkRead(s.id);
     }
-    if (s.deep_link) {
-      onClose();
-      setTimeout(() => navigate(s.deep_link!), 150);
-    }
+    // Use signal-aware navigation: fly-to on map, deep-link elsewhere
+    navigateToSignalTree(s, navigate, onClose);
   };
 
   const timeAgo = (iso: string) => {
