@@ -140,11 +140,7 @@ export default function PlantHeartsModal({
             <Button
               onClick={handlePlant}
               disabled={isPlanting || amount < 1 || amount > available || available < 1}
-              className="w-full rounded-xl font-serif text-sm gap-2"
-              style={{
-                background: available >= 1 ? "hsl(140 35% 42%)" : undefined,
-                color: available >= 1 ? "white" : undefined,
-              }}
+              className="w-full rounded-xl font-serif text-sm gap-2 bg-[hsl(140_35%_42%)] hover:bg-[hsl(140_35%_38%)] text-white disabled:opacity-40"
             >
               {isPlanting ? (
                 <>

@@ -46,13 +46,19 @@ export function useTreeRooting(
   }, [qc, userId, treeId]);
 
   const plant = useMutation({
-    mutationFn: (params: { amount: number; speciesKey?: string }) =>
-      plantHearts({
+    mutationFn: async (params: { amount: number; speciesKey?: string }) => {
+      // If there's pending growth, silently collect it first
+      // to prevent retroactive growth on newly planted hearts
+      if (root && calculateGrowth(root) > 0) {
+        await collectGrowth(userId!, treeId!).catch(() => {});
+      }
+      return plantHearts({
         userId: userId!,
         treeId: treeId!,
         amount: params.amount,
         speciesKey: params.speciesKey,
-      }),
+      });
+    },
     onSuccess: () => {
       invalidate();
     },
