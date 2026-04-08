@@ -157,17 +157,7 @@ export interface AtlasFilterProps {
 const chipBase = "shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95 border backdrop-blur-sm";
 const chipActive = "bg-primary/20 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]";
 const chipInactive = "bg-card/80 text-muted-foreground border-border/60 shadow-sm hover:bg-accent/30 hover:text-foreground";
-const LEGEND_STORAGE_KEY = "s33d-map-legend-collapsed";
-const LEGEND_STATE_EVENT = "s33d-map-legend-state";
 const TOP_CONTROL_ROW = "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)";
-
-function loadLegendCollapsed(): boolean {
-  try {
-    return localStorage.getItem(LEGEND_STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 function hslStringToHue(hsl: string): number {
   const m = hsl.match(/(\d+)/);
@@ -209,19 +199,7 @@ const AtlasFilter = ({
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [hiveBlendMode, setHiveBlendMode] = useState<"exact" | "blend">("blend");
   const [selectedHiveFamilies, setSelectedHiveFamilies] = useState<Set<string>>(new Set());
-  const [legendCollapsed, setLegendCollapsed] = useState(loadLegendCollapsed);
-
-  useEffect(() => {
-    const handleLegendState = (event: Event) => {
-      const detail = (event as CustomEvent<{ collapsed?: boolean }>).detail;
-      if (typeof detail?.collapsed === "boolean") {
-        setLegendCollapsed(detail.collapsed);
-      }
-    };
-
-    window.addEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
-    return () => window.removeEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
-  }, []);
+  // Legend state listener removed — legend now inside MapControlPanel
 
   // Count active visual layers for badge
   const activeLayerCount = useMemo(() =>
