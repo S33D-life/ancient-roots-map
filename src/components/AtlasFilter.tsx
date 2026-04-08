@@ -157,17 +157,7 @@ export interface AtlasFilterProps {
 const chipBase = "shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95 border backdrop-blur-sm";
 const chipActive = "bg-primary/20 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]";
 const chipInactive = "bg-card/80 text-muted-foreground border-border/60 shadow-sm hover:bg-accent/30 hover:text-foreground";
-const LEGEND_STORAGE_KEY = "s33d-map-legend-collapsed";
-const LEGEND_STATE_EVENT = "s33d-map-legend-state";
 const TOP_CONTROL_ROW = "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)";
-
-function loadLegendCollapsed(): boolean {
-  try {
-    return localStorage.getItem(LEGEND_STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 function hslStringToHue(hsl: string): number {
   const m = hsl.match(/(\d+)/);
@@ -209,19 +199,7 @@ const AtlasFilter = ({
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [hiveBlendMode, setHiveBlendMode] = useState<"exact" | "blend">("blend");
   const [selectedHiveFamilies, setSelectedHiveFamilies] = useState<Set<string>>(new Set());
-  const [legendCollapsed, setLegendCollapsed] = useState(loadLegendCollapsed);
-
-  useEffect(() => {
-    const handleLegendState = (event: Event) => {
-      const detail = (event as CustomEvent<{ collapsed?: boolean }>).detail;
-      if (typeof detail?.collapsed === "boolean") {
-        setLegendCollapsed(detail.collapsed);
-      }
-    };
-
-    window.addEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
-    return () => window.removeEventListener(LEGEND_STATE_EVENT, handleLegendState as EventListener);
-  }, []);
+  // Legend state listener removed — legend now inside MapControlPanel
 
   // Count active visual layers for badge
   const activeLayerCount = useMemo(() =>
@@ -333,61 +311,19 @@ const AtlasFilter = ({
   }, [onSpeciesChange, onLineageChange, onProjectChange, resetGlobalFilters]);
 
   const activeAccent = PERSPECTIVES.find(p => p.key === perspective)?.accent || "42, 90%, 55%";
-  const mobileFilterLeft = legendCollapsed ? "7.35rem" : "9.9rem";
+  // mobileFilterLeft removed — perspective capsule moved to MapControlPanel
 
   return (
     <>
-      {/* ══ Top bar: Mode Capsule + Count + Fullscreen ══ */}
+      {/* ══ Top bar: Active filter chips + Fullscreen ══ */}
       <div
-        className="absolute left-[var(--map-filter-mobile-left)] right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in sm:left-3"
+        className="absolute left-3 right-3 z-[1001] flex flex-col gap-2 animate-fade-in"
         style={{
           top: TOP_CONTROL_ROW,
-          ["--map-filter-mobile-left" as string]: mobileFilterLeft,
-        } as CSSProperties}
+        }}
       >
         <div className="flex min-w-0 items-start gap-2">
-          {/* Mode Capsule */}
-          <div
-            className="flex min-w-0 flex-1 items-center overflow-x-auto rounded-full p-[3px] backdrop-blur-md [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{
-              background: "hsla(30, 25%, 10%, 0.88)",
-              border: `1px solid hsla(${activeAccent}, 0.25)`,
-              boxShadow: `0 2px 12px hsla(${activeAccent}, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.04)`,
-            }}
-          >
-            {PERSPECTIVES.map(p => {
-              const isActive = perspective === p.key;
-              return (
-                <motion.button
-                  key={p.key}
-                  onClick={() => {
-                    setPerspective(p.key);
-                    if (onPerspectivePreset) onPerspectivePreset(PERSPECTIVE_PRESETS[p.key]);
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-serif transition-colors duration-200"
-                  style={{
-                    color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 55%, 0.6)",
-                    background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
-                  }}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mode-indicator"
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        border: `1.5px solid hsla(${p.accent}, 0.4)`,
-                        boxShadow: `0 0 10px hsla(${p.accent}, 0.15), inset 0 0 8px hsla(${p.accent}, 0.06)`,
-                      }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10 text-[13px]">{p.icon}</span>
-                  <span className="relative z-10 tracking-wide">{p.label}</span>
-                </motion.button>
-              );
-            })}
-          </div>
+          <div className="flex-1" />
 
           {/* Count badge */}
           <motion.span
@@ -403,8 +339,6 @@ const AtlasFilter = ({
           >
             {totalVisible}
           </motion.span>
-
-          <div className="flex-1" />
 
           {onFullscreenToggle && (
             <motion.button
@@ -463,27 +397,7 @@ const AtlasFilter = ({
         </AnimatePresence>
       </div>
 
-      {/* Perspective label */}
-      <AnimatePresence>
-        {perspective !== "collective" && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute z-[1001] px-3 py-1 rounded-full text-[10px] font-serif tracking-wide backdrop-blur-md"
-            style={{
-              top: totalFilterCount > 0 || groveScale !== "all" ? "9rem" : "7.5rem",
-              left: "0.75rem",
-              background: `hsla(${activeAccent}, 0.18)`,
-              color: `hsl(${activeAccent})`,
-              border: `1px solid hsla(${activeAccent}, 0.35)`,
-              boxShadow: `0 2px 10px hsla(${activeAccent}, 0.15)`,
-            }}
-          >
-            {perspective === "personal" ? "🌱 Viewing your mapped trees" : "👥 Viewing tribe trees"}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Perspective label removed — now inside MapControlPanel */}
 
       {/* ══ Living Layers — Right Sidebar ══ */}
       <AnimatePresence>

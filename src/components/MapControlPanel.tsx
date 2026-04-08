@@ -1,7 +1,9 @@
 /**
  * MapControlPanel — unified entry point for Legend, Signals, and Layers.
  * Replaces scattered legend/signal/filter buttons with ONE floating pill
- * that expands into a tabbed panel.
+ * that expands into a tabbed panel with integrated perspective control.
+ *
+ * Hierarchy: Legend (teaches) → Perspective (grounds) → Signals (reveals) → Layers (refines)
  */
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,16 +18,21 @@ import {
   type MythicTimeframe,
   type EventPulse,
 } from "@/hooks/use-grove-events";
+import {
+  useMapFilters,
+  PERSPECTIVES,
+  type Perspective,
+} from "@/contexts/MapFilterContext";
 
 const STORAGE_KEY = "s33d-map-control-tab";
-type PanelTab = "signals" | "layers" | "legend";
+type PanelTab = "legend" | "signals" | "layers";
 
 function loadLastTab(): PanelTab {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
-    if (v === "signals" || v === "layers" || v === "legend") return v;
+    if (v === "legend" || v === "signals" || v === "layers") return v;
   } catch {}
-  return "signals";
+  return "legend";
 }
 
 interface TreeItem {
@@ -36,19 +43,16 @@ interface TreeItem {
 }
 
 interface MapControlPanelProps {
-  /** Whether grove mode is active (for signals data) */
   groveActive: boolean;
   userLat?: number;
   treeLookup?: Map<string, { lat: number; lng: number }>;
   onEventPulses?: (pulses: EventPulse[]) => void;
   onTreeClick?: (treeId: string) => void;
-  /** Layers tab: open the AtlasFilter sidebar */
   onOpenLayers: () => void;
   layersPanelOpen: boolean;
-  /** Active filter/layer count for badge */
   activeCount: number;
-  /** Live signal event count */
   liveSignalCount?: number;
+  onPerspectivePreset?: (perspective: Perspective) => void;
 }
 
 const LEGEND_ITEMS = [
@@ -57,12 +61,14 @@ const LEGEND_ITEMS = [
   { emoji: "🌬️", label: "Whisper waiting", color: "260, 40%, 60%" },
   { emoji: "🌱", label: "Seed planted", color: "120, 50%, 50%" },
   { emoji: "🐦", label: "Birdsong recorded", color: "200, 60%, 55%" },
+  { emoji: "🌿", label: "Grove cluster", color: "130, 45%, 50%" },
+  { emoji: "🔮", label: "Rootstone", color: "280, 50%, 55%" },
 ];
 
 const TAB_CONFIG: { key: PanelTab; label: string; icon: string }[] = [
+  { key: "legend", label: "Legend", icon: "✦" },
   { key: "signals", label: "Signals", icon: "🌿" },
   { key: "layers", label: "Layers", icon: "🗺️" },
-  { key: "legend", label: "Legend", icon: "✦" },
 ];
 
 export default function MapControlPanel({
@@ -74,10 +80,14 @@ export default function MapControlPanel({
   onOpenLayers,
   layersPanelOpen,
   activeCount,
+  onPerspectivePreset,
 }: MapControlPanelProps) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<PanelTab>(loadLastTab);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Perspective from context
+  const { perspective, setPerspective } = useMapFilters();
 
   // Signal data
   const [timeframe, setTimeframe] = useState<MythicTimeframe>("moon");
@@ -131,24 +141,30 @@ export default function MapControlPanel({
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  // When layers tab selected and panel is open, open the sidebar
+  // When layers tab selected, open sidebar
   const handleTabChange = useCallback((t: PanelTab) => {
     setTab(t);
     if (t === "layers") {
       onOpenLayers();
-      setOpen(false); // Close the mini-panel since the sidebar takes over
+      setOpen(false);
     }
   }, [onOpenLayers]);
 
   const handleToggle = useCallback(() => {
-    if (layersPanelOpen) return; // Don't open if layers sidebar is open
+    if (layersPanelOpen) return;
     setOpen(v => !v);
   }, [layersPanelOpen]);
 
+  const handlePerspectiveChange = useCallback((p: Perspective) => {
+    setPerspective(p);
+    onPerspectivePreset?.(p);
+  }, [setPerspective, onPerspectivePreset]);
+
   const season = useMemo(() => getCurrentSeason(userLat), [userLat]);
   const palette = SEASON_PALETTE[season];
-
   const totalBadge = activeCount + (liveEventCount > 0 ? 1 : 0);
+  const activePerspective = PERSPECTIVES.find(p => p.key === perspective);
+  const activeAccent = activePerspective?.accent || "42, 90%, 55%";
 
   return (
     <div
@@ -156,13 +172,13 @@ export default function MapControlPanel({
       className="absolute left-3 z-[1005] select-none"
       style={{
         pointerEvents: "auto",
-        top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)",
+        top: "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 0.75rem)",
       }}
     >
       {/* ── Entry pill ── */}
       <button
         onClick={handleToggle}
-        className="flex items-center gap-2 h-10 px-3 rounded-full transition-all duration-200 active:scale-95"
+        className="flex items-center gap-2 h-10 px-3.5 rounded-full transition-all duration-200 active:scale-95"
         style={{
           background: open
             ? "hsla(120, 30%, 12%, 0.95)"
@@ -183,6 +199,8 @@ export default function MapControlPanel({
       >
         <Layers className="w-4 h-4" />
         <span className="text-[11px] font-serif tracking-wider">Map</span>
+        {/* Perspective indicator */}
+        <span className="text-[12px]">{activePerspective?.icon}</span>
         {totalBadge > 0 && !open && (
           <span
             className="min-w-[16px] h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
@@ -227,7 +245,7 @@ export default function MapControlPanel({
             {/* Tab bar */}
             <div
               className="flex px-1.5 pt-2 pb-1 gap-0.5"
-              style={{ borderBottom: "1px solid hsla(42, 40%, 30%, 0.2)" }}
+              style={{ borderBottom: "1px solid hsla(42, 40%, 30%, 0.15)" }}
             >
               {TAB_CONFIG.map(t => (
                 <button
@@ -253,8 +271,81 @@ export default function MapControlPanel({
               </button>
             </div>
 
+            {/* ── Perspective control — always visible, below tabs ── */}
+            <div className="px-3 pt-2.5 pb-1.5">
+              <p
+                className="text-[8px] font-serif uppercase tracking-[0.2em] mb-1.5"
+                style={{ color: "hsl(42, 35%, 42%)" }}
+              >
+                Perspective
+              </p>
+              <div
+                className="flex rounded-full p-[2px]"
+                style={{
+                  background: "hsla(30, 20%, 12%, 0.8)",
+                  border: `1px solid hsla(${activeAccent}, 0.2)`,
+                }}
+              >
+                {PERSPECTIVES.map(p => {
+                  const isActive = perspective === p.key;
+                  return (
+                    <motion.button
+                      key={p.key}
+                      onClick={() => handlePerspectiveChange(p.key)}
+                      whileTap={{ scale: 0.95 }}
+                      className="relative flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-[10px] font-serif transition-colors duration-200"
+                      style={{
+                        color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 50%, 0.5)",
+                        background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
+                      }}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="perspective-glow"
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            border: `1px solid hsla(${p.accent}, 0.35)`,
+                            boxShadow: `0 0 8px hsla(${p.accent}, 0.12)`,
+                          }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                      <span className="relative z-10 text-[12px]">{p.icon}</span>
+                      <span className="relative z-10 tracking-wide">{p.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Soft divider */}
+            <div className="mx-3 my-1" style={{ height: "1px", background: "hsla(42, 30%, 30%, 0.15)" }} />
+
             {/* Tab content */}
-            <div className="px-3 py-2.5 max-h-[calc(100svh-12rem)] overflow-y-auto overscroll-contain space-y-2">
+            <div className="px-3 py-2 max-h-[calc(100svh-16rem)] overflow-y-auto overscroll-contain space-y-2">
+              {tab === "legend" && (
+                <div className="space-y-2">
+                  <p className="text-[9px] font-serif uppercase tracking-[0.15em]" style={{ color: "hsl(42, 40%, 45%)" }}>
+                    Map Symbols
+                  </p>
+                  {LEGEND_ITEMS.map(item => (
+                    <div key={item.label} className="flex items-center gap-2.5">
+                      <span className="text-sm shrink-0">{item.emoji}</span>
+                      <span className="text-[11px] font-serif" style={{ color: `hsl(${item.color})` }}>
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="pt-2" style={{ borderTop: "1px solid hsla(42, 30%, 30%, 0.12)" }}>
+                    <p className="text-[9px] font-serif italic leading-relaxed" style={{ color: "hsl(42, 30%, 40%)" }}>
+                      Tap any tree to discover its story.
+                      <br />
+                      Use <strong>Signals</strong> to see live activity, or <strong>Layers</strong> to refine what the forest reveals.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {tab === "signals" && (
                 <SignalsContent
                   signals={signals}
@@ -288,22 +379,6 @@ export default function MapControlPanel({
                       {activeCount} filter{activeCount > 1 ? "s" : ""} active
                     </p>
                   )}
-                </div>
-              )}
-
-              {tab === "legend" && (
-                <div className="space-y-2">
-                  <p className="text-[9px] font-serif uppercase tracking-[0.15em]" style={{ color: "hsl(42, 40%, 45%)" }}>
-                    Map Symbols
-                  </p>
-                  {LEGEND_ITEMS.map(item => (
-                    <div key={item.label} className="flex items-center gap-2.5">
-                      <span className="text-sm shrink-0">{item.emoji}</span>
-                      <span className="text-[11px] font-serif" style={{ color: `hsl(${item.color})` }}>
-                        {item.label}
-                      </span>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
