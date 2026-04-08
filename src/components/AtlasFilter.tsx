@@ -333,7 +333,7 @@ const AtlasFilter = ({
   }, [onSpeciesChange, onLineageChange, onProjectChange, resetGlobalFilters]);
 
   const activeAccent = PERSPECTIVES.find(p => p.key === perspective)?.accent || "42, 90%, 55%";
-  const mobileFilterLeft = legendCollapsed ? "7.35rem" : "9.9rem";
+  // mobileFilterLeft removed — perspective capsule moved to MapControlPanel
 
   return (
     <>
@@ -419,27 +419,7 @@ const AtlasFilter = ({
         </AnimatePresence>
       </div>
 
-      {/* Perspective label */}
-      <AnimatePresence>
-        {perspective !== "collective" && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute z-[1001] px-3 py-1 rounded-full text-[10px] font-serif tracking-wide backdrop-blur-md"
-            style={{
-              top: totalFilterCount > 0 || groveScale !== "all" ? "9rem" : "7.5rem",
-              left: "0.75rem",
-              background: `hsla(${activeAccent}, 0.18)`,
-              color: `hsl(${activeAccent})`,
-              border: `1px solid hsla(${activeAccent}, 0.35)`,
-              boxShadow: `0 2px 10px hsla(${activeAccent}, 0.15)`,
-            }}
-          >
-            {perspective === "personal" ? "🌱 Viewing your mapped trees" : "👥 Viewing tribe trees"}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Perspective label removed — now inside MapControlPanel */}
 
       {/* ══ Living Layers — Right Sidebar ══ */}
       <AnimatePresence>
