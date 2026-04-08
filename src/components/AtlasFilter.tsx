@@ -337,57 +337,15 @@ const AtlasFilter = ({
 
   return (
     <>
-      {/* ══ Top bar: Mode Capsule + Count + Fullscreen ══ */}
+      {/* ══ Top bar: Active filter chips + Fullscreen ══ */}
       <div
-        className="absolute left-[var(--map-filter-mobile-left)] right-3 z-[1001] flex flex-col gap-2.5 animate-fade-in sm:left-3"
+        className="absolute left-3 right-3 z-[1001] flex flex-col gap-2 animate-fade-in"
         style={{
           top: TOP_CONTROL_ROW,
-          ["--map-filter-mobile-left" as string]: mobileFilterLeft,
-        } as CSSProperties}
+        }}
       >
         <div className="flex min-w-0 items-start gap-2">
-          {/* Mode Capsule */}
-          <div
-            className="flex min-w-0 flex-1 items-center overflow-x-auto rounded-full p-[3px] backdrop-blur-md [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            style={{
-              background: "hsla(30, 25%, 10%, 0.88)",
-              border: `1px solid hsla(${activeAccent}, 0.25)`,
-              boxShadow: `0 2px 12px hsla(${activeAccent}, 0.1), inset 0 1px 0 hsla(0, 0%, 100%, 0.04)`,
-            }}
-          >
-            {PERSPECTIVES.map(p => {
-              const isActive = perspective === p.key;
-              return (
-                <motion.button
-                  key={p.key}
-                  onClick={() => {
-                    setPerspective(p.key);
-                    if (onPerspectivePreset) onPerspectivePreset(PERSPECTIVE_PRESETS[p.key]);
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-serif transition-colors duration-200"
-                  style={{
-                    color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 55%, 0.6)",
-                    background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
-                  }}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mode-indicator"
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        border: `1.5px solid hsla(${p.accent}, 0.4)`,
-                        boxShadow: `0 0 10px hsla(${p.accent}, 0.15), inset 0 0 8px hsla(${p.accent}, 0.06)`,
-                      }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10 text-[13px]">{p.icon}</span>
-                  <span className="relative z-10 tracking-wide">{p.label}</span>
-                </motion.button>
-              );
-            })}
-          </div>
+          <div className="flex-1" />
 
           {/* Count badge */}
           <motion.span
@@ -403,8 +361,6 @@ const AtlasFilter = ({
           >
             {totalVisible}
           </motion.span>
-
-          <div className="flex-1" />
 
           {onFullscreenToggle && (
             <motion.button
