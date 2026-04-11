@@ -487,6 +487,12 @@ const AgentGardenPage = () => {
             </Card>
             <SubmissionReviewPanel />
           </TabsContent>
+
+          {/* ═══════════════ WANDERERS ═══════════════ */}
+          <TabsContent value="wanderers" className="mt-6">
+            <WanderersTab />
+          </TabsContent>
+
         </Tabs>
 
         {/* Back link */}
