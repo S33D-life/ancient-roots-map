@@ -199,6 +199,7 @@ const TreeDetailPage = () => {
     treeLng: tree?.longitude,
   });
   const presenceCount = useTreePresenceCount(userId, id);
+  const treeDetailPresence = useSingleTreePresence(id);
   const { progress: relationship } = useTreeRelationship(id, userId);
   const proximityGate = useTreeProximityGate({
     treeId: id,
