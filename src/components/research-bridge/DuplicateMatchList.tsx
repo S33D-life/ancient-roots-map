@@ -107,19 +107,25 @@ export function DuplicateMatchList({ candidate, onMarkDuplicate }: Props) {
   );
 }
 
-/** Small warning badge for candidate rows */
+/** Small warning badge for candidate rows — deferred load to avoid N+1 */
 export function DuplicateWarningBadge({ candidate }: { candidate: SourceCandidate }) {
   const [count, setCount] = useState<number | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!candidate.raw_latitude || !candidate.raw_longitude) return;
-    findDuplicates(
-      candidate.raw_latitude,
-      candidate.raw_longitude,
-      candidate.raw_species || "",
-      candidate.raw_name,
-    ).then((m) => setCount(m.length));
-  }, [candidate.id]);
+    if (loaded || !candidate.raw_latitude || !candidate.raw_longitude) return;
+    // Defer the check to avoid hammering the API on render
+    const timer = setTimeout(() => {
+      setLoaded(true);
+      findDuplicates(
+        candidate.raw_latitude,
+        candidate.raw_longitude,
+        candidate.raw_species || "",
+        candidate.raw_name,
+      ).then((m) => setCount(m.length));
+    }, 500 + Math.random() * 1000);
+    return () => clearTimeout(timer);
+  }, [candidate.id, loaded]);
 
   if (!count) return null;
 
