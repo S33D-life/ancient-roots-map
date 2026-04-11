@@ -78,7 +78,7 @@ const FieldVisibilityToggle = ({
     ) : (
       <EyeOff className="w-3 h-3 text-muted-foreground" />
     )}
-    {visible ? "Public" : "Private"}
+    {visible ? "Shared" : "Hidden"}
   </button>
 );
 
