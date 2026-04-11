@@ -197,8 +197,10 @@ export function setupPopupActions(container: HTMLElement): () => void {
         return;
       }
 
+      if (navigator.vibrate) navigator.vibrate(40);
       heartsBtn.style.opacity = "0.5";
       heartsBtn.style.pointerEvents = "none";
+      heartsBtn.style.animation = "none";
       heartsBtn.textContent = "⏳ Collecting...";
 
       try {
@@ -209,11 +211,13 @@ export function setupPopupActions(container: HTMLElement): () => void {
         if (error) throw error;
         const amount = typeof data === "number" ? data : 0;
         if (amount > 0) {
+          if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
           heartsBtn.textContent = `✨ ${amount} hearts collected!`;
           heartsBtn.style.opacity = "1";
-          heartsBtn.style.background = "hsl(120,50%,40%,0.15)";
-          heartsBtn.style.borderColor = "hsl(120,40%,45%,0.3)";
-          toast.success(`You collected ${amount} heart${amount !== 1 ? "s" : ""}!`, { icon: "💚" });
+          heartsBtn.style.background = "hsla(140, 50%, 40%, 0.15)";
+          heartsBtn.style.borderColor = "hsla(140, 40%, 45%, 0.3)";
+          heartsBtn.style.boxShadow = "0 0 16px hsla(140, 45%, 50%, 0.2)";
+          toast.success(`${amount} heart${amount !== 1 ? "s" : ""} gathered!`, { icon: "🌿" });
           window.dispatchEvent(new CustomEvent("s33d-hearts-earned", { detail: { amount } }));
         } else {
           heartsBtn.textContent = "No hearts ready yet";
