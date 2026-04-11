@@ -21,7 +21,7 @@ import {
 import { Loader2, Search, Check, AlertTriangle, TreeDeciduous, Database, Code, HelpCircle, Globe, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { useHasRole } from "@/hooks/use-role";
-import { resolveSpeciesSync, type MatchConfidence } from "@/services/speciesResolver";
+import { resolveSpeciesSync, enrichFromGBIF, type MatchConfidence } from "@/services/speciesResolver";
 
 type CurationStatus = "unresolved" | "custom_local" | "needs_gbif" | "resolved";
 type SortMode = "count" | "alpha";
@@ -274,6 +274,41 @@ const CuratorSpeciesPage = () => {
           </Select>
           <Button variant="outline" size="sm" onClick={fetchTrees} className="font-serif">
             Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="font-serif gap-1.5"
+            disabled={loading}
+            onClick={async () => {
+              // Collect unresolved species strings that look like GBIF candidates
+              const gbifCandidates = filteredGroups
+                .filter(g => g.curationStatus === "unresolved" || g.curationStatus === "needs_gbif")
+                .map(g => g.speciesStr)
+                .filter(s => {
+                  // Has parens with scientific name, or looks like a binomial
+                  return /\([A-Z][a-z]+\s+[a-z]+/.test(s) || /^[A-Z][a-z]+\s+[a-z]+$/.test(s);
+                });
+              if (gbifCandidates.length === 0) {
+                toast.info("No GBIF candidates found among unresolved species");
+                return;
+              }
+              toast.loading(`Running GBIF enrichment for ${gbifCandidates.length} species...`, { id: "gbif" });
+              const result = await enrichFromGBIF(gbifCandidates);
+              if (result) {
+                toast.success(
+                  `GBIF: ${result.summary.created} created, ${result.summary.trees_linked} trees linked, ${result.summary.low_confidence} need review`,
+                  { id: "gbif" }
+                );
+                fetchTrees();
+                fetchCandidates();
+              } else {
+                toast.error("GBIF enrichment failed", { id: "gbif" });
+              }
+            }}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            GBIF Enrich
           </Button>
         </div>
 

@@ -26,15 +26,38 @@ export interface SpeciesResolution {
 }
 
 /**
- * GBIF enrichment stub — future integration point.
- * When implemented, will fetch taxonomy from GBIF API by scientific name.
+ * GBIF enrichment via the gbif-enrich edge function.
+ * Parses scientific names and creates species_index entries + links trees.
  */
 export async function enrichFromGBIF(
-  _scientificName: string
-): Promise<Partial<SpeciesResolution> | null> {
-  // TODO: Implement GBIF species/match?name= lookup
-  // Returns { genus, family, scientificName, speciesKey (gbif taxon id) }
-  return null;
+  speciesStrings: string[]
+): Promise<{
+  summary: { created: number; updated: number; low_confidence: number; skipped: number; trees_linked: number };
+  results: Array<{
+    original: string;
+    parsed_scientific: string;
+    confidence: number;
+    match_type: string;
+    action: string;
+    species_key: string | null;
+    trees_updated: number;
+  }>;
+} | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke("gbif-enrich", {
+      body: { species_strings: speciesStrings },
+    });
+    if (error) {
+      console.error("GBIF enrich error:", error);
+      return null;
+    }
+    // Clear cache so new species_index entries are picked up
+    cache.clear();
+    return data;
+  } catch (err) {
+    console.error("GBIF enrich failed:", err);
+    return null;
+  }
 }
 
 // In-memory cache: normalized string → resolution

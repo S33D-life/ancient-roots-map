@@ -1,0 +1,1 @@
+ALTER TABLE public.species_index ADD COLUMN metadata jsonb DEFAULT '{}'::jsonb;
