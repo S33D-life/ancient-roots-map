@@ -72,7 +72,7 @@ const CuratorSpeciesPage = () => {
   const [candidates, setCandidates] = useState<SpeciesCandidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "unresolved" | "exact" | "fuzzy">("unresolved");
+  const [filter, setFilter] = useState<FilterMode>("unresolved");
   const [sortMode, setSortMode] = useState<SortMode>("count");
   const [assigning, setAssigning] = useState<string | null>(null);
   const [markedStatuses, setMarkedStatuses] = useState<Record<string, CurationStatus>>({});
@@ -81,7 +81,7 @@ const CuratorSpeciesPage = () => {
     setLoading(true);
     let query = supabase
       .from("trees")
-      .select("id, name, species, species_key")
+      .select("id, name, species, species_key, metadata")
       .order("species", { ascending: true })
       .limit(500);
 
@@ -139,6 +139,7 @@ const CuratorSpeciesPage = () => {
       const suggestedCandidate = findBestMatch(speciesStr);
       const isResolved = treesInGroup.every(t => t.species_key !== null);
 
+      const resType = (treesInGroup[0].metadata?.resolution_type as ResolutionType) || null;
       return {
         speciesStr,
         trees: treesInGroup,
@@ -146,6 +147,7 @@ const CuratorSpeciesPage = () => {
         source: resolution.source,
         suggestedCandidate,
         curationStatus: markedStatuses[speciesStr.toLowerCase().trim()] || (isResolved ? "resolved" : "unresolved"),
+        resolutionType: resType,
       };
     });
   }, [trees, findBestMatch, markedStatuses]);
