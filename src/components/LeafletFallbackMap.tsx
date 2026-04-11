@@ -377,6 +377,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const showDreamOfferings = layers.dreamOfferings;
   const showSignalField = layers.signalField;
   const showMemoryTrail = layers.memoryTrail;
+  const showPresence = layers.presence;
 
   // Broadcast clearView state so external panels (MapTreePanel) can hide
   useEffect(() => {
