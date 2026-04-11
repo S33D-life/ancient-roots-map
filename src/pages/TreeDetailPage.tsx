@@ -39,6 +39,7 @@ import type { OfferingSortMode } from "@/components/OfferingSortControls";
 import { useBloomStatus } from "@/hooks/use-bloom-status";
 import { useTeotagPageContext } from "@/hooks/use-teotag-page-context";
 import { useTreePresence } from "@/hooks/use-tree-presence";
+import { useSingleTreePresence } from "@/hooks/use-single-tree-presence";
 import { useTreePresenceCount } from "@/hooks/use-presence-spiral";
 import { useTreeProximityGate } from "@/hooks/use-tree-proximity-gate";
 import { goToTreeOnMap } from "@/utils/mapNavigation";
@@ -93,6 +94,7 @@ const AddContributionPanel = lazy(() => import("@/components/contributions/AddCo
 const ContributionFeed = lazy(() => import("@/components/contributions/ContributionFeed"));
 const WhisperCollector = lazy(() => import("@/components/WhisperCollector"));
 const TreeArrivalPanel = lazy(() => import("@/components/TreeArrivalPanel"));
+const TreeDetailPresenceBlock = lazy(() => import("@/components/TreeDetailPresenceBlock"));
 const WeatherCard = lazy(() => import("@/components/WeatherCard"));
 const TreeCheckinButton = lazy(() => import("@/components/TreeCheckinButton"));
 const SkystampSeal = lazy(() => import("@/components/SkystampSeal"));
@@ -198,6 +200,7 @@ const TreeDetailPage = () => {
     treeLng: tree?.longitude,
   });
   const presenceCount = useTreePresenceCount(userId, id);
+  const treeDetailPresence = useSingleTreePresence(id);
   const { progress: relationship } = useTreeRelationship(id, userId);
   const proximityGate = useTreeProximityGate({
     treeId: id,
@@ -581,80 +584,20 @@ const TreeDetailPage = () => {
           />
         )}
 
-        {/* ══════ Primary Check-In Prompt ══════ */}
+        {/* ══════ Primary Check-In Prompt + Presence Signal ══════ */}
         {userId && tree && (
           <Suspense fallback={null}>
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 mb-2"
-            >
-              {(() => {
-                const isNearby = proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_grace";
-                const isActive = meetingStatus === "active" || meetingStatus === "expiring";
-                const hasCheckedIn = checkinStats && (checkinStats.totalVisits ?? 0) > 0;
-
-                if (isActive) {
-                  return (
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/20 bg-primary/5">
-                      <span className="relative flex h-2.5 w-2.5 shrink-0">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40" />
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
-                      </span>
-                      <p className="text-sm font-serif text-foreground/80">You are here with {tree.name}</p>
-                    </div>
-                  );
-                }
-
-                if (isNearby) {
-                  return (
-                    <button
-                      onClick={() => setCanopyCheckinOpen(true)}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/25 bg-primary/5 hover:bg-primary/10 transition-colors text-left group"
-                    >
-                      <span className="relative flex h-2.5 w-2.5 shrink-0">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-40" style={{ background: "hsl(120, 50%, 50%)" }} />
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5" style={{ background: "hsl(120, 50%, 50%)" }} />
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-serif text-foreground/90 group-hover:text-primary transition-colors">Check in at this tree</p>
-                        <p className="text-[11px] font-serif text-muted-foreground mt-0.5">You are nearby — mark your arrival</p>
-                      </div>
-                      <TreeDeciduous className="w-4 h-4 text-primary/40 shrink-0" />
-                    </button>
-                  );
-                }
-
-                return (
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border/30 bg-secondary/10">
-                    <span className="flex h-2.5 w-2.5 rounded-full shrink-0 bg-muted-foreground/30" />
-                    <p className="text-[12px] font-serif text-muted-foreground/70">
-                      {hasCheckedIn ? `Visited ${checkinStats!.totalVisits} time${checkinStats!.totalVisits !== 1 ? "s" : ""} · visit again to check in` : "Visit this tree to check in"}
-                    </p>
-                  </div>
-                );
-              })()}
-            </motion.div>
-          </Suspense>
-        )}
-
-        {/* ══════ Collect Hearts CTA ══════ */}
-        {userId && tree && id && (
-          <Suspense fallback={null}>
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.35 }}
-              className="mb-2"
-            >
-              <CollectHeartsButton
-                treeId={id}
-                treeName={tree.name}
-                userId={userId}
-                isEligible={proximityGate.isUnlocked}
-              />
-            </motion.div>
+            <TreeDetailPresenceBlock
+              tree={tree}
+              proximityGate={proximityGate}
+              meetingStatus={meetingStatus}
+              checkinStats={checkinStats}
+              onCheckin={() => setCanopyCheckinOpen(true)}
+              treePresence={treeDetailPresence}
+              availableWhispers={availableWhispers}
+              hasHearts={false}
+              onGoToEncounters={() => setSectionTab("encounters")}
+            />
           </Suspense>
         )}
 
@@ -937,18 +880,18 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* 333s Presence Ritual */}
+            {/* 333s Presence Ritual — deeper layer of encounter */}
             {userId && (
               <Card className="bg-card/60 backdrop-blur border-primary/20">
                 <CardContent className="p-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <TreeDeciduous className="w-5 h-5 text-primary/60" />
                     <div>
-                      <p className="font-serif text-sm text-foreground">Tree Presence (333s)</p>
+                      <p className="font-serif text-sm text-foreground">Deepen your presence</p>
                       <p className="text-xs text-muted-foreground font-serif">
                         {presenceCompleted
-                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence completed · ${presenceCount} total`
-                          : "Be still with this tree to unlock minting"}
+                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
+                          : "333 seconds of stillness — be fully here with this tree"}
                       </p>
                     </div>
                   </div>
@@ -959,7 +902,7 @@ const TreeDetailPage = () => {
                     onClick={() => setPresenceOpen(true)}
                     disabled={completedToday}
                   >
-                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin Presence"}
+                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin"}
                   </Button>
                 </CardContent>
               </Card>

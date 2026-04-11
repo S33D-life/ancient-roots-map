@@ -231,13 +231,19 @@ export function buildPopupHtml(
       <button data-wish-tree="${escapeHtml(tree.id)}" id="${wishBtnId}" aria-label="Wish" title="Save to wishes" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:34px;font-size:10px;color:hsl(42,50%,55%);background:transparent;border:1px solid hsla(42,50%,45%,0.15);border-radius:8px;cursor:pointer;font-family:sans-serif;transition:all .15s;">⭐ Wish</button>
     </div>
 
-    <!-- Secondary row — Photo · Song · Refine · Share -->
-    <div style="padding:2px 16px 14px;display:flex;gap:4px;justify-content:center;">
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(0,0%,45%);background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Add Photo">📷 Photo</a>
-      <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(0,0%,45%);background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Add Song">🎵 Song</a>
-      <a href="/tree/${encodeURIComponent(tree.id)}?tab=encounters&refine=1" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(142,40%,50%);background:transparent;border:1px solid hsla(142,40%,40%,0.12);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Refine location">📍 Refine</a>
-      <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;cursor:pointer;color:hsl(0,0%,45%);font-family:sans-serif;transition:all .15s;" title="Share">↗️ Share</button>
-    </div>
+    <!-- Secondary actions — tucked for calmer first encounter -->
+    <details style="padding:2px 16px 14px;">
+      <summary style="display:flex;align-items:center;justify-content:center;gap:4px;height:28px;font-size:9px;color:hsl(0,0%,45%);font-family:sans-serif;cursor:pointer;list-style:none;-webkit-appearance:none;user-select:none;transition:color .15s;" onmouseover="this.style.color='hsl(42,60%,60%)'" onmouseout="this.style.color='hsl(0,0%,45%)'">
+        <span>More actions</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <div style="display:flex;gap:4px;justify-content:center;padding-top:6px;">
+        <a href="/tree/${encodeURIComponent(tree.id)}?add=photo" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(0,0%,45%);background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Add Photo">📷 Photo</a>
+        <a href="/tree/${encodeURIComponent(tree.id)}?add=song" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(0,0%,45%);background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Add Song">🎵 Song</a>
+        <a href="/tree/${encodeURIComponent(tree.id)}?tab=encounters&refine=1" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;text-decoration:none;color:hsl(142,40%,50%);background:transparent;border:1px solid hsla(142,40%,40%,0.12);border-radius:7px;font-family:sans-serif;transition:all .15s;" title="Refine location">📍 Refine</a>
+        <button data-share-tree="${encodeURIComponent(tree.id)}" style="display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:1;height:28px;font-size:9px;background:transparent;border:1px solid hsla(0,0%,40%,0.1);border-radius:7px;cursor:pointer;color:hsl(0,0%,45%);font-family:sans-serif;transition:all .15s;" title="Share">↗️ Share</button>
+      </div>
+    </details>
   </div>`;
   // Cache the result
   if (POPUP_CACHE.size >= MAX_POPUP_CACHE) {
