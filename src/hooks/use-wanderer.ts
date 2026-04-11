@@ -1,12 +1,22 @@
 /**
  * useWanderer — React hook for the First Wanderer agent system.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { runJourney } from "@/services/wanderer-runner";
 import { evaluate } from "@/services/wanderer-evaluator";
 import type { AgentJourney, AgentRun, AgentFinding, JourneyStep } from "@/lib/wanderer-types";
 import type { Json } from "@/integrations/supabase/types";
+
+const SMOKE_SUITE_SLUGS = ["map-load", "tree-detail-page", "tree-radio-open", "staff-room-open", "homepage-entry"];
+
+export interface JourneyHealth {
+  journeyId: string;
+  lastStatus: string | null;
+  passRate: number;       // 0–100 over last 5
+  lastFindingCount: number;
+  lastRunMs: number | null;
+}
 
 export function useWanderer() {
   const [journeys, setJourneys] = useState<AgentJourney[]>([]);
@@ -14,6 +24,8 @@ export function useWanderer() {
   const [findings, setFindings] = useState<AgentFinding[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [smokeRunning, setSmokeRunning] = useState(false);
+  const [smokeProgress, setSmokeProgress] = useState<{ current: number; total: number; results: Array<{ slug: string; status: string }> } | null>(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -29,6 +41,29 @@ export function useWanderer() {
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // Journey health signals
+  const journeyHealth = useMemo((): Map<string, JourneyHealth> => {
+    const map = new Map<string, JourneyHealth>();
+    for (const j of journeys) {
+      const jRuns = runs.filter(r => r.journey_id === j.id).slice(0, 5);
+      const lastRun = jRuns[0];
+      const passCount = jRuns.filter(r => r.status === "passed").length;
+      const lastFindings = lastRun ? findings.filter(f => f.run_id === lastRun.id).length : 0;
+      const lastRunMs = lastRun?.started_at && lastRun?.finished_at
+        ? new Date(lastRun.finished_at).getTime() - new Date(lastRun.started_at).getTime()
+        : null;
+
+      map.set(j.id, {
+        journeyId: j.id,
+        lastStatus: lastRun?.status || null,
+        passRate: jRuns.length > 0 ? Math.round((passCount / jRuns.length) * 100) : 0,
+        lastFindingCount: lastFindings,
+        lastRunMs,
+      });
+    }
+    return map;
+  }, [journeys, runs, findings]);
 
   const startRun = useCallback(async (journey: AgentJourney) => {
     if (running) return;
@@ -74,10 +109,33 @@ export function useWanderer() {
         await supabase.from("agent_findings").insert(rows);
       }
       await fetchAll();
+      return status;
     } finally {
       setRunning(false);
     }
   }, [running, fetchAll]);
+
+  // Smoke suite: run 5 core journeys in sequence
+  const runSmokeSuite = useCallback(async () => {
+    if (smokeRunning || running) return;
+    setSmokeRunning(true);
+    const suiteJourneys = journeys.filter(j => SMOKE_SUITE_SLUGS.includes(j.slug));
+    const results: Array<{ slug: string; status: string }> = [];
+    setSmokeProgress({ current: 0, total: suiteJourneys.length, results: [] });
+
+    for (let i = 0; i < suiteJourneys.length; i++) {
+      const j = suiteJourneys[i];
+      setSmokeProgress({ current: i + 1, total: suiteJourneys.length, results: [...results] });
+      const status = await startRun(j);
+      results.push({ slug: j.slug, status: status || "failed" });
+      // Brief pause between journeys
+      await new Promise(r => setTimeout(r, 500));
+    }
+    setSmokeProgress({ current: suiteJourneys.length, total: suiteJourneys.length, results });
+    setSmokeRunning(false);
+    await fetchAll();
+    return results;
+  }, [smokeRunning, running, journeys, startRun, fetchAll]);
 
   const reviewFinding = useCallback(async (findingId: string, reviewStatus: string, curatorNotes?: string) => {
     await supabase.from("agent_findings").update({
@@ -117,5 +175,9 @@ export function useWanderer() {
     return report?.id;
   }, [fetchAll]);
 
-  return { journeys, runs, findings, loading, running, startRun, reviewFinding, convertToBugReport, refetch: fetchAll };
+  return {
+    journeys, runs, findings, loading, running,
+    smokeRunning, smokeProgress, journeyHealth,
+    startRun, runSmokeSuite, reviewFinding, convertToBugReport, refetch: fetchAll,
+  };
 }

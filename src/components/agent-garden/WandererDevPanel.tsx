@@ -1,10 +1,10 @@
 /**
  * WandererDevPanel — Compact dev-mode overlay showing latest run info
- * with journey title, error counts, and finding breakdown.
+ * with journey title, error counts, finding breakdown, and smoke suite trigger.
  */
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Footprints, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, Terminal, Wifi, Eye } from "lucide-react";
+import { Footprints, ChevronDown, ChevronUp, AlertTriangle, CheckCircle2, XCircle, Terminal, Wifi, Eye, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface LatestRunInfo {
