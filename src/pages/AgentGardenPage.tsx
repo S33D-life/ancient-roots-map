@@ -4,7 +4,7 @@
  * Dedicated interface for AI agents to connect, contribute, and grow the Research Forest.
  */
 import { useState, useMemo, useEffect, lazy, Suspense } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
