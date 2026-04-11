@@ -1,12 +1,12 @@
 /**
- * ResearchContributionsPanel — Shows research pipeline contribution activity in Agent Garden.
- * Displays task categories, recent events, acceptance counts, filters, and heart-readiness signals.
+ * ResearchContributionsPanel — Research pipeline contribution feed in Agent Garden.
+ * Filters, grouped view, reward-state visibility, heart-readiness signals.
  */
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Activity, Heart, TreeDeciduous, CheckCircle, Clock, XCircle, Sparkles } from "lucide-react";
+import { Loader2, Activity, Heart, TreeDeciduous, CheckCircle, Clock, XCircle, Sparkles, Gift } from "lucide-react";
 import {
   RESEARCH_TASK_CATEGORIES,
   fetchRecentResearchContributions,
@@ -32,26 +32,20 @@ const TYPE_LABELS: Record<string, string> = {
   research_tree_promoted_to_af: "Promoted to Ancient Friend",
 };
 
-const VALIDATION_ICON: Record<string, { icon: React.ReactNode; label: string }> = {
-  pending: { icon: <span className="text-[10px]">⏳</span>, label: "Pending" },
-  accepted: { icon: <span className="text-[10px]">✅</span>, label: "Accepted" },
-  validated: { icon: <span className="text-[10px]">✅</span>, label: "Validated" },
-  rejected: { icon: <span className="text-[10px]">❌</span>, label: "Rejected" },
-};
-
-type FilterStatus = "all" | "pending" | "accepted" | "rejected";
+type FilterStatus = "all" | "pending" | "accepted" | "rejected" | "reward_ready";
 
 const FILTERS: { value: FilterStatus; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "pending", label: "Pending Review" },
+  { value: "pending", label: "Pending" },
   { value: "accepted", label: "Accepted" },
+  { value: "reward_ready", label: "Reward Ready" },
   { value: "rejected", label: "Rejected" },
 ];
 
 export function ResearchContributionsPanel() {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<any[]>([]);
-  const [stats, setStats] = useState({ total: 0, accepted: 0, pending: 0, rejected: 0, rewardReady: 0, byType: {} as Record<string, number> });
+  const [stats, setStats] = useState({ total: 0, accepted: 0, pending: 0, rejected: 0, rewardReady: 0, distributed: 0, byType: {} as Record<string, number> });
   const [filter, setFilter] = useState<FilterStatus>("all");
 
   const load = useCallback(async () => {
@@ -67,43 +61,33 @@ export function ResearchContributionsPanel() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Group events
   const pendingEvents = events.filter(e => e.validation_status === "pending");
-  const validatedEvents = events.filter(e => e.validation_status === "accepted" || e.validation_status === "validated");
+  const readyEvents = events.filter(e => e.reward_status === "ready");
+  const distributedEvents = events.filter(e => e.reward_status === "distributed");
   const rejectedEvents = events.filter(e => e.validation_status === "rejected");
-
+  const otherAccepted = events.filter(e => e.validation_status === "accepted" && e.reward_status !== "ready" && e.reward_status !== "distributed");
   const showGrouped = filter === "all";
 
   return (
     <div className="space-y-4">
-      {/* Stats summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card className="bg-card/30 border-border/20">
-          <CardContent className="p-3 text-center">
-            <span className="text-xl font-mono font-bold text-foreground/90 block">{stats.total}</span>
-            <span className="text-[9px] text-muted-foreground/60">Total</span>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/30 border-border/20">
-          <CardContent className="p-3 text-center">
-            <span className="text-xl font-mono font-bold text-accent-foreground block">{stats.pending}</span>
-            <span className="text-[9px] text-muted-foreground/60">Pending</span>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/30 border-border/20">
-          <CardContent className="p-3 text-center">
-            <span className="text-xl font-mono font-bold text-primary block">{stats.accepted}</span>
-            <span className="text-[9px] text-muted-foreground/60">Accepted</span>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/30 border-border/20">
-          <CardContent className="p-3 text-center">
-            <span className="text-xl font-mono font-bold text-primary block">{stats.rewardReady}</span>
-            <span className="text-[9px] text-muted-foreground/60 flex items-center justify-center gap-0.5">
-              <Sparkles className="w-2.5 h-2.5" /> Reward Ready
-            </span>
-          </CardContent>
-        </Card>
+      {/* Stats */}
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+        {[
+          { n: stats.total, label: "Total", color: "text-foreground/90" },
+          { n: stats.pending, label: "Pending", color: "text-accent-foreground" },
+          { n: stats.accepted, label: "Accepted", color: "text-primary" },
+          { n: stats.rewardReady, label: "Reward Ready", color: "text-primary", icon: <Sparkles className="w-2.5 h-2.5 inline" /> },
+          { n: stats.distributed, label: "Distributed", color: "text-muted-foreground", icon: <Gift className="w-2.5 h-2.5 inline" /> },
+        ].map(s => (
+          <Card key={s.label} className="bg-card/30 border-border/20">
+            <CardContent className="p-2 text-center">
+              <span className={`text-lg font-mono font-bold block ${s.color}`}>{s.n}</span>
+              <span className="text-[8px] text-muted-foreground/60 flex items-center justify-center gap-0.5">
+                {s.icon} {s.label}
+              </span>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Filters */}
@@ -120,16 +104,19 @@ export function ResearchContributionsPanel() {
             {f.value === "pending" && stats.pending > 0 && (
               <Badge variant="secondary" className="ml-1 text-[8px] h-3.5 px-1">{stats.pending}</Badge>
             )}
+            {f.value === "reward_ready" && stats.rewardReady > 0 && (
+              <Badge variant="secondary" className="ml-1 text-[8px] h-3.5 px-1">{stats.rewardReady}</Badge>
+            )}
           </Button>
         ))}
       </div>
 
-      {/* Task categories */}
+      {/* Categories */}
       <Card className="bg-card/30 border-border/20">
         <CardHeader className="pb-2 pt-3 px-4">
           <CardTitle className="text-xs font-mono flex items-center gap-2">
             <TreeDeciduous className="w-3.5 h-3.5 text-primary" />
-            Research Task Categories
+            Task Categories
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-3">
@@ -143,13 +130,13 @@ export function ResearchContributionsPanel() {
         </CardContent>
       </Card>
 
-      {/* Contribution by type */}
+      {/* By type */}
       {Object.keys(stats.byType).length > 0 && (
         <Card className="bg-card/30 border-border/20">
           <CardHeader className="pb-2 pt-3 px-4">
             <CardTitle className="text-xs font-mono flex items-center gap-2">
               <Activity className="w-3.5 h-3.5 text-primary" />
-              Contributions by Type
+              By Type
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3 space-y-1">
@@ -169,35 +156,27 @@ export function ResearchContributionsPanel() {
           <Loader2 className="w-4 h-4 animate-spin text-primary mr-2" />
           <span className="text-xs text-muted-foreground">Loading…</span>
         </div>
-      ) : (
+      ) : events.length === 0 ? (
+        <p className="text-[11px] text-muted-foreground/60 text-center py-6">No contributions match this filter.</p>
+      ) : showGrouped ? (
         <div className="space-y-3">
-          {showGrouped && pendingEvents.length > 0 && (
-            <EventGroup title="Awaiting Steward Attention" icon={<Clock className="w-3 h-3 text-accent-foreground" />} events={pendingEvents} />
-          )}
-          {showGrouped && validatedEvents.length > 0 && (
-            <EventGroup title="Validated Contributions" icon={<CheckCircle className="w-3 h-3 text-primary" />} events={validatedEvents} />
-          )}
-          {showGrouped && rejectedEvents.length > 0 && (
-            <EventGroup title="Rejected" icon={<XCircle className="w-3 h-3 text-destructive" />} events={rejectedEvents} />
-          )}
-          {!showGrouped && (
-            <EventGroup title={FILTERS.find(f => f.value === filter)?.label || "Results"} events={events} />
-          )}
-          {events.length === 0 && (
-            <p className="text-[11px] text-muted-foreground/60 text-center py-6">
-              No contributions match this filter.
-            </p>
-          )}
+          {pendingEvents.length > 0 && <EventGroup title="Awaiting Steward Attention" icon={<Clock className="w-3 h-3 text-accent-foreground" />} events={pendingEvents} />}
+          {readyEvents.length > 0 && <EventGroup title="Reward Ready" icon={<Sparkles className="w-3 h-3 text-primary" />} events={readyEvents} elevated />}
+          {otherAccepted.length > 0 && <EventGroup title="Accepted" icon={<CheckCircle className="w-3 h-3 text-primary" />} events={otherAccepted} />}
+          {distributedEvents.length > 0 && <EventGroup title="Hearts Distributed" icon={<Gift className="w-3 h-3 text-muted-foreground" />} events={distributedEvents} muted />}
+          {rejectedEvents.length > 0 && <EventGroup title="Rejected" icon={<XCircle className="w-3 h-3 text-destructive" />} events={rejectedEvents} muted />}
         </div>
+      ) : (
+        <EventGroup title={FILTERS.find(f => f.value === filter)?.label || "Results"} events={events} elevated={filter === "reward_ready"} />
       )}
     </div>
   );
 }
 
-function EventGroup({ title, icon, events }: { title: string; icon?: React.ReactNode; events: any[] }) {
-  if (events.length === 0) return null;
+function EventGroup({ title, icon, events, elevated, muted }: { title: string; icon?: React.ReactNode; events: any[]; elevated?: boolean; muted?: boolean }) {
+  if (!events.length) return null;
   return (
-    <Card className="bg-card/30 border-border/20">
+    <Card className={`border-border/20 ${elevated ? "bg-primary/5 border-primary/15" : muted ? "bg-card/20 opacity-80" : "bg-card/30"}`}>
       <CardHeader className="pb-2 pt-3 px-4">
         <CardTitle className="text-xs font-mono flex items-center gap-2">
           {icon || <Heart className="w-3.5 h-3.5 text-primary" />}
@@ -206,27 +185,25 @@ function EventGroup({ title, icon, events }: { title: string; icon?: React.React
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 pb-3 space-y-1">
-        {events.map((evt: any) => (
-          <ContributionEventRow key={evt.id} evt={evt} />
-        ))}
+        {events.map((evt: any) => <EventRow key={evt.id} evt={evt} />)}
       </CardContent>
     </Card>
   );
 }
 
-function ContributionEventRow({ evt }: { evt: any }) {
+function EventRow({ evt }: { evt: any }) {
   const agent = evt.agent_profiles as { agent_name: string; avatar_emoji: string | null } | null;
   const payload = evt.payload_json as Record<string, any> | null;
-  const valInfo = VALIDATION_ICON[evt.validation_status] || VALIDATION_ICON.pending;
-  const isRewardReady = evt.reward_status === "ready";
-  const isDistributed = evt.reward_status === "distributed";
+  const isReady = evt.reward_status === "ready";
+  const isDist = evt.reward_status === "distributed";
+  const isRejected = evt.validation_status === "rejected";
+
+  const valIcon = isRejected ? "❌" : isDist ? "✅" : isReady ? "💚" : evt.validation_status === "accepted" ? "✅" : "⏳";
 
   return (
-    <div className={`flex items-center justify-between text-[11px] py-1 px-1 rounded transition-colors ${
-      isRewardReady ? "bg-primary/5" : ""
-    }`}>
+    <div className={`flex items-center justify-between text-[11px] py-1 px-1 rounded ${isReady ? "bg-primary/5" : ""}`}>
       <div className="flex items-center gap-1.5 min-w-0">
-        {valInfo.icon}
+        <span className="text-[10px]">{valIcon}</span>
         <span className="text-foreground/80 truncate">
           {agent ? `${agent.avatar_emoji || "🤖"} ${agent.agent_name}` : "System"}
         </span>
@@ -239,15 +216,12 @@ function ContributionEventRow({ evt }: { evt: any }) {
         )}
         {evt.hearts_awarded > 0 && (
           <span className={`font-mono text-[10px] ${
-            isRewardReady
-              ? "text-primary font-semibold"
-              : isDistributed
-                ? "text-muted-foreground line-through"
-                : "text-muted-foreground/60"
+            isReady ? "text-primary font-semibold" : isDist ? "text-muted-foreground line-through" : "text-muted-foreground/60"
           }`}>
             +{evt.hearts_awarded}♡
           </span>
         )}
+        {isDist && <Gift className="w-2.5 h-2.5 text-muted-foreground/50" />}
       </div>
     </div>
   );

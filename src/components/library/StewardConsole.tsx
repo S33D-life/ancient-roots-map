@@ -13,7 +13,7 @@ import {
   AlertTriangle, CheckCircle, Clock, Globe, ExternalLink, Loader2,
   Eye, Telescope, Sprout,
 } from "lucide-react";
-import { ContributionReviewQueue } from "./ContributionReviewQueue";
+import { RewardReadyQueue } from "./RewardReadyQueue";
 import {
   clusterFindings, findFlakiestJourney, mostCommonCategory,
 } from "@/lib/wanderer-patterns";
@@ -251,8 +251,9 @@ export function StewardConsole() {
         </CardContent>
       </Card>
 
-      {/* Contribution Review Queue (keeper-only) */}
-      <ContributionReviewQueue />
+
+      {/* Reward Ready Queue (keeper-only) */}
+      <RewardReadyQueue />
 
       {/* Source Activity */}
       {latestSources.length > 0 && (
