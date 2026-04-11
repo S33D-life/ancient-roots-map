@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { TreeDeciduous, BookOpen, Leaf, Globe, Plus } from "lucide-react";
 import { Z, SAFE_ZONES } from "@/lib/z-index";
@@ -15,6 +15,7 @@ const NAV_ITEMS = [
 
 const BottomNav = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isMap = pathname === "/map";
 
   return (
@@ -54,7 +55,7 @@ const BottomNav = () => {
               window.dispatchEvent(new CustomEvent("s33d-add-tree-chooser"));
             } else {
               // Navigate to map with add-tree intent
-              window.location.href = "/map?addTree=true";
+              navigate("/map?addTree=true");
             }
           }}
           className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[48px] min-h-[48px] active:scale-95"
