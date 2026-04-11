@@ -1,6 +1,8 @@
 /**
  * useTreePresence — fetches presence signals for the current map viewport.
  * Returns trees where someone is "here now" or "recently met" (within 12h).
+ *
+ * Supports realtime updates from tree_checkins (debounced to avoid storms).
  */
 import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,11 +27,16 @@ interface Bounds {
   maxLng: number;
 }
 
+/** Minimum interval between realtime-triggered refetches (ms) */
+const REALTIME_DEBOUNCE_MS = 3000;
+
 export function useTreePresence(enabled: boolean = true) {
   const [signals, setSignals] = useState<TreePresenceSignal[]>([]);
   const [loading, setLoading] = useState(false);
   const lastBoundsRef = useRef<string>("");
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const realtimeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const lastRealtimeFetchRef = useRef(0);
 
   const fetchPresence = useCallback(async (bounds: Bounds) => {
     const key = `${bounds.minLat.toFixed(3)},${bounds.maxLat.toFixed(3)},${bounds.minLng.toFixed(3)},${bounds.maxLng.toFixed(3)}`;
@@ -70,21 +77,42 @@ export function useTreePresence(enabled: boolean = true) {
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (realtimeTimerRef.current) clearTimeout(realtimeTimerRef.current);
     };
   }, [enabled]);
 
-  // Realtime: re-fetch on new check-ins (only when enabled)
+  // Realtime: re-fetch on new check-ins (debounced, only when enabled)
   const lastBoundsForRealtimeRef = useRef<Bounds | null>(null);
   useEffect(() => {
     if (!enabled) return;
+
     const channel = supabase
       .channel("presence-checkins")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "tree_checkins" },
         () => {
-          // Invalidate cache so next fetch gets fresh data
-          lastBoundsRef.current = "";
+          // Debounce: skip if we fetched recently
+          const now = Date.now();
+          const elapsed = now - lastRealtimeFetchRef.current;
+
+          if (elapsed < REALTIME_DEBOUNCE_MS) {
+            // Schedule a deferred refetch if not already pending
+            if (!realtimeTimerRef.current) {
+              realtimeTimerRef.current = setTimeout(() => {
+                realtimeTimerRef.current = undefined;
+                lastBoundsRef.current = ""; // invalidate
+                lastRealtimeFetchRef.current = Date.now();
+                if (lastBoundsForRealtimeRef.current) {
+                  fetchPresence(lastBoundsForRealtimeRef.current);
+                }
+              }, REALTIME_DEBOUNCE_MS - elapsed);
+            }
+            return;
+          }
+
+          lastBoundsRef.current = ""; // invalidate cache
+          lastRealtimeFetchRef.current = now;
           if (lastBoundsForRealtimeRef.current) {
             fetchPresence(lastBoundsForRealtimeRef.current);
           }
@@ -92,7 +120,13 @@ export function useTreePresence(enabled: boolean = true) {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+      if (realtimeTimerRef.current) {
+        clearTimeout(realtimeTimerRef.current);
+        realtimeTimerRef.current = undefined;
+      }
+    };
   }, [enabled, fetchPresence]);
 
   // Track latest bounds for realtime refetch
