@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Gift, Heart, CheckCircle, Sparkles } from "lucide-react";
+import { timeAgo } from "@/lib/lifecycle-labels";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchRecentResearchContributions,
