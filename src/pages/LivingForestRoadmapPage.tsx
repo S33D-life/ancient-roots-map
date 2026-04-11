@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 import StageIcon from "@/components/roadmap/StageIcon";
+import { PulseSignal, FlowStrip } from "@/components/roadmap/PulseSignal";
+import { useRoadmapPulse, buildPulseConfigs } from "@/hooks/use-roadmap-pulse";
 import { hslAlpha } from "@/utils/colorUtils";
 import {
   ROADMAP_FEATURES,
@@ -84,10 +86,12 @@ const FeatureNode = ({
   feature,
   isActive,
   onSelect,
+  pulseConfig,
 }: {
   feature: RoadmapFeature;
   isActive: boolean;
   onSelect: (f: RoadmapFeature) => void;
+  pulseConfig?: import("@/hooks/use-roadmap-pulse").PulseConfig;
 }) => {
   const meta = STAGE_META[feature.stage];
   const sizeClass = {
@@ -98,6 +102,7 @@ const FeatureNode = ({
   }[feature.stage];
 
   const isLive = feature.status === "live" && feature.route;
+  const needsAttention = pulseConfig?.needsAttention ?? false;
 
   return (
     <motion.button
@@ -120,19 +125,30 @@ const FeatureNode = ({
         <span className="absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
           style={{ boxShadow: `0 0 12px 2px hsl(120 55% 45% / 0.2)` }} />
       )}
+      {/* Needs attention glow */}
+      {needsAttention && (
+        <span className="absolute -inset-1 rounded-xl animate-pulse"
+          style={{ boxShadow: `0 0 16px 3px hsl(var(--primary) / 0.2)`, opacity: 0.6 }} />
+      )}
       <span
         className={`
           w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center
-          border-2 transition-colors duration-300 text-sm
+          border-2 transition-colors duration-300 text-sm relative
           ${isActive
             ? "border-primary bg-primary/20 shadow-lg"
-            : isLive
-              ? "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card ring-1 ring-primary/10"
-              : "border-border/40 bg-card/70 group-hover:border-border/60 opacity-75"
+            : needsAttention
+              ? "border-primary/40 bg-primary/10 ring-1 ring-primary/20"
+              : isLive
+                ? "border-border/40 bg-card/70 group-hover:border-primary/50 group-hover:bg-card ring-1 ring-primary/10"
+                : "border-border/40 bg-card/70 group-hover:border-border/60 opacity-75"
           }
         `}
       >
         {feature.symbol || <StageIcon stage={feature.stage} className="w-5 h-5 md:w-6 md:h-6 text-primary" />}
+        {/* Needs attention dot */}
+        {needsAttention && (
+          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary animate-pulse" />
+        )}
       </span>
       <span className={`text-[10px] md:text-xs font-serif text-center leading-tight max-w-[90px] ${isLive ? "text-foreground/80" : "text-foreground/50"}`}>
         {feature.name}
@@ -143,6 +159,8 @@ const FeatureNode = ({
       >
         {meta.emoji} {feature.stage}
       </span>
+      {/* Pulse signal under node */}
+      <PulseSignal config={pulseConfig} />
     </motion.button>
   );
 };
@@ -281,7 +299,7 @@ const ForestParticles = () => (
 );
 
 /* ── Map View (Kumu-style visual network) ── */
-const MapView = ({ onNavigate }: { onNavigate: (route: string) => void }) => {
+const MapView = ({ onNavigate, pulseConfigs }: { onNavigate: (route: string) => void; pulseConfigs: Map<string, import("@/hooks/use-roadmap-pulse").PulseConfig> }) => {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [regionFilter, setRegionFilter] = useState<RoadmapRegion | null>(null);
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | null>(null);
@@ -432,6 +450,7 @@ const MapView = ({ onNavigate }: { onNavigate: (route: string) => void }) => {
                   feature={f}
                   isActive={activeFeature?.id === f.id}
                   onSelect={handleSelect}
+                  pulseConfig={pulseConfigs.get(f.id)}
                 />
               </div>
             );
@@ -507,6 +526,8 @@ const LivingForestRoadmapPage = () => {
   useDocumentTitle("Living Forest Roadmap");
   const navigate = useNavigate();
   const [view, setView] = useState<RoadmapView>("map");
+  const pulse = useRoadmapPulse();
+  const pulseConfigs = useMemo(() => buildPulseConfigs(pulse), [pulse]);
 
   const handleNavigate = useCallback((route: string) => {
     navigate(route);
@@ -544,6 +565,19 @@ const LivingForestRoadmapPage = () => {
             </Button>
           </section>
 
+          {/* ── Flow Strip — pipeline pulse ── */}
+          {!pulse.loading && (
+            <div className="max-w-lg mx-auto mb-2">
+              <FlowStrip
+                rawCandidates={pulse.rawCandidates}
+                promotedCandidates={pulse.promotedCandidates}
+                researchTreesTotal={pulse.researchTreesTotal}
+                openVerifications={pulse.openVerifications}
+                convertedTrees={pulse.convertedTrees}
+              />
+            </div>
+          )}
+
           {/* ── Stats strip ── */}
           <div className="flex justify-center gap-4 md:gap-6 mb-4 flex-wrap">
             {(Object.keys(STAGE_META) as RoadmapStage[]).map((s) => (
@@ -573,7 +607,7 @@ const LivingForestRoadmapPage = () => {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
               >
-                <MapView onNavigate={handleNavigate} />
+                <MapView onNavigate={handleNavigate} pulseConfigs={pulseConfigs} />
               </motion.div>
             ) : (
               <motion.div
