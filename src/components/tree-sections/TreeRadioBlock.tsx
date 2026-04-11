@@ -126,8 +126,15 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
 
   const handlePlayClick = () => {
     if (isYouTube) {
+      // Stop any audio preview before showing YT embed
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
       setShowYTEmbed(!showYTEmbed);
     } else {
+      // Collapse any active YT embed before playing audio
+      setShowYTEmbed(false);
       setIsPlaying(!isPlaying);
     }
   };

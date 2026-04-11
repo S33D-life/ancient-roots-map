@@ -75,6 +75,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   const [loading, setLoading] = useState(false);
   const [currentPreview, setCurrentPreview] = useState<ItunesPreview | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [showYTEmbed, setShowYTEmbed] = useState(false);
   const [localSpecies, setLocalSpecies] = useState(speciesFilter);
   const [availableSpecies, setAvailableSpecies] = useState<string[]>([]);
   const [showTuner, setShowTuner] = useState(false);
@@ -170,8 +171,13 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
     if (song.youtube_video_id) {
       setCurrentPreview(null);
       setPreviewLoading(false);
+      // Show YT embed if already playing
+      if (isPlaying) setShowYTEmbed(true);
       return;
     }
+
+    // Hide YT embed when switching to non-YT song
+    setShowYTEmbed(false);
 
     setPreviewLoading(true);
     setCurrentPreview(null);
@@ -229,6 +235,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
 
   const skipNext = useCallback(() => {
     if (playlist.length === 0) return;
+    setShowYTEmbed(false);
     setCurrentIndex((prev) => (prev + 1) % playlist.length);
     setIsPlaying(true);
   }, [playlist.length]);
@@ -434,7 +441,25 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                     </button>
 
                     <button
-                      onClick={() => setIsPlaying(!isPlaying)}
+                      onClick={() => {
+                        const song = playlist[currentIndex];
+                        if (song?.youtube_video_id) {
+                          // YouTube: toggle embed instead of audio
+                          if (showYTEmbed) {
+                            setShowYTEmbed(false);
+                            setIsPlaying(false);
+                          } else {
+                            // Stop any audio first
+                            if (audioRef.current) { audioRef.current.pause(); }
+                            setShowYTEmbed(true);
+                            setIsPlaying(true);
+                          }
+                        } else {
+                          // Audio: stop any YT embed
+                          setShowYTEmbed(false);
+                          setIsPlaying(!isPlaying);
+                        }
+                      }}
                       className="w-10 h-10 rounded-full flex items-center justify-center border transition-all hover:scale-105"
                       style={{
                         background: "linear-gradient(135deg, hsl(35 50% 25%), hsl(28 40% 20%))",
@@ -458,6 +483,19 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                       <SkipForward className="h-4 w-4" />
                     </button>
                   </div>
+
+                  {/* Inline YouTube embed for YT songs */}
+                  {showYTEmbed && currentSong?.youtube_embed_url && (
+                    <div className="mt-3 rounded-lg overflow-hidden" style={{ aspectRatio: "16 / 9" }}>
+                      <iframe
+                        src={`${currentSong.youtube_embed_url}?autoplay=1&rel=0`}
+                        allow="autoplay; encrypted-media"
+                        allowFullScreen
+                        className="w-full h-full"
+                        title={currentSong.title || "YouTube"}
+                      />
+                    </div>
+                  )}
 
                   {/* Station info */}
                   <div className="mt-3 pt-3 border-t" style={{ borderColor: "hsl(42 40% 20% / 0.3)" }}>

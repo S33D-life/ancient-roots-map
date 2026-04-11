@@ -280,6 +280,39 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
     setHasSearched(true);
 
     try {
+      // Client-side YouTube resolution — no edge function needed
+      if (/youtube\.com|youtu\.be|music\.youtube\.com/i.test(url)) {
+        const ytParsed = parseYouTubeUrl(url);
+        if (ytParsed.videoId) {
+          // Try to fetch title via oEmbed
+          let videoTitle = "YouTube Song";
+          let channelName = "";
+          try {
+            const oembed = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+            if (oembed.ok) {
+              const meta = await oembed.json();
+              videoTitle = meta.title || videoTitle;
+              channelName = meta.author_name || "";
+            }
+          } catch { /* graceful fallback */ }
+
+          const song: CatalogSong = {
+            id: `yt-${ytParsed.videoId}`,
+            title: videoTitle,
+            artist: channelName,
+            album: null,
+            genre: null,
+            artwork_url: ytParsed.thumbnail,
+            preview_url: null,
+            external_url: url,
+            source: "youtube",
+          };
+          handleSelect(song);
+          return true;
+        }
+      }
+
+      // Apple Music client-side resolution
       if (/music\.apple\.com|itunes\.apple\.com/i.test(url)) {
         const parsed = parseAppleMusicInput(input);
         if (parsed.trackId) {
@@ -293,6 +326,7 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
         }
       }
 
+      // Fallback: edge function for Spotify and other links
       const { data, error } = await supabase.functions.invoke("resolve-music-link", {
         body: { url },
       });
