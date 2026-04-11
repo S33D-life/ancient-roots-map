@@ -118,7 +118,7 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
               border: "1px solid hsl(260 40% 55% / 0.15)",
             }}
           >
-            {current?.recipient_scope === "PUBLIC" ? "Shared" : "Private"}
+            {current?.recipient_scope === "PUBLIC" ? "Public Offering" : "Heartwood Memory"}
           </span>
         </div>
 
