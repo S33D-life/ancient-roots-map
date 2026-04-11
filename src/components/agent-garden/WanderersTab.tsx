@@ -1,12 +1,13 @@
 /**
  * WanderersTab — "First Wanderer" tab for the Agent Garden.
- * Shows journeys, recent runs, findings, and curator controls.
+ * Shows journeys, runs, findings with rich evidence, and curator controls.
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Footprints, Play, CheckCircle2, XCircle, AlertTriangle, Clock,
   Eye, Bug, Sparkles, ChevronRight, Loader2, Filter, Leaf,
+  Globe, Terminal, Wifi,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,8 +78,8 @@ export function WanderersTab() {
             Guided UI Testing Agent
           </p>
           <p className="text-sm text-muted-foreground font-serif leading-relaxed">
-            A careful wandering steward that walks the app's paths, observing what works and what needs tending.
-            Findings are saved for curator review — never auto-published.
+            A careful wandering steward that walks the app's paths, capturing real console errors, network failures,
+            and DOM evidence. Findings are saved for curator review — never auto-published.
           </p>
         </div>
       </div>
@@ -88,8 +89,8 @@ export function WanderersTab() {
         {[
           { label: "Journeys", value: journeys.length, icon: <Footprints className="w-4 h-4" /> },
           { label: "Total Runs", value: runs.length, icon: <Play className="w-4 h-4" /> },
-          { label: "Pending Findings", value: pendingFindings.length, icon: <Eye className="w-4 h-4" /> },
-          { label: "Findings", value: findings.length, icon: <Leaf className="w-4 h-4" /> },
+          { label: "Pending", value: pendingFindings.length, icon: <Eye className="w-4 h-4" /> },
+          { label: "All Findings", value: findings.length, icon: <Leaf className="w-4 h-4" /> },
         ].map((s) => (
           <div
             key={s.label}
@@ -121,17 +122,16 @@ export function WanderersTab() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-serif font-medium text-foreground">{j.title}</p>
-                  <p className="text-[10px] font-serif text-muted-foreground truncate">{j.description}</p>
+                  <p className="text-[10px] font-serif text-muted-foreground truncate">
+                    {j.entry_path} · {(j.steps_json as any[])?.length || 0} steps
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
                   {latestRun && <StatusPill status={latestRun.status} />}
                   {isKeeper && (
                     <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs font-serif"
-                      disabled={running}
-                      onClick={() => startRun(j)}
+                      size="sm" variant="ghost" className="h-7 px-2 text-xs font-serif"
+                      disabled={running} onClick={() => startRun(j)}
                     >
                       {running ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
                       <span className="ml-1">Run</span>
@@ -150,7 +150,7 @@ export function WanderersTab() {
       {/* Recent Runs */}
       <Card className="border-primary/10 bg-card/60">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <CardTitle className="text-base font-serif flex items-center gap-2">
               <Play className="w-4 h-4 text-primary" /> Recent Runs
             </CardTitle>
@@ -158,12 +158,9 @@ export function WanderersTab() {
               <Filter className="w-3 h-3 text-muted-foreground" />
               {["all", "passed", "failed", "needs_review"].map((f) => (
                 <button
-                  key={f}
-                  onClick={() => setStatusFilter(f)}
+                  key={f} onClick={() => setStatusFilter(f)}
                   className={`text-[10px] font-serif px-2 py-0.5 rounded-full transition-colors ${
-                    statusFilter === f
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                    statusFilter === f ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {f === "all" ? "All" : f === "needs_review" ? "Needs tending" : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -187,7 +184,7 @@ export function WanderersTab() {
                   {(run.agent_journeys as any)?.title || "Journey"}
                 </p>
                 <p className="text-[10px] font-serif text-muted-foreground">
-                  {new Date(run.created_at).toLocaleString()} · Score: {run.score ?? "—"}
+                  {new Date(run.created_at).toLocaleString()} · Score: {run.score ?? "—"}/100
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">
@@ -205,20 +202,19 @@ export function WanderersTab() {
       {/* Run Detail / Findings */}
       <AnimatePresence>
         {selectedRun && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
             <Card className="border-primary/10 bg-card/60">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base font-serif flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-primary" />
-                  Run Detail
-                  <StatusPill status={selectedRun.status} />
+                  <Eye className="w-4 h-4 text-primary" /> Run Detail <StatusPill status={selectedRun.status} />
                 </CardTitle>
                 {selectedRun.summary && (
                   <p className="text-xs font-serif text-muted-foreground mt-1">{selectedRun.summary}</p>
+                )}
+                {selectedRun.environment && (
+                  <p className="text-[9px] font-serif text-muted-foreground/60 mt-0.5 truncate">
+                    {selectedRun.environment}
+                  </p>
                 )}
               </CardHeader>
               <CardContent className="space-y-2">
@@ -227,13 +223,10 @@ export function WanderersTab() {
                 </p>
                 {runFindings.map((f) => (
                   <FindingRow
-                    key={f.id}
-                    finding={f}
-                    isKeeper={isKeeper}
+                    key={f.id} finding={f} isKeeper={isKeeper}
                     isSelected={selectedFinding?.id === f.id}
-                    onSelect={() => setSelectedFinding(f)}
-                    onReview={reviewFinding}
-                    onConvert={convertToBugReport}
+                    onSelect={() => setSelectedFinding(selectedFinding?.id === f.id ? null : f)}
+                    onReview={reviewFinding} onConvert={convertToBugReport}
                   />
                 ))}
                 {runFindings.length === 0 && (
@@ -250,18 +243,11 @@ export function WanderersTab() {
   );
 }
 
-/* ── Finding Row ──────────────────────────────────── */
+/* ── Finding Row with rich evidence ──────────────── */
 function FindingRow({
-  finding,
-  isKeeper,
-  isSelected,
-  onSelect,
-  onReview,
-  onConvert,
+  finding, isKeeper, isSelected, onSelect, onReview, onConvert,
 }: {
-  finding: AgentFinding;
-  isKeeper: boolean;
-  isSelected: boolean;
+  finding: AgentFinding; isKeeper: boolean; isSelected: boolean;
   onSelect: () => void;
   onReview: (id: string, status: string, notes?: string) => Promise<void>;
   onConvert: (f: AgentFinding) => Promise<string | undefined>;
@@ -272,6 +258,8 @@ function FindingRow({
     insight: <Sparkles className="w-3.5 h-3.5 text-blue-500" />,
     spark: <Sparkles className="w-3.5 h-3.5 text-primary" />,
   }[finding.type] || <Eye className="w-3.5 h-3.5" />;
+
+  const trace = finding.trace_json as Record<string, any> | null;
 
   return (
     <div
@@ -304,42 +292,92 @@ function FindingRow({
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 pt-1 space-y-2 border-t border-border/10">
-              <p className="text-xs font-serif text-muted-foreground">{finding.description}</p>
+              {/* Description */}
+              <p className="text-xs font-serif text-muted-foreground whitespace-pre-line">{finding.description}</p>
+
+              {/* Evidence grid */}
+              {trace && (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-serif mt-2 p-2 rounded-md bg-muted/30">
+                  {trace.action && (
+                    <>
+                      <span className="text-muted-foreground">Action</span>
+                      <span className="text-foreground font-medium">{trace.action}</span>
+                    </>
+                  )}
+                  {trace.target && (
+                    <>
+                      <span className="text-muted-foreground">Target</span>
+                      <span className="text-foreground truncate">{String(trace.target).slice(0, 60)}</span>
+                    </>
+                  )}
+                  {trace.urlBefore && (
+                    <>
+                      <span className="text-muted-foreground flex items-center gap-1"><Globe className="w-2.5 h-2.5" /> Route</span>
+                      <span className="text-foreground">{trace.urlBefore}{trace.urlAfter !== trace.urlBefore ? ` → ${trace.urlAfter}` : ""}</span>
+                    </>
+                  )}
+                  {trace.snapshot?.headingText && (
+                    <>
+                      <span className="text-muted-foreground">Page heading</span>
+                      <span className="text-foreground truncate">"{trace.snapshot.headingText}"</span>
+                    </>
+                  )}
+                  {trace.snapshot?.resolvedSelector && (
+                    <>
+                      <span className="text-muted-foreground">Resolved to</span>
+                      <span className="text-foreground truncate">{trace.snapshot.resolvedSelector}</span>
+                    </>
+                  )}
+                  {trace.durationMs != null && (
+                    <>
+                      <span className="text-muted-foreground">Duration</span>
+                      <span className="text-foreground">{Math.round(trace.durationMs)}ms</span>
+                    </>
+                  )}
+                  {trace.consoleErrors?.length > 0 && (
+                    <>
+                      <span className="text-muted-foreground flex items-center gap-1"><Terminal className="w-2.5 h-2.5" /> Console</span>
+                      <span className="text-red-500">{trace.consoleErrors.length} error(s)</span>
+                    </>
+                  )}
+                  {trace.networkErrors?.length > 0 && (
+                    <>
+                      <span className="text-muted-foreground flex items-center gap-1"><Wifi className="w-2.5 h-2.5" /> Network</span>
+                      <span className="text-red-500">{trace.networkErrors.length} failure(s)</span>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Console error details */}
+              {trace?.consoleErrors?.length > 0 && (
+                <div className="text-[9px] font-mono text-red-400/80 bg-muted/20 rounded p-1.5 max-h-24 overflow-y-auto space-y-0.5">
+                  {(trace.consoleErrors as string[]).slice(0, 5).map((e: string, i: number) => (
+                    <p key={i} className="truncate">• {e.slice(0, 120)}</p>
+                  ))}
+                </div>
+              )}
+
               {finding.curator_notes && (
                 <p className="text-xs font-serif text-primary/80 italic">Curator: {finding.curator_notes}</p>
               )}
+
+              {/* Curator actions */}
               {isKeeper && finding.review_status === "pending" && (
                 <div className="flex flex-wrap gap-2 pt-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 text-[10px] font-serif"
-                    onClick={() => onConvert(finding)}
-                  >
+                  <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={() => onConvert(finding)}>
                     <Bug className="w-3 h-3 mr-1" /> File as Bug
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 text-[10px] font-serif"
-                    onClick={() => onReview(finding.id, "approved_as_spark")}
-                  >
+                  <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={() => onReview(finding.id, "approved_as_spark")}>
                     <Sparkles className="w-3 h-3 mr-1" /> Approve as Spark
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 text-[10px] font-serif text-muted-foreground"
-                    onClick={() => onReview(finding.id, "dismissed")}
-                  >
+                  <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif text-muted-foreground" onClick={() => onReview(finding.id, "dismissed")}>
                     Dismiss
                   </Button>
                 </div>
               )}
               {finding.suggested_bug_garden_post_id && (
-                <p className="text-[10px] font-serif text-green-600">
-                  ✓ Filed in Bug Garden
-                </p>
+                <p className="text-[10px] font-serif text-green-600">✓ Filed in Bug Garden</p>
               )}
             </div>
           </motion.div>
