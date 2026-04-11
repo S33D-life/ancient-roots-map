@@ -634,6 +634,15 @@ const TreeDetailPage = () => {
           </Suspense>
         )}
 
+        {/* Aliveness signal — visible to all visitors, above tabs */}
+        <Suspense fallback={null}>
+          <TreeAliveness
+            checkinCount={checkins?.length ?? 0}
+            offeringCount={offerings.length}
+            treeName={tree.name}
+          />
+        </Suspense>
+
         {/* ══════ Top-Level Section Tabs ══════ */}
         <Tabs value={sectionTab} onValueChange={setSectionTab} className="w-full mt-2">
           <TabsList className="w-full grid grid-cols-3 bg-secondary/20 border border-border/40 mb-6 h-10 rounded-lg">
