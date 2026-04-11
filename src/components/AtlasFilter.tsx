@@ -157,7 +157,7 @@ export interface AtlasFilterProps {
 const chipBase = "shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-serif transition-all duration-200 active:scale-95 border backdrop-blur-sm";
 const chipActive = "bg-primary/20 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]";
 const chipInactive = "bg-card/80 text-muted-foreground border-border/60 shadow-sm hover:bg-accent/30 hover:text-foreground";
-const TOP_CONTROL_ROW = "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 2.75rem)";
+const TOP_CONTROL_ROW = "calc(var(--header-height, 3.5rem) + env(safe-area-inset-top, 0px) + 3.75rem)";
 
 function hslStringToHue(hsl: string): number {
   const m = hsl.match(/(\d+)/);
