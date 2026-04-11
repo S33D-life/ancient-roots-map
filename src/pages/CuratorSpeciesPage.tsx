@@ -36,7 +36,7 @@ interface SpeciesCandidate {
 }
 
 const CuratorSpeciesPage = () => {
-  const { hasRole, isLoading: roleLoading } = useHasRole("admin");
+  const { hasRole, loading: roleLoading } = useHasRole("curator");
   const [trees, setTrees] = useState<UnresolvedTree[]>([]);
   const [candidates, setCandidates] = useState<SpeciesCandidate[]>([]);
   const [loading, setLoading] = useState(true);
