@@ -17,7 +17,7 @@ import {
   hslStringToHue,
 } from "@/components/map/mapMarkerUtils";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
-import { buildPopupHtml, getPopupStatusLight } from "@/utils/mapPopups";
+import { buildPopupHtml, getPopupStatusLight, type PopupPresenceSignal } from "@/utils/mapPopups";
 import { haversineKm } from "@/utils/mapGeometry";
 
 interface Tree {
@@ -45,6 +45,7 @@ interface MarkerLayerRefs {
   treePhotos: Record<string, string>;
   heartPoolCounts: Record<string, number>;
   userLatLng: [number, number] | null;
+  presenceMap?: Map<string, PopupPresenceSignal>;
 }
 
 interface UseTreeMarkerLayerOptions {
@@ -124,6 +125,7 @@ export function useTreeMarkerLayer({
             refs.userLatLng,
             getPopupStatusLight(tree.id, tree.latitude, tree.longitude, refs.userLatLng),
             refs.heartPoolCounts[tree.id] || 0,
+            refs.presenceMap?.get(tree.id) || null,
           ),
         {
           className: "atlas-leaflet-popup",

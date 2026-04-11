@@ -43,9 +43,16 @@ export function getPopupStatusLight(
 const POPUP_CACHE = new Map<string, string>();
 const MAX_POPUP_CACHE = 200;
 
-function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null, heartCount?: number): string {
+/** Presence signal for popup display */
+export interface PopupPresenceSignal {
+  presence_state: "here_now" | "recently_met";
+  presence_count: number;
+}
+
+function cacheKey(treeId: string, offerings: number, age: number, birdsongCount: number, whisperCount: number, hasPhoto: boolean, distKm: number | null, statusLight: string | null, heartCount?: number, presence?: PopupPresenceSignal | null): string {
   const dKey = distKm != null ? Math.round(distKm * 10) : "x";
-  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}:${heartCount ?? 0}`;
+  const pKey = presence ? `${presence.presence_state}:${presence.presence_count}` : "n";
+  return `${treeId}:${offerings}:${age}:${birdsongCount}:${whisperCount}:${hasPhoto ? 1 : 0}:${dKey}:${statusLight || "n"}:${heartCount ?? 0}:${pKey}`;
 }
 
 export interface PopupTree {
@@ -71,12 +78,13 @@ export function buildPopupHtml(
   userLatLng?: [number, number] | null,
   statusLight?: PopupStatusLight,
   heartCount?: number,
+  presenceSignal?: PopupPresenceSignal | null,
 ): string {
   if (!tree?.name && !tree?.species)
     return '<div style="padding:12px;font-family:sans-serif;color:#999;">Tree data unavailable</div>';
 
   const distKm = userLatLng ? haversineKm(userLatLng[0], userLatLng[1], tree.latitude, tree.longitude) : null;
-  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount);
+  const key = cacheKey(tree.id, offerings, age, birdsongCount ?? 0, whisperCount ?? 0, !!photoUrl, distKm, statusLight ?? null, heartCount, presenceSignal);
   const cached = POPUP_CACHE.get(key);
   if (cached) return cached;
 
@@ -124,6 +132,19 @@ export function buildPopupHtml(
   const whisperHref = `/tree/${encodeURIComponent(tree.id)}?whisper=1&context=map`;
   const wishBtnId = `wish-${tree.id}`;
 
+  /* ── Presence signal line ── */
+  const presenceLine = presenceSignal
+    ? presenceSignal.presence_state === "here_now"
+      ? `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-family:sans-serif;color:hsl(145,50%,55%);margin-top:2px;">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:hsl(145,55%,48%);box-shadow:0 0 6px hsla(145,55%,48%,0.5);animation:statusPulse 2s ease-in-out infinite;"></span>
+          ${presenceSignal.presence_count > 1 ? `${presenceSignal.presence_count} wanderers here now` : "Someone is here now"}
+        </div>`
+      : `<div style="display:flex;align-items:center;gap:5px;font-size:10px;font-family:sans-serif;color:hsl(210,30%,55%);margin-top:2px;">
+          <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:hsl(210,35%,58%);opacity:0.7;"></span>
+          ${presenceSignal.presence_count > 1 ? `${presenceSignal.presence_count} wanderers here recently` : "Recently met"}
+        </div>`
+    : "";
+
   /* ── Metadata line — age · offerings · birdsong · whispers ── */
   const metaParts = [ageText, offeringText, birdsongLine, whisperLine].filter(Boolean);
   const metaLine = metaParts.length > 0
@@ -157,6 +178,8 @@ export function buildPopupHtml(
 
       <!-- Species -->
       <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
+
+      ${presenceLine}
 
       <!-- Status + Hive (left) + Metadata (right) -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
