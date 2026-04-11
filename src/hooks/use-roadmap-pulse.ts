@@ -25,6 +25,8 @@ export interface RoadmapPulse {
   // Agent Garden
   totalContributionEvents: number;
   pendingContributions: number;
+  rewardReadyContributions: number;
+  distributedContributions: number;
 
   // Sources
   crawlRuns: number;
@@ -40,6 +42,7 @@ const EMPTY: RoadmapPulse = {
   openVerifications: 0, completedVerifications: 0,
   pendingFindings: 0, recurringPatternCount: 0,
   totalContributionEvents: 0, pendingContributions: 0,
+  rewardReadyContributions: 0, distributedContributions: 0,
   crawlRuns: 0, activeSources: 0,
   loading: true,
 };
@@ -64,7 +67,7 @@ export function useRoadmapPulse(): RoadmapPulse {
         supabase.from("research_trees").select("conversion_status, latitude, longitude, species_scientific"),
         supabase.from("verification_tasks").select("status"),
         supabase.from("agent_findings").select("review_status"),
-        supabase.from("agent_contribution_events").select("validation_status"),
+        supabase.from("agent_contribution_events").select("validation_status, reward_status"),
         supabase.from("dataset_crawl_runs").select("id", { count: "exact", head: true }),
         supabase.from("tree_data_sources").select("id", { count: "exact", head: true }),
       ]);
@@ -96,6 +99,8 @@ export function useRoadmapPulse(): RoadmapPulse {
         recurringPatternCount: 0, // derived client-side, keep lightweight
         totalContributionEvents: contribs.length,
         pendingContributions: contribs.filter(c => c.validation_status === "pending").length,
+        rewardReadyContributions: contribs.filter(c => c.reward_status === "ready").length,
+        distributedContributions: contribs.filter(c => c.reward_status === "distributed").length,
         crawlRuns: crawlRes.count ?? 0,
         activeSources: sourcesRes.count ?? 0,
         loading: false,
@@ -171,17 +176,25 @@ export function buildPulseConfigs(pulse: RoadmapPulse): Map<string, PulseConfig>
     invitationRoute: "/agent-garden?tab=bridge",
   });
 
-  // Hearts
+  // Hearts / Economy
+  const rewardSignal = pulse.rewardReadyContributions > 0
+    ? `${pulse.rewardReadyContributions} reward${pulse.rewardReadyContributions !== 1 ? "s" : ""} ready to distribute`
+    : pulse.pendingContributions > 0
+      ? `${pulse.pendingContributions} contribution${pulse.pendingContributions !== 1 ? "s" : ""} pending review`
+      : pulse.distributedContributions > 0
+        ? `${pulse.distributedContributions} heart${pulse.distributedContributions !== 1 ? "s" : ""} distributed`
+        : null;
+
   map.set("hearts", {
     featureId: "hearts",
     primary: pulse.totalContributionEvents > 0
       ? { label: "contribution events", count: pulse.totalContributionEvents, route: "/agent-garden?tab=contributions" }
       : null,
-    secondary: pulse.pendingContributions > 0 ? { label: "pending review", count: pulse.pendingContributions } : null,
-    needsAttention: pulse.pendingContributions >= 5,
-    invitation: pulse.pendingContributions > 0
-      ? `${pulse.pendingContributions} contribution${pulse.pendingContributions !== 1 ? "s" : ""} pending review`
-      : null,
+    secondary: pulse.rewardReadyContributions > 0
+      ? { label: "reward ready", count: pulse.rewardReadyContributions }
+      : pulse.pendingContributions > 0 ? { label: "pending review", count: pulse.pendingContributions } : null,
+    needsAttention: pulse.rewardReadyContributions >= 3 || pulse.pendingContributions >= 5,
+    invitation: rewardSignal,
     invitationRoute: "/agent-garden?tab=contributions",
   });
 
