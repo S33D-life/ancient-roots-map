@@ -326,6 +326,7 @@ const AncientFriendsRoom = ({
                 heroPhotoUrl={photoOffering?.media_url}
                 whisperCount={whisperCounts[tree.id] || 0}
                 wishlistPulseActive={wishlistPulseId === tree.id}
+                presence={presenceByTreeId[tree.id] || null}
                 onSelect={(t) => onSelectTree(t as any)}
                 onWishlist={addToWishlist}
                 onShare={handleShare}
