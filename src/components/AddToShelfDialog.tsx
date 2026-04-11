@@ -1,12 +1,13 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Search, Plus, Quote, Sparkles } from "lucide-react";
+import { BookOpen, Search, Plus, Quote, Sparkles, TreeDeciduous } from "lucide-react";
 import { useBookshelf, type BookshelfVisibility } from "@/hooks/use-bookshelf";
 import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
+import { VISIBILITY_LABELS } from "@/lib/heartwood-labels";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchBooks, type BookResult } from "@/utils/bookSearch";
@@ -33,7 +34,15 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
   const [visibility, setVisibility] = useState<OfferingVisibility>("private");
   const [submitting, setSubmitting] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reflectionRef = useRef<HTMLTextAreaElement>(null);
   const { addEntry } = useBookshelf({ userId });
+
+  // Auto-focus reflection when arriving at details step
+  useEffect(() => {
+    if (step === "details") {
+      setTimeout(() => reflectionRef.current?.focus(), 300);
+    }
+  }, [step]);
 
   const handleSearch = useCallback((q: string) => {
     setQuery(q);
@@ -67,6 +76,8 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
     setStep("details");
   };
 
+  const visibilityLabel = (v: string) => VISIBILITY_LABELS[v] ?? v;
+
   const handleSubmit = async () => {
     if (!selectedBook || submitting) return;
     setSubmitting(true);
@@ -83,7 +94,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
         catalog_book_id: null,
       });
       toast.success("Book placed on your shelf", {
-        description: visibility === "private" ? "Held in Heartwood" : "Shared with the forest",
+        description: visibilityLabel(visibility),
       });
       resetAndClose();
     } catch (err: any) {
@@ -137,23 +148,30 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 />
               </div>
 
-              <div className="max-h-[260px] overflow-y-auto space-y-1 pr-1">
-                {searching && [1, 2, 3].map(i => (
-                  <div key={i} className="flex gap-3 p-2">
-                    <Skeleton className="w-10 h-14 rounded shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-3.5 w-3/4" />
-                      <Skeleton className="h-3 w-1/2" />
-                    </div>
-                  </div>
-                ))}
+              <div className="max-h-[260px] overflow-y-auto space-y-0.5 pr-1">
+                {searching && (
+                  <>
+                    <p className="text-[11px] font-serif text-muted-foreground/40 text-center pt-1 pb-2 italic">
+                      Searching the forest of books…
+                    </p>
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="flex gap-3 p-2">
+                        <Skeleton className="w-10 h-14 rounded shrink-0" />
+                        <div className="flex-1 space-y-1.5">
+                          <Skeleton className="h-3.5 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
 
                 {!searching && results.map((book, idx) => (
                   <button
                     key={`${book.source}-${book.externalId}-${idx}`}
                     type="button"
                     onClick={() => selectResult(book)}
-                    className="w-full flex items-start gap-3 p-2.5 rounded-lg hover:bg-primary/5 transition-colors text-left group"
+                    className="w-full flex items-start gap-3 px-2.5 py-2 rounded-lg hover:bg-primary/5 transition-colors text-left group"
                   >
                     {book.coverUrl ? (
                       <img
@@ -167,11 +185,11 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                         <BookOpen className="h-4 w-4 text-primary/40" />
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-serif font-medium text-foreground/90 truncate group-hover:text-primary transition-colors">
+                    <div className="flex-1 min-w-0 py-0.5">
+                      <p className="text-sm font-serif font-medium text-foreground/90 truncate group-hover:text-primary transition-colors leading-tight">
                         {book.title}
                       </p>
-                      <p className="text-xs text-muted-foreground/70 truncate">
+                      <p className="text-xs text-muted-foreground/70 truncate mt-0.5">
                         {authorLine(book)}
                       </p>
                     </div>
@@ -179,16 +197,21 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 ))}
 
                 {!searching && query.length >= 2 && results.length === 0 && (
-                  <div className="text-center py-6">
-                    <BookOpen className="h-5 w-5 text-muted-foreground/30 mx-auto mb-1.5" />
-                    <p className="text-xs text-muted-foreground/60 font-serif">No match — add your own below</p>
+                  <div className="text-center py-8 px-4">
+                    <BookOpen className="h-5 w-5 text-muted-foreground/25 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground/50 font-serif leading-relaxed">
+                      We couldn't find it in the forest of books.
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/40 font-serif mt-1">
+                      Add it by hand and place it on your shelf.
+                    </p>
                   </div>
                 )}
 
                 {!searching && query.length < 2 && (
-                  <div className="text-center py-6">
-                    <BookOpen className="h-6 w-6 text-muted-foreground/30 mx-auto mb-1.5" />
-                    <p className="text-xs text-muted-foreground/50 font-serif">Search by title, author, or ISBN</p>
+                  <div className="text-center py-8">
+                    <BookOpen className="h-6 w-6 text-muted-foreground/20 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground/40 font-serif">Search by title, author, or ISBN</p>
                   </div>
                 )}
               </div>
@@ -229,6 +252,11 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 </div>
               </div>
 
+              <p className="text-[11px] font-serif text-muted-foreground/50 text-center flex items-center justify-center gap-1.5">
+                <TreeDeciduous className="h-3 w-3 text-primary/40" />
+                You're offering this book to the grove.
+              </p>
+
               <div className="space-y-1.5">
                 <label className="font-serif text-[10px] tracking-widest uppercase text-muted-foreground/60 flex items-center gap-1">
                   <Quote className="h-3 w-3" /> Favorite quote (optional)
@@ -240,7 +268,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 <label className="font-serif text-[10px] tracking-widest uppercase text-muted-foreground/60">
                   Why does this matter to you?
                 </label>
-                <Textarea value={reflection} onChange={e => setReflection(e.target.value.slice(0, 2000))} placeholder="What does this book mean in your life?" rows={3} className="font-serif text-sm bg-secondary/10 border-border/30 resize-none" />
+                <Textarea ref={reflectionRef} value={reflection} onChange={e => setReflection(e.target.value.slice(0, 2000))} placeholder="What does this book mean in your life?" rows={3} className="font-serif text-sm bg-secondary/10 border-border/30 resize-none" />
               </div>
 
               <OfferingVisibilityPicker value={visibility} onChange={setVisibility} />
@@ -272,7 +300,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 {quote.trim() && <blockquote className="border-l-2 border-primary/30 pl-3 italic text-sm font-serif text-foreground/70">"{quote.trim()}"</blockquote>}
                 {reflection.trim() && <p className="text-sm font-serif text-foreground/60">{reflection.trim()}</p>}
                 <p className="text-[10px] font-serif text-muted-foreground/50">
-                  {visibility === "private" ? "Held in Heartwood" : visibility === "public" ? "Shared with the forest" : `Shared with ${visibility}`}
+                  {visibilityLabel(visibility)}
                 </p>
               </div>
 
