@@ -27,9 +27,10 @@ import {
 } from "lucide-react";
 
 const TelegramSettings = lazy(() => import("@/components/settings/TelegramSettings"));
+import { StewardConsole } from "@/components/library/StewardConsole";
 
 /* ── Types ── */
-type Section = "overview" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings" | "telegram";
+type Section = "overview" | "steward" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings" | "telegram";
 
 interface SystemNode {
   id: string;
@@ -44,6 +45,7 @@ interface SystemNode {
 /* ── Section nav ── */
 const SECTIONS: { key: Section; label: string; icon: React.ReactNode }[] = [
   { key: "overview",        label: "Overview",    icon: <Eye className="w-3.5 h-3.5" /> },
+  { key: "steward",         label: "Steward",     icon: <Telescope className="w-3.5 h-3.5" /> },
   { key: "system-map",      label: "System Map",  icon: <Network className="w-3.5 h-3.5" /> },
   { key: "data-roots",      label: "Data Roots",  icon: <Database className="w-3.5 h-3.5" /> },
   { key: "agent-garden",    label: "Agent Garden", icon: <Bot className="w-3.5 h-3.5" /> },
@@ -187,6 +189,7 @@ const DevRoom = () => {
           transition={{ duration: 0.2 }}
         >
           {section === "overview" && <OverviewSection stats={stats} />}
+          {section === "steward" && <StewardConsole />}
           {section === "system-map" && <SystemMapSection selectedNode={selectedNode} setSelectedNode={setSelectedNode} />}
           {section === "data-roots" && <DataRootsSection stats={stats} />}
           {section === "agent-garden" && <AgentGardenSection stats={stats} />}
