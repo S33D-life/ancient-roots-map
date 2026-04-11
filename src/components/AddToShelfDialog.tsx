@@ -3,14 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Search, Plus, Quote, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useBookshelf, type BookshelfVisibility } from "@/hooks/use-bookshelf";
 import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/OfferingVisibilityPicker";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { searchBooks, type BookResult } from "@/utils/bookSearch";
 
 interface AddToShelfDialogProps {
   open: boolean;
@@ -19,32 +18,14 @@ interface AddToShelfDialogProps {
   defaultTreeId?: string;
 }
 
-interface CatalogBook {
-  id: string;
-  title: string;
-  author: string;
-  genre: string | null;
-  cover_url: string | null;
-  similarity: number;
-}
-
 type Step = "search" | "details" | "review";
-
-const genreColors: Record<string, string> = {
-  Nature: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-  Fiction: "bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-500/20",
-  Poetry: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
-  Science: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-  Philosophy: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-  Mythology: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20",
-};
 
 const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToShelfDialogProps) => {
   const [step, setStep] = useState<Step>("search");
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<CatalogBook[]>([]);
+  const [results, setResults] = useState<BookResult[]>([]);
   const [searching, setSearching] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<{ title: string; author: string; genre: string | null; coverUrl: string | null; catalogId: string | null } | null>(null);
+  const [selectedBook, setSelectedBook] = useState<BookResult | null>(null);
   const [customTitle, setCustomTitle] = useState("");
   const [customAuthor, setCustomAuthor] = useState("");
   const [quote, setQuote] = useState("");
@@ -60,20 +41,29 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
     if (q.trim().length < 2) { setResults([]); setSearching(false); return; }
     setSearching(true);
     debounceRef.current = setTimeout(async () => {
-      const { data } = await supabase.rpc("search_books", { query: q.trim(), result_limit: 8 });
-      setResults((data as CatalogBook[]) || []);
+      const books = await searchBooks(q.trim(), 8);
+      setResults(books);
       setSearching(false);
-    }, 300);
+    }, 350);
   }, []);
 
-  const selectCatalog = (book: CatalogBook) => {
-    setSelectedBook({ title: book.title, author: book.author, genre: book.genre, coverUrl: book.cover_url, catalogId: book.id });
+  const selectResult = (book: BookResult) => {
+    setSelectedBook(book);
     setStep("details");
   };
 
   const selectCustom = () => {
     if (!customTitle.trim() || !customAuthor.trim()) return;
-    setSelectedBook({ title: customTitle.trim(), author: customAuthor.trim(), genre: null, coverUrl: null, catalogId: null });
+    setSelectedBook({
+      title: customTitle.trim(),
+      authors: [customAuthor.trim()],
+      publishedYear: null,
+      isbn: null,
+      coverUrl: null,
+      description: null,
+      source: "catalog",
+      externalId: "",
+    });
     setStep("details");
   };
 
@@ -83,14 +73,14 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
     try {
       await addEntry({
         title: selectedBook.title,
-        author: selectedBook.author,
-        genre: selectedBook.genre,
+        author: selectedBook.authors.join(", "),
+        genre: null,
         cover_url: selectedBook.coverUrl,
         quote: quote.trim() || null,
         reflection: reflection.trim() || null,
         visibility: visibility as BookshelfVisibility,
         linked_tree_ids: defaultTreeId ? [defaultTreeId] : [],
-        catalog_book_id: selectedBook.catalogId,
+        catalog_book_id: null,
       });
       toast.success("Book placed on your shelf", {
         description: visibility === "private" ? "Held in Heartwood" : "Shared with the forest",
@@ -116,6 +106,12 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
     onOpenChange(false);
   };
 
+  const authorLine = (b: BookResult) => {
+    const parts = [b.authors.join(", ")];
+    if (b.publishedYear) parts.push(b.publishedYear);
+    return parts.join(" · ");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -127,64 +123,81 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
         </DialogHeader>
 
         <AnimatePresence mode="wait">
+          {/* ── STEP 1: Search ───────────────────────── */}
           {step === "search" && (
             <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
-                <Input value={query} onChange={(e) => handleSearch(e.target.value)} placeholder="Search for a book…" className="pl-9 font-serif" autoFocus />
+                <Input
+                  value={query}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder="Search by title, author, or ISBN…"
+                  className="pl-9 font-serif"
+                  autoFocus
+                />
               </div>
 
-              <div className="max-h-[240px] overflow-y-auto space-y-1.5 pr-1">
-                {searching && [1,2,3].map(i => (
+              <div className="max-h-[260px] overflow-y-auto space-y-1 pr-1">
+                {searching && [1, 2, 3].map(i => (
                   <div key={i} className="flex gap-3 p-2">
                     <Skeleton className="w-10 h-14 rounded shrink-0" />
-                    <div className="flex-1 space-y-1.5"><Skeleton className="h-3.5 w-3/4" /><Skeleton className="h-3 w-1/2" /></div>
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3.5 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
                   </div>
                 ))}
 
-                {!searching && results.map(book => (
+                {!searching && results.map((book, idx) => (
                   <button
-                    key={book.id}
+                    key={`${book.source}-${book.externalId}-${idx}`}
                     type="button"
-                    onClick={() => selectCatalog(book)}
+                    onClick={() => selectResult(book)}
                     className="w-full flex items-start gap-3 p-2.5 rounded-lg hover:bg-primary/5 transition-colors text-left group"
                   >
-                    <div className="w-10 h-14 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                      <BookOpen className="h-4 w-4 text-primary/40" />
-                    </div>
+                    {book.coverUrl ? (
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        className="w-10 h-14 rounded object-cover shrink-0 border border-border/30"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-10 h-14 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                        <BookOpen className="h-4 w-4 text-primary/40" />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-serif font-medium text-foreground/90 truncate group-hover:text-primary">{book.title}</p>
-                      <p className="text-xs text-muted-foreground/70 truncate">{book.author}</p>
-                      {book.genre && (
-                        <Badge variant="outline" className={`mt-1 text-[10px] px-1.5 py-0 border ${genreColors[book.genre] || ""}`}>{book.genre}</Badge>
-                      )}
+                      <p className="text-sm font-serif font-medium text-foreground/90 truncate group-hover:text-primary transition-colors">
+                        {book.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground/70 truncate">
+                        {authorLine(book)}
+                      </p>
                     </div>
                   </button>
                 ))}
 
                 {!searching && query.length >= 2 && results.length === 0 && (
-                  <div className="text-center py-4">
+                  <div className="text-center py-6">
+                    <BookOpen className="h-5 w-5 text-muted-foreground/30 mx-auto mb-1.5" />
                     <p className="text-xs text-muted-foreground/60 font-serif">No match — add your own below</p>
                   </div>
                 )}
 
                 {!searching && query.length < 2 && (
-                  <div className="text-center py-4 space-y-2">
-                    <BookOpen className="h-6 w-6 text-muted-foreground/30 mx-auto" />
-                    <p className="text-xs text-muted-foreground/50 font-serif">Search by title or author</p>
-                    <div className="flex flex-wrap justify-center gap-1.5">
-                      {Object.keys(genreColors).map(g => (
-                        <button key={g} type="button" onClick={() => handleSearch(g)}
-                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-serif transition-all hover:scale-105 ${genreColors[g]}`}
-                        >{g}</button>
-                      ))}
-                    </div>
+                  <div className="text-center py-6">
+                    <BookOpen className="h-6 w-6 text-muted-foreground/30 mx-auto mb-1.5" />
+                    <p className="text-xs text-muted-foreground/50 font-serif">Search by title, author, or ISBN</p>
                   </div>
                 )}
               </div>
 
+              {/* Manual fallback */}
               <div className="border-t border-border/30 pt-3 space-y-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 font-serif flex items-center gap-1"><Plus className="h-3 w-3" /> Or add manually</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 font-serif flex items-center gap-1">
+                  <Plus className="h-3 w-3" /> Or add manually
+                </p>
                 <div className="flex gap-2">
                   <Input value={customTitle} onChange={e => setCustomTitle(e.target.value.slice(0, 200))} placeholder="Title" className="font-serif text-sm flex-1" />
                   <Input value={customAuthor} onChange={e => setCustomAuthor(e.target.value.slice(0, 200))} placeholder="Author" className="font-serif text-sm flex-1" />
@@ -196,15 +209,23 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
             </motion.div>
           )}
 
+          {/* ── STEP 2: Details ──────────────────────── */}
           {step === "details" && selectedBook && (
             <motion.div key="details" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="space-y-4">
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex gap-3">
-                <div className="w-12 h-16 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                  <BookOpen className="h-5 w-5 text-primary/40" />
-                </div>
-                <div>
-                  <p className="text-sm font-serif font-medium">{selectedBook.title}</p>
-                  <p className="text-xs text-muted-foreground/70">{selectedBook.author}</p>
+                {selectedBook.coverUrl ? (
+                  <img src={selectedBook.coverUrl} alt={selectedBook.title} className="w-12 h-16 rounded object-cover shrink-0 border border-border/30" />
+                ) : (
+                  <div className="w-12 h-16 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                    <BookOpen className="h-5 w-5 text-primary/40" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-sm font-serif font-medium truncate">{selectedBook.title}</p>
+                  <p className="text-xs text-muted-foreground/70 truncate">{authorLine(selectedBook)}</p>
+                  {selectedBook.isbn && (
+                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">ISBN {selectedBook.isbn}</p>
+                  )}
                 </div>
               </div>
 
@@ -231,21 +252,28 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
             </motion.div>
           )}
 
+          {/* ── STEP 3: Review ───────────────────────── */}
           {step === "review" && selectedBook && (
             <motion.div key="review" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="space-y-4">
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-3">
                 <div className="flex gap-3">
-                  <div className="w-14 h-20 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
-                    <BookOpen className="h-6 w-6 text-primary/40" />
-                  </div>
+                  {selectedBook.coverUrl ? (
+                    <img src={selectedBook.coverUrl} alt={selectedBook.title} className="w-14 h-20 rounded object-cover shrink-0 border border-border/30" />
+                  ) : (
+                    <div className="w-14 h-20 rounded bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                      <BookOpen className="h-6 w-6 text-primary/40" />
+                    </div>
+                  )}
                   <div>
                     <p className="font-serif font-medium">{selectedBook.title}</p>
-                    <p className="text-sm text-muted-foreground/70">{selectedBook.author}</p>
+                    <p className="text-sm text-muted-foreground/70">{authorLine(selectedBook)}</p>
                   </div>
                 </div>
                 {quote.trim() && <blockquote className="border-l-2 border-primary/30 pl-3 italic text-sm font-serif text-foreground/70">"{quote.trim()}"</blockquote>}
                 {reflection.trim() && <p className="text-sm font-serif text-foreground/60">{reflection.trim()}</p>}
-                <p className="text-[10px] font-serif text-muted-foreground/50">{visibility === "private" ? "Held in Heartwood" : visibility === "public" ? "Shared with the forest" : `Shared with ${visibility}`}</p>
+                <p className="text-[10px] font-serif text-muted-foreground/50">
+                  {visibility === "private" ? "Held in Heartwood" : visibility === "public" ? "Shared with the forest" : `Shared with ${visibility}`}
+                </p>
               </div>
 
               <div className="flex gap-2">
