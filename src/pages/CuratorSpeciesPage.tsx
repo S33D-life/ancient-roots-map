@@ -360,6 +360,11 @@ const CuratorSpeciesPage = () => {
                           <Badge variant="outline" className="text-[10px] text-muted-foreground/60">
                             src: {group.source}
                           </Badge>
+                          {group.resolutionType && (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground/80 border-muted-foreground/20">
+                              {group.resolutionType.replace(/_/g, " ")}
+                            </Badge>
+                          )}
                           {group.curationStatus !== "unresolved" && group.curationStatus !== "resolved" && (
                             <Badge className="text-[10px] bg-accent/20 text-accent">
                               <Tag className="w-2.5 h-2.5 mr-0.5" />
@@ -443,7 +448,25 @@ const CuratorSpeciesPage = () => {
                       </Select>
 
                       {/* Status marking buttons */}
-                      <div className="flex items-center gap-1 ml-auto">
+                      <div className="flex items-center gap-1 ml-auto flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[10px] h-6 px-2 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() => markStatus(group.speciesStr, "intentionally_unresolved")}
+                          title="Mark as intentionally unresolved"
+                        >
+                          ✓ Intentional
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[10px] h-6 px-2 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() => markStatus(group.speciesStr, "needs_field_verification")}
+                          title="Needs field verification"
+                        >
+                          🔍 Field check
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
