@@ -147,7 +147,10 @@ const TreeDetailPage = () => {
   const [birdsongCount, setBirdsongCount] = useState(0);
   const [activeTab, setActiveTab] = useState<string>("photo");
   const [sortMode, setSortMode] = useState<OfferingSortMode>("new");
-  const [sectionTab, setSectionTab] = useState<string>("overview");
+  const [sectionTab, setSectionTab] = useState<string>(() => {
+    const tabParam = searchParams.get("tab");
+    return tabParam === "encounters" || tabParam === "offerings" ? tabParam : "overview";
+  });
   const [secondaryOpen, setSecondaryOpen] = useState(false);
   const [shareCardOpen, setShareCardOpen] = useState(false);
   const [greetingCardOpen, setGreetingCardOpen] = useState(false);
@@ -996,45 +999,54 @@ const TreeDetailPage = () => {
             {/* Location Refinement */}
             {userId && tree && tree.latitude != null && tree.longitude != null && (
               <Suspense fallback={null}>
-                {refinementOpen ? (
-                  <LocationRefinementFlow
-                    treeId={tree.id}
-                    treeName={tree.name}
-                    treeLat={Number(tree.latitude)}
-                    treeLng={Number(tree.longitude)}
-                    userId={userId}
-                    onComplete={() => setRefinementOpen(false)}
-                    onDismiss={() => setRefinementOpen(false)}
-                  />
-                ) : (
-                  <Card className="bg-card/60 backdrop-blur border-border/40">
-                    <CardContent className="p-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <MapPin className="w-4 h-4 text-primary/60 shrink-0" />
-                        <div className="min-w-0">
-                          <p className="font-serif text-sm text-foreground">Refine location</p>
-                          <p className="text-xs text-muted-foreground font-serif truncate">
-                            Help pin this tree more precisely
-                          </p>
+                <div id="refine-location-section" ref={(el) => {
+                  if (el && searchParams.get("refine") === "1" && !refinementOpen) {
+                    setTimeout(() => {
+                      el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      setRefinementOpen(true);
+                    }, 400);
+                  }
+                }}>
+                  {refinementOpen ? (
+                    <LocationRefinementFlow
+                      treeId={tree.id}
+                      treeName={tree.name}
+                      treeLat={Number(tree.latitude)}
+                      treeLng={Number(tree.longitude)}
+                      userId={userId}
+                      onComplete={() => setRefinementOpen(false)}
+                      onDismiss={() => setRefinementOpen(false)}
+                    />
+                  ) : (
+                    <Card className={`bg-card/60 backdrop-blur border-border/40 transition-all duration-700 ${searchParams.get("refine") === "1" ? "ring-2 ring-primary/40 animate-pulse" : ""}`}>
+                      <CardContent className="p-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <MapPin className="w-4 h-4 text-primary/60 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-serif text-sm text-foreground">Refine location</p>
+                            <p className="text-xs text-muted-foreground font-serif truncate">
+                              Stand by the tree and place the pin as accurately as you can
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <LocationConfidenceBadge
-                          confidence={tree.location_confidence}
-                          refinementCount={tree.refinement_count}
-                        />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="font-serif text-xs"
-                          onClick={() => setRefinementOpen(true)}
-                        >
-                          Refine
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <LocationConfidenceBadge
+                            confidence={tree.location_confidence}
+                            refinementCount={tree.refinement_count}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="font-serif text-xs"
+                            onClick={() => setRefinementOpen(true)}
+                          >
+                            Refine
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </Suspense>
             )}
 
