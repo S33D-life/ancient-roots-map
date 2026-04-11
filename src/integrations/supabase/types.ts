@@ -4593,6 +4593,45 @@ export type Database = {
           },
         ]
       }
+      partnership_proposals: {
+        Row: {
+          category: string
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          message: string
+          org_name: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          message: string
+          org_name: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          message?: string
+          org_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       pathway_groves: {
         Row: {
           created_at: string
