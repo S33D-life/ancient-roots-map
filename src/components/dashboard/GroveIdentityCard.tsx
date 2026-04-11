@@ -117,6 +117,11 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
               <span className="text-[11px] text-primary/50 font-serif font-medium">{displayHandle}</span>
             )}
           </div>
+          {firstTree && (
+            <Link to={`/tree/${firstTree.id}`} className="text-[10px] font-serif text-muted-foreground/50 hover:text-primary/60 transition-colors mt-0.5 block">
+              Your journey began at {firstTree.name}
+            </Link>
+          )}
         </div>
         <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
           <TreeDeciduous className="w-5 h-5 text-primary" />
