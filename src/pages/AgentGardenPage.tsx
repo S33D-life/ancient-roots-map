@@ -31,6 +31,7 @@ import { ConnectAgentWizard } from "@/components/agent-garden/ConnectAgentWizard
 import { AgentOverviewTab } from "@/components/agent-garden/AgentOverviewTab";
 import { WanderersTab } from "@/components/agent-garden/WanderersTab";
 import { ResearchBridgeTab } from "@/components/agent-garden/ResearchBridgeTab";
+import { ResearchContributionsPanel } from "@/components/agent-garden/ResearchContributionsPanel";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
@@ -277,6 +278,9 @@ const AgentGardenPage = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Research Pipeline Contributions */}
+            <ResearchContributionsPanel />
           </TabsContent>
 
           {/* ═══════════════ SPARKS ═══════════════ */}
