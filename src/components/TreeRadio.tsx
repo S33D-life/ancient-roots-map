@@ -388,6 +388,15 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                     >
                       {previewLoading ? (
                         <div className="w-4 h-4 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+                      ) : currentSong?.thumbnail_url ? (
+                        <div className="relative w-full h-full">
+                          <img src={currentSong.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                          {currentSong.youtube_video_id && (
+                            <div className="absolute bottom-0.5 right-0.5">
+                              <Youtube className="w-3 h-3 text-white drop-shadow" />
+                            </div>
+                          )}
+                        </div>
                       ) : currentPreview?.artworkUrl ? (
                         <img
                           src={currentPreview.artworkUrl}
