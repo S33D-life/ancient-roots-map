@@ -76,7 +76,7 @@ export function StewardConsole() {
         supabase.from("source_tree_candidates").select("id", { count: "exact", head: true }).eq("normalization_status", "promoted"),
         supabase.from("verification_tasks").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("verification_tasks").select("id", { count: "exact", head: true }).eq("status", "completed"),
-        supabase.from("research_trees").select("id", { count: "exact", head: true }).eq("conversion_status", "verified"),
+        supabase.from("research_trees").select("id, latitude, longitude, species_scientific, conversion_status").in("conversion_status", ["research_only", "candidate", "in_conversion"]).not("latitude", "is", null).not("longitude", "is", null).not("species_scientific", "is", null),
         supabase.from("agent_findings").select("id", { count: "exact", head: true }).eq("review_status", "pending"),
         supabase.from("tree_data_sources").select("id, name, integration_status, record_count").order("updated_at", { ascending: false }).limit(5),
       ]);
@@ -105,7 +105,7 @@ export function StewardConsole() {
         promoted: candPromRes.count ?? 0,
         openVerifications: verifOpenRes.count ?? 0,
         completedVerifications: verifDoneRes.count ?? 0,
-        readyForPromotion: researchReadyRes.count ?? 0,
+        readyForPromotion: (researchReadyRes.data || []).filter(rt => rt.species_scientific && rt.species_scientific !== "Unknown").length,
       });
 
       setQueues({
@@ -238,9 +238,9 @@ export function StewardConsole() {
         </CardHeader>
         <CardContent className="px-4 pb-3 space-y-1.5">
           {[
-            { label: "Candidates awaiting review", count: queues.candidatesAwaiting, route: "/agent-garden" },
-            { label: "Verification tasks open", count: queues.verificationsOpen, route: "/agent-garden" },
-            { label: "Findings pending", count: queues.findingsPending, route: "/agent-garden" },
+            { label: "Candidates awaiting review", count: queues.candidatesAwaiting, route: "/agent-garden?tab=bridge" },
+            { label: "Verification tasks open", count: queues.verificationsOpen, route: "/agent-garden?tab=bridge" },
+            { label: "Findings pending", count: queues.findingsPending, route: "/agent-garden?tab=wanderers" },
           ].map(q => (
             <Link key={q.label} to={q.route} className="flex items-center justify-between text-[11px] group hover:bg-card/20 rounded px-1 py-0.5">
               <span className="text-muted-foreground/70 group-hover:text-foreground/80">{q.label}</span>
@@ -276,12 +276,12 @@ export function StewardConsole() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 gap-1.5">
         {[
-          { label: "Wanderers", route: "/agent-garden", icon: <Footprints className="w-3 h-3" /> },
-          { label: "Research Bridge", route: "/agent-garden", icon: <TreeDeciduous className="w-3 h-3" /> },
-          { label: "Verification Queue", route: "/agent-garden", icon: <ClipboardCheck className="w-3 h-3" /> },
+          { label: "Wanderers", route: "/agent-garden?tab=wanderers", icon: <Footprints className="w-3 h-3" /> },
+          { label: "Research Bridge", route: "/agent-garden?tab=bridge", icon: <TreeDeciduous className="w-3 h-3" /> },
+          { label: "Verification Queue", route: "/agent-garden?tab=bridge", icon: <ClipboardCheck className="w-3 h-3" /> },
           { label: "Bug Garden", route: "/bug-garden", icon: <Bug className="w-3 h-3" /> },
           { label: "Tree Data Commons", route: "/tree-data-commons", icon: <Database className="w-3 h-3" /> },
-          { label: "Agent Garden", route: "/agent-garden", icon: <Sprout className="w-3 h-3" /> },
+          { label: "Contributions", route: "/agent-garden?tab=contributions", icon: <Sprout className="w-3 h-3" /> },
         ].map(l => (
           <Link key={l.label} to={l.route}>
             <Button variant="outline" size="sm" className="w-full justify-start gap-1.5 bg-card/20 border-border/20 text-[10px] h-7">
