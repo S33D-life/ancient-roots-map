@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { parseAppleMusicInput } from "@/utils/appleMusicParser";
+import { parseYouTubeUrl } from "@/utils/youtubeParser";
 import {
   Search, Music, Play, Pause, X, Check, ChevronRight,
   Plus, Disc3, Loader2, Sparkles, ExternalLink, Clock,
@@ -43,8 +44,13 @@ export interface SelectedSongData {
   artworkUrl: string | null;
   previewUrl: string | null;
   externalUrl: string | null;
-  source: "catalog" | "itunes" | "custom";
+  source: "catalog" | "itunes" | "youtube" | "custom";
   message: string;
+  /** YouTube-specific fields (populated when source === "youtube") */
+  youtubeUrl?: string | null;
+  youtubeVideoId?: string | null;
+  youtubeEmbedUrl?: string | null;
+  thumbnailUrl?: string | null;
 }
 
 interface MusicOfferingFlowProps {
@@ -382,6 +388,10 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
         message: message.trim(),
       });
     } else if (selectedSong) {
+      const isYT = selectedSong.source === "youtube";
+      const ytParsed = isYT && selectedSong.external_url
+        ? parseYouTubeUrl(selectedSong.external_url)
+        : null;
       onComplete({
         title: selectedSong.title,
         artist: selectedSong.artist,
@@ -389,8 +399,12 @@ const MusicOfferingFlow = ({ treeId, treeName, onComplete, onCancel }: MusicOffe
         artworkUrl: selectedSong.artwork_url,
         previewUrl: selectedSong.preview_url,
         externalUrl: selectedSong.external_url,
-        source: selectedSong.source === "itunes" ? "itunes" : "catalog",
+        source: isYT ? "youtube" : selectedSong.source === "itunes" ? "itunes" : "catalog",
         message: message.trim(),
+        youtubeUrl: isYT ? selectedSong.external_url : null,
+        youtubeVideoId: ytParsed?.videoId ?? null,
+        youtubeEmbedUrl: ytParsed?.embedUrl ?? null,
+        thumbnailUrl: ytParsed?.thumbnail ?? selectedSong.artwork_url ?? null,
       });
     }
   };

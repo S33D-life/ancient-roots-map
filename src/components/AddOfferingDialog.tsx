@@ -328,11 +328,15 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast({ title: "Not authenticated", description: "Please sign in to add offerings", variant: "destructive" }); return; }
       const impactWeight = treeRole === "stewardship" ? 2.0 : 1.0;
-      const { data: insertedOffering, error } = await supabase.from("offerings").insert({
+      const { data: insertedOffering, error } = await (supabase.from("offerings") as any).insert({
         tree_id: treeId, type: "song" as const, title: data.title,
         content: data.message || `${data.artist}${data.album ? ` — ${data.album}` : ""}`,
-        media_url: data.previewUrl || null, nft_link: data.externalUrl || null, created_by: user.id,
+        media_url: data.previewUrl || data.artworkUrl || null, nft_link: data.externalUrl || null, created_by: user.id,
         sealed_by_staff: sealedByStaff.trim() || null, meeting_id: meetingId || null, visibility, tree_role: treeRole, impact_weight: impactWeight,
+        youtube_url: data.youtubeUrl || null,
+        youtube_video_id: data.youtubeVideoId || null,
+        youtube_embed_url: data.youtubeEmbedUrl || null,
+        thumbnail_url: data.thumbnailUrl || data.artworkUrl || null,
       }).select("id").single();
       if (error) throw error;
       if (insertedOffering) {
