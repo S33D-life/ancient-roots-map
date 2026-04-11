@@ -81,29 +81,19 @@ export default function SendWhisperModal({
     }
   }, [open]);
 
-  // Fetch invite code when invite toggle is enabled
+  // Create a fresh single-use invite link when invite toggle is enabled
   useEffect(() => {
     if (!inviteEnabled || inviteCode) return;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: existing } = await supabase
+      // Always create a new single-use invite link for each whisper invitation
+      const { data: newLink } = await supabase
         .from("invite_links")
+        .insert({ created_by: user.id, max_uses: 1 } as any)
         .select("code")
-        .eq("created_by", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (existing) {
-        setInviteCode(existing.code);
-      } else {
-        const { data: newLink } = await supabase
-          .from("invite_links")
-          .insert({ created_by: user.id })
-          .select("code")
-          .single();
-        setInviteCode(newLink?.code || null);
-      }
+        .single();
+      setInviteCode(newLink?.code || null);
     })();
   }, [inviteEnabled, inviteCode]);
 
