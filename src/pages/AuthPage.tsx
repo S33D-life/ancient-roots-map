@@ -763,17 +763,21 @@ const AuthPage = () => {
               {isSignup && (
                 <div className="space-y-1.5">
                   <Label htmlFor="invite-code" className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                    <Gift className="w-3 h-3" /> Invite Code <span className="text-muted-foreground/50">(optional)</span>
+                    <Gift className="w-3 h-3" /> Invitation Code <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="invite-code"
                     type="text"
-                    placeholder="Enter invite code from a friend"
+                    placeholder="Enter your invitation code"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
                     disabled={isLoading}
                     className="font-mono text-sm"
+                    required
                   />
+                  <p className="text-[10px] text-muted-foreground/60 font-serif">
+                    S33D is invitation-only. Ask a wanderer for an invite link to join.
+                  </p>
                 </div>
               )}
 
