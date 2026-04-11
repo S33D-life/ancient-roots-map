@@ -15,6 +15,12 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 
 export type TreeCardVariant = "gallery" | "compact";
 
+/** Presence signal for tree cards — matches popup format */
+export interface TreeCardPresence {
+  presence_state: "here_now" | "recently_met";
+  presence_count: number;
+}
+
 interface TreeCardProps {
   tree: TreeCardData;
   variant?: TreeCardVariant;
@@ -24,6 +30,8 @@ interface TreeCardProps {
   birdsongCount?: number;
   whisperCount?: number;
   wishlistPulseActive?: boolean;
+  /** Live presence signal from the map layer */
+  presence?: TreeCardPresence | null;
   onSelect?: (tree: TreeCardData) => void;
   onWishlist?: (treeId: string) => void;
   onShare?: (name: string, description: string, url: string) => void;
