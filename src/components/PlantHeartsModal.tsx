@@ -125,11 +125,13 @@ export default function PlantHeartsModal({
               <div className="flex items-center gap-3">
                 <input
                   type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   min={1}
                   max={available}
                   value={amount}
                   onChange={(e) => setAmount(Math.max(1, Math.min(available, parseInt(e.target.value) || 1)))}
-                  className="flex-1 bg-muted/20 border border-border/30 rounded-xl px-3 py-2.5 text-sm font-serif text-foreground text-center focus:outline-none focus:border-primary/40 transition-colors"
+                  className="flex-1 bg-muted/20 border border-border/30 rounded-xl px-3 py-3 text-base font-serif text-foreground text-center focus:outline-none focus:border-primary/40 transition-colors"
                 />
                 <span className="text-[10px] text-muted-foreground/50 font-serif shrink-0">
                   of {available} available
