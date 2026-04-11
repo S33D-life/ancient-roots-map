@@ -16,6 +16,7 @@ import GalleryFilterDrawer from "@/components/GalleryFilterDrawer";
 import NFTreeStudio from "@/components/NFTreeStudio";
 import ancientFriendsWindow from "@/assets/ancient-friends-window.jpeg";
 import { deduplicateForGallery, type EncounterCluster } from "@/utils/treeEncounterClustering";
+import { useTreesPresenceLookup } from "@/hooks/use-trees-presence-lookup";
 
 interface Tree {
   id: string;
@@ -73,6 +74,10 @@ const AncientFriendsRoom = ({
   const [discoveryChip, setDiscoveryChip] = useState<DiscoveryChip>("all");
 
   const { offerings } = useOfferings({ treeId: null });
+
+  // Presence lookup for tree cards
+  const allTreeIds = useMemo(() => trees.map(t => t.id), [trees]);
+  const presenceByTreeId = useTreesPresenceLookup(allTreeIds);
 
   const uniqueSpecies = Array.from(new Set(trees.map(t => t.species)));
   const uniqueLineages = Array.from(new Set(trees.filter(t => t.lineage).map(t => t.lineage!))).sort();
@@ -321,6 +326,7 @@ const AncientFriendsRoom = ({
                 heroPhotoUrl={photoOffering?.media_url}
                 whisperCount={whisperCounts[tree.id] || 0}
                 wishlistPulseActive={wishlistPulseId === tree.id}
+                presence={presenceByTreeId[tree.id] || null}
                 onSelect={(t) => onSelectTree(t as any)}
                 onWishlist={addToWishlist}
                 onShare={handleShare}

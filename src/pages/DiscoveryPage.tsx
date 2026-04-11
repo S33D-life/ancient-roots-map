@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import TreeCard from "@/components/TreeCard";
 import PageShell from "@/components/PageShell";
 import { type TreeCardData } from "@/utils/treeCardTypes";
+import { useTreesPresenceLookup } from "@/hooks/use-trees-presence-lookup";
 import { Search, Globe, MapPin, TreeDeciduous, Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -73,6 +74,10 @@ const DiscoveryPage = () => {
     }
     return result;
   }, [trees, activeList, search]);
+
+  // Presence lookup for visible trees
+  const filteredIds = useMemo(() => filtered.map(t => t.id), [filtered]);
+  const presenceByTreeId = useTreesPresenceLookup(filteredIds);
 
   // Source counts
   const counts = useMemo(() => {
@@ -212,6 +217,7 @@ const DiscoveryPage = () => {
                   onWishlist={handleWishlist}
                   onShare={handleShare}
                   wishlistPulseActive={wishlistIds.includes(tree.id)}
+                  presence={presenceByTreeId[tree.id] || null}
                 />
               </div>
             ))}
