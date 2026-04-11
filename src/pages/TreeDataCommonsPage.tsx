@@ -479,7 +479,7 @@ const TreeDataCommonsPage = () => {
 
           {/* ── Research Pipeline Tab ── */}
           <TabsContent value="pipeline" className="mt-6">
-            <SourceDashboardLazy sources={sources} />
+            <SourceDashboard sources={sources} />
           </TabsContent>
 
           {/* ── Integration Queue Tab ── */}
