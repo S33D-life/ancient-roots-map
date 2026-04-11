@@ -242,43 +242,8 @@ export default function MapControlPanel({
               boxShadow: "0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px hsla(42, 20%, 20%, 0.1)",
             }}
           >
-            {/* Tab bar */}
-            <div
-              className="flex px-1.5 pt-2 pb-1 gap-0.5"
-              style={{ borderBottom: "1px solid hsla(42, 40%, 30%, 0.15)" }}
-            >
-              {TAB_CONFIG.map(t => (
-                <button
-                  key={t.key}
-                  onClick={() => handleTabChange(t.key)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-serif tracking-wider transition-all duration-200"
-                  style={{
-                    background: tab === t.key ? "hsla(42, 50%, 40%, 0.15)" : "transparent",
-                    color: tab === t.key ? "hsl(42, 70%, 65%)" : "hsl(42, 30%, 40%)",
-                    border: tab === t.key ? "1px solid hsla(42, 50%, 40%, 0.25)" : "1px solid transparent",
-                  }}
-                >
-                  <span className="text-xs">{t.icon}</span>
-                  {t.label}
-                </button>
-              ))}
-              <button
-                onClick={() => setOpen(false)}
-                className="px-1.5 py-1 transition-colors"
-                style={{ color: "hsl(42, 40%, 45%)" }}
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* ── Perspective control — always visible, below tabs ── */}
-            <div className="px-3 pt-2.5 pb-1.5">
-              <p
-                className="text-[8px] font-serif uppercase tracking-[0.2em] mb-1.5"
-                style={{ color: "hsl(42, 35%, 42%)" }}
-              >
-                Perspective
-              </p>
+            {/* ── Perspective control — primary, above tabs ── */}
+            <div className="px-3 pt-3 pb-2">
               <div
                 className="flex rounded-full p-[2px]"
                 style={{
@@ -293,7 +258,7 @@ export default function MapControlPanel({
                       key={p.key}
                       onClick={() => handlePerspectiveChange(p.key)}
                       whileTap={{ scale: 0.95 }}
-                      className="relative flex-1 flex items-center justify-center gap-1 py-1.5 rounded-full text-[10px] font-serif transition-colors duration-200"
+                      className="relative flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-[10px] font-serif transition-colors duration-200"
                       style={{
                         color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 50%, 0.5)",
                         background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
@@ -319,7 +284,35 @@ export default function MapControlPanel({
             </div>
 
             {/* Soft divider */}
-            <div className="mx-3 my-1" style={{ height: "1px", background: "hsla(42, 30%, 30%, 0.15)" }} />
+            <div className="mx-3" style={{ height: "1px", background: "hsla(42, 30%, 30%, 0.15)" }} />
+
+            {/* Tab bar */}
+            <div
+              className="flex px-1.5 pt-1.5 pb-1 gap-0.5"
+            >
+              {TAB_CONFIG.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => handleTabChange(t.key)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-serif tracking-wider transition-all duration-200"
+                  style={{
+                    background: tab === t.key ? "hsla(42, 50%, 40%, 0.15)" : "transparent",
+                    color: tab === t.key ? "hsl(42, 70%, 65%)" : "hsl(42, 30%, 40%)",
+                    border: tab === t.key ? "1px solid hsla(42, 50%, 40%, 0.25)" : "1px solid transparent",
+                  }}
+                >
+                  <span className="text-xs">{t.icon}</span>
+                  {t.label}
+                </button>
+              ))}
+              <button
+                onClick={() => setOpen(false)}
+                className="px-1.5 py-1 transition-colors"
+                style={{ color: "hsl(42, 40%, 45%)" }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
 
             {/* Tab content */}
             <div className="px-3 py-2 max-h-[calc(100svh-16rem)] overflow-y-auto overscroll-contain space-y-2">
