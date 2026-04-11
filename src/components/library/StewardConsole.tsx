@@ -13,6 +13,7 @@ import {
   AlertTriangle, CheckCircle, Clock, Globe, ExternalLink, Loader2,
   Eye, Telescope, Sprout,
 } from "lucide-react";
+import { ContributionReviewQueue } from "./ContributionReviewQueue";
 import {
   clusterFindings, findFlakiestJourney, mostCommonCategory,
 } from "@/lib/wanderer-patterns";
