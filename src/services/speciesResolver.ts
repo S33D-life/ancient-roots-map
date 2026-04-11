@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { matchSpecies, enrichSpecies } from "@/data/treeSpecies";
 import { getHiveForSpecies, getHiveInfo, type HiveInfo } from "@/utils/hiveUtils";
 
+export type MatchConfidence = "exact" | "fuzzy" | "unresolved";
+
 export interface SpeciesResolution {
   speciesKey: string | null;
   displayName: string;
@@ -20,6 +22,19 @@ export interface SpeciesResolution {
   genus: string | null;
   hive: HiveInfo | null;
   source: "db" | "hardcoded" | "unresolved";
+  confidence: MatchConfidence;
+}
+
+/**
+ * GBIF enrichment stub — future integration point.
+ * When implemented, will fetch taxonomy from GBIF API by scientific name.
+ */
+export async function enrichFromGBIF(
+  _scientificName: string
+): Promise<Partial<SpeciesResolution> | null> {
+  // TODO: Implement GBIF species/match?name= lookup
+  // Returns { genus, family, scientificName, speciesKey (gbif taxon id) }
+  return null;
 }
 
 // In-memory cache: normalized string → resolution
