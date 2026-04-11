@@ -29,3 +29,13 @@ export function hapticClick() {
 export function hapticDragStart() {
   if (canVibrate) navigator.vibrate([8, 30, 12]);
 }
+
+/** Whisper reveal — ethereal triple-pulse */
+export function hapticWhisperReveal() {
+  if (canVibrate) navigator.vibrate([5, 40, 8, 40, 12]);
+}
+
+/** Heart collect — warm pulse */
+export function hapticHeartCollect() {
+  if (canVibrate) navigator.vibrate([12, 30, 20]);
+}
