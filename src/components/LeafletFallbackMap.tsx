@@ -478,6 +478,20 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   usePulseMapLayer(mapRef.current, showForestPulse);
   usePathwayMapLayer(mapRef.current, showMycelialPathways, navigate);
 
+  // Tree presence layer — soft signals of recent/current visitors
+  const { signals: presenceSignals, updateBounds: updatePresenceBounds } = useTreePresence(showPresence);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !showPresence) return;
+    const feed = () => {
+      const b = map.getBounds();
+      updatePresenceBounds({ minLat: b.getSouth(), maxLat: b.getNorth(), minLng: b.getWest(), maxLng: b.getEast() });
+    };
+    feed();
+    map.on("moveend", feed);
+    return () => { map.off("moveend", feed); };
+  }, [showPresence, updatePresenceBounds]);
+
   // Gateway mode — Countries / Hives / Bioregions perspective
   const [gatewayMode, setGatewayMode] = useState<GatewayMode>("countries");
   const handleGatewayChange = useCallback((mode: GatewayMode) => {
