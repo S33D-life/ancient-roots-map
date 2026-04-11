@@ -213,7 +213,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
     const nextVisibility = entry.visibility === "private" ? "public" : "private";
     try {
       await updateEntry(entry.id, { visibility: nextVisibility as BookshelfVisibility });
-      toast.success(nextVisibility === "public" ? "Book shared publicly" : "Book made private");
+      toast.success(nextVisibility === "public" ? "Book shared with the forest" : "Book returned to Heartwood");
     } catch {
       toast.error("Failed to update visibility");
     }
