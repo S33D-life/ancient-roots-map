@@ -115,7 +115,7 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
     try {
       await onSubmit(data);
       toast.success("Volume placed on your shelf", {
-        description: "Visibility: Root (Private)",
+        description: "Held in Heartwood",
       });
       setData({
         collaborator_name: "", collaborator_project: "", document_title: "",
@@ -389,7 +389,7 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
                   )}
                   <div className="flex items-center gap-1.5 pt-2 text-[10px] text-muted-foreground">
                     <Lock className="w-3 h-3" />
-                    <span className="font-serif">Visibility: Root (Private)</span>
+                    <span className="font-serif">Held in Heartwood</span>
                   </div>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-serif text-center">
