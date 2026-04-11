@@ -83,6 +83,7 @@ const TreeCard = ({
   birdsongCount = 0,
   whisperCount = 0,
   wishlistPulseActive = false,
+  presence,
   onSelect,
   onWishlist,
   onShare,
