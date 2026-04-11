@@ -55,7 +55,7 @@ const BottomNav = () => {
               window.dispatchEvent(new CustomEvent("s33d-add-tree-chooser"));
             } else {
               // Navigate to map with add-tree intent
-              window.location.href = "/map?addTree=true";
+              navigate("/map?addTree=true");
             }
           }}
           className="relative flex flex-col items-center gap-0.5 px-3 py-1 justify-center min-w-[48px] min-h-[48px] active:scale-95"
