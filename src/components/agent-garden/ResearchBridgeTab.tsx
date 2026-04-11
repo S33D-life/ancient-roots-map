@@ -308,7 +308,7 @@ function CandidateRow({
 
               {candidate.promoted_research_tree_id && (
                 <div className="flex items-center gap-2 pt-1">
-                  <p className="text-[10px] font-serif text-green-600">✓ Promoted to Research Forest</p>
+                  <p className="text-[10px] font-serif text-primary">✓ Promoted to Research Forest</p>
                   <Link
                     to={`/tree/research/${candidate.promoted_research_tree_id}`}
                     className="text-[10px] font-serif text-primary hover:underline"
