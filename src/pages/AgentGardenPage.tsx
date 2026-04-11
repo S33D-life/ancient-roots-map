@@ -109,13 +109,20 @@ function TableSkeleton({ rows = 4, cols = 5 }: { rows?: number; cols?: number })
 /* ── Main Page ─────────────────────────────────── */
 const AgentGardenPage = () => {
   const { agents, agentContributions, sparkReports, loading, stats, refetch } = useDataCommons();
+  const [searchParams] = useSearchParams();
   const [contribFilter, setContribFilter] = useState("all");
   const [sparkFilter, setSparkFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => searchParams.get("tab") || "overview");
 
   useEffect(() => {
     document.title = "Agent Garden — S33D.life";
   }, []);
+
+  // Sync tab from URL query param
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   const totalHeartsDistributed = useMemo(
     () => agents.reduce((a, ag) => a + (ag.hearts_earned || 0), 0),
