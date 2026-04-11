@@ -181,9 +181,12 @@ export function buildPopupHtml(
     <!-- Hearts available — collect CTA or guidance -->
     ${(heartCount ?? 0) > 0 && (statusLight === "green" || statusLight === "orange") ? `
     <div style="padding:4px 16px 6px;">
-      <button data-collect-hearts="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px 0;font-size:11px;color:hsl(140,40%,58%);background:hsla(140,35%,30%,0.08);border:1px solid hsla(140,35%,40%,0.18);border-radius:9px;cursor:pointer;font-family:sans-serif;font-weight:600;transition:all .2s;">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="hsl(140,45%,50%)" style="flex-shrink:0;"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 0 1 8 4.5 3.5 3.5 0 0 1 13.5 7C13.5 10.5 8 14 8 14z"/></svg>
-        ${heartCount} heart${heartCount !== 1 ? "s" : ""} waiting — collect now
+      <style>
+        @keyframes heartPulseGlow { 0%,100% { box-shadow: 0 0 8px hsla(140,40%,50%,0.12), 0 0 2px hsla(42,70%,50%,0.08); } 50% { box-shadow: 0 0 16px hsla(140,40%,50%,0.22), 0 0 6px hsla(42,70%,50%,0.14); } }
+      </style>
+      <button data-collect-hearts="${escapeHtml(tree.id)}" data-tree-name="${escapeHtml(tree.name)}" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px 0;font-size:12px;color:hsl(140,40%,58%);background:linear-gradient(135deg,hsla(140,35%,30%,0.1),hsla(42,70%,50%,0.06));border:1px solid hsla(140,35%,40%,0.22);border-radius:10px;cursor:pointer;font-family:sans-serif;font-weight:700;transition:all .2s;animation:heartPulseGlow 2.5s ease-in-out infinite;">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="hsl(140,45%,50%)" style="flex-shrink:0;"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 0 1 8 4.5 3.5 3.5 0 0 1 13.5 7C13.5 10.5 8 14 8 14z"/></svg>
+        Collect ${heartCount} Heart${heartCount !== 1 ? "s" : ""} →
       </button>
     </div>` : (heartCount ?? 0) > 0 ? `
     <div style="padding:4px 16px 6px;">
