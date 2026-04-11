@@ -484,6 +484,19 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                     </button>
                   </div>
 
+                  {/* Inline YouTube embed for YT songs */}
+                  {showYTEmbed && currentSong?.youtube_embed_url && (
+                    <div className="mt-3 rounded-lg overflow-hidden" style={{ aspectRatio: "16 / 9" }}>
+                      <iframe
+                        src={`${currentSong.youtube_embed_url}?autoplay=1&rel=0`}
+                        allow="autoplay; encrypted-media"
+                        allowFullScreen
+                        className="w-full h-full"
+                        title={currentSong.title || "YouTube"}
+                      />
+                    </div>
+                  )}
+
                   {/* Station info */}
                   <div className="mt-3 pt-3 border-t" style={{ borderColor: "hsl(42 40% 20% / 0.3)" }}>
                     <div className="flex items-center justify-between">
