@@ -105,7 +105,7 @@ export function StewardConsole() {
         promoted: candPromRes.count ?? 0,
         openVerifications: verifOpenRes.count ?? 0,
         completedVerifications: verifDoneRes.count ?? 0,
-        readyForPromotion: researchReadyRes.count ?? 0,
+        readyForPromotion: (researchReadyRes.data || []).filter(rt => rt.species_scientific && rt.species_scientific !== "Unknown").length,
       });
 
       setQueues({
