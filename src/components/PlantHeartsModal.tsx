@@ -58,7 +58,10 @@ export default function PlantHeartsModal({
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm mx-4 mb-4 sm:mb-0 rounded-2xl overflow-hidden"
+          className="relative w-full max-w-sm mx-4 rounded-2xl overflow-hidden"
+          style={{
+            marginBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 5rem), 6rem)",
+          }}
           style={{
             background: "hsl(var(--card))",
             border: "1px solid hsl(var(--border) / 0.3)",
