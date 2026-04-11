@@ -173,7 +173,7 @@ const TreeCard = ({
           <div className="flex-1 min-w-0 space-y-1">
             <h4 className="font-serif text-sm text-primary truncate leading-tight">{tree.name}</h4>
             <p className="text-[11px] italic truncate" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
-              {tree.species}
+              {speciesDisplayName}
             </p>
             <div className="flex flex-col gap-1 mt-0.5">
               {/* Presence signal */}
@@ -279,8 +279,11 @@ const TreeCard = ({
           {tree.name}
         </CardTitle>
         <p className="text-[11px] italic mt-0.5 font-serif" style={{ color: `hsl(${speciesHue}, 45%, 55%)` }}>
-          {tree.species}
+          {speciesDisplayName}
         </p>
+        {scientificName && scientificName !== speciesDisplayName && (
+          <p className="text-[9px] text-muted-foreground/50 font-serif italic">{scientificName}</p>
+        )}
       </CardHeader>
 
       <CardContent className="pt-0">
