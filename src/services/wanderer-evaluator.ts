@@ -1,8 +1,8 @@
 /**
- * First Wanderer — Evaluation layer (hardened).
+ * First Wanderer — Evaluation layer (calibrated).
  *
- * Distinguishes real bugs from fragile selectors, navigation failures,
- * and UX friction. Generates concise, actionable findings.
+ * Distinguishes real bugs from stale selectors, route mismatches,
+ * auth/state issues, and UX friction. Generates concise, actionable findings.
  */
 import type { RunTrace, StepResult, FindingType, FindingSeverity } from "@/lib/wanderer-types";
 
@@ -21,76 +21,106 @@ export interface EvaluationResult {
   findings: EvaluatedFinding[];
 }
 
-/** Classify a failed step into the right finding type */
-function classifyFinding(step: StepResult): { type: FindingType; severity: FindingSeverity } {
+/** Classify a failed step into the right finding type with clear reasoning */
+function classifyFinding(step: StepResult): { type: FindingType; severity: FindingSeverity; category: string } {
   const action = step.step.action;
   const error = step.error || "";
+  const url = step.urlAfter || step.urlBefore || "";
 
-  // Navigation failure — often infrastructure, not a real bug
-  if (action === "goto") {
-    return { type: "ux_friction", severity: "medium" };
-  }
-
-  // Timeout waiting for content — could be slow load or missing content
-  if (action === "wait_for") {
-    if (step.durationMs > 5000) return { type: "ux_friction", severity: "high" };
-    return { type: "ux_friction", severity: "medium" };
-  }
-
-  // Assertion failures are more likely real bugs
-  if (action === "assert_visible" || action === "assert_text") {
-    // Distinguish "element exists but hidden" from "element not found at all"
-    if (error.includes("zero dimensions") || error.includes("hidden")) {
-      return { type: "bug", severity: "medium" };
+  // Route mismatch — navigation didn't land where expected
+  if (action === "goto" && error.includes("timed out")) {
+    // Check if we ended up on auth
+    if (url.includes("/auth") || url.includes("/login")) {
+      return { type: "insight", severity: "low", category: "auth-redirect" };
     }
-    // "not found" could be a fragile selector
-    if (error.includes("not found") && isSelectorFragile(step.step.target)) {
-      return { type: "insight", severity: "low" };
-    }
-    return { type: "bug", severity: "high" };
+    return { type: "ux_friction", severity: "medium", category: "route-mismatch" };
   }
 
-  // Click target missing
-  if (action === "click" && !step.passed) {
+  // Stale selector — element not found, likely the selector needs updating
+  if ((action === "wait_for" || action === "assert_visible" || action === "click") && error.includes("not found")) {
     if (isSelectorFragile(step.step.target)) {
-      return { type: "insight", severity: "low" };
+      return { type: "insight", severity: "low", category: "stale-selector" };
     }
-    return { type: "bug", severity: "medium" };
+    // Semantic target not found — more likely a real issue
+    if (isSemanticTarget(step.step.target)) {
+      return { type: "bug", severity: "medium", category: "missing-element" };
+    }
+    return { type: "insight", severity: "low", category: "stale-selector" };
   }
 
-  return { type: "insight", severity: "low" };
+  // Element hidden
+  if (error.includes("zero dimensions") || error.includes("hidden")) {
+    return { type: "bug", severity: "medium", category: "hidden-element" };
+  }
+
+  // Text assertion failure — real content bug
+  if (action === "assert_text" && error.includes("Expected text")) {
+    return { type: "bug", severity: "high", category: "wrong-content" };
+  }
+
+  // Slow step
+  if (step.durationMs > 5000) {
+    return { type: "ux_friction", severity: "high", category: "slow-response" };
+  }
+
+  // Wait timeout — could be loading issue
+  if (action === "wait_for" && error.includes("Timed out")) {
+    return { type: "ux_friction", severity: "medium", category: "load-timeout" };
+  }
+
+  return { type: "insight", severity: "low", category: "unknown" };
+}
+
+function isSemanticTarget(target: string): boolean {
+  return target.startsWith("has-text(") || target.startsWith("[role") || target.startsWith("[aria-label") || target === "h1" || target === "main" || target === "header" || target === "nav" || target === "textarea";
 }
 
 /** Heuristic: selectors with deeply nested classes or pseudo-selectors are fragile */
 function isSelectorFragile(target: string): boolean {
   if (target.split(".").length > 3) return true;
   if (target.includes(":nth") || target.includes(":last") || target.includes(":first")) return true;
-  // data-testid, aria-label, role, and text-based targets are stable
-  if (target.startsWith("[data-testid") || target.startsWith("[aria-label") || target.startsWith("[role")) return false;
-  if (target.includes("has-text(")) return false;
   return false;
 }
 
-function buildTitle(step: StepResult): string {
-  const action = step.step.action;
+function buildTitle(step: StepResult, category: string): string {
   const target = step.step.target.length > 50 ? step.step.target.slice(0, 50) + "…" : step.step.target;
 
-  switch (action) {
-    case "goto": return `Navigation failed → ${target}`;
-    case "wait_for": return `Content not found: ${target}`;
-    case "assert_visible": return `Missing element: ${target}`;
-    case "assert_text": return `Wrong text in ${target}`;
-    case "click": return `Click target missing: ${target}`;
-    case "type": return `Input target missing: ${target}`;
-    default: return `Step failed: ${action} on ${target}`;
+  switch (category) {
+    case "route-mismatch": return `Route unreachable: ${target}`;
+    case "auth-redirect": return `Auth redirect when navigating to ${target}`;
+    case "stale-selector": return `Stale selector: ${target}`;
+    case "missing-element": return `Missing element: ${target}`;
+    case "hidden-element": return `Hidden element: ${target}`;
+    case "wrong-content": return `Wrong text in ${target}`;
+    case "slow-response": return `Slow response: ${step.step.action} (${Math.round(step.durationMs)}ms)`;
+    case "load-timeout": return `Load timeout waiting for: ${target}`;
+    default: return `Step failed: ${step.step.action} on ${target}`;
   }
 }
 
-function buildDescription(step: StepResult): string {
+function buildDescription(step: StepResult, category: string): string {
   const parts: string[] = [];
-  if (step.error) parts.push(step.error);
+
+  // Category-specific guidance
+  switch (category) {
+    case "route-mismatch":
+      parts.push(`Navigation to "${step.step.target}" did not complete. Ended at ${step.urlAfter}.`);
+      parts.push("This may indicate a removed route or a redirect loop.");
+      break;
+    case "auth-redirect":
+      parts.push(`Navigating to "${step.step.target}" redirected to an auth page.`);
+      parts.push("This journey may require authentication to pass.");
+      break;
+    case "stale-selector":
+      parts.push(`Selector "${step.step.target}" not found on the page.`);
+      parts.push("The UI may have changed — consider updating this journey's target.");
+      break;
+    default:
+      if (step.error) parts.push(step.error);
+  }
+
   if (step.urlBefore !== step.urlAfter) {
-    parts.push(`Route changed: ${step.urlBefore} → ${step.urlAfter}`);
+    parts.push(`Route: ${step.urlBefore} → ${step.urlAfter}`);
   }
   if (step.snapshot.headingText) {
     parts.push(`Page heading: "${step.snapshot.headingText}"`);
@@ -111,7 +141,7 @@ export function evaluate(trace: RunTrace, journeyTitle: string): EvaluationResul
   const totalSteps = trace.steps.length;
   const passedCount = totalSteps - failedSteps.length;
 
-  // Weighted score: failed assertions count more than slow steps
+  // Weighted score
   const failPenalty = failedSteps.reduce((sum, s) => {
     const { severity } = classifyFinding(s);
     return sum + (severity === "high" ? 3 : severity === "medium" ? 2 : 1);
@@ -121,20 +151,19 @@ export function evaluate(trace: RunTrace, journeyTitle: string): EvaluationResul
 
   const findings: EvaluatedFinding[] = [];
 
-  // Findings from failed steps
   for (const step of failedSteps) {
-    const { type, severity } = classifyFinding(step);
+    const { type, severity, category } = classifyFinding(step);
     findings.push({
-      type,
-      severity,
-      title: buildTitle(step),
-      description: buildDescription(step),
+      type, severity,
+      title: buildTitle(step, category),
+      description: buildDescription(step, category),
       route: step.urlAfter || step.urlBefore || null,
       trace_json: {
         action: step.step.action,
         target: step.step.target,
         expected: step.step.expected,
         error: step.error,
+        category,
         durationMs: step.durationMs,
         urlBefore: step.urlBefore,
         urlAfter: step.urlAfter,
@@ -153,16 +182,11 @@ export function evaluate(trace: RunTrace, journeyTitle: string): EvaluationResul
       title: `Slow response: ${step.step.action} (${Math.round(step.durationMs)}ms)`,
       description: `Step "${step.step.action}" on "${step.step.target}" took ${Math.round(step.durationMs)}ms. Route: ${step.urlAfter}`,
       route: step.urlAfter || null,
-      trace_json: {
-        action: step.step.action,
-        target: step.step.target,
-        durationMs: step.durationMs,
-        snapshot: step.snapshot,
-      },
+      trace_json: { action: step.step.action, target: step.step.target, durationMs: step.durationMs, category: "slow-response", snapshot: step.snapshot },
     });
   }
 
-  // Console errors as a single aggregated finding (if any)
+  // Console errors
   if (trace.consoleErrorCount > 0) {
     const uniqueErrors = [...new Set(trace.consoleErrors)].slice(0, 10);
     findings.push({
@@ -171,10 +195,7 @@ export function evaluate(trace: RunTrace, journeyTitle: string): EvaluationResul
       title: `${trace.consoleErrorCount} console error(s) during "${journeyTitle}"`,
       description: `Errors captured:\n${uniqueErrors.map(e => `• ${e.slice(0, 150)}`).join("\n")}`,
       route: null,
-      trace_json: {
-        consoleErrorCount: trace.consoleErrorCount,
-        uniqueErrors,
-      },
+      trace_json: { consoleErrorCount: trace.consoleErrorCount, uniqueErrors, category: "console-errors" },
     });
   }
 
@@ -187,10 +208,7 @@ export function evaluate(trace: RunTrace, journeyTitle: string): EvaluationResul
       title: `${trace.networkErrorCount} network error(s) during "${journeyTitle}"`,
       description: `Failed requests:\n${uniqueNetErrors.map(e => `• ${e.slice(0, 150)}`).join("\n")}`,
       route: null,
-      trace_json: {
-        networkErrorCount: trace.networkErrorCount,
-        uniqueNetErrors,
-      },
+      trace_json: { networkErrorCount: trace.networkErrorCount, uniqueNetErrors, category: "network-errors" },
     });
   }
 

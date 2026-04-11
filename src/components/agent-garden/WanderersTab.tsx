@@ -1,13 +1,13 @@
 /**
  * WanderersTab — "First Wanderer" tab for the Agent Garden.
- * Shows journeys, runs, findings with rich evidence, and curator controls.
+ * Shows journeys with health signals, runs, findings with evidence + copy repro, smoke suite, and curator controls.
  */
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Footprints, Play, CheckCircle2, XCircle, AlertTriangle, Clock,
   Eye, Bug, Sparkles, ChevronRight, Loader2, Filter, Leaf,
-  Globe, Terminal, Wifi,
+  Globe, Terminal, Wifi, Zap, Copy, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useWanderer } from "@/hooks/use-wanderer";
 import { useHasRole } from "@/hooks/use-role";
 import type { AgentRun, AgentFinding } from "@/lib/wanderer-types";
+import { toast } from "sonner";
 
 /* ── Status helpers ───────────────────────────────── */
 const STATUS_CONFIG: Record<string, { icon: React.ReactNode; label: string; className: string }> = {
@@ -40,9 +41,42 @@ const SEVERITY_COLORS: Record<string, string> = {
   low: "text-muted-foreground",
 };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  "route-mismatch": "🗺️ Route mismatch",
+  "auth-redirect": "🔐 Auth redirect",
+  "stale-selector": "🔧 Stale selector",
+  "missing-element": "❌ Missing element",
+  "hidden-element": "👻 Hidden element",
+  "wrong-content": "📝 Wrong content",
+  "slow-response": "🐢 Slow response",
+  "load-timeout": "⏳ Load timeout",
+  "console-errors": "🖥️ Console errors",
+  "network-errors": "📡 Network errors",
+};
+
+function buildReproSummary(finding: AgentFinding): string {
+  const trace = finding.trace_json as Record<string, any> | null;
+  const parts = [
+    `**${finding.title}**`,
+    `Type: ${finding.type} · Severity: ${finding.severity}`,
+    finding.route ? `Route: ${finding.route}` : null,
+    trace?.category ? `Category: ${CATEGORY_LABELS[trace.category] || trace.category}` : null,
+    trace?.action ? `Action: ${trace.action} on "${trace.target}"` : null,
+    trace?.error ? `Error: ${trace.error}` : null,
+    trace?.snapshot?.headingText ? `Page heading: "${trace.snapshot.headingText}"` : null,
+    trace?.urlBefore && trace?.urlAfter !== trace?.urlBefore ? `Navigation: ${trace.urlBefore} → ${trace.urlAfter}` : null,
+    `\n${finding.description}`,
+  ].filter(Boolean);
+  return parts.join("\n");
+}
+
 /* ── Main Tab ─────────────────────────────────────── */
 export function WanderersTab() {
-  const { journeys, runs, findings, loading, running, startRun, reviewFinding, convertToBugReport } = useWanderer();
+  const {
+    journeys, runs, findings, loading, running,
+    smokeRunning, smokeProgress, journeyHealth,
+    startRun, runSmokeSuite, reviewFinding, convertToBugReport,
+  } = useWanderer();
   const { hasRole: isKeeper } = useHasRole("keeper");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedRun, setSelectedRun] = useState<AgentRun | null>(null);
@@ -72,7 +106,7 @@ export function WanderersTab() {
         }}
       >
         <Footprints className="w-10 h-10 text-primary shrink-0 mt-1" />
-        <div>
+        <div className="flex-1">
           <h2 className="font-serif text-xl text-foreground mb-1">The First Wanderer</h2>
           <p className="text-xs font-serif text-primary/60 tracking-[0.15em] uppercase mb-2">
             Guided UI Testing Agent
@@ -81,8 +115,33 @@ export function WanderersTab() {
             A careful wandering steward that walks the app's paths, capturing real console errors, network failures,
             and DOM evidence. Findings are saved for curator review — never auto-published.
           </p>
+          {isKeeper && (
+            <Button
+              size="sm" variant="outline" className="mt-3 text-xs font-serif gap-1.5"
+              disabled={smokeRunning || running}
+              onClick={() => runSmokeSuite()}
+            >
+              {smokeRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+              Run Smoke Suite
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Smoke progress */}
+      {smokeProgress && smokeRunning && (
+        <div className="rounded-xl p-3 text-xs font-serif space-y-1.5" style={{ background: "hsl(var(--card) / 0.6)", border: "1px solid hsl(var(--border) / 0.15)" }}>
+          <p className="text-muted-foreground">Smoke suite: {smokeProgress.current}/{smokeProgress.total}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {smokeProgress.results.map(r => (
+              <span key={r.slug} className="inline-flex items-center gap-1">
+                <StatusPill status={r.status} />
+                <span className="text-[9px] text-muted-foreground">{r.slug}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -104,7 +163,7 @@ export function WanderersTab() {
         ))}
       </div>
 
-      {/* Journeys */}
+      {/* Journeys with health signals */}
       <Card className="border-primary/10 bg-card/60">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-serif flex items-center gap-2">
@@ -113,7 +172,7 @@ export function WanderersTab() {
         </CardHeader>
         <CardContent className="space-y-2">
           {journeys.map((j) => {
-            const latestRun = runs.find(r => r.journey_id === j.id);
+            const health = journeyHealth.get(j.id);
             return (
               <div
                 key={j.id}
@@ -125,13 +184,31 @@ export function WanderersTab() {
                   <p className="text-[10px] font-serif text-muted-foreground truncate">
                     {j.entry_path} · {(j.steps_json as any[])?.length || 0} steps
                   </p>
+                  {/* Health signals */}
+                  {health?.lastStatus && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <StatusPill status={health.lastStatus} />
+                      <span className="text-[9px] font-serif text-muted-foreground">
+                        {health.passRate}% pass rate
+                      </span>
+                      {health.lastFindingCount > 0 && (
+                        <span className="text-[9px] font-serif text-amber-500">
+                          {health.lastFindingCount} finding{health.lastFindingCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                      {health.lastRunMs != null && (
+                        <span className="text-[9px] font-serif text-muted-foreground/60">
+                          {(health.lastRunMs / 1000).toFixed(1)}s
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  {latestRun && <StatusPill status={latestRun.status} />}
                   {isKeeper && (
                     <Button
                       size="sm" variant="ghost" className="h-7 px-2 text-xs font-serif"
-                      disabled={running} onClick={() => startRun(j)}
+                      disabled={running || smokeRunning} onClick={() => startRun(j)}
                     >
                       {running ? <Loader2 className="w-3 h-3 animate-spin" /> : <Play className="w-3 h-3" />}
                       <span className="ml-1">Run</span>
@@ -243,7 +320,7 @@ export function WanderersTab() {
   );
 }
 
-/* ── Finding Row with rich evidence ──────────────── */
+/* ── Finding Row with rich evidence + copy repro ──── */
 function FindingRow({
   finding, isKeeper, isSelected, onSelect, onReview, onConvert,
 }: {
@@ -252,6 +329,7 @@ function FindingRow({
   onReview: (id: string, status: string, notes?: string) => Promise<void>;
   onConvert: (f: AgentFinding) => Promise<string | undefined>;
 }) {
+  const [copied, setCopied] = useState(false);
   const typeIcon = {
     bug: <Bug className="w-3.5 h-3.5 text-red-500" />,
     ux_friction: <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />,
@@ -260,6 +338,15 @@ function FindingRow({
   }[finding.type] || <Eye className="w-3.5 h-3.5" />;
 
   const trace = finding.trace_json as Record<string, any> | null;
+  const category = trace?.category as string | undefined;
+
+  const handleCopyRepro = useCallback(async () => {
+    const text = buildReproSummary(finding);
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast.success("Repro summary copied");
+    setTimeout(() => setCopied(false), 2000);
+  }, [finding]);
 
   return (
     <div
@@ -271,8 +358,9 @@ function FindingRow({
         <div className="min-w-0 flex-1">
           <p className="text-sm font-serif text-foreground truncate">{finding.title}</p>
           <p className="text-[10px] font-serif text-muted-foreground">
-            {finding.route && <span>{finding.route} · </span>}
-            <span className={SEVERITY_COLORS[finding.severity]}>{finding.severity}</span>
+            {category && <span className="mr-1">{CATEGORY_LABELS[category] || category}</span>}
+            {finding.route && <span>· {finding.route} </span>}
+            <span className={SEVERITY_COLORS[finding.severity]}>· {finding.severity}</span>
             {finding.review_status !== "pending" && (
               <span className="ml-1">· {finding.review_status.replace(/_/g, " ")}</span>
             )}
@@ -298,6 +386,12 @@ function FindingRow({
               {/* Evidence grid */}
               {trace && (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-serif mt-2 p-2 rounded-md bg-muted/30">
+                  {category && (
+                    <>
+                      <span className="text-muted-foreground">Category</span>
+                      <span className="text-foreground font-medium">{CATEGORY_LABELS[category] || category}</span>
+                    </>
+                  )}
                   {trace.action && (
                     <>
                       <span className="text-muted-foreground">Action</span>
@@ -362,20 +456,30 @@ function FindingRow({
                 <p className="text-xs font-serif text-primary/80 italic">Curator: {finding.curator_notes}</p>
               )}
 
-              {/* Curator actions */}
-              {isKeeper && finding.review_status === "pending" && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={() => onConvert(finding)}>
-                    <Bug className="w-3 h-3 mr-1" /> File as Bug
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={() => onReview(finding.id, "approved_as_spark")}>
-                    <Sparkles className="w-3 h-3 mr-1" /> Approve as Spark
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif text-muted-foreground" onClick={() => onReview(finding.id, "dismissed")}>
-                    Dismiss
-                  </Button>
-                </div>
-              )}
+              {/* Actions row */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {/* Copy repro — always available */}
+                <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={handleCopyRepro}>
+                  {copied ? <Check className="w-3 h-3 mr-1 text-green-500" /> : <Copy className="w-3 h-3 mr-1" />}
+                  {copied ? "Copied" : "Copy repro"}
+                </Button>
+
+                {/* Curator actions */}
+                {isKeeper && finding.review_status === "pending" && (
+                  <>
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={() => onConvert(finding)}>
+                      <Bug className="w-3 h-3 mr-1" /> File as Bug
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif" onClick={() => onReview(finding.id, "approved_as_spark")}>
+                      <Sparkles className="w-3 h-3 mr-1" /> Approve as Spark
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-6 text-[10px] font-serif text-muted-foreground" onClick={() => onReview(finding.id, "dismissed")}>
+                      Dismiss
+                    </Button>
+                  </>
+                )}
+              </div>
+
               {finding.suggested_bug_garden_post_id && (
                 <p className="text-[10px] font-serif text-green-600">✓ Filed in Bug Garden</p>
               )}
