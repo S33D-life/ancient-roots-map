@@ -97,7 +97,7 @@ const CuratorSpeciesPage = () => {
   const fetchCandidates = useCallback(async () => {
     const { data } = await supabase
       .from("species_index")
-      .select("species_key, common_name, scientific_name, family")
+      .select("species_key, common_name, scientific_name, family, synonym_names")
       .order("common_name", { ascending: true })
       .limit(1000);
     setCandidates((data as SpeciesCandidate[]) || []);
@@ -114,6 +114,7 @@ const CuratorSpeciesPage = () => {
     return (
       candidates.find((c) => c.common_name.toLowerCase() === norm) ||
       candidates.find((c) => c.scientific_name?.toLowerCase() === norm) ||
+      candidates.find((c) => (c.synonym_names as unknown as string[])?.some(s => s.toLowerCase() === norm)) ||
       candidates.find((c) => c.common_name.toLowerCase().includes(norm) || norm.includes(c.common_name.toLowerCase())) ||
       null
     );
