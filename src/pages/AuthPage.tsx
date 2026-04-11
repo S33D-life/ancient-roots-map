@@ -682,7 +682,7 @@ const AuthPage = () => {
                     </button>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    {isSignup ? "Create your grove account" : "Welcome back, tree guardian"}
+                    {isSignup ? "Join through an invitation" : "Welcome back, tree guardian"}
                   </p>
                 </>
               )}
