@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getHiveBySlug } from "@/utils/hiveUtils";
 import { matchSpecies } from "@/data/treeSpecies";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,8 +58,8 @@ const HiveTreasuryPage = () => {
       setHeartTxs(hRes.data || []);
       setInfluenceTxs(iRes.data || []);
       const hiveTrees = (tRes.data || []).filter(t => {
-        const m = matchSpecies(t.species);
-        return m && m.family === hiveFamily;
+        const res = resolveSpeciesSync(t.species);
+        return res.family === hiveFamily || (matchSpecies(t.species)?.family === hiveFamily);
       });
       setTreeCount(hiveTrees.length);
       setLoading(false);

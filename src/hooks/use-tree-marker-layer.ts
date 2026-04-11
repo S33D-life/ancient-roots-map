@@ -16,7 +16,7 @@ import {
   getOrCreateIcon,
   hslStringToHue,
 } from "@/components/map/mapMarkerUtils";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 import { buildPopupHtml, getPopupStatusLight, type PopupPresenceSignal } from "@/utils/mapPopups";
 import { haversineKm } from "@/utils/mapGeometry";
 
@@ -94,8 +94,8 @@ export function useTreeMarkerLayer({
       const tier = getTreeTier(age, offerings);
       const hiveHue = config.showHiveLayer
         ? (() => {
-            const h = getHiveForSpecies(tree.species);
-            return h ? hslStringToHue(h.accentHsl) : undefined;
+            const res = resolveSpeciesSync(tree.species);
+            return res?.hive ? hslStringToHue(res.hive.accentHsl) : undefined;
           })()
         : undefined;
       const hCount = refs.heartPoolCounts[tree.id] || 0;

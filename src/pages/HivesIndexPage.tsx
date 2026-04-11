@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import AtlasPerspectiveNav from "@/components/atlas/AtlasPerspectiveNav";
 import { getAllHives, type HiveInfo, getHiveForSpecies } from "@/utils/hiveUtils";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import HexHiveCell from "@/components/hives/HexHiveCell";
@@ -79,7 +80,7 @@ const HivesIndexPage = () => {
 
       // Map user trees
       trees.forEach(t => {
-        const hive = getHiveForSpecies(t.species);
+        const hive = resolveSpeciesSync(t.species)?.hive ?? getHiveForSpecies(t.species);
         if (!hive) return;
         if (!hiveTreeMap[hive.family]) hiveTreeMap[hive.family] = [];
         hiveTreeMap[hive.family].push(t);
@@ -88,7 +89,7 @@ const HivesIndexPage = () => {
       // Map research trees (use species_common or species_scientific for matching)
       researchTrees.forEach(rt => {
         const speciesName = rt.species_common || rt.species_scientific;
-        const hive = getHiveForSpecies(speciesName);
+        const hive = resolveSpeciesSync(speciesName)?.hive ?? getHiveForSpecies(speciesName);
         if (!hive) return;
         if (!hiveTreeMap[hive.family]) hiveTreeMap[hive.family] = [];
         hiveTreeMap[hive.family].push({
