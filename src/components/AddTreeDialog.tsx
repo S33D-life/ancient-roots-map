@@ -1148,7 +1148,7 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
                 {/* Header bar over map */}
                 <div className="px-5 pt-4 pb-2">
                   <p className="text-xs text-muted-foreground font-serif leading-relaxed">
-                    Drag the golden pin to fine-tune — up to <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) from your GPS fix.
+                    <strong style={{ color: 'hsl(42, 75%, 60%)' }}>Tap the map</strong> to place the tree, or drag the pin to fine-tune — up to <strong style={{ color: 'hsl(42, 75%, 60%)' }}>144 ft</strong> (≈44m) from your GPS fix.
                   </p>
                 </div>
 
