@@ -393,7 +393,7 @@ const CollaboratorVolumeWizard = ({ open, onClose, onSubmit }: WizardProps) => {
                   </div>
                 </div>
                 <p className="text-[10px] text-muted-foreground font-serif text-center">
-                  This volume begins in your private shelf. You can share it later.
+                  This volume begins in Heartwood. You can share it later.
                 </p>
               </div>
             )}

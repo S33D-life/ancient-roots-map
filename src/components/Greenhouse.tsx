@@ -548,7 +548,7 @@ const Greenhouse = () => {
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: plant.is_shared ? "Made private" : "Shared with community!" });
+      toast({ title: plant.is_shared ? "Returned to Heartwood" : "Shared with the forest!" });
       fetchPlants(userId);
     }
   };
