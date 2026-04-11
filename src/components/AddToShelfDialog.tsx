@@ -93,7 +93,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
         catalog_book_id: selectedBook.catalogId,
       });
       toast.success("Book placed on your shelf", {
-        description: visibility === "private" ? "Only you can see it" : `Visible to ${visibility}`,
+        description: visibility === "private" ? "Held in Heartwood" : "Shared with the forest",
       });
       resetAndClose();
     } catch (err: any) {

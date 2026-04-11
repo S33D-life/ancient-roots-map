@@ -166,9 +166,9 @@ const TreeCheckinButton = ({ treeId, treeName, treeLat, treeLng, userId, onCheck
                 <Select value={privacy} onValueChange={setPrivacy}>
                   <SelectTrigger className="font-serif text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="public" className="font-serif">Public — visible to all</SelectItem>
-                    <SelectItem value="friends" className="font-serif">Friends only</SelectItem>
-                    <SelectItem value="private" className="font-serif">Private — only you</SelectItem>
+                    <SelectItem value="public" className="font-serif">Shared with the forest</SelectItem>
+                    <SelectItem value="friends" className="font-serif">Shared with your grove</SelectItem>
+                    <SelectItem value="private" className="font-serif">Held in Heartwood</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

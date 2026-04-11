@@ -401,7 +401,7 @@ export default function TreeArrivalPanel({
                           border: "1px solid hsl(260 40% 55% / 0.12)",
                         }}
                       >
-                        {currentWhisper?.recipient_scope === "PUBLIC" ? "Shared" : "Private"}
+                        {currentWhisper?.recipient_scope === "PUBLIC" ? "Shared" : "Heartwood"}
                       </span>
                     </div>
 
