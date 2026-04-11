@@ -37,10 +37,10 @@ export const GROVE_SCALES: { key: GroveScale; label: string; radiusKm: number; i
   { key: "regional", label: "100km", radiusKm: 100, icon: "🗺️" },
 ];
 
-export const PERSPECTIVES: { key: Perspective; label: string; icon: string; accent: string }[] = [
-  { key: "personal", label: "I AM", icon: "🌱", accent: "120, 50%, 45%" },
-  { key: "collective", label: "TETOL", icon: "🌍", accent: "42, 90%, 55%" },
-  { key: "tribe", label: "TRIBE", icon: "👥", accent: "200, 55%, 50%" },
+export const PERSPECTIVES: { key: Perspective; label: string; icon: string; accent: string; description: string }[] = [
+  { key: "personal", label: "I AM", icon: "🌱", accent: "120, 50%, 45%", description: "Your personal trees and journeys" },
+  { key: "collective", label: "TETOL", icon: "🌍", accent: "42, 90%, 55%", description: "All ancient friends across the world" },
+  { key: "tribe", label: "TRIBE", icon: "👥", accent: "200, 55%, 50%", description: "Trees from your tribe and community" },
 ];
 
 interface MapFilters {
