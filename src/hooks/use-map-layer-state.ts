@@ -49,7 +49,8 @@ export type LayerKey =
   | "dreamTrees"
   | "dreamOfferings"
   | "signalField"
-  | "memoryTrail";
+  | "memoryTrail"
+  | "presence";
 
 export type LayerState = Record<LayerKey, boolean>;
 
@@ -112,6 +113,7 @@ function getInitialState(): LayerState {
     dreamOfferings: false,
     signalField: false,
     memoryTrail: false,
+    presence: false,
   };
 }
 

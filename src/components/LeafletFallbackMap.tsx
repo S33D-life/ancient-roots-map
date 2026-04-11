@@ -22,6 +22,8 @@ import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
 import { useDreamConstellationLayer } from "@/hooks/use-dream-constellation-layer";
 import { usePulseMapLayer } from "@/hooks/use-pulse-map-layer";
 import { usePathwayMapLayer } from "@/hooks/use-pathway-map-layer";
+import { useTreePresence } from "@/hooks/use-tree-presence-layer";
+import TreePresenceLayer from "./TreePresenceLayer";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useTreeFocus } from "@/hooks/use-tree-focus";
 import { haversineKm, convexHull } from "@/utils/mapGeometry";
@@ -375,6 +377,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const showDreamOfferings = layers.dreamOfferings;
   const showSignalField = layers.signalField;
   const showMemoryTrail = layers.memoryTrail;
+  const showPresence = layers.presence;
 
   // Broadcast clearView state so external panels (MapTreePanel) can hide
   useEffect(() => {
@@ -474,6 +477,20 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   useGroveMapLayer(mapRef.current, showGroves, navigate);
   usePulseMapLayer(mapRef.current, showForestPulse);
   usePathwayMapLayer(mapRef.current, showMycelialPathways, navigate);
+
+  // Tree presence layer — soft signals of recent/current visitors
+  const { signals: presenceSignals, updateBounds: updatePresenceBounds } = useTreePresence(showPresence);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !showPresence) return;
+    const feed = () => {
+      const b = map.getBounds();
+      updatePresenceBounds({ minLat: b.getSouth(), maxLat: b.getNorth(), minLng: b.getWest(), maxLng: b.getEast() });
+    };
+    feed();
+    map.on("moveend", feed);
+    return () => { map.off("moveend", feed); };
+  }, [showPresence, updatePresenceBounds]);
 
   // Gateway mode — Countries / Hives / Bioregions perspective
   const [gatewayMode, setGatewayMode] = useState<GatewayMode>("countries");
@@ -921,6 +938,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       accent: "hsl(260, 55%, 65%)",
       description: "Community activity — visits, seeds, offerings, dreams, and whispers.",
       layers: [
+        { key: "presence", label: "👤 Wanderer Presence", description: "Trees with recent or current visitors", active: showPresence, toggle: () => toggle("presence"), extra: showPresence && presenceSignals.length > 0 ? `${presenceSignals.length}` : undefined, accent: "140, 50%, 50%" },
         { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => toggle("heartGlow"), accent: "0, 65%, 55%" },
         { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", description: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => toggle("bloomedSeeds"), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
         { key: "recent-visits", label: "◎ Recent Visits", description: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => toggle("recentVisits"), accent: "260, 55%, 70%" },
@@ -976,7 +994,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
       activeLens, lensConfig, setLens,
       showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles,
-      showForestPulse, showMycelialPathways, showDreamTrees, showDreamOfferings, dreamTreeCount, dreamOfferingCount]);
+      showForestPulse, showMycelialPathways, showDreamTrees, showDreamOfferings, dreamTreeCount, dreamOfferingCount,
+      showPresence, presenceSignals.length]);
 
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
@@ -2540,6 +2559,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         userLatLng={userLatLng}
         userId={userId}
       />
+
+      {/* Tree Presence Layer */}
+      <TreePresenceLayer map={mapRef.current} signals={presenceSignals} visible={showPresence} />
 
       {/* Add Tree Dialog */}
       <AddTreeDialog
