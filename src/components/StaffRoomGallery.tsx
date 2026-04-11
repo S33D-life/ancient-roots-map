@@ -1091,6 +1091,31 @@ export default function StaffRoomGallery() {
                   {hasLinkedStaff ? "View Your Vault" : "Claim a Staff"}
                 </Button>
               </div>
+            {/* Stewardship Recognition */}
+            <SectionDivider />
+
+            <div className="rounded-2xl border border-primary/10 bg-primary/5 backdrop-blur-sm p-5 space-y-3 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <h4 className="font-serif text-sm text-foreground tracking-wide">Heartwood Stewardship</h4>
+              </div>
+              <p className="text-xs font-serif text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                Origin Staff holders steward the Heartwood freely — guardians of entrusted memories, long-term legacy, and the roots of this living system.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 pt-1">
+                {[
+                  "Lifetime Heartwood access",
+                  "Entrusted memory stewardship",
+                  "Founding guardian recognition",
+                ].map(right => (
+                  <span key={right} className="text-[9px] font-serif px-2.5 py-1 rounded-full border border-primary/15 bg-primary/5 text-primary/80">
+                    {right}
+                  </span>
+                ))}
+              </div>
+              <p className="text-[9px] font-serif text-muted-foreground/50 italic">
+                Hearts help keep entrusted memories alive — stewardship energy for the grove.
+              </p>
             </div>
           </TabsContent>
 
