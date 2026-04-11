@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Radio, Play, Pause, SkipForward, Volume2, VolumeX, Music, X, TreeDeciduous, ChevronDown } from "lucide-react";
+import { Radio, Play, Pause, SkipForward, Volume2, VolumeX, Music, X, TreeDeciduous, ChevronDown, Youtube } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SongOffering {
@@ -160,11 +160,18 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
     fetchSongs();
   }, [activeFilter]);
 
-  // Fetch iTunes preview when current song changes
+  // Fetch iTunes preview when current song changes (skip for YouTube songs)
   useEffect(() => {
     if (playlist.length === 0) return;
     const song = playlist[currentIndex];
     if (!song) return;
+
+    // YouTube songs don't need iTunes preview
+    if (song.youtube_video_id) {
+      setCurrentPreview(null);
+      setPreviewLoading(false);
+      return;
+    }
 
     setPreviewLoading(true);
     setCurrentPreview(null);
