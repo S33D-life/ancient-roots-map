@@ -1,16 +1,18 @@
 /**
- * QueueAgingIndicators — Shows oldest items in review queues with urgency coloring.
+ * QueueAgingIndicators — Shows oldest items in review queues with urgency coloring and action links.
  */
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Hourglass } from "lucide-react";
+import { Loader2, Hourglass, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { timeAgo, getAgingUrgency } from "@/lib/lifecycle-labels";
 
 interface AgingItem {
   label: string;
-  oldest: string | null; // ISO date
+  oldest: string | null;
+  route: string;
 }
 
 export function QueueAgingIndicators() {
@@ -35,10 +37,10 @@ export function QueueAgingIndicators() {
       ]);
 
       setItems([
-        { label: "Oldest raw candidate", oldest: candRes.data?.[0]?.created_at || null },
-        { label: "Oldest open verification", oldest: verifRes.data?.[0]?.created_at || null },
-        { label: "Oldest pending contribution", oldest: contribRes.data?.[0]?.created_at || null },
-        { label: "Oldest pending finding", oldest: findingsRes.data?.[0]?.created_at || null },
+        { label: "Oldest raw candidate", oldest: candRes.data?.[0]?.created_at || null, route: "/agent-garden?tab=bridge" },
+        { label: "Oldest open verification", oldest: verifRes.data?.[0]?.created_at || null, route: "/agent-garden?tab=bridge" },
+        { label: "Oldest pending contribution", oldest: contribRes.data?.[0]?.created_at || null, route: "/agent-garden?tab=contributions" },
+        { label: "Oldest pending finding", oldest: findingsRes.data?.[0]?.created_at || null, route: "/agent-garden?tab=wanderers" },
       ]);
       setLoading(false);
     })();
@@ -71,8 +73,15 @@ export function QueueAgingIndicators() {
         {items.filter(i => i.oldest).map((item) => {
           const urgency = getAgingUrgency(item.oldest!);
           return (
-            <div key={item.label} className="flex items-center justify-between text-[11px]">
-              <span className="text-muted-foreground/70">{item.label}</span>
+            <Link
+              key={item.label}
+              to={item.route}
+              className="flex items-center justify-between text-[11px] group hover:bg-card/20 rounded px-1 py-0.5 transition-colors"
+            >
+              <span className="text-muted-foreground/70 group-hover:text-foreground/80 flex items-center gap-1">
+                {item.label}
+                <ArrowRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-60 transition-opacity" />
+              </span>
               <div className="flex items-center gap-1.5">
                 <span className={`font-mono ${urgency.className}`}>
                   {timeAgo(item.oldest!)}
@@ -81,7 +90,7 @@ export function QueueAgingIndicators() {
                   {urgency.label}
                 </Badge>
               </div>
-            </div>
+            </Link>
           );
         })}
       </CardContent>

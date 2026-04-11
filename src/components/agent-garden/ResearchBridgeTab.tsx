@@ -25,10 +25,10 @@ import type { Database as DB } from "@/integrations/supabase/types";
 type SourceCandidate = DB["public"]["Tables"]["source_tree_candidates"]["Row"];
 
 const STATUS_COLORS: Record<string, string> = {
-  raw: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  normalized: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  promoted: "bg-green-500/10 text-green-600 border-green-500/20",
-  rejected: "bg-red-500/10 text-red-500 border-red-500/20",
+  raw: "bg-accent/10 text-accent-foreground border-accent/20",
+  normalized: "bg-secondary/30 text-secondary-foreground border-secondary/20",
+  promoted: "bg-primary/10 text-primary border-primary/20",
+  rejected: "bg-destructive/10 text-destructive border-destructive/20",
   duplicate: "bg-muted text-muted-foreground border-border",
 };
 
@@ -108,13 +108,13 @@ export function ResearchBridgeTab() {
       <div className="flex items-center justify-center gap-2 text-[10px] font-serif text-muted-foreground py-2">
         <span className="px-2 py-1 rounded bg-muted/30">Source</span>
         <ArrowRight className="w-3 h-3" />
-        <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-600">Crawl</span>
+        <span className="px-2 py-1 rounded bg-accent/10 text-accent-foreground">Crawl</span>
         <ArrowRight className="w-3 h-3" />
-        <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-500">Candidate</span>
+        <span className="px-2 py-1 rounded bg-secondary/30 text-secondary-foreground">Candidate</span>
         <ArrowRight className="w-3 h-3" />
-        <span className="px-2 py-1 rounded bg-green-500/10 text-green-600">Research Tree</span>
+        <span className="px-2 py-1 rounded bg-primary/10 text-primary">Research Tree</span>
         <ArrowRight className="w-3 h-3" />
-        <span className="px-2 py-1 rounded bg-primary/10 text-primary">Ancient Friend 🌳</span>
+        <span className="px-2 py-1 rounded bg-primary/15 text-primary font-medium">Ancient Friend 🌳</span>
       </div>
 
       {/* Sub-tabs */}
@@ -308,7 +308,7 @@ function CandidateRow({
 
               {candidate.promoted_research_tree_id && (
                 <div className="flex items-center gap-2 pt-1">
-                  <p className="text-[10px] font-serif text-green-600">✓ Promoted to Research Forest</p>
+                  <p className="text-[10px] font-serif text-primary">✓ Promoted to Research Forest</p>
                   <Link
                     to={`/tree/research/${candidate.promoted_research_tree_id}`}
                     className="text-[10px] font-serif text-primary hover:underline"

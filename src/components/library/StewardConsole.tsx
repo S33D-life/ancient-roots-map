@@ -1,7 +1,7 @@
 /**
  * StewardConsole — Compact operational dashboard for the living system.
  * Wanderer health, research pipeline, review queues, queue aging,
- * reward distribution, activity feed, ledger, source activity, quick links.
+ * reward distribution, activity feed, ledger, source activity, 7-day trends, quick links.
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Footprints, TreeDeciduous, ClipboardCheck, Database, Bug,
   AlertTriangle, CheckCircle, Clock, Globe, ExternalLink, Loader2,
-  Eye, Telescope, Sprout,
+  Eye, Telescope, Sprout, TrendingUp, ArrowUpRight,
 } from "lucide-react";
 import { RewardReadyQueue } from "./RewardReadyQueue";
 import { RewardLedgerPanel } from "./RewardLedgerPanel";
@@ -48,6 +48,13 @@ interface ReviewQueues {
   contributionsPending: number;
 }
 
+interface WeekTrends {
+  promotedTrees7d: number;
+  completedVerifications7d: number;
+  distributedHearts7d: number;
+  newContributions7d: number;
+}
+
 export function StewardConsole() {
   const [loading, setLoading] = useState(true);
   const [wanderer, setWanderer] = useState<WandererHealth>({
@@ -61,17 +68,23 @@ export function StewardConsole() {
   const [queues, setQueues] = useState<ReviewQueues>({
     candidatesAwaiting: 0, verificationsOpen: 0, findingsPending: 0, contributionsPending: 0,
   });
+  const [trends, setTrends] = useState<WeekTrends>({
+    promotedTrees7d: 0, completedVerifications7d: 0, distributedHearts7d: 0, newContributions7d: 0,
+  });
   const [latestSources, setLatestSources] = useState<{ name: string; integrationStatus: string; recordCount: number }[]>([]);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
 
       const [
         runsRes, findingsRes, journeysRes,
         crawlRes, candRawRes, candDupRes, candPromRes,
         verifOpenRes, verifDoneRes, researchReadyRes,
         findingsPendingRes, sourcesRes, contribPendingRes,
+        // 7-day trends
+        promoted7dRes, verif7dRes, distributed7dRes, contrib7dRes,
       ] = await Promise.all([
         supabase.from("agent_runs").select("*, agent_journeys(title, slug)").order("created_at", { ascending: false }).limit(50),
         supabase.from("agent_findings").select("*").order("created_at", { ascending: false }).limit(200),
@@ -86,6 +99,11 @@ export function StewardConsole() {
         supabase.from("agent_findings").select("id", { count: "exact", head: true }).eq("review_status", "pending"),
         supabase.from("tree_data_sources").select("id, name, integration_status, record_count").order("updated_at", { ascending: false }).limit(5),
         supabase.from("agent_contribution_events").select("id", { count: "exact", head: true }).eq("validation_status", "pending"),
+        // 7-day trend queries (count-only, head: true)
+        supabase.from("source_tree_candidates").select("id", { count: "exact", head: true }).eq("normalization_status", "promoted").gte("reviewed_at", sevenDaysAgo),
+        supabase.from("verification_tasks").select("id", { count: "exact", head: true }).eq("status", "completed").gte("completed_at", sevenDaysAgo),
+        supabase.from("agent_reward_ledger").select("id", { count: "exact", head: true }).eq("status", "issued").gte("created_at", sevenDaysAgo),
+        supabase.from("agent_contribution_events").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
       ]);
 
       const runs = (runsRes.data || []) as unknown as AgentRun[];
@@ -121,6 +139,13 @@ export function StewardConsole() {
         contributionsPending: contribPendingRes.count ?? 0,
       });
 
+      setTrends({
+        promotedTrees7d: promoted7dRes.count ?? 0,
+        completedVerifications7d: verif7dRes.count ?? 0,
+        distributedHearts7d: distributed7dRes.count ?? 0,
+        newContributions7d: contrib7dRes.count ?? 0,
+      });
+
       setLatestSources((sourcesRes.data || []).map(s => ({
         name: s.name,
         integrationStatus: s.integration_status || "unknown",
@@ -142,6 +167,7 @@ export function StewardConsole() {
   }
 
   const totalQueueItems = queues.candidatesAwaiting + queues.verificationsOpen + queues.findingsPending + queues.contributionsPending;
+  const hasTrends = trends.promotedTrees7d + trends.completedVerifications7d + trends.distributedHearts7d + trends.newContributions7d > 0;
 
   return (
     <div className="space-y-4">
@@ -155,6 +181,34 @@ export function StewardConsole() {
           </Badge>
         )}
       </div>
+
+      {/* 7-Day Trends */}
+      {hasTrends && (
+        <Card className="bg-card/30 border-border/20">
+          <CardHeader className="pb-2 pt-3 px-4">
+            <CardTitle className="text-xs font-mono flex items-center gap-2">
+              <TrendingUp className="w-3.5 h-3.5 text-primary" />
+              Last 7 Days
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="px-4 pb-3">
+            <div className="flex flex-wrap gap-3 text-[11px]">
+              {[
+                { n: trends.promotedTrees7d, label: "promoted", icon: "⬆️" },
+                { n: trends.completedVerifications7d, label: "verified", icon: "📋" },
+                { n: trends.distributedHearts7d, label: "hearts distributed", icon: "🎁" },
+                { n: trends.newContributions7d, label: "new contributions", icon: "🌱" },
+              ].filter(t => t.n > 0).map(t => (
+                <span key={t.label} className="flex items-center gap-1 text-foreground/70">
+                  <span>{t.icon}</span>
+                  <span className="font-mono font-semibold text-foreground/90">{t.n}</span>
+                  <span>{t.label}</span>
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Activity Feed */}
       <RecentActivityFeed />
@@ -229,10 +283,11 @@ export function StewardConsole() {
             ))}
           </div>
           {pipeline.readyForPromotion > 0 && (
-            <div className="mt-2 text-[10px] flex items-center gap-1.5 text-primary">
+            <Link to="/agent-garden?tab=bridge" className="mt-2 text-[10px] flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors group">
               <TreeDeciduous className="w-3 h-3" />
               {pipeline.readyForPromotion} research tree{pipeline.readyForPromotion !== 1 ? "s" : ""} ready for Ancient Friend promotion
-            </div>
+              <ArrowUpRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Link>
           )}
         </CardContent>
       </Card>
