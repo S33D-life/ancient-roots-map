@@ -113,6 +113,7 @@ function getInitialState(): LayerState {
     dreamOfferings: false,
     signalField: false,
     memoryTrail: false,
+    presence: false,
   };
 }
 
