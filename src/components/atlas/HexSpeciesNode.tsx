@@ -111,6 +111,13 @@ const HexSpeciesNode = memo(({
             {data.species.length > 16 ? data.species.slice(0, 14) + "…" : data.species}
           </p>
 
+          {/* Family subtitle */}
+          {data.family && !showDetails && (
+            <p className="text-[6px] sm:text-[7px] font-serif text-muted-foreground/40 leading-tight truncate max-w-[85%]">
+              {data.family}
+            </p>
+          )}
+
           {/* Tree count */}
           <span className="text-[9px] sm:text-[10px] font-serif tabular-nums text-primary/80 font-semibold">
             {data.mapped}
