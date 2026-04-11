@@ -238,9 +238,9 @@ export function StewardConsole() {
         </CardHeader>
         <CardContent className="px-4 pb-3 space-y-1.5">
           {[
-            { label: "Candidates awaiting review", count: queues.candidatesAwaiting, route: "/agent-garden" },
-            { label: "Verification tasks open", count: queues.verificationsOpen, route: "/agent-garden" },
-            { label: "Findings pending", count: queues.findingsPending, route: "/agent-garden" },
+            { label: "Candidates awaiting review", count: queues.candidatesAwaiting, route: "/agent-garden?tab=bridge" },
+            { label: "Verification tasks open", count: queues.verificationsOpen, route: "/agent-garden?tab=bridge" },
+            { label: "Findings pending", count: queues.findingsPending, route: "/agent-garden?tab=wanderers" },
           ].map(q => (
             <Link key={q.label} to={q.route} className="flex items-center justify-between text-[11px] group hover:bg-card/20 rounded px-1 py-0.5">
               <span className="text-muted-foreground/70 group-hover:text-foreground/80">{q.label}</span>
