@@ -92,7 +92,7 @@ export function RewardReadyQueue() {
               const agent = evt.agent_profiles as { agent_name: string; avatar_emoji: string | null } | null;
               const payload = evt.payload_json as Record<string, any> | null;
               const isActioning = actioningId === evt.id;
-              const validatedAt = evt.validated_at ? timeAgo(new Date(evt.validated_at)) : "";
+              const validatedAt = evt.validated_at ? timeAgo(evt.validated_at) : "";
 
               return (
                 <div key={evt.id} className="flex items-center gap-2 text-[11px] py-1.5 px-1.5 rounded bg-primary/5 hover:bg-primary/10 transition-colors">
@@ -132,4 +132,4 @@ export function RewardReadyQueue() {
   );
 }
 
-// Uses shared timeAgo from lifecycle-labels via inline for now
+
