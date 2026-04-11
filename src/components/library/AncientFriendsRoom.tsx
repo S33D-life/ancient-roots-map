@@ -75,6 +75,10 @@ const AncientFriendsRoom = ({
 
   const { offerings } = useOfferings({ treeId: null });
 
+  // Presence lookup for tree cards
+  const allTreeIds = useMemo(() => trees.map(t => t.id), [trees]);
+  const presenceByTreeId = useTreesPresenceLookup(allTreeIds);
+
   const uniqueSpecies = Array.from(new Set(trees.map(t => t.species)));
   const uniqueLineages = Array.from(new Set(trees.filter(t => t.lineage).map(t => t.lineage!))).sort();
   const uniqueProjects = Array.from(new Set(trees.filter(t => t.project_name).map(t => t.project_name!))).sort();
