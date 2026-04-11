@@ -122,7 +122,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
         return;
       }
 
-      const treeIds = [...new Set(songData.map((s) => s.tree_id))];
+      const treeIds = [...new Set(songData.map((s: any) => s.tree_id))] as string[];
       const { data: treesData } = await supabase
         .from("trees")
         .select("id, name, species")
