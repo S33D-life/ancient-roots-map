@@ -8,6 +8,7 @@ import { TreeWhisper, collectPrivateWhisper, collectSharedWhisper } from "@/hook
 import { Button } from "@/components/ui/button";
 import { TreeDeciduous, MessageCircle, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { VISIBILITY_LABELS, HEARTWOOD_LINE } from "@/lib/heartwood-labels";
 
 interface Props {
   whispers: TreeWhisper[];
@@ -29,6 +30,7 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
   if (uncollected.length === 0 && revealed) return null;
 
   const current = uncollected[currentIndex] || uncollected[0];
+  const isHeartwood = current?.recipient_scope !== "PUBLIC";
 
   const handleCollect = async () => {
     if (!current) return;
@@ -100,10 +102,12 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
-      className="rounded-xl border p-5 backdrop-blur-sm space-y-4"
+        className="rounded-xl border p-5 backdrop-blur-sm space-y-4"
         style={{
-          borderColor: "hsl(260 40% 55% / 0.15)",
-          background: "linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(260 40% 50% / 0.04))",
+          borderColor: isHeartwood ? "hsl(var(--accent) / 0.15)" : "hsl(260 40% 55% / 0.15)",
+          background: isHeartwood
+            ? "linear-gradient(135deg, hsl(var(--accent) / 0.04), hsl(var(--muted) / 0.06))"
+            : "linear-gradient(135deg, hsl(var(--card) / 0.8), hsl(260 40% 50% / 0.04))",
         }}
       >
         <div className="flex items-center gap-2">
@@ -113,22 +117,30 @@ export default function WhisperCollector({ whispers, userId, treeId, treeName, o
           </span>
           <span className="ml-auto text-[9px] font-serif px-2 py-0.5 rounded-full"
             style={{
-              background: "hsl(260 40% 55% / 0.08)",
-              color: "hsl(260 40% 60%)",
-              border: "1px solid hsl(260 40% 55% / 0.15)",
+              background: isHeartwood ? "hsl(var(--accent) / 0.08)" : "hsl(260 40% 55% / 0.08)",
+              color: isHeartwood ? "hsl(var(--accent-foreground))" : "hsl(260 40% 60%)",
+              border: isHeartwood ? "1px solid hsl(var(--accent) / 0.15)" : "1px solid hsl(260 40% 55% / 0.15)",
             }}
           >
-            {current?.recipient_scope === "PUBLIC" ? "Public Offering" : "Heartwood Memory"}
+            {current?.recipient_scope === "PUBLIC"
+              ? VISIBILITY_LABELS.public
+              : VISIBILITY_LABELS.private}
           </span>
         </div>
 
         {current && !collectedIds.has(current.id) ? (
           <>
-            <div className="pl-4" style={{ borderLeft: "2px solid hsl(260 40% 55% / 0.2)" }}>
+            <div className="pl-4" style={{ borderLeft: `2px solid ${isHeartwood ? "hsl(var(--accent) / 0.2)" : "hsl(260 40% 55% / 0.2)"}` }}>
               <p className="text-sm font-serif text-foreground/90 leading-relaxed italic">
                 "{current.message_content}"
               </p>
             </div>
+
+            {isHeartwood && (
+              <p className="text-[9px] font-serif text-muted-foreground/50 text-center italic leading-relaxed px-2">
+                {HEARTWOOD_LINE}
+              </p>
+            )}
 
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground font-serif">

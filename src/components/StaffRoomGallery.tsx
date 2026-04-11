@@ -1104,6 +1104,9 @@ export default function StaffRoomGallery() {
               <p className="text-xs font-serif text-muted-foreground max-w-sm mx-auto leading-relaxed">
                 Origin Staff holders steward the Heartwood freely — guardians of entrusted memories, long-term legacy, and the roots of this living system.
               </p>
+              <p className="text-[10px] font-serif text-muted-foreground/40 italic mt-1">
+                The Heartwood grows through what is entrusted.
+              </p>
               <div className="flex flex-wrap justify-center gap-2 pt-1">
                 {[
                   "Lifetime Heartwood access",

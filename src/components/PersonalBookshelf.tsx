@@ -34,18 +34,18 @@ const visibilityIcons: Record<string, React.ReactNode> = {
 };
 
 const visibilityLabels: Record<string, string> = {
-  private: "Heartwood",
-  circle: "Grove",
-  tribe: "Tree Circle",
-  public: "Public",
+  private: "Held in Heartwood",
+  circle: "Shared with your grove",
+  tribe: "Shared with this tree's circle",
+  public: "Shared with the forest",
 };
 
 const filterOptions = [
   { value: "all", label: "All Books" },
-  { value: "private", label: "Heartwood" },
-  { value: "circle", label: "Grove" },
+  { value: "private", label: "Held in Heartwood" },
+  { value: "circle", label: "Shared with grove" },
   { value: "tribe", label: "Tree Circle" },
-  { value: "public", label: "Public" },
+  { value: "public", label: "Shared with forest" },
   { value: "tree-linked", label: "Tree-Linked" },
 ] as const;
 
