@@ -5,10 +5,13 @@
  */
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, Leaf, Camera, Apple, Eye, Shield, TreePine } from "lucide-react";
+import { ChevronRight, Camera, Apple, Eye, Shield, UserPlus, Copy, Check } from "lucide-react";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
 import type { SpeciesResolution } from "@/services/speciesResolver";
 import { ROUTES } from "@/lib/routes";
+import { useInviteIdentity } from "@/hooks/use-invite-identity";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   species: string;
@@ -28,6 +31,38 @@ const actions = [
 
 const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLogStewardship, speciesResolution }: Props) => {
   const hive = speciesResolution?.hive ?? getHiveForSpecies(species);
+  const { buildInviteLink, treeInviteText, displayHandle } = useInviteIdentity();
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+
+  const handleInvite = async () => {
+    const link = buildInviteLink(`/tree/${treeId}`);
+    if (!link) return;
+    const text = `${treeInviteText(treeName)}\n\n${link}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: treeName, text, url: link });
+        return;
+      } catch { /* cancelled */ }
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch {}
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    toast({ title: "Invite link copied!" });
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <section className="space-y-4">
@@ -52,6 +87,28 @@ const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLo
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </Link>
+      )}
+
+      {/* Invite a wanderer — contextual */}
+      {displayHandle && (
+        <button
+          onClick={handleInvite}
+          className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-primary/20 bg-primary/[0.03] hover:bg-primary/[0.06] hover:border-primary/30 transition-all text-left group"
+        >
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <UserPlus className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-serif text-foreground font-medium">Invite a wanderer</p>
+            <p className="text-[10px] text-muted-foreground font-serif mt-0.5">
+              Share this tree as {displayHandle}
+            </p>
+          </div>
+          {copied
+            ? <Check className="w-4 h-4 text-primary shrink-0" />
+            : <Copy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+          }
+        </button>
       )}
 
       {/* Contribution invitations */}
