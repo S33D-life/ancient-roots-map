@@ -9884,6 +9884,7 @@ export type Database = {
           species: string
         }[]
       }
+      get_heart_economy_stats: { Args: { p_user_id: string }; Returns: Json }
       get_hive_leaderboard: {
         Args: { p_family: string; p_limit?: number }
         Returns: {
@@ -10000,6 +10001,24 @@ export type Database = {
           type: string
         }[]
       }
+      get_tree_presence_summary: {
+        Args: {
+          p_max_lat?: number
+          p_max_lng?: number
+          p_min_lat?: number
+          p_min_lng?: number
+        }
+        Returns: {
+          latitude: number
+          longitude: number
+          most_recent: string
+          presence_count: number
+          presence_state: string
+          species: string
+          tree_id: string
+          tree_name: string
+        }[]
+      }
       get_trees_in_viewport: {
         Args: {
           p_east: number
@@ -10026,6 +10045,7 @@ export type Database = {
           what3words: string
         }[]
       }
+      get_user_lineage: { Args: { p_user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
