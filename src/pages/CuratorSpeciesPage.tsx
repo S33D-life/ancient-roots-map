@@ -38,6 +38,7 @@ interface SpeciesCandidate {
   common_name: string;
   scientific_name: string;
   family: string | null;
+  synonym_names: string[] | null;
 }
 
 interface GroupMeta {
@@ -96,7 +97,7 @@ const CuratorSpeciesPage = () => {
   const fetchCandidates = useCallback(async () => {
     const { data } = await supabase
       .from("species_index")
-      .select("species_key, common_name, scientific_name, family")
+      .select("species_key, common_name, scientific_name, family, synonym_names")
       .order("common_name", { ascending: true })
       .limit(1000);
     setCandidates((data as SpeciesCandidate[]) || []);
@@ -113,6 +114,7 @@ const CuratorSpeciesPage = () => {
     return (
       candidates.find((c) => c.common_name.toLowerCase() === norm) ||
       candidates.find((c) => c.scientific_name?.toLowerCase() === norm) ||
+      candidates.find((c) => (c.synonym_names as unknown as string[])?.some(s => s.toLowerCase() === norm)) ||
       candidates.find((c) => c.common_name.toLowerCase().includes(norm) || norm.includes(c.common_name.toLowerCase())) ||
       null
     );
@@ -352,13 +354,20 @@ const CuratorSpeciesPage = () => {
                           )}
                         </div>
                         {group.suggestedCandidate && (
-                          <p className="text-[11px] text-muted-foreground font-serif">
-                            Suggested: <span className="text-primary">{group.suggestedCandidate.common_name}</span>
-                            {group.suggestedCandidate.scientific_name && (
-                              <span className="italic ml-1">({group.suggestedCandidate.scientific_name})</span>
+                          <div className="space-y-0.5">
+                            <p className="text-[11px] text-muted-foreground font-serif">
+                              Suggested: <span className="text-primary">{group.suggestedCandidate.common_name}</span>
+                              {group.suggestedCandidate.scientific_name && (
+                                <span className="italic ml-1">({group.suggestedCandidate.scientific_name})</span>
+                              )}
+                              {group.suggestedCandidate.family && <span className="ml-1">· {group.suggestedCandidate.family}</span>}
+                            </p>
+                            {(group.suggestedCandidate.synonym_names as unknown as string[])?.length > 0 && (
+                              <p className="text-[10px] text-muted-foreground/50 font-serif">
+                                Aliases: {(group.suggestedCandidate.synonym_names as unknown as string[]).join(", ")}
+                              </p>
                             )}
-                            {group.suggestedCandidate.family && <span className="ml-1">· {group.suggestedCandidate.family}</span>}
-                          </p>
+                          </div>
                         )}
                         <div className="flex flex-wrap gap-1 mt-0.5">
                           {group.trees.slice(0, 4).map((t) => (
