@@ -656,7 +656,7 @@ const TreeDetailPage = () => {
             )}
 
             {/* Story + Structured Data */}
-            <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} />
+            <TreeStorySection tree={tree} ecoBelonging={ecoBelonging} speciesResolution={speciesResolution} />
 
             {/* Photo Gallery */}
             {photoOfferings.length > 0 && (

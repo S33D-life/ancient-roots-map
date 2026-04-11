@@ -6,15 +6,17 @@ import { motion } from "framer-motion";
 import TreeLoreSection from "@/components/TreeLoreSection";
 import TreeStructuredDataCard from "./TreeStructuredDataCard";
 import type { Database } from "@/integrations/supabase/types";
+import type { SpeciesResolution } from "@/services/speciesResolver";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 interface TreeStorySectionProps {
   tree: Tree;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
+  speciesResolution?: SpeciesResolution | null;
 }
 
-const TreeStorySection = ({ tree, ecoBelonging }: TreeStorySectionProps) => {
+const TreeStorySection = ({ tree, ecoBelonging, speciesResolution }: TreeStorySectionProps) => {
   const hasLore = (tree as any).lore_text || (tree as any).elemental_signature || (tree as any).archetype;
   if (!hasLore && !tree.description) return null;
 
@@ -54,7 +56,7 @@ const TreeStorySection = ({ tree, ecoBelonging }: TreeStorySectionProps) => {
 
         {/* Right: Structured Data Card */}
         <div className="md:col-span-2">
-          <TreeStructuredDataCard tree={tree} ecoBelonging={ecoBelonging} />
+          <TreeStructuredDataCard tree={tree} ecoBelonging={ecoBelonging} speciesResolution={speciesResolution} />
         </div>
       </div>
     </section>

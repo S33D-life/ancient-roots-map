@@ -6,19 +6,21 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { TreeDeciduous, MapPin, Globe, Calendar, Leaf, Shield } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import type { SpeciesResolution } from "@/services/speciesResolver";
 
 type Tree = Database["public"]["Tables"]["trees"]["Row"];
 
 interface Props {
   tree: Tree;
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
+  speciesResolution?: SpeciesResolution | null;
 }
 
 const ROW = "flex items-start justify-between py-2 border-b border-border/20 last:border-b-0";
 const LABEL = "text-[11px] text-muted-foreground font-serif tracking-wider uppercase flex items-center gap-1.5";
 const VALUE = "text-sm font-serif text-foreground/80 text-right max-w-[60%]";
 
-const TreeStructuredDataCard = ({ tree, ecoBelonging }: Props) => {
+const TreeStructuredDataCard = ({ tree, ecoBelonging, speciesResolution }: Props) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -38,13 +40,18 @@ const TreeStructuredDataCard = ({ tree, ecoBelonging }: Props) => {
       <div className="px-4 py-2">
         <div className={ROW}>
           <span className={LABEL}><TreeDeciduous className="w-3 h-3" /> Species</span>
-          <span className={VALUE}>{tree.species}</span>
+          <span className={`${VALUE} flex flex-col items-end`}>
+            <span>{speciesResolution?.displayName || tree.species}</span>
+            {speciesResolution?.scientificName && speciesResolution.scientificName !== (speciesResolution?.displayName || tree.species) && (
+              <span className="text-[10px] italic text-muted-foreground/50">{speciesResolution.scientificName}</span>
+            )}
+          </span>
         </div>
 
-        {tree.lineage && (
+        {(speciesResolution?.family || tree.lineage) && (
           <div className={ROW}>
             <span className={LABEL}><Leaf className="w-3 h-3" /> Family</span>
-            <span className={VALUE}>{tree.lineage}</span>
+            <span className={VALUE}>{speciesResolution?.family || tree.lineage}</span>
           </div>
         )}
 

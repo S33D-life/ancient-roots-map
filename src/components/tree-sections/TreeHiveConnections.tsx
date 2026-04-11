@@ -43,10 +43,17 @@ const TreeHiveConnections = ({ species, ecoBelonging, extraHives = [], speciesRe
 
   return (
     <section className="space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent)" }} />
-        <h2 className="text-lg font-serif text-primary tracking-[0.2em] uppercase">Hives</h2>
-        <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.3), transparent)" }} />
+      <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center gap-3 w-full">
+          <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent)" }} />
+          <h2 className="text-lg font-serif text-primary tracking-[0.2em] uppercase">Hives</h2>
+          <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.3), transparent)" }} />
+        </div>
+        {speciesResolution?.family && (
+          <p className="text-[10px] font-serif text-muted-foreground/50 tracking-wider">
+            {speciesResolution.displayName} · {speciesResolution.family}{speciesResolution.hive ? ` · ${speciesResolution.hive.displayName}` : ""}
+          </p>
+        )}
       </div>
 
       <motion.div

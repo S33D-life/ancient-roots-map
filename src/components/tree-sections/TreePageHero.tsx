@@ -206,7 +206,19 @@ const TreePageHero = ({
 
           {/* Metadata pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-6 text-xs font-serif text-muted-foreground">
-            <span className="bg-secondary/50 px-3 py-1 rounded-full">{tree.species}</span>
+            <span className="bg-secondary/50 px-3 py-1 rounded-full">
+              {speciesResolution?.displayName || tree.species}
+              {speciesResolution?.scientificName && speciesResolution.scientificName !== (speciesResolution?.displayName || tree.species) && (
+                <span className="text-[10px] italic text-muted-foreground/50 ml-1.5">
+                  {speciesResolution.scientificName}
+                </span>
+              )}
+            </span>
+            {speciesResolution?.family && (
+              <span className="bg-secondary/30 px-2.5 py-0.5 rounded-full text-[10px] text-muted-foreground/60">
+                {speciesResolution.family}
+              </span>
+            )}
             {tree.estimated_age && (
               <span className="bg-secondary/50 px-3 py-1 rounded-full">~{tree.estimated_age} years</span>
             )}
