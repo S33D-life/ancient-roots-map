@@ -8,6 +8,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import L from "leaflet";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 import type { HiveSeasonalStatus } from "@/hooks/use-hive-seasonal-status";
 
 interface Tree {
@@ -52,7 +53,7 @@ export default function HiveFruitLayer({
     const hiveGroups = new Map<string, { hive: HiveInfo; trees: Tree[]; status: HiveSeasonalStatus }>();
 
     for (const tree of trees) {
-      const hive = getHiveForSpecies(tree.species);
+      const hive = resolveSpeciesSync(tree.species)?.hive ?? getHiveForSpecies(tree.species);
       if (!hive || !targetFamilies.has(hive.family)) continue;
 
       if (!hiveGroups.has(hive.family)) {

@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { TreeDeciduous, MapPin, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/utils/mapGeometry";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 
 interface NearbyTree {
   id: string;
@@ -75,7 +75,8 @@ const NearbyTreesExplorer = ({ treeId, lat, lng, species }: NearbyTreesExplorerP
 
       <div className="space-y-1">
         {trees.map((t) => {
-          const hive = getHiveForSpecies(t.species);
+          const resolved = resolveSpeciesSync(t.species);
+          const hive = resolved?.hive ?? null;
           return (
             <Link
               key={t.id}

@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getHiveBySlug, type HiveInfo } from "@/utils/hiveUtils";
 import { matchSpecies } from "@/data/treeSpecies";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -98,15 +99,15 @@ const HivePage = () => {
 
       // Filter user trees by hive family
       const hiveTrees = (treesResult.data || []).filter(t => {
-        const match = matchSpecies(t.species);
-        return match && match.family === hive.family;
+        const res = resolveSpeciesSync(t.species);
+        return res.family === hive.family || (matchSpecies(t.species)?.family === hive.family);
       });
 
       // Filter research trees by hive family and merge
       const researchTrees = (researchResult.data || []).filter(rt => {
         const speciesName = rt.species_common || rt.species_scientific;
-        const match = matchSpecies(speciesName);
-        return match && match.family === hive.family;
+        const res = resolveSpeciesSync(speciesName);
+        return res.family === hive.family || (matchSpecies(speciesName)?.family === hive.family);
       }).map(rt => ({
         id: rt.id,
         name: rt.tree_name || rt.species_common || rt.species_scientific,

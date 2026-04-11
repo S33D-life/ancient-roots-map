@@ -57,6 +57,7 @@ import MapControlPanel from "./MapControlPanel";
 
 import { useMapFilters, AGE_BANDS, GIRTH_BANDS, GROVE_SCALES } from "@/contexts/MapFilterContext";
 import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 
 import AddTreeDialog from "./AddTreeDialog";
 import AddTreeChooser from "./AddTreeChooser";
@@ -791,7 +792,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const hiveMap = useMemo(() => {
     const m = new Map<string, { hive: HiveInfo; count: number; speciesList: string[] }>();
     trees.forEach((t) => {
-      const hive = getHiveForSpecies(t.species);
+      const hive = resolveSpeciesSync(t.species)?.hive ?? getHiveForSpecies(t.species);
       if (!hive) return;
       const existing = m.get(hive.family);
       if (existing) {
