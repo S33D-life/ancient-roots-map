@@ -309,10 +309,16 @@ const Hero = () => {
       <div className="relative z-10 container mx-auto px-4 py-16 text-center flex flex-col items-center justify-center min-h-[85vh]">
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Title */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight">
+            <h1
+              className="text-3xl md:text-5xl lg:text-6xl font-serif leading-tight"
+              style={{ textShadow: "0 2px 16px hsl(var(--background) / 0.6), 0 1px 3px hsl(var(--background) / 0.4)" }}
+            >
               The Arboreal Atlas of<br />Ancient Friends
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            <p
+              className="text-sm md:text-base max-w-lg mx-auto leading-relaxed"
+              style={{ color: "hsl(var(--foreground) / 0.75)", textShadow: "0 1px 8px hsl(var(--background) / 0.5)" }}
+            >
             A living atlas of the world's most ancient trees.<br className="hidden sm:inline" />
             Discover them, share their stories, and help protect them.
            </p>
