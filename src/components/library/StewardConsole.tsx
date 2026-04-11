@@ -76,7 +76,7 @@ export function StewardConsole() {
         supabase.from("source_tree_candidates").select("id", { count: "exact", head: true }).eq("normalization_status", "promoted"),
         supabase.from("verification_tasks").select("id", { count: "exact", head: true }).eq("status", "open"),
         supabase.from("verification_tasks").select("id", { count: "exact", head: true }).eq("status", "completed"),
-        supabase.from("research_trees").select("id", { count: "exact", head: true }).eq("conversion_status", "verified"),
+        supabase.from("research_trees").select("id, latitude, longitude, species_scientific, conversion_status").in("conversion_status", ["research_only", "candidate", "in_conversion"]).not("latitude", "is", null).not("longitude", "is", null).not("species_scientific", "is", null),
         supabase.from("agent_findings").select("id", { count: "exact", head: true }).eq("review_status", "pending"),
         supabase.from("tree_data_sources").select("id, name, integration_status, record_count").order("updated_at", { ascending: false }).limit(5),
       ]);
