@@ -67,8 +67,17 @@ const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay =
         <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, hsl(var(--primary) / 0.3), transparent)" }} />
       </div>
 
+      {/* Human-centered count */}
+      {offerings.length > 0 && (
+        <p className="text-[11px] font-serif text-muted-foreground/45 text-center">
+          {offerings.length === 1
+            ? "1 offering has been left here"
+            : `${offerings.length} offerings have been left here`}
+        </p>
+      )}
+
       {/* Type summary pills */}
-      {Object.keys(typeCounts).length > 0 && (
+      {Object.keys(typeCounts).length > 1 && (
         <div className="flex flex-wrap items-center justify-center gap-2">
           {Object.entries(typeCounts).map(([type, count]) => (
             <Badge key={type} variant="outline" className="text-[10px] font-serif gap-1 border-border/40 hover:border-primary/30 transition-colors">

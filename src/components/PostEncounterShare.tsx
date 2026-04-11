@@ -94,6 +94,11 @@ const PostEncounterShare = ({
               <X className="w-4 h-4 text-muted-foreground" />
             </button>
 
+            {/* Spark */}
+            <p className="text-[10px] font-serif text-muted-foreground/40 text-center italic">
+              This moment can travel
+            </p>
+
             {/* Header */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
@@ -142,9 +147,9 @@ const PostEncounterShare = ({
               </button>
             </div>
 
-            {/* Skip hint */}
-            <p className="text-[10px] text-center text-muted-foreground/50 font-serif">
-              Tap anywhere outside to skip
+            {/* Continuation nudge */}
+            <p className="text-[10px] text-center text-muted-foreground/40 font-serif">
+              There are more trees waiting
             </p>
           </div>
         </motion.div>

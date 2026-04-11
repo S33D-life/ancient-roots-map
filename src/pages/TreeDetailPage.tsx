@@ -58,6 +58,7 @@ const TreeLoreSection = lazy(() => import("@/components/TreeLoreSection"));
 const HeartCanopyPulse = lazy(() => import("@/components/HeartCanopyPulse"));
 const WishTagSigils = lazy(() => import("@/components/WishTagSigils"));
 const TreeJourneyInvitations = lazy(() => import("@/components/tree-sections/TreeJourneyInvitations"));
+const TreeAliveness = lazy(() => import("@/components/tree-sections/TreeAliveness"));
 const SeedPlanter = lazy(() => import("@/components/SeedPlanter"));
 const WhisperRipple = lazy(() => import("@/components/WhisperRipple"));
 const TreeHeartPool = lazy(() => import("@/components/TreeHeartPool"));
@@ -690,6 +691,15 @@ const TreeDetailPage = () => {
               <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
             )}
 
+            {/* Aliveness signal */}
+            <Suspense fallback={null}>
+              <TreeAliveness
+                checkinCount={checkins?.length ?? 0}
+                offeringCount={offerings.length}
+                treeName={tree.name}
+              />
+            </Suspense>
+
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
@@ -786,7 +796,11 @@ const TreeDetailPage = () => {
                     speciesResolution={speciesResolution}
                   />
 
-                  {/* Discovery Paths — country, hive, bioregion */}
+                  {/* Depth — unseen layers */}
+                  <p className="text-[10px] font-serif text-muted-foreground/30 text-center py-4">
+                    Beneath this tree, life is moving unseen
+                  </p>
+
                   <Suspense fallback={null}>
                     <TreeDiscoveryPaths
                       species={tree.species}
