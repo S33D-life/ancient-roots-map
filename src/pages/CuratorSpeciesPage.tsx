@@ -354,13 +354,20 @@ const CuratorSpeciesPage = () => {
                           )}
                         </div>
                         {group.suggestedCandidate && (
-                          <p className="text-[11px] text-muted-foreground font-serif">
-                            Suggested: <span className="text-primary">{group.suggestedCandidate.common_name}</span>
-                            {group.suggestedCandidate.scientific_name && (
-                              <span className="italic ml-1">({group.suggestedCandidate.scientific_name})</span>
+                          <div className="space-y-0.5">
+                            <p className="text-[11px] text-muted-foreground font-serif">
+                              Suggested: <span className="text-primary">{group.suggestedCandidate.common_name}</span>
+                              {group.suggestedCandidate.scientific_name && (
+                                <span className="italic ml-1">({group.suggestedCandidate.scientific_name})</span>
+                              )}
+                              {group.suggestedCandidate.family && <span className="ml-1">· {group.suggestedCandidate.family}</span>}
+                            </p>
+                            {(group.suggestedCandidate.synonym_names as unknown as string[])?.length > 0 && (
+                              <p className="text-[10px] text-muted-foreground/50 font-serif">
+                                Aliases: {(group.suggestedCandidate.synonym_names as unknown as string[]).join(", ")}
+                              </p>
                             )}
-                            {group.suggestedCandidate.family && <span className="ml-1">· {group.suggestedCandidate.family}</span>}
-                          </p>
+                          </div>
                         )}
                         <div className="flex flex-wrap gap-1 mt-0.5">
                           {group.trees.slice(0, 4).map((t) => (
