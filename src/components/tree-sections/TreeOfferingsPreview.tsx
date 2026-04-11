@@ -3,9 +3,11 @@
  * and an "Add Your Voice to the Canopy" CTA. Used in the master tree template.
  *
  * Elevated with ambient glow, organic spacing, and warmer empty states.
+ * Now supports YouTube song offerings with inline embed playback.
  */
-import { motion } from "framer-motion";
-import { Sparkles, Camera, Music, FileText, MessageSquare, Mic, BookOpen, Heart, Leaf } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Camera, Music, FileText, MessageSquare, Mic, BookOpen, Heart, Leaf, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +41,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay = 6 }: Props) => {
+  const [expandedYT, setExpandedYT] = useState<string | null>(null);
   const recent = offerings.slice(0, maxDisplay);
   const typeCounts = offerings.reduce(
     (acc, o) => {
@@ -89,39 +92,89 @@ const TreeOfferingsPreview = ({ offerings, onAddOffering, treeName, maxDisplay =
               variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="bg-card/50 backdrop-blur border-border/30 hover:border-primary/20 transition-all hover:shadow-sm group">
-                <CardContent className="p-3 flex items-center gap-3">
-                  {off.media_url && off.type === "photo" && (
-                    <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
-                      <img src={off.media_url} alt={off.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-                  )}
-                  {/* Icon for non-photo types */}
-                  {(!off.media_url || off.type !== "photo") && (
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ background: "hsl(var(--primary) / 0.08)" }}
-                    >
-                      <span className="text-primary/60">{TYPE_ICONS[off.type]}</span>
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-muted-foreground/60 font-mono">
-                        {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
-                      </span>
-                      {(off as any).influence_score > 0 && (
-                        <span className="text-[10px] text-primary/60 font-serif flex items-center gap-0.5">
-                          <Heart className="w-2.5 h-2.5" /> {(off as any).influence_score}
+              <Card className="bg-card/50 backdrop-blur border-border/30 hover:border-primary/20 transition-all hover:shadow-sm group overflow-hidden">
+                <CardContent className="p-3 space-y-0">
+                  <div className="flex items-center gap-3">
+                    {/* YouTube thumbnail for song offerings */}
+                    {off.type === "song" && (off as any).youtube_video_id && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedYT(expandedYT === off.id ? null : off.id)}
+                        className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0"
+                      >
+                        <img
+                          src={(off as any).thumbnail_url || `https://img.youtube.com/vi/${(off as any).youtube_video_id}/hqdefault.jpg`}
+                          alt={off.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
+                          <Play className="w-4 h-4 text-white fill-white" />
+                        </div>
+                      </button>
+                    )}
+                    {/* Photo thumbnail */}
+                    {off.media_url && off.type === "photo" && (
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
+                        <img src={off.media_url} alt={off.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      </div>
+                    )}
+                    {/* Icon for non-photo, non-YouTube types */}
+                    {!(off.type === "song" && (off as any).youtube_video_id) && !(off.media_url && off.type === "photo") && (
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{ background: "hsl(var(--primary) / 0.08)" }}
+                      >
+                        <span className="text-primary/60">{TYPE_ICONS[off.type]}</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-serif text-sm text-foreground truncate">{off.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] text-muted-foreground/60 font-mono">
+                          {new Date(off.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
                         </span>
-                      )}
+                        {(off as any).influence_score > 0 && (
+                          <span className="text-[10px] text-primary/60 font-serif flex items-center gap-0.5">
+                            <Heart className="w-2.5 h-2.5" /> {(off as any).influence_score}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    <Badge variant="outline" className="text-[10px] font-serif capitalize border-primary/20 text-primary/70 shrink-0 gap-1">
+                      {TYPE_ICONS[off.type]} {off.type}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-[10px] font-serif capitalize border-primary/20 text-primary/70 shrink-0 gap-1">
-                    {TYPE_ICONS[off.type]} {off.type}
-                  </Badge>
+
+                  {/* Inline YouTube embed */}
+                  <AnimatePresence>
+                    {expandedYT === off.id && (off as any).youtube_embed_url && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="relative mt-3 rounded-lg overflow-hidden" style={{ aspectRatio: "16 / 9" }}>
+                          <iframe
+                            src={`${(off as any).youtube_embed_url}?autoplay=1&rel=0`}
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
+                            className="absolute inset-0 w-full h-full"
+                            title={off.title}
+                          />
+                          <button
+                            onClick={() => setExpandedYT(null)}
+                            className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5 text-white" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </CardContent>
               </Card>
             </motion.div>
