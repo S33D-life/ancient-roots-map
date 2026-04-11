@@ -3,7 +3,7 @@
  *
  * Central registry and control layer for all tree knowledge sources feeding S33D.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
@@ -28,6 +28,7 @@ import {
   ExternalLink, Plus, Telescope, BookOpen, Leaf, Clock, ChevronRight,
   Bot, Shield, Heart, Zap, ArrowDown, Network
 } from "lucide-react";
+import { SourceDashboard } from "@/components/research-bridge/SourceDashboard";
 
 /* ── Status helpers ─────────────────────────────────────────── */
 const STATUS_COLORS: Record<string, string> = {
@@ -88,8 +89,28 @@ function CanopyOverview({ stats }: { stats: ReturnType<typeof useDataCommons>["s
   );
 }
 
-/* ── Source Registry Card ───────────────────────────────────── */
+/* ── Source Registry Card (with pipeline info) ──────────────── */
 function SourceCard({ source }: { source: DataSource }) {
+  const [pipelineInfo, setPipelineInfo] = useState<{ crawls: number; candidates: number; promoted: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [crawlRes, candRes] = await Promise.all([
+        supabase.from("dataset_crawl_runs").select("id", { count: "exact", head: true }).eq("source_id", source.id),
+        supabase.from("source_tree_candidates").select("normalization_status").eq("source_id", source.id),
+      ]);
+      if (cancelled) return;
+      const cands = candRes.data || [];
+      setPipelineInfo({
+        crawls: crawlRes.count || 0,
+        candidates: cands.length,
+        promoted: cands.filter(c => c.normalization_status === "promoted").length,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [source.id]);
+
   return (
     <Card className="border-primary/15 hover:border-primary/40 transition-all duration-300 bg-card/60">
       <CardHeader className="pb-2">
@@ -133,6 +154,17 @@ function SourceCard({ source }: { source: DataSource }) {
             {source.species_keys.length > 5 && (
               <Badge variant="secondary" className="text-xs">+{source.species_keys.length - 5}</Badge>
             )}
+          </div>
+        )}
+        {/* Pipeline info */}
+        {pipelineInfo && (pipelineInfo.crawls > 0 || pipelineInfo.candidates > 0) && (
+          <div className="flex items-center gap-3 pt-2 border-t border-border/10 text-[10px] font-serif text-muted-foreground">
+            <span>{pipelineInfo.crawls} crawl{pipelineInfo.crawls !== 1 ? "s" : ""}</span>
+            <span>{pipelineInfo.candidates} candidate{pipelineInfo.candidates !== 1 ? "s" : ""}</span>
+            <span className="text-green-600">{pipelineInfo.promoted} promoted</span>
+            <Link to="/agent-garden" className="ml-auto text-primary hover:underline">
+              View pipeline →
+            </Link>
           </div>
         )}
       </CardContent>
@@ -400,6 +432,9 @@ const TreeDataCommonsPage = () => {
             <TabsTrigger value="sources">
               <Database className="w-3.5 h-3.5 mr-1.5" /> Sources
             </TabsTrigger>
+            <TabsTrigger value="pipeline">
+              <TreeDeciduous className="w-3.5 h-3.5 mr-1.5" /> Research Pipeline
+            </TabsTrigger>
             <TabsTrigger value="integration">
               <Clock className="w-3.5 h-3.5 mr-1.5" /> Integration Queue
             </TabsTrigger>
@@ -440,6 +475,11 @@ const TreeDataCommonsPage = () => {
                 {filteredSources.map(s => <SourceCard key={s.id} source={s} />)}
               </div>
             )}
+          </TabsContent>
+
+          {/* ── Research Pipeline Tab ── */}
+          <TabsContent value="pipeline" className="mt-6">
+            <SourceDashboard sources={sources} />
           </TabsContent>
 
           {/* ── Integration Queue Tab ── */}
