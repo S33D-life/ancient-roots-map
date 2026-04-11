@@ -27,6 +27,15 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
   const { displayHandle, buildInviteLink, genericInviteText } = useInviteIdentity();
   const { toast } = useToast();
   const [inviteCopied, setInviteCopied] = useState(false);
+
+  // Journey origin from first arrival
+  const firstTree = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("s33d_first_tree");
+      if (raw) return JSON.parse(raw) as { id: string; name: string };
+    } catch {}
+    return null;
+  }, []);
   const [stats, setStats] = useState<GroveStats>({
     treesLogged: 0,
     treesVisited: 0,
