@@ -152,12 +152,16 @@ const CuratorSpeciesPage = () => {
     });
   }, [trees, findBestMatch, markedStatuses]);
 
-  // Apply confidence filter
+  // Apply filter
   const filteredGroups = useMemo(() => {
     let result = groups;
     if (filter === "exact") result = result.filter(g => g.confidence === "exact");
     if (filter === "fuzzy") result = result.filter(g => g.confidence === "fuzzy");
     if (filter === "unresolved") result = result.filter(g => g.confidence === "unresolved" || g.curationStatus === "unresolved");
+    if (filter === "ambiguous") result = result.filter(g => g.resolutionType === "ambiguous_multi_species");
+    if (filter === "genus") result = result.filter(g => g.resolutionType === "genus_level");
+    if (filter === "poetic") result = result.filter(g => g.resolutionType === "custom_poetic");
+    if (filter === "unknown") result = result.filter(g => g.resolutionType === "unknown");
 
     if (sortMode === "count") {
       result = [...result].sort((a, b) => b.trees.length - a.trees.length);
