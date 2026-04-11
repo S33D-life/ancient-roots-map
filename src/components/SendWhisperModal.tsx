@@ -104,12 +104,13 @@ export default function SendWhisperModal({
     })();
   }, [inviteEnabled, inviteCode]);
 
+  // Auto-close only if invite is NOT enabled (otherwise show share step)
   useEffect(() => {
-    if (!sent) return;
+    if (!sent || inviteEnabled) return;
     toast.success("Whisper sent.");
     const timer = setTimeout(() => onOpenChange(false), 900);
     return () => clearTimeout(timer);
-  }, [sent, onOpenChange]);
+  }, [sent, onOpenChange, inviteEnabled]);
 
   // Search wanderers for private whispers
   useEffect(() => {
@@ -138,7 +139,7 @@ export default function SendWhisperModal({
     setSending(true);
     const speciesKey = treeSpecies?.toLowerCase().replace(/\s+/g, "_");
 
-    const { error } = await sendWhisper({
+    const { error, data: whisperData } = await sendWhisper({
       senderUserId: userId,
       recipientScope,
       recipientUserId: recipientScope === "PRIVATE" ? recipientUserId! : undefined,
@@ -153,6 +154,7 @@ export default function SendWhisperModal({
       toast.error("Failed to send whisper.");
       console.error(error);
     } else {
+      if (whisperData?.[0]?.id) setSentWhisperId(whisperData[0].id);
       let senderLocation: { lat: number; lng: number } | null = null;
       if (typeof navigator !== "undefined" && "geolocation" in navigator) {
         try {
@@ -174,10 +176,50 @@ export default function SendWhisperModal({
         from: senderLocation,
       });
       setSent(true);
+      if (inviteEnabled) {
+        toast.success("Whisper sent — now share the invitation!");
+      }
       window.dispatchEvent(new CustomEvent("whisper-sent", { detail: { treeId } }));
     }
     setSending(false);
   };
+
+  /* ── Share helpers for invite flow ── */
+  const INVITE_PLATFORMS = [
+    { key: "whatsapp", label: "WhatsApp", icon: "💬" },
+    { key: "telegram", label: "Telegram", icon: "✈️" },
+    { key: "copy", label: "Copy Link", icon: "🔗" },
+  ] as const;
+
+  const whisperShareEntity: ShareEntity = {
+    type: "tree",
+    id: treeId,
+    name: treeName,
+    species: treeSpecies,
+  };
+
+  const whisperShareCaption = "I left you a whisper through this tree 🌳\nCome and find it…";
+
+  const whisperShareOpts: ShareOptions = {
+    entity: whisperShareEntity,
+    caption: whisperShareCaption,
+    inviteCode,
+  };
+
+  const handleInviteShare = async (platform: string) => {
+    const success = await shareByPlatform(platform, whisperShareOpts);
+    if (platform === "copy" && success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast.success("Link copied!");
+    }
+  };
+
+  const handleNativeInviteShare = async () => {
+    await shareByPlatform("native", whisperShareOpts);
+  };
+
+  const hasNativeShare = typeof navigator !== "undefined" && "share" in navigator;
 
   if (sent) {
     return (
