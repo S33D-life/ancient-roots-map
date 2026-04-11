@@ -18,8 +18,15 @@ import { Badge } from "@/components/ui/badge";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, TreeDeciduous, Users, Globe, User } from "lucide-react";
+import { Loader2, Send, TreeDeciduous, Users, Globe, User, Share2, Copy, Check, Wind } from "lucide-react";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import {
+  type ShareEntity,
+  type ShareOptions,
+  shareByPlatform,
+  getShareUrl,
+} from "@/utils/shareUtils";
 
 interface Props {
   open: boolean;
@@ -45,6 +52,10 @@ export default function SendWhisperModal({
   const [deliveryScope, setDeliveryScope] = useState<"ANY_TREE" | "SPECIFIC_TREE" | "SPECIES_MATCH">("ANY_TREE");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [inviteEnabled, setInviteEnabled] = useState(false);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [sentWhisperId, setSentWhisperId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -60,8 +71,38 @@ export default function SendWhisperModal({
       setMessage("");
       setDeliveryScope("ANY_TREE");
       setSent(false);
+      setInviteEnabled(false);
+      setInviteCode(null);
+      setSentWhisperId(null);
+      setCopied(false);
     }
   }, [open]);
+
+  // Fetch invite code when invite toggle is enabled
+  useEffect(() => {
+    if (!inviteEnabled || inviteCode) return;
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: existing } = await supabase
+        .from("invite_links")
+        .select("code")
+        .eq("created_by", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (existing) {
+        setInviteCode(existing.code);
+      } else {
+        const { data: newLink } = await supabase
+          .from("invite_links")
+          .insert({ created_by: user.id })
+          .select("code")
+          .single();
+        setInviteCode(newLink?.code || null);
+      }
+    })();
+  }, [inviteEnabled, inviteCode]);
 
   useEffect(() => {
     if (!sent) return;
