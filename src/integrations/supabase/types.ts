@@ -6607,6 +6607,7 @@ export type Database = {
           genus: string | null
           icon: string | null
           id: string
+          metadata: Json | null
           normalized_name: string | null
           rank: string
           scientific_name: string | null
@@ -6624,6 +6625,7 @@ export type Database = {
           genus?: string | null
           icon?: string | null
           id?: string
+          metadata?: Json | null
           normalized_name?: string | null
           rank?: string
           scientific_name?: string | null
@@ -6641,6 +6643,7 @@ export type Database = {
           genus?: string | null
           icon?: string | null
           id?: string
+          metadata?: Json | null
           normalized_name?: string | null
           rank?: string
           scientific_name?: string | null
