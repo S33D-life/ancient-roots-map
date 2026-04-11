@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import PartnersTab from "@/components/support/PartnersTab";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import {
