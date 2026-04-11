@@ -7,16 +7,14 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Footprints, TreeDeciduous, ClipboardCheck, Database, Bug,
-  Activity, ChevronRight, AlertTriangle, CheckCircle, Clock,
-  Globe, ExternalLink, Loader2, TrendingUp, TrendingDown, Minus,
-  Eye, Telescope, Heart, Sprout,
+  AlertTriangle, CheckCircle, Clock, Globe, ExternalLink, Loader2,
+  Eye, Telescope, Sprout,
 } from "lucide-react";
 import {
-  clusterFindings, computeTrend, findFlakiestJourney, mostCommonCategory,
+  clusterFindings, findFlakiestJourney, mostCommonCategory,
 } from "@/lib/wanderer-patterns";
 import type { AgentRun, AgentFinding } from "@/lib/wanderer-types";
 
@@ -44,16 +42,6 @@ interface ReviewQueues {
   findingsPending: number;
 }
 
-interface SourceActivity {
-  latestSources: { name: string; status: string; candidates: number; promoted: number }[];
-}
-
-const TrendIcon = ({ trend }: { trend: string }) => {
-  if (trend === "improving") return <TrendingUp className="w-3 h-3 text-emerald-400" />;
-  if (trend === "worsening") return <TrendingDown className="w-3 h-3 text-destructive" />;
-  return <Minus className="w-3 h-3 text-muted-foreground" />;
-};
-
 export function StewardConsole() {
   const [loading, setLoading] = useState(true);
   const [wanderer, setWanderer] = useState<WandererHealth>({
@@ -67,13 +55,12 @@ export function StewardConsole() {
   const [queues, setQueues] = useState<ReviewQueues>({
     candidatesAwaiting: 0, verificationsOpen: 0, findingsPending: 0,
   });
-  const [sources, setSources] = useState<SourceActivity>({ latestSources: [] });
+  const [latestSources, setLatestSources] = useState<{ name: string; integrationStatus: string; recordCount: number }[]>([]);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
 
-      // Parallel fetches
       const [
         runsRes, findingsRes, journeysRes,
         crawlRes, candRawRes, candDupRes, candPromRes,
@@ -91,7 +78,7 @@ export function StewardConsole() {
         supabase.from("verification_tasks").select("id", { count: "exact", head: true }).eq("status", "completed"),
         supabase.from("research_trees").select("id", { count: "exact", head: true }).eq("conversion_status", "verified"),
         supabase.from("agent_findings").select("id", { count: "exact", head: true }).eq("review_status", "pending"),
-        supabase.from("tree_data_sources").select("id, name, status, tree_count, promoted_count").order("updated_at", { ascending: false }).limit(5),
+        supabase.from("tree_data_sources").select("id, name, integration_status, record_count").order("updated_at", { ascending: false }).limit(5),
       ]);
 
       // Wanderer health
@@ -99,18 +86,18 @@ export function StewardConsole() {
       const findings = (findingsRes.data || []) as unknown as AgentFinding[];
       const journeys = (journeysRes.data || []) as { id: string; slug: string; title: string }[];
       const latestRun = runs[0];
-      const patterns = clusterFindings(findings);
+      const patterns = clusterFindings(findings, runs);
       const recurring = patterns.filter(p => p.count >= 2);
+      const flakiest = findFlakiestJourney(runs, journeys);
 
       setWanderer({
         latestStatus: latestRun?.status || null,
         latestScore: latestRun?.score ?? null,
         recurringCount: recurring.length,
         commonCategory: mostCommonCategory(findings),
-        flakiestJourney: findFlakiestJourney(runs, journeys),
+        flakiestJourney: flakiest?.title || null,
       });
 
-      // Pipeline health
       setPipeline({
         crawlRuns: crawlRes.count ?? 0,
         rawCandidates: candRawRes.count ?? 0,
@@ -121,23 +108,18 @@ export function StewardConsole() {
         readyForPromotion: researchReadyRes.count ?? 0,
       });
 
-      // Review queues
       setQueues({
         candidatesAwaiting: candRawRes.count ?? 0,
         verificationsOpen: verifOpenRes.count ?? 0,
         findingsPending: findingsPendingRes.count ?? 0,
       });
 
-      // Source activity
-      const srcData = (sourcesRes.data || []) as { id: string; name: string; status: string; tree_count: number | null; promoted_count: number | null }[];
-      setSources({
-        latestSources: srcData.map(s => ({
-          name: s.name,
-          status: s.status || "unknown",
-          candidates: s.tree_count ?? 0,
-          promoted: s.promoted_count ?? 0,
-        })),
-      });
+      const srcData = (sourcesRes.data || []);
+      setLatestSources(srcData.map(s => ({
+        name: s.name,
+        integrationStatus: s.integration_status || "unknown",
+        recordCount: s.record_count ?? 0,
+      })));
 
       setLoading(false);
     };
@@ -162,13 +144,13 @@ export function StewardConsole() {
         <Eye className="w-4 h-4 text-primary" />
         <span className="text-sm font-mono font-medium text-foreground/90">Steward Console</span>
         {totalQueueItems > 0 && (
-          <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-400 border-amber-500/20">
+          <Badge variant="outline" className="text-[10px] bg-accent/10 text-accent-foreground border-accent/20">
             {totalQueueItems} awaiting review
           </Badge>
         )}
       </div>
 
-      {/* ── Wanderer Health ── */}
+      {/* Wanderer Health */}
       <Card className="bg-card/30 border-border/20">
         <CardHeader className="pb-2 pt-3 px-4">
           <CardTitle className="text-xs font-mono flex items-center gap-2">
@@ -181,7 +163,7 @@ export function StewardConsole() {
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground/70">Latest run:</span>
               {wanderer.latestStatus === "completed" ? (
-                <CheckCircle className="w-3 h-3 text-emerald-400" />
+                <CheckCircle className="w-3 h-3 text-primary" />
               ) : wanderer.latestStatus === "failed" ? (
                 <AlertTriangle className="w-3 h-3 text-destructive" />
               ) : (
@@ -195,7 +177,7 @@ export function StewardConsole() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground/70">Recurring:</span>
-              <span className={`font-mono ${wanderer.recurringCount > 0 ? "text-amber-400" : "text-foreground/80"}`}>
+              <span className={`font-mono ${wanderer.recurringCount > 0 ? "text-accent-foreground" : "text-foreground/80"}`}>
                 {wanderer.recurringCount}
               </span>
             </div>
@@ -213,11 +195,11 @@ export function StewardConsole() {
         </CardContent>
       </Card>
 
-      {/* ── Research Pipeline Health ── */}
+      {/* Research Pipeline Health */}
       <Card className="bg-card/30 border-border/20">
         <CardHeader className="pb-2 pt-3 px-4">
           <CardTitle className="text-xs font-mono flex items-center gap-2">
-            <Telescope className="w-3.5 h-3.5 text-emerald-400" />
+            <Telescope className="w-3.5 h-3.5 text-primary" />
             Research Pipeline
           </CardTitle>
         </CardHeader>
@@ -238,7 +220,7 @@ export function StewardConsole() {
             ))}
           </div>
           {pipeline.readyForPromotion > 0 && (
-            <div className="mt-2 text-[10px] flex items-center gap-1.5 text-emerald-400">
+            <div className="mt-2 text-[10px] flex items-center gap-1.5 text-primary">
               <TreeDeciduous className="w-3 h-3" />
               {pipeline.readyForPromotion} research tree{pipeline.readyForPromotion !== 1 ? "s" : ""} ready for Ancient Friend promotion
             </div>
@@ -246,11 +228,11 @@ export function StewardConsole() {
         </CardContent>
       </Card>
 
-      {/* ── Review Queues ── */}
+      {/* Review Queues */}
       <Card className="bg-card/30 border-border/20">
         <CardHeader className="pb-2 pt-3 px-4">
           <CardTitle className="text-xs font-mono flex items-center gap-2">
-            <ClipboardCheck className="w-3.5 h-3.5 text-amber-400" />
+            <ClipboardCheck className="w-3.5 h-3.5 text-accent-foreground" />
             Review Queues
           </CardTitle>
         </CardHeader>
@@ -262,28 +244,28 @@ export function StewardConsole() {
           ].map(q => (
             <Link key={q.label} to={q.route} className="flex items-center justify-between text-[11px] group hover:bg-card/20 rounded px-1 py-0.5">
               <span className="text-muted-foreground/70 group-hover:text-foreground/80">{q.label}</span>
-              <span className={`font-mono ${q.count > 0 ? "text-amber-400" : "text-foreground/60"}`}>{q.count}</span>
+              <span className={`font-mono ${q.count > 0 ? "text-accent-foreground" : "text-foreground/60"}`}>{q.count}</span>
             </Link>
           ))}
         </CardContent>
       </Card>
 
-      {/* ── Source Activity ── */}
-      {sources.latestSources.length > 0 && (
+      {/* Source Activity */}
+      {latestSources.length > 0 && (
         <Card className="bg-card/30 border-border/20">
           <CardHeader className="pb-2 pt-3 px-4">
             <CardTitle className="text-xs font-mono flex items-center gap-2">
-              <Globe className="w-3.5 h-3.5 text-cyan-400" />
+              <Globe className="w-3.5 h-3.5 text-secondary-foreground" />
               Source Activity
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-3 space-y-1.5">
-            {sources.latestSources.map((s, i) => (
+            {latestSources.map((s, i) => (
               <div key={i} className="flex items-center justify-between text-[11px]">
                 <span className="text-foreground/80 truncate max-w-[60%]">{s.name}</span>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[8px] capitalize">{s.status}</Badge>
-                  <span className="text-muted-foreground/60">{s.candidates}c / {s.promoted}p</span>
+                  <Badge variant="outline" className="text-[8px] capitalize">{s.integrationStatus}</Badge>
+                  <span className="text-muted-foreground/60">{s.recordCount} records</span>
                 </div>
               </div>
             ))}
@@ -291,7 +273,7 @@ export function StewardConsole() {
         </Card>
       )}
 
-      {/* ── Quick Links ── */}
+      {/* Quick Links */}
       <div className="grid grid-cols-2 gap-1.5">
         {[
           { label: "Wanderers", route: "/agent-garden", icon: <Footprints className="w-3 h-3" /> },
