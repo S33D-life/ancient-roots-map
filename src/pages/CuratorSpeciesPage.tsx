@@ -23,14 +23,17 @@ import { toast } from "sonner";
 import { useHasRole } from "@/hooks/use-role";
 import { resolveSpeciesSync, enrichFromGBIF, type MatchConfidence } from "@/services/speciesResolver";
 
-type CurationStatus = "unresolved" | "custom_local" | "needs_gbif" | "resolved";
+type CurationStatus = "unresolved" | "custom_local" | "needs_gbif" | "resolved" | "intentionally_unresolved" | "needs_field_verification" | "resolved_locally";
+type ResolutionType = "ambiguous_multi_species" | "generic_common_name" | "unknown" | "custom_poetic" | "genus_level" | null;
 type SortMode = "count" | "alpha";
+type FilterMode = "all" | "unresolved" | "exact" | "fuzzy" | "ambiguous" | "genus" | "poetic" | "unknown";
 
 interface UnresolvedTree {
   id: string;
   name: string;
   species: string;
   species_key: string | null;
+  metadata: { resolution_type?: string } | null;
 }
 
 interface SpeciesCandidate {
