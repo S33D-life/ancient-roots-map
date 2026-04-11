@@ -571,6 +571,17 @@ const TreeDetailPage = () => {
           }}
         />
 
+        {/* Inviter arrival context */}
+        {arrivalRef && (
+          <Suspense fallback={null}>
+            <InviterContext
+              refHandle={arrivalRef}
+              context="tree"
+              treeName={tree.name}
+            />
+          </Suspense>
+        )}
+
         {tree && (
           <TreeShareCard
             open={shareCardOpen}
