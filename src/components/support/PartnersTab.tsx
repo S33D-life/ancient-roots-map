@@ -365,4 +365,9 @@ const PartnersTab = () => {
             </CardContent>
           </Card>
         )}
+      </motion.section>
+    </div>
+  );
+};
+
 export default PartnersTab;
