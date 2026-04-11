@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import SeasonalLensBanner from "@/components/seasonal/SeasonalLensBanner";
 import StageIcon from "@/components/roadmap/StageIcon";
+import { PulseSignal, FlowStrip } from "@/components/roadmap/PulseSignal";
+import { useRoadmapPulse, buildPulseConfigs } from "@/hooks/use-roadmap-pulse";
 import { hslAlpha } from "@/utils/colorUtils";
 import {
   ROADMAP_FEATURES,
