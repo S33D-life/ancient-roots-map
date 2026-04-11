@@ -51,6 +51,8 @@ interface GroupMeta {
   source: "db" | "hardcoded" | "unresolved";
   suggestedCandidate: SpeciesCandidate | null;
   curationStatus: CurationStatus;
+  resolutionType: ResolutionType;
+}
 }
 
 const CONFIDENCE_COLORS: Record<MatchConfidence, string> = {
