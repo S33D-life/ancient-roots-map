@@ -332,8 +332,38 @@ const AuthPage = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate("signup")) return;
+
+    // Require a valid invite code to sign up
+    const code = inviteCode.trim();
+    if (!code) {
+      toast({ title: "Invitation required", description: "You need an invitation to join S33D. Ask a wanderer for an invite link.", variant: "destructive" });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Pre-validate the invite code before attempting signup
+      const { data: linkCheck } = await supabase
+        .from("invite_links")
+        .select("id, created_by, is_used")
+        .eq("code", code)
+        .maybeSingle();
+
+      if (!linkCheck || (linkCheck as any).is_used) {
+        throw new Error("This invitation has already been used or is invalid. Ask for a fresh invite.");
+      }
+
+      // Check inviter has remaining invitations
+      const { data: inviterProfile } = await supabase
+        .from("profiles")
+        .select("invites_remaining")
+        .eq("id", (linkCheck as any).created_by)
+        .maybeSingle();
+
+      if (!inviterProfile || (inviterProfile as any).invites_remaining <= 0) {
+        throw new Error("The person who sent this invitation has no invites remaining.");
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -345,9 +375,9 @@ const AuthPage = () => {
         }
         throw error;
       }
-      // Store invite code so we can record the referral after email verification
-      if (inviteCode.trim() && data.user) {
-        localStorage.setItem("s33d_invite_code", inviteCode.trim());
+      // Store invite code so we can consume the invitation after email verification
+      if (data.user) {
+        localStorage.setItem("s33d_invite_code", code);
       }
       setView("verify-email");
     } catch (err) {
