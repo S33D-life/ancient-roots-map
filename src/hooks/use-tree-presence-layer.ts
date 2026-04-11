@@ -62,11 +62,44 @@ export function useTreePresence(enabled: boolean = true) {
     timerRef.current = setTimeout(() => fetchPresence(bounds), 500);
   }, [enabled, fetchPresence]);
 
+  // Clear signals when disabled
   useEffect(() => {
+    if (!enabled) {
+      setSignals([]);
+      lastBoundsRef.current = "";
+    }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, []);
+  }, [enabled]);
 
-  return { signals, loading, updateBounds };
+  // Realtime: re-fetch on new check-ins (only when enabled)
+  const lastBoundsForRealtimeRef = useRef<Bounds | null>(null);
+  useEffect(() => {
+    if (!enabled) return;
+    const channel = supabase
+      .channel("presence-checkins")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "tree_checkins" },
+        () => {
+          // Invalidate cache so next fetch gets fresh data
+          lastBoundsRef.current = "";
+          if (lastBoundsForRealtimeRef.current) {
+            fetchPresence(lastBoundsForRealtimeRef.current);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [enabled, fetchPresence]);
+
+  // Track latest bounds for realtime refetch
+  const updateBoundsWrapped = useCallback((bounds: Bounds) => {
+    lastBoundsForRealtimeRef.current = bounds;
+    updateBounds(bounds);
+  }, [updateBounds]);
+
+  return { signals, loading, updateBounds: updateBoundsWrapped };
 }
