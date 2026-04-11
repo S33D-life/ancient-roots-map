@@ -182,7 +182,7 @@ export function buildPopupHtml(
       <h3 style="margin:0;font-size:16px;color:hsl(42,65%,62%);line-height:1.35;font-weight:700;letter-spacing:0.02em;">${escapeHtml(tree.name)}</h3>
 
       <!-- Species -->
-      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
+      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(speciesDisplay)}${scientificName ? ` <span style="font-size:9px;color:hsl(0,0%,42%);font-style:italic;opacity:0.7;">${escapeHtml(scientificName)}</span>` : ""}</p>
 
       ${presenceLine}
 
