@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Gift, Heart, CheckCircle, Sparkles } from "lucide-react";
+import { timeAgo } from "@/lib/lifecycle-labels";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchRecentResearchContributions,
@@ -91,7 +92,7 @@ export function RewardReadyQueue() {
               const agent = evt.agent_profiles as { agent_name: string; avatar_emoji: string | null } | null;
               const payload = evt.payload_json as Record<string, any> | null;
               const isActioning = actioningId === evt.id;
-              const validatedAt = evt.validated_at ? timeAgo(new Date(evt.validated_at)) : "";
+              const validatedAt = evt.validated_at ? timeAgo(evt.validated_at) : "";
 
               return (
                 <div key={evt.id} className="flex items-center gap-2 text-[11px] py-1.5 px-1.5 rounded bg-primary/5 hover:bg-primary/10 transition-colors">
@@ -131,11 +132,4 @@ export function RewardReadyQueue() {
   );
 }
 
-function timeAgo(date: Date): string {
-  const mins = Math.floor((Date.now() - date.getTime()) / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
+

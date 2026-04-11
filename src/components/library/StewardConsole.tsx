@@ -1,6 +1,7 @@
 /**
  * StewardConsole — Compact operational dashboard for the living system.
- * Shows wanderer health, research pipeline, review queues, source activity, and quick links.
+ * Wanderer health, research pipeline, review queues, queue aging,
+ * reward distribution, activity feed, ledger, source activity, quick links.
  */
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -14,6 +15,9 @@ import {
   Eye, Telescope, Sprout,
 } from "lucide-react";
 import { RewardReadyQueue } from "./RewardReadyQueue";
+import { RewardLedgerPanel } from "./RewardLedgerPanel";
+import { RecentActivityFeed } from "./RecentActivityFeed";
+import { QueueAgingIndicators } from "./QueueAgingIndicators";
 import {
   clusterFindings, findFlakiestJourney, mostCommonCategory,
 } from "@/lib/wanderer-patterns";
@@ -41,6 +45,7 @@ interface ReviewQueues {
   candidatesAwaiting: number;
   verificationsOpen: number;
   findingsPending: number;
+  contributionsPending: number;
 }
 
 export function StewardConsole() {
@@ -54,7 +59,7 @@ export function StewardConsole() {
     openVerifications: 0, completedVerifications: 0, readyForPromotion: 0,
   });
   const [queues, setQueues] = useState<ReviewQueues>({
-    candidatesAwaiting: 0, verificationsOpen: 0, findingsPending: 0,
+    candidatesAwaiting: 0, verificationsOpen: 0, findingsPending: 0, contributionsPending: 0,
   });
   const [latestSources, setLatestSources] = useState<{ name: string; integrationStatus: string; recordCount: number }[]>([]);
 
@@ -66,7 +71,7 @@ export function StewardConsole() {
         runsRes, findingsRes, journeysRes,
         crawlRes, candRawRes, candDupRes, candPromRes,
         verifOpenRes, verifDoneRes, researchReadyRes,
-        findingsPendingRes, sourcesRes,
+        findingsPendingRes, sourcesRes, contribPendingRes,
       ] = await Promise.all([
         supabase.from("agent_runs").select("*, agent_journeys(title, slug)").order("created_at", { ascending: false }).limit(50),
         supabase.from("agent_findings").select("*").order("created_at", { ascending: false }).limit(200),
@@ -80,9 +85,9 @@ export function StewardConsole() {
         supabase.from("research_trees").select("id, latitude, longitude, species_scientific, conversion_status").in("conversion_status", ["research_only", "candidate", "in_conversion"]).not("latitude", "is", null).not("longitude", "is", null).not("species_scientific", "is", null),
         supabase.from("agent_findings").select("id", { count: "exact", head: true }).eq("review_status", "pending"),
         supabase.from("tree_data_sources").select("id, name, integration_status, record_count").order("updated_at", { ascending: false }).limit(5),
+        supabase.from("agent_contribution_events").select("id", { count: "exact", head: true }).eq("validation_status", "pending"),
       ]);
 
-      // Wanderer health
       const runs = (runsRes.data || []) as unknown as AgentRun[];
       const findings = (findingsRes.data || []) as unknown as AgentFinding[];
       const journeys = (journeysRes.data || []) as { id: string; slug: string; title: string }[];
@@ -113,10 +118,10 @@ export function StewardConsole() {
         candidatesAwaiting: candRawRes.count ?? 0,
         verificationsOpen: verifOpenRes.count ?? 0,
         findingsPending: findingsPendingRes.count ?? 0,
+        contributionsPending: contribPendingRes.count ?? 0,
       });
 
-      const srcData = (sourcesRes.data || []);
-      setLatestSources(srcData.map(s => ({
+      setLatestSources((sourcesRes.data || []).map(s => ({
         name: s.name,
         integrationStatus: s.integration_status || "unknown",
         recordCount: s.record_count ?? 0,
@@ -136,7 +141,7 @@ export function StewardConsole() {
     );
   }
 
-  const totalQueueItems = queues.candidatesAwaiting + queues.verificationsOpen + queues.findingsPending;
+  const totalQueueItems = queues.candidatesAwaiting + queues.verificationsOpen + queues.findingsPending + queues.contributionsPending;
 
   return (
     <div className="space-y-4">
@@ -150,6 +155,9 @@ export function StewardConsole() {
           </Badge>
         )}
       </div>
+
+      {/* Recent Activity Feed */}
+      <RecentActivityFeed />
 
       {/* Wanderer Health */}
       <Card className="bg-card/30 border-border/20">
@@ -196,7 +204,7 @@ export function StewardConsole() {
         </CardContent>
       </Card>
 
-      {/* Research Pipeline Health */}
+      {/* Research Pipeline */}
       <Card className="bg-card/30 border-border/20">
         <CardHeader className="pb-2 pt-3 px-4">
           <CardTitle className="text-xs font-mono flex items-center gap-2">
@@ -241,6 +249,7 @@ export function StewardConsole() {
           {[
             { label: "Candidates awaiting review", count: queues.candidatesAwaiting, route: "/agent-garden?tab=bridge" },
             { label: "Verification tasks open", count: queues.verificationsOpen, route: "/agent-garden?tab=bridge" },
+            { label: "Contributions pending", count: queues.contributionsPending, route: "/agent-garden?tab=contributions" },
             { label: "Findings pending", count: queues.findingsPending, route: "/agent-garden?tab=wanderers" },
           ].map(q => (
             <Link key={q.label} to={q.route} className="flex items-center justify-between text-[11px] group hover:bg-card/20 rounded px-1 py-0.5">
@@ -251,9 +260,14 @@ export function StewardConsole() {
         </CardContent>
       </Card>
 
+      {/* Queue Aging */}
+      <QueueAgingIndicators />
 
       {/* Reward Ready Queue (keeper-only) */}
       <RewardReadyQueue />
+
+      {/* Reward Ledger */}
+      <RewardLedgerPanel />
 
       {/* Source Activity */}
       {latestSources.length > 0 && (
