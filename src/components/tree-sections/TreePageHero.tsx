@@ -109,7 +109,7 @@ const TreePageHero = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       className="relative -mx-4 md:-mx-8 mb-10 overflow-hidden rounded-b-2xl"
-      style={{ maxHeight: "min(85vh, 680px)" }}
+      style={{ maxHeight: "min(65vh, 520px)" }}
     >
       {/* Background with parallax */}
       <div
@@ -208,7 +208,7 @@ const TreePageHero = ({
           )}
 
           {/* Metadata pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-6 text-xs font-serif text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6 text-xs font-serif" style={{ color: "hsl(var(--foreground) / 0.65)" }}>
             <span className="bg-secondary/50 px-3 py-1 rounded-full">
               {speciesResolution?.displayName || tree.species}
               {speciesResolution?.scientificName && speciesResolution.scientificName !== (speciesResolution?.displayName || tree.species) && (
