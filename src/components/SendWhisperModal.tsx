@@ -444,19 +444,23 @@ export default function SendWhisperModal({
 
           {/* Invite toggle */}
           {userId && (
-            <div className="flex items-center justify-between rounded-lg border border-border/40 bg-secondary/10 px-3 py-2.5">
+            <div className={`flex items-center justify-between rounded-lg border px-3 py-2.5 ${canInvite ? "border-border/40 bg-secondary/10" : "border-border/20 bg-muted/30 opacity-60"}`}>
               <div className="space-y-0.5">
                 <Label className="font-serif text-sm cursor-pointer" htmlFor="invite-toggle">
                   Invite someone with this whisper
                 </Label>
                 <p className="text-[10px] text-muted-foreground/60 font-serif">
-                  Share a link so they can join and find your whisper
+                  {canInvite
+                    ? `${allowance?.invitesRemaining ?? 0} invitations remaining`
+                    : "No invitations remaining"
+                  }
                 </p>
               </div>
               <Switch
                 id="invite-toggle"
                 checked={inviteEnabled}
                 onCheckedChange={setInviteEnabled}
+                disabled={!canInvite}
               />
             </div>
           )}
