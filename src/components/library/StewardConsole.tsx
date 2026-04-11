@@ -251,6 +251,9 @@ export function StewardConsole() {
         </CardContent>
       </Card>
 
+      {/* Contribution Review Queue (keeper-only) */}
+      <ContributionReviewQueue />
+
       {/* Source Activity */}
       {latestSources.length > 0 && (
         <Card className="bg-card/30 border-border/20">
