@@ -216,6 +216,62 @@ export type Database = {
           },
         ]
       }
+      agent_findings: {
+        Row: {
+          created_at: string
+          curator_notes: string | null
+          description: string
+          id: string
+          review_status: string
+          route: string | null
+          run_id: string
+          screenshot_url: string | null
+          severity: string
+          suggested_bug_garden_post_id: string | null
+          title: string
+          trace_json: Json | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          curator_notes?: string | null
+          description: string
+          id?: string
+          review_status?: string
+          route?: string | null
+          run_id: string
+          screenshot_url?: string | null
+          severity?: string
+          suggested_bug_garden_post_id?: string | null
+          title: string
+          trace_json?: Json | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          curator_notes?: string | null
+          description?: string
+          id?: string
+          review_status?: string
+          route?: string | null
+          run_id?: string
+          screenshot_url?: string | null
+          severity?: string
+          suggested_bug_garden_post_id?: string | null
+          title?: string
+          trace_json?: Json | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_findings_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_garden_tasks: {
         Row: {
           category: string
@@ -315,6 +371,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      agent_journeys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_path: string
+          id: string
+          is_active: boolean
+          slug: string
+          steps_json: Json
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_path?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          steps_json?: Json
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_path?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          steps_json?: Json
+          title?: string
+        }
+        Relationships: []
       }
       agent_profiles: {
         Row: {
@@ -450,6 +542,56 @@ export type Database = {
             columns: ["contribution_event_id"]
             isOneToOne: false
             referencedRelation: "agent_contribution_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_runs: {
+        Row: {
+          agent_id: string | null
+          build_id: string | null
+          created_at: string
+          environment: string | null
+          finished_at: string | null
+          id: string
+          journey_id: string
+          score: number | null
+          started_at: string | null
+          status: string
+          summary: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          build_id?: string | null
+          created_at?: string
+          environment?: string | null
+          finished_at?: string | null
+          id?: string
+          journey_id: string
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          summary?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          build_id?: string | null
+          created_at?: string
+          environment?: string | null
+          finished_at?: string | null
+          id?: string
+          journey_id?: string
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_runs_journey_id_fkey"
+            columns: ["journey_id"]
+            isOneToOne: false
+            referencedRelation: "agent_journeys"
             referencedColumns: ["id"]
           },
         ]

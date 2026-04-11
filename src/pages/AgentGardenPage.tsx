@@ -29,11 +29,12 @@ import { TaskBoard } from "@/components/agent-garden/TaskBoard";
 import { SubmissionReviewPanel } from "@/components/agent-garden/SubmissionReviewPanel";
 import { ConnectAgentWizard } from "@/components/agent-garden/ConnectAgentWizard";
 import { AgentOverviewTab } from "@/components/agent-garden/AgentOverviewTab";
+import { WanderersTab } from "@/components/agent-garden/WanderersTab";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
   Star, Award, Activity, CheckCircle, Clock, AlertTriangle,
-  ExternalLink, Eye, ListChecks, Sprout, BookOpen, Telescope
+  ExternalLink, Eye, ListChecks, Sprout, BookOpen, Telescope, Footprints
 } from "lucide-react";
 
 /* ── Helpers ─────────────────────────────────────── */
@@ -170,6 +171,7 @@ const AgentGardenPage = () => {
             <TabsTrigger value="sparks"><Zap className="w-3.5 h-3.5 mr-1.5" /> Sparks</TabsTrigger>
             <TabsTrigger value="rewards"><Heart className="w-3.5 h-3.5 mr-1.5" /> Rewards & Trust</TabsTrigger>
             <TabsTrigger value="review"><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Review</TabsTrigger>
+            <TabsTrigger value="wanderers"><Footprints className="w-3.5 h-3.5 mr-1.5" /> Wanderers</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -485,6 +487,12 @@ const AgentGardenPage = () => {
             </Card>
             <SubmissionReviewPanel />
           </TabsContent>
+
+          {/* ═══════════════ WANDERERS ═══════════════ */}
+          <TabsContent value="wanderers" className="mt-6">
+            <WanderersTab />
+          </TabsContent>
+
         </Tabs>
 
         {/* Back link */}
