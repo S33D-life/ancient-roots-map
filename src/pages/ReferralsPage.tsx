@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useReferrals } from "@/hooks/use-referrals";
+import { useInvitationAllowance } from "@/hooks/use-invitation-allowance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +49,7 @@ const ReferralsPage = () => {
   }, [navigate]);
 
   const { referrals, referredBy, totalTreesFromReferrals, loading } = useReferrals(userId ?? undefined);
+  const { allowance } = useInvitationAllowance(userId);
 
   // Milestone progress
   const currentMilestone = useMemo(() => {
