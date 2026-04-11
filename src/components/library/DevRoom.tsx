@@ -189,7 +189,7 @@ const DevRoom = () => {
           transition={{ duration: 0.2 }}
         >
           {section === "overview" && <OverviewSection stats={stats} />}
-          {section === "steward" && <StewardConsoleSection />}
+          {section === "steward" && <StewardConsole />}
           {section === "system-map" && <SystemMapSection selectedNode={selectedNode} setSelectedNode={setSelectedNode} />}
           {section === "data-roots" && <DataRootsSection stats={stats} />}
           {section === "agent-garden" && <AgentGardenSection stats={stats} />}
