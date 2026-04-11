@@ -416,7 +416,7 @@ export function useMapOverlayLayers({
     return () => { if (seedTrailLayerRef.current && map.hasLayer(seedTrailLayerRef.current)) map.removeLayer(seedTrailLayerRef.current); };
   }, [showSeedTrail, userId, map]);
 
-  // ── Heart Glow (hex-bin density) ──
+  // ── Heart Glow (tree-anchored offering density) ──
   useEffect(() => {
     if (!map) return;
     if (!showHeartGlow) {
@@ -424,38 +424,43 @@ export function useMapOverlayLayers({
       return;
     }
 
-    const loadHexBins = async () => {
+    const loadHeartGlow = async () => {
       const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const { data } = await supabase.from("offerings").select("tree_id").gte("created_at", cutoff).limit(500);
       if (!data || data.length === 0) return;
 
-      const points: { lat: number; lng: number }[] = [];
-      for (const o of data) { const loc = treeLookup.get(o.tree_id); if (loc) points.push(loc); }
-      if (points.length === 0) return;
-
-      const { computeHexBins } = await import("@/hooks/use-grove-events");
-      const zoom = map.getZoom();
-      const resolution = zoom >= 10 ? 0.05 : zoom >= 7 ? 0.2 : zoom >= 4 ? 0.5 : 2;
-      const bins = computeHexBins(points, resolution);
+      // Count offerings per tree — only render at valid tree coordinates
+      const countByTree: Record<string, number> = {};
+      for (const o of data) {
+        if (!o.tree_id) continue;
+        countByTree[o.tree_id] = (countByTree[o.tree_id] || 0) + 1;
+      }
 
       if (hexBinLayerRef.current) map.removeLayer(hexBinLayerRef.current);
       const hexLayer = L.layerGroup();
-      bins.forEach(bin => {
-        const radius = 8 + bin.intensity * 24;
-        const opacity = 0.15 + bin.intensity * 0.45;
+      const maxCount = Math.max(...Object.values(countByTree), 1);
+
+      Object.entries(countByTree).forEach(([treeId, count]) => {
+        const loc = treeLookup.get(treeId);
+        if (!loc) return; // Skip hearts with no valid tree anchor
+
+        const intensity = Math.min(count / maxCount, 1);
+        const radius = 8 + intensity * 20;
+        const opacity = 0.15 + intensity * 0.45;
         const icon = L.divIcon({
-          className: "hex-bin-marker",
-          html: `<div style="width:${radius*2}px;height:${radius*2}px;border-radius:50%;background:radial-gradient(circle,hsla(42,80%,55%,${opacity}) 0%,hsla(42,70%,45%,${opacity*0.3}) 60%,transparent 100%);box-shadow:0 0 ${radius}px hsla(42,80%,55%,${opacity*0.4});transform:translate(-50%,-50%);"></div>`,
+          className: "heart-glow-tree-marker",
+          html: `<div style="width:${radius*2}px;height:${radius*2}px;border-radius:50%;background:radial-gradient(circle,hsla(42,80%,55%,${opacity}) 0%,hsla(42,70%,45%,${opacity*0.3}) 60%,transparent 100%);box-shadow:0 0 ${radius}px hsla(42,80%,55%,${opacity*0.4});transform:translate(-50%,-50%);pointer-events:none;"></div>`,
           iconSize: [radius * 2, radius * 2], iconAnchor: [radius, radius],
         });
-        L.marker([bin.lat, bin.lng], { icon, interactive: false }).addTo(hexLayer);
+        L.marker([loc.lat, loc.lng], { icon, interactive: false }).addTo(hexLayer);
       });
+
       hexLayer.addTo(map);
       hexBinLayerRef.current = hexLayer;
     };
 
-    loadHexBins();
-    const debounced = (() => { let t: ReturnType<typeof setTimeout>; return () => { clearTimeout(t); t = setTimeout(loadHexBins, 800); }; })();
+    loadHeartGlow();
+    const debounced = (() => { let t: ReturnType<typeof setTimeout>; return () => { clearTimeout(t); t = setTimeout(loadHeartGlow, 800); }; })();
     map.on("moveend", debounced);
 
     return () => {
