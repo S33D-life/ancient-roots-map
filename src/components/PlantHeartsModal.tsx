@@ -61,8 +61,6 @@ export default function PlantHeartsModal({
           className="relative w-full max-w-sm mx-4 rounded-2xl overflow-hidden"
           style={{
             marginBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 5rem), 6rem)",
-          }}
-          style={{
             background: "hsl(var(--card))",
             border: "1px solid hsl(var(--border) / 0.3)",
             boxShadow: "0 20px 60px -15px hsl(var(--foreground) / 0.15)",
