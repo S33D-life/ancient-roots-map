@@ -547,6 +547,7 @@ const TreeDetailPage = () => {
           onGreetingCard={() => setGreetingCardOpen(true)}
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
+          speciesResolution={speciesResolution}
           presenceLocked={!proximityGate.isUnlocked && proximityGate.status !== "checking"}
           graceLabel={proximityGate.graceLabel}
           checkinLight={checkinStatus.light}
@@ -755,6 +756,7 @@ const TreeDetailPage = () => {
                     treeId={id!}
                     treeName={tree.name}
                     onAddOffering={openOfferingGateway}
+                    speciesResolution={speciesResolution}
                   />
 
                   {/* Discovery Paths — country, hive, bioregion */}
@@ -763,11 +765,12 @@ const TreeDetailPage = () => {
                       species={tree.species}
                       country={tree.nation}
                       ecoBelonging={ecoBelonging}
+                      speciesResolution={speciesResolution}
                     />
                   </Suspense>
 
                   {/* Hive Connections */}
-                  <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} />
+                  <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} speciesResolution={speciesResolution} />
 
                   {/* Heart Rewards */}
                   <TreeHeartRewards />
