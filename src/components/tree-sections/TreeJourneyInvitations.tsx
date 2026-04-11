@@ -89,7 +89,7 @@ const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLo
         </Link>
       )}
 
-      {/* Invite a wanderer — contextual */}
+      {/* Share this tree */}
       {displayHandle && (
         <button
           onClick={handleInvite}
@@ -99,7 +99,7 @@ const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLo
             <UserPlus className="w-4 h-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-serif text-foreground font-medium">Invite a wanderer</p>
+            <p className="text-xs font-serif text-foreground font-medium">Bring someone here</p>
             <p className="text-[10px] text-muted-foreground font-serif mt-0.5">
               Share this tree as {displayHandle}
             </p>

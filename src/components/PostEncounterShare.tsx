@@ -36,7 +36,7 @@ const PostEncounterShare = ({
     ? `${shareLink}${shareLink.includes("?") ? "&" : "?"}ref=${encodeURIComponent(ref)}`
     : shareLink;
 
-  const text = `🌳 I just met ${treeName} (${treeSpecies})${city ? ` in ${city}` : ""}.\n\nMeet this Ancient Friend:`;
+  const text = `🌳 I found ${treeName}${city ? ` in ${city}` : ""} — come walk with me`;
   const fullText = `${text}\n${refLink}`;
 
   const copyLink = async () => {

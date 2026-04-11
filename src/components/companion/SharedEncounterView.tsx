@@ -76,7 +76,7 @@ export default function SharedEncounterView({ onBack, treeContext, user }: Props
                 <button onClick={handleHost}
                   className="w-full py-3 rounded-xl text-sm font-serif min-h-[48px] transition-all active:scale-[0.98]"
                   style={{ background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" }}>
-                  Invite a wanderer here
+                  Bring someone here
                 </button>
               )}
               <button onClick={() => setSubMode("join")}

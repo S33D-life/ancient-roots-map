@@ -76,7 +76,7 @@ export function useInviteIdentity(): InviteIdentity {
   };
 
   const treeInviteText = (treeName: string) =>
-    `🌳 I found this tree — come visit it with me\n\n${treeName}`;
+    `🌳 I found ${treeName} — come walk with me`;
 
   const staffInviteText = () =>
     `🌿 Come walk with me`;
