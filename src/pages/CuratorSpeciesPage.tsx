@@ -264,12 +264,16 @@ const CuratorSpeciesPage = () => {
               className="pl-9 font-serif"
             />
           </div>
-          <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-            <SelectTrigger className="w-40 font-serif">
+          <Select value={filter} onValueChange={(v) => setFilter(v as FilterMode)}>
+            <SelectTrigger className="w-44 font-serif">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unresolved">Unresolved</SelectItem>
+              <SelectItem value="ambiguous">Ambiguous multi</SelectItem>
+              <SelectItem value="genus">Genus-level</SelectItem>
+              <SelectItem value="unknown">Unknown</SelectItem>
+              <SelectItem value="poetic">Custom / Poetic</SelectItem>
               <SelectItem value="fuzzy">Fuzzy matches</SelectItem>
               <SelectItem value="exact">Exact matches</SelectItem>
               <SelectItem value="all">All</SelectItem>
