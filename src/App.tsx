@@ -185,6 +185,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const RefCapture = () => { useCaptureRef(); return null; };
+
 const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
