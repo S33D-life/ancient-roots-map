@@ -163,10 +163,17 @@ const AuthPage = () => {
       if (isRecoveryFlow()) return;
 
       if (session) {
-        // Record referral on first sign-in if invite code was stored
+        // Consume invitation on first sign-in (assigns lineage + decrements inviter)
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
-          await recordReferral(session.user.id, storedCode);
+          const { data: consumeResult } = await supabase.rpc("consume_invitation", {
+            p_invite_code: storedCode,
+            p_new_user_id: session.user.id,
+          });
+          // Fallback to old referral system if consume_invitation doesn't exist yet
+          if (!consumeResult || (consumeResult as any)?.error) {
+            await recordReferral(session.user.id, storedCode);
+          }
           localStorage.removeItem("s33d_invite_code");
         }
 
