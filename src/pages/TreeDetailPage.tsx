@@ -796,7 +796,11 @@ const TreeDetailPage = () => {
                     speciesResolution={speciesResolution}
                   />
 
-                  {/* Discovery Paths — country, hive, bioregion */}
+                  {/* Depth — unseen layers */}
+                  <p className="text-[10px] font-serif text-muted-foreground/30 text-center py-4">
+                    Beneath this tree, life is moving unseen
+                  </p>
+
                   <Suspense fallback={null}>
                     <TreeDiscoveryPaths
                       species={tree.species}
