@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Globe, TreeDeciduous, Layers, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
+import type { SpeciesResolution } from "@/services/speciesResolver";
 import { ROUTES } from "@/lib/routes";
 import { getEntryByCountry } from "@/config/countryRegistry";
 
@@ -14,10 +15,11 @@ interface Props {
   species: string;
   country?: string | null;
   ecoBelonging?: Array<{ id: string; name: string; type: string }>;
+  speciesResolution?: SpeciesResolution | null;
 }
 
-const TreeDiscoveryPaths = ({ species, country, ecoBelonging = [] }: Props) => {
-  const hive = getHiveForSpecies(species);
+const TreeDiscoveryPaths = ({ species, country, ecoBelonging = [], speciesResolution }: Props) => {
+  const hive = speciesResolution?.hive ?? getHiveForSpecies(species);
   const countryEntry = country ? getEntryByCountry(country) : null;
   const bioregion = ecoBelonging.length > 0 ? ecoBelonging[0] : null;
 

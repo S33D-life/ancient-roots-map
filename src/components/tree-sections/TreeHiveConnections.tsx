@@ -4,7 +4,8 @@
  */
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
+import type { SpeciesResolution } from "@/services/speciesResolver";
 
 interface HiveLink {
   slug: string;
@@ -17,11 +18,12 @@ interface Props {
   ecoBelonging: Array<{ id: string; name: string; type: string }>;
   /** Additional custom hives (e.g. cultural, watershed) */
   extraHives?: HiveLink[];
+  speciesResolution?: SpeciesResolution | null;
 }
 
-const TreeHiveConnections = ({ species, ecoBelonging, extraHives = [] }: Props) => {
+const TreeHiveConnections = ({ species, ecoBelonging, extraHives = [], speciesResolution }: Props) => {
   const navigate = useNavigate();
-  const speciesHive = getHiveForSpecies(species);
+  const speciesHive = speciesResolution?.hive ?? getHiveForSpecies(species);
 
   const hives: HiveLink[] = [];
 

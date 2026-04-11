@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ChevronRight, Leaf, Camera, Apple, Eye, Shield, TreePine } from "lucide-react";
 import { getHiveForSpecies } from "@/utils/hiveUtils";
+import type { SpeciesResolution } from "@/services/speciesResolver";
 import { ROUTES } from "@/lib/routes";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
   treeName: string;
   onAddOffering?: () => void;
   onLogStewardship?: () => void;
+  speciesResolution?: SpeciesResolution | null;
 }
 
 const actions = [
@@ -24,8 +26,8 @@ const actions = [
   { key: "guardian", icon: Shield, label: "Become a guardian", desc: "Care for this tree over time" },
 ] as const;
 
-const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLogStewardship }: Props) => {
-  const hive = getHiveForSpecies(species);
+const TreeJourneyInvitations = ({ species, treeId, treeName, onAddOffering, onLogStewardship, speciesResolution }: Props) => {
+  const hive = speciesResolution?.hive ?? getHiveForSpecies(species);
 
   return (
     <section className="space-y-4">
