@@ -185,7 +185,10 @@ const TreePageHero = ({
         >
           {/* Name */}
           <div className="flex items-center justify-center gap-3 mb-2">
-            <h1 className="text-3xl md:text-5xl font-serif tracking-wide leading-tight">
+            <h1
+              className="text-3xl md:text-5xl font-serif tracking-wide leading-tight"
+              style={{ textShadow: "0 2px 12px hsl(var(--background) / 0.7), 0 1px 3px hsl(var(--background) / 0.5)" }}
+            >
               {tree.name}
             </h1>
           </div>
