@@ -30,6 +30,7 @@ import { SubmissionReviewPanel } from "@/components/agent-garden/SubmissionRevie
 import { ConnectAgentWizard } from "@/components/agent-garden/ConnectAgentWizard";
 import { AgentOverviewTab } from "@/components/agent-garden/AgentOverviewTab";
 import { WanderersTab } from "@/components/agent-garden/WanderersTab";
+import { ResearchBridgeTab } from "@/components/agent-garden/ResearchBridgeTab";
 import {
   Bot, Shield, Heart, Zap, ChevronRight, ArrowDown, Network,
   TreeDeciduous, Database, Globe, MapPin, Search, Plus, Layers,
