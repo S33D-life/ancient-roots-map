@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Heart, Map, Share2, Sparkles, Users, TreePine, Wind, Eye, Scroll, ExternalLink } from "lucide-react";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import { type TreeCardData, getTreeTier, TIER_LABELS, TIER_COLORS, getSpeciesHue } from "@/utils/treeCardTypes";
 import { type EncounterCluster } from "@/utils/treeEncounterClustering";
 import SendWhisperModal from "@/components/SendWhisperModal";
@@ -98,7 +98,10 @@ const TreeCard = ({
   const tierStyle = TIER_COLORS[tier];
   const speciesHue = getSpeciesHue(tree.species);
   const isResearch = !!tree.research?.isResearch;
-  const hive = useMemo(() => getHiveForSpecies(tree.species), [tree.species]);
+  const resolution = useSpeciesResolution(tree.species, tree.species_key);
+  const hive = resolution?.hive ?? null;
+  const speciesDisplayName = resolution?.displayName || tree.species;
+  const scientificName = resolution?.scientificName;
 
   const isClustered = cluster?.isClustered ?? false;
   const encounterCount = cluster?.encounters?.length ?? 0;
