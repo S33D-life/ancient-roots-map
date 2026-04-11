@@ -4504,11 +4504,15 @@ export type Database = {
           resonance_count: number
           sealed_by_staff: string | null
           sky_stamp_id: string | null
+          thumbnail_url: string | null
           title: string
           tree_id: string
           tree_role: string
           type: Database["public"]["Enums"]["offering_type"]
           visibility: string
+          youtube_embed_url: string | null
+          youtube_url: string | null
+          youtube_video_id: string | null
         }
         Insert: {
           content?: string | null
@@ -4530,11 +4534,15 @@ export type Database = {
           resonance_count?: number
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
+          thumbnail_url?: string | null
           title: string
           tree_id: string
           tree_role?: string
           type: Database["public"]["Enums"]["offering_type"]
           visibility?: string
+          youtube_embed_url?: string | null
+          youtube_url?: string | null
+          youtube_video_id?: string | null
         }
         Update: {
           content?: string | null
@@ -4556,11 +4564,15 @@ export type Database = {
           resonance_count?: number
           sealed_by_staff?: string | null
           sky_stamp_id?: string | null
+          thumbnail_url?: string | null
           title?: string
           tree_id?: string
           tree_role?: string
           type?: Database["public"]["Enums"]["offering_type"]
           visibility?: string
+          youtube_embed_url?: string | null
+          youtube_url?: string | null
+          youtube_video_id?: string | null
         }
         Relationships: [
           {
