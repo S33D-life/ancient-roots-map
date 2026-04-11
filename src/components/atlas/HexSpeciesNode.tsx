@@ -16,6 +16,7 @@ export interface HexSpeciesNodeData {
   recentActivity?: boolean;
   lastActivity?: string | null;
   family?: string;
+  scientificName?: string;
   hiveIcon?: string;
   hiveSlug?: string;
 }

@@ -59,6 +59,7 @@ export interface PopupTree {
   id: string;
   name: string;
   species: string;
+  species_key?: string | null;
   latitude: number;
   longitude: number;
   what3words: string;
