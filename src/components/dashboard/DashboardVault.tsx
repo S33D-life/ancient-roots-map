@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 const ActivityFeed = lazy(() => import("@/components/ActivityFeed"));
 const EcosystemMomentum = lazy(() => import("@/components/EcosystemMomentum"));
 const PersonalJourneySummary = lazy(() => import("@/components/PersonalJourneySummary"));
+const HeartEconomyDashboard = lazy(() => import("@/components/HeartEconomyDashboard"));
+const LineageTree = lazy(() => import("@/components/LineageTree"));
+const OfflineEncounterPanel = lazy(() => import("@/components/OfflineEncounterPanel"));
 import { useSeedEconomy } from "@/hooks/use-seed-economy";
 import { useSpeciesTokens } from "@/hooks/use-species-tokens";
 import { useWallet } from "@/hooks/use-wallet";
@@ -293,7 +296,40 @@ const DashboardVault = ({ userId }: Props) => {
             <EcosystemMomentum showDiscovery compact={false} />
           </Suspense>
         </VaultSection>
+
+        {/* Heart Flow — Economy Dashboard */}
+        <VaultSection
+          id="heart-flow"
+          icon={<Activity className="w-4 h-4" />}
+          title="Heart Flow"
+          subtitle="Where your hearts are growing"
+          isOpen={openSection === "heart-flow"}
+          onToggle={handleToggle}
+          accent="0 65% 55%"
+        >
+          <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+            <HeartEconomyDashboard userId={userId} />
+          </Suspense>
+        </VaultSection>
+
+        {/* Lineage — Invitation tree */}
+        <VaultSection
+          id="lineage"
+          icon={<Users className="w-4 h-4" />}
+          title="Lineage"
+          subtitle="Your path into the forest"
+          isOpen={openSection === "lineage"}
+          onToggle={handleToggle}
+        >
+          <Suspense fallback={<div className="h-20 bg-card/20 animate-pulse rounded-xl" />}>
+            <LineageTree userId={userId} />
+          </Suspense>
+        </VaultSection>
       </div>
+
+      {/* Offline Encounters */}
+      <Suspense fallback={null}>
+        <OfflineEncounterPanel />
 
       {/* Re-awaken overlay */}
       <AnimatePresence>
