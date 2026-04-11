@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Gift, Heart, CheckCircle, Sparkles } from "lucide-react";
-import { timeAgo } from "@/lib/lifecycle-labels";
+import { timeAgo, CONTRIBUTION_TYPE_LABELS } from "@/lib/lifecycle-labels";
 import { supabase } from "@/integrations/supabase/client";
 import {
   fetchRecentResearchContributions,
@@ -16,15 +16,6 @@ import {
 } from "@/services/research-contributions";
 import { useHasRole } from "@/hooks/use-role";
 import { toast } from "sonner";
-
-const TYPE_LABELS: Record<string, string> = {
-  candidate_promoted: "Candidate promoted",
-  candidate_rejected: "Candidate rejected",
-  duplicate_marked: "Duplicate marked",
-  verification_tasks_generated: "Verification generated",
-  verification_completed: "Verification completed",
-  research_tree_promoted_to_af: "Promoted to AF",
-};
 
 export function RewardReadyQueue() {
   const { hasRole: isKeeper, loading: roleLoading } = useHasRole("keeper");
@@ -102,7 +93,7 @@ export function RewardReadyQueue() {
                       {agent?.agent_name || "Unknown"}
                     </span>
                     <span className="text-muted-foreground/70 text-[10px]">
-                      {TYPE_LABELS[evt.contribution_type] || evt.contribution_type}
+                      {CONTRIBUTION_TYPE_LABELS[evt.contribution_type] || evt.contribution_type}
                       {validatedAt && ` · validated ${validatedAt}`}
                     </span>
                   </div>

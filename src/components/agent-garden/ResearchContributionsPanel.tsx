@@ -12,6 +12,7 @@ import {
   fetchRecentResearchContributions,
   fetchResearchContributionStats,
 } from "@/services/research-contributions";
+import { CONTRIBUTION_TYPE_LABELS, getLifecycleDisplay } from "@/lib/lifecycle-labels";
 
 const CATEGORY_LABELS: Record<string, string> = {
   discover_sources: "🔍 Discover Sources",
@@ -21,15 +22,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   generate_verification_invites: "📨 Generate Verifications",
   review_verification_results: "✅ Review Verifications",
   suggest_af_promotion: "🌳 Suggest AF Promotion",
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  candidate_promoted: "Candidate promoted",
-  candidate_rejected: "Candidate rejected",
-  duplicate_marked: "Duplicate marked",
-  verification_tasks_generated: "Verification generated",
-  verification_completed: "Verification completed",
-  research_tree_promoted_to_af: "Promoted to Ancient Friend",
 };
 
 type FilterStatus = "all" | "pending" | "accepted" | "rejected" | "reward_ready";
@@ -142,7 +134,7 @@ export function ResearchContributionsPanel() {
           <CardContent className="px-4 pb-3 space-y-1">
             {Object.entries(stats.byType).map(([type, count]) => (
               <div key={type} className="flex items-center justify-between text-[11px]">
-                <span className="text-foreground/80">{TYPE_LABELS[type] || type}</span>
+                <span className="text-foreground/80">{CONTRIBUTION_TYPE_LABELS[type] || type}</span>
                 <span className="font-mono text-foreground/90">{count}</span>
               </div>
             ))}
@@ -198,7 +190,9 @@ function EventRow({ evt }: { evt: any }) {
   const isDist = evt.reward_status === "distributed";
   const isRejected = evt.validation_status === "rejected";
 
-  const valIcon = isRejected ? "❌" : isDist ? "✅" : isReady ? "💚" : evt.validation_status === "accepted" ? "✅" : "⏳";
+  const statusKey = isDist ? "reward_distributed" : isReady ? "reward_ready" : isRejected ? "rejected" : evt.validation_status === "accepted" ? "accepted" : "pending";
+  const lifecycle = getLifecycleDisplay(statusKey);
+  const valIcon = lifecycle.emoji;
 
   return (
     <div className={`flex items-center justify-between text-[11px] py-1 px-1 rounded ${isReady ? "bg-primary/5" : ""}`}>
@@ -208,7 +202,7 @@ function EventRow({ evt }: { evt: any }) {
           {agent ? `${agent.avatar_emoji || "🤖"} ${agent.agent_name}` : "System"}
         </span>
         <span className="text-muted-foreground/40">·</span>
-        <span className="text-muted-foreground/80 truncate">{TYPE_LABELS[evt.contribution_type] || evt.contribution_type}</span>
+        <span className="text-muted-foreground/80 truncate">{CONTRIBUTION_TYPE_LABELS[evt.contribution_type] || evt.contribution_type}</span>
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         {payload?.reward_class && (
