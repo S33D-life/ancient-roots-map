@@ -17,7 +17,7 @@ interface Props {
 const VISIBILITY_CONFIG = {
   root: {
     icon: Lock,
-    label: "Root (Private)",
+    label: "Root (Heartwood)",
     borderColor: "border-amber-800/40",
     accentColor: "hsl(28 35% 30%)",
     bgGradient: "linear-gradient(135deg, hsl(28 25% 12% / 0.7), hsl(22 20% 10% / 0.7))",

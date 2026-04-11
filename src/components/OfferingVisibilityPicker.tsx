@@ -17,7 +17,7 @@ interface OfferingVisibilityPickerProps {
 }
 
 const options: { value: OfferingVisibility; label: string; desc: string; icon: React.ReactNode }[] = [
-  { value: "public", label: "Public Offering", desc: "Shared with the forest", icon: <Eye className="h-3.5 w-3.5" /> },
+  { value: "public", label: "Forest Offering", desc: "Shared with the forest", icon: <Eye className="h-3.5 w-3.5" /> },
   { value: "tribe", label: "Tree Circle", desc: "Shared with this tree's circle", icon: <TreeDeciduous className="h-3.5 w-3.5" /> },
   { value: "circle", label: "Grove", desc: "Shared with your grove", icon: <Users className="h-3.5 w-3.5" /> },
   { value: "private", label: "Heartwood Memory", desc: "Held in Heartwood", icon: <Heart className="h-3.5 w-3.5" /> },

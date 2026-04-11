@@ -378,7 +378,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
           <div className="h-4 w-px bg-border/30" />
           <div className="flex gap-2 flex-wrap">
             <Badge variant="outline" className="text-[10px] font-serif gap-1 py-0.5">
-              <EyeOff className="h-2.5 w-2.5" /> {stats.private} private
+              <EyeOff className="h-2.5 w-2.5" /> {stats.private} in Heartwood
             </Badge>
             <Badge variant="outline" className="text-[10px] font-serif gap-1 py-0.5">
               <Eye className="h-2.5 w-2.5" /> {stats.shared} shared
@@ -495,7 +495,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
               <BookMarked className="h-7 w-7 text-primary/40" />
             </div>
             <p className="text-sm font-serif text-muted-foreground/60 mt-4">Your shelf awaits its first book</p>
-            <p className="text-xs text-muted-foreground/40 font-serif mt-1">Books start private. Share when you're ready.</p>
+            <p className="text-xs text-muted-foreground/40 font-serif mt-1">Books begin in Heartwood. Share when you're ready.</p>
             <Button variant="outline" size="sm" onClick={() => setAddOpen(true)} className="font-serif text-xs gap-1 mt-4">
               <Plus className="h-3 w-3" /> Add Your First Book
             </Button>
