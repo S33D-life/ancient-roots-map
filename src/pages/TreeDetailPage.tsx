@@ -48,6 +48,7 @@ import InfluenceUpvoteButton from "@/components/InfluenceUpvoteButton";
 import { PhotoGrid, Lightbox, BookShelf, SealedByLabel, shareOffering } from "@/components/tree-detail/TreeDetailSubComponents";
 import EmptyOffering from "@/components/tree-detail/EmptyOffering";
 const ProximityGateMessage = lazy(() => import("@/components/ProximityGateMessage"));
+const InviterContext = lazy(() => import("@/components/InviterContext"));
 const CollectHeartsButton = lazy(() => import("@/components/CollectHeartsButton"));
 
 // Lazy-loaded secondary components (modals, panels, below-fold)
@@ -169,6 +170,9 @@ const TreeDetailPage = () => {
   const [witnessCount, setWitnessCount] = useState(0);
   const witnessSessionId = searchParams.get("witness") || undefined;
 
+  // Capture arrival context from shared links
+  const [arrivalRef, setArrivalRef] = useState<string | null>(null);
+
   useEffect(() => {
     const invite = searchParams.get("invite");
     const ref = searchParams.get("ref");
@@ -182,8 +186,13 @@ const TreeDetailPage = () => {
     }
     if (ref) {
       localStorage.setItem("s33d_ref", ref);
+      setArrivalRef(ref);
+    } else {
+      // Check if ref was stored from a previous landing
+      const storedRef = localStorage.getItem("s33d_ref");
+      if (storedRef && !userId) setArrivalRef(storedRef);
     }
-  }, [searchParams, id]);
+  }, [searchParams, id, userId]);
 
   // Centralized offerings via shared hook (with realtime)
   const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType, getByRole } = useOfferings({ treeId: id, realtime: true });
@@ -561,6 +570,17 @@ const TreeDetailPage = () => {
             if (freshTree) setTree(freshTree);
           }}
         />
+
+        {/* Inviter arrival context */}
+        {arrivalRef && (
+          <Suspense fallback={null}>
+            <InviterContext
+              refHandle={arrivalRef}
+              context="tree"
+              treeName={tree.name}
+            />
+          </Suspense>
+        )}
 
         {tree && (
           <TreeShareCard
