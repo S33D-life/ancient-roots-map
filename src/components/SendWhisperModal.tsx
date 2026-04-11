@@ -262,13 +262,55 @@ export default function SendWhisperModal({
               Your message now rests within <strong>{treeName}</strong>, waiting to be collected.
             </motion.p>
 
+            {/* Invite share flow */}
+            {inviteEnabled && (
+              <motion.div
+                className="w-full space-y-3 pt-2"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                  <p className="text-xs font-serif text-primary/80 flex items-center gap-1.5">
+                    <Share2 className="w-3.5 h-3.5" />
+                    Share this whisper as an invitation
+                  </p>
+                </div>
+
+                {hasNativeShare && (
+                  <Button
+                    onClick={handleNativeInviteShare}
+                    className="w-full font-serif text-sm tracking-wider gap-2 min-h-[44px]"
+                  >
+                    <Share2 className="w-4 h-4" /> Share invitation
+                  </Button>
+                )}
+
+                <div className="grid grid-cols-3 gap-2">
+                  {INVITE_PLATFORMS.map((p) => (
+                    <button
+                      key={p.key}
+                      onClick={() => handleInviteShare(p.key)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/30 bg-card/50 hover:bg-primary/5 hover:border-primary/30 transition-all min-h-[56px] active:scale-95 relative"
+                    >
+                      <span className="text-lg">{p.icon}</span>
+                      <span className="text-[10px] font-serif text-muted-foreground">{p.label}</span>
+                      {p.key === "copy" && copied && (
+                        <Check className="w-3 h-3 text-primary absolute top-1 right-1" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: inviteEnabled ? 0.9 : 0.7 }}
             >
               <Button onClick={() => onOpenChange(false)} variant="outline" className="font-serif mt-2">
-                Return
+                {inviteEnabled ? "Done" : "Return"}
               </Button>
             </motion.div>
           </div>
