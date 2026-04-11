@@ -387,7 +387,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
                   <div className="flex items-start gap-3 mb-4">
                     {/* Artwork */}
                     <div
-                      className="w-14 h-14 rounded-lg border flex-shrink-0 overflow-hidden flex items-center justify-center"
+                      className="w-12 h-12 rounded-lg border flex-shrink-0 overflow-hidden flex items-center justify-center"
                       style={{
                         borderColor: "hsl(42 40% 30% / 0.4)",
                         background: "hsl(42 20% 12%)",
