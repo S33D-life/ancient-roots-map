@@ -23,14 +23,17 @@ import { toast } from "sonner";
 import { useHasRole } from "@/hooks/use-role";
 import { resolveSpeciesSync, enrichFromGBIF, type MatchConfidence } from "@/services/speciesResolver";
 
-type CurationStatus = "unresolved" | "custom_local" | "needs_gbif" | "resolved";
+type CurationStatus = "unresolved" | "custom_local" | "needs_gbif" | "resolved" | "intentionally_unresolved" | "needs_field_verification" | "resolved_locally";
+type ResolutionType = "ambiguous_multi_species" | "generic_common_name" | "unknown" | "custom_poetic" | "genus_level" | null;
 type SortMode = "count" | "alpha";
+type FilterMode = "all" | "unresolved" | "exact" | "fuzzy" | "ambiguous" | "genus" | "poetic" | "unknown";
 
 interface UnresolvedTree {
   id: string;
   name: string;
   species: string;
   species_key: string | null;
+  metadata: { resolution_type?: string } | null;
 }
 
 interface SpeciesCandidate {
@@ -48,6 +51,7 @@ interface GroupMeta {
   source: "db" | "hardcoded" | "unresolved";
   suggestedCandidate: SpeciesCandidate | null;
   curationStatus: CurationStatus;
+  resolutionType: ResolutionType;
 }
 
 const CONFIDENCE_COLORS: Record<MatchConfidence, string> = {
@@ -68,7 +72,7 @@ const CuratorSpeciesPage = () => {
   const [candidates, setCandidates] = useState<SpeciesCandidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "unresolved" | "exact" | "fuzzy">("unresolved");
+  const [filter, setFilter] = useState<FilterMode>("unresolved");
   const [sortMode, setSortMode] = useState<SortMode>("count");
   const [assigning, setAssigning] = useState<string | null>(null);
   const [markedStatuses, setMarkedStatuses] = useState<Record<string, CurationStatus>>({});
@@ -77,7 +81,7 @@ const CuratorSpeciesPage = () => {
     setLoading(true);
     let query = supabase
       .from("trees")
-      .select("id, name, species, species_key")
+      .select("id, name, species, species_key, metadata")
       .order("species", { ascending: true })
       .limit(500);
 
@@ -135,6 +139,7 @@ const CuratorSpeciesPage = () => {
       const suggestedCandidate = findBestMatch(speciesStr);
       const isResolved = treesInGroup.every(t => t.species_key !== null);
 
+      const resType = (treesInGroup[0].metadata?.resolution_type as ResolutionType) || null;
       return {
         speciesStr,
         trees: treesInGroup,
@@ -142,16 +147,21 @@ const CuratorSpeciesPage = () => {
         source: resolution.source,
         suggestedCandidate,
         curationStatus: markedStatuses[speciesStr.toLowerCase().trim()] || (isResolved ? "resolved" : "unresolved"),
+        resolutionType: resType,
       };
     });
   }, [trees, findBestMatch, markedStatuses]);
 
-  // Apply confidence filter
+  // Apply filter
   const filteredGroups = useMemo(() => {
     let result = groups;
     if (filter === "exact") result = result.filter(g => g.confidence === "exact");
     if (filter === "fuzzy") result = result.filter(g => g.confidence === "fuzzy");
     if (filter === "unresolved") result = result.filter(g => g.confidence === "unresolved" || g.curationStatus === "unresolved");
+    if (filter === "ambiguous") result = result.filter(g => g.resolutionType === "ambiguous_multi_species");
+    if (filter === "genus") result = result.filter(g => g.resolutionType === "genus_level");
+    if (filter === "poetic") result = result.filter(g => g.resolutionType === "custom_poetic");
+    if (filter === "unknown") result = result.filter(g => g.resolutionType === "unknown");
 
     if (sortMode === "count") {
       result = [...result].sort((a, b) => b.trees.length - a.trees.length);
@@ -254,12 +264,16 @@ const CuratorSpeciesPage = () => {
               className="pl-9 font-serif"
             />
           </div>
-          <Select value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-            <SelectTrigger className="w-40 font-serif">
+          <Select value={filter} onValueChange={(v) => setFilter(v as FilterMode)}>
+            <SelectTrigger className="w-44 font-serif">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="unresolved">Unresolved</SelectItem>
+              <SelectItem value="ambiguous">Ambiguous multi</SelectItem>
+              <SelectItem value="genus">Genus-level</SelectItem>
+              <SelectItem value="unknown">Unknown</SelectItem>
+              <SelectItem value="poetic">Custom / Poetic</SelectItem>
               <SelectItem value="fuzzy">Fuzzy matches</SelectItem>
               <SelectItem value="exact">Exact matches</SelectItem>
               <SelectItem value="all">All</SelectItem>
@@ -346,6 +360,11 @@ const CuratorSpeciesPage = () => {
                           <Badge variant="outline" className="text-[10px] text-muted-foreground/60">
                             src: {group.source}
                           </Badge>
+                          {group.resolutionType && (
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground/80 border-muted-foreground/20">
+                              {group.resolutionType.replace(/_/g, " ")}
+                            </Badge>
+                          )}
                           {group.curationStatus !== "unresolved" && group.curationStatus !== "resolved" && (
                             <Badge className="text-[10px] bg-accent/20 text-accent">
                               <Tag className="w-2.5 h-2.5 mr-0.5" />
@@ -429,7 +448,25 @@ const CuratorSpeciesPage = () => {
                       </Select>
 
                       {/* Status marking buttons */}
-                      <div className="flex items-center gap-1 ml-auto">
+                      <div className="flex items-center gap-1 ml-auto flex-wrap">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[10px] h-6 px-2 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() => markStatus(group.speciesStr, "intentionally_unresolved")}
+                          title="Mark as intentionally unresolved"
+                        >
+                          ✓ Intentional
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-[10px] h-6 px-2 text-muted-foreground/60 hover:text-foreground"
+                          onClick={() => markStatus(group.speciesStr, "needs_field_verification")}
+                          title="Needs field verification"
+                        >
+                          🔍 Field check
+                        </Button>
                         <Button
                           size="sm"
                           variant="ghost"
