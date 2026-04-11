@@ -49,7 +49,8 @@ export type LayerKey =
   | "dreamTrees"
   | "dreamOfferings"
   | "signalField"
-  | "memoryTrail";
+  | "memoryTrail"
+  | "presence";
 
 export type LayerState = Record<LayerKey, boolean>;
 
