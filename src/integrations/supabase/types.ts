@@ -73,6 +73,7 @@ export type Database = {
           source_id: string | null
           spark_report_id: string | null
           validated_at: string | null
+          validated_by: string | null
           validation_status: string
         }
         Insert: {
@@ -89,6 +90,7 @@ export type Database = {
           source_id?: string | null
           spark_report_id?: string | null
           validated_at?: string | null
+          validated_by?: string | null
           validation_status?: string
         }
         Update: {
@@ -105,6 +107,7 @@ export type Database = {
           source_id?: string | null
           spark_report_id?: string | null
           validated_at?: string | null
+          validated_by?: string | null
           validation_status?: string
         }
         Relationships: [
