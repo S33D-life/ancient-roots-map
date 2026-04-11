@@ -28,6 +28,7 @@ import {
   ExternalLink, Plus, Telescope, BookOpen, Leaf, Clock, ChevronRight,
   Bot, Shield, Heart, Zap, ArrowDown, Network
 } from "lucide-react";
+import { SourceDashboard } from "@/components/research-bridge/SourceDashboard";
 
 /* ── Status helpers ─────────────────────────────────────────── */
 const STATUS_COLORS: Record<string, string> = {
