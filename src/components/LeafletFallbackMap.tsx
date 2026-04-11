@@ -22,6 +22,8 @@ import { useGroveMapLayer } from "@/hooks/use-grove-map-layer";
 import { useDreamConstellationLayer } from "@/hooks/use-dream-constellation-layer";
 import { usePulseMapLayer } from "@/hooks/use-pulse-map-layer";
 import { usePathwayMapLayer } from "@/hooks/use-pathway-map-layer";
+import { useTreePresence } from "@/hooks/use-tree-presence-layer";
+import TreePresenceLayer from "./TreePresenceLayer";
 import { escapeHtml } from "@/utils/escapeHtml";
 import { useTreeFocus } from "@/hooks/use-tree-focus";
 import { haversineKm, convexHull } from "@/utils/mapGeometry";
