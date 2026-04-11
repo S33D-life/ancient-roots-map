@@ -350,7 +350,7 @@ const SaplingCard = ({
             onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 20%, 50%)')}
           >
             {plant.is_shared ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-            {plant.is_shared ? "Private" : "Share"}
+            {plant.is_shared ? "Heartwood" : "Share"}
           </button>
           <button
             onClick={onDelete}
@@ -448,7 +448,7 @@ const HouseplantCard = ({
             onMouseLeave={(e) => (e.currentTarget.style.color = 'hsl(90, 20%, 50%)')}
           >
             {plant.is_shared ? <Lock className="h-3 w-3" /> : <Share2 className="h-3 w-3" />}
-            {plant.is_shared ? "Private" : "Share"}
+            {plant.is_shared ? "Heartwood" : "Share"}
           </button>
           <button
             onClick={onDelete}
