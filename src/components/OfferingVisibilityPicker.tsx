@@ -77,6 +77,12 @@ const OfferingVisibilityPicker = ({ value, onChange, disabled, hasStaff }: Offer
           </p>
         </div>
       )}
+
+      {value === "public" && (
+        <p className="text-[10px] font-serif text-muted-foreground/50 text-center leading-relaxed px-2">
+          Some offerings are shared with the forest. Others are held in Heartwood — kept through time.
+        </p>
+      )}
     </div>
   );
 };
