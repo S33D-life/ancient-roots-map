@@ -13,7 +13,7 @@ import { checkWhispersAtTree, type TreeWhisper, collectPrivateWhisper, collectSh
 import { useHeartCollection } from "@/hooks/use-heart-collection";
 import { canCollect, getHeartPoolGuidance } from "@/utils/heartPoolState";
 import { toast } from "sonner";
-import { hapticSuccess, hapticTap } from "@/lib/haptics";
+import { hapticSuccess, hapticTap, hapticWhisperReveal } from "@/lib/haptics";
 import HeartCollectAnimation from "@/components/HeartCollectAnimation";
 import GraceCountdown from "@/components/GraceCountdown";
 import { useSpeciesResonance, getSpeciesHint } from "@/hooks/use-species-resonance";
@@ -350,6 +350,7 @@ export default function TreeArrivalPanel({
                 <button
                   onClick={() => {
                     if (isNearby || isCheckedIn) {
+                      hapticWhisperReveal();
                       setWhisperRevealed(true);
                     } else {
                       toast("Come closer to receive whispers from this tree", {
