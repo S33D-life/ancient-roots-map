@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -105,12 +105,19 @@ const PartnersTab = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("technology");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [form, setForm] = useState({
     orgName: "",
     contactName: "",
     contactEmail: "",
     message: "",
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthenticated(!!session?.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => setIsAuthenticated(!!session?.user));
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
