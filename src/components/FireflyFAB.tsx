@@ -40,6 +40,8 @@ const EDGE_PAD = 72;
 const FAB_SIZE = 48;
 const DRAG_THRESHOLD = 8;
 const TAP_DEBOUNCE_MS = 800;
+/** Keep orb away from bottom nav area on mobile */
+const BOTTOM_SAFE_ZONE = 120;
 
 interface StoredPos {
   y: number;
@@ -54,7 +56,9 @@ function loadPos(): StoredPos {
       if (typeof p.y === "number" && (p.edge === "left" || p.edge === "right")) return p;
     }
   } catch { /* ignore */ }
-  return { y: Math.round(window.innerHeight * 0.58), edge: "right" };
+  // Default: right edge, above bottom nav safe zone
+  const safeY = Math.round(window.innerHeight * 0.5);
+  return { y: safeY, edge: "right" };
 }
 
 function savePos(p: StoredPos) {
@@ -65,7 +69,7 @@ function posToXY(p: StoredPos): { x: number; y: number } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const x = p.edge === "right" ? vw - FAB_SIZE - EDGE_PAD : EDGE_PAD;
-  const maxY = vh - FAB_SIZE - 56 - 24;
+  const maxY = vh - FAB_SIZE - BOTTOM_SAFE_ZONE; // clear of bottom nav
   const minY = EDGE_PAD + 56;
   const y = Math.max(minY, Math.min(maxY, p.y));
   return { x, y };

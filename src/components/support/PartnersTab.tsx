@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -105,12 +105,19 @@ const PartnersTab = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("technology");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [form, setForm] = useState({
     orgName: "",
     contactName: "",
     contactEmail: "",
     message: "",
   });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthenticated(!!session?.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => setIsAuthenticated(!!session?.user));
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,7 +242,24 @@ const PartnersTab = () => {
           </p>
         </div>
 
-        {submitted ? (
+        {isAuthenticated === false ? (
+          <Card className="border-border/20">
+            <CardContent className="p-8 text-center space-y-4">
+              <Lock className="w-6 h-6 mx-auto text-muted-foreground/40" />
+              <p className="text-sm font-serif text-muted-foreground">
+                Sign in to propose a partnership
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = "/auth"}
+                className="gap-2 font-serif"
+              >
+                <Handshake className="w-4 h-4" />
+                Sign in to continue
+              </Button>
+            </CardContent>
+          </Card>
+        ) : submitted ? (
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="p-6 text-center space-y-3">
               <span className="text-3xl">🌿</span>
