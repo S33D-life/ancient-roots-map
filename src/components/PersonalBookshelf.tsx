@@ -807,10 +807,10 @@ const ShelfHeader = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="private" className="text-[10px] font-serif">Private</SelectItem>
-              <SelectItem value="circle" className="text-[10px] font-serif">Circle</SelectItem>
-              <SelectItem value="tribe" className="text-[10px] font-serif">Tribe</SelectItem>
-              <SelectItem value="public" className="text-[10px] font-serif">Public</SelectItem>
+              <SelectItem value="private" className="text-[10px] font-serif">Heartwood</SelectItem>
+              <SelectItem value="circle" className="text-[10px] font-serif">Grove</SelectItem>
+              <SelectItem value="tribe" className="text-[10px] font-serif">Tree Circle</SelectItem>
+              <SelectItem value="public" className="text-[10px] font-serif">Forest</SelectItem>
             </SelectContent>
           </Select>
         )}
