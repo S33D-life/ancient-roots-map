@@ -1011,6 +1011,18 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
   const whisperCountsRef = useRef(whisperCountsMap);
   whisperCountsRef.current = whisperCountsMap;
 
+  // Build presence map for popup display
+  const presenceMapRef = useRef(new Map<string, { presence_state: "here_now" | "recently_met"; presence_count: number }>());
+  presenceMapRef.current = useMemo(() => {
+    const m = new Map<string, { presence_state: "here_now" | "recently_met"; presence_count: number }>();
+    for (const s of presenceSignals) {
+      if (s.presence_state !== "none") {
+        m.set(s.tree_id, { presence_state: s.presence_state, presence_count: s.presence_count });
+      }
+    }
+    return m;
+  }, [presenceSignals]);
+
   // Signal Field — canvas overlay showing heart + whisper density
   useSignalFieldLayer({
     map: mapRef.current,
@@ -1347,6 +1359,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       treePhotos: treePhotosRef.current,
       heartPoolCounts: heartPoolCountsRef.current,
       userLatLng,
+      presenceMap: presenceMapRef.current,
     },
     userLatLng,
     debugEnabled,
