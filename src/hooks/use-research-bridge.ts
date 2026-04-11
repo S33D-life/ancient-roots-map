@@ -125,9 +125,13 @@ export function useResearchBridge() {
       return 0;
     }
     toast.success(`Created ${count} verification task(s)`);
+    const agentId = await getAgentId();
+    if (agentId) {
+      logResearchContribution({ agentId, contributionType: "verification_tasks_generated", researchTreeRecordId: researchTreeId, payload: { taskCount: count } });
+    }
     await fetchAll();
     return count;
-  }, [fetchAll]);
+  }, [fetchAll, getAgentId]);
 
   const claimTask = useCallback(async (taskId: string, userId: string) => {
     await supabase.from("verification_tasks").update({
@@ -145,8 +149,12 @@ export function useResearchBridge() {
       completion_notes: notes,
     }).eq("id", taskId);
     toast.success("Task completed! 🎉");
+    const agentId = await getAgentId();
+    if (agentId) {
+      logResearchContribution({ agentId, contributionType: "verification_completed", payload: { taskId } });
+    }
     await fetchAll();
-  }, [fetchAll]);
+  }, [fetchAll, getAgentId]);
 
   return {
     candidates, crawlRuns, verificationTasks, stats, loading,
