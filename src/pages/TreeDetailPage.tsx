@@ -690,6 +690,13 @@ const TreeDetailPage = () => {
               <PhotoGrid offerings={photoOfferings} onImageClick={(i) => setLightboxIndex(i)} />
             )}
 
+            {/* Aliveness signal */}
+            <TreeAliveness
+              checkinCount={checkins?.length ?? 0}
+              offeringCount={offerings.length}
+              treeName={tree.name}
+            />
+
             {/* Offerings Preview */}
             <TreeOfferingsPreview
               offerings={offerings}
