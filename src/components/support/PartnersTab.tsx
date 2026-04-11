@@ -125,14 +125,19 @@ const PartnersTab = () => {
         data: { session },
       } = await supabase.auth.getSession();
 
-      const { error } = await supabase.from("partnership_proposals").insert({
-        user_id: session?.user?.id ?? null,
+      if (!session?.user) {
+        toast.error("Please sign in to submit a partnership proposal", { icon: "🔑" });
+        return;
+      }
+
+      const { error } = await supabase.from("partnership_proposals" as any).insert({
+        user_id: session.user.id,
         org_name: form.orgName,
         contact_name: form.contactName,
         contact_email: form.contactEmail,
         category: selectedCategory,
         message: form.message,
-      } as any);
+      });
 
       if (error) throw error;
 
