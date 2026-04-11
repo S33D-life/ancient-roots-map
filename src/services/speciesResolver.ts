@@ -65,6 +65,7 @@ export function resolveSpeciesSync(
     genus: enriched.lineage?.split(" ")[0] || null,
     hive,
     source: enriched.lineage ? "hardcoded" : "unresolved",
+    confidence: enriched.lineage ? "fuzzy" : "unresolved",
   };
 
   cache.set(cacheKey, resolution);
@@ -106,6 +107,7 @@ export async function resolveSpecies(
       genus: data.genus,
       hive,
       source: "db",
+      confidence: "exact",
     };
     cache.set(cacheKey, resolution);
     if (data.species_key) cache.set(data.species_key, resolution);
@@ -160,6 +162,7 @@ export async function resolveSpeciesBatch(
           genus: dbEntry.genus,
           hive,
           source: "db",
+          confidence: "exact",
         };
         cache.set(key, resolution);
         results.set(key, resolution);
