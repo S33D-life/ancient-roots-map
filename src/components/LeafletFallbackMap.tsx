@@ -2559,6 +2559,9 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
         userId={userId}
       />
 
+      {/* Tree Presence Layer */}
+      <TreePresenceLayer map={mapRef.current} signals={presenceSignals} visible={showPresence} />
+
       {/* Add Tree Dialog */}
       <AddTreeDialog
         open={addDialogOpen}
