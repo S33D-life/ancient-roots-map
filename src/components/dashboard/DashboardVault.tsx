@@ -330,6 +330,7 @@ const DashboardVault = ({ userId }: Props) => {
       {/* Offline Encounters */}
       <Suspense fallback={null}>
         <OfflineEncounterPanel />
+      </Suspense>
 
       {/* Re-awaken overlay */}
       <AnimatePresence>
