@@ -880,18 +880,18 @@ const TreeDetailPage = () => {
               </Card>
             )}
 
-            {/* 333s Presence Ritual */}
+            {/* 333s Presence Ritual — deeper layer of encounter */}
             {userId && (
               <Card className="bg-card/60 backdrop-blur border-primary/20">
                 <CardContent className="p-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <TreeDeciduous className="w-5 h-5 text-primary/60" />
                     <div>
-                      <p className="font-serif text-sm text-foreground">Tree Presence (333s)</p>
+                      <p className="font-serif text-sm text-foreground">Deepen your presence</p>
                       <p className="text-xs text-muted-foreground font-serif">
                         {presenceCompleted
-                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence completed · ${presenceCount} total`
-                          : "Be still with this tree to unlock minting"}
+                          ? completedToday ? `✓ Presence completed today · ${presenceCount} total` : `✓ Presence held ${presenceCount} time${presenceCount !== 1 ? "s" : ""}`
+                          : "333 seconds of stillness — be fully here with this tree"}
                       </p>
                     </div>
                   </div>
@@ -902,7 +902,7 @@ const TreeDetailPage = () => {
                     onClick={() => setPresenceOpen(true)}
                     disabled={completedToday}
                   >
-                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin Presence"}
+                    {completedToday ? "Done Today" : presenceCompleted ? "Re-enter" : "Begin"}
                   </Button>
                 </CardContent>
               </Card>
