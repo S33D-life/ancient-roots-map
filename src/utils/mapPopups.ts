@@ -4,6 +4,7 @@
  */
 import { escapeHtml } from "@/utils/escapeHtml";
 import { type TreeTier, getTreeTier, TIER_LABELS, getSpeciesHue } from "@/utils/treeCardTypes";
+import { resolveSpeciesSync } from "@/services/speciesResolver";
 import { haversineKm } from "@/utils/mapGeometry";
 import type { ExternalTreeCandidate } from "@/utils/externalTreeSources";
 import { getSourceById } from "@/utils/externalTreeSources";
@@ -104,7 +105,10 @@ export function buildPopupHtml(
         ? "hsl(42,60%,55%)"
         : "hsl(0,0%,55%)";
   const speciesHue = getSpeciesHue(tree.species);
-  const hive = getHiveForSpecies(tree.species);
+  const resolved = resolveSpeciesSync(tree.species, tree.species_key);
+  const hive = resolved.hive ?? getHiveForSpecies(tree.species);
+  const speciesDisplay = resolved.displayName || tree.species;
+  const scientificName = resolved.scientificName && resolved.scientificName !== speciesDisplay ? resolved.scientificName : null;
   const ageText = age > 0 ? `🌿 ~${age}y` : "";
   const offeringText =
     offerings > 0 ? `<span style="color:hsl(42,80%,60%);">✦ ${offerings}</span>` : "";
@@ -178,7 +182,7 @@ export function buildPopupHtml(
       <h3 style="margin:0;font-size:16px;color:hsl(42,65%,62%);line-height:1.35;font-weight:700;letter-spacing:0.02em;">${escapeHtml(tree.name)}</h3>
 
       <!-- Species -->
-      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(tree.species)}</p>
+      <p style="margin:0;font-size:11px;color:hsl(${speciesHue},35%,50%);font-style:italic;opacity:0.85;">${escapeHtml(speciesDisplay)}${scientificName ? ` <span style="font-size:9px;color:hsl(0,0%,42%);font-style:italic;opacity:0.7;">${escapeHtml(scientificName)}</span>` : ""}</p>
 
       ${presenceLine}
 
