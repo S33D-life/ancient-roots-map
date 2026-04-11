@@ -938,7 +938,7 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       accent: "hsl(260, 55%, 65%)",
       description: "Community activity — visits, seeds, offerings, dreams, and whispers.",
       layers: [
-        { key: "presence", label: "👤 Presence", description: "Sense where the forest is alive — recent and current visitors", active: showPresence, toggle: () => toggle("presence"), extra: showPresence ? (presenceSignals.length > 0 ? `${presenceSignals.length}` : "quiet") : undefined, accent: "140, 50%, 50%" },
+        { key: "presence", label: "👤 Presence", description: "Sense where the forest is alive — recent and current visitors", active: showPresence, toggle: () => toggle("presence"), extra: showPresence ? (presenceSignals.length > 0 ? `${presenceSignals.length} signal${presenceSignals.length !== 1 ? "s" : ""}` : "quiet forest") : undefined, accent: "140, 50%, 50%" },
         { key: "heart-glow", label: "❤️ Heart Glow", active: showHeartGlow, toggle: () => toggle("heartGlow"), accent: "0, 65%, 55%" },
         { key: "bloomed-seeds", label: "🌱 Bloomed Seeds", description: "Collectible seeds glowing on the map", active: showBloomedSeeds, toggle: () => toggle("bloomedSeeds"), extra: showBloomedSeeds ? (bloomedSeedCount > 0 ? `${bloomedSeedCount}` : "—") : undefined, accent: "260, 55%, 70%" },
         { key: "recent-visits", label: "◎ Recent Visits", description: "Soft glows near recently visited trees", active: showRecentVisits, toggle: () => toggle("recentVisits"), accent: "260, 55%, 70%" },
