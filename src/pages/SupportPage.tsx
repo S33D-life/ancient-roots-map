@@ -442,20 +442,24 @@ const SupportPage = () => {
 
         {/* ── Top-level tabs ── */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="w-full grid grid-cols-3 h-auto p-1 bg-muted/50 rounded-xl">
+          <TabsList className="w-full grid grid-cols-4 h-auto p-1 bg-muted/50 rounded-xl">
             <TabsTrigger value="give" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
               <Heart className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Support the Garden</span>
+              <span className="hidden sm:inline">Support</span>
               <span className="sm:hidden">Give</span>
+            </TabsTrigger>
+            <TabsTrigger value="partners" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
+              <Users className="w-3.5 h-3.5" />
+              <span>Partners</span>
             </TabsTrigger>
             <TabsTrigger value="receive" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
               <LifeBuoy className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Get Support</span>
+              <span className="hidden sm:inline">Help</span>
               <span className="sm:hidden">Help</span>
             </TabsTrigger>
             <TabsTrigger value="signals" className="font-serif text-xs sm:text-sm py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg gap-1.5">
               <Radio className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Live Signals</span>
+              <span className="hidden sm:inline">Signals</span>
               <span className="sm:hidden">Signals</span>
             </TabsTrigger>
           </TabsList>
