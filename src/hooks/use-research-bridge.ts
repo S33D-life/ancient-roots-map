@@ -10,6 +10,7 @@ import {
   fetchPipelineStats,
   type PipelineStats,
 } from "@/services/research-bridge";
+import { logResearchContribution } from "@/services/research-contributions";
 import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
@@ -51,6 +52,14 @@ export function useResearchBridge() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  const getAgentId = useCallback(async (): Promise<string | null> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) return null;
+    const { data } = await supabase.from("agent_profiles")
+      .select("id").eq("creator", session.user.id).limit(1).maybeSingle();
+    return data?.id || null;
+  }, []);
+
   const promoteCandidate = useCallback(async (candidateId: string, sourceId: string) => {
     const { researchTreeId, error } = await promoteCandidateToResearch(candidateId, sourceId);
     if (error) {
@@ -58,9 +67,13 @@ export function useResearchBridge() {
       return null;
     }
     toast.success("Candidate promoted to Research Forest");
+    const agentId = await getAgentId();
+    if (agentId) {
+      logResearchContribution({ agentId, contributionType: "candidate_promoted", sourceId, researchTreeRecordId: researchTreeId });
+    }
     await fetchAll();
     return researchTreeId;
-  }, [fetchAll]);
+  }, [fetchAll, getAgentId]);
 
   const rejectCandidate = useCallback(async (candidateId: string, notes?: string) => {
     await supabase.from("source_tree_candidates").update({
@@ -69,8 +82,12 @@ export function useResearchBridge() {
       reviewed_at: new Date().toISOString(),
     }).eq("id", candidateId);
     toast.success("Candidate rejected");
+    const agentId = await getAgentId();
+    if (agentId) {
+      logResearchContribution({ agentId, contributionType: "candidate_rejected", payload: { candidateId } });
+    }
     await fetchAll();
-  }, [fetchAll]);
+  }, [fetchAll, getAgentId]);
 
   const markDuplicate = useCallback(async (candidateId: string, duplicateOfId: string) => {
     await supabase.from("source_tree_candidates").update({
@@ -79,8 +96,12 @@ export function useResearchBridge() {
       reviewed_at: new Date().toISOString(),
     }).eq("id", candidateId);
     toast.success("Marked as duplicate");
+    const agentId = await getAgentId();
+    if (agentId) {
+      logResearchContribution({ agentId, contributionType: "duplicate_marked", payload: { candidateId, duplicateOfId } });
+    }
     await fetchAll();
-  }, [fetchAll]);
+  }, [fetchAll, getAgentId]);
 
   const promoteToAncientFriend = useCallback(async (researchTreeId: string, userId: string) => {
     const { treeId, error } = await promoteResearchToAncientFriend(researchTreeId, userId);
@@ -89,9 +110,13 @@ export function useResearchBridge() {
       return null;
     }
     toast.success("Research tree promoted to Ancient Friend! 🌳");
+    const agentId = await getAgentId();
+    if (agentId) {
+      logResearchContribution({ agentId, contributionType: "research_tree_promoted_to_af", researchTreeRecordId: researchTreeId });
+    }
     await fetchAll();
     return treeId;
-  }, [fetchAll]);
+  }, [fetchAll, getAgentId]);
 
   const createVerificationTasks = useCallback(async (researchTreeId: string, userId: string) => {
     const { count, error } = await generateVerificationTasks(researchTreeId, userId);
