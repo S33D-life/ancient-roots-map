@@ -439,6 +439,25 @@ export default function SendWhisperModal({
             </div>
           </div>
 
+          {/* Invite toggle */}
+          {userId && (
+            <div className="flex items-center justify-between rounded-lg border border-border/40 bg-secondary/10 px-3 py-2.5">
+              <div className="space-y-0.5">
+                <Label className="font-serif text-sm cursor-pointer" htmlFor="invite-toggle">
+                  Invite someone with this whisper
+                </Label>
+                <p className="text-[10px] text-muted-foreground/60 font-serif">
+                  Share a link so they can join and find your whisper
+                </p>
+              </div>
+              <Switch
+                id="invite-toggle"
+                checked={inviteEnabled}
+                onCheckedChange={setInviteEnabled}
+              />
+            </div>
+          )}
+
           {!userId && (
             <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-serif text-muted-foreground">
               You can compose freely. Sign in is required to send.
