@@ -58,6 +58,7 @@ const TreeLoreSection = lazy(() => import("@/components/TreeLoreSection"));
 const HeartCanopyPulse = lazy(() => import("@/components/HeartCanopyPulse"));
 const WishTagSigils = lazy(() => import("@/components/WishTagSigils"));
 const TreeJourneyInvitations = lazy(() => import("@/components/tree-sections/TreeJourneyInvitations"));
+const TreeAliveness = lazy(() => import("@/components/tree-sections/TreeAliveness"));
 const SeedPlanter = lazy(() => import("@/components/SeedPlanter"));
 const WhisperRipple = lazy(() => import("@/components/WhisperRipple"));
 const TreeHeartPool = lazy(() => import("@/components/TreeHeartPool"));
