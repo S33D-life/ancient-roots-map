@@ -6551,6 +6551,7 @@ export type Database = {
       }
       species_hives: {
         Row: {
+          accent_hsl: string | null
           created_at: string
           description: string | null
           display_name: string
@@ -6558,12 +6559,14 @@ export type Database = {
           governance_status: string
           icon: string | null
           id: string
+          representative_species: string[] | null
           slug: string
           species_patterns: string[]
           tree_count: number
           updated_at: string
         }
         Insert: {
+          accent_hsl?: string | null
           created_at?: string
           description?: string | null
           display_name: string
@@ -6571,12 +6574,14 @@ export type Database = {
           governance_status?: string
           icon?: string | null
           id?: string
+          representative_species?: string[] | null
           slug: string
           species_patterns?: string[]
           tree_count?: number
           updated_at?: string
         }
         Update: {
+          accent_hsl?: string | null
           created_at?: string
           description?: string | null
           display_name?: string
@@ -6584,6 +6589,7 @@ export type Database = {
           governance_status?: string
           icon?: string | null
           id?: string
+          representative_species?: string[] | null
           slug?: string
           species_patterns?: string[]
           tree_count?: number
@@ -6593,35 +6599,53 @@ export type Database = {
       }
       species_index: {
         Row: {
+          canonical_name: string | null
           common_name: string
           created_at: string
           family: string | null
+          gbif_taxon_id: number | null
+          genus: string | null
           icon: string | null
           id: string
+          normalized_name: string | null
+          rank: string
           scientific_name: string | null
           species_key: string
+          synonym_names: Json | null
           synonyms: string[] | null
           updated_at: string
         }
         Insert: {
+          canonical_name?: string | null
           common_name: string
           created_at?: string
           family?: string | null
+          gbif_taxon_id?: number | null
+          genus?: string | null
           icon?: string | null
           id?: string
+          normalized_name?: string | null
+          rank?: string
           scientific_name?: string | null
           species_key: string
+          synonym_names?: Json | null
           synonyms?: string[] | null
           updated_at?: string
         }
         Update: {
+          canonical_name?: string | null
           common_name?: string
           created_at?: string
           family?: string | null
+          gbif_taxon_id?: number | null
+          genus?: string | null
           icon?: string | null
           id?: string
+          normalized_name?: string | null
+          rank?: string
           scientific_name?: string | null
           species_key?: string
+          synonym_names?: Json | null
           synonyms?: string[] | null
           updated_at?: string
         }
@@ -8848,6 +8872,7 @@ export type Database = {
           source_name: string | null
           source_url: string | null
           species: string
+          species_key: string | null
           state: string | null
           updated_at: string
           what3words: string | null
@@ -8891,6 +8916,7 @@ export type Database = {
           source_name?: string | null
           source_url?: string | null
           species: string
+          species_key?: string | null
           state?: string | null
           updated_at?: string
           what3words?: string | null
@@ -8934,6 +8960,7 @@ export type Database = {
           source_name?: string | null
           source_url?: string | null
           species?: string
+          species_key?: string | null
           state?: string | null
           updated_at?: string
           what3words?: string | null
