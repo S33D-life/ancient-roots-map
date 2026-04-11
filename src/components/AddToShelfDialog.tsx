@@ -23,6 +23,7 @@ type Step = "search" | "details" | "review";
 
 const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToShelfDialogProps) => {
   const [step, setStep] = useState<Step>("search");
+  const [selectedFromSearch, setSelectedFromSearch] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -37,12 +38,12 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
   const reflectionRef = useRef<HTMLTextAreaElement>(null);
   const { addEntry } = useBookshelf({ userId });
 
-  // Auto-focus reflection when arriving at details step
+  // Auto-focus reflection only when selected from search (not manual entry)
   useEffect(() => {
-    if (step === "details") {
-      setTimeout(() => reflectionRef.current?.focus(), 300);
+    if (step === "details" && selectedFromSearch) {
+      setTimeout(() => reflectionRef.current?.focus(), 350);
     }
-  }, [step]);
+  }, [step, selectedFromSearch]);
 
   const handleSearch = useCallback((q: string) => {
     setQuery(q);
@@ -58,6 +59,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
 
   const selectResult = (book: BookResult) => {
     setSelectedBook(book);
+    setSelectedFromSearch(true);
     setStep("details");
   };
 
@@ -73,6 +75,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
       source: "catalog",
       externalId: "",
     });
+    setSelectedFromSearch(false);
     setStep("details");
   };
 
@@ -109,6 +112,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
     setQuery("");
     setResults([]);
     setSelectedBook(null);
+    setSelectedFromSearch(false);
     setCustomTitle("");
     setCustomAuthor("");
     setQuote("");
@@ -133,7 +137,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
           </DialogTitle>
         </DialogHeader>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {/* ── STEP 1: Search ───────────────────────── */}
           {step === "search" && (
             <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
@@ -234,7 +238,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
 
           {/* ── STEP 2: Details ──────────────────────── */}
           {step === "details" && selectedBook && (
-            <motion.div key="details" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+            <motion.div key="details" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25, ease: "easeOut" }} className="space-y-4">
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex gap-3">
                 {selectedBook.coverUrl ? (
                   <img src={selectedBook.coverUrl} alt={selectedBook.title} className="w-12 h-16 rounded object-cover shrink-0 border border-border/30" />
@@ -252,9 +256,9 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 </div>
               </div>
 
-              <p className="text-[11px] font-serif text-muted-foreground/50 text-center flex items-center justify-center gap-1.5">
-                <TreeDeciduous className="h-3 w-3 text-primary/40" />
-                You're offering this book to the grove.
+              <p className="text-[11px] font-serif text-foreground/40 text-center flex items-center justify-center gap-1.5 py-0.5">
+                <TreeDeciduous className="h-3 w-3 text-primary/30" />
+                You're placing this book into the grove.
               </p>
 
               <div className="space-y-1.5">
@@ -268,7 +272,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 <label className="font-serif text-[10px] tracking-widest uppercase text-muted-foreground/60">
                   Why does this matter to you?
                 </label>
-                <Textarea ref={reflectionRef} value={reflection} onChange={e => setReflection(e.target.value.slice(0, 2000))} placeholder="What does this book mean in your life?" rows={3} className="font-serif text-sm bg-secondary/10 border-border/30 resize-none" />
+                <Textarea ref={reflectionRef} value={reflection} onChange={e => setReflection(e.target.value.slice(0, 2000))} placeholder="What does this book hold for you?" rows={3} className="font-serif text-sm bg-secondary/10 border-border/30 resize-none" />
               </div>
 
               <OfferingVisibilityPicker value={visibility} onChange={setVisibility} />
@@ -282,7 +286,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
 
           {/* ── STEP 3: Review ───────────────────────── */}
           {step === "review" && selectedBook && (
-            <motion.div key="review" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+            <motion.div key="review" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25, ease: "easeOut" }} className="space-y-4">
               <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 space-y-3">
                 <div className="flex gap-3">
                   {selectedBook.coverUrl ? (
@@ -303,6 +307,10 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                   {visibilityLabel(visibility)}
                 </p>
               </div>
+
+              <p className="text-[10px] font-serif text-muted-foreground/40 text-center">
+                This will become part of your grove.
+              </p>
 
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setStep("details")} className="font-serif text-xs">Back</Button>
