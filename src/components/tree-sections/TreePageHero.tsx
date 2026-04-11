@@ -109,7 +109,7 @@ const TreePageHero = ({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       className="relative -mx-4 md:-mx-8 mb-10 overflow-hidden rounded-b-2xl"
-      style={{ maxHeight: "min(65vh, 520px)" }}
+      style={{ maxHeight: "min(50vh, 400px)" }}
     >
       {/* Background with parallax */}
       <div
@@ -176,7 +176,7 @@ const TreePageHero = ({
       </div>
 
       {/* Content */}
-      <div className="relative z-10 px-5 md:px-10 pt-10 pb-8 md:pt-20 md:pb-14">
+      <div className="relative z-10 px-5 md:px-10 pt-6 pb-6 md:pt-16 md:pb-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -262,83 +262,42 @@ const TreePageHero = ({
             </div>
           )}
 
-          {/* Primary CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          {/* Primary CTA — one clear action */}
+          <div className="flex items-center justify-center gap-3">
             <Button
               onClick={onMakeOffering}
               className={`font-serif tracking-wider gap-2 ${presenceLocked ? "opacity-50 cursor-not-allowed" : "glow-subtle"}`}
               size="lg"
               disabled={presenceLocked}
             >
-              {presenceLocked ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />} Make an Offering
-            </Button>
-            <Button
-              onClick={onAddWish}
-              variant="outline"
-              className="font-serif tracking-wider gap-2 border-primary/30 hover:bg-primary/10"
-              size="lg"
-            >
-              <Heart className="h-4 w-4" /> Add a Wish
+              {presenceLocked ? <Lock className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+              {presenceLocked ? "Find this tree first" : "Leave something here"}
             </Button>
           </div>
 
-          {/* Unified Status Row — single source of presence state */}
+          {/* Unified Status Row */}
           {checkinLight && (
-            <div className="flex items-center justify-center mt-3">
+            <div className="flex items-center justify-center mt-2.5">
               <Suspense fallback={null}>
                 <TreeCheckinStatusLight light={checkinLight} size="md" showLabel timeRemaining={graceLabel} />
               </Suspense>
             </div>
           )}
 
-          {/* Quick shortcuts — direct to flow, skip gateway */}
-          {(onAddPhoto || onAddSong) && !presenceLocked && (
-            <div className="flex items-center justify-center gap-2 mt-3">
-              {onAddPhoto && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onAddPhoto}
-                  className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
-                >
-                  <Camera className="h-3.5 w-3.5" /> Photo
-                </Button>
-              )}
-              {onAddSong && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onAddSong}
-                  className="font-serif text-xs gap-1.5 text-muted-foreground hover:text-primary"
-                >
-                  <Music className="h-3.5 w-3.5" /> Song
-                </Button>
-              )}
-            </div>
-          )}
-
-          {/* Secondary actions */}
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onViewMap}>
-              <Map className="h-3.5 w-3.5" /> View on Atlas
+          {/* Compact secondary row */}
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onAddWish}>
+              <Heart className="h-3 w-3" /> Wish
             </Button>
-            {onWhisper && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`font-serif text-xs gap-1.5 ${presenceLocked ? "opacity-40 cursor-not-allowed" : ""}`}
-                onClick={onWhisper}
-                disabled={presenceLocked}
-              >
-                {presenceLocked ? <Lock className="h-3.5 w-3.5" /> : <Wind className="h-3.5 w-3.5" />} Whisper
-              </Button>
-            )}
-            <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onShare}>
-              <Share2 className="h-3.5 w-3.5" /> Share
+            <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onViewMap}>
+              <Map className="h-3 w-3" /> Atlas
             </Button>
-            {onGreetingCard && (
-              <Button variant="ghost" size="sm" className="font-serif text-xs gap-1.5" onClick={onGreetingCard}>
-                <ImageIcon className="h-3.5 w-3.5" /> Card
+            <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onShare}>
+              <Share2 className="h-3 w-3" /> Share
+            </Button>
+            {onWhisper && !presenceLocked && (
+              <Button variant="ghost" size="sm" className="font-serif text-[11px] gap-1 text-muted-foreground/70 hover:text-primary h-8 px-2" onClick={onWhisper}>
+                <Wind className="h-3 w-3" /> Whisper
               </Button>
             )}
           </div>
