@@ -173,6 +173,19 @@ const TreeCard = ({
               {tree.species}
             </p>
             <div className="flex flex-col gap-1 mt-0.5">
+              {/* Presence signal */}
+              {presence && (
+                <div className="flex items-center gap-1.5 text-[10px]" style={{ color: presence.presence_state === "here_now" ? "hsl(145, 50%, 55%)" : "hsl(210, 30%, 58%)" }}>
+                  <span className="inline-block w-[5px] h-[5px] rounded-full shrink-0" style={{
+                    background: presence.presence_state === "here_now" ? "hsl(145, 55%, 48%)" : "hsl(210, 35%, 58%)",
+                    boxShadow: presence.presence_state === "here_now" ? "0 0 5px hsla(145, 55%, 48%, 0.5)" : "none",
+                    opacity: presence.presence_state === "here_now" ? 1 : 0.7,
+                  }} />
+                  {presence.presence_state === "here_now"
+                    ? presence.presence_count > 1 ? `${presence.presence_count} wanderers here now` : "Someone is here now"
+                    : presence.presence_count > 1 ? `${presence.presence_count} wanderers here recently` : "Recently met"}
+                </div>
+              )}
               {/* Line 1: activity */}
               <div className="flex items-center gap-2 text-[10px] text-muted-foreground/80">
                 {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
