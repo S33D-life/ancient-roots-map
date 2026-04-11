@@ -5,6 +5,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { runJourney } from "@/services/wanderer-runner";
 import { evaluate } from "@/services/wanderer-evaluator";
+import {
+  clusterFindings, computeTrend, findFlakiestJourney,
+  mostCommonCategory, buildGroupingKey,
+  type RecurringPattern, type TrendDirection,
+} from "@/lib/wanderer-patterns";
 import type { AgentJourney, AgentRun, AgentFinding, JourneyStep } from "@/lib/wanderer-types";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -13,9 +18,10 @@ const SMOKE_SUITE_SLUGS = ["map-load", "tree-detail-page", "tree-radio-open", "s
 export interface JourneyHealth {
   journeyId: string;
   lastStatus: string | null;
-  passRate: number;       // 0–100 over last 5
+  passRate: number;
   lastFindingCount: number;
   lastRunMs: number | null;
+  trend: TrendDirection;
 }
 
 export function useWanderer() {
@@ -42,7 +48,7 @@ export function useWanderer() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Journey health signals
+  // Journey health signals with trend
   const journeyHealth = useMemo((): Map<string, JourneyHealth> => {
     const map = new Map<string, JourneyHealth>();
     for (const j of journeys) {
@@ -60,10 +66,18 @@ export function useWanderer() {
         passRate: jRuns.length > 0 ? Math.round((passCount / jRuns.length) * 100) : 0,
         lastFindingCount: lastFindings,
         lastRunMs,
+        trend: computeTrend(runs, findings, j.id),
       });
     }
     return map;
   }, [journeys, runs, findings]);
+
+  // Recurring patterns
+  const recurringPatterns = useMemo(() => clusterFindings(findings, runs), [findings, runs]);
+
+  // Dev panel signals
+  const flakiestJourney = useMemo(() => findFlakiestJourney(runs, journeys), [runs, journeys]);
+  const topCategory = useMemo(() => mostCommonCategory(findings), [findings]);
 
   const startRun = useCallback(async (journey: AgentJourney) => {
     if (running) return;
@@ -115,7 +129,7 @@ export function useWanderer() {
     }
   }, [running, fetchAll]);
 
-  // Smoke suite: run 5 core journeys in sequence
+  // Smoke suite
   const runSmokeSuite = useCallback(async () => {
     if (smokeRunning || running) return;
     setSmokeRunning(true);
@@ -128,7 +142,6 @@ export function useWanderer() {
       setSmokeProgress({ current: i + 1, total: suiteJourneys.length, results: [...results] });
       const status = await startRun(j);
       results.push({ slug: j.slug, status: status || "failed" });
-      // Brief pause between journeys
       await new Promise(r => setTimeout(r, 500));
     }
     setSmokeProgress({ current: suiteJourneys.length, total: suiteJourneys.length, results });
@@ -147,6 +160,13 @@ export function useWanderer() {
 
   const convertToBugReport = useCallback(async (finding: AgentFinding) => {
     const trace = finding.trace_json as Record<string, any> | null;
+
+    // Recurrence context
+    const groupKey = buildGroupingKey(finding);
+    const similarCount = findings.filter(f => buildGroupingKey(f) === groupKey).length;
+    const journeyId = runs.find(r => r.id === finding.run_id)?.journey_id;
+    const health = journeyId ? journeyHealth.get(journeyId) : null;
+
     const { data: report } = await supabase.from("bug_reports").insert({
       title: `[Wanderer] ${finding.title}`,
       steps: [
@@ -155,6 +175,8 @@ export function useWanderer() {
         trace?.action ? `Action: ${trace.action} on "${trace.target}"` : null,
         trace?.error ? `Error: ${trace.error}` : null,
         trace?.snapshot?.headingText ? `Page heading: "${trace.snapshot.headingText}"` : null,
+        similarCount > 1 ? `\n⟳ Recurring: seen ${similarCount} time(s) across runs.` : null,
+        health ? `Journey health: ${health.passRate}% pass rate, trend ${health.trend}.` : null,
         `\nDescription: ${finding.description}`,
       ].filter(Boolean).join("\n"),
       expected: "No errors or friction",
@@ -173,11 +195,12 @@ export function useWanderer() {
     }
     await fetchAll();
     return report?.id;
-  }, [fetchAll]);
+  }, [fetchAll, findings, runs, journeyHealth]);
 
   return {
     journeys, runs, findings, loading, running,
     smokeRunning, smokeProgress, journeyHealth,
+    recurringPatterns, flakiestJourney, topCategory,
     startRun, runSmokeSuite, reviewFinding, convertToBugReport, refetch: fetchAll,
   };
 }
