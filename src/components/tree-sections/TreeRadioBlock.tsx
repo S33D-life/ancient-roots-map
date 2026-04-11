@@ -4,6 +4,7 @@
  * Now supports YouTube song offerings with inline embed playback.
  */
 import { useState, useEffect, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Radio, Play, Pause, Volume2, VolumeX, Music, Youtube } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -158,8 +159,8 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
           {isYouTube && song.thumbnailUrl ? (
             <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
               <img src={song.thumbnailUrl} alt="" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <Youtube className="w-4 h-4 text-white" />
+              <div className="absolute bottom-0.5 right-0.5">
+                <Youtube className="w-3 h-3 text-white drop-shadow-sm" />
               </div>
             </div>
           ) : (
@@ -216,19 +217,27 @@ const TreeRadioBlock = ({ treeId, treeName, species, radioTheme }: Props) => {
         </div>
 
         {/* Inline YouTube embed */}
-        {showYTEmbed && song?.youtubeEmbedUrl && (
-          <div className="px-4 pb-4">
-            <div className="relative rounded-lg overflow-hidden" style={{ aspectRatio: "16 / 9" }}>
-              <iframe
-                src={`${song.youtubeEmbedUrl}?autoplay=1&rel=0`}
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full"
-                title={song.title}
-              />
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {showYTEmbed && song?.youtubeEmbedUrl && (
+            <motion.div
+              className="px-4 pb-4"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="relative rounded-lg overflow-hidden" style={{ aspectRatio: "16 / 9" }}>
+                <iframe
+                  src={`${song.youtubeEmbedUrl}?autoplay=1&rel=0`}
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                  title={song.title}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
