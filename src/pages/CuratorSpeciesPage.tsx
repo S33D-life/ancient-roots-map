@@ -53,7 +53,6 @@ interface GroupMeta {
   curationStatus: CurationStatus;
   resolutionType: ResolutionType;
 }
-}
 
 const CONFIDENCE_COLORS: Record<MatchConfidence, string> = {
   exact: "bg-primary/20 text-primary border-primary/30",
