@@ -152,11 +152,11 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
   const resetFilters = useCallback(() => setFilters(DEFAULTS), []);
 
   const hasActiveFilters = Object.entries(filters).some(
-    ([k, v]) => v !== DEFAULTS[k as keyof MapFilters]
+    ([k, v]) => k !== "perspective" && v !== DEFAULTS[k as keyof MapFilters]
   );
 
   const activeFilterCount = Object.entries(filters).filter(
-    ([k, v]) => v !== DEFAULTS[k as keyof MapFilters]
+    ([k, v]) => k !== "perspective" && v !== DEFAULTS[k as keyof MapFilters]
   ).length;
 
   const LABEL_MAP: Record<keyof MapFilters, string> = {
@@ -171,7 +171,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const activeFilterLabels = Object.entries(filters)
-    .filter(([k, v]) => v !== DEFAULTS[k as keyof MapFilters])
+    .filter(([k, v]) => k !== "perspective" && v !== DEFAULTS[k as keyof MapFilters])
     .map(([k, v]) => ({
       key: k,
       label: LABEL_MAP[k as keyof MapFilters],
