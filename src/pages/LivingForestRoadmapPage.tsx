@@ -450,6 +450,7 @@ const MapView = ({ onNavigate, pulseConfigs }: { onNavigate: (route: string) => 
                   feature={f}
                   isActive={activeFeature?.id === f.id}
                   onSelect={handleSelect}
+                  pulseConfig={pulseConfigs.get(f.id)}
                 />
               </div>
             );
