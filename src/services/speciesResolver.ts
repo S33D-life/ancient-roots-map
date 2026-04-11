@@ -107,18 +107,36 @@ export async function resolveSpecies(
   const cached = cache.get(cacheKey);
   if (cached && cached.source === "db") return cached;
 
-  // Try DB lookup
-  let query = supabase
-    .from("species_index")
-    .select("species_key, common_name, scientific_name, family, genus");
+  // Try DB lookup by key or normalized_name
+  const norm = speciesString.toLowerCase().trim();
+  let data: { species_key: string; common_name: string; scientific_name: string | null; family: string | null; genus: string | null } | null = null;
 
   if (speciesKey) {
-    query = query.eq("species_key", speciesKey);
+    const res = await supabase
+      .from("species_index")
+      .select("species_key, common_name, scientific_name, family, genus")
+      .eq("species_key", speciesKey)
+      .maybeSingle();
+    data = res.data;
   } else {
-    query = query.eq("normalized_name", speciesString.toLowerCase().trim());
-  }
+    // Try normalized_name first
+    const res = await supabase
+      .from("species_index")
+      .select("species_key, common_name, scientific_name, family, genus")
+      .eq("normalized_name", norm)
+      .maybeSingle();
+    data = res.data;
 
-  const { data } = await query.maybeSingle();
+    // If not found, try synonym_names (jsonb array contains the string)
+    if (!data) {
+      const synRes = await supabase
+        .from("species_index")
+        .select("species_key, common_name, scientific_name, family, genus")
+        .contains("synonym_names", JSON.stringify([norm]))
+        .maybeSingle();
+      data = synRes.data;
+    }
+  }
 
   if (data) {
     const hive = data.family ? getHiveInfo(data.family) : null;

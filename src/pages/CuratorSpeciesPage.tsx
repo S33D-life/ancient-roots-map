@@ -38,6 +38,7 @@ interface SpeciesCandidate {
   common_name: string;
   scientific_name: string;
   family: string | null;
+  synonym_names: string[] | null;
 }
 
 interface GroupMeta {
