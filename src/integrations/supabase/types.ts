@@ -2338,6 +2338,66 @@ export type Database = {
           },
         ]
       }
+      dataset_crawl_runs: {
+        Row: {
+          agent_id: string | null
+          candidates_found: number
+          config_json: Json | null
+          created_at: string
+          error_log: string | null
+          finished_at: string | null
+          id: string
+          pages_scraped: number
+          source_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          candidates_found?: number
+          config_json?: Json | null
+          created_at?: string
+          error_log?: string | null
+          finished_at?: string | null
+          id?: string
+          pages_scraped?: number
+          source_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          candidates_found?: number
+          config_json?: Json | null
+          created_at?: string
+          error_log?: string | null
+          finished_at?: string | null
+          id?: string
+          pages_scraped?: number
+          source_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dataset_crawl_runs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dataset_crawl_runs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dataset_discovery_queue: {
         Row: {
           access_type: string
@@ -6495,6 +6555,98 @@ export type Database = {
         }
         Relationships: []
       }
+      source_tree_candidates: {
+        Row: {
+          confidence_score: number | null
+          crawl_run_id: string
+          created_at: string
+          duplicate_of_candidate_id: string | null
+          id: string
+          normalization_status: string
+          promoted_research_tree_id: string | null
+          raw_country: string | null
+          raw_data: Json
+          raw_latitude: number | null
+          raw_location_text: string | null
+          raw_longitude: number | null
+          raw_name: string | null
+          raw_species: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          source_id: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          crawl_run_id: string
+          created_at?: string
+          duplicate_of_candidate_id?: string | null
+          id?: string
+          normalization_status?: string
+          promoted_research_tree_id?: string | null
+          raw_country?: string | null
+          raw_data?: Json
+          raw_latitude?: number | null
+          raw_location_text?: string | null
+          raw_longitude?: number | null
+          raw_name?: string | null
+          raw_species?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          source_id: string
+        }
+        Update: {
+          confidence_score?: number | null
+          crawl_run_id?: string
+          created_at?: string
+          duplicate_of_candidate_id?: string | null
+          id?: string
+          normalization_status?: string
+          promoted_research_tree_id?: string | null
+          raw_country?: string | null
+          raw_data?: Json
+          raw_latitude?: number | null
+          raw_location_text?: string | null
+          raw_longitude?: number | null
+          raw_name?: string | null
+          raw_species?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_tree_candidates_crawl_run_id_fkey"
+            columns: ["crawl_run_id"]
+            isOneToOne: false
+            referencedRelation: "dataset_crawl_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_tree_candidates_duplicate_of_candidate_id_fkey"
+            columns: ["duplicate_of_candidate_id"]
+            isOneToOne: false
+            referencedRelation: "source_tree_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_tree_candidates_promoted_research_tree_id_fkey"
+            columns: ["promoted_research_tree_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "source_tree_candidates_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "tree_data_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spark_reports: {
         Row: {
           created_at: string
@@ -9549,6 +9701,68 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "staffs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verification_tasks: {
+        Row: {
+          claimed_by: string | null
+          completed_at: string | null
+          completion_evidence_json: Json | null
+          completion_notes: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          hearts_reward: number
+          id: string
+          research_tree_id: string
+          status: string
+          task_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_by?: string | null
+          completed_at?: string | null
+          completion_evidence_json?: Json | null
+          completion_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          hearts_reward?: number
+          id?: string
+          research_tree_id: string
+          status?: string
+          task_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_by?: string | null
+          completed_at?: string | null
+          completion_evidence_json?: Json | null
+          completion_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          hearts_reward?: number
+          id?: string
+          research_tree_id?: string
+          status?: string
+          task_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_tasks_research_tree_id_fkey"
+            columns: ["research_tree_id"]
+            isOneToOne: false
+            referencedRelation: "research_trees"
             referencedColumns: ["id"]
           },
         ]
