@@ -172,7 +172,7 @@ const TreePageHero = ({
       </div>
 
       {/* Content */}
-      <div className="relative z-10 px-6 md:px-10 pt-16 pb-10 md:pt-20 md:pb-14">
+      <div className="relative z-10 px-5 md:px-10 pt-10 pb-8 md:pt-20 md:pb-14">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
