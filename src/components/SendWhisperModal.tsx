@@ -154,7 +154,7 @@ export default function SendWhisperModal({
       toast.error("Failed to send whisper.");
       console.error(error);
     } else {
-      if (whisperData && typeof whisperData === "object" && "id" in whisperData) {
+      if (whisperData && typeof whisperData === "object" && whisperData !== null && "id" in (whisperData as Record<string, unknown>)) {
         setSentWhisperId((whisperData as any).id);
       }
       let senderLocation: { lat: number; lng: number } | null = null;
