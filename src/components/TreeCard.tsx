@@ -15,6 +15,12 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 
 export type TreeCardVariant = "gallery" | "compact";
 
+/** Presence signal for tree cards — matches popup format */
+export interface TreeCardPresence {
+  presence_state: "here_now" | "recently_met";
+  presence_count: number;
+}
+
 interface TreeCardProps {
   tree: TreeCardData;
   variant?: TreeCardVariant;
@@ -24,6 +30,8 @@ interface TreeCardProps {
   birdsongCount?: number;
   whisperCount?: number;
   wishlistPulseActive?: boolean;
+  /** Live presence signal from the map layer */
+  presence?: TreeCardPresence | null;
   onSelect?: (tree: TreeCardData) => void;
   onWishlist?: (treeId: string) => void;
   onShare?: (name: string, description: string, url: string) => void;
@@ -75,6 +83,7 @@ const TreeCard = ({
   birdsongCount = 0,
   whisperCount = 0,
   wishlistPulseActive = false,
+  presence,
   onSelect,
   onWishlist,
   onShare,
@@ -164,6 +173,19 @@ const TreeCard = ({
               {tree.species}
             </p>
             <div className="flex flex-col gap-1 mt-0.5">
+              {/* Presence signal */}
+              {presence && (
+                <div className="flex items-center gap-1.5 text-[10px]" style={{ color: presence.presence_state === "here_now" ? "hsl(145, 50%, 55%)" : "hsl(210, 30%, 58%)" }}>
+                  <span className="inline-block w-[5px] h-[5px] rounded-full shrink-0" style={{
+                    background: presence.presence_state === "here_now" ? "hsl(145, 55%, 48%)" : "hsl(210, 35%, 58%)",
+                    boxShadow: presence.presence_state === "here_now" ? "0 0 5px hsla(145, 55%, 48%, 0.5)" : "none",
+                    opacity: presence.presence_state === "here_now" ? 1 : 0.7,
+                  }} />
+                  {presence.presence_state === "here_now"
+                    ? presence.presence_count > 1 ? `${presence.presence_count} wanderers here now` : "Someone is here now"
+                    : presence.presence_count > 1 ? `${presence.presence_count} wanderers here recently` : "Recently met"}
+                </div>
+              )}
               {/* Line 1: activity */}
               <div className="flex items-center gap-2 text-[10px] text-muted-foreground/80">
                 {offeringCount > 0 && <span className="text-primary/70">✦ {offeringCount}</span>}
@@ -262,6 +284,19 @@ const TreeCard = ({
         <div className="cursor-pointer" onClick={handleClick}>
           {/* Two-line metadata layout */}
           <div className="flex flex-col gap-1.5">
+            {/* Presence signal */}
+            {presence && (
+              <div className="flex items-center gap-1.5 text-[11px]" style={{ color: presence.presence_state === "here_now" ? "hsl(145, 50%, 55%)" : "hsl(210, 30%, 58%)" }}>
+                <span className="inline-block w-[6px] h-[6px] rounded-full shrink-0" style={{
+                  background: presence.presence_state === "here_now" ? "hsl(145, 55%, 48%)" : "hsl(210, 35%, 58%)",
+                  boxShadow: presence.presence_state === "here_now" ? "0 0 6px hsla(145, 55%, 48%, 0.5)" : "none",
+                  opacity: presence.presence_state === "here_now" ? 1 : 0.65,
+                }} />
+                {presence.presence_state === "here_now"
+                  ? presence.presence_count > 1 ? `${presence.presence_count} wanderers here now` : "Someone is here now"
+                  : presence.presence_count > 1 ? `${presence.presence_count} wanderers here recently` : "Recently met"}
+              </div>
+            )}
             {/* Line 1: Activity / Presence — brighter */}
             <div className="flex items-center gap-2 flex-wrap text-[11px]">
               {isClustered && encounterCount > 0 && (
