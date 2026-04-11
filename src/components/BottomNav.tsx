@@ -15,6 +15,7 @@ const NAV_ITEMS = [
 
 const BottomNav = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const isMap = pathname === "/map";
 
   return (
