@@ -280,7 +280,7 @@ const PARTICIPATION_ACTIONS: ParticipationAction[] = [
   { id: "presence", label: "333-Second Presence", description: "Complete a mindfulness session with an Ancient Friend.", icon: <Sun className="w-5 h-5" />, reward: "+10 ❤️ +3 🌿", link: "/map", category: "Presence" },
   { id: "curate", label: "Verify or Curate", description: "Confirm species, resolve duplicates, add metadata.", icon: <Eye className="w-5 h-5" />, reward: "+1-5 🛡️", link: "/map", category: "Curation" },
   { id: "firefly", label: "Firefly Contribution", description: "Report bugs, suggest improvements, propose trees.", icon: <Bug className="w-5 h-5" />, reward: "+3-25 ❤️", link: "/bug-garden", category: "Care" },
-  { id: "invite", label: "Invite a Wanderer", description: "Share your invite link — earn Hearts when they join.", icon: <UserPlus className="w-5 h-5" />, reward: "+5 ❤️ per referral", link: "/referrals", category: "Growth" },
+  { id: "invite", label: "Walk With Me", description: "Share your invite link — earn Hearts when they join.", icon: <UserPlus className="w-5 h-5" />, reward: "+5 ❤️ per referral", link: "/referrals", category: "Growth" },
 ];
 
 /* ─── Main Page ────────────────────────────────────────────── */

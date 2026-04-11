@@ -187,8 +187,11 @@ const TreeDetailPage = () => {
     if (ref) {
       localStorage.setItem("s33d_ref", ref);
       setArrivalRef(ref);
+      // Store first arrival tree (only once, ever)
+      if (id && tree && !localStorage.getItem("s33d_first_tree")) {
+        localStorage.setItem("s33d_first_tree", JSON.stringify({ id, name: tree.name }));
+      }
     } else {
-      // Check if ref was stored from a previous landing
       const storedRef = localStorage.getItem("s33d_ref");
       if (storedRef && !userId) setArrivalRef(storedRef);
     }

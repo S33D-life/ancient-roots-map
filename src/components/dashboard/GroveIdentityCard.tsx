@@ -27,6 +27,15 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
   const { displayHandle, buildInviteLink, genericInviteText } = useInviteIdentity();
   const { toast } = useToast();
   const [inviteCopied, setInviteCopied] = useState(false);
+
+  // Journey origin from first arrival
+  const firstTree = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("s33d_first_tree");
+      if (raw) return JSON.parse(raw) as { id: string; name: string };
+    } catch {}
+    return null;
+  }, []);
   const [stats, setStats] = useState<GroveStats>({
     treesLogged: 0,
     treesVisited: 0,
@@ -108,6 +117,11 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
               <span className="text-[11px] text-primary/50 font-serif font-medium">{displayHandle}</span>
             )}
           </div>
+          {firstTree && (
+            <Link to={`/tree/${firstTree.id}`} className="text-[10px] font-serif text-muted-foreground/50 hover:text-primary/60 transition-colors mt-0.5 block">
+              Your journey began at {firstTree.name}
+            </Link>
+          )}
         </div>
         <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
           <TreeDeciduous className="w-5 h-5 text-primary" />
@@ -128,7 +142,7 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
         ))}
       </div>
 
-      {/* Invite a wanderer */}
+      {/* Walk with me */}
       {displayHandle && (
         <button
           onClick={async () => {
@@ -148,7 +162,7 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
           className="flex items-center gap-2.5 mx-4 mb-2 px-3.5 py-2.5 rounded-xl border border-primary/15 hover:border-primary/25 hover:bg-primary/[0.04] transition-colors group w-[calc(100%-2rem)]"
         >
           <UserPlus className="w-4 h-4 text-primary/60" />
-          <span className="flex-1 text-xs font-serif text-foreground/70 text-left">Invite a wanderer</span>
+          <span className="flex-1 text-xs font-serif text-foreground/70 text-left">Walk with me</span>
           {inviteCopied
             ? <Check className="w-3.5 h-3.5 text-primary" />
             : <Copy className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
