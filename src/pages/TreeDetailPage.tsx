@@ -188,15 +188,18 @@ const TreeDetailPage = () => {
     if (ref) {
       localStorage.setItem("s33d_ref", ref);
       setArrivalRef(ref);
-      // Store first arrival tree (only once, ever)
-      if (id && tree && !localStorage.getItem("s33d_first_tree")) {
-        localStorage.setItem("s33d_first_tree", JSON.stringify({ id, name: tree.name }));
-      }
     } else {
       const storedRef = localStorage.getItem("s33d_ref");
       if (storedRef && !userId) setArrivalRef(storedRef);
     }
   }, [searchParams, id, userId]);
+
+  // Store first arrival tree once tree data is available
+  useEffect(() => {
+    if (tree && arrivalRef && !localStorage.getItem("s33d_first_tree")) {
+      localStorage.setItem("s33d_first_tree", JSON.stringify({ id: tree.id, name: tree.name }));
+    }
+  }, [tree, arrivalRef]);
 
   // Centralized offerings via shared hook (with realtime)
   const { offerings, refetch: refetchOfferings, getByType: getOfferingsByType, getByRole } = useOfferings({ treeId: id, realtime: true });
