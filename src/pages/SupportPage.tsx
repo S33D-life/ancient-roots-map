@@ -585,6 +585,13 @@ const SupportPage = () => {
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════════════ */}
+          {/* TAB: PARTNERS                                          */}
+          {/* ═══════════════════════════════════════════════════════ */}
+          <TabsContent value="partners" className="space-y-8 mt-0">
+            <PartnersTab />
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════════════ */}
           {/* TAB 2: GET SUPPORT                                     */}
           {/* ═══════════════════════════════════════════════════════ */}
           <TabsContent value="receive" className="space-y-8 mt-0">
