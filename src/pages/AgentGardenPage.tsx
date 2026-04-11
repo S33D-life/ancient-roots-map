@@ -495,6 +495,11 @@ const AgentGardenPage = () => {
             <WanderersTab />
           </TabsContent>
 
+          {/* ═══════════════ RESEARCH BRIDGE ═══════════════ */}
+          <TabsContent value="bridge" className="mt-6">
+            <ResearchBridgeTab />
+          </TabsContent>
+
         </Tabs>
 
         {/* Back link */}
