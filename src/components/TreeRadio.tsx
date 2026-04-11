@@ -12,6 +12,9 @@ interface SongOffering {
   media_url: string | null;
   tree_name: string;
   species: string;
+  youtube_video_id?: string | null;
+  youtube_embed_url?: string | null;
+  thumbnail_url?: string | null;
 }
 
 interface ItunesPreview {
@@ -107,9 +110,9 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
   useEffect(() => {
     const fetchSongs = async () => {
       setLoading(true);
-      let query = supabase
+      let query = (supabase
         .from("offerings")
-        .select("id, title, content, nft_link, media_url, tree_id")
+        .select("id, title, content, nft_link, media_url, tree_id, youtube_video_id, youtube_embed_url, thumbnail_url") as any)
         .eq("type", "song");
 
       const { data: songData } = await query;
@@ -128,7 +131,7 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
       const treeMap = new Map(treesData?.map((t) => [t.id, t]) || []);
 
       const enriched: SongOffering[] = songData
-        .map((s) => {
+        .map((s: any) => {
           const tree = treeMap.get(s.tree_id);
           return {
             id: s.id,
@@ -138,6 +141,9 @@ const TreeRadio = ({ speciesFilter }: TreeRadioProps) => {
             media_url: s.media_url,
             tree_name: tree?.name || "Unknown Tree",
             species: tree?.species || "Unknown",
+            youtube_video_id: s.youtube_video_id || null,
+            youtube_embed_url: s.youtube_embed_url || null,
+            thumbnail_url: s.thumbnail_url || null,
           };
         })
         .filter((s) => {
