@@ -526,6 +526,8 @@ const LivingForestRoadmapPage = () => {
   useDocumentTitle("Living Forest Roadmap");
   const navigate = useNavigate();
   const [view, setView] = useState<RoadmapView>("map");
+  const pulse = useRoadmapPulse();
+  const pulseConfigs = useMemo(() => buildPulseConfigs(pulse), [pulse]);
 
   const handleNavigate = useCallback((route: string) => {
     navigate(route);
@@ -563,6 +565,19 @@ const LivingForestRoadmapPage = () => {
             </Button>
           </section>
 
+          {/* ── Flow Strip — pipeline pulse ── */}
+          {!pulse.loading && (
+            <div className="max-w-lg mx-auto mb-2">
+              <FlowStrip
+                rawCandidates={pulse.rawCandidates}
+                promotedCandidates={pulse.promotedCandidates}
+                researchTreesTotal={pulse.researchTreesTotal}
+                openVerifications={pulse.openVerifications}
+                convertedTrees={pulse.convertedTrees}
+              />
+            </div>
+          )}
+
           {/* ── Stats strip ── */}
           <div className="flex justify-center gap-4 md:gap-6 mb-4 flex-wrap">
             {(Object.keys(STAGE_META) as RoadmapStage[]).map((s) => (
@@ -592,7 +607,7 @@ const LivingForestRoadmapPage = () => {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.25 }}
               >
-                <MapView onNavigate={handleNavigate} />
+                <MapView onNavigate={handleNavigate} pulseConfigs={pulseConfigs} />
               </motion.div>
             ) : (
               <motion.div
