@@ -34,6 +34,7 @@ export interface TreeCardData {
   id: string;
   name: string;
   species: string;
+  species_key?: string | null;
   what3words?: string | null;
   latitude?: number | null;
   longitude?: number | null;

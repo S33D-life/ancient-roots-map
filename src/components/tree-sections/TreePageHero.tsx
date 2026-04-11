@@ -18,7 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import HeartCanopyPulse from "@/components/HeartCanopyPulse";
 import LeafAtmosphere from "@/components/LeafAtmosphere";
 import PhenologyBadge from "@/components/PhenologyBadge";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { getHiveForSpecies, type HiveInfo } from "@/utils/hiveUtils";
+import type { SpeciesResolution } from "@/services/speciesResolver";
 import type { Database } from "@/integrations/supabase/types";
 
 const StaffPatronMapperBadge = lazy(() => import("@/components/tree-sections/StaffPatronMapperBadge"));
@@ -46,6 +47,8 @@ interface TreePageHeroProps {
   graceLabel?: string | null;
   /** Check-in status light */
   checkinLight?: CheckinLight;
+  /** Pre-resolved species data from parent */
+  speciesResolution?: SpeciesResolution | null;
 }
 
 const TreePageHero = ({
@@ -65,6 +68,7 @@ const TreePageHero = ({
   presenceLocked = false,
   graceLabel,
   checkinLight,
+  speciesResolution,
 }: TreePageHeroProps) => {
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -94,7 +98,7 @@ const TreePageHero = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const hive = getHiveForSpecies(tree.species);
+  const hive = speciesResolution?.hive ?? getHiveForSpecies(tree.species);
   const location = [tree.state, tree.nation].filter(Boolean).join(", ");
 
   return (

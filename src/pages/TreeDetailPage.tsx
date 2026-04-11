@@ -25,7 +25,7 @@ import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous,
 } from "lucide-react";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
@@ -190,6 +190,7 @@ const TreeDetailPage = () => {
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
   const bloomStatus = useBloomStatus(tree?.species);
+  const speciesResolution = useSpeciesResolution(tree?.species, (tree as any)?.species_key);
   const { data: treeContributions = [] } = useTreeContributions(id);
   const { role: editRole, canDirectEdit, loading: editPermLoading, userId: editUserId } = useTreeEditPermission(id);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
@@ -546,6 +547,7 @@ const TreeDetailPage = () => {
           onGreetingCard={() => setGreetingCardOpen(true)}
           ecoBelonging={ecoBelonging}
           onNavigateHive={(slug) => navigate(`/hive/${slug}`)}
+          speciesResolution={speciesResolution}
           presenceLocked={!proximityGate.isUnlocked && proximityGate.status !== "checking"}
           graceLabel={proximityGate.graceLabel}
           checkinLight={checkinStatus.light}
@@ -754,6 +756,7 @@ const TreeDetailPage = () => {
                     treeId={id!}
                     treeName={tree.name}
                     onAddOffering={openOfferingGateway}
+                    speciesResolution={speciesResolution}
                   />
 
                   {/* Discovery Paths — country, hive, bioregion */}
@@ -762,11 +765,12 @@ const TreeDetailPage = () => {
                       species={tree.species}
                       country={tree.nation}
                       ecoBelonging={ecoBelonging}
+                      speciesResolution={speciesResolution}
                     />
                   </Suspense>
 
                   {/* Hive Connections */}
-                  <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} />
+                  <TreeHiveConnections species={tree.species} ecoBelonging={ecoBelonging} speciesResolution={speciesResolution} />
 
                   {/* Heart Rewards */}
                   <TreeHeartRewards />

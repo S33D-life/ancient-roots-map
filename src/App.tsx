@@ -107,6 +107,7 @@ const DocsPage = lazyImportWithRetry(() => import("./pages/DocsPage"), "docs");
 const NotFound = lazyImportWithRetry(() => import("./pages/NotFound"), "not-found");
 const StaffDetailPage = lazyImportWithRetry(() => import("./pages/StaffDetailPage"), "staff-detail");
 const CuratorPage = lazyImportWithRetry(() => import("./pages/CuratorPage"), "curator");
+const CuratorSpeciesPage = lazyImportWithRetry(() => import("./pages/CuratorSpeciesPage"), "curator-species");
 const SyncDashboardPage = lazyImportWithRetry(() => import("./pages/SyncDashboardPage"), "sync-dash");
 const EditReviewPage = lazyImportWithRetry(() => import("./pages/EditReviewPage"), "edit-review");
 const HivePage = lazyImportWithRetry(() => import("./pages/HivePage"), "hive");
@@ -346,6 +347,7 @@ const App = () => {
                 <Route path="/curator" element={<CuratorPage />} />
                 <Route path="/curator/rootstones-import" element={<RootstoneImporterPage />} />
                 <Route path="/curator/refinements" element={<CuratorRefinementReviewPage />} />
+                <Route path="/curator/species" element={<CuratorSpeciesPage />} />
                 {ShowDevPanel && <Route path="/sync" element={<SyncDashboardPage />} />}
                 {ShowDevPanel && <Route path="/edit-review" element={<EditReviewPage />} />}
                 <Route path="/hives" element={<HivesIndexPage />} />
