@@ -190,6 +190,7 @@ const TreeDetailPage = () => {
   const { checkins, loading: checkinsLoading, refetch: refetchCheckins } = useTreeCheckins(id);
   const checkinStats = useCheckinStats(id, userId);
   const bloomStatus = useBloomStatus(tree?.species);
+  const speciesResolution = useSpeciesResolution(tree?.species, (tree as any)?.species_key);
   const { data: treeContributions = [] } = useTreeContributions(id);
   const { role: editRole, canDirectEdit, loading: editPermLoading, userId: editUserId } = useTreeEditPermission(id);
   const { presenceCompleted, completedToday, recordCompletion } = useTreePresence({
