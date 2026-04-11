@@ -173,6 +173,7 @@ const AgentGardenPage = () => {
             <TabsTrigger value="rewards"><Heart className="w-3.5 h-3.5 mr-1.5" /> Rewards & Trust</TabsTrigger>
             <TabsTrigger value="review"><CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Review</TabsTrigger>
             <TabsTrigger value="wanderers"><Footprints className="w-3.5 h-3.5 mr-1.5" /> Wanderers</TabsTrigger>
+            <TabsTrigger value="bridge"><TreeDeciduous className="w-3.5 h-3.5 mr-1.5" /> Research Bridge</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
