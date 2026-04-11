@@ -248,18 +248,19 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         center: [lng, lat],
         zoom: 19,
         maxZoom: 22,
+        doubleClickZoom: false,
       });
 
       const markerEl = document.createElement('div');
       markerEl.className = 'encounter-map-pin';
       markerEl.style.cssText = `
-        width: 28px; height: 28px; border-radius: 50%;
+        width: 32px; height: 32px; border-radius: 50%;
         background: radial-gradient(circle at 40% 35%, hsl(42, 95%, 65%), hsl(42, 90%, 45%));
         border: 2.5px solid white;
         cursor: grab;
         box-shadow: 0 0 0 0 hsla(42, 90%, 55%, 0.4), 0 2px 8px hsla(0, 0%, 0%, 0.3);
         animation: pinPulse 2s ease-in-out infinite;
-        transition: transform 0.2s ease;
+        transition: transform 0.15s ease, left 0s, top 0s;
       `;
       const marker = new maplibregl.Marker({ element: markerEl, draggable: true })
         .setLngLat([lng, lat])
@@ -280,6 +281,34 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         setLng(clampedLng);
       });
 
+      // Tap-to-place: click anywhere on the map to move the marker
+      let lastClickTime = 0;
+      map.on("click", (e: any) => {
+        const now = Date.now();
+        // Ignore rapid successive clicks (debounce accidental taps)
+        if (now - lastClickTime < 300) return;
+        lastClickTime = now;
+
+        const clickLat = e.lngLat.lat;
+        const clickLng = e.lngLat.lng;
+
+        if (originLat !== null && originLng !== null) {
+          const dist = getDistance(originLat, originLng, clickLat, clickLng);
+          if (dist > MAX_ADJUST_METERS) {
+            // Out of range — gentle feedback
+            toast({
+              title: "Outside your range",
+              description: `That point is ${Math.round(dist)}m away. Max allowed is ${Math.round(MAX_ADJUST_METERS)}m from your GPS fix.`,
+            });
+            return;
+          }
+        }
+
+        marker.setLngLat([clickLng, clickLat]);
+        setLat(clickLat);
+        setLng(clickLng);
+      });
+
       map.on("load", () => {
         if (circleAddedRef.current) return;
         circleAddedRef.current = true;
@@ -287,6 +316,14 @@ const AddTreeDialog = ({ open, onOpenChange, latitude: initLat, longitude: initL
         map.addSource("adjust-radius", { type: "geojson", data: circleGeoJSON });
         map.addLayer({ id: "adjust-radius-fill", type: "fill", source: "adjust-radius", paint: { "fill-color": "hsl(42, 95%, 55%)", "fill-opacity": 0.08 } });
         map.addLayer({ id: "adjust-radius-border", type: "line", source: "adjust-radius", paint: { "line-color": "hsl(42, 95%, 55%)", "line-width": 1.5, "line-dasharray": [4, 3], "line-opacity": 0.45 } });
+
+        // Show GPS accuracy radius if available
+        if (gpsAccuracy && gpsAccuracy > 5) {
+          const accuracyCircle = createCircleGeoJSON(lng, lat, Math.min(gpsAccuracy, MAX_ADJUST_METERS * 2));
+          map.addSource("gps-accuracy", { type: "geojson", data: accuracyCircle });
+          map.addLayer({ id: "gps-accuracy-fill", type: "fill", source: "gps-accuracy", paint: { "fill-color": "hsl(200, 80%, 60%)", "fill-opacity": 0.06 } });
+          map.addLayer({ id: "gps-accuracy-border", type: "line", source: "gps-accuracy", paint: { "line-color": "hsl(200, 80%, 60%)", "line-width": 1, "line-opacity": 0.3 } });
+        }
       });
 
       mapRef.current = map;
