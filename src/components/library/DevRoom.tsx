@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 const TelegramSettings = lazy(() => import("@/components/settings/TelegramSettings"));
+import { StewardConsole } from "@/components/library/StewardConsole";
 
 /* ── Types ── */
 type Section = "overview" | "steward" | "system-map" | "data-roots" | "agent-garden" | "code-grove" | "contract-shelf" | "roadmap" | "toolshed" | "skills" | "settings" | "telegram";
