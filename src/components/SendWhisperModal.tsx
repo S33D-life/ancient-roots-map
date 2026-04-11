@@ -2,7 +2,7 @@
  * SendWhisperModal — Send a whisper through an Ancient Friend.
  * Ceremonial, organic, not like chat.
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { sendWhisper } from "@/hooks/use-whispers";
@@ -27,6 +27,7 @@ import {
   shareByPlatform,
   getShareUrl,
 } from "@/utils/shareUtils";
+import { useInvitationAllowance } from "@/hooks/use-invitation-allowance";
 
 interface Props {
   open: boolean;
@@ -56,6 +57,8 @@ export default function SendWhisperModal({
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [sentWhisperId, setSentWhisperId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { allowance } = useInvitationAllowance(userId);
+  const canInvite = (allowance?.invitesRemaining ?? 0) > 0;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -78,29 +81,19 @@ export default function SendWhisperModal({
     }
   }, [open]);
 
-  // Fetch invite code when invite toggle is enabled
+  // Create a fresh single-use invite link when invite toggle is enabled
   useEffect(() => {
     if (!inviteEnabled || inviteCode) return;
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data: existing } = await supabase
+      // Always create a new single-use invite link for each whisper invitation
+      const { data: newLink } = await supabase
         .from("invite_links")
+        .insert({ created_by: user.id, max_uses: 1 } as any)
         .select("code")
-        .eq("created_by", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (existing) {
-        setInviteCode(existing.code);
-      } else {
-        const { data: newLink } = await supabase
-          .from("invite_links")
-          .insert({ created_by: user.id })
-          .select("code")
-          .single();
-        setInviteCode(newLink?.code || null);
-      }
+        .single();
+      setInviteCode(newLink?.code || null);
     })();
   }, [inviteEnabled, inviteCode]);
 
@@ -441,19 +434,23 @@ export default function SendWhisperModal({
 
           {/* Invite toggle */}
           {userId && (
-            <div className="flex items-center justify-between rounded-lg border border-border/40 bg-secondary/10 px-3 py-2.5">
+            <div className={`flex items-center justify-between rounded-lg border px-3 py-2.5 ${canInvite ? "border-border/40 bg-secondary/10" : "border-border/20 bg-muted/30 opacity-60"}`}>
               <div className="space-y-0.5">
                 <Label className="font-serif text-sm cursor-pointer" htmlFor="invite-toggle">
                   Invite someone with this whisper
                 </Label>
                 <p className="text-[10px] text-muted-foreground/60 font-serif">
-                  Share a link so they can join and find your whisper
+                  {canInvite
+                    ? `${allowance?.invitesRemaining ?? 0} invitations remaining`
+                    : "No invitations remaining"
+                  }
                 </p>
               </div>
               <Switch
                 id="invite-toggle"
                 checked={inviteEnabled}
                 onCheckedChange={setInviteEnabled}
+                disabled={!canInvite}
               />
             </div>
           )}

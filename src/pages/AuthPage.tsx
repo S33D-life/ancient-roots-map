@@ -163,10 +163,17 @@ const AuthPage = () => {
       if (isRecoveryFlow()) return;
 
       if (session) {
-        // Record referral on first sign-in if invite code was stored
+        // Consume invitation on first sign-in (assigns lineage + decrements inviter)
         const storedCode = localStorage.getItem("s33d_invite_code");
         if (storedCode && session.user) {
-          await recordReferral(session.user.id, storedCode);
+          const { data: consumeResult } = await supabase.rpc("consume_invitation", {
+            p_invite_code: storedCode,
+            p_new_user_id: session.user.id,
+          });
+          // Fallback to old referral system if consume_invitation doesn't exist yet
+          if (!consumeResult || (consumeResult as any)?.error) {
+            await recordReferral(session.user.id, storedCode);
+          }
           localStorage.removeItem("s33d_invite_code");
         }
 
@@ -332,8 +339,38 @@ const AuthPage = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate("signup")) return;
+
+    // Require a valid invite code to sign up
+    const code = inviteCode.trim();
+    if (!code) {
+      toast({ title: "Invitation required", description: "You need an invitation to join S33D. Ask a wanderer for an invite link.", variant: "destructive" });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Pre-validate the invite code before attempting signup
+      const { data: linkCheck } = await supabase
+        .from("invite_links")
+        .select("id, created_by, is_used")
+        .eq("code", code)
+        .maybeSingle();
+
+      if (!linkCheck || (linkCheck as any).is_used) {
+        throw new Error("This invitation has already been used or is invalid. Ask for a fresh invite.");
+      }
+
+      // Check inviter has remaining invitations
+      const { data: inviterProfile } = await supabase
+        .from("profiles")
+        .select("invites_remaining")
+        .eq("id", (linkCheck as any).created_by)
+        .maybeSingle();
+
+      if (!inviterProfile || (inviterProfile as any).invites_remaining <= 0) {
+        throw new Error("The person who sent this invitation has no invites remaining.");
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -345,9 +382,9 @@ const AuthPage = () => {
         }
         throw error;
       }
-      // Store invite code so we can record the referral after email verification
-      if (inviteCode.trim() && data.user) {
-        localStorage.setItem("s33d_invite_code", inviteCode.trim());
+      // Store invite code so we can consume the invitation after email verification
+      if (data.user) {
+        localStorage.setItem("s33d_invite_code", code);
       }
       setView("verify-email");
     } catch (err) {
@@ -645,7 +682,7 @@ const AuthPage = () => {
                     </button>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    {isSignup ? "Create your grove account" : "Welcome back, tree guardian"}
+                    {isSignup ? "Join through an invitation" : "Welcome back, tree guardian"}
                   </p>
                 </>
               )}
@@ -726,17 +763,21 @@ const AuthPage = () => {
               {isSignup && (
                 <div className="space-y-1.5">
                   <Label htmlFor="invite-code" className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                    <Gift className="w-3 h-3" /> Invite Code <span className="text-muted-foreground/50">(optional)</span>
+                    <Gift className="w-3 h-3" /> Invitation Code <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="invite-code"
                     type="text"
-                    placeholder="Enter invite code from a friend"
+                    placeholder="Enter your invitation code"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
                     disabled={isLoading}
                     className="font-mono text-sm"
+                    required
                   />
+                  <p className="text-[10px] text-muted-foreground/60 font-serif">
+                    S33D is invitation-only. Ask a wanderer for an invite link to join.
+                  </p>
                 </div>
               )}
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useReferrals } from "@/hooks/use-referrals";
+import { useInvitationAllowance } from "@/hooks/use-invitation-allowance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +49,7 @@ const ReferralsPage = () => {
   }, [navigate]);
 
   const { referrals, referredBy, totalTreesFromReferrals, loading } = useReferrals(userId ?? undefined);
+  const { allowance } = useInvitationAllowance(userId);
 
   // Milestone progress
   const currentMilestone = useMemo(() => {
@@ -179,6 +181,37 @@ const ReferralsPage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Invitation Allowance */}
+        {allowance && (
+          <Card className="bg-card/50 backdrop-blur border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-sm font-serif text-foreground flex items-center gap-1.5">
+                    <Gift className="w-4 h-4 text-primary" />
+                    Invitations
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 font-serif">
+                    {allowance.lineageStaffId
+                      ? `Lineage: Staff ${allowance.lineageStaffId}`
+                      : "Each invite carries your Staff lineage"
+                    }
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-serif text-primary">{allowance.invitesRemaining}</p>
+                  <p className="text-[10px] text-muted-foreground">of 144 remaining</p>
+                </div>
+              </div>
+              {allowance.invitesRemaining <= 0 && (
+                <p className="text-xs text-muted-foreground/60 font-serif mt-2 text-center italic">
+                  All invitations have been sent. Your grove is fully seeded.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Milestone Progress */}
         {nextMilestone && (
