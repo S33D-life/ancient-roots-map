@@ -692,11 +692,13 @@ const TreeDetailPage = () => {
             )}
 
             {/* Aliveness signal */}
-            <TreeAliveness
-              checkinCount={checkins?.length ?? 0}
-              offeringCount={offerings.length}
-              treeName={tree.name}
-            />
+            <Suspense fallback={null}>
+              <TreeAliveness
+                checkinCount={checkins?.length ?? 0}
+                offeringCount={offerings.length}
+                treeName={tree.name}
+              />
+            </Suspense>
 
             {/* Offerings Preview */}
             <TreeOfferingsPreview
