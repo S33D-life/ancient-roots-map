@@ -57,6 +57,8 @@ export default function SendWhisperModal({
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [sentWhisperId, setSentWhisperId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const { allowance } = useInvitationAllowance(userId);
+  const canInvite = (allowance?.invitesRemaining ?? 0) > 0;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
