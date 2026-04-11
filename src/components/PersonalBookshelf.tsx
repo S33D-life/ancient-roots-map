@@ -34,17 +34,17 @@ const visibilityIcons: Record<string, React.ReactNode> = {
 };
 
 const visibilityLabels: Record<string, string> = {
-  private: "Private",
-  circle: "Circle",
-  tribe: "Tribe",
+  private: "Heartwood",
+  circle: "Grove",
+  tribe: "Tree Circle",
   public: "Public",
 };
 
 const filterOptions = [
   { value: "all", label: "All Books" },
-  { value: "private", label: "Private" },
-  { value: "circle", label: "Circle" },
-  { value: "tribe", label: "Tribe" },
+  { value: "private", label: "Heartwood" },
+  { value: "circle", label: "Grove" },
+  { value: "tribe", label: "Tree Circle" },
   { value: "public", label: "Public" },
   { value: "tree-linked", label: "Tree-Linked" },
 ] as const;
@@ -213,7 +213,7 @@ const PersonalBookshelf = ({ userId }: PersonalBookshelfProps) => {
     const nextVisibility = entry.visibility === "private" ? "public" : "private";
     try {
       await updateEntry(entry.id, { visibility: nextVisibility as BookshelfVisibility });
-      toast.success(nextVisibility === "public" ? "Book shared publicly" : "Book made private");
+      toast.success(nextVisibility === "public" ? "Book shared with the forest" : "Book returned to Heartwood");
     } catch {
       toast.error("Failed to update visibility");
     }
