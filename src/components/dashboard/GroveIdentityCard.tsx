@@ -128,6 +128,34 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
         ))}
       </div>
 
+      {/* Invite a wanderer */}
+      {displayHandle && (
+        <button
+          onClick={async () => {
+            const link = buildInviteLink();
+            if (!link) return;
+            const text = `${genericInviteText()}\n\n${link}`;
+            try { await navigator.clipboard.writeText(text); } catch {
+              const ta = document.createElement("textarea");
+              ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+              document.body.appendChild(ta); ta.select();
+              try { document.execCommand("copy"); } catch {} document.body.removeChild(ta);
+            }
+            setInviteCopied(true);
+            toast({ title: "Invite link copied!" });
+            setTimeout(() => setInviteCopied(false), 2000);
+          }}
+          className="flex items-center gap-2.5 mx-4 mb-2 px-3.5 py-2.5 rounded-xl border border-primary/15 hover:border-primary/25 hover:bg-primary/[0.04] transition-colors group w-[calc(100%-2rem)]"
+        >
+          <UserPlus className="w-4 h-4 text-primary/60" />
+          <span className="flex-1 text-xs font-serif text-foreground/70 text-left">Invite a wanderer</span>
+          {inviteCopied
+            ? <Check className="w-3.5 h-3.5 text-primary" />
+            : <Copy className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+          }
+        </button>
+      )}
+
       {/* Next action */}
       <Link
         to={nextAction.to}
