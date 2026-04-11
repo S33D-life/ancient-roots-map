@@ -65,13 +65,28 @@ export interface AgentFinding {
   created_at: string;
 }
 
+/** Evidence snapshot captured at each step */
+export interface StepSnapshot {
+  url: string;
+  pageTitle: string;
+  headingText: string | null;
+  landmarkCount: number;
+  resolvedSelector: string | null;
+  targetTagName: string | null;
+  targetText: string | null;
+  visibleText: string;
+}
+
 export interface StepResult {
   step: JourneyStep;
   passed: boolean;
   durationMs: number;
   error?: string;
-  url?: string;
-  consoleErrors?: string[];
+  urlBefore: string;
+  urlAfter: string;
+  consoleErrors: string[];
+  networkErrors: string[];
+  snapshot: StepSnapshot;
 }
 
 export interface RunTrace {
@@ -79,5 +94,6 @@ export interface RunTrace {
   totalDurationMs: number;
   consoleErrorCount: number;
   networkErrorCount: number;
-  screenshotUrls: string[];
+  consoleErrors: string[];
+  networkErrors: string[];
 }
