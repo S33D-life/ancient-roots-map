@@ -252,35 +252,52 @@ export default function MapControlPanel({
                   border: `1px solid hsla(${activeAccent}, 0.2)`,
                 }}
               >
+                <TooltipProvider delayDuration={300}>
                 {PERSPECTIVES.map(p => {
                   const isActive = perspective === p.key;
                   return (
-                    <motion.button
-                      key={p.key}
-                      onClick={() => handlePerspectiveChange(p.key)}
-                      whileTap={{ scale: 0.95 }}
-                      className="relative flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-[10px] font-serif transition-colors duration-200"
-                      style={{
-                        color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 50%, 0.5)",
-                        background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
-                      }}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="perspective-glow"
-                          className="absolute inset-0 rounded-full"
+                    <Tooltip key={p.key}>
+                      <TooltipTrigger asChild>
+                        <motion.button
+                          onClick={() => handlePerspectiveChange(p.key)}
+                          whileTap={{ scale: 0.95 }}
+                          className="relative flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-[10px] font-serif transition-colors duration-200"
                           style={{
-                            border: `1px solid hsla(${p.accent}, 0.35)`,
-                            boxShadow: `0 0 8px hsla(${p.accent}, 0.12)`,
+                            color: isActive ? `hsl(${p.accent})` : "hsla(42, 30%, 50%, 0.5)",
+                            background: isActive ? `hsla(${p.accent}, 0.12)` : "transparent",
                           }}
-                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                        />
-                      )}
-                      <span className="relative z-10 text-[12px]">{p.icon}</span>
-                      <span className="relative z-10 tracking-wide">{p.label}</span>
-                    </motion.button>
+                        >
+                          {isActive && (
+                            <motion.div
+                              layoutId="perspective-glow"
+                              className="absolute inset-0 rounded-full"
+                              style={{
+                                border: `1px solid hsla(${p.accent}, 0.35)`,
+                                boxShadow: `0 0 8px hsla(${p.accent}, 0.12)`,
+                              }}
+                              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            />
+                          )}
+                          <span className="relative z-10 text-[12px]">{p.icon}</span>
+                          <span className="relative z-10 tracking-wide">{p.label}</span>
+                        </motion.button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="bottom"
+                        className="font-serif text-[11px] border-0"
+                        style={{
+                          background: "hsla(30, 20%, 10%, 0.95)",
+                          color: `hsl(${p.accent})`,
+                          border: `1px solid hsla(${p.accent}, 0.25)`,
+                          backdropFilter: "blur(8px)",
+                        }}
+                      >
+                        {p.description}
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
+                </TooltipProvider>
               </div>
             </div>
 
