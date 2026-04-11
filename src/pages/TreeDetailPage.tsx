@@ -25,7 +25,7 @@ import {
   ArrowLeft, MapPin, Music, Camera, MessageSquare, FileText,
   Loader2, Sparkles, X, ChevronLeft, ChevronRight, ExternalLink, Share2, Map, Mic, BookOpen, Bird, TreeDeciduous,
 } from "lucide-react";
-import { getHiveForSpecies } from "@/utils/hiveUtils";
+import { useSpeciesResolution } from "@/hooks/use-species-resolution";
 import type { Database } from "@/integrations/supabase/types";
 import { useOfferings, offeringLabels } from "@/hooks/use-offerings";
 import type { OfferingType, Offering } from "@/hooks/use-offerings";
