@@ -51,6 +51,7 @@ export function mapResearchTreeToTreeRow(rt: ResearchTreeRow): TreeRow & { __res
     name,
     species,
     species_key: null,
+    metadata: {},
     latitude: rt.latitude,
     longitude: rt.longitude,
     description: rt.description,
