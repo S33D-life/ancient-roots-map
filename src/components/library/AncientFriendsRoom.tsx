@@ -16,6 +16,7 @@ import GalleryFilterDrawer from "@/components/GalleryFilterDrawer";
 import NFTreeStudio from "@/components/NFTreeStudio";
 import ancientFriendsWindow from "@/assets/ancient-friends-window.jpeg";
 import { deduplicateForGallery, type EncounterCluster } from "@/utils/treeEncounterClustering";
+import { useTreesPresenceLookup } from "@/hooks/use-trees-presence-lookup";
 
 interface Tree {
   id: string;
