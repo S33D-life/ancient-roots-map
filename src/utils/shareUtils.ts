@@ -140,13 +140,19 @@ export function buildShareDescription(entity: ShareEntity): string {
 export interface ShareOptions {
   entity: ShareEntity;
   caption?: string;
-  /** Referral invite code to append */
+  /** Referral invite code to append (legacy) */
   inviteCode?: string | null;
+  /** Username-based ref param (preferred) */
+  ref?: string | null;
 }
 
 function buildFullShareUrl(opts: ShareOptions): string {
   let url = getShareUrl(opts.entity);
-  if (opts.inviteCode) {
+  // Prefer ref (username-based) over legacy invite code
+  if (opts.ref) {
+    const sep = url.includes("?") ? "&" : "?";
+    url += `${sep}ref=${encodeURIComponent(opts.ref)}`;
+  } else if (opts.inviteCode) {
     const separator = url.includes("?") ? "&" : "?";
     url += `${separator}invite=${encodeURIComponent(opts.inviteCode)}`;
   }

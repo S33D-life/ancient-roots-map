@@ -1,13 +1,14 @@
 /**
  * PostEncounterShare — lightweight overlay after a check-in.
  * "You met this Ancient Friend." + share options.
- * Optional, skippable, max 3 taps.
+ * Now includes ref param from useInviteIdentity.
  */
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Share2, Copy, Check, X, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useInviteIdentity } from "@/hooks/use-invite-identity";
 
 interface PostEncounterShareProps {
   visible: boolean;
@@ -28,15 +29,20 @@ const PostEncounterShare = ({
 }: PostEncounterShareProps) => {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { ref, displayHandle, treeInviteText } = useInviteIdentity();
+
+  // Append ref param to shareLink if available
+  const refLink = ref
+    ? `${shareLink}${shareLink.includes("?") ? "&" : "?"}ref=${encodeURIComponent(ref)}`
+    : shareLink;
 
   const text = `🌳 I just met ${treeName} (${treeSpecies})${city ? ` in ${city}` : ""}.\n\nMeet this Ancient Friend:`;
-  const fullText = `${text}\n${shareLink}`;
+  const fullText = `${text}\n${refLink}`;
 
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(fullText);
     } catch {
-      /* fallback */
       const ta = document.createElement("textarea");
       ta.value = fullText;
       ta.style.position = "fixed";
@@ -56,13 +62,13 @@ const PostEncounterShare = ({
   };
 
   const shareTelegram = () => {
-    window.open(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(text)}`, "_blank");
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const nativeShare = async () => {
     if (!navigator.share) return;
     try {
-      await navigator.share({ title: `${treeName} · ${treeSpecies}`, text, url: shareLink });
+      await navigator.share({ title: `${treeName} · ${treeSpecies}`, text, url: refLink });
     } catch { /* cancelled */ }
   };
 
@@ -99,7 +105,14 @@ const PostEncounterShare = ({
               </div>
             </div>
 
-            {/* Action row — max 3 taps from here */}
+            {/* Sharing as handle */}
+            {displayHandle && (
+              <p className="text-[10px] text-muted-foreground/60 font-serif text-center">
+                Sharing as {displayHandle}
+              </p>
+            )}
+
+            {/* Action row */}
             <div className="flex gap-2">
               {hasNativeShare ? (
                 <Button onClick={nativeShare} className="flex-1 font-serif text-xs gap-1.5 min-h-[44px]">

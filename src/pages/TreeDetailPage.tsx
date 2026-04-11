@@ -171,6 +171,7 @@ const TreeDetailPage = () => {
 
   useEffect(() => {
     const invite = searchParams.get("invite");
+    const ref = searchParams.get("ref");
     const from = searchParams.get("from");
     if (invite) {
       localStorage.setItem("s33d_invite_code", invite);
@@ -178,6 +179,9 @@ const TreeDetailPage = () => {
         localStorage.setItem("s33d_inspiration_source", "share");
         if (id) sessionStorage.setItem("s33d_shared_tree_id", id);
       }
+    }
+    if (ref) {
+      localStorage.setItem("s33d_ref", ref);
     }
   }, [searchParams, id]);
 

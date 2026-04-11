@@ -44,6 +44,7 @@ import FireflyFAB from "@/components/FireflyFAB";
 import MissingEnvBanner from "@/components/MissingEnvBanner";
 import { attachAutoSync } from "@/utils/syncEngine";
 import { useTreeCelebration } from "@/hooks/use-tree-celebration";
+import { useCaptureRef } from "@/hooks/use-capture-ref";
 import { useContributionCelebration } from "@/hooks/use-contribution-celebration";
 const ContributionCelebration = lazy(() => import("@/components/growth/ContributionCelebration"));
 
@@ -184,6 +185,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const RefCapture = () => { useCaptureRef(); return null; };
+
 const PageLoader = () => <PageSkeleton variant="default" />;
 
 const App = () => {
@@ -300,6 +303,7 @@ const App = () => {
           <SeasonalLensProvider>
           <CompanionProvider>
           <TeotagProvider>
+            <RefCapture />
             <CompanionBridge />
             <BottomNav />
             <FireflyFAB />

@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { TreeDeciduous, Heart, Sparkles, Sprout, Map, BookOpen, ChevronRight, Hexagon, Zap } from "lucide-react";
+import { TreeDeciduous, Heart, Sparkles, Sprout, Map, BookOpen, ChevronRight, Hexagon, Zap, UserPlus, Copy, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserOfferingCount } from "@/repositories/offerings";
+import { useInviteIdentity } from "@/hooks/use-invite-identity";
+import { useToast } from "@/hooks/use-toast";
 
 interface GroveIdentityCardProps {
   userId: string;
@@ -22,6 +24,9 @@ interface GroveStats {
 }
 
 const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
+  const { displayHandle, buildInviteLink, genericInviteText } = useInviteIdentity();
+  const { toast } = useToast();
+  const [inviteCopied, setInviteCopied] = useState(false);
   const [stats, setStats] = useState<GroveStats>({
     treesLogged: 0,
     treesVisited: 0,
@@ -93,11 +98,16 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
           <h2 className="text-lg font-serif text-primary tracking-wide">
             {userName ? `${userName}'s Grove` : "Your Grove"}
           </h2>
-          {stats.daysSinceFirst !== null && (
-            <p className="text-[11px] text-muted-foreground/60 font-serif mt-0.5">
-              {stats.daysSinceFirst === 0 ? "Joined today" : `${stats.daysSinceFirst} day${stats.daysSinceFirst !== 1 ? "s" : ""} walking`}
-            </p>
-          )}
+          <div className="flex items-center gap-2 mt-0.5">
+            {stats.daysSinceFirst !== null && (
+              <p className="text-[11px] text-muted-foreground/60 font-serif">
+                {stats.daysSinceFirst === 0 ? "Joined today" : `${stats.daysSinceFirst} day${stats.daysSinceFirst !== 1 ? "s" : ""} walking`}
+              </p>
+            )}
+            {displayHandle && (
+              <span className="text-[11px] text-primary/50 font-serif font-medium">{displayHandle}</span>
+            )}
+          </div>
         </div>
         <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
           <TreeDeciduous className="w-5 h-5 text-primary" />
@@ -117,6 +127,34 @@ const GroveIdentityCard = ({ userId, userName }: GroveIdentityCardProps) => {
           </div>
         ))}
       </div>
+
+      {/* Invite a wanderer */}
+      {displayHandle && (
+        <button
+          onClick={async () => {
+            const link = buildInviteLink();
+            if (!link) return;
+            const text = `${genericInviteText()}\n\n${link}`;
+            try { await navigator.clipboard.writeText(text); } catch {
+              const ta = document.createElement("textarea");
+              ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+              document.body.appendChild(ta); ta.select();
+              try { document.execCommand("copy"); } catch {} document.body.removeChild(ta);
+            }
+            setInviteCopied(true);
+            toast({ title: "Invite link copied!" });
+            setTimeout(() => setInviteCopied(false), 2000);
+          }}
+          className="flex items-center gap-2.5 mx-4 mb-2 px-3.5 py-2.5 rounded-xl border border-primary/15 hover:border-primary/25 hover:bg-primary/[0.04] transition-colors group w-[calc(100%-2rem)]"
+        >
+          <UserPlus className="w-4 h-4 text-primary/60" />
+          <span className="flex-1 text-xs font-serif text-foreground/70 text-left">Invite a wanderer</span>
+          {inviteCopied
+            ? <Check className="w-3.5 h-3.5 text-primary" />
+            : <Copy className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary/60 transition-colors" />
+          }
+        </button>
+      )}
 
       {/* Next action */}
       <Link
