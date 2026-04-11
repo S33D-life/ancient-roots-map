@@ -245,7 +245,7 @@ const AddToShelfDialog = ({ open, onOpenChange, userId, defaultTreeId }: AddToSh
                 </div>
                 {quote.trim() && <blockquote className="border-l-2 border-primary/30 pl-3 italic text-sm font-serif text-foreground/70">"{quote.trim()}"</blockquote>}
                 {reflection.trim() && <p className="text-sm font-serif text-foreground/60">{reflection.trim()}</p>}
-                <p className="text-[10px] font-serif text-muted-foreground/50">Visibility: {visibility}</p>
+                <p className="text-[10px] font-serif text-muted-foreground/50">{visibility === "private" ? "Held in Heartwood" : visibility === "public" ? "Shared with the forest" : `Shared with ${visibility}`}</p>
               </div>
 
               <div className="flex gap-2">
