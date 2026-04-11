@@ -381,10 +381,12 @@ export default function TreeArrivalPanel({
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentWhisper?.id || "done"}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="py-3 px-1 space-y-3"
+                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="py-3 px-1 space-y-3 rounded-lg"
+                    style={{ boxShadow: "0 0 20px hsl(260 40% 55% / 0.08)" }}
                   >
                       <div className="flex items-center gap-2">
                        <Wind className="w-3 h-3" style={{ color: "hsl(260 40% 60%)" }} />
