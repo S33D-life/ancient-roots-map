@@ -1091,6 +1091,8 @@ export default function StaffRoomGallery() {
                   {hasLinkedStaff ? "View Your Vault" : "Claim a Staff"}
                 </Button>
               </div>
+            </div>
+
             {/* Stewardship Recognition */}
             <SectionDivider />
 
