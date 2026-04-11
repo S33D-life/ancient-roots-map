@@ -35,9 +35,9 @@ export function useWanderer() {
         .limit(100),
     ]);
 
-    setJourneys((jRes.data as AgentJourney[]) || []);
-    setRuns((rRes.data as AgentRun[]) || []);
-    setFindings((fRes.data as AgentFinding[]) || []);
+    setJourneys((jRes.data as unknown as AgentJourney[]) || []);
+    setRuns((rRes.data as unknown as AgentRun[]) || []);
+    setFindings((fRes.data as unknown as AgentFinding[]) || []);
     setLoading(false);
   }, []);
 
@@ -93,12 +93,12 @@ export function useWanderer() {
         if (evaluation.findings.length > 0) {
           const findingRows = evaluation.findings.map(f => ({
             run_id: run.id,
-            type: f.type,
-            severity: f.severity,
+            type: f.type as string,
+            severity: f.severity as string,
             title: f.title,
             description: f.description,
             route: f.route,
-            trace_json: f.trace_json,
+            trace_json: f.trace_json as unknown as import("@/integrations/supabase/types").Json,
             review_status: "pending",
           }));
           await supabase.from("agent_findings").insert(findingRows);
