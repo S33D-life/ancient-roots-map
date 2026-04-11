@@ -34,7 +34,7 @@ const FirstWalkTrail = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 16 }}
         transition={{ duration: 0.5, delay: 1.5 }}
-        className="fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[55]"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+72px)] md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[55]"
       >
         <div
           className="rounded-2xl border backdrop-blur-md shadow-xl overflow-hidden"
