@@ -8859,6 +8859,7 @@ export type Database = {
           longitude: number | null
           lore_text: string | null
           merged_into_tree_id: string | null
+          metadata: Json | null
           name: string
           nation: string | null
           photo_error: string | null
@@ -8903,6 +8904,7 @@ export type Database = {
           longitude?: number | null
           lore_text?: string | null
           merged_into_tree_id?: string | null
+          metadata?: Json | null
           name: string
           nation?: string | null
           photo_error?: string | null
@@ -8947,6 +8949,7 @@ export type Database = {
           longitude?: number | null
           lore_text?: string | null
           merged_into_tree_id?: string | null
+          metadata?: Json | null
           name?: string
           nation?: string | null
           photo_error?: string | null
