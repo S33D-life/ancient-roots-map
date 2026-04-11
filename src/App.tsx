@@ -28,6 +28,7 @@ const StarryNight = lazy(() => import("@/components/StarryNight"));
 
 import DevQAPanel from "@/components/DevQAPanel";
 import DevDiagnosticsOverlay from "@/components/DevDiagnosticsOverlay";
+import { WandererDevPanel } from "@/components/agent-garden/WandererDevPanel";
 const ShowDevPanel = import.meta.env.DEV;
 
 import { supabase } from "@/integrations/supabase/client";
@@ -286,6 +287,7 @@ const App = () => {
         <MissingEnvBanner />
         {ShowDevPanel && <DevQAPanel />}
         {ShowDevPanel && <DevDiagnosticsOverlay />}
+        {ShowDevPanel && <WandererDevPanel />}
         
         <CanopyHeartPulse />
         
