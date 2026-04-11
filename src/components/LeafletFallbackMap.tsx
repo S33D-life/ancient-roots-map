@@ -994,7 +994,8 @@ const LeafletFallbackMap = ({ trees, offeringCounts = {}, treePhotos = {}, birds
       showSharedTrees, showTribeActivity, showHiveLayer, showHeartGlow,
       activeLens, lensConfig, setLens,
       showBloomingClock, bloomConstellationMode, bloomStageFilter, selectedFoodIds, bloomMonth, foodCycles,
-      showForestPulse, showMycelialPathways, showDreamTrees, showDreamOfferings, dreamTreeCount, dreamOfferingCount]);
+      showForestPulse, showMycelialPathways, showDreamTrees, showDreamOfferings, dreamTreeCount, dreamOfferingCount,
+      showPresence, presenceSignals.length]);
 
   const offeringCountsRef = useRef(offeringCounts);
   offeringCountsRef.current = offeringCounts;
