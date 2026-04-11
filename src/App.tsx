@@ -107,6 +107,7 @@ const DocsPage = lazyImportWithRetry(() => import("./pages/DocsPage"), "docs");
 const NotFound = lazyImportWithRetry(() => import("./pages/NotFound"), "not-found");
 const StaffDetailPage = lazyImportWithRetry(() => import("./pages/StaffDetailPage"), "staff-detail");
 const CuratorPage = lazyImportWithRetry(() => import("./pages/CuratorPage"), "curator");
+const CuratorSpeciesPage = lazyImportWithRetry(() => import("./pages/CuratorSpeciesPage"), "curator-species");
 const SyncDashboardPage = lazyImportWithRetry(() => import("./pages/SyncDashboardPage"), "sync-dash");
 const EditReviewPage = lazyImportWithRetry(() => import("./pages/EditReviewPage"), "edit-review");
 const HivePage = lazyImportWithRetry(() => import("./pages/HivePage"), "hive");
