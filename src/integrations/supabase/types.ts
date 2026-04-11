@@ -3673,7 +3673,10 @@ export type Database = {
           created_by: string
           expires_at: string | null
           id: string
+          is_used: boolean
           max_uses: number | null
+          used_at: string | null
+          used_by_user_id: string | null
           uses_count: number
         }
         Insert: {
@@ -3682,7 +3685,10 @@ export type Database = {
           created_by: string
           expires_at?: string | null
           id?: string
+          is_used?: boolean
           max_uses?: number | null
+          used_at?: string | null
+          used_by_user_id?: string | null
           uses_count?: number
         }
         Update: {
@@ -3691,7 +3697,10 @@ export type Database = {
           created_by?: string
           expires_at?: string | null
           id?: string
+          is_used?: boolean
           max_uses?: number | null
+          used_at?: string | null
+          used_by_user_id?: string | null
           uses_count?: number
         }
         Relationships: []
@@ -4978,7 +4987,12 @@ export type Database = {
           inspired_by_tree_id: string | null
           inspired_by_user_id: string | null
           instagram_handle: string | null
+          invited_by_user_id: string | null
+          invites_accepted: number
+          invites_remaining: number
+          invites_sent: number
           is_discoverable: boolean
+          lineage_staff_id: string | null
           updated_at: string
           visible_fields: Json
           wallet_address: string | null
@@ -4998,7 +5012,12 @@ export type Database = {
           inspired_by_tree_id?: string | null
           inspired_by_user_id?: string | null
           instagram_handle?: string | null
+          invited_by_user_id?: string | null
+          invites_accepted?: number
+          invites_remaining?: number
+          invites_sent?: number
           is_discoverable?: boolean
+          lineage_staff_id?: string | null
           updated_at?: string
           visible_fields?: Json
           wallet_address?: string | null
@@ -5018,7 +5037,12 @@ export type Database = {
           inspired_by_tree_id?: string | null
           inspired_by_user_id?: string | null
           instagram_handle?: string | null
+          invited_by_user_id?: string | null
+          invites_accepted?: number
+          invites_remaining?: number
+          invites_sent?: number
           is_discoverable?: boolean
+          lineage_staff_id?: string | null
           updated_at?: string
           visible_fields?: Json
           wallet_address?: string | null
@@ -9789,6 +9813,10 @@ export type Database = {
       compute_hot_score: {
         Args: { p_created_at: string; p_influence: number }
         Returns: number
+      }
+      consume_invitation: {
+        Args: { p_invite_code: string; p_new_user_id: string }
+        Returns: Json
       }
       create_bot_handoff: {
         Args: {
