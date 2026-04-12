@@ -41,6 +41,9 @@ export default function TelegramHandoffPage() {
 
   const token = searchParams.get("token");
   const flowParam = searchParams.get("flow") as HandoffFlow | null;
+  const inviteParam = searchParams.get("invite");
+  const treeParam = searchParams.get("tree");
+  const roomParam = searchParams.get("room");
 
   const [state, setState] = useState<PageState>("loading");
   const [handoff, setHandoff] = useState<ResolvedHandoff | null>(null);
@@ -246,19 +249,37 @@ export default function TelegramHandoffPage() {
   const handleSignInRedirect = useCallback(() => {
     if (token) {
       localStorage.setItem("s33d_telegram_handoff_token", token);
+      // Compute return URL preserving all params
+      const returnParams = new URLSearchParams({ token, flow: "connect" });
+      if (inviteParam) returnParams.set("invite", inviteParam);
+      if (treeParam) returnParams.set("tree", treeParam);
+      if (roomParam) returnParams.set("room", roomParam);
+
+      // Compute intent from context
+      const resolvedIntent = treeParam ? "tree"
+        : roomParam === "music" || roomParam === "library" ? "library"
+        : roomParam === "council" ? "dashboard"
+        : inviteParam ? "invite"
+        : "dashboard";
+
       localStorage.setItem("s33d_bot_handoff", JSON.stringify({
         source: "telegram",
         bot: "openclaw",
         handoffToken: token,
-        intent: "dashboard",
-        invite: null,
+        intent: resolvedIntent,
+        invite: inviteParam || null,
         gift: null,
-        returnTo: `/telegram-handoff?token=${token}&flow=connect`,
+        returnTo: `/telegram-handoff?${returnParams.toString()}`,
         campaign: null,
       }));
+
+      // Also store invite code for onboarding flow
+      if (inviteParam) {
+        localStorage.setItem("s33d_invite_code", inviteParam);
+      }
     }
     navigate(ROUTES.AUTH);
-  }, [token, navigate]);
+  }, [token, navigate, inviteParam, treeParam, roomParam]);
 
   const botLink = BOT_CONFIG.telegramBotLink("start");
   const telegramUsername = (handoff?.payload as any)?.telegram_username;
