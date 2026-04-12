@@ -4,40 +4,15 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video, Sparkles } from "lucide-react";
-
-/** Hardcoded for now — structured for future DB mapping */
-const CURRENT_COUNCIL = {
-  title: "New Moon Gathering",
-  moonPhase: "new" as const,
-  date: "Monday 20th April 2026",
-  time: "7:30 – 8:30 PM (UK)",
-  curator: "Edward James Thurlow",
-  agenda: {
-    invocation:
-      "We gather at the turn of the Moon, beneath the canopy that connects all things. Each voice here is a leaf on the same tree. Let us listen as the forest listens — with patience, with presence.",
-    thisMoon:
-      "This Moon we tend the roots of our shared practice. As S33D grows from prototype into living rhythm, we ask: what does stewardship look like when the tools are digital but the intention is ancient?",
-    timeTreeQuestion:
-      "What does your local ecology need most right now — and how could S33D help you respond to it?",
-    focusAreas: [
-      "Council in S33D — refining the gathering flow",
-      "Curation roles — who tends what",
-      "S33D Hearts distribution — how contribution becomes harvest",
-    ],
-  },
-};
-
-const MOON_CYCLE = {
-  current: {
-    marker: { emoji: "🌑", label: "New Moon", date: "April 17" },
-    gathering: { emoji: "🌿", label: "Council", date: "April 20" },
-  },
-  next: {
-    marker: { emoji: "🌕", label: "Full Moon", date: "May 2" },
-    gathering: { emoji: "🌿", label: "Council", date: "May 4 (est.)" },
-  },
-};
+import { MoonStar, CalendarDays, Clock, Mic, ChevronDown, ChevronUp, Video, Sparkles, Leaf } from "lucide-react";
+import {
+  getCurrentCouncil,
+  getNextCouncil,
+  formatGatheringDate,
+  formatMarkerDate,
+  moonEmoji,
+  moonLabel,
+} from "@/data/council/councilCycles";
 
 interface NextCouncilCardProps {
   onJoinCouncil: () => void;
@@ -46,6 +21,9 @@ interface NextCouncilCardProps {
 const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
   const [agendaOpen, setAgendaOpen] = useState(false);
   const navigate = useNavigate();
+
+  const current = getCurrentCouncil();
+  const next = getNextCouncil();
 
   return (
     <div className="space-y-4">
@@ -71,20 +49,20 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
           {/* Session details */}
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-foreground/80">
-              <span className="text-base">🌑</span>
-              <span className="font-serif">{CURRENT_COUNCIL.title}</span>
+              <span className="text-base">{moonEmoji(current.moonPhase)}</span>
+              <span className="font-serif">{current.title}</span>
             </div>
             <div className="flex items-center gap-2 text-foreground/80">
               <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-serif">{CURRENT_COUNCIL.date}</span>
+              <span className="font-serif">{formatGatheringDate(current.gatheringDate)}</span>
             </div>
             <div className="flex items-center gap-2 text-foreground/80">
               <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-serif">{CURRENT_COUNCIL.time}</span>
+              <span className="font-serif">{current.time}</span>
             </div>
             <div className="flex items-center gap-2 text-foreground/80">
               <Mic className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="font-serif">{CURRENT_COUNCIL.curator}</span>
+              <span className="font-serif">{current.curator}</span>
             </div>
           </div>
 
@@ -94,10 +72,7 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-2 pt-1">
-            <Button
-              onClick={onJoinCouncil}
-              className="gap-2 font-serif tracking-wide"
-            >
+            <Button onClick={onJoinCouncil} className="gap-2 font-serif tracking-wide">
               <Video className="h-4 w-4" />
               Join Council
             </Button>
@@ -122,7 +97,7 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
                     Opening Invocation
                   </h4>
                   <p className="text-sm font-serif text-foreground/70 leading-relaxed italic">
-                    {CURRENT_COUNCIL.agenda.invocation}
+                    {current.agenda.invocation}
                   </p>
                 </div>
 
@@ -132,7 +107,7 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
                     🌙 This Moon
                   </h4>
                   <p className="text-sm font-serif text-foreground/70 leading-relaxed">
-                    {CURRENT_COUNCIL.agenda.thisMoon}
+                    {current.agenda.thisMoon}
                   </p>
                 </div>
 
@@ -142,7 +117,7 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
                     🌳 The Time Tree
                   </h4>
                   <p className="text-sm font-serif text-foreground/80 leading-relaxed">
-                    "{CURRENT_COUNCIL.agenda.timeTreeQuestion}"
+                    "{current.agenda.timeTreeQuestion}"
                   </p>
                   <p className="text-xs font-serif text-muted-foreground/50 italic">
                     Offer your reflection in the Time Tree
@@ -164,7 +139,7 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
                     Focus Areas
                   </h4>
                   <ul className="space-y-1.5">
-                    {CURRENT_COUNCIL.agenda.focusAreas.map((area, i) => (
+                    {current.agenda.focusAreas.map((area, i) => (
                       <li key={i} className="text-sm font-serif text-foreground/70 flex items-start gap-2">
                         <span className="text-primary/60 mt-0.5">·</span>
                         {area}
@@ -172,13 +147,40 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
                     ))}
                   </ul>
                 </div>
+
+                {/* Highlights — only if present */}
+                {current.highlights && (current.highlights.plant || current.highlights.tree || current.highlights.project) && (
+                  <div>
+                    <h4 className="font-serif text-xs tracking-[0.12em] uppercase text-muted-foreground/60 mb-1.5">
+                      <Leaf className="inline h-3 w-3 mr-1" />
+                      In Focus This Cycle
+                    </h4>
+                    <div className="space-y-1">
+                      {current.highlights.plant && (
+                        <p className="text-xs font-serif text-foreground/60">
+                          🌱 <span className="text-foreground/70">{current.highlights.plant}</span>
+                        </p>
+                      )}
+                      {current.highlights.tree && (
+                        <p className="text-xs font-serif text-foreground/60">
+                          🌳 <span className="text-foreground/70">{current.highlights.tree}</span>
+                        </p>
+                      )}
+                      {current.highlights.project && (
+                        <p className="text-xs font-serif text-foreground/60">
+                          🛠 <span className="text-foreground/70">{current.highlights.project}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </CollapsibleContent>
           </Collapsible>
         </CardHeader>
       </Card>
 
-      {/* Moon cycle indicator */}
+      {/* Moon cycle indicator — dynamic */}
       <div className="rounded-xl border border-border/20 bg-card/30 backdrop-blur-sm p-4">
         <h4 className="font-serif text-[10px] tracking-[0.15em] uppercase text-muted-foreground/50 mb-3">
           Bi-weekly Moon Rhythm
@@ -188,26 +190,33 @@ const NextCouncilCard = ({ onJoinCouncil }: NextCouncilCardProps) => {
           <div className="space-y-1.5">
             <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Current</p>
             <div className="text-xs font-serif text-foreground/70">
-              <span>{MOON_CYCLE.current.marker.emoji} {MOON_CYCLE.current.marker.label}</span>
-              <span className="text-muted-foreground/40"> — {MOON_CYCLE.current.marker.date}</span>
+              <span>{moonEmoji(current.moonPhase)} {moonLabel(current.moonPhase)}</span>
+              <span className="text-muted-foreground/40"> — {formatMarkerDate(current.markerDate)}</span>
             </div>
             <div className="text-xs font-serif text-foreground/70">
-              <span>{MOON_CYCLE.current.gathering.emoji} {MOON_CYCLE.current.gathering.label}</span>
-              <span className="text-muted-foreground/40"> — {MOON_CYCLE.current.gathering.date}</span>
+              <span>🌿 Council</span>
+              <span className="text-muted-foreground/40"> — {formatMarkerDate(current.gatheringDate)}</span>
             </div>
           </div>
           {/* Next cycle */}
-          <div className="space-y-1.5">
-            <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Next</p>
-            <div className="text-xs font-serif text-foreground/70">
-              <span>{MOON_CYCLE.next.marker.emoji} {MOON_CYCLE.next.marker.label}</span>
-              <span className="text-muted-foreground/40"> — {MOON_CYCLE.next.marker.date}</span>
+          {next ? (
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Next</p>
+              <div className="text-xs font-serif text-foreground/70">
+                <span>{moonEmoji(next.moonPhase)} {moonLabel(next.moonPhase)}</span>
+                <span className="text-muted-foreground/40"> — {formatMarkerDate(next.markerDate)}</span>
+              </div>
+              <div className="text-xs font-serif text-foreground/70">
+                <span>🌿 Council</span>
+                <span className="text-muted-foreground/40"> — {formatMarkerDate(next.gatheringDate)}</span>
+              </div>
             </div>
-            <div className="text-xs font-serif text-foreground/70">
-              <span>{MOON_CYCLE.next.gathering.emoji} {MOON_CYCLE.next.gathering.label}</span>
-              <span className="text-muted-foreground/40"> — {MOON_CYCLE.next.gathering.date}</span>
+          ) : (
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-serif text-muted-foreground/40 uppercase tracking-wider">Next</p>
+              <p className="text-xs font-serif text-muted-foreground/40 italic">To be announced</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
