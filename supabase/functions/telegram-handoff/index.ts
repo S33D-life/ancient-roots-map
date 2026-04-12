@@ -122,8 +122,8 @@ Deno.serve(async (req: Request) => {
         });
 
         if (rpcErr) {
-          console.error("create_bot_handoff RPC error:", rpcErr);
-          return jsonResponse({ ok: false, error: "Failed to create handoff" }, 500);
+          console.error("create_bot_handoff RPC error:", JSON.stringify(rpcErr));
+          return jsonResponse({ ok: false, error: "Failed to create handoff", detail: rpcErr.message || rpcErr.code }, 500);
         }
 
         const result = handoff as { ok: boolean; token: string; expires_at: string };
