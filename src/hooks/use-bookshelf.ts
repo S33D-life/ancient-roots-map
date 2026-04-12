@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 
 export interface BookshelfEntry {
   id: string;
@@ -80,27 +81,21 @@ export function useBookshelf({ userId, filter = "all" }: UseBookshelfOptions) {
 
   const addEntry = useCallback(async (entry: CreateBookshelfEntry) => {
     if (!userId) return null;
-    const { data, error } = await supabase
-      .from("bookshelf_entries")
-      .insert({
-        user_id: userId,
-        title: entry.title,
-        author: entry.author,
-        genre: entry.genre || null,
-        cover_url: entry.cover_url || null,
-        quote: entry.quote || null,
-        reflection: entry.reflection || null,
-        visibility: entry.visibility || "private",
-        linked_tree_ids: entry.linked_tree_ids || [],
-        linked_council_sessions: entry.linked_council_sessions || [],
-        species_category: entry.species_category || null,
-        catalog_book_id: entry.catalog_book_id || null,
-      } as any)
-      .select("*")
-      .single();
-    if (error) throw error;
+    const id = await upsertBookshelfEntry({
+      user_id: userId,
+      title: entry.title,
+      author: entry.author,
+      genre: entry.genre || null,
+      cover_url: entry.cover_url || null,
+      quote: entry.quote || null,
+      reflection: entry.reflection || null,
+      visibility: entry.visibility || "private",
+      linked_tree_ids: entry.linked_tree_ids || [],
+      species_category: entry.species_category || null,
+      catalog_book_id: entry.catalog_book_id || null,
+    });
     await fetchEntries();
-    return data as unknown as BookshelfEntry;
+    return id ? ({ id } as unknown as BookshelfEntry) : null;
   }, [userId, fetchEntries]);
 
   const updateEntry = useCallback(async (id: string, updates: Partial<CreateBookshelfEntry>) => {

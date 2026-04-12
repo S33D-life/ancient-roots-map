@@ -23,6 +23,7 @@ import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/
 import TreeRolePicker, { type TreeRole } from "@/components/TreeRolePicker";
 import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
+import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -427,8 +428,8 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
       if (taggedUsers.length > 0 && insertedOffering) {
         await supabase.from("offering_tags").insert(taggedUsers.map((t) => ({ offering_id: insertedOffering.id, tagged_user_id: t.id, tagged_by: user.id })));
       }
-      // Also save to bookshelf_entries so the book appears in the library
-      await supabase.from("bookshelf_entries").insert({
+      // Upsert bookshelf entry (deduplicates by title+author, merges tree links)
+      upsertBookshelfEntry({
         user_id: user.id,
         title: data.title,
         author: data.author,
@@ -439,9 +440,7 @@ const AddOfferingDialog = ({ open, onOpenChange, treeId, treeSpecies, treeName, 
         linked_tree_ids: [treeId],
         offering_id: insertedOffering?.id || null,
         source: data.isCustom ? "manual" : "google_books",
-      }).then(({ error: shelfErr }) => {
-        if (shelfErr) console.warn("Bookshelf entry skipped:", shelfErr.message);
-      });
+      }).catch(err => console.warn("Bookshelf upsert skipped:", err));
       window.dispatchEvent(new CustomEvent("offering-created"));
       let earnedReward: RewardResult | null = null;
       if (treeSpecies) {
