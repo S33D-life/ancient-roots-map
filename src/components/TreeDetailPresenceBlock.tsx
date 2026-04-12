@@ -10,7 +10,7 @@ import type { TreeWhisper } from "@/hooks/use-whispers";
 
 interface Props {
   tree: { id: string; name: string };
-  proximityGate: { status: string; isUnlocked: boolean };
+  proximityGate: { status: string; isUnlocked: boolean; canCheckin?: boolean };
   meetingStatus: string;
   checkinStats: { totalVisits?: number } | null;
   onCheckin: () => void;
@@ -31,7 +31,8 @@ export default function TreeDetailPresenceBlock({
   hasHearts,
   onGoToEncounters,
 }: Props) {
-  const isNearby = proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_grace";
+  const canCheckin = proximityGate.canCheckin ?? (proximityGate.status === "unlocked_present");
+  const isNearby = proximityGate.status === "unlocked_present" || proximityGate.status === "unlocked_nearby" || proximityGate.status === "unlocked_grace";
   const isActive = meetingStatus === "active" || meetingStatus === "expiring";
   const hasCheckedIn = checkinStats && (checkinStats.totalVisits ?? 0) > 0;
   const hasWhispers = availableWhispers.length > 0;
