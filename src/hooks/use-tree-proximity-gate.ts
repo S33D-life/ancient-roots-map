@@ -175,6 +175,7 @@ export function useTreeProximityGate({ treeId, treeLat, treeLng, userId }: UseTr
   return {
     status,
     isUnlocked,
+    canCheckin,
     graceLabel,
     graceMs,
     recordVisitNow,
