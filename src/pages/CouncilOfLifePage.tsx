@@ -191,9 +191,9 @@ const CouncilOfLifePage = () => {
                     if (isComingSoon) {
                       setPodModalOpen(true);
                     } else if ("internalUrl" in room && room.internalUrl) {
-                      navigate(room.internalUrl);
+                      navigate(room.internalUrl as string);
                     } else if ("externalUrl" in room && room.externalUrl) {
-                      window.open(room.externalUrl, "_blank", "noopener,noreferrer");
+                      window.open(room.externalUrl as string, "_blank", "noopener,noreferrer");
                     } else {
                       setActiveRoom(room.id);
                     }
