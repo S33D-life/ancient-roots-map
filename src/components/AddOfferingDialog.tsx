@@ -23,6 +23,7 @@ import OfferingVisibilityPicker, { type OfferingVisibility } from "@/components/
 import TreeRolePicker, { type TreeRole } from "@/components/TreeRolePicker";
 import { issueRewards, type RewardResult } from "@/utils/issueRewards";
 import { createOrReuseSkystamp } from "@/hooks/use-skystamp";
+import { upsertBookshelfEntry } from "@/repositories/bookshelf-upsert";
 import OfferingQuoteInput, { type QuoteData } from "@/components/OfferingQuoteInput";
 import type { Database } from "@/integrations/supabase/types";
 
