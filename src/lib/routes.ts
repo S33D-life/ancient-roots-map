@@ -24,6 +24,10 @@ export const ROUTES = {
   LIBRARY: "/library",
   /** Council of Life */
   COUNCIL: "/council-of-life",
+  /** Council Records archive */
+  COUNCIL_RECORDS: "/council/records",
+  /** Council session detail */
+  COUNCIL_SESSION: (id: string) => `/council/records/${id}` as const,
   /** Dashboard / Hearth */
   HEARTH: "/dashboard",
   /** Vault */
